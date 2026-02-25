@@ -6,16 +6,15 @@ struct CupertinoSliderView: View {
   var body: some View {
     Group {
       if let s = model.step, s > 0 {
-        Slider(value: $model.value, in: model.min...model.max, step: s)
+        Slider(value: $model.value, in: model.min...model.max, step: s).tint(model.tintColor)
       } else {
-        Slider(value: $model.value, in: model.min...model.max)
+        Slider(value: $model.value, in: model.min...model.max).tint(model.tintColor)
       }
     }
     .disabled(!model.enabled)
     .onChange(of: model.value) { 
       model.onChange(model.value)
     }
-    .accentColor(model.tintColor)
   }
 }
 
