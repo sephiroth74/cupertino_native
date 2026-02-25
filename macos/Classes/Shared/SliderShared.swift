@@ -12,8 +12,8 @@ struct CupertinoSliderView: View {
       }
     }
     .disabled(!model.enabled)
-    .onChange(of: model.value) { newValue in
-      model.onChange(newValue)
+    .onChange(of: model.value) { 
+      model.onChange(model.value)
     }
     .accentColor(model.tintColor)
   }
