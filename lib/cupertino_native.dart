@@ -10,7 +10,10 @@ export 'components/tab_bar.dart';
 export 'components/popup_menu_button.dart';
 export 'style/sf_symbol.dart';
 export 'style/button_style.dart';
+export 'model/control_size.dart';
 export 'components/button.dart';
+export 'components/color_well.dart';
+export 'style/color_well_style.dart';
 
 import 'cupertino_native_platform_interface.dart';
 

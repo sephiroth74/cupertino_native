@@ -134,7 +134,8 @@ class _CNSliderState extends State<CNSlider> {
       CupertinoTheme.of(context).primaryColor;
   Color? get _effectiveThumbTint => widget.thumbColor;
   Color? get _effectiveTrackBgTint => widget.trackBackgroundColor;
-  Color? get _effectiveTint => widget.color ?? CupertinoTheme.of(context).primaryColor;
+  Color? get _effectiveTint =>
+      widget.color ?? CupertinoTheme.of(context).primaryColor;
 
   @override
   void dispose() {

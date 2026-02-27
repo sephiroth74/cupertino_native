@@ -1,3 +1,4 @@
+import 'package:cupertino_native/model/control_size.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +7,10 @@ import 'package:flutter/gestures.dart';
 import '../channel/params.dart';
 import '../style/sf_symbol.dart';
 import '../style/button_style.dart';
+
+const double _kDefaultHeight = 64.0;
+const double _kDefaultWidth = 80.0;
+const double _kDefaultSize = 44.0;
 
 /// A Cupertino-native push button.
 ///
@@ -19,9 +24,10 @@ class CNButton extends StatefulWidget {
     this.onPressed,
     this.enabled = true,
     this.tint,
-    this.height = 32.0,
+    this.height,
     this.shrinkWrap = false,
     this.style = CNButtonStyle.plain,
+    this.controlSize = ControlSize.regular,
   }) : icon = null,
        width = null,
        round = false;
@@ -33,8 +39,9 @@ class CNButton extends StatefulWidget {
     this.onPressed,
     this.enabled = true,
     this.tint,
-    double size = 44.0,
+    double size = _kDefaultSize,
     this.style = CNButtonStyle.glass,
+    this.controlSize = ControlSize.regular,
   }) : label = null,
        round = true,
        width = size,
@@ -56,7 +63,7 @@ class CNButton extends StatefulWidget {
   final Color? tint;
 
   /// Control height.
-  final double height;
+  final double? height;
 
   /// Fixed width used in icon/round mode.
   final double? width; // fixed when round/icon mode
@@ -65,6 +72,9 @@ class CNButton extends StatefulWidget {
 
   /// Visual style to apply.
   final CNButtonStyle style;
+
+  /// Control size.
+  final ControlSize controlSize;
 
   /// Whether the icon variant (round) is used.
   final bool round;
@@ -85,7 +95,9 @@ class _CNButtonState extends State<CNButton> {
   double? _lastIconSize;
   int? _lastIconColor;
   double? _intrinsicWidth;
+  double? _intrinsicHeight;
   CNButtonStyle? _lastStyle;
+  ControlSize? _lastControlSize;
   Offset? _downPosition;
   bool _pressed = false;
 
@@ -118,9 +130,9 @@ class _CNButtonState extends State<CNButton> {
         defaultTargetPlatform == TargetPlatform.macOS)) {
       // Fallback Flutter implementation
       return SizedBox(
-        height: widget.height,
+        height: widget.height ?? _kDefaultHeight,
         width: widget.isIcon && widget.round
-            ? (widget.width ?? widget.height)
+            ? (widget.width ?? widget.height ?? _kDefaultHeight)
             : null,
         child: CupertinoButton(
           padding: widget.isIcon
@@ -157,6 +169,8 @@ class _CNButtonState extends State<CNButton> {
       'enabled': (widget.enabled && widget.onPressed != null),
       'isDark': _isDark,
       'style': encodeStyle(context, tint: _effectiveTint),
+      'controlSize': widget.controlSize.name,
+      'tint': resolveColorToArgb(_effectiveTint, context),
     };
 
     final platformView = defaultTargetPlatform == TargetPlatform.iOS
@@ -183,13 +197,26 @@ class _CNButtonState extends State<CNButton> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final hasBoundedWidth = constraints.hasBoundedWidth;
-        final preferIntrinsic = widget.shrinkWrap || !hasBoundedWidth;
+        final hasBoundedHeight = constraints.hasBoundedHeight;
+        final preferIntrinsicWidth = widget.shrinkWrap || !hasBoundedWidth;
+        final preferIntrinsicHeight = widget.shrinkWrap || !hasBoundedHeight;
         double? width;
         if (widget.isIcon) {
-          width = widget.width ?? widget.height;
-        } else if (preferIntrinsic) {
-          width = _intrinsicWidth ?? 80.0;
+          width = widget.width ?? widget.height ?? _kDefaultHeight;
+        } else if (preferIntrinsicWidth) {
+          width = _intrinsicWidth ?? _kDefaultWidth;
+        } else {
+          width = _intrinsicWidth;
         }
+        double? height;
+        if (widget.isIcon) {
+          height = widget.height ?? widget.width ?? _kDefaultHeight;
+        } else if (preferIntrinsicHeight) {
+          height = _intrinsicHeight ?? _kDefaultHeight;
+        } else {
+          height = _intrinsicHeight;
+        }
+
         return Listener(
           onPointerDown: (e) {
             _downPosition = e.position;
@@ -212,11 +239,7 @@ class _CNButtonState extends State<CNButton> {
             _setPressed(false);
             _downPosition = null;
           },
-          child: SizedBox(
-            height: widget.height,
-            width: width,
-            child: platformView,
-          ),
+          child: SizedBox(width: width, height: height, child: platformView),
         );
       },
     );
@@ -233,6 +256,7 @@ class _CNButtonState extends State<CNButton> {
     _lastIconSize = widget.icon?.size;
     _lastIconColor = resolveColorToArgb(widget.icon?.color, context);
     _lastStyle = widget.style;
+    _lastControlSize = widget.controlSize;
     if (!widget.isIcon) {
       _requestIntrinsicSize();
     }
@@ -255,8 +279,13 @@ class _CNButtonState extends State<CNButton> {
     try {
       final size = await ch.invokeMethod<Map>('getIntrinsicSize');
       final w = (size?['width'] as num?)?.toDouble();
-      if (w != null && mounted) {
-        setState(() => _intrinsicWidth = w);
+      final h = (size?['height'] as num?)?.toDouble();
+
+      if (w != null && h != null && mounted) {
+        setState(() {
+          _intrinsicWidth = w;
+          _intrinsicHeight = h;
+        });
       }
     } catch (_) {}
   }
@@ -268,6 +297,7 @@ class _CNButtonState extends State<CNButton> {
     final preIconName = widget.icon?.name;
     final preIconSize = widget.icon?.size;
     final preIconColor = resolveColorToArgb(widget.icon?.color, context);
+    bool needsIntrinsicSize = false;
 
     if (_lastTint != tint && tint != null) {
       await ch.invokeMethod('setStyle', {'tint': tint});
@@ -277,6 +307,13 @@ class _CNButtonState extends State<CNButton> {
       await ch.invokeMethod('setStyle', {'buttonStyle': widget.style.name});
       _lastStyle = widget.style;
     }
+    if (_lastControlSize != widget.controlSize) {
+      await ch.invokeMethod('setControlSize', {
+        'controlSize': widget.controlSize.name,
+      });
+      _lastControlSize = widget.controlSize;
+      needsIntrinsicSize = true;
+    }
     // Enabled state
     await ch.invokeMethod('setEnabled', {
       'enabled': (widget.enabled && widget.onPressed != null),
@@ -284,6 +321,10 @@ class _CNButtonState extends State<CNButton> {
     if (_lastTitle != widget.label && widget.label != null) {
       await ch.invokeMethod('setButtonTitle', {'title': widget.label});
       _lastTitle = widget.label;
+      needsIntrinsicSize = true;
+    }
+
+    if (needsIntrinsicSize) {
       _requestIntrinsicSize();
     }
 
