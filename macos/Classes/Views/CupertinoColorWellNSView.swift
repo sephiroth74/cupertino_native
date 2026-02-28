@@ -9,6 +9,7 @@ class CupertinoColorWellNSView: NSView {
   private var enabled: Bool = true
   private var isDark: Bool = false
   private var continuous: Bool = true
+  private var supportsAlpha: Bool = true
 
   init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
     self.channel = FlutterMethodChannel(
@@ -29,6 +30,10 @@ class CupertinoColorWellNSView: NSView {
   private func parseArgs(_ args: [String: Any]) {
     if let colorValue = args["color"] as? Int {
       color = ColorUtils.colorFromARGB(colorValue)
+    }
+
+    if let supportsAlphaValue = args["supportsAlpha"] as? Bool {
+      supportsAlpha = supportsAlphaValue
     }
 
     if let styleValue = args["style"] as? String {
@@ -52,7 +57,7 @@ class CupertinoColorWellNSView: NSView {
     self.colorWell!.target = self
     self.colorWell!.action = #selector(colorWellChanged(_:))
     self.colorWell!.isContinuous = continuous
-
+    self.colorWell!.supportsAlpha = supportsAlpha
     self.colorWell!.color = color
     self.colorWell!.isEnabled = enabled
 
@@ -84,7 +89,6 @@ class CupertinoColorWellNSView: NSView {
         let s = self.colorWell!.intrinsicContentSize
         result(["width": Double(s.width), "height": Double(s.height)])
       case "setStyle":
-        NSLog("Called setStyle with value: \(call.arguments)")
         if let args = call.arguments as? [String: Any], let s = args["style"] as? String {
           self.colorWell!.colorWellStyle = Self.parseStyle(s)
           result(nil)
@@ -111,6 +115,15 @@ class CupertinoColorWellNSView: NSView {
           NSLog("setColor called with invalid arguments: \(call.arguments)")
           result(FlutterError(code: "bad_args", message: "Missing color", details: nil))
         }
+      case "setSupportsAlpha":
+        if let args = call.arguments as? [String: Any], let s = args["supportsAlpha"] as? Bool {
+          self.supportsAlpha = s
+          self.colorWell!.supportsAlpha = s
+          result(nil)
+        } else {
+          NSLog("setSupportsAlpha called with invalid arguments: \(call.arguments)")
+          result(FlutterError(code: "bad_args", message: "Missing supportsAlpha", details: nil))
+        }
       default:
         NSLog("Unknown method: \(call.method)")
         result(FlutterMethodNotImplemented)
@@ -136,7 +149,6 @@ class CupertinoColorWellNSView: NSView {
 
   override func layout() {
     super.layout()
-    NSLog("colorWell bounds: \(bounds)")
     self.colorWell!.frame = bounds
   }
 }

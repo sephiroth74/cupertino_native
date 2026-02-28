@@ -15,7 +15,7 @@ const double _kDefaultSize = 44.0;
 /// A Cupertino-native push button.
 ///
 /// Embeds a native UIButton/NSButton for authentic visuals and behavior on
-/// iOS and macOS. Falls back to [CupertinoButton] on other platforms.
+/// macOS. Falls back to [CupertinoButton] on other platforms.
 class CNButton extends StatefulWidget {
   /// Creates a text button variant of [CNButton].
   const CNButton({
@@ -126,8 +126,7 @@ class _CNButtonState extends State<CNButton> {
 
   @override
   Widget build(BuildContext context) {
-    if (!(defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.macOS)) {
+    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
       // Fallback Flutter implementation
       return SizedBox(
         height: widget.height ?? _kDefaultHeight,
@@ -173,26 +172,15 @@ class _CNButtonState extends State<CNButton> {
       'tint': resolveColorToArgb(_effectiveTint, context),
     };
 
-    final platformView = defaultTargetPlatform == TargetPlatform.iOS
-        ? UiKitView(
-            viewType: viewType,
-            creationParams: creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            onPlatformViewCreated: _onCreated,
-            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-              // Forward taps to native; let Flutter keep drags for scrolling.
-              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-            },
-          )
-        : AppKitView(
-            viewType: viewType,
-            creationParams: creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            onPlatformViewCreated: _onCreated,
-            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-            },
-          );
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParams: creationParams,
+      creationParamsCodec: const StandardMessageCodec(),
+      onPlatformViewCreated: _onCreated,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+      },
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {

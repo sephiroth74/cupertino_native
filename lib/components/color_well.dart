@@ -18,8 +18,15 @@ class CNColorWell extends StatefulWidget {
   /// The [color] parameter is optional and defaults to [Colors.transparent].
   /// The [onColorChanged] parameter is optional and defaults to null.
   /// The [style] parameter is optional and defaults to [CNColorWellStyle.regular].
+  /// The [supportsAlpha] parameter is optional and defaults to true.
   ///
-  const CNColorWell({super.key, this.color, this.onColorChanged, this.style = CNColorWellStyle.regular});
+  const CNColorWell({
+    super.key,
+    this.color,
+    this.onColorChanged,
+    this.style = CNColorWellStyle.regular,
+    this.supportsAlpha = true,
+  });
 
   /// The color of the color well.
   final Color? color;
@@ -30,6 +37,12 @@ class CNColorWell extends StatefulWidget {
   /// The style of the color well.
   final CNColorWellStyle style;
 
+  /// Whether the color well supports alpha.
+  /// If supportsAlpha is false, the color well will not show an alpha slider and the returned color will be opaque.
+  /// If supportsAlpha is true, the color well will show an alpha slider and the returned color will be transparent.
+  /// Defaults to true.
+  final bool supportsAlpha;
+
   @override
   State<CNColorWell> createState() => _CNColorWellState();
 }
@@ -39,9 +52,8 @@ class _CNColorWellState extends State<CNColorWell> {
   bool _lastIsDark = false;
   Color? _lastColor;
   CNColorWellStyle _lastStyle = CNColorWellStyle.regular;
-
+  bool _lastSupportsAlpha = true;
   double? _intrinsicWidth;
-
   double? _intrinsicHeight;
 
   bool get isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
@@ -69,6 +81,7 @@ class _CNColorWellState extends State<CNColorWell> {
       'enabled': enabled,
       'isDark': isDark,
       'continuous': true,
+      'supportsAlpha': widget.supportsAlpha,
     };
 
     if (defaultTargetPlatform != TargetPlatform.macOS) {
@@ -90,14 +103,16 @@ class _CNColorWellState extends State<CNColorWell> {
       builder: (context, constraints) {
         final hasWidth = constraints.hasBoundedWidth;
         final hasHeight = constraints.hasBoundedHeight;
-        final width = hasWidth ? constraints.maxWidth : _kDefaultWidth;
-        final height = hasHeight ? constraints.maxHeight : _kDefaultHeight;
+        double width = hasWidth ? constraints.maxWidth : _kDefaultWidth;
+        double height = hasHeight ? constraints.maxHeight : _kDefaultHeight;
 
-        if (_intrinsicWidth != null && _intrinsicHeight != null && !hasWidth && !hasHeight) {
-          debugPrint('Using intrinsic size: $_intrinsicWidth x $_intrinsicHeight');
-          return SizedBox(width: _intrinsicWidth, height: _intrinsicHeight, child: platformView);
+        if (_intrinsicWidth != null &&
+            _intrinsicHeight != null &&
+            !hasWidth &&
+            !hasHeight) {
+          width = _intrinsicWidth!;
+          height = _intrinsicHeight!;
         }
-
         return SizedBox(width: width, height: height, child: platformView);
       },
     );
@@ -110,6 +125,7 @@ class _CNColorWellState extends State<CNColorWell> {
     _lastIsDark = isDark;
     _lastColor = widget.color;
     _lastStyle = widget.style;
+    _lastSupportsAlpha = widget.supportsAlpha;
     _requestIntrinsicSize();
   }
 
@@ -148,7 +164,9 @@ class _CNColorWellState extends State<CNColorWell> {
     bool needsIntrinsicSize = false;
 
     if (_lastColor != widget.color) {
-      ch.invokeMethod('setColor', {'color': resolveColorToArgb(widget.color, context)});
+      ch.invokeMethod('setColor', {
+        'color': resolveColorToArgb(widget.color, context),
+      });
       _lastColor = widget.color;
     }
 
@@ -156,6 +174,13 @@ class _CNColorWellState extends State<CNColorWell> {
       ch.invokeMethod('setStyle', {'style': widget.style.name});
       _lastStyle = widget.style;
       needsIntrinsicSize = true;
+    }
+
+    if (_lastSupportsAlpha != widget.supportsAlpha) {
+      ch.invokeMethod('setSupportsAlpha', {
+        'supportsAlpha': widget.supportsAlpha,
+      });
+      _lastSupportsAlpha = widget.supportsAlpha;
     }
 
     if (needsIntrinsicSize) {

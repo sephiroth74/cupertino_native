@@ -33,7 +33,14 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   buttonIcon: const CNSymbol('chevron.down', size: 18),
                   buttonStyle: CNButtonStyle.plain,
                   size: 44.0,
-                  items: _sizes.map((e) => CNPopupMenuItem(label: e.name, checked: _controlSize == e)).toList(),
+                  items: _sizes
+                      .map(
+                        (e) => CNPopupMenuItem(
+                          label: e.name,
+                          checked: _controlSize == e,
+                        ),
+                      )
+                      .toList(),
                   onSelected: (value) {
                     print("value: $value");
                     print("_sizes: ${_sizes}");
@@ -58,7 +65,13 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   shrinkWrap: _shrinkWrap,
                   controlSize: _controlSize,
                 ),
-                CNButton(label: 'Gray', style: CNButtonStyle.gray, onPressed: () => _set('Gray'), shrinkWrap: _shrinkWrap, controlSize: _controlSize),
+                CNButton(
+                  label: 'Gray',
+                  style: CNButtonStyle.gray,
+                  onPressed: () => _set('Gray'),
+                  shrinkWrap: _shrinkWrap,
+                  controlSize: _controlSize,
+                ),
                 CNButton(
                   label: 'Tinted',
                   style: CNButtonStyle.tinted,
@@ -102,7 +115,13 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   shrinkWrap: _shrinkWrap,
                   controlSize: _controlSize,
                 ),
-                CNButton(label: 'Disabled', style: CNButtonStyle.bordered, onPressed: null, shrinkWrap: _shrinkWrap, controlSize: _controlSize),
+                CNButton(
+                  label: 'Disabled',
+                  style: CNButtonStyle.bordered,
+                  onPressed: null,
+                  shrinkWrap: _shrinkWrap,
+                  controlSize: _controlSize,
+                ),
               ],
             ),
             // const SizedBox(height: 48),
@@ -170,7 +189,6 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   child: CNColorWell(
                     color: _color,
                     style: CNColorWellStyle.regular,
-                    continuous: false,
                     onColorChanged: (color) {
                       print('Color changed: $color');
                       setState(() => _color = color);
@@ -181,7 +199,6 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                 CNColorWell(
                   color: _color,
                   style: CNColorWellStyle.expanded,
-                  continuous: true,
                   onColorChanged: (color) {
                     print('Color changed: $color');
                     setState(() => _color = color);
@@ -191,6 +208,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                 CNColorWell(
                   color: _color,
                   style: CNColorWellStyle.minimal,
+                  supportsAlpha: false,
                   onColorChanged: (color) {
                     print('Color changed: $color');
                     setState(() => _color = color);
