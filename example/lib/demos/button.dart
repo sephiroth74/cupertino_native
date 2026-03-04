@@ -10,9 +10,9 @@ class ButtonDemoPage extends StatefulWidget {
 
 class _ButtonDemoPageState extends State<ButtonDemoPage> {
   String _last = 'None';
-  ControlSize _controlSize = ControlSize.regular;
+  CNControlSize _controlSize = CNControlSize.regular;
   bool _shrinkWrap = true;
-  final List<ControlSize> _sizes = ControlSize.values;
+  final List<CNControlSize> _sizes = CNControlSize.values;
   Color _color = CupertinoColors.systemBlue;
 
   void _set(String what) => setState(() => _last = what);

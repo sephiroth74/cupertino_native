@@ -1,5 +1,5 @@
 /// Control size
-enum ControlSize {
+enum CNControlSize {
   /// Mini
   mini,
 

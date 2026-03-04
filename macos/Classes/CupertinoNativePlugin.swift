@@ -2,7 +2,10 @@ import Cocoa
 import FlutterMacOS
 
 public class CupertinoNativePlugin: NSObject, FlutterPlugin {
+  static var registrar: FlutterPluginRegistrar?
+
   public static func register(with registrar: FlutterPluginRegistrar) {
+    CupertinoNativePlugin.registrar = registrar
     let channel = FlutterMethodChannel(name: "cupertino_native", binaryMessenger: registrar.messenger)
     let instance = CupertinoNativePlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
@@ -30,6 +33,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
     let colorWellFactory = CupertinoColorWellViewFactory(messenger: registrar.messenger)
     registrar.register(colorWellFactory, withId: "CupertinoNativeColorWell")
+
+    let pathControlFactory = CupertinoPathControlViewFactory(registrar: registrar)
+    registrar.register(pathControlFactory, withId: "CupertinoNativePathControl")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -39,5 +45,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     default:
       result(FlutterMethodNotImplemented)
     }
+  }
+
+  public static func getFlutterWindow() -> NSWindow? {
+    return registrar?.view?.window
   }
 }

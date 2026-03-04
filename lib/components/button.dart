@@ -27,7 +27,7 @@ class CNButton extends StatefulWidget {
     this.height,
     this.shrinkWrap = false,
     this.style = CNButtonStyle.plain,
-    this.controlSize = ControlSize.regular,
+    this.controlSize = CNControlSize.regular,
   }) : icon = null,
        width = null,
        round = false;
@@ -41,7 +41,7 @@ class CNButton extends StatefulWidget {
     this.tint,
     double size = _kDefaultSize,
     this.style = CNButtonStyle.glass,
-    this.controlSize = ControlSize.regular,
+    this.controlSize = CNControlSize.regular,
   }) : label = null,
        round = true,
        width = size,
@@ -74,7 +74,7 @@ class CNButton extends StatefulWidget {
   final CNButtonStyle style;
 
   /// Control size.
-  final ControlSize controlSize;
+  final CNControlSize controlSize;
 
   /// Whether the icon variant (round) is used.
   final bool round;
@@ -97,7 +97,7 @@ class _CNButtonState extends State<CNButton> {
   double? _intrinsicWidth;
   double? _intrinsicHeight;
   CNButtonStyle? _lastStyle;
-  ControlSize? _lastControlSize;
+  CNControlSize? _lastControlSize;
   Offset? _downPosition;
   bool _pressed = false;
 
