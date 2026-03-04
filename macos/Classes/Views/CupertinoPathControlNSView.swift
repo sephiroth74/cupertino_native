@@ -7,6 +7,7 @@ import UniformTypeIdentifiers
 class CupertinoPathControlNSView: NSView {
     private let registrar: FlutterPluginRegistrar
     private let channel: FlutterMethodChannel
+    private var coordinator: Coordinator? = nil
     private let pathControl: NSPathControl
     private var currentPathStyle: String = "standard"
     private var currentPathSize: String = "regular"
@@ -15,7 +16,7 @@ class CupertinoPathControlNSView: NSView {
     private var currentPath: String = "/"
     private var currentIsDirectory: Bool = false
     private var currentTint: NSColor? = nil
-    private var coordinator: Coordinator? = nil
+    private var currentEditable: Bool = true
 
     init(viewId: Int64, args: Any?, registrar: FlutterPluginRegistrar) {
         self.registrar = registrar
@@ -34,6 +35,7 @@ class CupertinoPathControlNSView: NSView {
         var tint: NSColor? = nil
         var enabled: Bool = true
         var allowedTypes: [String] = []
+        var editable: Bool = true
 
         if let dict = args as? [String: Any] {
             if let v = dict["isDirectory"] as? NSNumber { isDirectory = v.boolValue }
@@ -46,6 +48,7 @@ class CupertinoPathControlNSView: NSView {
                 tint = ColorUtils.colorFromARGB(n.intValue)
             }
             if let at = dict["allowedTypes"] as? [String] { allowedTypes = at }
+            if let e = dict["editable"] as? NSNumber { editable = e.boolValue }
         }
 
         wantsLayer = true
@@ -78,13 +81,14 @@ class CupertinoPathControlNSView: NSView {
 
         pathControl.isEnabled = enabled
         pathControl.url = URL(fileURLWithPath: path, isDirectory: isDirectory)
-        pathControl.isEditable = true
+        pathControl.isEditable = editable
         pathControl.allowedTypes = allowedTypes
 
+        currentPath = path
         currentTint = tint
+        currentEditable = editable
         currentPathSize = controlSize
         currentPathStyle = controlStyle
-        currentPath = path
         currentIsDirectory = isDirectory
         currentAllowedTypes = allowedTypes
         isEnabled = enabled
@@ -198,6 +202,15 @@ class CupertinoPathControlNSView: NSView {
                         FlutterError(
                             code: "bad_args", message: "Missing allowedTypes", details: nil))
                 }
+            case "setEditable":
+                if let args = call.arguments as? [String: Any], let e = args["editable"] as? NSNumber
+                {
+                    self.currentEditable = e.boolValue
+                    self.pathControl.isEditable = self.currentEditable
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing editable", details: nil))
+                }
 
             default:
                 result(FlutterMethodNotImplemented)
@@ -232,9 +245,11 @@ class CupertinoPathControlNSView: NSView {
         }
 
         @objc func otherItemClick(_ sender: NSMenuItem) {
-            guard let appWindow = self.parent?.registrar.getFlutterWindow() else { return }
+            guard let parent = self.parent else { return }
+            guard parent.currentEditable else { return }
+            guard let appWindow = parent.registrar.getFlutterWindow() else { return }
 
-            let allowedTypesCount = parent?.pathControl.allowedTypes?.count ?? 0
+            let allowedTypesCount = parent.pathControl.allowedTypes?.count ?? 0
             let openPanel = NSOpenPanel()
             openPanel.showsHiddenFiles = false
             openPanel.canChooseDirectories = allowedTypesCount == 0
@@ -242,7 +257,7 @@ class CupertinoPathControlNSView: NSView {
             openPanel.allowsMultipleSelection = false
 
             if allowedTypesCount > 0 {
-                openPanel.allowedContentTypes = parent!.pathControl.allowedTypes!.map {
+                openPanel.allowedContentTypes = parent.pathControl.allowedTypes!.map {
                     UTType(filenameExtension: $0)!
                 }
             }

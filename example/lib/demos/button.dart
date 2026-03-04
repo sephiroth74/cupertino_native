@@ -1,6 +1,9 @@
-import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:cupertino_native/cupertino_native.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'dart:async';
+import 'package:async/async.dart';
 
 class ButtonDemoPage extends StatefulWidget {
   const ButtonDemoPage({super.key});
@@ -19,6 +22,15 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
   bool _pathControlIsDirectory = true;
 
   void _set(String what) => setState(() => _last = what);
+
+  final _memoizer = AsyncMemoizer();
+
+  Future<void> _fetchInitialDirectory() async {
+    return _memoizer.runOnce(() async {
+      _pathControlPath = (await getDownloadsDirectory())?.path ?? "/";
+      _pathControlIsDirectory = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +67,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
             Wrap(
               spacing: 12,
               runSpacing: 12,
+              alignment: WrapAlignment.center,
               children: [
                 CNButton(
                   label: 'Plain',
@@ -214,40 +227,51 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
             const SizedBox(height: 48),
             const Text('Path control'),
             const SizedBox(height: 12),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CNPathControl(
-                  controlStyle: CNPathControlStyle.popup,
-                  controlSize: CNControlSize.large,
-                  url: Uri.parse(_pathControlPath),
-                  isDirectory: _pathControlIsDirectory,
-                  onPressed: (url) {
-                    setState(() {
-                      _pathControlPath = url;
-                      _pathControlIsDirectory =
-                          FileSystemEntity.typeSync(url) ==
-                          FileSystemEntityType.directory;
-                    });
-                  },
-                ),
-                const SizedBox(height: 12),
-                CNPathControl(
-                  controlStyle: CNPathControlStyle.standard,
-                  controlSize: CNControlSize.large,
-                  url: Uri.parse(_pathControlPath),
-                  isDirectory: _pathControlIsDirectory,
-                  onPressed: (url) {
-                    setState(() {
-                      _pathControlPath = url;
-                      _pathControlIsDirectory =
-                          FileSystemEntity.typeSync(url) ==
-                          FileSystemEntityType.directory;
-                    });
-                  },
-                ),
-              ],
+            FutureBuilder<void>(
+              future: _fetchInitialDirectory(),
+              builder: (context, snapshot) {
+                debugPrint('Snapshot: $snapshot');
+
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CNPathControl(
+                        editable: true,
+                        controlStyle: CNPathControlStyle.popup,
+                        controlSize: CNControlSize.large,
+                        url: Uri.parse(_pathControlPath),
+                        isDirectory: _pathControlIsDirectory,
+                        onPressed: (url) {
+                          setState(() {
+                            _pathControlPath = url;
+                            _pathControlIsDirectory =
+                                FileSystemEntity.typeSync(url) ==
+                                FileSystemEntityType.directory;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      CNPathControl(
+                        controlStyle: CNPathControlStyle.standard,
+                        controlSize: CNControlSize.large,
+                        url: Uri.parse(_pathControlPath),
+                        isDirectory: _pathControlIsDirectory,
+                        onPressed: (url) {
+                          setState(() {
+                            _pathControlPath = url;
+                            _pathControlIsDirectory =
+                                FileSystemEntity.typeSync(url) ==
+                                FileSystemEntityType.directory;
+                          });
+                        },
+                      ),
+                    ],
+                  );
+                }
+                return const SizedBox(height: 48);
+              },
             ),
           ],
         ),

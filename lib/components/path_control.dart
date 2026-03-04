@@ -1,11 +1,9 @@
 import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:cupertino_native/style/path_control_style.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 const _kDefaultWidth = 44.0;
 const _kDefaultHeight = 24.0;
@@ -44,6 +42,9 @@ class CNPathControl extends StatefulWidget {
   /// Allowed file types (extensions).
   final List<String>? allowedTypes;
 
+  /// Whether the path is editable.
+  final bool editable;
+
   const CNPathControl({
     super.key,
     required this.url,
@@ -53,6 +54,7 @@ class CNPathControl extends StatefulWidget {
     this.controlSize = CNControlSize.regular,
     this.controlStyle = CNPathControlStyle.standard,
     this.allowedTypes,
+    this.editable = true,
   });
 
   @override
@@ -69,6 +71,7 @@ class _CNPathControlState extends State<CNPathControl> {
   CNPathControlStyle? _lastStyle;
   CNControlSize? _lastControlSize;
   List<String>? _lastAllowedTypes;
+  bool? _lastEditable;
   int? _lastTint;
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
@@ -111,6 +114,7 @@ class _CNPathControlState extends State<CNPathControl> {
       'enabled': widget.onPressed != null,
       'allowedTypes': widget.allowedTypes,
       'isDark': _isDark,
+      'editable': widget.editable,
     };
 
     final platformView = AppKitView(
@@ -158,6 +162,7 @@ class _CNPathControlState extends State<CNPathControl> {
     _lastStyle = widget.controlStyle;
     _lastControlSize = widget.controlSize;
     _lastAllowedTypes = widget.allowedTypes;
+    _lastEditable = widget.editable;
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
@@ -246,6 +251,11 @@ class _CNPathControlState extends State<CNPathControl> {
         'allowedTypes': widget.allowedTypes,
       });
       _lastAllowedTypes = widget.allowedTypes;
+    }
+
+    if (_lastEditable != widget.editable) {
+      await ch.invokeMethod('setEditable', {'editable': widget.editable});
+      _lastEditable = widget.editable;
     }
 
     if (needsIntrinsicSize) {
