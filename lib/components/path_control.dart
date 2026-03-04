@@ -45,6 +45,7 @@ class CNPathControl extends StatefulWidget {
   /// Whether the path is editable.
   final bool editable;
 
+  /// Creates a new instance of [CNPathControl].
   const CNPathControl({
     super.key,
     required this.url,
