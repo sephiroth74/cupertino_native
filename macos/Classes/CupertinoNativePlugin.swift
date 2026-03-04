@@ -6,7 +6,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     CupertinoNativePlugin.registrar = registrar
-    let channel = FlutterMethodChannel(name: "cupertino_native", binaryMessenger: registrar.messenger)
+    let channel = FlutterMethodChannel(
+      name: "cupertino_native", binaryMessenger: registrar.messenger)
     let instance = CupertinoNativePlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
 
@@ -46,8 +47,10 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
       result(FlutterMethodNotImplemented)
     }
   }
+}
 
-  public static func getFlutterWindow() -> NSWindow? {
-    return registrar?.view?.window
+extension FlutterPluginRegistrar {
+  func getFlutterWindow() -> NSWindow? {
+    return view?.window
   }
 }

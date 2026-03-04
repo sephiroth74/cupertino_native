@@ -18,8 +18,6 @@ class CupertinoPathControlNSView: NSView {
     private var coordinator: Coordinator? = nil
 
     init(viewId: Int64, args: Any?, registrar: FlutterPluginRegistrar) {
-        NSLog("init with registrar: \(registrar)")
-
         self.registrar = registrar
         self.pathControl = NSPathControl()
         self.channel = FlutterMethodChannel(
@@ -82,8 +80,6 @@ class CupertinoPathControlNSView: NSView {
         pathControl.url = URL(fileURLWithPath: path, isDirectory: isDirectory)
         pathControl.isEditable = true
         pathControl.allowedTypes = allowedTypes
-
-        NSLog("allowedTypes: \(allowedTypes)")
 
         currentTint = tint
         currentPathSize = controlSize
@@ -228,14 +224,15 @@ class CupertinoPathControlNSView: NSView {
 
         func pathControl(_ pathControl: NSPathControl, willPopUp menu: NSMenu) {
             if pathControl.isEditable {
-                menu.item(at: 0)?.action = #selector(otherItemClick(_:))
-                menu.item(at: 0)?.isEnabled = true
-                menu.item(at: 0)?.target = self
+                guard let firstMenuItem = menu.item(at: 0) else { return }
+                firstMenuItem.action = #selector(otherItemClick(_:))
+                firstMenuItem.isEnabled = true
+                firstMenuItem.target = self
             }
         }
 
         @objc func otherItemClick(_ sender: NSMenuItem) {
-            guard let appWindow = CupertinoNativePlugin.getFlutterWindow() else { return }
+            guard let appWindow = self.parent?.registrar.getFlutterWindow() else { return }
 
             let allowedTypesCount = parent?.pathControl.allowedTypes?.count ?? 0
             let openPanel = NSOpenPanel()

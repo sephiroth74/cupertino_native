@@ -1,5 +1,6 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
+import 'dart:io';
 
 class ButtonDemoPage extends StatefulWidget {
   const ButtonDemoPage({super.key});
@@ -14,6 +15,8 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
   bool _shrinkWrap = true;
   final List<CNControlSize> _sizes = CNControlSize.values;
   Color _color = CupertinoColors.systemBlue;
+  String _pathControlPath = "/Users";
+  bool _pathControlIsDirectory = true;
 
   void _set(String what) => setState(() => _last = what);
 
@@ -25,6 +28,8 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            const Text('Text buttons'),
+            const SizedBox(height: 12),
             Row(
               children: [
                 const Text('Control Size'),
@@ -42,18 +47,11 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                       )
                       .toList(),
                   onSelected: (value) {
-                    print("value: $value");
-                    print("_sizes: ${_sizes}");
-                    print("_sizes[value]: ${_sizes[value]}");
-
                     setState(() => _controlSize = _sizes[value]);
                   },
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            const Text('Text buttons'),
-            const SizedBox(height: 12),
             Wrap(
               spacing: 12,
               runSpacing: 12,
@@ -175,9 +173,6 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
             //   ],
             // ),
             const SizedBox(height: 48),
-            Center(child: Text('Last pressed: $_last')),
-
-            const SizedBox(height: 48),
             const Text('Color well'),
             const SizedBox(height: 12),
             Row(
@@ -212,6 +207,44 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   onColorChanged: (color) {
                     print('Color changed: $color');
                     setState(() => _color = color);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 48),
+            const Text('Path control'),
+            const SizedBox(height: 12),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CNPathControl(
+                  controlStyle: CNPathControlStyle.popup,
+                  controlSize: CNControlSize.large,
+                  url: Uri.parse(_pathControlPath),
+                  isDirectory: _pathControlIsDirectory,
+                  onPressed: (url) {
+                    setState(() {
+                      _pathControlPath = url;
+                      _pathControlIsDirectory =
+                          FileSystemEntity.typeSync(url) ==
+                          FileSystemEntityType.directory;
+                    });
+                  },
+                ),
+                const SizedBox(height: 12),
+                CNPathControl(
+                  controlStyle: CNPathControlStyle.standard,
+                  controlSize: CNControlSize.large,
+                  url: Uri.parse(_pathControlPath),
+                  isDirectory: _pathControlIsDirectory,
+                  onPressed: (url) {
+                    setState(() {
+                      _pathControlPath = url;
+                      _pathControlIsDirectory =
+                          FileSystemEntity.typeSync(url) ==
+                          FileSystemEntityType.directory;
+                    });
                   },
                 ),
               ],
