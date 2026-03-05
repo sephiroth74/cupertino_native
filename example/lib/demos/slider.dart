@@ -29,72 +29,89 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                 Text('Value: ${_defaultSliderValue.toStringAsFixed(1)}'),
               ],
             ),
+
             CNSlider(
               value: _defaultSliderValue,
-              min: 0,
-              max: 100,
-              enabled: true,
               onChanged: (v) => setState(() => _defaultSliderValue = v),
             ),
-            const SizedBox(height: 48),
-            Row(
-              children: [
-                const Text('Shared value'),
-                Spacer(),
-                Text('Value: ${_defaultSliderValue.toStringAsFixed(1)}'),
-              ],
-            ),
-            CNSlider(
-              value: _defaultSliderValue,
-              min: 0,
-              max: 100,
-              enabled: true,
-              onChanged: (v) => setState(() => _defaultSliderValue = v),
-            ),
-            const SizedBox(height: 48),
-            Row(
-              children: [
-                const Text('With color'),
-                Spacer(),
-                Text('Value: ${_coloredSliderValue.toStringAsFixed(1)}'),
-              ],
-            ),
-            CNSlider(
-              value: _coloredSliderValue,
-              min: 0,
-              max: 100,
-              enabled: true,
-              color: CupertinoColors.systemPink,
-              onChanged: (v) => setState(() => _coloredSliderValue = v),
-            ),
-            const SizedBox(height: 48),
-
-            Row(
-              children: [
-                const Text('Step slider'),
-                Spacer(),
-                Text('Value: ${_stepSliderValue.toStringAsFixed(0)}'),
-              ],
-            ),
-            CNSlider(
-              value: _stepSliderValue,
-              min: 0,
-              max: 100,
-              enabled: true,
-              step: 10,
-              onChanged: (v) => setState(() => _stepSliderValue = v),
-            ),
 
             const SizedBox(height: 48),
 
-            const Text('Disabled'),
-            CNSlider(
-              value: 50,
-              min: 0,
-              max: 100,
-              enabled: false,
-              onChanged: (_) {},
+            SizedBox(
+              child: CNSlider(
+                color: CupertinoColors.systemPink,
+                size: CNControlSize.large,
+                value: _defaultSliderValue,
+                onChanged: (v) => setState(() => _defaultSliderValue = v),
+                thickMarks: 10,
+                thickMarkPosition: CNSliderTickmarkPosition.below,
+              ),
             ),
+
+            SizedBox(
+              child: CNSlider.circular(
+                size: CNControlSize.extraLarge,
+                value: _defaultSliderValue,
+                thickMarks: 10,
+                onChanged: (v) => setState(() => _defaultSliderValue = v),
+              ),
+            ),
+
+            // Row(
+            //   children: [
+            //     const Text('Shared value'),
+            //     Spacer(),
+            //     Text('Value: ${_defaultSliderValue.toStringAsFixed(1)}'),
+            //   ],
+            // ),
+            // CNSlider(
+            //   value: _defaultSliderValue,
+            //   min: 0,
+            //   max: 100,
+            //   onChanged: (v) => setState(() => _defaultSliderValue = v),
+            // ),
+            // const SizedBox(height: 48),
+            // Row(
+            //   children: [
+            //     const Text('With color'),
+            //     Spacer(),
+            //     Text('Value: ${_coloredSliderValue.toStringAsFixed(1)}'),
+            //   ],
+            // ),
+            // CNSlider(
+            //   value: _coloredSliderValue,
+            //   min: 0,
+            //   max: 100,
+            //   color: CupertinoColors.systemPink,
+            //   onChanged: (v) => setState(() => _coloredSliderValue = v),
+            // ),
+            // const SizedBox(height: 48),
+
+            // Row(
+            //   children: [
+            //     const Text('Step slider'),
+            //     Spacer(),
+            //     Text('Value: ${_stepSliderValue.toStringAsFixed(0)}'),
+            //   ],
+            // ),
+            // CNSlider(
+            //   value: _stepSliderValue,
+            //   min: 0,
+            //   max: 100,
+            //   thickMarks: 10,
+            //   thickMarkPosition: CNSliderTickmarkPosition.leading,
+            //   onChanged: (v) => setState(() => _stepSliderValue = v),
+            // ),
+
+            // const SizedBox(height: 48),
+
+            // const Text('Disabled'),
+            // CNSlider(
+            //   value: 50,
+            //   min: 0,
+            //   max: 100,
+            //   onChanged: null,
+            // ),
           ],
         ),
       ),

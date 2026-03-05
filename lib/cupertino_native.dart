@@ -14,12 +14,14 @@ export 'components/path_control.dart';
 export 'components/progress_indicator.dart';
 
 export 'model/control_size.dart';
+export 'model/slider_tickmark_position.dart';
 
 export 'style/sf_symbol.dart';
 export 'style/button_style.dart';
 export 'style/color_well_style.dart';
 export 'style/path_control_style.dart';
 export 'style/progress_style.dart';
+export 'style/slider_type.dart';
 
 import 'cupertino_native_platform_interface.dart';
 

@@ -1,8 +1,10 @@
-import 'package:flutter/foundation.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart';
+
 import '../channel/params.dart';
 
 /// Controller for a [CNSlider] allowing imperative changes to the native
@@ -52,18 +54,70 @@ class CNSlider extends StatefulWidget {
   const CNSlider({
     super.key,
     required this.value,
-    required this.onChanged,
+    this.onChanged,
+    this.type = CNSliderType.linear,
+    this.size = CNControlSize.regular,
+    this.continuous = true,
     this.min = 0.0,
     this.max = 1.0,
-    this.enabled = true,
     this.controller,
-    this.height = 44.0,
     this.color,
-    this.thumbColor,
-    this.trackColor,
-    this.trackBackgroundColor,
-    this.step,
+    this.thickMarks,
+    this.thickMarkPosition,
+    this.isVertical = false,
   });
+
+  /// Creates a Cupertino-native circular slider.
+  factory CNSlider.circular({
+    required double value,
+    ValueChanged<double>? onChanged,
+    CNControlSize size = CNControlSize.regular,
+    bool continuous = true,
+    double min = 0.0,
+    double max = 1.0,
+    CNSliderController? controller,
+    Color? color,
+    int? thickMarks,
+  }) => CNSlider(
+    value: value,
+    onChanged: onChanged,
+    type: CNSliderType.circular,
+    continuous: continuous,
+    min: min,
+    max: max,
+    controller: controller,
+    color: color,
+    thickMarks: thickMarks,
+  );
+
+  /// Creates a Cupertino-native vertical slider.
+  factory CNSlider.vertical({
+    required double value,
+    ValueChanged<double>? onChanged,
+    CNControlSize size = CNControlSize.regular,
+    bool continuous = true,
+    double min = 0.0,
+    double max = 1.0,
+    CNSliderController? controller,
+    Color? color,
+    int? thickMarks,
+    CNSliderTickmarkPosition? thickMarkPosition,
+  }) => CNSlider(
+    value: value,
+    onChanged: onChanged,
+    type: CNSliderType.linear,
+    continuous: continuous,
+    min: min,
+    max: max,
+    controller: controller,
+    color: color,
+    thickMarks: thickMarks,
+    thickMarkPosition: thickMarkPosition,
+    isVertical: true,
+  );
+
+  /// Size of the slider.
+  final CNControlSize size;
 
   /// Current slider value.
   final double value;
@@ -74,32 +128,29 @@ class CNSlider extends StatefulWidget {
   /// Maximum value.
   final double max;
 
-  /// Whether the control is interactive.
-  final bool enabled;
+  /// Type of slider.
+  final CNSliderType type;
+
+  /// Whether the slider is continuous.
+  final bool continuous;
 
   /// Callback when the value changes due to user interaction.
-  final ValueChanged<double> onChanged;
+  final ValueChanged<double>? onChanged;
 
   /// Optional controller to imperatively interact with the native view.
   final CNSliderController? controller;
 
-  /// Visual height of the embedded platform view.
-  final double height;
-
   /// General accent/tint color for the control.
   final Color? color;
 
-  /// Explicit thumb color; if null, uses the native default.
-  final Color? thumbColor;
+  /// Number of thick marks.
+  final int? thickMarks;
 
-  /// Explicit active track color.
-  final Color? trackColor;
+  /// Position of the thick marks.
+  final CNSliderTickmarkPosition? thickMarkPosition;
 
-  /// Explicit inactive track color.
-  final Color? trackBackgroundColor;
-
-  /// Optional step interval for discrete values.
-  final double? step;
+  /// Whether the slider is vertical.
+  final bool isVertical;
 
   @override
   State<CNSlider> createState() => _CNSliderState();
@@ -111,31 +162,29 @@ class _CNSliderState extends State<CNSlider> {
   double? _lastValue;
   double? _lastMin;
   double? _lastMax;
-  bool? _lastEnabled;
   bool? _lastIsDark;
-  int? _lastTint;
-  int? _lastThumbTint;
-  int? _lastTrackTint;
-  int? _lastTrackBgTint;
-  double? _lastStep;
+  Color? _lastTint;
+  int? _lastThickMarks;
+  CNSliderTickmarkPosition? _lastThickMarkPosition;
+  CNSliderType? _lastType;
+  bool? _lastContinuous;
+  bool? _lastIsVertical;
+  bool? _lastEnabled;
+  CNControlSize? _lastSize;
+
+  double? _intrinsicWidth;
+  double? _intrinsicHeight;
+
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+
+  bool get _enabled => widget.onChanged != null;
 
   CNSliderController? _internalController;
 
   CNSliderController get _controller =>
       widget.controller ?? (_internalController ??= CNSliderController());
 
-  // Default colors:
-  // - Track: use explicit trackColor, otherwise widget.color, otherwise theme primaryColor.
-  // - Thumb: only use explicit thumbColor; otherwise keep the native default.
-  Color? get _effectiveTrackTint =>
-      widget.trackColor ??
-      widget.color ??
-      CupertinoTheme.of(context).primaryColor;
-  Color? get _effectiveThumbTint => widget.thumbColor;
-  Color? get _effectiveTrackBgTint => widget.trackBackgroundColor;
-  Color? get _effectiveTint =>
-      widget.color ?? CupertinoTheme.of(context).primaryColor;
+  Color? get _tint => widget.color ?? CupertinoTheme.of(context).primaryColor;
 
   @override
   void dispose() {
@@ -160,18 +209,8 @@ class _CNSliderState extends State<CNSlider> {
   @override
   Widget build(BuildContext context) {
     // Fallback to Flutter Slider on unsupported platforms.
-    if (!(defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.macOS)) {
-      return SizedBox(
-        height: widget.height,
-        width: double.infinity,
-        child: Slider(
-          value: widget.value.clamp(widget.min, widget.max).toDouble(),
-          min: widget.min,
-          max: widget.max,
-          onChanged: widget.enabled ? widget.onChanged : null,
-        ),
-      );
+    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
+      return Placeholder();
     }
 
     const viewType = 'CupertinoNativeSlider';
@@ -179,58 +218,70 @@ class _CNSliderState extends State<CNSlider> {
       'min': widget.min,
       'max': widget.max,
       'value': widget.value,
-      'enabled': widget.enabled,
       'isDark': _isDark,
-      'style': encodeStyle(
-        context,
-        // Do not provide a general 'tint' so the thumb color remains default.
-        tint: _effectiveTint,
-        trackTint: _effectiveTrackTint,
-        thumbTint: _effectiveThumbTint,
-        trackBackgroundTint: _effectiveTrackBgTint,
-      ),
-      if (widget.step != null) 'step': widget.step,
+      'enabled': _enabled,
+      'type': widget.type.name,
+      'isContinuous': widget.continuous,
+      'isVertical': widget.isVertical,
+      'tickMarks': widget.thickMarks,
+      'tickMarkPosition': widget.thickMarkPosition?.name,
+      'tint': resolveColorToArgb(_tint, context),
+      'size': widget.size.name,
     };
 
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      return SizedBox(
-        height: widget.height,
-        width: double.infinity,
-        child: UiKitView(
-          viewType: viewType,
-          creationParamsCodec: const StandardMessageCodec(),
-          creationParams: creationParams,
-          onPlatformViewCreated: _onPlatformViewCreated,
-          // Forward horizontal drags and taps to the native slider so it
-          // works correctly inside Flutter scroll views.
-          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-            Factory<HorizontalDragGestureRecognizer>(
-              () => HorizontalDragGestureRecognizer(),
-            ),
-            Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-          },
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParams: creationParams,
+      creationParamsCodec: const StandardMessageCodec(),
+      onPlatformViewCreated: _onPlatformViewCreated,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<HorizontalDragGestureRecognizer>(
+          () => HorizontalDragGestureRecognizer(),
         ),
-      );
-    }
+        Factory<VerticalDragGestureRecognizer>(
+          () => VerticalDragGestureRecognizer(),
+        ),
+        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+      },
+    );
 
-    // macOS
-    return SizedBox(
-      height: widget.height,
-      width: double.infinity,
-      // AppKitView is available on macOS to host NSView platform views.
-      child: AppKitView(
-        viewType: viewType,
-        creationParamsCodec: const StandardMessageCodec(),
-        creationParams: creationParams,
-        onPlatformViewCreated: _onPlatformViewCreated,
-        // Mirror iOS behavior: allow horizontal drag/tap gestures through.
-        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-          Factory<HorizontalDragGestureRecognizer>(
-            () => HorizontalDragGestureRecognizer(),
-          ),
-          Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-        },
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedWidth = constraints.hasBoundedWidth;
+        final hasBoundedHeight = constraints.hasBoundedHeight;
+
+        // debugPrint('constraints: $constraints');
+        // debugPrint('hasBoundedWidth: $hasBoundedWidth');
+        // debugPrint('hasBoundedHeight: $hasBoundedHeight');
+        // debugPrint('intrinsicWidth: $_intrinsicWidth');
+        // debugPrint('intrinsicHeight: $_intrinsicHeight');
+
+        // Use intrinsicWidth if type is circular, or linear and it's vertical
+        final useIntrinsicWidth =
+            widget.type == CNSliderType.circular || widget.isVertical;
+
+        // Use intrinsicHeight if type is circular, or linear and it's not vertical
+        final useIntrinsicHeight =
+            widget.type == CNSliderType.circular || !widget.isVertical;
+
+        final preferIntrinsicWidth = !hasBoundedWidth && useIntrinsicWidth;
+        final preferIntrinsicHeight = !hasBoundedHeight && useIntrinsicHeight;
+
+        double? width;
+        if (preferIntrinsicWidth) {
+          width = _intrinsicWidth ?? 44.0;
+        } else {
+          width = _intrinsicWidth;
+        }
+        double? height;
+        if (preferIntrinsicHeight) {
+          height = _intrinsicHeight ?? 44.0;
+        } else {
+          height = _intrinsicHeight;
+        }
+
+        return SizedBox(width: width, height: height, child: platformView);
+      },
     );
   }
 
@@ -248,35 +299,51 @@ class _CNSliderState extends State<CNSlider> {
       final args = call.arguments as Map?;
       final value = (args?['value'] as num?)?.toDouble();
       if (value != null) {
-        widget.onChanged(value);
+        widget.onChanged?.call(value);
         _lastValue = value;
       }
     }
     return null;
   }
 
+  Future<void> _requestIntrinsicSize() async {
+    final ch = _channel;
+    if (ch == null) return;
+    try {
+      final size = await ch.invokeMethod<Map>('getIntrinsicSize');
+      final w = (size?['width'] as num?)?.toDouble();
+      final h = (size?['height'] as num?)?.toDouble();
+
+      if ((w != null || h != null) && mounted) {
+        setState(() {
+          _intrinsicWidth = w != null && w > -1 ? w + 18 : null;
+          _intrinsicHeight = h != null && h > -1 ? h + 18 : null;
+        });
+      }
+    } catch (_) {}
+  }
+
   void _cacheCurrentProps() {
     _lastValue = widget.value;
     _lastMin = widget.min;
     _lastMax = widget.max;
-    _lastEnabled = widget.enabled;
+    _lastEnabled = _enabled;
     _lastIsDark = _isDark;
-    _lastTint = null; // Not using general tint to avoid coloring the thumb.
-    _lastThumbTint = resolveColorToArgb(_effectiveThumbTint, context);
-    _lastTrackTint = resolveColorToArgb(_effectiveTrackTint, context);
-    _lastTrackBgTint = resolveColorToArgb(_effectiveTrackBgTint, context);
-    _lastStep = widget.step;
+    _lastTint = _tint;
+    _lastThickMarks = widget.thickMarks;
+    _lastThickMarkPosition = widget.thickMarkPosition;
+    _lastType = widget.type;
+    _lastContinuous = widget.continuous;
+    _lastIsVertical = widget.isVertical;
+    _lastSize = widget.size;
+    _requestIntrinsicSize();
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
 
-    // Resolve any context-dependent values before awaiting.
-    final int? tint = null; // No general tint
-    final int? thumb0 = resolveColorToArgb(_effectiveThumbTint, context);
-    final int? track0 = resolveColorToArgb(_effectiveTrackTint, context);
-    final int? trackBg0 = resolveColorToArgb(_effectiveTrackBgTint, context);
+    bool needsIntrinsicSize = false;
 
     if (_lastMin != widget.min || _lastMax != widget.max) {
       await channel.invokeMethod('setRange', {
@@ -287,9 +354,9 @@ class _CNSliderState extends State<CNSlider> {
       _lastMax = widget.max;
     }
 
-    if (_lastEnabled != widget.enabled) {
-      await channel.invokeMethod('setEnabled', {'enabled': widget.enabled});
-      _lastEnabled = widget.enabled;
+    if (_lastEnabled != _enabled) {
+      await channel.invokeMethod('setEnabled', {'enabled': _enabled});
+      _lastEnabled = _enabled;
     }
 
     final double clamped = widget.value
@@ -303,34 +370,56 @@ class _CNSliderState extends State<CNSlider> {
       _lastValue = clamped;
     }
 
-    // Style updates (e.g., tint colors)
-    final thumb = thumb0;
-    final track = track0;
-    final trackBg = trackBg0;
-    final styleUpdate = <String, dynamic>{};
-    if (_lastTint != tint && tint != null) {
-      styleUpdate['tint'] = tint;
-      _lastTint = tint;
-    }
-    if (_lastThumbTint != thumb && thumb != null) {
-      styleUpdate['thumbTint'] = thumb;
-      _lastThumbTint = thumb;
-    }
-    if (_lastTrackTint != track && track != null) {
-      styleUpdate['trackTint'] = track;
-      _lastTrackTint = track;
-    }
-    if (_lastTrackBgTint != trackBg && trackBg != null) {
-      styleUpdate['trackBackgroundTint'] = trackBg;
-      _lastTrackBgTint = trackBg;
-    }
-    if (styleUpdate.isNotEmpty) {
-      await channel.invokeMethod('setStyle', styleUpdate);
+    if (_lastSize != widget.size) {
+      await channel.invokeMethod('setSize', {'size': widget.size.name});
+      _lastSize = widget.size;
+      needsIntrinsicSize = true;
     }
 
-    if (_lastStep != widget.step && widget.step != null) {
-      await channel.invokeMethod('setStep', {'step': widget.step});
-      _lastStep = widget.step;
+    if (_lastThickMarks != widget.thickMarks) {
+      await channel.invokeMethod('setTickMarks', {
+        'tickMarks': widget.thickMarks,
+      });
+      _lastThickMarks = widget.thickMarks;
+      needsIntrinsicSize = true;
+    }
+
+    if (_lastThickMarkPosition != widget.thickMarkPosition) {
+      await channel.invokeMethod('setTickMarkPosition', {
+        'tickMarkPosition': widget.thickMarkPosition?.name,
+      });
+      _lastThickMarkPosition = widget.thickMarkPosition;
+      needsIntrinsicSize = true;
+    }
+
+    if (_lastType != widget.type) {
+      await channel.invokeMethod('setType', {'type': widget.type.name});
+      _lastType = widget.type;
+      needsIntrinsicSize = true;
+    }
+
+    if (_lastContinuous != widget.continuous) {
+      await channel.invokeMethod('setIsContinuous', {
+        'isContinuous': widget.continuous,
+      });
+      _lastContinuous = widget.continuous;
+    }
+
+    if (_lastIsVertical != widget.isVertical) {
+      await channel.invokeMethod('setIsVertical', {
+        'isVertical': widget.isVertical,
+      });
+      _lastIsVertical = widget.isVertical;
+      needsIntrinsicSize = true;
+    }
+
+    if (_lastTint != _tint) {
+      _lastTint = _tint;
+      await channel.invokeMethod('setStyle', {'tint': _tint});
+    }
+
+    if (needsIntrinsicSize) {
+      _requestIntrinsicSize();
     }
   }
 
@@ -339,35 +428,15 @@ class _CNSliderState extends State<CNSlider> {
     if (channel == null) return;
     // Resolve theme-dependent values before awaiting.
     final isDark = _isDark;
-    final int? tint = null; // No general tint
-    final int? thumb = resolveColorToArgb(_effectiveThumbTint, context);
-    final int? track = resolveColorToArgb(_effectiveTrackTint, context);
-    final int? trackBg = resolveColorToArgb(_effectiveTrackBgTint, context);
 
     if (_lastIsDark != isDark) {
       await channel.invokeMethod('setBrightness', {'isDark': isDark});
       _lastIsDark = isDark;
     }
 
-    final styleUpdate = <String, dynamic>{};
-    if (_lastTint != tint && tint != null) {
-      styleUpdate['tint'] = tint;
-      _lastTint = tint;
-    }
-    if (_lastThumbTint != thumb && thumb != null) {
-      styleUpdate['thumbTint'] = thumb;
-      _lastThumbTint = thumb;
-    }
-    if (_lastTrackTint != track && track != null) {
-      styleUpdate['trackTint'] = track;
-      _lastTrackTint = track;
-    }
-    if (_lastTrackBgTint != trackBg && trackBg != null) {
-      styleUpdate['trackBackgroundTint'] = trackBg;
-      _lastTrackBgTint = trackBg;
-    }
-    if (styleUpdate.isNotEmpty) {
-      await channel.invokeMethod('setStyle', styleUpdate);
+    if (_lastTint != _tint) {
+      _lastTint = _tint;
+      await channel.invokeMethod('setStyle', {'tint': _tint});
     }
   }
 }

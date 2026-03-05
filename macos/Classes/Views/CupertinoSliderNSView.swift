@@ -1,102 +1,248 @@
-import FlutterMacOS
 import Cocoa
+import FlutterMacOS
 import SwiftUI
+
 
 class CupertinoSliderNSView: NSView {
   private let channel: FlutterMethodChannel
-  private let hostingController: NSHostingController<CupertinoSliderView>
+  @objc let myModel: SliderModel = SliderModel()
 
   init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
-    self.channel = FlutterMethodChannel(name: "CupertinoNativeSlider_\(viewId)", binaryMessenger: messenger)
+    self.channel = FlutterMethodChannel(
+      name: "CupertinoNativeSlider_\(viewId)", binaryMessenger: messenger)
+
+    let slider = NSSlider()
 
     var initialValue: Double = 0
     var minValue: Double = 0
     var maxValue: Double = 1
     var enabled: Bool = true
     var isDark: Bool = false
-    var initialTint: NSColor? = nil
-    var initialStep: Double? = nil
+    var tint: NSColor? = nil
+    var tickMarks: Int = 0
+    var tickMarkPosition: NSSlider.TickMarkPosition = .above
+    var type: NSSlider.SliderType = .linear
+    var isContinuous: Bool = true
+    var isVertical: Bool = false
+    var controlSize: NSControl.ControlSize = .regular
+
     if let dict = args as? [String: Any] {
       if let v = dict["value"] as? NSNumber { initialValue = v.doubleValue }
       if let v = dict["min"] as? NSNumber { minValue = v.doubleValue }
       if let v = dict["max"] as? NSNumber { maxValue = v.doubleValue }
       if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
       if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
-      if let v = dict["step"] as? NSNumber { initialStep = v.doubleValue }
-      if let style = dict["style"] as? [String: Any], let tintNum = style["tint"] as? NSNumber {
-        initialTint = Self.colorFromARGB(tintNum.intValue)
+      if let v = dict["type"] as? String {
+        switch v {
+        case "circular":
+          type = .circular
+        case "linear":
+          type = .linear
+        default:
+          type = .linear
+        }
+      }
+      if let v = dict["tickMarkPosition"] as? String {
+        switch v {
+        case "above":
+          tickMarkPosition = .above
+        case "below":
+          tickMarkPosition = .below
+        case "leading":
+          tickMarkPosition = .leading
+        case "trailing":
+          tickMarkPosition = .trailing
+        default:
+          tickMarkPosition = .above
+        }
+      }
+      if let v = dict["tickMarks"] as? NSNumber { tickMarks = v.intValue }
+      if let v = dict["isContinuous"] as? NSNumber { isContinuous = v.boolValue }
+      if let v = dict["tint"] as? NSNumber { tint = Self.colorFromARGB(v.intValue) }
+      if let v = dict["isVertical"] as? NSNumber { isVertical = v.boolValue }
+      if let v = dict["size"] as? String {
+        controlSize = ControlSizeUtils.controlSizeFromString(v)
       }
     }
 
-    var channelRef: FlutterMethodChannel? = nil
-    let model = SliderModel(value: initialValue, min: minValue, max: maxValue, enabled: enabled) { newValue in
-      channelRef?.invokeMethod("valueChanged", arguments: ["value": newValue])
-    }
-    self.hostingController = NSHostingController(rootView: CupertinoSliderView(model: model))
     super.init(frame: .zero)
 
-    channelRef = self.channel
+    self.myModel.onChange = { value in
+      self.channel.invokeMethod("valueChanged", arguments: ["value": value])
+    }
 
-    hostingController.view.wantsLayer = true
-    hostingController.view.layer?.backgroundColor = NSColor.clear.cgColor
-    hostingController.view.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+    slider.bind(.value, to: self.myModel, withKeyPath: "value", options: nil)
+    slider.bind(.minValue, to: self.myModel, withKeyPath: "minValue", options: nil)
+    slider.bind(.maxValue, to: self.myModel, withKeyPath: "maxValue", options: nil)
 
-    addSubview(hostingController.view)
-    hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+    self.myModel.value = initialValue
+    self.myModel.minValue = minValue
+    self.myModel.maxValue = maxValue
+
+    slider.controlSize = controlSize
+    slider.isEnabled = enabled
+    slider.isContinuous = isContinuous
+    slider.sliderType = type
+    slider.isVertical = isVertical
+
+    if tickMarks > 0 {
+      slider.numberOfTickMarks = tickMarks
+      slider.tickMarkPosition = tickMarkPosition
+    } else {
+      slider.numberOfTickMarks = 0
+    }
+
+    if let tint = tint {
+      slider.trackFillColor = tint
+    }
+
+    slider.wantsLayer = true
+
+    slider.layer?.backgroundColor = NSColor.clear.cgColor
+
+    slider.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+
+    slider.target = self
+    slider.action = #selector(onSliderValueChanged(_:))
+
+    addSubview(slider)
+    slider.translatesAutoresizingMaskIntoConstraints = false
     NSLayoutConstraint.activate([
-      hostingController.view.leadingAnchor.constraint(equalTo: leadingAnchor),
-      hostingController.view.trailingAnchor.constraint(equalTo: trailingAnchor),
-      hostingController.view.topAnchor.constraint(equalTo: topAnchor),
-      hostingController.view.bottomAnchor.constraint(equalTo: bottomAnchor)
+      slider.leadingAnchor.constraint(equalTo: leadingAnchor),
+      slider.trailingAnchor.constraint(equalTo: trailingAnchor),
+      slider.topAnchor.constraint(equalTo: topAnchor),
+      slider.bottomAnchor.constraint(equalTo: bottomAnchor),
     ])
 
-    if let tint = initialTint { model.tintColor = Color(tint) }
-    if let s = initialStep, s > 0 { model.step = s } else { model.step = nil }
-
     channel.setMethodCallHandler { call, result in
+
       switch call.method {
+      case "getIntrinsicSize":
+        let size = slider.intrinsicContentSize
+        result(["width": size.width, "height": size.height])
       case "setValue":
-        if let args = call.arguments as? [String: Any], let value = (args["value"] as? NSNumber)?.doubleValue {
-          model.value = value
+        if let args = call.arguments as? [String: Any],
+          let value = (args["value"] as? NSNumber)?.doubleValue
+        {
+          self.myModel.value = value
           result(nil)
-        } else { result(FlutterError(code: "bad_args", message: "Missing value", details: nil)) }
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
+        }
       case "setRange":
         if let args = call.arguments as? [String: Any],
-           let min = (args["min"] as? NSNumber)?.doubleValue,
-           let max = (args["max"] as? NSNumber)?.doubleValue {
-          model.min = min; model.max = max
-          if model.value < min { model.value = min }
-          if model.value > max { model.value = max }
+          let min = (args["min"] as? NSNumber)?.doubleValue,
+          let max = (args["max"] as? NSNumber)?.doubleValue
+        {
+          self.myModel.minValue = min
+          self.myModel.maxValue = max
+          if self.myModel.value < min { self.myModel.value = min }
+          if self.myModel.value > max { self.myModel.value = max }
           result(nil)
-        } else { result(FlutterError(code: "bad_args", message: "Missing min/max", details: nil)) }
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing min/max", details: nil))
+        }
       case "setEnabled":
-        if let args = call.arguments as? [String: Any], let enabled = (args["enabled"] as? NSNumber)?.boolValue {
-          model.enabled = enabled
+        if let args = call.arguments as? [String: Any],
+          let enabled = (args["enabled"] as? NSNumber)?.boolValue
+        {
+          slider.isEnabled = enabled
           result(nil)
-        } else { result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil)) }
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
+        }
       case "setStyle":
         if let args = call.arguments as? [String: Any] {
           if let tintNum = args["tint"] as? NSNumber {
             let ns = Self.colorFromARGB(tintNum.intValue)
-            model.tintColor = Color(ns)
-          }
-          // Best-effort: if specific track/thumb colors provided, prefer them as overall tint
-          if let tintNum = (args["trackTint"] as? NSNumber) ?? (args["thumbTint"] as? NSNumber) {
-            let ns = Self.colorFromARGB(tintNum.intValue)
-            model.tintColor = Color(ns)
+            slider.trackFillColor = ns
           }
           result(nil)
-        } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
-      case "setStep":
-        if let args = call.arguments as? [String: Any], let step = (args["step"] as? NSNumber)?.doubleValue {
-          model.step = step > 0 ? step : nil
-          result(nil)
-        } else { result(FlutterError(code: "bad_args", message: "Missing step", details: nil)) }
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
+        }
       case "setBrightness":
-        if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
-          self.hostingController.view.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+        if let args = call.arguments as? [String: Any],
+          let isDark = (args["isDark"] as? NSNumber)?.boolValue
+        {
+          slider.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
           result(nil)
-        } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
+        }
+      case "setTickMarks":
+        if let args = call.arguments as? [String: Any],
+          let tickMarks = (args["tickMarks"] as? NSNumber)?.intValue
+        {
+          slider.numberOfTickMarks = tickMarks
+          result(nil)
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing tickMarks", details: nil))
+        }
+      case "setTickMarkPosition":
+        if let args = call.arguments as? [String: Any],
+          let tickMarkPosition = args["tickMarkPosition"] as? String
+        {
+          switch tickMarkPosition {
+          case "above":
+            slider.tickMarkPosition = .above
+          case "below":
+            slider.tickMarkPosition = .below
+          case "leading":
+            slider.tickMarkPosition = .leading
+          case "trailing":
+            slider.tickMarkPosition = .trailing
+          default:
+            slider.tickMarkPosition = .above
+          }
+          result(nil)
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing tickMarkPosition", details: nil))
+        }
+      case "setType":
+        if let args = call.arguments as? [String: Any],
+          let type = args["type"] as? String
+        {
+          switch type {
+          case "circular":
+            slider.sliderType = .circular
+          case "linear":
+            slider.sliderType = .linear
+          default:
+            slider.sliderType = .linear
+          }
+          result(nil)
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing type", details: nil))
+        }
+      case "setIsContinuous":
+        if let args = call.arguments as? [String: Any],
+          let isContinuous = (args["isContinuous"] as? NSNumber)?.boolValue
+        {
+          slider.isContinuous = isContinuous
+          result(nil)
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing isContinuous", details: nil))
+        }
+      case "setIsVertical":
+        if let args = call.arguments as? [String: Any],
+          let isVertical = (args["isVertical"] as? NSNumber)?.boolValue
+        {
+          slider.isVertical = isVertical
+          result(nil)
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing isVertical", details: nil))
+        }
+      case "setSize":
+        if let args = call.arguments as? [String: Any],
+          let size = args["size"] as? String
+        {
+          slider.controlSize = ControlSizeUtils.controlSizeFromString(size)
+          result(nil)
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing size", details: nil))
+        }
+
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -105,6 +251,10 @@ class CupertinoSliderNSView: NSView {
 
   required init?(coder: NSCoder) {
     return nil
+  }
+
+  @objc func onSliderValueChanged(_ sender: NSSlider) {
+    myModel.value = sender.doubleValue
   }
 
   private static func colorFromARGB(_ argb: Int) -> NSColor {
