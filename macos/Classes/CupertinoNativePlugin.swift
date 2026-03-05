@@ -37,6 +37,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
     let pathControlFactory = CupertinoPathControlViewFactory(registrar: registrar)
     registrar.register(pathControlFactory, withId: "CupertinoNativePathControl")
+
+    let progressIndicatorFactory = CupertinoProgressIndicatorViewFactory(messenger: registrar.messenger)
+    registrar.register(progressIndicatorFactory, withId: "CupertinoNativeProgressIndicator")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

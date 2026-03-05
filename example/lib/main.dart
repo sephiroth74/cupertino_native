@@ -7,6 +7,7 @@ import 'demos/tab_bar.dart';
 import 'demos/icon.dart';
 import 'demos/popup_menu_button.dart';
 import 'demos/button.dart';
+import 'demos/progress_indicators.dart';
 
 void main() {
   runApp(const MyApp());
@@ -196,6 +197,20 @@ class HomePage extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     CupertinoPageRoute(builder: (_) => const ButtonDemoPage()),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Progress Indicators'),
+                leading: CNIcon(
+                  symbol: CNSymbol('hourglass', color: accentColor),
+                ),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(
+                      builder: (_) => const ProgressIndicatorsPageDemo(),
+                    ),
                   );
                 },
               ),

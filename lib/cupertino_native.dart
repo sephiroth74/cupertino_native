@@ -11,6 +11,7 @@ export 'components/popup_menu_button.dart';
 export 'components/button.dart';
 export 'components/color_well.dart';
 export 'components/path_control.dart';
+export 'components/progress_indicator.dart';
 
 export 'model/control_size.dart';
 
@@ -18,6 +19,7 @@ export 'style/sf_symbol.dart';
 export 'style/button_style.dart';
 export 'style/color_well_style.dart';
 export 'style/path_control_style.dart';
+export 'style/progress_style.dart';
 
 import 'cupertino_native_platform_interface.dart';
 
