@@ -13,4 +13,22 @@ class SliderModel: NSObject {
     @objc dynamic var maxValue: Double = 100.0
 
     var onChange: ((Double) -> Void)?
+
+    public func updateValues(minValue: Double, maxValue: Double, value: Double) {
+        NSLog("updateValues: %f %f %f", minValue, maxValue, value)
+
+        guard minValue < maxValue else {
+            NSLog("minValue must be less than maxValue")
+            return
+        }
+
+        guard value >= minValue && value <= maxValue else {
+            NSLog("value must be between minValue and maxValue")
+            return
+        }
+
+        self.minValue = minValue
+        self.maxValue = maxValue
+        self.value = value
+    }
 }

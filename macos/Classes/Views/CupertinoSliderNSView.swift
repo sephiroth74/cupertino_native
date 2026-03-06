@@ -2,7 +2,6 @@ import Cocoa
 import FlutterMacOS
 import SwiftUI
 
-
 class CupertinoSliderNSView: NSView {
   private let channel: FlutterMethodChannel
   @objc let myModel: SliderModel = SliderModel()
@@ -20,11 +19,12 @@ class CupertinoSliderNSView: NSView {
     var isDark: Bool = false
     var tint: NSColor? = nil
     var tickMarks: Int = 0
-    var tickMarkPosition: NSSlider.TickMarkPosition = .above
+    var tickMarkPosition: NSSlider.TickMarkPosition? = nil
     var type: NSSlider.SliderType = .linear
     var isContinuous: Bool = true
     var isVertical: Bool = false
     var controlSize: NSControl.ControlSize = .regular
+    var allowsTickMarkValuesOnly: Bool = false
 
     if let dict = args as? [String: Any] {
       if let v = dict["value"] as? NSNumber { initialValue = v.doubleValue }
@@ -32,31 +32,14 @@ class CupertinoSliderNSView: NSView {
       if let v = dict["max"] as? NSNumber { maxValue = v.doubleValue }
       if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
       if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
-      if let v = dict["type"] as? String {
-        switch v {
-        case "circular":
-          type = .circular
-        case "linear":
-          type = .linear
-        default:
-          type = .linear
-        }
-      }
+      if let v = dict["type"] as? String { type = Self.sliderTypeFromString(v) }
       if let v = dict["tickMarkPosition"] as? String {
-        switch v {
-        case "above":
-          tickMarkPosition = .above
-        case "below":
-          tickMarkPosition = .below
-        case "leading":
-          tickMarkPosition = .leading
-        case "trailing":
-          tickMarkPosition = .trailing
-        default:
-          tickMarkPosition = .above
-        }
+        tickMarkPosition = Self.tickMarkPositionFromString(v)
       }
       if let v = dict["tickMarks"] as? NSNumber { tickMarks = v.intValue }
+      if let v = dict["allowsTickMarkValuesOnly"] as? NSNumber {
+        allowsTickMarkValuesOnly = v.boolValue
+      }
       if let v = dict["isContinuous"] as? NSNumber { isContinuous = v.boolValue }
       if let v = dict["tint"] as? NSNumber { tint = Self.colorFromARGB(v.intValue) }
       if let v = dict["isVertical"] as? NSNumber { isVertical = v.boolValue }
@@ -67,41 +50,40 @@ class CupertinoSliderNSView: NSView {
 
     super.init(frame: .zero)
 
-    self.myModel.onChange = { value in
-      self.channel.invokeMethod("valueChanged", arguments: ["value": value])
-    }
+    self.myModel.updateValues(minValue: minValue, maxValue: maxValue, value: initialValue)
 
     slider.bind(.value, to: self.myModel, withKeyPath: "value", options: nil)
     slider.bind(.minValue, to: self.myModel, withKeyPath: "minValue", options: nil)
     slider.bind(.maxValue, to: self.myModel, withKeyPath: "maxValue", options: nil)
 
-    self.myModel.value = initialValue
-    self.myModel.minValue = minValue
-    self.myModel.maxValue = maxValue
+    self.myModel.onChange = { value in
+      NSLog("myModel.onChange \(value)")
+      self.channel.invokeMethod("valueChanged", arguments: ["value": value])
+    }
 
     slider.controlSize = controlSize
     slider.isEnabled = enabled
     slider.isContinuous = isContinuous
     slider.sliderType = type
     slider.isVertical = isVertical
+    slider.numberOfTickMarks = tickMarks
+    slider.allowsTickMarkValuesOnly = allowsTickMarkValuesOnly
 
-    if tickMarks > 0 {
-      slider.numberOfTickMarks = tickMarks
-      slider.tickMarkPosition = tickMarkPosition
-    } else {
-      slider.numberOfTickMarks = 0
+    if tickMarkPosition != nil {
+      slider.tickMarkPosition = tickMarkPosition!
+      NSLog("tickMarkPosition: \(tickMarkPosition!)")
     }
 
     if let tint = tint {
       slider.trackFillColor = tint
     }
 
+    NSLog("tickMarks: %d", tickMarks)
+    NSLog("allowsTickMarkValuesOnly: %d", allowsTickMarkValuesOnly)
+
     slider.wantsLayer = true
-
     slider.layer?.backgroundColor = NSColor.clear.cgColor
-
     slider.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-
     slider.target = self
     slider.action = #selector(onSliderValueChanged(_:))
 
@@ -114,6 +96,10 @@ class CupertinoSliderNSView: NSView {
       slider.bottomAnchor.constraint(equalTo: bottomAnchor),
     ])
 
+    if !isVertical {
+      // slider.bounds = frame.insetBy(dx: 20.0, dy: 20.0)
+    }
+
     channel.setMethodCallHandler { call, result in
 
       switch call.method {
@@ -124,7 +110,9 @@ class CupertinoSliderNSView: NSView {
         if let args = call.arguments as? [String: Any],
           let value = (args["value"] as? NSNumber)?.doubleValue
         {
-          self.myModel.value = value
+          if value != self.myModel.value {
+            self.myModel.value = value
+          }
           result(nil)
         } else {
           result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
@@ -183,34 +171,27 @@ class CupertinoSliderNSView: NSView {
         if let args = call.arguments as? [String: Any],
           let tickMarkPosition = args["tickMarkPosition"] as? String
         {
-          switch tickMarkPosition {
-          case "above":
-            slider.tickMarkPosition = .above
-          case "below":
-            slider.tickMarkPosition = .below
-          case "leading":
-            slider.tickMarkPosition = .leading
-          case "trailing":
-            slider.tickMarkPosition = .trailing
-          default:
-            slider.tickMarkPosition = .above
-          }
+          slider.tickMarkPosition = Self.tickMarkPositionFromString(tickMarkPosition)
           result(nil)
         } else {
           result(FlutterError(code: "bad_args", message: "Missing tickMarkPosition", details: nil))
+        }
+      case "setAllowsTickMarkValuesOnly":
+        if let args = call.arguments as? [String: Any],
+          let allowsTickMarkValuesOnly = (args["allowsTickMarkValuesOnly"] as? NSNumber)?.boolValue
+        {
+          slider.allowsTickMarkValuesOnly = allowsTickMarkValuesOnly
+          result(nil)
+        } else {
+          result(
+            FlutterError(
+              code: "bad_args", message: "Missing allowsTickMarkValuesOnly", details: nil))
         }
       case "setType":
         if let args = call.arguments as? [String: Any],
           let type = args["type"] as? String
         {
-          switch type {
-          case "circular":
-            slider.sliderType = .circular
-          case "linear":
-            slider.sliderType = .linear
-          default:
-            slider.sliderType = .linear
-          }
+          slider.sliderType = Self.sliderTypeFromString(type)
           result(nil)
         } else {
           result(FlutterError(code: "bad_args", message: "Missing type", details: nil))
@@ -254,6 +235,7 @@ class CupertinoSliderNSView: NSView {
   }
 
   @objc func onSliderValueChanged(_ sender: NSSlider) {
+    NSLog("onSliderValueChanged: \(sender.doubleValue)")
     myModel.value = sender.doubleValue
   }
 
@@ -263,5 +245,31 @@ class CupertinoSliderNSView: NSView {
     let g = CGFloat((argb >> 8) & 0xFF) / 255.0
     let b = CGFloat(argb & 0xFF) / 255.0
     return NSColor(srgbRed: r, green: g, blue: b, alpha: a)
+  }
+
+  private static func tickMarkPositionFromString(_ s: String) -> NSSlider.TickMarkPosition {
+    switch s {
+    case "above":
+      return .above
+    case "below":
+      return .below
+    case "leading":
+      return .leading
+    case "trailing":
+      return .trailing
+    default:
+      return .above
+    }
+  }
+
+  private static func sliderTypeFromString(_ s: String) -> NSSlider.SliderType {
+    switch s {
+    case "circular":
+      return .circular
+    case "linear":
+      return .linear
+    default:
+      return .linear
+    }
   }
 }

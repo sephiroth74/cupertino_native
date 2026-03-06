@@ -65,7 +65,9 @@ class CNSlider extends StatefulWidget {
     this.thickMarks,
     this.thickMarkPosition,
     this.isVertical = false,
-  });
+    this.allowsTickMarkValuesOnly = false,
+  }) : assert(min < max),
+       assert(value >= min && value <= max);
 
   /// Creates a Cupertino-native circular slider.
   factory CNSlider.circular({
@@ -87,7 +89,7 @@ class CNSlider extends StatefulWidget {
     max: max,
     controller: controller,
     color: color,
-    thickMarks: thickMarks,
+    thickMarks: 0,
   );
 
   /// Creates a Cupertino-native vertical slider.
@@ -102,6 +104,7 @@ class CNSlider extends StatefulWidget {
     Color? color,
     int? thickMarks,
     CNSliderTickmarkPosition? thickMarkPosition,
+    bool allowsTickMarkValuesOnly = false,
   }) => CNSlider(
     value: value,
     onChanged: onChanged,
@@ -113,6 +116,7 @@ class CNSlider extends StatefulWidget {
     color: color,
     thickMarks: thickMarks,
     thickMarkPosition: thickMarkPosition,
+    allowsTickMarkValuesOnly: allowsTickMarkValuesOnly,
     isVertical: true,
   );
 
@@ -152,6 +156,9 @@ class CNSlider extends StatefulWidget {
   /// Whether the slider is vertical.
   final bool isVertical;
 
+  /// Wheter the slider allows only tick mark values.
+  final bool allowsTickMarkValuesOnly;
+
   @override
   State<CNSlider> createState() => _CNSliderState();
 }
@@ -171,6 +178,7 @@ class _CNSliderState extends State<CNSlider> {
   bool? _lastIsVertical;
   bool? _lastEnabled;
   CNControlSize? _lastSize;
+  bool? _lastAllowsTickMarkValuesOnly;
 
   double? _intrinsicWidth;
   double? _intrinsicHeight;
@@ -227,6 +235,7 @@ class _CNSliderState extends State<CNSlider> {
       'tickMarkPosition': widget.thickMarkPosition?.name,
       'tint': resolveColorToArgb(_tint, context),
       'size': widget.size.name,
+      'allowsTickMarkValuesOnly': widget.allowsTickMarkValuesOnly,
     };
 
     final platformView = AppKitView(
@@ -249,12 +258,6 @@ class _CNSliderState extends State<CNSlider> {
       builder: (context, constraints) {
         final hasBoundedWidth = constraints.hasBoundedWidth;
         final hasBoundedHeight = constraints.hasBoundedHeight;
-
-        // debugPrint('constraints: $constraints');
-        // debugPrint('hasBoundedWidth: $hasBoundedWidth');
-        // debugPrint('hasBoundedHeight: $hasBoundedHeight');
-        // debugPrint('intrinsicWidth: $_intrinsicWidth');
-        // debugPrint('intrinsicHeight: $_intrinsicHeight');
 
         // Use intrinsicWidth if type is circular, or linear and it's vertical
         final useIntrinsicWidth =
@@ -316,8 +319,8 @@ class _CNSliderState extends State<CNSlider> {
 
       if ((w != null || h != null) && mounted) {
         setState(() {
-          _intrinsicWidth = w != null && w > -1 ? w + 18 : null;
-          _intrinsicHeight = h != null && h > -1 ? h + 18 : null;
+          _intrinsicWidth = w != null && w > -1 ? w + 20 : null;
+          _intrinsicHeight = h != null && h > -1 ? h + 20 : null;
         });
       }
     } catch (_) {}
@@ -336,6 +339,7 @@ class _CNSliderState extends State<CNSlider> {
     _lastContinuous = widget.continuous;
     _lastIsVertical = widget.isVertical;
     _lastSize = widget.size;
+    _lastAllowsTickMarkValuesOnly = widget.allowsTickMarkValuesOnly;
     _requestIntrinsicSize();
   }
 
@@ -390,6 +394,13 @@ class _CNSliderState extends State<CNSlider> {
       });
       _lastThickMarkPosition = widget.thickMarkPosition;
       needsIntrinsicSize = true;
+    }
+
+    if (_lastAllowsTickMarkValuesOnly != widget.allowsTickMarkValuesOnly) {
+      await channel.invokeMethod('setAllowsTickMarkValuesOnly', {
+        'allowsTickMarkValuesOnly': widget.allowsTickMarkValuesOnly,
+      });
+      _lastAllowsTickMarkValuesOnly = widget.allowsTickMarkValuesOnly;
     }
 
     if (_lastType != widget.type) {
