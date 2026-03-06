@@ -12,6 +12,7 @@ export 'components/button.dart';
 export 'components/color_well.dart';
 export 'components/path_control.dart';
 export 'components/progress_indicator.dart';
+export 'components/level_indicator.dart';
 
 export 'model/control_size.dart';
 export 'model/slider_tickmark_position.dart';
@@ -22,6 +23,7 @@ export 'style/color_well_style.dart';
 export 'style/path_control_style.dart';
 export 'style/progress_style.dart';
 export 'style/slider_type.dart';
+export 'style/level_indicator_style.dart';
 
 import 'cupertino_native_platform_interface.dart';
 

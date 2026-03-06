@@ -36,13 +36,6 @@ class CNSliderController {
     if (channel == null) return;
     await channel.invokeMethod('setRange', {'min': min, 'max': max});
   }
-
-  /// Enables or disables user interaction on the slider.
-  Future<void> setEnabled(bool enabled) async {
-    final channel = _channel;
-    if (channel == null) return;
-    await channel.invokeMethod('setEnabled', {'enabled': enabled});
-  }
 }
 
 /// A Cupertino-native slider rendered by the host platform.
@@ -262,22 +255,6 @@ class _CNSliderState extends State<CNSlider> {
         final preferIntrinsicWidth = !hasBoundedWidth && useIntrinsicWidth;
         final preferIntrinsicHeight = !hasBoundedHeight && useIntrinsicHeight;
 
-        if (widget.sliderType == CNSliderType.circular) {
-          debugPrint('constraints: $constraints');
-          debugPrint(
-            'hasBoundedWidth: ${constraints.hasBoundedWidth}, hasBoundedHeight: ${constraints.hasBoundedHeight}',
-          );
-          debugPrint(
-            'useIntrinsicWidth: $useIntrinsicWidth, useIntrinsicHeight: $useIntrinsicHeight',
-          );
-          debugPrint(
-            'preferIntrinsicWidth: $preferIntrinsicWidth, preferIntrinsicHeight: $preferIntrinsicHeight',
-          );
-          debugPrint(
-            '_intrinsicWidth: $_intrinsicWidth, _intrinsicHeight: $_intrinsicHeight',
-          );
-        }
-
         double? width;
         if (preferIntrinsicWidth) {
           width = _intrinsicWidth ?? 44.0;
@@ -317,8 +294,6 @@ class _CNSliderState extends State<CNSlider> {
   }
 
   Future<void> _requestIntrinsicSize() async {
-    debugPrint('** _requestIntrinsicSize called');
-
     final ch = _channel;
     if (ch == null) return;
     try {
@@ -328,8 +303,6 @@ class _CNSliderState extends State<CNSlider> {
 
       if ((w != null || h != null) && mounted) {
         setState(() {
-          debugPrint('[${widget.sliderType}] InstrinsicSize result: $w x $h');
-
           _intrinsicWidth = w != null && w > -1 ? w + 20 : null;
           _intrinsicHeight = h != null && h > -1 ? h + 20 : null;
         });
@@ -343,12 +316,8 @@ class _CNSliderState extends State<CNSlider> {
   }
 
   Future<void> _syncPropsToNativeIfNeeded(CNSlider oldWidget) async {
-    debugPrint(
-      '_syncPropsToNativeIfNeeded ${oldWidget.controlSize} != ${widget.controlSize}, ${oldWidget.sliderType} != ${widget.sliderType}',
-    );
-
     final channel = _channel;
-    if (channel == null) return;
+    if (channel == null || !mounted) return;
 
     bool needsIntrinsicSize = false;
 
@@ -359,8 +328,8 @@ class _CNSliderState extends State<CNSlider> {
       });
     }
 
-    if (oldWidget.isEnabled != _enabled) {
-      await channel.invokeMethod('setIsEnabled', {'value': _enabled});
+    if (oldWidget.isEnabled != widget.isEnabled) {
+      await channel.invokeMethod('setIsEnabled', {'value': widget.isEnabled});
     }
 
     final double clamped = widget.value
@@ -420,7 +389,9 @@ class _CNSliderState extends State<CNSlider> {
     }
 
     if (oldWidget.color != widget.color) {
-      await channel.invokeMethod('setTint', {'value': _tint});
+      await channel.invokeMethod('setTint', {
+        'value': resolveColorToArgb(widget.color, context),
+      });
     }
 
     if (needsIntrinsicSize) {

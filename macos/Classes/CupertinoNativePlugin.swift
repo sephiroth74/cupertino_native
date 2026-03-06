@@ -40,6 +40,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
     let progressIndicatorFactory = CupertinoProgressIndicatorViewFactory(messenger: registrar.messenger)
     registrar.register(progressIndicatorFactory, withId: "CupertinoNativeProgressIndicator")
+
+    let levelIndicatorFactory = CupertinoLevelIndicatorViewFactory(messenger: registrar.messenger)
+    registrar.register(levelIndicatorFactory, withId: "CupertinoNativeLevelIndicator")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

@@ -2,7 +2,7 @@ import Cocoa
 internal import Combine
 import Foundation
 
-class SliderModel: NSObject {
+class RangeModel: NSObject {
     @objc dynamic var value: Double = 50.0 {
         didSet {
             if value != oldValue {
@@ -31,4 +31,20 @@ class SliderModel: NSObject {
         self.maxValue = maxValue
         self.value = value
     }
+
+    public func updateRange(minValue: Double, maxValue: Double) {
+        guard minValue < maxValue else {
+            NSLog("minValue must be less than maxValue")
+            return
+        }
+        
+        self.minValue = minValue
+        self.maxValue = maxValue
+        
+        if self.value < minValue {
+            self.value = minValue
+        } else if self.value > maxValue {
+            self.value = maxValue
+        }
+    }    
 }

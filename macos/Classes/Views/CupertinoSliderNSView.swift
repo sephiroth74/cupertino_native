@@ -4,7 +4,7 @@ import SwiftUI
 
 class CupertinoSliderNSView: NSView {
   private let channel: FlutterMethodChannel
-  @objc let myModel: SliderModel = SliderModel()
+  @objc let myModel: RangeModel = RangeModel()
 
   init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
     self.channel = FlutterMethodChannel(
@@ -41,7 +41,7 @@ class CupertinoSliderNSView: NSView {
         allowsTickMarkValuesOnly = v.boolValue
       }
       if let v = dict["isContinuous"] as? NSNumber { isContinuous = v.boolValue }
-      if let v = dict["tint"] as? NSNumber { tint = Self.colorFromARGB(v.intValue) }
+      if let v = dict["tint"] as? NSNumber { tint = ColorUtils.colorFromARGB(v.intValue) }
       if let v = dict["isVertical"] as? NSNumber { isVertical = v.boolValue }
       if let v = dict["controlSize"] as? String {
         controlSize = ControlSizeUtils.controlSizeFromString(v)
@@ -80,7 +80,7 @@ class CupertinoSliderNSView: NSView {
     slider.layer?.backgroundColor = NSColor.clear.cgColor
     slider.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
     slider.target = self
-    slider.action = #selector(onSliderValueChanged(_:))
+    //slider.action = #selector(onSliderValueChanged(_:))
 
     addSubview(slider)
     slider.translatesAutoresizingMaskIntoConstraints = false
@@ -91,12 +91,7 @@ class CupertinoSliderNSView: NSView {
       slider.bottomAnchor.constraint(equalTo: bottomAnchor),
     ])
 
-    if !isVertical {
-      // slider.bounds = frame.insetBy(dx: 20.0, dy: 20.0)
-    }
-
     channel.setMethodCallHandler { call, result in
-      var sliderIsEnabled = slider.isEnabled
 
       switch call.method {
       case "getIntrinsicSize":
@@ -120,11 +115,7 @@ class CupertinoSliderNSView: NSView {
           let min = (args["min"] as? NSNumber)?.doubleValue,
           let max = (args["max"] as? NSNumber)?.doubleValue
         {
-          self.myModel.minValue = min
-          self.myModel.maxValue = max
-          if self.myModel.value < min { self.myModel.value = min }
-          if self.myModel.value > max { self.myModel.value = max }
-          self.myModel.updateValues(minValue: min, maxValue: max, value: self.myModel.value)
+          self.myModel.updateRange(minValue: min, maxValue: max)
           result(nil)
         } else {
           result(FlutterError(code: "bad_args", message: "Missing min/max", details: nil))
@@ -134,7 +125,6 @@ class CupertinoSliderNSView: NSView {
           let enabled = (args["value"] as? NSNumber)?.boolValue
         {
           slider.isEnabled = enabled
-          sliderIsEnabled = enabled
           result(nil)
         } else {
           result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
@@ -142,7 +132,7 @@ class CupertinoSliderNSView: NSView {
       case "setTint":
         if let args = call.arguments as? [String: Any] {
           if let tintNum = args["value"] as? NSNumber {
-            let ns = Self.colorFromARGB(tintNum.intValue)
+            let ns = ColorUtils.colorFromARGB(tintNum.intValue)
             slider.trackFillColor = ns
           }
           result(nil)
@@ -228,10 +218,6 @@ class CupertinoSliderNSView: NSView {
         result(FlutterMethodNotImplemented)
 
       }
-
-      if !sliderIsEnabled {
-        slider.isEnabled = sliderIsEnabled
-      }
     }
   }
 
@@ -241,14 +227,6 @@ class CupertinoSliderNSView: NSView {
 
   @objc func onSliderValueChanged(_ sender: NSSlider) {
     myModel.value = sender.doubleValue
-  }
-
-  private static func colorFromARGB(_ argb: Int) -> NSColor {
-    let a = CGFloat((argb >> 24) & 0xFF) / 255.0
-    let r = CGFloat((argb >> 16) & 0xFF) / 255.0
-    let g = CGFloat((argb >> 8) & 0xFF) / 255.0
-    let b = CGFloat(argb & 0xFF) / 255.0
-    return NSColor(srgbRed: r, green: g, blue: b, alpha: a)
   }
 
   private static func tickMarkPositionFromString(_ s: String) -> NSSlider.TickMarkPosition {

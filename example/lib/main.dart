@@ -8,6 +8,7 @@ import 'demos/icon.dart';
 import 'demos/popup_menu_button.dart';
 import 'demos/button.dart';
 import 'demos/progress_indicators.dart';
+import 'demos/level_indicators.dart';
 
 void main() {
   runApp(const MyApp());
@@ -210,6 +211,18 @@ class HomePage extends StatelessWidget {
                   Navigator.of(context).push(
                     CupertinoPageRoute(
                       builder: (_) => const ProgressIndicatorsPageDemo(),
+                    ),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Level Indicators'),
+                leading: CNIcon(symbol: CNSymbol('gauge', color: accentColor)),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(
+                      builder: (_) => const LevelIndicatorDemoPage(),
                     ),
                   );
                 },
