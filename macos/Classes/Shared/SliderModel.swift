@@ -5,7 +5,9 @@ import Foundation
 class SliderModel: NSObject {
     @objc dynamic var value: Double = 50.0 {
         didSet {
-            onChange?(value)
+            if value != oldValue {
+                onChange?(value)
+            }
         }
     }
 
@@ -15,8 +17,6 @@ class SliderModel: NSObject {
     var onChange: ((Double) -> Void)?
 
     public func updateValues(minValue: Double, maxValue: Double, value: Double) {
-        NSLog("updateValues: %f %f %f", minValue, maxValue, value)
-
         guard minValue < maxValue else {
             NSLog("minValue must be less than maxValue")
             return

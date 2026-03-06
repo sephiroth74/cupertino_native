@@ -11,6 +11,13 @@ class SliderDemoPage extends StatefulWidget {
 class _SliderDemoPageState extends State<SliderDemoPage> {
   double _defaultSliderValue = .5;
   double _coloredSliderValue = 50;
+  CNControlSize _size = CNControlSize.regular;
+
+  void _onSliderChange(double v) {
+    setState(() {
+      _defaultSliderValue = v;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,52 +29,157 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text('Size'),
+                const SizedBox(width: 16),
+                CNPopupMenuButton.icon(
+                  buttonIcon: CNSymbol('gearshape', size: 12),
+                  items: [
+                    CNPopupMenuItem(
+                      label: 'Mini',
+                      checked: _size == CNControlSize.mini,
+                    ),
+                    CNPopupMenuItem(
+                      label: 'Small',
+                      checked: _size == CNControlSize.small,
+                    ),
+                    CNPopupMenuItem(
+                      label: 'Regular',
+                      checked: _size == CNControlSize.regular,
+                    ),
+                    CNPopupMenuItem(
+                      label: 'Large',
+                      checked: _size == CNControlSize.large,
+                    ),
+                    CNPopupMenuItem(
+                      label: 'Extra Large',
+                      checked: _size == CNControlSize.extraLarge,
+                    ),
+                  ],
+                  onSelected: (v) =>
+                      setState(() => _size = CNControlSize.values[v]),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
               children: [
                 const Text('Default'),
                 Spacer(),
-                Text('Value: ${_defaultSliderValue.toStringAsFixed(1)}'),
+                Text('Value: ${_defaultSliderValue.toStringAsFixed(2)}'),
               ],
             ),
-
             CNSlider(
               value: _defaultSliderValue,
               onChanged: (v) => setState(() => _defaultSliderValue = v),
-              allowsTickMarkValuesOnly: true,
-              thickMarks: 20,
+              controlSize: _size,
             ),
+            const SizedBox(height: 16),
+            Text('Step Slider'),
+            CNSlider(
+              value: _defaultSliderValue,
+              onChanged: (v) => setState(() => _defaultSliderValue = v),
+              tickMarks: 20,
+              allowsTickMarkValuesOnly: true,
+              tickMarkPosition: CNSliderTickmarkPosition.below,
+              controlSize: _size,
+            ),
+            const SizedBox(height: 16),
+            Text('Non Continuous'),
+            CNSlider(
+              value: _defaultSliderValue,
+              isContinuous: false,
+              onChanged: (v) => setState(() => _defaultSliderValue = v),
+              controlSize: _size,
+            ),
+            const SizedBox(height: 16),
+            Text('Tinted'),
 
-            const SizedBox(height: 48),
+            CNSlider(
+              value: _defaultSliderValue,
+              isContinuous: false,
+              onChanged: (v) => setState(() => _defaultSliderValue = v),
+              controlSize: _size,
+              color: CupertinoColors.activeGreen,
+            ),
+            const SizedBox(height: 16),
+            Text('Disabled'),
 
-            // SizedBox(
-            //   child: CNSlider(
-            //     size: CNControlSize.large,
-            //     value: _defaultSliderValue,
-            //     onChanged: (v) => setState(() => _defaultSliderValue = v),
-            //     thickMarks: 20,
-            //     thickMarkPosition: CNSliderTickmarkPosition.above,
-            //   ),
-            // ),
+            CNSlider(
+              value: _defaultSliderValue,
+              isContinuous: false,
+              onChanged: null,
+              controlSize: _size,
+            ),
+            const SizedBox(height: 16),
 
-            // const SizedBox(height: 48),
+            Row(
+              children: [
+                SizedBox(
+                  height: 150,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Text('Vertical'),
+                      const SizedBox(height: 16.0),
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: 100,
+                            child: CNSlider.vertical(
+                              value: _defaultSliderValue,
+                              isContinuous: true,
+                              onChanged: _onSliderChange,
+                              controlSize: _size,
+                            ),
+                          ),
+                          const SizedBox(width: 16.0),
+                          SizedBox(
+                            height: 100,
+                            child: CNSlider.vertical(
+                              value: _defaultSliderValue,
+                              isContinuous: true,
+                              onChanged: _onSliderChange,
+                              controlSize: _size,
+                              tickMarks: 10,
+                              allowsTickMarkValuesOnly: true,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 32),
 
-            // SizedBox(
-            //   child: CNSlider(
-            //     size: CNControlSize.large,
-            //     value: _defaultSliderValue,
-            //     onChanged: (v) => setState(() => _defaultSliderValue = v),
-            //     thickMarks: 40,
-            //     thickMarkPosition: CNSliderTickmarkPosition.below,
-            //   ),
-            // ),
-
-            // SizedBox(
-            //   child: CNSlider.circular(
-            //     size: CNControlSize.extraLarge,
-            //     value: _defaultSliderValue,
-            //     thickMarks: 10,
-            //     onChanged: (v) => setState(() => _defaultSliderValue = v),
-            //   ),
-            // ),
+                SizedBox(
+                  height: 150,
+                  child: Column(
+                    children: [
+                      Text('Circular'),
+                      const SizedBox(height: 16.0),
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          CNSlider.circular(
+                            value: _defaultSliderValue,
+                            onChanged: _onSliderChange,
+                            controlSize: _size,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

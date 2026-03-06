@@ -55,15 +55,15 @@ class CNSlider extends StatefulWidget {
     super.key,
     required this.value,
     this.onChanged,
-    this.type = CNSliderType.linear,
-    this.size = CNControlSize.regular,
-    this.continuous = true,
+    this.sliderType = CNSliderType.linear,
+    this.controlSize = CNControlSize.regular,
+    this.isContinuous = true,
     this.min = 0.0,
     this.max = 1.0,
     this.controller,
     this.color,
-    this.thickMarks,
-    this.thickMarkPosition,
+    this.tickMarks,
+    this.tickMarkPosition,
     this.isVertical = false,
     this.allowsTickMarkValuesOnly = false,
   }) : assert(min < max),
@@ -73,55 +73,58 @@ class CNSlider extends StatefulWidget {
   factory CNSlider.circular({
     required double value,
     ValueChanged<double>? onChanged,
-    CNControlSize size = CNControlSize.regular,
-    bool continuous = true,
+    CNControlSize controlSize = CNControlSize.regular,
+    bool isContinuous = true,
     double min = 0.0,
     double max = 1.0,
     CNSliderController? controller,
     Color? color,
-    int? thickMarks,
+    int? tickMarks,
+    bool allowsTickMarkValuesOnly = false,
   }) => CNSlider(
     value: value,
     onChanged: onChanged,
-    type: CNSliderType.circular,
-    continuous: continuous,
+    sliderType: CNSliderType.circular,
+    isContinuous: isContinuous,
     min: min,
     max: max,
     controller: controller,
     color: color,
-    thickMarks: 0,
+    tickMarks: tickMarks,
+    controlSize: controlSize,
+    allowsTickMarkValuesOnly: allowsTickMarkValuesOnly,
   );
 
   /// Creates a Cupertino-native vertical slider.
   factory CNSlider.vertical({
     required double value,
     ValueChanged<double>? onChanged,
-    CNControlSize size = CNControlSize.regular,
-    bool continuous = true,
+    CNControlSize controlSize = CNControlSize.regular,
+    bool isContinuous = true,
     double min = 0.0,
     double max = 1.0,
     CNSliderController? controller,
     Color? color,
-    int? thickMarks,
-    CNSliderTickmarkPosition? thickMarkPosition,
+    int? tickMarks,
+    CNSliderTickmarkPosition? tickMarkPosition,
     bool allowsTickMarkValuesOnly = false,
   }) => CNSlider(
     value: value,
     onChanged: onChanged,
-    type: CNSliderType.linear,
-    continuous: continuous,
+    sliderType: CNSliderType.linear,
+    isContinuous: isContinuous,
     min: min,
     max: max,
     controller: controller,
     color: color,
-    thickMarks: thickMarks,
-    thickMarkPosition: thickMarkPosition,
+    tickMarks: tickMarks,
+    tickMarkPosition: tickMarkPosition,
     allowsTickMarkValuesOnly: allowsTickMarkValuesOnly,
     isVertical: true,
   );
 
   /// Size of the slider.
-  final CNControlSize size;
+  final CNControlSize controlSize;
 
   /// Current slider value.
   final double value;
@@ -133,10 +136,10 @@ class CNSlider extends StatefulWidget {
   final double max;
 
   /// Type of slider.
-  final CNSliderType type;
+  final CNSliderType sliderType;
 
   /// Whether the slider is continuous.
-  final bool continuous;
+  final bool isContinuous;
 
   /// Callback when the value changes due to user interaction.
   final ValueChanged<double>? onChanged;
@@ -147,11 +150,11 @@ class CNSlider extends StatefulWidget {
   /// General accent/tint color for the control.
   final Color? color;
 
-  /// Number of thick marks.
-  final int? thickMarks;
+  /// Number of tick marks.
+  final int? tickMarks;
 
-  /// Position of the thick marks.
-  final CNSliderTickmarkPosition? thickMarkPosition;
+  /// Position of the tick marks.
+  final CNSliderTickmarkPosition? tickMarkPosition;
 
   /// Whether the slider is vertical.
   final bool isVertical;
@@ -159,26 +162,14 @@ class CNSlider extends StatefulWidget {
   /// Wheter the slider allows only tick mark values.
   final bool allowsTickMarkValuesOnly;
 
+  bool get isEnabled => onChanged != null;
+
   @override
   State<CNSlider> createState() => _CNSliderState();
 }
 
 class _CNSliderState extends State<CNSlider> {
   MethodChannel? _channel;
-
-  double? _lastValue;
-  double? _lastMin;
-  double? _lastMax;
-  bool? _lastIsDark;
-  Color? _lastTint;
-  int? _lastThickMarks;
-  CNSliderTickmarkPosition? _lastThickMarkPosition;
-  CNSliderType? _lastType;
-  bool? _lastContinuous;
-  bool? _lastIsVertical;
-  bool? _lastEnabled;
-  CNControlSize? _lastSize;
-  bool? _lastAllowsTickMarkValuesOnly;
 
   double? _intrinsicWidth;
   double? _intrinsicHeight;
@@ -194,6 +185,8 @@ class _CNSliderState extends State<CNSlider> {
 
   Color? get _tint => widget.color ?? CupertinoTheme.of(context).primaryColor;
 
+  bool _lastIsDark = false;
+
   @override
   void dispose() {
     _channel?.setMethodCallHandler(null);
@@ -204,13 +197,12 @@ class _CNSliderState extends State<CNSlider> {
   @override
   void didUpdateWidget(covariant CNSlider oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _syncPropsToNativeIfNeeded();
+    _syncPropsToNativeIfNeeded(oldWidget);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Theme may have changed
     _syncBrightnessIfNeeded();
   }
 
@@ -227,14 +219,14 @@ class _CNSliderState extends State<CNSlider> {
       'max': widget.max,
       'value': widget.value,
       'isDark': _isDark,
-      'enabled': _enabled,
-      'type': widget.type.name,
-      'isContinuous': widget.continuous,
+      'isEnabled': _enabled,
+      'sliderType': widget.sliderType.name,
+      'isContinuous': widget.isContinuous,
       'isVertical': widget.isVertical,
-      'tickMarks': widget.thickMarks,
-      'tickMarkPosition': widget.thickMarkPosition?.name,
+      'tickMarks': widget.tickMarks,
+      'tickMarkPosition': widget.tickMarkPosition?.name,
       'tint': resolveColorToArgb(_tint, context),
-      'size': widget.size.name,
+      'controlSize': widget.controlSize.name,
       'allowsTickMarkValuesOnly': widget.allowsTickMarkValuesOnly,
     };
 
@@ -261,14 +253,30 @@ class _CNSliderState extends State<CNSlider> {
 
         // Use intrinsicWidth if type is circular, or linear and it's vertical
         final useIntrinsicWidth =
-            widget.type == CNSliderType.circular || widget.isVertical;
+            widget.sliderType == CNSliderType.circular || widget.isVertical;
 
         // Use intrinsicHeight if type is circular, or linear and it's not vertical
         final useIntrinsicHeight =
-            widget.type == CNSliderType.circular || !widget.isVertical;
+            widget.sliderType == CNSliderType.circular || !widget.isVertical;
 
         final preferIntrinsicWidth = !hasBoundedWidth && useIntrinsicWidth;
         final preferIntrinsicHeight = !hasBoundedHeight && useIntrinsicHeight;
+
+        if (widget.sliderType == CNSliderType.circular) {
+          debugPrint('constraints: $constraints');
+          debugPrint(
+            'hasBoundedWidth: ${constraints.hasBoundedWidth}, hasBoundedHeight: ${constraints.hasBoundedHeight}',
+          );
+          debugPrint(
+            'useIntrinsicWidth: $useIntrinsicWidth, useIntrinsicHeight: $useIntrinsicHeight',
+          );
+          debugPrint(
+            'preferIntrinsicWidth: $preferIntrinsicWidth, preferIntrinsicHeight: $preferIntrinsicHeight',
+          );
+          debugPrint(
+            '_intrinsicWidth: $_intrinsicWidth, _intrinsicHeight: $_intrinsicHeight',
+          );
+        }
 
         double? width;
         if (preferIntrinsicWidth) {
@@ -303,13 +311,14 @@ class _CNSliderState extends State<CNSlider> {
       final value = (args?['value'] as num?)?.toDouble();
       if (value != null) {
         widget.onChanged?.call(value);
-        _lastValue = value;
       }
     }
     return null;
   }
 
   Future<void> _requestIntrinsicSize() async {
+    debugPrint('** _requestIntrinsicSize called');
+
     final ch = _channel;
     if (ch == null) return;
     try {
@@ -319,6 +328,8 @@ class _CNSliderState extends State<CNSlider> {
 
       if ((w != null || h != null) && mounted) {
         setState(() {
+          debugPrint('[${widget.sliderType}] InstrinsicSize result: $w x $h');
+
           _intrinsicWidth = w != null && w > -1 ? w + 20 : null;
           _intrinsicHeight = h != null && h > -1 ? h + 20 : null;
         });
@@ -327,106 +338,89 @@ class _CNSliderState extends State<CNSlider> {
   }
 
   void _cacheCurrentProps() {
-    _lastValue = widget.value;
-    _lastMin = widget.min;
-    _lastMax = widget.max;
-    _lastEnabled = _enabled;
     _lastIsDark = _isDark;
-    _lastTint = _tint;
-    _lastThickMarks = widget.thickMarks;
-    _lastThickMarkPosition = widget.thickMarkPosition;
-    _lastType = widget.type;
-    _lastContinuous = widget.continuous;
-    _lastIsVertical = widget.isVertical;
-    _lastSize = widget.size;
-    _lastAllowsTickMarkValuesOnly = widget.allowsTickMarkValuesOnly;
     _requestIntrinsicSize();
   }
 
-  Future<void> _syncPropsToNativeIfNeeded() async {
+  Future<void> _syncPropsToNativeIfNeeded(CNSlider oldWidget) async {
+    debugPrint(
+      '_syncPropsToNativeIfNeeded ${oldWidget.controlSize} != ${widget.controlSize}, ${oldWidget.sliderType} != ${widget.sliderType}',
+    );
+
     final channel = _channel;
     if (channel == null) return;
 
     bool needsIntrinsicSize = false;
 
-    if (_lastMin != widget.min || _lastMax != widget.max) {
+    if (oldWidget.min != widget.min || oldWidget.max != widget.max) {
       await channel.invokeMethod('setRange', {
         'min': widget.min,
         'max': widget.max,
       });
-      _lastMin = widget.min;
-      _lastMax = widget.max;
     }
 
-    if (_lastEnabled != _enabled) {
-      await channel.invokeMethod('setEnabled', {'enabled': _enabled});
-      _lastEnabled = _enabled;
+    if (oldWidget.isEnabled != _enabled) {
+      await channel.invokeMethod('setIsEnabled', {'value': _enabled});
     }
 
     final double clamped = widget.value
         .clamp(widget.min, widget.max)
         .toDouble();
-    if (_lastValue != clamped) {
+    if (oldWidget.value != clamped) {
       await channel.invokeMethod('setValue', {
         'value': clamped,
         'animated': false,
       });
-      _lastValue = clamped;
     }
 
-    if (_lastSize != widget.size) {
-      await channel.invokeMethod('setSize', {'size': widget.size.name});
-      _lastSize = widget.size;
-      needsIntrinsicSize = true;
-    }
-
-    if (_lastThickMarks != widget.thickMarks) {
-      await channel.invokeMethod('setTickMarks', {
-        'tickMarks': widget.thickMarks,
+    if (oldWidget.controlSize != widget.controlSize) {
+      await channel.invokeMethod('setControlSize', {
+        'value': widget.controlSize.name,
       });
-      _lastThickMarks = widget.thickMarks;
+      debugPrint(
+        'called setControlSize with value: ${widget.controlSize.name} for type: ${widget.sliderType}',
+      );
       needsIntrinsicSize = true;
     }
 
-    if (_lastThickMarkPosition != widget.thickMarkPosition) {
+    if (oldWidget.tickMarks != widget.tickMarks) {
+      await channel.invokeMethod('setTickMarks', {'value': widget.tickMarks});
+      needsIntrinsicSize = true;
+    }
+
+    if (oldWidget.tickMarkPosition != widget.tickMarkPosition) {
       await channel.invokeMethod('setTickMarkPosition', {
-        'tickMarkPosition': widget.thickMarkPosition?.name,
+        'value': widget.tickMarkPosition?.name,
       });
-      _lastThickMarkPosition = widget.thickMarkPosition;
       needsIntrinsicSize = true;
     }
 
-    if (_lastAllowsTickMarkValuesOnly != widget.allowsTickMarkValuesOnly) {
+    if (oldWidget.allowsTickMarkValuesOnly != widget.allowsTickMarkValuesOnly) {
       await channel.invokeMethod('setAllowsTickMarkValuesOnly', {
-        'allowsTickMarkValuesOnly': widget.allowsTickMarkValuesOnly,
+        'value': widget.allowsTickMarkValuesOnly,
       });
-      _lastAllowsTickMarkValuesOnly = widget.allowsTickMarkValuesOnly;
     }
 
-    if (_lastType != widget.type) {
-      await channel.invokeMethod('setType', {'type': widget.type.name});
-      _lastType = widget.type;
+    if (oldWidget.sliderType != widget.sliderType) {
+      await channel.invokeMethod('setSliderType', {
+        'value': widget.sliderType.name,
+      });
       needsIntrinsicSize = true;
     }
 
-    if (_lastContinuous != widget.continuous) {
+    if (oldWidget.isContinuous != widget.isContinuous) {
       await channel.invokeMethod('setIsContinuous', {
-        'isContinuous': widget.continuous,
+        'value': widget.isContinuous,
       });
-      _lastContinuous = widget.continuous;
     }
 
-    if (_lastIsVertical != widget.isVertical) {
-      await channel.invokeMethod('setIsVertical', {
-        'isVertical': widget.isVertical,
-      });
-      _lastIsVertical = widget.isVertical;
+    if (oldWidget.isVertical != widget.isVertical) {
+      await channel.invokeMethod('setIsVertical', {'value': widget.isVertical});
       needsIntrinsicSize = true;
     }
 
-    if (_lastTint != _tint) {
-      _lastTint = _tint;
-      await channel.invokeMethod('setStyle', {'tint': _tint});
+    if (oldWidget.color != widget.color) {
+      await channel.invokeMethod('setTint', {'value': _tint});
     }
 
     if (needsIntrinsicSize) {
@@ -437,17 +431,11 @@ class _CNSliderState extends State<CNSlider> {
   Future<void> _syncBrightnessIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
-    // Resolve theme-dependent values before awaiting.
     final isDark = _isDark;
 
     if (_lastIsDark != isDark) {
-      await channel.invokeMethod('setBrightness', {'isDark': isDark});
+      await channel.invokeMethod('setIsDark', {'value': isDark});
       _lastIsDark = isDark;
-    }
-
-    if (_lastTint != _tint) {
-      _lastTint = _tint;
-      await channel.invokeMethod('setStyle', {'tint': _tint});
     }
   }
 }
