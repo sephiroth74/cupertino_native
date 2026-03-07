@@ -73,52 +73,52 @@ class _StepperDemoPageState extends State<StepperDemoPage> {
                 ),
               ],
             ),
-            // const SizedBox(height: 32),
-            // Row(
-            //   children: [
-            //     Text('Wraps: ${_wrappedValue.toStringAsFixed(0)}'),
-            //     const Spacer(),
-            //     CNStepper(
-            //       value: _wrappedValue,
-            //       min: 0,
-            //       max: 5,
-            //       step: 1,
-            //       valueWraps: true,
-            //       controlSize: _size,
-            //       onChanged: (v) => setState(() => _wrappedValue = v),
-            //     ),
-            //   ],
-            // ),
-            // const SizedBox(height: 32),
-            // Row(
-            //   children: [
-            //     Text('Step 5: ${_coarseValue.toStringAsFixed(0)}'),
-            //     const Spacer(),
-            //     CNStepper(
-            //       value: _coarseValue,
-            //       min: 0,
-            //       max: 50,
-            //       step: 5,
-            //       controlSize: _size,
-            //       onChanged: (v) => setState(() => _coarseValue = v),
-            //     ),
-            //   ],
-            // ),
-            // const SizedBox(height: 32),
-            // Row(
-            //   children: [
-            //     Text('Disabled'),
-            //     const Spacer(),
-            //     CNStepper(
-            //       value: 3,
-            //       min: 0,
-            //       max: 10,
-            //       step: 1,
-            //       controlSize: _size,
-            //       onChanged: null,
-            //     ),
-            //   ],
-            // ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Text('Wraps: ${_wrappedValue.toStringAsFixed(0)}'),
+                const Spacer(),
+                CNStepper(
+                  value: _wrappedValue,
+                  min: 0,
+                  max: 5,
+                  step: 1,
+                  valueWraps: true,
+                  controlSize: _size,
+                  onChanged: (v) => setState(() => _wrappedValue = v),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Text('Step 5: ${_coarseValue.toStringAsFixed(0)}'),
+                const Spacer(),
+                CNStepper(
+                  value: _coarseValue,
+                  min: 0,
+                  max: 50,
+                  step: 5,
+                  controlSize: _size,
+                  onChanged: (v) => setState(() => _coarseValue = v),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Text('Disabled'),
+                const Spacer(),
+                CNStepper(
+                  value: 3,
+                  min: 0,
+                  max: 10,
+                  step: 1,
+                  controlSize: _size,
+                  onChanged: null,
+                ),
+              ],
+            ),
           ],
         ),
       ),

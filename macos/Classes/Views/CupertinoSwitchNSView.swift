@@ -1,5 +1,5 @@
-import FlutterMacOS
 import Cocoa
+import FlutterMacOS
 import SwiftUI
 
 class CupertinoSwitchNSView: NSView {
@@ -7,18 +7,30 @@ class CupertinoSwitchNSView: NSView {
   private let hostingController: NSHostingController<CupertinoSwitchView>
 
   init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
-    self.channel = FlutterMethodChannel(name: "CupertinoNativeSwitch_\(viewId)", binaryMessenger: messenger)
+    self.channel = FlutterMethodChannel(
+      name: "CupertinoNativeSwitch_\(viewId)", binaryMessenger: messenger)
 
     var initialValue: Bool = false
     var enabled: Bool = true
     var isDark: Bool = false
     var initialTint: NSColor? = nil
+    var controlSize: ControlSize = .regular
     if let dict = args as? [String: Any] {
       if let v = dict["value"] as? NSNumber { initialValue = v.boolValue }
       if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
       if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
-      if let style = dict["style"] as? [String: Any], let tintNum = style["tint"] as? NSNumber {
-        initialTint = Self.colorFromARGB(tintNum.intValue)
+      if let v = dict["controlSize"] as? String {
+        switch v {
+        case "mini": controlSize = .mini
+        case "small": controlSize = .small
+        case "regular": controlSize = .regular
+        case "large": controlSize = .large
+        case "extraLarge": controlSize = .large
+        default: controlSize = .regular
+        }
+      }
+      if let v = dict["tint"] as? NSNumber {
+        initialTint = ColorUtils.colorFromARGB(v.intValue)
       }
     }
 
@@ -26,6 +38,8 @@ class CupertinoSwitchNSView: NSView {
     let model = SwitchModel(value: initialValue, enabled: enabled) { newValue in
       channelRef?.invokeMethod("valueChanged", arguments: ["value": newValue])
     }
+    model.controlSize = controlSize
+
     self.hostingController = NSHostingController(rootView: CupertinoSwitchView(model: model))
     super.init(frame: .zero)
 
@@ -44,34 +58,67 @@ class CupertinoSwitchNSView: NSView {
       hostingController.view.leadingAnchor.constraint(equalTo: leadingAnchor),
       hostingController.view.trailingAnchor.constraint(equalTo: trailingAnchor),
       hostingController.view.topAnchor.constraint(equalTo: topAnchor),
-      hostingController.view.bottomAnchor.constraint(equalTo: bottomAnchor)
+      hostingController.view.bottomAnchor.constraint(equalTo: bottomAnchor),
     ])
 
     channel.setMethodCallHandler { call, result in
       switch call.method {
+      case "getIntrinsicSize":
+        let size = self.hostingController.view.intrinsicContentSize
+        result(["width": size.width, "height": size.height])
+
       case "setValue":
-        if let args = call.arguments as? [String: Any], let value = (args["value"] as? NSNumber)?.boolValue {
+        if let args = call.arguments as? [String: Any],
+          let value = (args["value"] as? NSNumber)?.boolValue
+        {
           model.setValueFromDart(value)
           result(nil)
-        } else { result(FlutterError(code: "bad_args", message: "Missing value", details: nil)) }
-      case "setEnabled":
-        if let args = call.arguments as? [String: Any], let enabled = (args["enabled"] as? NSNumber)?.boolValue {
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
+        }
+      case "setIsEnabled":
+        if let args = call.arguments as? [String: Any],
+          let enabled = (args["value"] as? NSNumber)?.boolValue
+        {
           model.enabled = enabled
           result(nil)
-        } else { result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil)) }
-      case "setStyle":
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
+        }
+      case "setTint":
         if let args = call.arguments as? [String: Any] {
-          if let tintNum = args["tint"] as? NSNumber {
-            let ns = Self.colorFromARGB(tintNum.intValue)
+          if let tintNum = args["value"] as? NSNumber {
+            let ns = ColorUtils.colorFromARGB(tintNum.intValue)
             model.tintColor = Color(ns)
           }
           result(nil)
-        } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
-      case "setBrightness":
-        if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
+        }
+      case "setIsDark":
+        if let args = call.arguments as? [String: Any],
+          let isDark = (args["value"] as? NSNumber)?.boolValue
+        {
           self.hostingController.view.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
           result(nil)
-        } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
+        }
+      case "setControlSize":
+        if let args = call.arguments as? [String: Any], let sizeStr = args["value"] as? String {
+          switch sizeStr {
+          case "mini": controlSize = .mini
+          case "small": controlSize = .small
+          case "regular": controlSize = .regular
+          case "large": controlSize = .large
+          case "extraLarge": controlSize = .large
+          default: controlSize = .regular
+          }
+          model.controlSize = controlSize
+          result(nil)
+        } else {
+          result(FlutterError(code: "bad_args", message: "Missing controlSize", details: nil))
+        }
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -80,13 +127,5 @@ class CupertinoSwitchNSView: NSView {
 
   required init?(coder: NSCoder) {
     return nil
-  }
-
-  private static func colorFromARGB(_ argb: Int) -> NSColor {
-    let a = CGFloat((argb >> 24) & 0xFF) / 255.0
-    let r = CGFloat((argb >> 16) & 0xFF) / 255.0
-    let g = CGFloat((argb >> 8) & 0xFF) / 255.0
-    let b = CGFloat(argb & 0xFF) / 255.0
-    return NSColor(srgbRed: r, green: g, blue: b, alpha: a)
   }
 }

@@ -11,6 +11,7 @@ class SwitchDemoPage extends StatefulWidget {
 class _SwitchDemoPageState extends State<SwitchDemoPage> {
   bool _basicSwitchValue = true;
   bool _coloredSwitchValue = true;
+  CNControlSize _size = CNControlSize.regular;
 
   @override
   Widget build(BuildContext context) {
@@ -21,12 +22,46 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
+            // control sizes
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text('Size'),
+                const SizedBox(width: 16),
+                CNPopupMenuButton.icon(
+                  buttonIcon: CNSymbol('gearshape', size: 12),
+                  items: [
+                    CNPopupMenuItem(
+                      label: 'Mini',
+                      checked: _size == CNControlSize.mini,
+                    ),
+                    CNPopupMenuItem(
+                      label: 'Small',
+                      checked: _size == CNControlSize.small,
+                    ),
+                    CNPopupMenuItem(
+                      label: 'Regular',
+                      checked: _size == CNControlSize.regular,
+                    ),
+                    CNPopupMenuItem(
+                      label: 'Large',
+                      checked: _size == CNControlSize.large,
+                    ),
+                  ],
+                  onSelected: (v) =>
+                      setState(() => _size = CNControlSize.values[v]),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
             Row(
               children: [
                 Text('Basic ${_basicSwitchValue ? 'ON' : 'OFF'}'),
                 Spacer(),
                 CNSwitch(
                   value: _basicSwitchValue,
+                  controlSize: _size,
                   onChanged: (v) => setState(() => _basicSwitchValue = v),
                 ),
               ],
@@ -38,6 +73,7 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
                 Spacer(),
                 CNSwitch(
                   value: _coloredSwitchValue,
+                  controlSize: _size,
                   color: CupertinoColors.systemPink,
                   onChanged: (v) => setState(() => _coloredSwitchValue = v),
                 ),
@@ -48,7 +84,7 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
               children: [
                 Text('Disabled'),
                 Spacer(),
-                CNSwitch(value: false, enabled: false, onChanged: (_) {}),
+                CNSwitch(value: false, onChanged: null, controlSize: _size),
               ],
             ),
           ],

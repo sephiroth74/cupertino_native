@@ -6,6 +6,7 @@ struct CupertinoSwitchView: View {
   var body: some View {
     let base = Toggle("", isOn: $model.value)
       .labelsHidden()
+      .controlSize(model.controlSize)
       .disabled(!model.enabled)
       .onChange(of: model.value) { newValue in
         model.handleChange(newValue)
@@ -24,7 +25,10 @@ class SwitchModel: ObservableObject {
   @Published var value: Bool
   @Published var enabled: Bool
   @Published var tintColor: Color = .accentColor
+  @Published var controlSize: ControlSize = .regular
+
   var onChange: (Bool) -> Void
+  
   private var suppressChangeCallback = false
 
   init(value: Bool, enabled: Bool, onChange: @escaping (Bool) -> Void) {
