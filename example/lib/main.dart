@@ -9,6 +9,7 @@ import 'demos/popup_menu_button.dart';
 import 'demos/button.dart';
 import 'demos/progress_indicators.dart';
 import 'demos/level_indicators.dart';
+import 'demos/stepper.dart';
 
 void main() {
   runApp(const MyApp());
@@ -224,6 +225,18 @@ class HomePage extends StatelessWidget {
                     CupertinoPageRoute(
                       builder: (_) => const LevelIndicatorDemoPage(),
                     ),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Steppers'),
+                leading: CNIcon(
+                  symbol: CNSymbol('plusminus', color: accentColor),
+                ),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(builder: (_) => const StepperDemoPage()),
                   );
                 },
               ),

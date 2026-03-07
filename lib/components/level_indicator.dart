@@ -21,13 +21,13 @@ class CNLevelIndicator extends StatefulWidget {
   /// Called when the user changes the value of the level indicator. The new
   final ValueChanged<double>? onChanged;
 
-  // /// The current value of the level indicator. This is clamped to be between
+  /// The current value of the level indicator. This is clamped to be between
   final double value;
 
-  // /// The minimum value of the level indicator. Defaults to 0.0.
+  /// The minimum value of the level indicator. Defaults to 0.0.
   final double minValue;
 
-  // /// The maximum value of the level indicator. Defaults to 1.0.
+  /// The maximum value of the level indicator. Defaults to 1.0.
   final double maxValue;
 
   /// The fill color of the level indicator.
