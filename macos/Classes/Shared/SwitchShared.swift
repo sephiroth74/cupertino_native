@@ -8,7 +8,7 @@ struct CupertinoSwitchView: View {
       .labelsHidden()
       .controlSize(model.controlSize)
       .disabled(!model.enabled)
-      .onChange(of: model.value) { newValue in
+      .onChange(of: model.value, initial: model.value) { oldValue, newValue in
         model.handleChange(newValue)
       }
       .toggleStyle(.switch)

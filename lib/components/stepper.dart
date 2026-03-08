@@ -3,7 +3,6 @@ import 'package:cupertino_native/model/control_size.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/scheduler.dart';
 
 /// A macOS native stepper rendered by the host platform.
 /// On unsupported platforms, this renders a placeholder.

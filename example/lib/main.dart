@@ -10,6 +10,7 @@ import 'demos/button.dart';
 import 'demos/progress_indicators.dart';
 import 'demos/level_indicators.dart';
 import 'demos/stepper.dart';
+import 'demos/checkboxes.dart';
 
 void main() {
   runApp(const MyApp());
@@ -149,6 +150,20 @@ class HomePage extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     CupertinoPageRoute(builder: (_) => const SwitchDemoPage()),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Checkbox'),
+                leading: CNIcon(
+                  symbol: CNSymbol('checkmark.square', color: accentColor),
+                ),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(
+                      builder: (_) => const CheckboxDemoPage(),
+                    ),
                   );
                 },
               ),

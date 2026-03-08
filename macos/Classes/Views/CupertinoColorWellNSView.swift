@@ -93,7 +93,7 @@ class CupertinoColorWellNSView: NSView {
           self.colorWell!.colorWellStyle = Self.parseStyle(s)
           result(nil)
         } else {
-          NSLog("setStyle called with invalid arguments: \(call.arguments)")
+          NSLog("setStyle called with invalid arguments: \(call.arguments as Optional)")
           result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
         }
       case "setBrightness":
@@ -103,7 +103,7 @@ class CupertinoColorWellNSView: NSView {
           self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
           result(nil)
         } else {
-          NSLog("setBrightness called with invalid arguments: \(call.arguments)")
+          NSLog("setBrightness called with invalid arguments: \(call.arguments as Optional)")
           result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
         }
       case "setColor":
@@ -112,7 +112,7 @@ class CupertinoColorWellNSView: NSView {
           self.colorWell!.color = self.color
           result(nil)
         } else {
-          NSLog("setColor called with invalid arguments: \(call.arguments)")
+          NSLog("setColor called with invalid arguments: \(call.arguments as Optional)")
           result(FlutterError(code: "bad_args", message: "Missing color", details: nil))
         }
       case "setSupportsAlpha":
@@ -121,7 +121,7 @@ class CupertinoColorWellNSView: NSView {
           self.colorWell!.supportsAlpha = s
           result(nil)
         } else {
-          NSLog("setSupportsAlpha called with invalid arguments: \(call.arguments)")
+          NSLog("setSupportsAlpha called with invalid arguments: \(call.arguments as Optional)")
           result(FlutterError(code: "bad_args", message: "Missing supportsAlpha", details: nil))
         }
       default:

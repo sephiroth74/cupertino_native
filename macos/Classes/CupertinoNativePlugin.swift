@@ -46,6 +46,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
     let stepperFactory = CupertinoStepperViewFactory(messenger: registrar.messenger)
     registrar.register(stepperFactory, withId: "CupertinoNativeStepper")
+
+    let checkboxFactory = CupertinoCheckboxViewFactory(messenger: registrar.messenger)
+    registrar.register(checkboxFactory, withId: "CupertinoNativeCheckbox")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
