@@ -1,5 +1,6 @@
 import SwiftUI
 
+
 struct CupertinoCheckboxView: View {
   @ObservedObject var model: CheckboxModel
 

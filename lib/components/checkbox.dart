@@ -2,7 +2,6 @@ import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
@@ -25,35 +24,32 @@ const Map<CNControlSize, double> _kDefaultSwitchHeight = {
 };
 
 /// A Cupertino-native checkbox rendered by the host platform.
-///
-/// On iOS/macOS this uses a platform view to embed UISwitch/NSSwitch, and
-/// falls back to Flutter's [Switch] on unsupported platforms.
 class CNCheckbox extends StatefulWidget {
   /// Creates a Cupertino-native checkbox.
   const CNCheckbox({
     super.key,
-    required this.value,
+    required this.state,
     this.onChanged,
     this.controlSize = CNControlSize.regular,
+    this.allowMixedState = false,
     this.color,
-    this.label,
-    this.systemImage,
+    this.title,
   });
 
-  /// An optional label to display next to the checkbox.
-  final String? label;
+  /// Whether the checkbox supports a mixed state. If true, the checkbox can have a third "indeterminate" state in addition to on/off.
+  final bool allowMixedState;
 
-  /// An optional system image name to display next to the checkbox.
-  final String? systemImage;
+  /// An optional title to display next to the checkbox.
+  final String? title;
 
-  /// Whether the checkbox is on.
-  final bool value;
+  /// The state of the checkbox.
+  final CNCheckboxState state;
 
   /// Whether the checkbox is interactive.
   bool get enabled => onChanged != null;
 
   /// Callback invoked when the user toggles the value.
-  final ValueChanged<bool>? onChanged;
+  final ValueChanged<CNCheckboxState>? onChanged;
 
   /// The size of the checkbox control.
   final CNControlSize controlSize;
@@ -70,20 +66,19 @@ class _CNCheckboxState extends State<CNCheckbox> {
   double? _intrinsicWidth;
   double? _intrinsicHeight;
 
-  String? _lastSystemImage;
-  String? _lastLabel;
-  bool? _lastValue;
+  String? _lastTitle;
+  CNCheckboxState? _lastState;
   bool? _lastIsDark;
   bool? _lastEnabled;
   CNControlSize? _lastControlSize;
-  Color? _lastEffectiveColor;
+  Color? _lastTint;
+  bool _lastAllowMixedState = false;
 
   // int _pendingToggleId = 0;
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
-  Color? get _effectiveColor =>
-      widget.color ?? CupertinoTheme.of(context).primaryColor;
+  Color? get _tint => widget.color ?? CupertinoTheme.of(context).primaryColor;
 
   @override
   void dispose() {
@@ -113,13 +108,13 @@ class _CNCheckboxState extends State<CNCheckbox> {
     const viewType = 'CupertinoNativeCheckbox';
 
     final creationParams = <String, dynamic>{
-      'value': widget.value,
+      'state': widget.state.value,
       'enabled': widget.enabled,
       'isDark': _isDark,
       'controlSize': widget.controlSize.name,
-      'tint': resolveColorToArgb(_effectiveColor, context),
-      'label': widget.label,
-      'systemImage': widget.systemImage,
+      'tint': resolveColorToArgb(_tint, context),
+      'title': widget.title,
+      'allowMixedState': widget.allowMixedState,
     };
 
     // macOS
@@ -179,24 +174,26 @@ class _CNCheckboxState extends State<CNCheckbox> {
       '[checkbox] Method call from native: ${call.method} with args: ${call.arguments}',
     );
 
-    if (call.method == 'valueChanged') {
+    if (call.method == 'stateChanged') {
       final args = call.arguments as Map?;
-      final value = args?['value'] as bool?;
+      final value = args?['value'] as int?;
       if (value != null) {
-        widget.onChanged?.call(value);
+        widget.onChanged?.call(
+          CNCheckboxState.values.firstWhere((s) => s.value == value),
+        );
       }
     }
     return null;
   }
 
   void _cacheCurrentProps() {
-    _lastValue = widget.value;
+    _lastState = widget.state;
     _lastEnabled = widget.enabled;
     _lastIsDark = _isDark;
     _lastControlSize = widget.controlSize;
-    _lastEffectiveColor = _effectiveColor;
-    _lastLabel = widget.label;
-    _lastSystemImage = widget.systemImage;
+    _lastTint = _tint;
+    _lastTitle = widget.title;
+    _lastAllowMixedState = widget.allowMixedState;
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
@@ -210,22 +207,20 @@ class _CNCheckboxState extends State<CNCheckbox> {
       _lastEnabled = widget.enabled;
     }
 
-    if (_lastValue != widget.value) {
-      await channel.invokeMethod('setValue', {
-        'value': widget.value,
+    if (_lastState != widget.state) {
+      await channel.invokeMethod('setState', {
+        'value': widget.state.value,
         'animated': false,
       });
-      _lastValue = widget.value;
+      _lastState = widget.state;
     }
 
     // Style updates (e.g., tint color)
-    if (_lastEffectiveColor != _effectiveColor &&
-        _effectiveColor != null &&
-        mounted) {
+    if (_lastTint != _tint && _tint != null && mounted) {
       await channel.invokeMethod('setTint', {
-        'value': resolveColorToArgb(_effectiveColor, context),
+        'value': resolveColorToArgb(_tint, context),
       });
-      _lastEffectiveColor = _effectiveColor;
+      _lastTint = _tint;
     }
 
     if (_lastControlSize != widget.controlSize) {
@@ -236,18 +231,17 @@ class _CNCheckboxState extends State<CNCheckbox> {
       requiresIntrinsicSizeUpdate = true;
     }
 
-    if (_lastLabel != widget.label) {
-      await channel.invokeMethod('setLabel', {'value': widget.label});
-      _lastLabel = widget.label;
+    if (_lastTitle != widget.title) {
+      await channel.invokeMethod('setTitle', {'value': widget.title});
+      _lastTitle = widget.title;
       requiresIntrinsicSizeUpdate = true;
     }
 
-    if (_lastSystemImage != widget.systemImage) {
-      await channel.invokeMethod('setSystemImage', {
-        'value': widget.systemImage,
+    if (_lastAllowMixedState != widget.allowMixedState) {
+      await channel.invokeMethod('setAllowsMixedState', {
+        'value': widget.allowMixedState,
       });
-      _lastSystemImage = widget.systemImage;
-      requiresIntrinsicSizeUpdate = true;
+      _lastAllowMixedState = widget.allowMixedState;
     }
 
     if (requiresIntrinsicSizeUpdate) {
@@ -265,13 +259,11 @@ class _CNCheckboxState extends State<CNCheckbox> {
       _lastIsDark = isDark;
     }
 
-    if (_lastEffectiveColor != _effectiveColor &&
-        _effectiveColor != null &&
-        mounted) {
+    if (_lastTint != _tint && _tint != null && mounted) {
       await channel.invokeMethod('setTint', {
-        'value': resolveColorToArgb(_effectiveColor, context),
+        'value': resolveColorToArgb(_tint, context),
       });
-      _lastEffectiveColor = _effectiveColor;
+      _lastTint = _tint;
     }
   }
 

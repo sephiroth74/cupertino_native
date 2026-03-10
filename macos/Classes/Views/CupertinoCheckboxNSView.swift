@@ -1,28 +1,28 @@
 import Cocoa
 import FlutterMacOS
-import SwiftUI
 
 class CupertinoCheckboxNSView: NSView {
   private let channel: FlutterMethodChannel
-  private let hostingController: NSHostingController<CupertinoCheckboxView>
+  private let checkbox = NSButton(checkboxWithTitle: "", target: nil, action: nil)
 
   init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
     self.channel = FlutterMethodChannel(
       name: "CupertinoNativeCheckbox_\(viewId)", binaryMessenger: messenger)
 
-    var initialValue: Bool = false
+    var allowsMixedState = false
+    var title = ""
+    var controlSize: NSControl.ControlSize = .regular
+    var initialState: NSControl.StateValue = .off
+    var bezelColor: NSColor? = nil
     var enabled: Bool = true
     var isDark: Bool = false
-    var initialTint: NSColor? = nil
-    var controlSize: ControlSize = .regular
-    var label: String? = nil
-    var systemImage: String? = nil
+
     if let dict = args as? [String: Any] {
-      if let v = dict["value"] as? NSNumber { initialValue = v.boolValue }
+      if let v = dict["state"] as? NSNumber { initialState = NSControl.StateValue(v.intValue) }
       if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
       if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
-      if let v = dict["label"] as? String { label = v }
-      if let v = dict["systemImage"] as? String { systemImage = v }
+      if let v = dict["title"] as? String { title = v }
+      if let v = dict["allowsMixedState"] as? NSNumber { allowsMixedState = v.boolValue }
       if let v = dict["controlSize"] as? String {
         switch v {
         case "mini": controlSize = .mini
@@ -34,50 +34,53 @@ class CupertinoCheckboxNSView: NSView {
         }
       }
       if let v = dict["tint"] as? NSNumber {
-        initialTint = ColorUtils.colorFromARGB(v.intValue)
+        bezelColor = ColorUtils.colorFromARGB(v.intValue)
       }
     }
 
-    var channelRef: FlutterMethodChannel? = nil
-    let model = CheckboxModel(
-      value: initialValue, label: label, systemImage: systemImage, enabled: enabled
-    ) { newValue in
-      channelRef?.invokeMethod("valueChanged", arguments: ["value": newValue])
-    }
-    model.controlSize = controlSize
 
-    self.hostingController = NSHostingController(rootView: CupertinoCheckboxView(model: model))
     super.init(frame: .zero)
 
-    channelRef = self.channel
+    self.checkbox.wantsLayer = true
+    self.checkbox.layer?.backgroundColor = NSColor.clear.cgColor
+    self.checkbox.isEnabled = enabled
+    self.checkbox.allowsMixedState = allowsMixedState
+    self.checkbox.state = initialState
+    self.checkbox.title = title
+    self.checkbox.controlSize = controlSize
 
-    hostingController.view.wantsLayer = true
-    hostingController.view.layer?.backgroundColor = NSColor.clear.cgColor
-    hostingController.view.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-    if let tint = initialTint {
-      model.tintColor = Color(tint)
+    self.checkbox.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+
+    if let tint = bezelColor {
+      self.checkbox.bezelColor = tint
     }
 
-    addSubview(hostingController.view)
-    hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+    self.checkbox.target = self
+    self.checkbox.action = #selector(checkboxToggled)
+    self.checkbox.setButtonType(.switch)
+
+    addSubview(self.checkbox)
+
+    self.checkbox.translatesAutoresizingMaskIntoConstraints = false
+
     NSLayoutConstraint.activate([
-      hostingController.view.leadingAnchor.constraint(equalTo: leadingAnchor),
-      hostingController.view.trailingAnchor.constraint(equalTo: trailingAnchor),
-      hostingController.view.topAnchor.constraint(equalTo: topAnchor),
-      hostingController.view.bottomAnchor.constraint(equalTo: bottomAnchor),
+      self.checkbox.leadingAnchor.constraint(equalTo: leadingAnchor),
+      self.checkbox.trailingAnchor.constraint(equalTo: trailingAnchor),
+      self.checkbox.topAnchor.constraint(equalTo: topAnchor),
+      self.checkbox.bottomAnchor.constraint(equalTo: bottomAnchor),
     ])
 
-    channel.setMethodCallHandler { call, result in
+    self.channel.setMethodCallHandler { call, result in
       switch call.method {
       case "getIntrinsicSize":
-        let size = self.hostingController.view.intrinsicContentSize
+        let size = self.checkbox.intrinsicContentSize
         result(["width": size.width, "height": size.height])
 
-      case "setValue":
+      case "setState":
         if let args = call.arguments as? [String: Any],
-          let value = (args["value"] as? NSNumber)?.boolValue
+          let value = (args["value"] as? NSNumber)?.intValue
         {
-          model.setValueFromDart(value)
+          self.checkbox.state = NSControl.StateValue(value)
           result(nil)
         } else {
           result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
@@ -86,7 +89,7 @@ class CupertinoCheckboxNSView: NSView {
         if let args = call.arguments as? [String: Any],
           let enabled = (args["value"] as? NSNumber)?.boolValue
         {
-          model.enabled = enabled
+          self.checkbox.isEnabled = enabled
           result(nil)
         } else {
           result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
@@ -95,7 +98,7 @@ class CupertinoCheckboxNSView: NSView {
         if let args = call.arguments as? [String: Any] {
           if let tintNum = args["value"] as? NSNumber {
             let ns = ColorUtils.colorFromARGB(tintNum.intValue)
-            model.tintColor = Color(ns)
+            self.checkbox.bezelColor = ns
           }
           result(nil)
         } else {
@@ -105,48 +108,39 @@ class CupertinoCheckboxNSView: NSView {
         if let args = call.arguments as? [String: Any],
           let isDark = (args["value"] as? NSNumber)?.boolValue
         {
-          self.hostingController.view.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+          self.checkbox.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
           result(nil)
         } else {
           result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
         }
       case "setControlSize":
         if let args = call.arguments as? [String: Any], let sizeStr = args["value"] as? String {
-          switch sizeStr {
-          case "mini": controlSize = .mini
-          case "small": controlSize = .small
-          case "regular": controlSize = .regular
-          case "large": controlSize = .large
-          case "extraLarge": controlSize = .large
-          default: controlSize = .regular
-          }
-          model.controlSize = controlSize
+          self.checkbox.controlSize = ControlSizeUtils.controlSizeFromString(sizeStr)
           result(nil)
         } else {
           result(FlutterError(code: "bad_args", message: "Missing controlSize", details: nil))
         }
-      case "setLabel":
+      case "setTitle":
         if let args = call.arguments as? [String: Any] {
-          if let label = args["value"] as? String {
-            model.label = label
+          if let title = args["value"] as? String {
+            self.checkbox.title = title
           } else {
-            model.label = nil
+            self.checkbox.title = ""
           }
           result(nil)
         } else {
           result(FlutterError(code: "bad_args", message: "Missing label", details: nil))
         }
-      case "setSystemImage":
-        if let args = call.arguments as? [String: Any] {
-          if let systemImage = args["value"] as? String {
-            model.systemImage = systemImage
-          } else {
-            model.systemImage = nil
-          }
+      case "setAllowsMixedState":
+        if let args = call.arguments as? [String: Any],
+          let allowsMixedState = (args["value"] as? NSNumber)?.boolValue
+        {
+          self.checkbox.allowsMixedState = allowsMixedState
           result(nil)
         } else {
-          result(FlutterError(code: "bad_args", message: "Missing systemImage", details: nil))
+          result(FlutterError(code: "bad_args", message: "Missing allowsMixedState", details: nil))
         }
+
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -155,5 +149,10 @@ class CupertinoCheckboxNSView: NSView {
 
   required init?(coder: NSCoder) {
     return nil
+  }
+
+  @objc private func checkboxToggled() {
+    let newValue = checkbox.state.rawValue
+    channel.invokeMethod("stateChanged", arguments: ["value": newValue])
   }
 }

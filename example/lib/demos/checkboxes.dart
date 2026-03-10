@@ -9,10 +9,25 @@ class CheckboxDemoPage extends StatefulWidget {
 }
 
 class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
-  bool _basicCheckboxValue = true;
-  bool _coloredCheckboxValue = true;
+  CNCheckboxState _checkboxValue = CNCheckboxState.off;
   bool _checkboxesEnabled = true;
+  bool _allowMixedState = false;
   CNControlSize _size = CNControlSize.regular;
+
+  void _toggleCheckbox(CNCheckboxState newValue) {
+    debugPrint('Checkbox toggled: $newValue');
+    setState(() {
+      if (newValue == CNCheckboxState.mixed) {
+        if (_allowMixedState) {
+          _checkboxValue = newValue;
+        } else {
+          _checkboxValue = CNCheckboxState.on;
+        }
+      } else {
+        _checkboxValue = newValue;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,12 +45,22 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const Text('Tristate'),
+                const SizedBox(width: 16),
+                CNSwitch(
+                  value: _allowMixedState,
+                  onChanged: (v) =>
+                      setState(() => _allowMixedState = v == true),
+                  controlSize: CNControlSize.small,
+                ),
+                const SizedBox(width: 32),
                 const Text('Enabled'),
                 const SizedBox(width: 16),
                 CNSwitch(
                   value: _checkboxesEnabled,
                   onChanged: (v) =>
                       setState(() => _checkboxesEnabled = v == true),
+                  controlSize: CNControlSize.small,
                 ),
                 const SizedBox(width: 32),
                 const Text('Size'),
@@ -68,45 +93,42 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
             const SizedBox(height: 24),
             Row(
               children: [
-                Text('Basic ${_basicCheckboxValue ? 'ON' : 'OFF'}'),
+                Text('Basic ${_checkboxValue.name.toUpperCase()}'),
                 Spacer(),
                 CNCheckbox(
-                  label: 'Default checkbox',
-                  value: _basicCheckboxValue,
+                  allowMixedState: _allowMixedState,
+                  title: 'Default checkbox',
+                  state: _checkboxValue,
                   controlSize: _size,
-                  onChanged: _checkboxesEnabled
-                      ? (v) => setState(() => _basicCheckboxValue = v)
-                      : null,
+                  onChanged: _checkboxesEnabled ? _toggleCheckbox : null,
                 ),
               ],
             ),
             const SizedBox(height: 16),
             Row(
               children: [
-                Text('Colored ${_basicCheckboxValue ? 'ON' : 'OFF'}'),
+                Text('Colored ${_checkboxValue.name.toUpperCase()}'),
                 Spacer(),
                 CNCheckbox(
-                  label: 'Colored checkbox',
+                  allowMixedState: _allowMixedState,
+                  title: 'Colored checkbox',
                   color: CupertinoColors.systemMint,
-                  value: _basicCheckboxValue,
+                  state: _checkboxValue,
                   controlSize: _size,
-                  onChanged: _checkboxesEnabled
-                      ? (v) => setState(() => _basicCheckboxValue = v)
-                      : null,
+                  onChanged: _checkboxesEnabled ? _toggleCheckbox : null,
                 ),
               ],
             ),
             const SizedBox(height: 16),
             Row(
               children: [
-                Text('Simple ${_basicCheckboxValue ? 'ON' : 'OFF'}'),
+                Text('Simple ${_checkboxValue.name.toUpperCase()}'),
                 Spacer(),
                 CNCheckbox(
-                  value: _basicCheckboxValue,
+                  allowMixedState: _allowMixedState,
+                  state: _checkboxValue,
                   controlSize: _size,
-                  onChanged: _checkboxesEnabled
-                      ? (v) => setState(() => _basicCheckboxValue = v)
-                      : null,
+                  onChanged: _checkboxesEnabled ? _toggleCheckbox : null,
                 ),
               ],
             ),

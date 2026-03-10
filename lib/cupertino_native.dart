@@ -18,6 +18,7 @@ export 'components/checkbox.dart';
 
 export 'model/control_size.dart';
 export 'model/slider_tickmark_position.dart';
+export 'model/checkbox_state.dart';
 
 export 'style/sf_symbol.dart';
 export 'style/button_style.dart';
