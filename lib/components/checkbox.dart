@@ -74,8 +74,6 @@ class _CNCheckboxState extends State<CNCheckbox> {
   Color? _lastTint;
   bool _lastAllowMixedState = false;
 
-  // int _pendingToggleId = 0;
-
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   Color? get _tint => widget.color ?? CupertinoTheme.of(context).primaryColor;
@@ -149,9 +147,6 @@ class _CNCheckboxState extends State<CNCheckbox> {
             creationParams: creationParams,
             onPlatformViewCreated: _onPlatformViewCreated,
             gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-              Factory<HorizontalDragGestureRecognizer>(
-                () => HorizontalDragGestureRecognizer(),
-              ),
               Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
             },
           ),
@@ -287,8 +282,6 @@ class _CNCheckboxState extends State<CNCheckbox> {
   void _onIntrinsicSizeChanged(double? width, double? height) {
     if (width != null && height != null && mounted) {
       setState(() {
-        debugPrint('Intrinsic size updated: $width x $height');
-
         _intrinsicWidth = width > -1 ? width : null;
         _intrinsicHeight = height > -1 ? height : null;
       });

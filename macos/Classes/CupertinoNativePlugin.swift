@@ -49,6 +49,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
     let checkboxFactory = CupertinoCheckboxViewFactory(messenger: registrar.messenger)
     registrar.register(checkboxFactory, withId: "CupertinoNativeCheckbox")
+
+    let comboButtonFactory = CupertinoComboButtonViewFactory(messenger: registrar.messenger)
+    registrar.register(comboButtonFactory, withId: "CupertinoNativeComboButton")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

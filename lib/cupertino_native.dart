@@ -15,6 +15,9 @@ export 'components/progress_indicator.dart';
 export 'components/level_indicator.dart';
 export 'components/stepper.dart';
 export 'components/checkbox.dart';
+export 'components/combo_button.dart';
+export 'components/image.dart';
+export 'components/menu.dart';
 
 export 'model/control_size.dart';
 export 'model/slider_tickmark_position.dart';
@@ -27,6 +30,7 @@ export 'style/path_control_style.dart';
 export 'style/progress_style.dart';
 export 'style/slider_type.dart';
 export 'style/level_indicator_style.dart';
+export 'style/combo_button_style.dart';
 
 import 'cupertino_native_platform_interface.dart';
 

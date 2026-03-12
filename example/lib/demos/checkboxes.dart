@@ -14,6 +14,11 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
   bool _allowMixedState = false;
   CNControlSize _size = CNControlSize.regular;
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void _toggleCheckbox(CNCheckboxState newValue) {
     debugPrint('Checkbox toggled: $newValue');
     setState(() {
@@ -65,28 +70,95 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
                 const SizedBox(width: 32),
                 const Text('Size'),
                 const SizedBox(width: 16),
-                CNPopupMenuButton.icon(
-                  buttonIcon: CNSymbol('gearshape', size: 12),
-                  items: [
-                    CNPopupMenuItem(
-                      label: 'Mini',
-                      checked: _size == CNControlSize.mini,
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minWidth: 150,
+                    maxWidth: 250,
+                  ),
+                  child: CNComboButton(
+                    title: _size.name.toUpperCase(),
+                    style: CNComboButtonStyle.split,
+                    menu: CNMenu(
+                      items: [
+                        CNMenuItem(
+                          title: 'Mini',
+                          tag: 0,
+                          state: _size == CNControlSize.mini
+                              ? CNMenuItemState.on
+                              : CNMenuItemState.off,
+                          image: CNImage(systemSymbolName: "1.calendar"),
+                        ),
+                        CNMenuItem(
+                          title: 'Small',
+                          tag: 1,
+                          state: _size == CNControlSize.small
+                              ? CNMenuItemState.on
+                              : CNMenuItemState.off,
+                          image: CNImage(
+                            systemSymbolName: "2.calendar",
+                            symbolConfiguration: CNSymbolConfiguration.palette([
+                              CupertinoColors.systemRed,
+                              CupertinoColors.systemYellow,
+                              CupertinoColors.systemGreen,
+                            ]),
+                          ),
+                        ),
+                        CNMenuItem(
+                          title: 'Regular',
+                          tag: 2,
+                          state: _size == CNControlSize.regular
+                              ? CNMenuItemState.on
+                              : CNMenuItemState.off,
+                          image: CNImage(
+                            systemSymbolName: "3.calendar",
+                            symbolConfiguration:
+                                CNSymbolConfiguration.monochrome(
+                                  CupertinoColors.systemGreen,
+                                ),
+                          ),
+                        ),
+                        CNMenuItem(
+                          title: 'Large',
+                          tag: 3,
+                          state: _size == CNControlSize.large
+                              ? CNMenuItemState.on
+                              : CNMenuItemState.off,
+                          image: CNImage(
+                            systemSymbolName: "4.calendar",
+                            symbolConfiguration:
+                                CNSymbolConfiguration.hierarchical(
+                                  CupertinoColors.systemBlue,
+                                ),
+                          ),
+                        ),
+                      ],
                     ),
-                    CNPopupMenuItem(
-                      label: 'Small',
-                      checked: _size == CNControlSize.small,
-                    ),
-                    CNPopupMenuItem(
-                      label: 'Regular',
-                      checked: _size == CNControlSize.regular,
-                    ),
-                    CNPopupMenuItem(
-                      label: 'Large',
-                      checked: _size == CNControlSize.large,
-                    ),
-                  ],
-                  onSelected: (v) =>
-                      setState(() => _size = CNControlSize.values[v]),
+                    onPressed: (sender) {
+                      debugPrint('onPressed($sender)');
+                    },
+                    onMenuItemSelected: (value) {
+                      debugPrint(
+                        'Size selected: ${value.title} (tag: ${value.tag})',
+                      );
+
+                      setState(() {
+                        switch (value.tag) {
+                          case 0:
+                            _size = CNControlSize.mini;
+                            break;
+                          case 1:
+                            _size = CNControlSize.small;
+                            break;
+                          case 2:
+                            _size = CNControlSize.regular;
+                            break;
+                          case 3:
+                            _size = CNControlSize.large;
+                            break;
+                        }
+                      });
+                    },
+                  ),
                 ),
               ],
             ),

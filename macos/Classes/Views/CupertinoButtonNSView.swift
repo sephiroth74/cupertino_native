@@ -75,12 +75,12 @@ class CupertinoButtonNSView: NSView {
             image = image.withSymbolConfiguration(cfg) ?? image
           }
         case "monochrome":
-          if let c = iconColor { image = image.tinted(with: c) }
+          if let c = iconColor { image = image.buttonTinted(with: c) }
         default:
           break
         }
       } else if let c = iconColor {
-        image = image.tinted(with: c)
+        image = image.buttonTinted(with: c)
       }
       button.image = image
       button.imagePosition = .imageOnly
@@ -316,7 +316,7 @@ class CupertinoButtonNSView: NSView {
 }
 
 extension NSImage {
-  fileprivate func tinted(with color: NSColor) -> NSImage {
+  fileprivate func buttonTinted(with color: NSColor) -> NSImage {
     guard isTemplate else { return self }
     let image = self.copy() as! NSImage
     image.lockFocus()
