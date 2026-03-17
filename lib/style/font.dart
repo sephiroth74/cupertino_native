@@ -1,3 +1,5 @@
+import 'package:equatable/equatable.dart';
+
 /// NSFont-compatible weights.
 enum CNFontWeight {
   /// Ultra-light system weight.
@@ -41,7 +43,7 @@ enum CNFontSizePreset {
 }
 
 /// Describes a font size either as a named NSFont preset or raw points.
-class CNFontSize {
+class CNFontSize extends Equatable {
   /// Uses one of NSFont's static size presets.
   const CNFontSize.preset(this.preset) : points = null;
 
@@ -61,6 +63,9 @@ class CNFontSize {
     }
     return {'points': points};
   }
+
+  @override
+  List<Object?> get props => [preset, points];
 }
 
 /// NSFont-compatible constructors.
@@ -112,7 +117,7 @@ enum CNFontKind {
 }
 
 /// Declarative font descriptor serialized to native NSFont constructors.
-class CNFont {
+class CNFont extends Equatable {
   /// Constructor kind mapped on the native side.
   final CNFontKind kind;
 
@@ -222,4 +227,7 @@ class CNFont {
       if (name != null) 'name': name,
     };
   }
+
+  @override
+  List<Object?> get props => [kind, size, weight, name];
 }

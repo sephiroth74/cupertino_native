@@ -56,14 +56,12 @@ class CupertinoDatePickerNSView: NSView {
             }
             if let fontDict = dict["font"] as? [String: Any] {
                 font = FontUtils.fontFromDictionary(fontDict)
-                NSLog("font: \(font?.fontName ?? "nil"), size: \(font?.pointSize ?? 0), string: \(font))")
             }
             if let localeStr = dict["locale"] as? String {
                 locale = Locale(identifier: localeStr)
             }
             if let v = dict["isEnabled"] as? Bool { isEnabled = v }
         }
-
 
         self.datePicker.datePickerStyle = datePickerStyle
         self.datePicker.datePickerMode = datePickerMode
@@ -125,6 +123,135 @@ class CupertinoDatePickerNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
                 }
 
+            case "setDatePickerStyle":
+                if let args = call.arguments as? [String: Any],
+                    let styleStr = args["value"] as? String
+                {
+                    self.datePicker.datePickerStyle = Self.datePickerStyleFromString(styleStr)
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
+                }
+
+            case "setDatePickerElements":
+                if let args = call.arguments as? [String: Any],
+                    let elementsArr = args["value"] as? [String]
+                {
+                    self.datePicker.datePickerElements =
+                        Self.datePickerElementsFromStrings(elementsArr)
+                    result(nil)
+                } else {
+                    result(
+                        FlutterError(code: "bad_args", message: "Missing elements", details: nil))
+                }
+
+            case "setFont":
+                if let args = call.arguments as? [String: Any],
+                    let fontDict = args["value"] as? [String: Any],
+                    let font = FontUtils.fontFromDictionary(fontDict)
+                {
+                    self.datePicker.font = font
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing font", details: nil))
+                }
+
+            case "setBackgroundColor":
+                if let args = call.arguments as? [String: Any],
+                    let colorInt = args["value"] as? Int
+                {
+                    self.datePicker.backgroundColor = ColorUtils.colorFromARGB(colorInt)
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing color", details: nil))
+                }
+
+            case "setTextColor":
+                if let args = call.arguments as? [String: Any],
+                    let colorInt = args["value"] as? Int
+                {
+                    self.datePicker.textColor = ColorUtils.colorFromARGB(colorInt)
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing color", details: nil))
+                }
+
+            case "setMinDate":
+                if let args = call.arguments as? [String: Any],
+                    let timestamp = args["value"] as? TimeInterval
+                {
+                    self.datePicker.minDate = Date(timeIntervalSince1970: timestamp / 1000)
+                    result(nil)
+                } else {
+                    result(
+                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil))
+                }
+
+            case "setMaxDate":
+                if let args = call.arguments as? [String: Any],
+                    let timestamp = args["value"] as? TimeInterval
+                {
+                    self.datePicker.maxDate = Date(timeIntervalSince1970: timestamp / 1000)
+                    result(nil)
+                } else {
+                    result(
+                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil))
+                }
+
+            case "setLocale":
+                if let args = call.arguments as? [String: Any],
+                    let localeStr = args["value"] as? String
+                {
+                    self.datePicker.locale = Locale(identifier: localeStr)
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing locale", details: nil))
+                }
+
+            case "setIsBordered":
+                if let args = call.arguments as? [String: Any],
+                    let bordered = (args["value"] as? NSNumber)?.boolValue
+                {
+                    self.datePicker.isBordered = bordered
+                    result(nil)
+                } else {
+                    result(
+                        FlutterError(code: "bad_args", message: "Missing bordered", details: nil))
+                }
+
+            case "setDrawsBackground":
+                if let args = call.arguments as? [String: Any],
+                    let draws = (args["value"] as? NSNumber)?.boolValue
+                {
+                    self.datePicker.drawsBackground = draws
+                    result(nil)
+                } else {
+                    result(
+                        FlutterError(
+                            code: "bad_args", message: "Missing drawsBackground", details: nil))
+                }
+
+            case "setDateValue":
+                if let args = call.arguments as? [String: Any],
+                    let timestamp = args["value"] as? TimeInterval
+                {
+                    self.datePicker.dateValue = Date(timeIntervalSince1970: timestamp / 1000)
+                    result(nil)
+                } else {
+                    result(
+                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil))
+                }
+
+            case "setDatePickerMode":
+                if let args = call.arguments as? [String: Any],
+                    let modeStr = args["value"] as? String
+                {
+                    self.datePicker.datePickerMode = Self.datePickerModeFromString(modeStr)
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing mode", details: nil))
+                }
+
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -141,7 +268,9 @@ class CupertinoDatePickerNSView: NSView {
 
         let timestamp = date.timeIntervalSince1970 * 1000
         let intervalMs = interval * 1000
-        channel.invokeMethod("onDateChanged", arguments: ["timestamp": timestamp, "interval": intervalMs])
+
+        channel.invokeMethod(
+            "onDateChanged", arguments: ["timestamp": timestamp, "interval": intervalMs])
     }
 
     private static func datePickerModeFromString(_ mode: String) -> NSDatePicker.Mode {

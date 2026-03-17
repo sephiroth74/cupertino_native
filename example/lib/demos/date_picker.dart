@@ -9,6 +9,8 @@ class DatePickerDemoPage extends StatefulWidget {
 }
 
 class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
+  DateTime selectedDate = DateTime.now();
+
   @override
   void dispose() {
     super.dispose();
@@ -36,9 +38,10 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
                 child: CNDatePicker(
                   width: 300,
                   datePickerMode: CNDatePickerMode.range,
-                  datePickerStyle: CNDatePickerStyle.textFieldAndStepper,
-                  datePickerElements: [CNDatePickerElements.yearMonthDay],
+                  datePickerStyle: CNDatePickerStyle.clockAndCalendar,
+                  datePickerElements: [CNDatePickerElements.yearMonthDay, CNDatePickerElements.hourMinute],
                   isBordered: true,
+                  dateValue: selectedDate,
                   minDate: DateTime(2020, 1, 1),
                   maxDate: DateTime(2030, 12, 31),
                   locale: const Locale('en', 'US'),
@@ -48,6 +51,9 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
                   ),
                   onDateChanged: (date, interval) {
                     debugPrint('Selected date: $date, interval: $interval');
+                    setState(() {
+                      selectedDate = date;
+                    });
                   },
                 ),
               ),
