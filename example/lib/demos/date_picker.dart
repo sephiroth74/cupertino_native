@@ -17,23 +17,39 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Date Picker Demo')),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Date Picker Demo'),
+      ),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             const SizedBox(height: 16),
-            SizedBox(
-              height: 400,
-              width: 400,
-              child: CNDatePicker(
-                datePickerMode: CNDatePickerMode.range,
-                datePickerStyle: CNDatePickerStyle.clockAndCalendar,
-                datePickerElements: [CNDatePickerElements.yearMonthDay, CNDatePickerElements.hourMinuteSecond],
-                isBordered: true,
-                minDate: DateTime(2020, 1, 1),
-                maxDate: DateTime(2030, 12, 31),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                constraints: BoxConstraints.expand(
+                  width: double.infinity,
+                  height: 200,
+                ),
+                child: CNDatePicker(
+                  width: 300,
+                  datePickerMode: CNDatePickerMode.range,
+                  datePickerStyle: CNDatePickerStyle.textFieldAndStepper,
+                  datePickerElements: [CNDatePickerElements.yearMonthDay],
+                  isBordered: true,
+                  minDate: DateTime(2020, 1, 1),
+                  maxDate: DateTime(2030, 12, 31),
+                  locale: const Locale('en', 'US'),
+                  font: CNFont.system(
+                    CNFontSize.preset(CNFontSizePreset.system),
+                    weight: CNFontWeight.bold,
+                  ),
+                  onDateChanged: (date, interval) {
+                    debugPrint('Selected date: $date, interval: $interval');
+                  },
+                ),
               ),
             ),
           ],

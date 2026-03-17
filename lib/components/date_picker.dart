@@ -6,6 +6,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+typedef CNDatePickerChanged = void Function(DateTime date, Duration interval);
+
 class CNDatePicker extends StatefulWidget {
   final CNDatePickerMode datePickerMode;
   final CNDatePickerStyle datePickerStyle;
@@ -17,12 +19,19 @@ class CNDatePicker extends StatefulWidget {
   final Color? textColor;
   final DateTime? minDate;
   final DateTime? maxDate;
+  final Locale? locale;
+  final CNDatePickerChanged? onDateChanged;
+  final double? width;
+
+  /// Optional native NSFont descriptor.
+  final CNFont? font;
 
   const CNDatePicker({
     super.key,
     this.datePickerMode = CNDatePickerMode.single,
     required this.datePickerStyle,
     required this.datePickerElements,
+    required this.onDateChanged,
     this.isBordered = true,
     this.drawsBackground = true,
     this.dateValue,
@@ -30,6 +39,9 @@ class CNDatePicker extends StatefulWidget {
     this.textColor,
     this.minDate,
     this.maxDate,
+    this.font,
+    this.locale,
+    this.width,
   });
 
   @override
@@ -40,6 +52,7 @@ class _CNDatePickerState extends State<CNDatePicker> {
   MethodChannel? _channel;
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+  bool get _isEnabled => widget.onDateChanged != null;
 
   double? _intrinsicWidth;
   double? _intrinsicHeight;
@@ -62,7 +75,9 @@ class _CNDatePickerState extends State<CNDatePicker> {
       'isDark': _isDark,
       'datePickerMode': widget.datePickerMode.name,
       'datePickerStyle': widget.datePickerStyle.name,
-      'datePickerElements': widget.datePickerElements.map((e) => e.name).toList(),
+      'datePickerElements': widget.datePickerElements
+          .map((e) => e.name)
+          .toList(),
       'isBordered': widget.isBordered,
       'dateValue': widget.dateValue?.millisecondsSinceEpoch,
       'drawsBackground': widget.drawsBackground,
@@ -70,6 +85,9 @@ class _CNDatePickerState extends State<CNDatePicker> {
       'textColor': resolveColorToArgb(widget.textColor, context),
       'minDate': widget.minDate?.millisecondsSinceEpoch,
       'maxDate': widget.maxDate?.millisecondsSinceEpoch,
+      'font': widget.font?.toMap(),
+      'locale': widget.locale?.toLanguageTag(),
+      'isEnabled': _isEnabled,
     };
 
     return LayoutBuilder(
@@ -82,22 +100,47 @@ class _CNDatePickerState extends State<CNDatePicker> {
 
         if (widget.datePickerStyle == CNDatePickerStyle.clockAndCalendar) {
           // we must use the intrinsic sizes, or the max available constraints, in case the intrinsic sizes are not available yet
-          width = _intrinsicWidth ?? (hasBoundedWidth ? constraints.maxWidth : null);
-          height = _intrinsicHeight ?? (hasBoundedHeight ? constraints.maxHeight : null);
+          width =
+              _intrinsicWidth ??
+              (hasBoundedWidth ? constraints.maxWidth : null);
+          height =
+              _intrinsicHeight ??
+              (hasBoundedHeight ? constraints.maxHeight : null);
+        } else {
+          // for textField styles we can expand to fill the available width, but height should be intrinsic or max 32
+          width =
+              widget.width ??
+              _intrinsicWidth ??
+              (hasBoundedWidth ? constraints.maxWidth : null);
+          height =
+              _intrinsicHeight ??
+              (hasBoundedHeight ? constraints.maxHeight : 21.0);
+        }
+
+        if (hasBoundedWidth && width != null) {
+          width = width.clamp(0.0, constraints.maxWidth);
         }
 
         debugPrint('constraints: $constraints');
+        debugPrint(
+          'hasBoundedWidth: $hasBoundedWidth, hasBoundedHeight: $hasBoundedHeight',
+        );
         debugPrint('Using width: $width, height: $height');
 
-        return SizedBox(
-          width: width,
-          height: height,
-          child: AppKitView(
-            viewType: viewType,
-            creationParamsCodec: const StandardMessageCodec(),
-            creationParams: creationParams,
-            onPlatformViewCreated: _onPlatformViewCreated,
-            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{Factory<TapGestureRecognizer>(() => TapGestureRecognizer())},
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            width: width,
+            height: height,
+            child: AppKitView(
+              viewType: viewType,
+              creationParamsCodec: const StandardMessageCodec(),
+              creationParams: creationParams,
+              onPlatformViewCreated: _onPlatformViewCreated,
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+              },
+            ),
           ),
         );
       },
@@ -112,7 +155,15 @@ class _CNDatePickerState extends State<CNDatePicker> {
   }
 
   Future<void> _onMethodCall(MethodCall call) async {
-    debugPrint('Received method call: ${call.method} with arguments: ${call.arguments}');
+    // debugPrint('Received method call: ${call.method} with arguments: ${call.arguments}');
+    if (call.method == 'onDateChanged') {
+      final args = call.arguments as Map;
+      final timestamp = args['timestamp'] as num;
+      final interval = args['interval'] as num;
+      final duration = Duration(milliseconds: interval.toInt());
+      final date = DateTime.fromMillisecondsSinceEpoch(timestamp.toInt());
+      widget.onDateChanged?.call(date, duration);
+    }
   }
 
   Future<void> _requestIntrinsicSize() async {
@@ -144,7 +195,14 @@ class _CNDatePickerState extends State<CNDatePicker> {
   }
 }
 
-enum CNDatePickerElements { hourMinute, hourMinuteSecond, timeZone, yearMonth, yearMonthDay, era }
+enum CNDatePickerElements {
+  hourMinute,
+  hourMinuteSecond,
+  timeZone,
+  yearMonth,
+  yearMonthDay,
+  era,
+}
 
 enum CNDatePickerMode { single, range }
 

@@ -32,7 +32,7 @@ export 'style/progress_style.dart';
 export 'style/slider_type.dart';
 export 'style/level_indicator_style.dart';
 export 'style/combo_button_style.dart';
-
+export 'style/font.dart';
 
 import 'cupertino_native_platform_interface.dart';
 

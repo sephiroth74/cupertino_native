@@ -264,7 +264,9 @@ class HomePage extends StatelessWidget {
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => const DatePickerDemoPage()),
+                    CupertinoPageRoute(
+                      builder: (_) => const DatePickerDemoPage(),
+                    ),
                   );
                 },
               ),

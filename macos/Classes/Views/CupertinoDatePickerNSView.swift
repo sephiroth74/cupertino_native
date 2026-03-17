@@ -22,6 +22,9 @@ class CupertinoDatePickerNSView: NSView {
         var textColor: NSColor = NSColor.controlTextColor
         var minDate: Date? = nil
         var maxDate: Date? = nil
+        var font: NSFont? = nil
+        var locale: Locale? = nil
+        var isEnabled: Bool = true
 
         if let dict = args as? [String: Any] {
             if let styleStr = dict["datePickerStyle"] as? String {
@@ -51,8 +54,16 @@ class CupertinoDatePickerNSView: NSView {
             if let v = dict["maxDate"] as? TimeInterval {
                 maxDate = Date(timeIntervalSince1970: v / 1000)
             }
-
+            if let fontDict = dict["font"] as? [String: Any] {
+                font = FontUtils.fontFromDictionary(fontDict)
+                NSLog("font: \(font?.fontName ?? "nil"), size: \(font?.pointSize ?? 0), string: \(font))")
+            }
+            if let localeStr = dict["locale"] as? String {
+                locale = Locale(identifier: localeStr)
+            }
+            if let v = dict["isEnabled"] as? Bool { isEnabled = v }
         }
+
 
         self.datePicker.datePickerStyle = datePickerStyle
         self.datePicker.datePickerMode = datePickerMode
@@ -64,22 +75,13 @@ class CupertinoDatePickerNSView: NSView {
         self.datePicker.textColor = textColor
         self.datePicker.minDate = minDate
         self.datePicker.maxDate = maxDate
+        self.datePicker.locale = locale
+        self.datePicker.isEnabled = isEnabled
+        self.datePicker.font =
+            font
+            ?? NSFont.systemFont(ofSize: NSFont.systemFontSize, weight: NSFont.Weight.regular)
 
         self.datePicker.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-
-        // parse locale from "en-US" format
-        //if let localeStr = dict["locale"] as? String {
-        //    let locale = Locale(identifier: localeStr)
-        //    self.datePicker.locale = locale
-        //}
-
-        let localeStr = "en-US"
-
-        self.datePicker.locale = Locale(identifier: localeStr)
-        //self.datePicker.timeZone = TimeZone.current
-        //self.datePicker.calendar = Calendar
-        self.datePicker.font = NSFont.systemFont(ofSize: NSFont.systemFontSize, weight: NSFont.Weight.regular)
-
         self.datePicker.target = self
         self.datePicker.action = #selector(dateChanged)
 
@@ -134,9 +136,12 @@ class CupertinoDatePickerNSView: NSView {
     }
 
     @objc private func dateChanged() {
-        // let date = self.datePicker.dateValue
-        // let timestamp = date.timeIntervalSince1970 * 1000
-        //channel.invokeMethod("onDateChanged", arguments: timestamp)
+        let date = self.datePicker.dateValue
+        let interval = self.datePicker.timeInterval
+
+        let timestamp = date.timeIntervalSince1970 * 1000
+        let intervalMs = interval * 1000
+        channel.invokeMethod("onDateChanged", arguments: ["timestamp": timestamp, "interval": intervalMs])
     }
 
     private static func datePickerModeFromString(_ mode: String) -> NSDatePicker.Mode {
