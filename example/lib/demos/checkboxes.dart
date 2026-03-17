@@ -205,26 +205,6 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
               ],
             ),
             const SizedBox(height: 16),
-            // Row(
-            //   children: [
-            //     Text('Colored ${_coloredCheckboxValue ? 'ON' : 'OFF'}'),
-            //     Spacer(),
-            //     CNCheckbox(
-            //       value: _coloredCheckboxValue,
-            //       controlSize: _size,
-            //       color: CupertinoColors.systemPink,
-            //       onChanged: (v) => setState(() => _coloredCheckboxValue = v),
-            //     ),
-            //   ],
-            // ),
-            // const SizedBox(height: 48),
-            // Row(
-            //   children: [
-            //     Text('Disabled'),
-            //     Spacer(),
-            //     CNCheckbox(value: false, onChanged: null, controlSize: _size),
-            //   ],
-            // ),
           ],
         ),
       ),

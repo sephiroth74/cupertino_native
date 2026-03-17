@@ -11,6 +11,7 @@ import 'demos/progress_indicators.dart';
 import 'demos/level_indicators.dart';
 import 'demos/stepper.dart';
 import 'demos/checkboxes.dart';
+import 'demos/date_picker.dart';
 
 void main() {
   runApp(const MyApp());
@@ -252,6 +253,18 @@ class HomePage extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     CupertinoPageRoute(builder: (_) => const StepperDemoPage()),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Date Picker'),
+                leading: CNIcon(
+                  symbol: CNSymbol('calendar', color: accentColor),
+                ),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(builder: (_) => const DatePickerDemoPage()),
                   );
                 },
               ),

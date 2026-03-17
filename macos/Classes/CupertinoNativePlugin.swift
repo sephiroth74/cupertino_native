@@ -52,6 +52,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
     let comboButtonFactory = CupertinoComboButtonViewFactory(messenger: registrar.messenger)
     registrar.register(comboButtonFactory, withId: "CupertinoNativeComboButton")
+
+    let datePickerFactory = CupertinoDatePickerViewFactory(messenger: registrar.messenger)
+    registrar.register(datePickerFactory, withId: "CupertinoNativeDatePicker")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
