@@ -14,6 +14,7 @@ import 'demos/checkboxes.dart';
 import 'demos/date_picker.dart';
 import 'demos/alert.dart';
 import 'demos/popover.dart';
+import 'demos/context_menu.dart';
 
 void main() {
   runApp(const MyApp());
@@ -221,6 +222,14 @@ class HomePage extends StatelessWidget {
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const PopoverDemoPage()));
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Context Menu'),
+                leading: CNIcon(symbol: CNSymbol('ellipsis.rectangle', color: accentColor)),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ContextMenuDemoPage()));
                 },
               ),
             ],

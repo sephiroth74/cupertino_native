@@ -200,6 +200,11 @@ class CupertinoComboButtonNSView: NSView {
                     var image: NSImage? = nil
 
                     for item in items {
+                        if let separator = item["separator"] as? Bool, separator {
+                            menu.addItem(.separator())
+                            continue
+                        }
+
                         if let v = item["title"] as? String {
                             title = v
                         }

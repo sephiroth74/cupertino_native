@@ -32,9 +32,19 @@ class CNMenu extends ChangeNotifier with EquatableMixin {
 
   /// Returns the first menu item with the given platform [identifier].
   CNMenuItem? findItemByIdentifier(String identifier) {
-    for (final item in items) {
-      if (item.identifier == identifier) {
+    if (identifier.isEmpty) return null;
+    return _findIn(items, identifier);
+  }
+
+  CNMenuItem? _findIn(List<CNMenuItem> nodes, String identifier) {
+    for (final item in nodes) {
+      if (!item.isSeparator && item.identifier == identifier) {
         return item;
+      }
+      final submenuItems = item.submenu?.items;
+      if (submenuItems != null) {
+        final nested = _findIn(submenuItems, identifier);
+        if (nested != null) return nested;
       }
     }
     return null;
@@ -72,6 +82,9 @@ enum CNMenuItemState {
 class CNMenuItem extends ChangeNotifier with EquatableMixin {
   static int _identifierCounter = 0;
 
+  /// Whether this entry is a visual separator.
+  final bool isSeparator;
+
   /// The state of the menu item, which can be on, off, or mixed (indeterminate).
   final CNMenuItemState state;
 
@@ -93,25 +106,40 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
   final int _identifier;
 
   /// A unique identifier for this menu item, used for platform communication. It is generated automatically and should not be set manually.
-  String get identifier => 'menuItem_$_identifier';
+  String get identifier => isSeparator ? '' : 'menuItem_$_identifier';
 
   /// Creates a new CNMenuItem with the given properties. The [title] is required, while other properties are optional.
   /// The [state] defaults to [CNMenuItemState.off], and [enabled] defaults to true.
   /// The [tag] can be used to store an arbitrary integer value for identification purposes.
-  CNMenuItem({
-    required this.title,
-    this.tag,
-    this.image,
-    this.submenu,
-    this.state = CNMenuItemState.off,
-    this.enabled = true,
-  }) : _identifier = _identifierCounter++;
+  CNMenuItem({required this.title, this.tag, this.image, this.submenu, this.state = CNMenuItemState.off, this.enabled = true})
+    : isSeparator = false,
+      _identifier = _identifierCounter++;
+
+  /// Creates a separator entry for [CNMenu].
+  CNMenuItem.separator()
+    : title = '',
+      tag = null,
+      image = null,
+      submenu = null,
+      state = CNMenuItemState.off,
+      enabled = false,
+      isSeparator = true,
+      _identifier = _identifierCounter++;
 
   /// Converts this menu item to a JSON string representation, which is used for communication with the native platform.
   /// The JSON includes all relevant properties of the menu item, such as title, tag, state, symbol configuration, enabled status, and submenu (if any).
   String toJson(BuildContext context) {
+    if (isSeparator) {
+      return '''
+    {
+      "separator": true
+    }
+    ''';
+    }
+
     return '''
     {
+      "separator": false,
       "title": "$title",
       "tag": $tag,
       "identifier": "menuItem_$_identifier",
@@ -124,13 +152,5 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
   }
 
   @override
-  List<Object?> get props => [
-    _identifier,
-    state,
-    tag,
-    title,
-    image,
-    submenu,
-    enabled,
-  ];
+  List<Object?> get props => [_identifier, isSeparator, state, tag, title, image, submenu, enabled];
 }

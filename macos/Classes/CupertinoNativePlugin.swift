@@ -3,9 +3,11 @@ import FlutterMacOS
 
 public class CupertinoNativePlugin: NSObject, FlutterPlugin {
   static var registrar: FlutterPluginRegistrar?
+  static var contextMenuHandler: CupertinoContextMenuHandler?
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     CupertinoNativePlugin.registrar = registrar
+    CupertinoNativePlugin.contextMenuHandler = CupertinoContextMenuHandler(registrar: registrar)
     let channel = FlutterMethodChannel(
       name: "cupertino_native", binaryMessenger: registrar.messenger)
     let instance = CupertinoNativePlugin()
@@ -75,6 +77,24 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         return
       }
       showAlert(args: args, result: result)
+    case "showContextMenu":
+      guard let args = call.arguments as? [String: Any] else {
+        result(
+          FlutterError(
+            code: "invalid_args",
+            message: "showContextMenu expects a map of arguments",
+            details: nil))
+        return
+      }
+      guard let handler = CupertinoNativePlugin.contextMenuHandler else {
+        result(
+          FlutterError(
+            code: "handler_unavailable",
+            message: "Context menu handler is not initialized",
+            details: nil))
+        return
+      }
+      handler.showContextMenu(args: args, result: result)
     default:
       result(FlutterMethodNotImplemented)
     }

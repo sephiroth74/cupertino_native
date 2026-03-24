@@ -21,6 +21,7 @@ export 'components/menu.dart';
 export 'components/date_picker.dart';
 export 'components/alert.dart';
 export 'components/popover.dart';
+export 'components/context_menu.dart';
 
 export 'model/control_size.dart';
 export 'model/slider_tickmark_position.dart';
