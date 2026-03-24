@@ -53,25 +53,38 @@ class _ComboButtonDemoPageState extends State<ComboButtonDemoPage> {
           children: [
             const Text('Split style'),
             const SizedBox(height: 12),
-            CNComboButton(
-              title: 'File',
-              style: CNComboButtonStyle.split,
-              image: const CNImage(systemSymbolName: 'doc'),
-              menu: splitMenu,
-              onPressed: (_) => _setLastAction('Split button pressed'),
-              onMenuItemSelected: (item) => _setLastAction('Split menu: ${item.title}'),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                width: 150,
+                child: CNComboButton(
+                  title: 'File',
+                  style: CNComboButtonStyle.split,
+                  controlSize: CNControlSize.regular,
+                  image: const CNImage(systemSymbolName: 'doc'),
+                  menu: splitMenu,
+                  onPressed: (_) => _setLastAction('Split button pressed'),
+                  onMenuItemSelected: (item) => _setLastAction('Split menu: ${item.title}'),
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             const Text('Unified style'),
             const SizedBox(height: 12),
-            CNComboButton(
-              title: 'Actions',
-              style: CNComboButtonStyle.unified,
-              image: const CNImage(systemSymbolName: 'ellipsis.circle'),
-              controlSize: CNControlSize.large,
-              menu: unifiedMenu,
-              onPressed: (_) => _setLastAction('Unified button pressed'),
-              onMenuItemSelected: (item) => _setLastAction('Unified menu: ${item.title}'),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                width: 150,
+                child: CNComboButton(
+                  title: 'Actions',
+                  style: CNComboButtonStyle.unified,
+                  image: const CNImage(systemSymbolName: 'ellipsis.circle'),
+                  controlSize: CNControlSize.large,
+                  menu: unifiedMenu,
+                  onPressed: (_) => _setLastAction('Unified button pressed'),
+                  onMenuItemSelected: (item) => _setLastAction('Unified menu: ${item.title}'),
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             Text('Last action: $_lastAction'),
