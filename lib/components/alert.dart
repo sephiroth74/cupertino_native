@@ -17,11 +17,7 @@ enum CNAlertStyle {
 /// Action button for [CNAlert.show].
 class CNAlertAction {
   /// Creates an alert action.
-  const CNAlertAction(
-    this.title, {
-    this.isDefault = false,
-    this.isDestructive = false,
-  });
+  const CNAlertAction(this.title, {this.isDefault = false, this.isDestructive = false});
 
   /// Button title.
   final String title;
@@ -33,11 +29,7 @@ class CNAlertAction {
   final bool isDestructive;
 
   /// Serializes this action for method-channel transport.
-  Map<String, dynamic> toMap() => {
-    'title': title,
-    'isDefault': isDefault,
-    'isDestructive': isDestructive,
-  };
+  Map<String, dynamic> toMap() => {'title': title, 'isDefault': isDefault, 'isDestructive': isDestructive};
 }
 
 /// Utility API to show native alerts.
@@ -54,20 +46,31 @@ class CNAlert {
     List<CNAlertAction> actions = const [CNAlertAction('OK', isDefault: true)],
     CNAlertStyle style = CNAlertStyle.informational,
     ValueChanged<int>? onSelected,
+    String? suppressionButtonLabel,
+    bool suppressionInitiallySelected = false,
+    ValueChanged<bool>? onSuppressionChanged,
   }) async {
     if (actions.isEmpty) {
       throw ArgumentError('actions must not be empty.');
     }
 
     if (defaultTargetPlatform == TargetPlatform.macOS) {
-      final selected = await _channel.invokeMethod<int>('showAlert', {
+      final response = await _channel.invokeMethod<Object>('showAlert', {
         'title': title,
         'message': message,
         'style': style.name,
         'actions': actions.map((a) => a.toMap()).toList(),
+        'suppressionButtonLabel': suppressionButtonLabel,
+        'suppressionInitiallySelected': suppressionInitiallySelected,
       });
+      final resultMap = response is Map ? Map<Object?, Object?>.from(response) : const <Object?, Object?>{};
+      final selected = (resultMap['selectedIndex'] as num?)?.toInt();
+      final suppressionSelected = resultMap['suppressionSelected'] as bool?;
       if (selected != null) {
         onSelected?.call(selected);
+      }
+      if (suppressionSelected != null) {
+        onSuppressionChanged?.call(suppressionSelected);
       }
       return selected;
     }
@@ -92,6 +95,9 @@ class CNAlert {
     );
     if (selected != null) {
       onSelected?.call(selected);
+    }
+    if (suppressionButtonLabel != null) {
+      onSuppressionChanged?.call(false);
     }
     return selected;
   }

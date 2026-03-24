@@ -10,6 +10,7 @@ class AlertDemoPage extends StatefulWidget {
 
 class _AlertDemoPageState extends State<AlertDemoPage> {
   int? _lastSelectedIndex;
+  bool _suppressionSelected = false;
 
   Future<void> _showInfoAlert() async {
     await CNAlert.show(
@@ -19,6 +20,11 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
       actions: const [CNAlertAction('OK', isDefault: true)],
       style: CNAlertStyle.informational,
       onSelected: (index) => setState(() => _lastSelectedIndex = index),
+      suppressionButtonLabel: 'Do not show this again',
+      suppressionInitiallySelected: _suppressionSelected,
+      onSuppressionChanged: (value) {
+        setState(() => _suppressionSelected = value);
+      },
     );
   }
 
@@ -27,11 +33,7 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
       context,
       title: 'Delete File',
       message: 'This action cannot be undone.',
-      actions: const [
-        CNAlertAction('Cancel', isDefault: false),
-        CNAlertAction('Ok', isDefault: true),
-        CNAlertAction('Delete', isDestructive: true),
-      ],
+      actions: const [CNAlertAction('Cancel', isDefault: false), CNAlertAction('Ok', isDefault: true), CNAlertAction('Delete', isDestructive: true)],
       style: CNAlertStyle.warning,
       onSelected: (index) => setState(() => _lastSelectedIndex = index),
     );
@@ -56,24 +58,15 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            CNButton(
-              label: 'Show Informational Alert',
-              onPressed: _showInfoAlert,
-            ),
+            CNButton(label: 'Show Informational Alert', onPressed: _showInfoAlert),
             const SizedBox(height: 12),
-            CNButton(
-              label: 'Show Confirm Alert',
-              onPressed: _showConfirmAlert,
-              style: CNButtonStyle.tinted,
-            ),
+            CNButton(label: 'Show Confirm Alert', onPressed: _showConfirmAlert, style: CNButtonStyle.tinted),
             const SizedBox(height: 12),
-            CNButton(
-              label: 'Show Critical Alert',
-              onPressed: _showCriticalAlert,
-              style: CNButtonStyle.borderedProminent,
-            ),
+            CNButton(label: 'Show Critical Alert', onPressed: _showCriticalAlert, style: CNButtonStyle.borderedProminent),
             const SizedBox(height: 16),
             Text('Last selected button index: ${_lastSelectedIndex ?? '-'}'),
+            const SizedBox(height: 8),
+            Text('Suppression selected: $_suppressionSelected'),
           ],
         ),
       ),

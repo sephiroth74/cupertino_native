@@ -82,6 +82,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     let message = (args["message"] as? String) ?? ""
     let styleRaw = (args["style"] as? String) ?? "informational"
     let rawActions = parseAlertActions(args["actions"])
+    let suppressionButtonLabel = args["suppressionButtonLabel"] as? String
+    let suppressionInitiallySelected = (args["suppressionInitiallySelected"] as? Bool) == true
 
     DispatchQueue.main.async {
       let alert = NSAlert()
@@ -95,6 +97,12 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         alert.alertStyle = .critical
       default:
         alert.alertStyle = .informational
+      }
+
+      if let suppressionButtonLabel, !suppressionButtonLabel.isEmpty {
+        alert.showsSuppressionButton = true
+        alert.suppressionButton?.title = suppressionButtonLabel
+        alert.suppressionButton?.state = suppressionInitiallySelected ? .on : .off
       }
 
       for action in rawActions {
@@ -118,7 +126,11 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
       let response = alert.runModal()
       let firstRaw = NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
       let selectedIndex = Int(response.rawValue - firstRaw)
-      result(selectedIndex >= 0 ? selectedIndex : nil)
+      let suppressionSelected = alert.suppressionButton?.state == .on
+      result([
+        "selectedIndex": max(selectedIndex, 0),
+        "suppressionSelected": suppressionSelected,
+      ])
     }
   }
 
