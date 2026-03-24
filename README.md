@@ -4,9 +4,9 @@ _This package is part of Serverpod's open-source initiative. [Serverpod](https:/
 
 # Liquid Glass for Flutter
 
-Native Liquid Glass widgets for iOS and macOS in Flutter with pixel‑perfect fidelity.
+Native Liquid Glass widgets for macOS in Flutter with pixel‑perfect fidelity.
 
-This plugin hosts real UIKit/AppKit controls inside Flutter using Platform Views and method channels. It matches native look/feel perfectly while still fitting naturally into Flutter code.
+This plugin hosts real AppKit controls inside Flutter using Platform Views and method channels. It matches native look/feel perfectly while still fitting naturally into Flutter code.
 
 Does it work and is it fast? Yes. Is it a vibe-coded Frankenstein's monster patched together with duct tape? Also yes.
 
@@ -26,7 +26,6 @@ Then run `flutter pub get`.
 
 Ensure your platform minimums are compatible:
 
-- iOS `platform :ios, '14.0'`
 - macOS 11.0+
 
 You will also need to install the Xcode 26 beta and use `xcode-select` to set it as your default.
@@ -151,6 +150,21 @@ CNTabBar(
   currentIndex: _tabIndex,
   onTap: (i) => setState(() => _tabIndex = i),
 )
+```
+
+### Alert
+
+```dart
+final selectedIndex = await CNAlert.show(
+  context,
+  title: 'Delete File',
+  message: 'This action cannot be undone.',
+  actions: const [
+    CNAlertAction('Cancel', isDefault: true),
+    CNAlertAction('Delete', isDestructive: true),
+  ],
+  style: CNAlertStyle.warning,
+);
 ```
 
 ## What's left to do?

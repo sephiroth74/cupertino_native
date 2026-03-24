@@ -39,7 +39,10 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
                   width: 300,
                   datePickerMode: CNDatePickerMode.range,
                   datePickerStyle: CNDatePickerStyle.clockAndCalendar,
-                  datePickerElements: [CNDatePickerElements.yearMonthDay, CNDatePickerElements.hourMinute],
+                  datePickerElements: [
+                    CNDatePickerElements.yearMonthDay,
+                    CNDatePickerElements.hourMinute,
+                  ],
                   isBordered: true,
                   dateValue: selectedDate,
                   minDate: DateTime(2020, 1, 1),

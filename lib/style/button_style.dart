@@ -18,8 +18,9 @@ enum CNButtonStyle {
   /// Filled background style.
   filled,
 
-  /// Glass effect (iOS 16+/macOS 13+ look-alike).
-  glass, // iOS 26+
+  /// Glass effect for modern Apple UI styles.
+  glass,
+
   /// More prominent glass effect.
-  prominentGlass, // iOS 26+
+  prominentGlass,
 }

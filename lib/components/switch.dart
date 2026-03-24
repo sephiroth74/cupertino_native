@@ -24,7 +24,7 @@ const Map<CNControlSize, double> _kDefaultSwitchHeight = {
 };
 
 /// Controller for a [CNSwitch] that allows imperative updates from Dart
-/// to the underlying native UISwitch/NSSwitch instance.
+/// to the underlying native NSSwitch instance.
 class CNSwitchController {
   MethodChannel? _channel;
 
@@ -57,7 +57,7 @@ class CNSwitchController {
 
 /// A Cupertino-native switch rendered by the host platform.
 ///
-/// On iOS/macOS this uses a platform view to embed UISwitch/NSSwitch, and
+/// On macOS this uses a platform view to embed NSSwitch, and
 /// falls back to Flutter's [Switch] on unsupported platforms.
 class CNSwitch extends StatefulWidget {
   /// Creates a Cupertino-native switch.

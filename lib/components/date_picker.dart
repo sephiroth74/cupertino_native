@@ -106,7 +106,9 @@ class _CNDatePickerState extends State<CNDatePicker> {
       'isDark': _isDark,
       'datePickerMode': widget.datePickerMode.name,
       'datePickerStyle': widget.datePickerStyle.name,
-      'datePickerElements': widget.datePickerElements.map((e) => e.name).toList(),
+      'datePickerElements': widget.datePickerElements
+          .map((e) => e.name)
+          .toList(),
       'isBordered': widget.isBordered,
       'dateValue': widget.dateValue?.millisecondsSinceEpoch,
       'drawsBackground': widget.drawsBackground,
@@ -129,12 +131,21 @@ class _CNDatePickerState extends State<CNDatePicker> {
 
         if (widget.datePickerStyle == CNDatePickerStyle.clockAndCalendar) {
           // we must use the intrinsic sizes, or the max available constraints, in case the intrinsic sizes are not available yet
-          width = _intrinsicWidth ?? (hasBoundedWidth ? constraints.maxWidth : null);
-          height = _intrinsicHeight ?? (hasBoundedHeight ? constraints.maxHeight : null);
+          width =
+              _intrinsicWidth ??
+              (hasBoundedWidth ? constraints.maxWidth : null);
+          height =
+              _intrinsicHeight ??
+              (hasBoundedHeight ? constraints.maxHeight : null);
         } else {
           // for textField styles we can expand to fill the available width, but height should be intrinsic or max 32
-          width = widget.width ?? _intrinsicWidth ?? (hasBoundedWidth ? constraints.maxWidth : null);
-          height = _intrinsicHeight ?? (hasBoundedHeight ? constraints.maxHeight : 21.0);
+          width =
+              widget.width ??
+              _intrinsicWidth ??
+              (hasBoundedWidth ? constraints.maxWidth : null);
+          height =
+              _intrinsicHeight ??
+              (hasBoundedHeight ? constraints.maxHeight : 21.0);
         }
 
         if (hasBoundedWidth && width != null) {
@@ -151,7 +162,9 @@ class _CNDatePickerState extends State<CNDatePicker> {
               creationParamsCodec: const StandardMessageCodec(),
               creationParams: creationParams,
               onPlatformViewCreated: _onPlatformViewCreated,
-              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{Factory<TapGestureRecognizer>(() => TapGestureRecognizer())},
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+              },
             ),
           ),
         );
@@ -236,7 +249,9 @@ class _CNDatePickerState extends State<CNDatePicker> {
     }
 
     if (oldWidget.datePickerStyle != widget.datePickerStyle) {
-      await channel.invokeMethod('setDatePickerStyle', {'value': widget.datePickerStyle.name});
+      await channel.invokeMethod('setDatePickerStyle', {
+        'value': widget.datePickerStyle.name,
+      });
       requiresIntrinsicSizeUpdate = true;
     }
 
@@ -244,8 +259,11 @@ class _CNDatePickerState extends State<CNDatePicker> {
     final oldElementsSet = oldWidget.datePickerElements.toSet();
     final newElementsSet = widget.datePickerElements.toSet();
 
-    if (oldElementsSet.length != newElementsSet.length || !oldElementsSet.containsAll(newElementsSet)) {
-      await channel.invokeMethod('setDatePickerElements', {'value': widget.datePickerElements.map((e) => e.name).toList()});
+    if (oldElementsSet.length != newElementsSet.length ||
+        !oldElementsSet.containsAll(newElementsSet)) {
+      await channel.invokeMethod('setDatePickerElements', {
+        'value': widget.datePickerElements.map((e) => e.name).toList(),
+      });
       requiresIntrinsicSizeUpdate = true;
     }
 
@@ -259,23 +277,33 @@ class _CNDatePickerState extends State<CNDatePicker> {
     }
 
     if (oldWidget.backgroundColor != widget.backgroundColor) {
-      await channel.invokeMethod('setBackgroundColor', {'value': resolveColorToArgb(widget.backgroundColor, context)});
+      await channel.invokeMethod('setBackgroundColor', {
+        'value': resolveColorToArgb(widget.backgroundColor, context),
+      });
     }
 
     if (oldWidget.textColor != widget.textColor) {
-      await channel.invokeMethod('setTextColor', {'value': resolveColorToArgb(widget.textColor, context)});
+      await channel.invokeMethod('setTextColor', {
+        'value': resolveColorToArgb(widget.textColor, context),
+      });
     }
 
     if (oldWidget.minDate != widget.minDate) {
-      await channel.invokeMethod('setMinDate', {'value': widget.minDate?.millisecondsSinceEpoch});
+      await channel.invokeMethod('setMinDate', {
+        'value': widget.minDate?.millisecondsSinceEpoch,
+      });
     }
 
     if (oldWidget.maxDate != widget.maxDate) {
-      await channel.invokeMethod('setMaxDate', {'value': widget.maxDate?.millisecondsSinceEpoch});
+      await channel.invokeMethod('setMaxDate', {
+        'value': widget.maxDate?.millisecondsSinceEpoch,
+      });
     }
 
     if (oldWidget.locale != widget.locale) {
-      await channel.invokeMethod('setLocale', {'value': widget.locale?.toLanguageTag()});
+      await channel.invokeMethod('setLocale', {
+        'value': widget.locale?.toLanguageTag(),
+      });
     }
 
     if (oldWidget.isBordered != widget.isBordered) {
@@ -283,15 +311,21 @@ class _CNDatePickerState extends State<CNDatePicker> {
     }
 
     if (oldWidget.drawsBackground != widget.drawsBackground) {
-      await channel.invokeMethod('setDrawsBackground', {'value': widget.drawsBackground});
+      await channel.invokeMethod('setDrawsBackground', {
+        'value': widget.drawsBackground,
+      });
     }
 
     if (oldWidget.dateValue != widget.dateValue) {
-      await channel.invokeMethod('setDateValue', {'value': widget.dateValue?.millisecondsSinceEpoch});
+      await channel.invokeMethod('setDateValue', {
+        'value': widget.dateValue?.millisecondsSinceEpoch,
+      });
     }
 
     if (oldWidget.datePickerMode != widget.datePickerMode) {
-      await channel.invokeMethod('setDatePickerMode', {'value': widget.datePickerMode.name});
+      await channel.invokeMethod('setDatePickerMode', {
+        'value': widget.datePickerMode.name,
+      });
     }
 
     if (requiresIntrinsicSizeUpdate) {

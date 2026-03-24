@@ -17,7 +17,7 @@ class CNTabBarItem {
   final CNSymbol? icon;
 }
 
-/// A Cupertino-native tab bar. Uses native UITabBar/NSTabView style visuals.
+/// A Cupertino-native tab bar. Uses native NSTabView style visuals.
 class CNTabBar extends StatefulWidget {
   /// Creates a Cupertino-native tab bar.
   const CNTabBar({
@@ -103,8 +103,7 @@ class _CNTabBarState extends State<CNTabBar> {
 
   @override
   Widget build(BuildContext context) {
-    if (!(defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.macOS)) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
       // Simple Flutter fallback using CupertinoTabBar for non-Apple platforms.
       return SizedBox(
         height: widget.height,
@@ -155,19 +154,12 @@ class _CNTabBarState extends State<CNTabBar> {
     };
 
     final viewType = 'CupertinoNativeTabBar';
-    final platformView = defaultTargetPlatform == TargetPlatform.iOS
-        ? UiKitView(
-            viewType: viewType,
-            creationParams: creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            onPlatformViewCreated: _onCreated,
-          )
-        : AppKitView(
-            viewType: viewType,
-            creationParams: creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            onPlatformViewCreated: _onCreated,
-          );
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParams: creationParams,
+      creationParamsCodec: const StandardMessageCodec(),
+      onPlatformViewCreated: _onCreated,
+    );
 
     final h = widget.height ?? _intrinsicHeight ?? 50.0;
     if (!widget.split && widget.shrinkCentered) {

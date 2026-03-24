@@ -14,7 +14,7 @@ const double _kDefaultSize = 44.0;
 
 /// A Cupertino-native push button.
 ///
-/// Embeds a native UIButton/NSButton for authentic visuals and behavior on
+/// Embeds a native NSButton for authentic visuals and behavior on
 /// macOS. Falls back to [CupertinoButton] on other platforms.
 class CNButton extends StatefulWidget {
   /// Creates a text button variant of [CNButton].

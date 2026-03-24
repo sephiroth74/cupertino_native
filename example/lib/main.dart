@@ -12,6 +12,7 @@ import 'demos/level_indicators.dart';
 import 'demos/stepper.dart';
 import 'demos/checkboxes.dart';
 import 'demos/date_picker.dart';
+import 'demos/alert.dart';
 
 void main() {
   runApp(const MyApp());
@@ -90,30 +91,46 @@ class HomePage extends StatelessWidget {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
+        enableBackgroundFilterBlur: true,
         backgroundColor: CupertinoColors.systemGroupedBackground,
-        border: null,
-        // middle: const Text('Cupertino Native'),
+        middle: const Text('Cupertino Native'),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CNPopupMenuButton.icon(
-              buttonIcon: CNSymbol(
-                'paintpalette.fill',
-                size: 18,
-                mode: CNSymbolRenderingMode.multicolor,
+            CNComboButton(
+              controlSize: CNControlSize.regular,
+              style: CNComboButtonStyle.split,
+              title: 'Accent Color',
+              image: CNImage(
+                systemSymbolName: 'circle.fill',
+                symbolConfiguration: CNSymbolConfiguration.monochrome(
+                  accentColor,
+                ),
               ),
-              tint: accentColor,
-              items: [
-                for (final entry in _systemColors)
-                  CNPopupMenuItem(
-                    label: entry.key,
-                    icon: CNSymbol('circle.fill', size: 18, color: entry.value),
-                  ),
-              ],
-              onSelected: (index) {
-                if (index >= 0 && index < _systemColors.length) {
-                  onSelectAccentColor(_systemColors[index].value);
-                }
+              menu: CNMenu(
+                items: _systemColors.map((entry) {
+                  return CNMenuItem(
+                    title: entry.key,
+                    image: CNImage(
+                      systemSymbolName: 'circle.fill',
+                      symbolConfiguration: CNSymbolConfiguration.monochrome(
+                        entry.value,
+                      ),
+                    ),
+                    state: accentColor == entry.value
+                        ? CNMenuItemState.on
+                        : CNMenuItemState.off,
+                    tag: entry.value.toARGB32(),
+                    enabled: true,
+                  );
+                }).toList(),
+              ),
+              onPressed: (value) {
+                debugPrint('onPressed($value)');
+              },
+              onMenuItemSelected: (value) {
+                final selectedColor = Color(value.tag as int);
+                onSelectAccentColor(selectedColor);
               },
             ),
             const SizedBox(width: 8),
@@ -267,6 +284,21 @@ class HomePage extends StatelessWidget {
                     CupertinoPageRoute(
                       builder: (_) => const DatePickerDemoPage(),
                     ),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Alert'),
+                leading: CNIcon(
+                  symbol: CNSymbol(
+                    'exclamationmark.bubble',
+                    color: accentColor,
+                  ),
+                ),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(builder: (_) => const AlertDemoPage()),
                   );
                 },
               ),

@@ -7,8 +7,7 @@ import '../style/sf_symbol.dart';
 
 /// A Cupertino-native segmented control.
 ///
-/// Embeds a native UISegmentedControl/NSSegmentedControl for pixel-perfect
-/// fidelity on iOS and macOS.
+/// Embeds a native NSSegmentedControl for pixel-perfect fidelity on macOS.
 class CNSegmentedControl extends StatefulWidget {
   /// Creates a Cupertino-native segmented control.
   const CNSegmentedControl({
@@ -102,8 +101,7 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
 
   @override
   Widget build(BuildContext context) {
-    if (!(defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.macOS)) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
       return SizedBox(
         height: widget.height,
         child: CupertinoSegmentedControl<int>(
@@ -165,22 +163,12 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
             .toList(),
     };
 
-    Widget platformView;
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      platformView = UiKitView(
-        viewType: viewType,
-        creationParamsCodec: const StandardMessageCodec(),
-        creationParams: creationParams,
-        onPlatformViewCreated: _onPlatformViewCreated,
-      );
-    } else {
-      platformView = AppKitView(
-        viewType: viewType,
-        creationParamsCodec: const StandardMessageCodec(),
-        creationParams: creationParams,
-        onPlatformViewCreated: _onPlatformViewCreated,
-      );
-    }
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParamsCodec: const StandardMessageCodec(),
+      creationParams: creationParams,
+      onPlatformViewCreated: _onPlatformViewCreated,
+    );
 
     if (widget.shrinkWrap) {
       final width = _intrinsicWidth;

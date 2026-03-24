@@ -46,7 +46,7 @@ class CNPopupMenuDivider extends CNPopupMenuEntry {
 
 /// A Cupertino-native popup menu button.
 ///
-/// On iOS/macOS this embeds a native popup button and shows a native menu.
+/// On macOS this embeds a native popup button and shows a native menu.
 class CNPopupMenuButton extends StatefulWidget {
   /// Creates a popup menu button with a custom child widget.
   ///
@@ -176,8 +176,7 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
 
   @override
   Widget build(BuildContext context) {
-    if (!(defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.macOS)) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
       // Fallback Flutter implementation
       if (widget.hasChild) {
         return GestureDetector(
@@ -335,25 +334,15 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
         'buttonIconGradientEnabled': widget.buttonIcon!.gradient,
     };
 
-    final platformView = defaultTargetPlatform == TargetPlatform.iOS
-        ? UiKitView(
-            viewType: viewType,
-            creationParams: creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            onPlatformViewCreated: _onCreated,
-            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-            },
-          )
-        : AppKitView(
-            viewType: viewType,
-            creationParams: creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            onPlatformViewCreated: _onCreated,
-            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-            },
-          );
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParams: creationParams,
+      creationParamsCodec: const StandardMessageCodec(),
+      onPlatformViewCreated: _onCreated,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+      },
+    );
 
     // If using a child widget, stack it with a transparent platform view overlay
     if (widget.hasChild) {

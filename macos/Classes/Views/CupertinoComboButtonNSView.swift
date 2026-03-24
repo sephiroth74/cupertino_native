@@ -16,6 +16,7 @@ class CupertinoComboButtonNSView: NSView {
         var isDark: Bool = false
         var menu: NSMenu? = nil
         var style: NSComboButton.Style = .split
+        var image: NSImage? = nil
 
         if let dict = args as? [String: Any] {
             if let v = dict["title"] as? String { title = v }
@@ -32,12 +33,21 @@ class CupertinoComboButtonNSView: NSView {
             if let v = dict["menu"] as? String {
                 menu = self.deserializeMenu(v)
             }
+            if let v = dict["image"] as? [String: Any] {
+                image = Self.deserializeImage(dict: v)
+            }
+            if let v = dict["image"] as? String {
+                image = Self.deserializeImage(jsonString: v)
+            }
         }
 
         self.comboButton.style = style
         self.comboButton.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
         self.comboButton.isEnabled = enabled
         self.comboButton.title = title
+        if let image = image {
+            self.comboButton.image = image
+        }
         self.comboButton.menu = menu ?? NSMenu()
 
         self.comboButton.target = self
@@ -64,7 +74,8 @@ class CupertinoComboButtonNSView: NSView {
                 result(["width": size.width, "height": size.height])
 
             case "setIsDark":
-                if let args = call.arguments as? [String: Any], let isDark = (args["value"] as? NSNumber)?.boolValue
+                if let args = call.arguments as? [String: Any],
+                    let isDark = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.comboButton.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
@@ -73,7 +84,8 @@ class CupertinoComboButtonNSView: NSView {
                 }
 
             case "setIsEnabled":
-                if let args = call.arguments as? [String: Any], let enabled = (args["value"] as? NSNumber)?.boolValue
+                if let args = call.arguments as? [String: Any],
+                    let enabled = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.comboButton.isEnabled = enabled
                     result(nil)
@@ -82,23 +94,39 @@ class CupertinoComboButtonNSView: NSView {
                 }
 
             case "setControlSize":
-                if let args = call.arguments as? [String: Any], let controlSizeStr = args["value"] as? String
+                if let args = call.arguments as? [String: Any],
+                    let controlSizeStr = args["value"] as? String
                 {
-                    self.comboButton.controlSize = ControlSizeUtils.controlSizeFromString(controlSizeStr)
+                    self.comboButton.controlSize = ControlSizeUtils.controlSizeFromString(
+                        controlSizeStr)
                     result(nil)
                 } else {
-                    result(FlutterError(code: "bad_args", message: "Missing control size", details: nil))
+                    result(
+                        FlutterError(
+                            code: "bad_args", message: "Missing control size", details: nil))
                 }
 
             case "setTitle":
-                if let args = call.arguments as? [String: Any], let title = args["value"] as? String {
+                if let args = call.arguments as? [String: Any], let title = args["value"] as? String
+                {
                     self.comboButton.title = title
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing title", details: nil))
                 }
+            case "setImage":
+                if let args = call.arguments as? [String: Any],
+                    let imageJson = args["value"] as? String
+                {
+                    self.comboButton.image = Self.deserializeImage(jsonString: imageJson)
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing image", details: nil))
+                }
             case "setStyle":
-                if let args = call.arguments as? [String: Any], let styleStr = args["value"] as? String {
+                if let args = call.arguments as? [String: Any],
+                    let styleStr = args["value"] as? String
+                {
                     switch styleStr {
                     case "unified":
                         self.comboButton.style = .unified
@@ -111,13 +139,14 @@ class CupertinoComboButtonNSView: NSView {
                 }
 
             case "setMenu":
-                if let args = call.arguments as? [String: Any], let menuJson = args["value"] as? String {
+                if let args = call.arguments as? [String: Any],
+                    let menuJson = args["value"] as? String
+                {
                     self.comboButton.menu = self.deserializeMenu(menuJson)
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing menu", details: nil))
                 }
-
 
             default:
                 result(FlutterMethodNotImplemented)
@@ -154,43 +183,7 @@ class CupertinoComboButtonNSView: NSView {
             ])
     }
 
-    /// Data is like:
-    /// {
-    //   "items": [
-    //     {
-    //       "title": "Mini",
-    //       "tag": null,
-    //       "symbolConfiguration": null,
-    //       "submenu": null
-    //     },
-    //     {
-    //       "title": "Small",
-    //       "tag": null,
-    //       "symbolConfiguration": null,
-    //       "submenu": null
-    //     },
-    //     {
-    //       "title": "Regular",
-    //       "tag": null,
-    //       "symbolConfiguration": null,
-    //       "submenu": null
-    //     },
-    //     {
-    //       "title": "Large",
-    //       "tag": null,
-    //       "image": {
-    //          "systemSymbolName": "star.fill",
-    //          "symbolConfiguration": {
-    //              "type": "hierarchical",
-    //              "hierarchicalColor": "#0000FF"
-    //          }
-    //       },
-    //       "submenu": null
-    //     }
-    //   ]
-    // }
     private func deserializeMenu(_ jsonString: String) -> NSMenu {
-        NSLog("Deserializing menu from JSON: \(jsonString)")
         let menu = NSMenu()
 
         if let data = jsonString.data(using: .utf8) {
@@ -232,7 +225,7 @@ class CupertinoComboButtonNSView: NSView {
                             }
                         }
                         if let v = item["image"] as? [String: Any] {
-                            image = self.deserializeImage(v)
+                            image = Self.deserializeImage(dict: v)
                         }
 
                         if let title = title {
@@ -260,7 +253,7 @@ class CupertinoComboButtonNSView: NSView {
 
                             if let image = image {
                                 menuItem.image = image
-                            }   
+                            }
 
                             menu.addItem(menuItem)
                         }
@@ -277,32 +270,49 @@ class CupertinoComboButtonNSView: NSView {
         return menu
     }
 
-    private func deserializeImage(_ dict: [String: Any]) -> NSImage? {
+    private static func deserializeImage(dict: [String: Any]) -> NSImage? {
         if let systemSymbolName = dict["systemSymbolName"] as? String {
-            var image = NSImage(systemSymbolName: systemSymbolName, accessibilityDescription: nil)
+            let image = NSImage(systemSymbolName: systemSymbolName, accessibilityDescription: nil)
             if let symbolConfig = dict["symbolConfiguration"] as? [String: Any] {
                 if let type = symbolConfig["type"] as? String {
 
                     switch type {
-                        case "hierarchical":
-                            if let v = symbolConfig["color"] as? NSNumber {
-                                let color = ColorUtils.colorFromARGB(v.intValue)
-                                return image?.withSymbolConfiguration(NSImage.SymbolConfiguration(hierarchicalColor: color))
-                            }
-                        case "monochrome":
-                            if let v = symbolConfig["color"] as? NSNumber {
-                                let color = ColorUtils.colorFromARGB(v.intValue)
-                                return image?.tinted(with: color)
-                            }
-                            return image?.withSymbolConfiguration(NSImage.SymbolConfiguration.preferringMonochrome())
-                        case "multicolor":
-                            return image?.withSymbolConfiguration(NSImage.SymbolConfiguration.preferringMulticolor())
-                        default:
-                            break
+                    case "hierarchical":
+                        if let v = symbolConfig["color"] as? NSNumber {
+                            let color = ColorUtils.colorFromARGB(v.intValue)
+                            return image?.withSymbolConfiguration(
+                                NSImage.SymbolConfiguration(hierarchicalColor: color))
+                        }
+                    case "monochrome":
+                        if let v = symbolConfig["color"] as? NSNumber {
+                            let color = ColorUtils.colorFromARGB(v.intValue)
+                            return image?.tinted(with: color)
+                        }
+                        return image?.withSymbolConfiguration(
+                            NSImage.SymbolConfiguration.preferringMonochrome())
+                    case "multicolor":
+                        return image?.withSymbolConfiguration(
+                            NSImage.SymbolConfiguration.preferringMulticolor())
+                    default:
+                        break
                     }
                 }
             }
             return image
+        }
+        return nil
+    }
+
+    private static func deserializeImage(jsonString: String) -> NSImage? {
+        // decode from json string
+        do {
+            if let imageDict = try JSONSerialization.jsonObject(
+                with: Data(jsonString.utf8), options: []) as? [String: Any]
+            {
+                return Self.deserializeImage(dict: imageDict)
+            }
+        } catch {
+            NSLog("Error deserializing image JSON string: \(error)")
         }
         return nil
     }

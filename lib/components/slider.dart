@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import '../channel/params.dart';
 
 /// Controller for a [CNSlider] allowing imperative changes to the native
-/// NSSlider/UISlider instance.
+/// NSSlider instance.
 class CNSliderController {
   MethodChannel? _channel;
 
@@ -40,7 +40,7 @@ class CNSliderController {
 
 /// A Cupertino-native slider rendered by the host platform.
 ///
-/// On iOS/macOS this embeds UISlider/NSSlider via a platform view and falls
+/// On macOS this embeds NSSlider via a platform view and falls
 /// back to Flutter's [Slider] on other platforms.
 class CNSlider extends StatefulWidget {
   /// Creates a Cupertino-native slider.

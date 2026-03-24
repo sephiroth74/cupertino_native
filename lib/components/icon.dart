@@ -7,7 +7,7 @@ import '../style/sf_symbol.dart';
 
 /// A platform-rendered SF Symbol icon.
 ///
-/// Renders an `SFSymbol` on iOS/macOS using native APIs for best fidelity.
+/// Renders an `SFSymbol` on macOS using native APIs for best fidelity.
 class CNIcon extends StatefulWidget {
   /// Creates a platform-rendered SF Symbol icon.
   const CNIcon({
@@ -74,6 +74,16 @@ class _CNIconState extends State<CNIcon> {
 
   @override
   Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      final symbol = widget.symbol;
+      final iconData = CupertinoIcons.question_circle;
+      return Icon(
+        iconData,
+        size: widget.size ?? symbol.size,
+        color: widget.color ?? symbol.color,
+      );
+    }
+
     const viewType = 'CupertinoNativeIcon';
 
     final symbol = widget.symbol;
@@ -98,19 +108,12 @@ class _CNIconState extends State<CNIcon> {
       },
     };
 
-    final platformView = defaultTargetPlatform == TargetPlatform.iOS
-        ? UiKitView(
-            viewType: viewType,
-            creationParamsCodec: const StandardMessageCodec(),
-            creationParams: creationParams,
-            onPlatformViewCreated: _onPlatformViewCreated,
-          )
-        : AppKitView(
-            viewType: viewType,
-            creationParamsCodec: const StandardMessageCodec(),
-            creationParams: creationParams,
-            onPlatformViewCreated: _onPlatformViewCreated,
-          );
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParamsCodec: const StandardMessageCodec(),
+      creationParams: creationParams,
+      onPlatformViewCreated: _onPlatformViewCreated,
+    );
 
     // Ensure the platform view always has finite constraints
     final fallbackSize = widget.size ?? widget.symbol.size;

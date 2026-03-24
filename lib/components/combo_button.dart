@@ -22,6 +22,9 @@ class CNComboButton extends StatefulWidget {
   /// The button title displayed in the native control.
   final String title;
 
+  /// An optional image to display in the combo button.
+  final CNImage? image;
+
   /// The visual combo button style.
   final CNComboButtonStyle style;
 
@@ -39,6 +42,7 @@ class CNComboButton extends StatefulWidget {
     this.controlSize = CNControlSize.regular,
     required this.title,
     this.style = CNComboButtonStyle.split,
+    this.image,
     this.onPressed,
     this.onMenuItemSelected,
   }) : assert(
@@ -54,7 +58,7 @@ class CNComboButton extends StatefulWidget {
   State<CNComboButton> createState() => _CNComboButtonState();
 
   /// Whether the button is interactive.
-  bool get enabled => onPressed != null;
+  bool get enabled => onPressed != null || onMenuItemSelected != null;
 }
 
 class _CNComboButtonState extends State<CNComboButton> {
@@ -112,6 +116,7 @@ class _CNComboButtonState extends State<CNComboButton> {
       'isDark': _isDark,
       'controlSize': widget.controlSize.name,
       'title': widget.title,
+      'image': widget.image?.toJson(context),
       'style': widget.style.name,
       'menu': menu.toJson(context),
     };
@@ -201,6 +206,7 @@ class _CNComboButtonState extends State<CNComboButton> {
   Future<void> _syncPropsToNativeIfNeeded(CNComboButton oldWidget) async {
     final channel = _channel;
     if (channel == null) return;
+    if (!mounted) return;
 
     bool requireIntrinsicSizeUpdate = false;
 
@@ -218,24 +224,6 @@ class _CNComboButtonState extends State<CNComboButton> {
         'Menu instance did not change. No need to update listener or sync menu to native.',
       );
     }
-
-    // if (widget.menu == null && oldWidget.items != widget.items) {
-    //   debugPrint('Updating internal menu items: ${widget.items}');
-    //   _internalMenu?.removeListener(_onMenuChanged);
-    //   _internalMenu?.dispose();
-    //   _internalMenu = CNMenu(items: widget.items!.map((item) => CNMenuItem(title: item)).toList());
-    //   requireIntrinsicSizeUpdate = true;
-    // }
-
-    // final oldMenu = oldWidget.menu ?? _internalMenu;
-    // final newMenu = menu;
-    // if (!identical(oldMenu, newMenu)) {
-    //   debugPrint('Updating menu: ${newMenu.items.map((i) => i.title).toList()}');
-    //   oldMenu?.removeListener(_onMenuChanged);
-    //   newMenu.addListener(_onMenuChanged);
-    //   await channel.invokeMethod('setMenu', {'value': newMenu.toJson(context)});
-    //   requireIntrinsicSizeUpdate = true;
-    // }
 
     if (_lastIsDark != _isDark) {
       await channel.invokeMethod('setIsDark', {'value': _isDark});
@@ -258,6 +246,13 @@ class _CNComboButtonState extends State<CNComboButton> {
       requireIntrinsicSizeUpdate = true;
     }
 
+    if (oldWidget.image != widget.image) {
+      await channel.invokeMethod('setImage', {
+        'value': widget.image?.toJson(context),
+      });
+      requireIntrinsicSizeUpdate = true;
+    }
+
     if (oldWidget.style != widget.style) {
       await channel.invokeMethod('setStyle', {'value': widget.style.name});
       requireIntrinsicSizeUpdate = true;
@@ -266,23 +261,6 @@ class _CNComboButtonState extends State<CNComboButton> {
     if (requireIntrinsicSizeUpdate) {
       _requestIntrinsicSize();
     }
-
-    // final creationParams = <String, dynamic>{
-    //   'enabled': widget.enabled,
-    //   'isDark': _isDark,
-    //   'controlSize': widget.controlSize.name,
-    //   'title': widget.title,
-    //   'style': widget.style.name,
-    //   'menu': menu.toJson(context),
-    // };
-
-    // try {
-    //   debugPrint('Syncing properties to native: $creationParams');
-
-    //   await channel.invokeMethod('updateProperties', creationParams);
-    // } catch (e) {
-    //   debugPrint('Error syncing properties to native: $e');
-    // }
   }
 
   void _onMenuChanged() {

@@ -38,7 +38,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     let pathControlFactory = CupertinoPathControlViewFactory(registrar: registrar)
     registrar.register(pathControlFactory, withId: "CupertinoNativePathControl")
 
-    let progressIndicatorFactory = CupertinoProgressIndicatorViewFactory(messenger: registrar.messenger)
+    let progressIndicatorFactory = CupertinoProgressIndicatorViewFactory(
+      messenger: registrar.messenger)
     registrar.register(progressIndicatorFactory, withId: "CupertinoNativeProgressIndicator")
 
     let levelIndicatorFactory = CupertinoLevelIndicatorViewFactory(messenger: registrar.messenger)
@@ -61,9 +62,91 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     switch call.method {
     case "getPlatformVersion":
       result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
+    case "showAlert":
+      guard let args = call.arguments as? [String: Any] else {
+        result(
+          FlutterError(
+            code: "invalid_args",
+            message: "showAlert expects a map of arguments",
+            details: nil))
+        return
+      }
+      showAlert(args: args, result: result)
     default:
       result(FlutterMethodNotImplemented)
     }
+  }
+
+  private func showAlert(args: [String: Any], result: @escaping FlutterResult) {
+    let title = (args["title"] as? String) ?? ""
+    let message = (args["message"] as? String) ?? ""
+    let styleRaw = (args["style"] as? String) ?? "informational"
+    let rawActions = parseAlertActions(args["actions"])
+
+    DispatchQueue.main.async {
+      let alert = NSAlert()
+      alert.messageText = title.isEmpty ? "Alert" : title
+      alert.informativeText = message
+
+      switch styleRaw {
+      case "warning":
+        alert.alertStyle = .warning
+      case "critical":
+        alert.alertStyle = .critical
+      default:
+        alert.alertStyle = .informational
+      }
+
+      for action in rawActions {
+        let actionTitle = (action["title"] as? String) ?? "OK"
+        let button = alert.addButton(withTitle: actionTitle)
+        if #available(macOS 11.0, *) {
+          button.hasDestructiveAction = (action["isDestructive"] as? Bool) == true
+        }
+        if actionTitle.lowercased() == "cancel" {
+          button.keyEquivalent = "\u{1b}"
+        }
+      }
+
+      for (index, action) in rawActions.enumerated() {
+        if (action["isDefault"] as? Bool) == true, index < alert.buttons.count {
+          alert.buttons[index].keyEquivalent = "\r"
+          break
+        }
+      }
+
+      let response = alert.runModal()
+      let firstRaw = NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
+      let selectedIndex = Int(response.rawValue - firstRaw)
+      result(selectedIndex >= 0 ? selectedIndex : nil)
+    }
+  }
+
+  private func parseAlertActions(_ raw: Any?) -> [[String: Any]] {
+    guard let list = raw as? [Any], !list.isEmpty else {
+      return [["title": "OK", "isDefault": true]]
+    }
+
+    var parsed = [[String: Any]]()
+    parsed.reserveCapacity(list.count)
+
+    for item in list {
+      if let dict = item as? [String: Any] {
+        parsed.append(dict)
+      } else if let dict = item as? [AnyHashable: Any] {
+        var normalized = [String: Any]()
+        for (key, value) in dict {
+          if let stringKey = key as? String {
+            normalized[stringKey] = value
+          }
+        }
+        if !normalized.isEmpty {
+          parsed.append(normalized)
+        }
+      }
+    }
+
+    return parsed.isEmpty ? [["title": "OK", "isDefault": true]] : parsed
   }
 }
 
