@@ -1,9 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import 'dart:async';
-import 'package:async/async.dart';
 
 class ButtonDemoPage extends StatefulWidget {
   const ButtonDemoPage({super.key});
@@ -17,20 +13,8 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
   CNControlSize _controlSize = CNControlSize.regular;
   bool _shrinkWrap = true;
   final List<CNControlSize> _sizes = CNControlSize.values;
-  Color _color = CupertinoColors.systemBlue;
-  String _pathControlPath = "/Users";
-  bool _pathControlIsDirectory = true;
 
   void _set(String what) => setState(() => _last = what);
-
-  final _memoizer = AsyncMemoizer();
-
-  Future<void> _fetchInitialDirectory() async {
-    return _memoizer.runOnce(() async {
-      _pathControlPath = (await getDownloadsDirectory())?.path ?? "/";
-      _pathControlIsDirectory = true;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,14 +34,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   buttonIcon: const CNSymbol('chevron.down', size: 18),
                   buttonStyle: CNButtonStyle.plain,
                   size: 44.0,
-                  items: _sizes
-                      .map(
-                        (e) => CNPopupMenuItem(
-                          label: e.name,
-                          checked: _controlSize == e,
-                        ),
-                      )
-                      .toList(),
+                  items: _sizes.map((e) => CNPopupMenuItem(label: e.name, checked: _controlSize == e)).toList(),
                   onSelected: (value) {
                     setState(() => _controlSize = _sizes[value]);
                   },
@@ -76,13 +53,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   shrinkWrap: _shrinkWrap,
                   controlSize: _controlSize,
                 ),
-                CNButton(
-                  label: 'Gray',
-                  style: CNButtonStyle.gray,
-                  onPressed: () => _set('Gray'),
-                  shrinkWrap: _shrinkWrap,
-                  controlSize: _controlSize,
-                ),
+                CNButton(label: 'Gray', style: CNButtonStyle.gray, onPressed: () => _set('Gray'), shrinkWrap: _shrinkWrap, controlSize: _controlSize),
                 CNButton(
                   label: 'Tinted',
                   style: CNButtonStyle.tinted,
@@ -126,13 +97,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   shrinkWrap: _shrinkWrap,
                   controlSize: _controlSize,
                 ),
-                CNButton(
-                  label: 'Disabled',
-                  style: CNButtonStyle.bordered,
-                  onPressed: null,
-                  shrinkWrap: _shrinkWrap,
-                  controlSize: _controlSize,
-                ),
+                CNButton(label: 'Disabled', style: CNButtonStyle.bordered, onPressed: null, shrinkWrap: _shrinkWrap, controlSize: _controlSize),
               ],
             ),
             // const SizedBox(height: 48),
@@ -185,94 +150,8 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
             //     ),
             //   ],
             // ),
-            const SizedBox(height: 48),
-            const Text('Color well'),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: 44.0,
-                  height: 24.0,
-                  child: CNColorWell(
-                    color: _color,
-                    style: CNColorWellStyle.regular,
-                    onColorChanged: (color) {
-                      print('Color changed: $color');
-                      setState(() => _color = color);
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                CNColorWell(
-                  color: _color,
-                  style: CNColorWellStyle.expanded,
-                  onColorChanged: (color) {
-                    print('Color changed: $color');
-                    setState(() => _color = color);
-                  },
-                ),
-                const SizedBox(width: 12),
-                CNColorWell(
-                  color: _color,
-                  style: CNColorWellStyle.minimal,
-                  supportsAlpha: false,
-                  onColorChanged: (color) {
-                    print('Color changed: $color');
-                    setState(() => _color = color);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 48),
-            const Text('Path control'),
-            const SizedBox(height: 12),
-            FutureBuilder<void>(
-              future: _fetchInitialDirectory(),
-              builder: (context, snapshot) {
-                debugPrint('Snapshot: $snapshot');
-
-                if (snapshot.connectionState == ConnectionState.done) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CNPathControl(
-                        editable: true,
-                        controlStyle: CNPathControlStyle.popup,
-                        controlSize: CNControlSize.large,
-                        url: Uri.parse(_pathControlPath),
-                        isDirectory: _pathControlIsDirectory,
-                        onPressed: (url) {
-                          setState(() {
-                            _pathControlPath = url;
-                            _pathControlIsDirectory =
-                                FileSystemEntity.typeSync(url) ==
-                                FileSystemEntityType.directory;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      CNPathControl(
-                        controlStyle: CNPathControlStyle.standard,
-                        controlSize: CNControlSize.large,
-                        url: Uri.parse(_pathControlPath),
-                        isDirectory: _pathControlIsDirectory,
-                        onPressed: (url) {
-                          setState(() {
-                            _pathControlPath = url;
-                            _pathControlIsDirectory =
-                                FileSystemEntity.typeSync(url) ==
-                                FileSystemEntityType.directory;
-                          });
-                        },
-                      ),
-                    ],
-                  );
-                }
-                return const SizedBox(height: 48);
-              },
-            ),
+            const SizedBox(height: 24),
+            Text('Last pressed: $_last'),
           ],
         ),
       ),

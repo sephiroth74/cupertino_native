@@ -7,6 +7,9 @@ import 'demos/tab_bar.dart';
 import 'demos/icon.dart';
 import 'demos/popup_menu_button.dart';
 import 'demos/button.dart';
+import 'demos/combo_button.dart';
+import 'demos/color_well.dart';
+import 'demos/path_control.dart';
 import 'demos/progress_indicators.dart';
 import 'demos/level_indicators.dart';
 import 'demos/stepper.dart';
@@ -174,6 +177,30 @@ class HomePage extends StatelessWidget {
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ButtonDemoPage()));
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Combo Button'),
+                leading: CNIcon(symbol: CNSymbol('chevron.down.square', color: accentColor)),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ComboButtonDemoPage()));
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Color Well'),
+                leading: CNIcon(symbol: CNSymbol('paintpalette', color: accentColor)),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ColorWellDemoPage()));
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Path Control'),
+                leading: CNIcon(symbol: CNSymbol('folder', color: accentColor)),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const PathControlDemoPage()));
                 },
               ),
               CupertinoListTile(
