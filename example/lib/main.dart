@@ -15,6 +15,7 @@ import 'demos/level_indicators.dart';
 import 'demos/stepper.dart';
 import 'demos/checkboxes.dart';
 import 'demos/date_picker.dart';
+import 'demos/search_field.dart';
 import 'demos/alert.dart';
 import 'demos/popover.dart';
 import 'demos/context_menu.dart';
@@ -233,6 +234,14 @@ class HomePage extends StatelessWidget {
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const DatePickerDemoPage()));
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Search Field'),
+                leading: CNIcon(symbol: CNSymbol('magnifyingglass', color: accentColor)),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SearchFieldDemoPage()));
                 },
               ),
               CupertinoListTile(

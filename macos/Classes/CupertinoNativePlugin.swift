@@ -61,6 +61,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
     let datePickerFactory = CupertinoDatePickerViewFactory(messenger: registrar.messenger)
     registrar.register(datePickerFactory, withId: "CupertinoNativeDatePicker")
+
+    let searchFieldFactory = CupertinoSearchFieldViewFactory(messenger: registrar.messenger)
+    registrar.register(searchFieldFactory, withId: "CupertinoNativeSearchField")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

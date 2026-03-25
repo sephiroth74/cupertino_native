@@ -19,6 +19,7 @@ export 'components/combo_button.dart';
 export 'components/image.dart';
 export 'components/menu.dart';
 export 'components/date_picker.dart';
+export 'components/search_field.dart';
 export 'components/alert.dart';
 export 'components/popover.dart';
 export 'components/context_menu.dart';
@@ -35,6 +36,7 @@ export 'style/progress_style.dart';
 export 'style/slider_type.dart';
 export 'style/level_indicator_style.dart';
 export 'style/combo_button_style.dart';
+export 'style/text_field_bezel_style.dart';
 export 'style/font.dart';
 
 import 'cupertino_native_platform_interface.dart';
