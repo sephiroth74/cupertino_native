@@ -167,6 +167,42 @@ final selectedIndex = await CNAlert.show(
 );
 ```
 
+### Popover
+
+```dart
+CNPopoverButton.label(
+  buttonLabel: 'Details',
+  title: 'Project Actions',
+  message: 'Choose what to do with the current project item.',
+  actions: const [
+    CNPopoverAction(label: 'Open', isDefault: true),
+    CNPopoverAction(label: 'Duplicate'),
+    CNPopoverAction(label: 'Delete', isDestructive: true),
+  ],
+  onSelected: (index) {
+    // Handle selected action
+  },
+)
+```
+
+### Context Menu
+
+```dart
+CNContextMenuRegion(
+  menu: CNMenu(
+    items: [
+      CNMenuItem(title: 'Open'),
+      CNMenuItem(title: 'Rename'),
+      CNMenuItem(title: 'Delete'),
+    ],
+  ),
+  onMenuItemSelected: (item) {
+    // Handle selected menu item
+  },
+  child: const Text('Right click me'),
+)
+```
+
 ## What's left to do?
 So far, this is more of a proof of concept than a full package (although the included components do work). Future improvements include:
 
