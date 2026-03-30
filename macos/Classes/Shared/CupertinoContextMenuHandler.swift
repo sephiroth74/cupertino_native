@@ -166,7 +166,7 @@ final class CupertinoContextMenuHandler: NSObject {
             }
 
             if let image = item["image"] as? [String: Any] {
-                menuItem.image = deserializeImage(dict: image)
+                menuItem.image = CupertinoImageDeserializer.deserialize(dict: image)
             }
 
             if let submenu = item["submenu"] as? [String: Any] {
@@ -179,40 +179,4 @@ final class CupertinoContextMenuHandler: NSObject {
         return menu
     }
 
-    private func deserializeImage(dict: [String: Any]) -> NSImage? {
-        guard let systemSymbolName = dict["systemSymbolName"] as? String else {
-            return nil
-        }
-
-        let baseImage = NSImage(systemSymbolName: systemSymbolName, accessibilityDescription: nil)
-        guard let symbolConfig = dict["symbolConfiguration"] as? [String: Any],
-            let type = symbolConfig["type"] as? String
-        else {
-            return baseImage
-        }
-
-        switch type {
-        case "hierarchical":
-            if let value = symbolConfig["color"] as? NSNumber {
-                let color = ColorUtils.colorFromARGB(value.intValue)
-                return baseImage?.withSymbolConfiguration(.init(hierarchicalColor: color))
-            }
-        case "monochrome":
-            if let value = symbolConfig["color"] as? NSNumber {
-                return baseImage?.tinted(with: ColorUtils.colorFromARGB(value.intValue))
-            }
-            return baseImage?.withSymbolConfiguration(.preferringMonochrome())
-        case "palette":
-            if let colors = symbolConfig["colors"] as? [NSNumber], !colors.isEmpty {
-                let nsColors = colors.map { ColorUtils.colorFromARGB($0.intValue) }
-                return baseImage?.withSymbolConfiguration(.init(paletteColors: nsColors))
-            }
-        case "multicolor":
-            return baseImage?.withSymbolConfiguration(.preferringMulticolor())
-        default:
-            break
-        }
-
-        return baseImage
-    }
 }

@@ -34,10 +34,10 @@ class CupertinoComboButtonNSView: NSView {
                 menu = self.deserializeMenu(v)
             }
             if let v = dict["image"] as? [String: Any] {
-                image = Self.deserializeImage(dict: v)
+                image = CupertinoImageDeserializer.deserialize(dict: v)
             }
             if let v = dict["image"] as? String {
-                image = Self.deserializeImage(jsonString: v)
+                image = CupertinoImageDeserializer.deserialize(jsonString: v)
             }
         }
 
@@ -116,9 +116,15 @@ class CupertinoComboButtonNSView: NSView {
                 }
             case "setImage":
                 if let args = call.arguments as? [String: Any],
+                    let imageDict = args["value"] as? [String: Any]
+                {
+                    self.comboButton.image = CupertinoImageDeserializer.deserialize(dict: imageDict)
+                    result(nil)
+                } else if let args = call.arguments as? [String: Any],
                     let imageJson = args["value"] as? String
                 {
-                    self.comboButton.image = Self.deserializeImage(jsonString: imageJson)
+                    self.comboButton.image = CupertinoImageDeserializer.deserialize(
+                        jsonString: imageJson)
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing image", details: nil))
@@ -230,7 +236,7 @@ class CupertinoComboButtonNSView: NSView {
                             }
                         }
                         if let v = item["image"] as? [String: Any] {
-                            image = Self.deserializeImage(dict: v)
+                            image = CupertinoImageDeserializer.deserialize(dict: v)
                         }
 
                         if let title = title {
@@ -275,50 +281,4 @@ class CupertinoComboButtonNSView: NSView {
         return menu
     }
 
-    private static func deserializeImage(dict: [String: Any]) -> NSImage? {
-        if let systemSymbolName = dict["systemSymbolName"] as? String {
-            let image = NSImage(systemSymbolName: systemSymbolName, accessibilityDescription: nil)
-            if let symbolConfig = dict["symbolConfiguration"] as? [String: Any] {
-                if let type = symbolConfig["type"] as? String {
-
-                    switch type {
-                    case "hierarchical":
-                        if let v = symbolConfig["color"] as? NSNumber {
-                            let color = ColorUtils.colorFromARGB(v.intValue)
-                            return image?.withSymbolConfiguration(
-                                NSImage.SymbolConfiguration(hierarchicalColor: color))
-                        }
-                    case "monochrome":
-                        if let v = symbolConfig["color"] as? NSNumber {
-                            let color = ColorUtils.colorFromARGB(v.intValue)
-                            return image?.tinted(with: color)
-                        }
-                        return image?.withSymbolConfiguration(
-                            NSImage.SymbolConfiguration.preferringMonochrome())
-                    case "multicolor":
-                        return image?.withSymbolConfiguration(
-                            NSImage.SymbolConfiguration.preferringMulticolor())
-                    default:
-                        break
-                    }
-                }
-            }
-            return image
-        }
-        return nil
-    }
-
-    private static func deserializeImage(jsonString: String) -> NSImage? {
-        // decode from json string
-        do {
-            if let imageDict = try JSONSerialization.jsonObject(
-                with: Data(jsonString.utf8), options: []) as? [String: Any]
-            {
-                return Self.deserializeImage(dict: imageDict)
-            }
-        } catch {
-            NSLog("Error deserializing image JSON string: \(error)")
-        }
-        return nil
-    }
 }
