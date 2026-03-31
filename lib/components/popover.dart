@@ -10,7 +10,12 @@ import '../style/sf_symbol.dart';
 /// A selectable action shown in a [CNPopoverButton].
 class CNPopoverAction {
   /// Creates a popover action.
-  const CNPopoverAction({required this.label, this.enabled = true, this.isDefault = false, this.isDestructive = false});
+  const CNPopoverAction({
+    required this.label,
+    this.enabled = true,
+    this.isDefault = false,
+    this.isDestructive = false,
+  });
 
   /// Visible label.
   final String label;
@@ -192,7 +197,8 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
   double? _intrinsicWidth;
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-  Color? get _effectiveTint => widget.tint ?? CupertinoTheme.of(context).primaryColor;
+  Color? get _effectiveTint =>
+      widget.tint ?? CupertinoTheme.of(context).primaryColor;
 
   @override
   void didUpdateWidget(covariant CNPopoverButton oldWidget) {
@@ -223,12 +229,21 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
       if (widget.hasChild) 'transparentOverlay': true,
       if (widget.buttonLabel != null) 'buttonTitle': widget.buttonLabel,
       if (widget.buttonIcon != null) 'buttonIconName': widget.buttonIcon!.name,
-      if (widget.buttonIcon?.size != null) 'buttonIconSize': widget.buttonIcon!.size,
-      if (widget.buttonIcon?.color != null) 'buttonIconColor': resolveColorToArgb(widget.buttonIcon!.color, context),
-      if (widget.buttonIcon?.mode != null) 'buttonIconRenderingMode': widget.buttonIcon!.mode!.name,
+      if (widget.buttonIcon?.size != null)
+        'buttonIconSize': widget.buttonIcon!.size,
+      if (widget.buttonIcon?.color != null)
+        'buttonIconColor': resolveColorToArgb(
+          widget.buttonIcon!.color,
+          context,
+        ),
+      if (widget.buttonIcon?.mode != null)
+        'buttonIconRenderingMode': widget.buttonIcon!.mode!.name,
       if (widget.buttonIcon?.paletteColors != null)
-        'buttonIconPaletteColors': widget.buttonIcon!.paletteColors!.map((c) => resolveColorToArgb(c, context)).toList(),
-      if (widget.buttonIcon?.gradient != null) 'buttonIconGradientEnabled': widget.buttonIcon!.gradient,
+        'buttonIconPaletteColors': widget.buttonIcon!.paletteColors!
+            .map((c) => resolveColorToArgb(c, context))
+            .toList(),
+      if (widget.buttonIcon?.gradient != null)
+        'buttonIconGradientEnabled': widget.buttonIcon!.gradient,
       if (widget.isIconButton) 'round': true,
       'buttonStyle': widget.buttonStyle.name,
       'isDark': _isDark,
@@ -239,7 +254,12 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
       'popoverMessage': widget.message,
       'actions': [
         for (final action in widget.actions)
-          {'label': action.label, 'enabled': action.enabled, 'isDefault': action.isDefault, 'isDestructive': action.isDestructive},
+          {
+            'label': action.label,
+            'enabled': action.enabled,
+            'isDefault': action.isDefault,
+            'isDestructive': action.isDestructive,
+          },
       ],
       'style': encodeStyle(context, tint: _effectiveTint),
     };
@@ -249,7 +269,9 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
       creationParams: creationParams,
       creationParamsCodec: const StandardMessageCodec(),
       onPlatformViewCreated: _onCreated,
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{Factory<TapGestureRecognizer>(() => TapGestureRecognizer())},
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+      },
     );
 
     if (widget.hasChild) {
@@ -263,7 +285,8 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final preferIntrinsic = widget.shrinkWrap || !constraints.hasBoundedWidth;
+        final preferIntrinsic =
+            widget.shrinkWrap || !constraints.hasBoundedWidth;
         double? width;
         if (widget.isIconButton) {
           width = widget.width ?? widget.height;
@@ -271,7 +294,11 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
           width = _intrinsicWidth ?? 100;
         }
 
-        return SizedBox(height: widget.height, width: width, child: platformView);
+        return SizedBox(
+          height: widget.height,
+          width: width,
+          child: platformView,
+        );
       },
     );
   }
@@ -296,7 +323,10 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
                   child: Text(widget.actions[index].label),
                 ),
             ],
-            cancelButton: CupertinoActionSheetAction(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+            cancelButton: CupertinoActionSheetAction(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
           );
         },
       );
@@ -311,11 +341,17 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
 
     return SizedBox(
       height: widget.height,
-      width: widget.isIconButton && widget.round ? (widget.width ?? widget.height) : null,
+      width: widget.isIconButton && widget.round
+          ? (widget.width ?? widget.height)
+          : null,
       child: CupertinoButton(
-        padding: widget.isIconButton ? const EdgeInsets.all(4) : const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        padding: widget.isIconButton
+            ? const EdgeInsets.all(4)
+            : const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         onPressed: showFallback,
-        child: widget.isIconButton ? Icon(CupertinoIcons.info, size: widget.buttonIcon?.size) : Text(widget.buttonLabel ?? ''),
+        child: widget.isIconButton
+            ? Icon(CupertinoIcons.info, size: widget.buttonIcon?.size)
+            : Text(widget.buttonLabel ?? ''),
       ),
     );
   }
@@ -363,7 +399,9 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
       _lastTint = tint;
     }
     if (_lastStyle != widget.buttonStyle) {
-      await ch.invokeMethod('setStyle', {'buttonStyle': widget.buttonStyle.name});
+      await ch.invokeMethod('setStyle', {
+        'buttonStyle': widget.buttonStyle.name,
+      });
       _lastStyle = widget.buttonStyle;
     }
     if (_lastTitle != widget.title ||
@@ -375,7 +413,12 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
         'message': widget.message,
         'actions': [
           for (final action in widget.actions)
-            {'label': action.label, 'enabled': action.enabled, 'isDefault': action.isDefault, 'isDestructive': action.isDestructive},
+            {
+              'label': action.label,
+              'enabled': action.enabled,
+              'isDefault': action.isDefault,
+              'isDestructive': action.isDestructive,
+            },
         ],
         'popoverWidth': widget.popoverWidth,
       });
@@ -384,20 +427,30 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
       _lastActionsSignature = _actionsSignature;
       _lastPopoverWidth = widget.popoverWidth;
     }
-    if (_lastBehavior != widget.behavior || _lastPreferredEdge != widget.preferredEdge) {
-      await ch.invokeMethod('setPopoverBehavior', {'behavior': widget.behavior.name, 'preferredEdge': widget.preferredEdge.name});
+    if (_lastBehavior != widget.behavior ||
+        _lastPreferredEdge != widget.preferredEdge) {
+      await ch.invokeMethod('setPopoverBehavior', {
+        'behavior': widget.behavior.name,
+        'preferredEdge': widget.preferredEdge.name,
+      });
       _lastBehavior = widget.behavior;
       _lastPreferredEdge = widget.preferredEdge;
     }
     if (_lastIconName != widget.buttonIcon?.name ||
         _lastIconSize != widget.buttonIcon?.size ||
-        _lastIconColor != resolveColorToArgb(widget.buttonIcon?.color, context)) {
+        _lastIconColor !=
+            resolveColorToArgb(widget.buttonIcon?.color, context)) {
       await ch.invokeMethod('setButtonIcon', {
         'buttonIconName': widget.buttonIcon?.name,
         'buttonIconSize': widget.buttonIcon?.size,
-        'buttonIconColor': resolveColorToArgb(widget.buttonIcon?.color, context),
+        'buttonIconColor': resolveColorToArgb(
+          widget.buttonIcon?.color,
+          context,
+        ),
         'buttonIconRenderingMode': widget.buttonIcon?.mode?.name,
-        'buttonIconPaletteColors': widget.buttonIcon?.paletteColors?.map((c) => resolveColorToArgb(c, context)).toList(),
+        'buttonIconPaletteColors': widget.buttonIcon?.paletteColors
+            ?.map((c) => resolveColorToArgb(c, context))
+            .toList(),
         'buttonIconGradientEnabled': widget.buttonIcon?.gradient,
         if (widget.isIconButton) 'round': true,
       });
@@ -405,15 +458,21 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
       _lastIconSize = widget.buttonIcon?.size;
       _lastIconColor = resolveColorToArgb(widget.buttonIcon?.color, context);
     }
-    if (_lastButtonTitle != widget.buttonLabel && widget.buttonLabel != null && !widget.hasChild) {
+    if (_lastButtonTitle != widget.buttonLabel &&
+        widget.buttonLabel != null &&
+        !widget.hasChild) {
       await ch.invokeMethod('setButtonTitle', {'title': widget.buttonLabel});
       _lastButtonTitle = widget.buttonLabel;
       _requestIntrinsicSize();
     }
   }
 
-  String get _actionsSignature =>
-      widget.actions.map((action) => '${action.label}|${action.enabled}|${action.isDefault}|${action.isDestructive}').join('||');
+  String get _actionsSignature => widget.actions
+      .map(
+        (action) =>
+            '${action.label}|${action.enabled}|${action.isDefault}|${action.isDestructive}',
+      )
+      .join('||');
 
   Future<void> _syncBrightnessIfNeeded() async {
     final ch = _channel;

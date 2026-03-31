@@ -34,7 +34,14 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   buttonIcon: const CNSymbol('chevron.down', size: 18),
                   buttonStyle: CNButtonStyle.plain,
                   size: 44.0,
-                  items: _sizes.map((e) => CNPopupMenuItem(label: e.name, checked: _controlSize == e)).toList(),
+                  items: _sizes
+                      .map(
+                        (e) => CNPopupMenuItem(
+                          label: e.name,
+                          checked: _controlSize == e,
+                        ),
+                      )
+                      .toList(),
                   onSelected: (value) {
                     setState(() => _controlSize = _sizes[value]);
                   },
@@ -53,7 +60,13 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   shrinkWrap: _shrinkWrap,
                   controlSize: _controlSize,
                 ),
-                CNButton(label: 'Gray', style: CNButtonStyle.gray, onPressed: () => _set('Gray'), shrinkWrap: _shrinkWrap, controlSize: _controlSize),
+                CNButton(
+                  label: 'Gray',
+                  style: CNButtonStyle.gray,
+                  onPressed: () => _set('Gray'),
+                  shrinkWrap: _shrinkWrap,
+                  controlSize: _controlSize,
+                ),
                 CNButton(
                   label: 'Tinted',
                   style: CNButtonStyle.tinted,
@@ -97,7 +110,13 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   shrinkWrap: _shrinkWrap,
                   controlSize: _controlSize,
                 ),
-                CNButton(label: 'Disabled', style: CNButtonStyle.bordered, onPressed: null, shrinkWrap: _shrinkWrap, controlSize: _controlSize),
+                CNButton(
+                  label: 'Disabled',
+                  style: CNButtonStyle.bordered,
+                  onPressed: null,
+                  shrinkWrap: _shrinkWrap,
+                  controlSize: _controlSize,
+                ),
               ],
             ),
             // const SizedBox(height: 48),

@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+
 /// Represents an image that can be used in various components, such as menu items or buttons.
 /// This class encapsulates the necessary information to render a system symbol on Apple platforms,
 /// along with optional configuration for customizing its appearance.
@@ -20,12 +21,17 @@ class CNImage extends StatefulWidget {
   const CNImage({
     super.key,
     required this.systemSymbolName,
-    this.symbolConfiguration = const CNSymbolConfiguration(type: CNSymbolConfigurationType.defaultConfiguration),
+    this.symbolConfiguration = const CNSymbolConfiguration(
+      type: CNSymbolConfigurationType.defaultConfiguration,
+    ),
   });
 
   /// Serializes this image to a map for platform channel communication.
   Map<String, dynamic> toMap(BuildContext context) {
-    return {'systemSymbolName': systemSymbolName, 'symbolConfiguration': symbolConfiguration.toMap(context)};
+    return {
+      'systemSymbolName': systemSymbolName,
+      'symbolConfiguration': symbolConfiguration.toMap(context),
+    };
   }
 
   /// Serializes this image to JSON for communication with the native platform.
@@ -130,31 +136,54 @@ class CNSymbolConfiguration extends Equatable {
   final Color? monochromeColor;
 
   /// Creates a symbol configuration with the specified properties. The [type] determines which properties are relevant for rendering.
-  const CNSymbolConfiguration({required this.type, this.hierarchicalColor, this.paletteColors, this.monochromeColor});
+  const CNSymbolConfiguration({
+    required this.type,
+    this.hierarchicalColor,
+    this.paletteColors,
+    this.monochromeColor,
+  });
 
   /// Private constructor for internal use by factory methods.
-  const CNSymbolConfiguration._({required this.type, this.hierarchicalColor, this.paletteColors, this.monochromeColor});
+  const CNSymbolConfiguration._({
+    required this.type,
+    this.hierarchicalColor,
+    this.paletteColors,
+    this.monochromeColor,
+  });
 
   /// Creates a default symbol configuration.
-  factory CNSymbolConfiguration.defaultConfiguration() => CNSymbolConfiguration._(type: CNSymbolConfigurationType.defaultConfiguration);
+  factory CNSymbolConfiguration.defaultConfiguration() =>
+      CNSymbolConfiguration._(
+        type: CNSymbolConfigurationType.defaultConfiguration,
+      );
 
   /// Creates a hierarchical symbol configuration.
   factory CNSymbolConfiguration.hierarchical(Color? color) {
-    return CNSymbolConfiguration._(type: CNSymbolConfigurationType.hierarchical, hierarchicalColor: color);
+    return CNSymbolConfiguration._(
+      type: CNSymbolConfigurationType.hierarchical,
+      hierarchicalColor: color,
+    );
   }
 
   /// Creates a monochrome symbol configuration.
   factory CNSymbolConfiguration.monochrome(Color? color) {
-    return CNSymbolConfiguration._(type: CNSymbolConfigurationType.monochrome, monochromeColor: color);
+    return CNSymbolConfiguration._(
+      type: CNSymbolConfigurationType.monochrome,
+      monochromeColor: color,
+    );
   }
 
   /// Creates a palette symbol configuration.
   factory CNSymbolConfiguration.palette(List<Color>? colors) {
-    return CNSymbolConfiguration._(type: CNSymbolConfigurationType.palette, paletteColors: colors);
+    return CNSymbolConfiguration._(
+      type: CNSymbolConfigurationType.palette,
+      paletteColors: colors,
+    );
   }
 
   /// Creates a multicolor symbol configuration.
-  factory CNSymbolConfiguration.multicolor() => CNSymbolConfiguration._(type: CNSymbolConfigurationType.multicolor);
+  factory CNSymbolConfiguration.multicolor() =>
+      CNSymbolConfiguration._(type: CNSymbolConfigurationType.multicolor);
 
   /// Serializes the symbol configuration to JSON for native consumption.
   Map<String, dynamic> toMap(BuildContext context) {
@@ -162,11 +191,22 @@ class CNSymbolConfiguration extends Equatable {
       case CNSymbolConfigurationType.defaultConfiguration:
         return {'type': 'default'};
       case CNSymbolConfigurationType.hierarchical:
-        return {'type': 'hierarchical', 'color': resolveColorToArgb(hierarchicalColor, context)};
+        return {
+          'type': 'hierarchical',
+          'color': resolveColorToArgb(hierarchicalColor, context),
+        };
       case CNSymbolConfigurationType.monochrome:
-        return {'type': 'monochrome', 'color': resolveColorToArgb(monochromeColor, context)};
+        return {
+          'type': 'monochrome',
+          'color': resolveColorToArgb(monochromeColor, context),
+        };
       case CNSymbolConfigurationType.palette:
-        return {'type': 'palette', 'colors': paletteColors?.map((c) => resolveColorToArgb(c, context)).toList()};
+        return {
+          'type': 'palette',
+          'colors': paletteColors
+              ?.map((c) => resolveColorToArgb(c, context))
+              .toList(),
+        };
       case CNSymbolConfigurationType.multicolor:
         return {'type': 'multicolor'};
     }
@@ -178,5 +218,10 @@ class CNSymbolConfiguration extends Equatable {
   }
 
   @override
-  List<Object?> get props => [type, hierarchicalColor, monochromeColor, paletteColors];
+  List<Object?> get props => [
+    type,
+    hierarchicalColor,
+    monochromeColor,
+    paletteColors,
+  ];
 }

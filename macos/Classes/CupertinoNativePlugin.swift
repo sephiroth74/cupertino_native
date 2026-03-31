@@ -65,6 +65,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     let searchFieldFactory = CupertinoSearchFieldViewFactory(messenger: registrar.messenger)
     registrar.register(searchFieldFactory, withId: "CupertinoNativeSearchField")
 
+    let textFieldFactory = CupertinoTextFieldFactory(messenger: registrar.messenger)
+    registrar.register(textFieldFactory, withId: "CupertinoNativeTextField")
+
     let imageFactory = CupertinoImageFactory(messenger: registrar.messenger)
     registrar.register(imageFactory, withId: "CupertinoNativeImage")
   }

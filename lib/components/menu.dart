@@ -111,9 +111,15 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
   /// Creates a new CNMenuItem with the given properties. The [title] is required, while other properties are optional.
   /// The [state] defaults to [CNMenuItemState.off], and [enabled] defaults to true.
   /// The [tag] can be used to store an arbitrary integer value for identification purposes.
-  CNMenuItem({required this.title, this.tag, this.image, this.submenu, this.state = CNMenuItemState.off, this.enabled = true})
-    : isSeparator = false,
-      _identifier = _identifierCounter++;
+  CNMenuItem({
+    required this.title,
+    this.tag,
+    this.image,
+    this.submenu,
+    this.state = CNMenuItemState.off,
+    this.enabled = true,
+  }) : isSeparator = false,
+       _identifier = _identifierCounter++;
 
   /// Creates a separator entry for [CNMenu].
   CNMenuItem.separator()
@@ -152,5 +158,14 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
   }
 
   @override
-  List<Object?> get props => [_identifier, isSeparator, state, tag, title, image, submenu, enabled];
+  List<Object?> get props => [
+    _identifier,
+    isSeparator,
+    state,
+    tag,
+    title,
+    image,
+    submenu,
+    enabled,
+  ];
 }

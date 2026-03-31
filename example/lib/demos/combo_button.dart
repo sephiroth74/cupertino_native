@@ -64,7 +64,8 @@ class _ComboButtonDemoPageState extends State<ComboButtonDemoPage> {
                   image: const CNImage(systemSymbolName: 'doc'),
                   menu: splitMenu,
                   onPressed: (_) => _setLastAction('Split button pressed'),
-                  onMenuItemSelected: (item) => _setLastAction('Split menu: ${item.title}'),
+                  onMenuItemSelected: (item) =>
+                      _setLastAction('Split menu: ${item.title}'),
                 ),
               ),
             ),
@@ -82,7 +83,8 @@ class _ComboButtonDemoPageState extends State<ComboButtonDemoPage> {
                   controlSize: CNControlSize.large,
                   menu: unifiedMenu,
                   onPressed: (_) => _setLastAction('Unified button pressed'),
-                  onMenuItemSelected: (item) => _setLastAction('Unified menu: ${item.title}'),
+                  onMenuItemSelected: (item) =>
+                      _setLastAction('Unified menu: ${item.title}'),
                 ),
               ),
             ),

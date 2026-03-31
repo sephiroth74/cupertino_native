@@ -45,8 +45,14 @@ class CNComboButton extends StatefulWidget {
     this.image,
     this.onPressed,
     this.onMenuItemSelected,
-  }) : assert(menu == null || items == null, 'Cannot provide both menu and items.'),
-       assert(menu != null || items != null, 'Must provide either menu or items.');
+  }) : assert(
+         menu == null || items == null,
+         'Cannot provide both menu and items.',
+       ),
+       assert(
+         menu != null || items != null,
+         'Must provide either menu or items.',
+       );
 
   @override
   State<CNComboButton> createState() => _CNComboButtonState();
@@ -66,7 +72,9 @@ class _CNComboButtonState extends State<CNComboButton> {
 
   CNMenu get menu {
     if (widget.menu != null) return widget.menu!;
-    return _internalMenu ??= CNMenu(items: widget.items!.map((item) => CNMenuItem(title: item)).toList());
+    return _internalMenu ??= CNMenu(
+      items: widget.items!.map((item) => CNMenuItem(title: item)).toList(),
+    );
   }
 
   @override
@@ -122,7 +130,9 @@ class _CNComboButtonState extends State<CNComboButton> {
         double? height;
 
         if (hasBoundedWidth) {
-          width = constraints.minWidth > 0 ? constraints.minWidth : constraints.maxWidth;
+          width = constraints.minWidth > 0
+              ? constraints.minWidth
+              : constraints.maxWidth;
         } else if (_intrinsicWidth != null && _intrinsicWidth! > 0) {
           width = _intrinsicWidth;
         } else {
@@ -145,7 +155,9 @@ class _CNComboButtonState extends State<CNComboButton> {
             creationParamsCodec: const StandardMessageCodec(),
             creationParams: creationParams,
             onPlatformViewCreated: _onPlatformViewCreated,
-            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{Factory<TapGestureRecognizer>(() => TapGestureRecognizer())},
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+            },
           ),
         );
       },
@@ -162,7 +174,9 @@ class _CNComboButtonState extends State<CNComboButton> {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
-    debugPrint('[checkbox] Method call from native: ${call.method} with args: ${call.arguments}');
+    debugPrint(
+      '[checkbox] Method call from native: ${call.method} with args: ${call.arguments}',
+    );
 
     if (call.method == 'menuItemSelected') {
       final args = call.arguments as Map<dynamic, dynamic>;
@@ -197,14 +211,18 @@ class _CNComboButtonState extends State<CNComboButton> {
     bool requireIntrinsicSizeUpdate = false;
 
     if (_lastMenu != menu) {
-      debugPrint('Menu instance changed. Updating listener and syncing to native.');
+      debugPrint(
+        'Menu instance changed. Updating listener and syncing to native.',
+      );
       _lastMenu?.removeListener(_onMenuChanged);
       menu.addListener(_onMenuChanged);
       await channel.invokeMethod('setMenu', {'value': menu.toJson(context)});
       _lastMenu = menu;
       requireIntrinsicSizeUpdate = true;
     } else {
-      debugPrint('Menu instance did not change. No need to update listener or sync menu to native.');
+      debugPrint(
+        'Menu instance did not change. No need to update listener or sync menu to native.',
+      );
     }
 
     if (_lastIsDark != _isDark) {
@@ -217,7 +235,9 @@ class _CNComboButtonState extends State<CNComboButton> {
     }
 
     if (oldWidget.controlSize != widget.controlSize) {
-      await channel.invokeMethod('setControlSize', {'value': widget.controlSize.name});
+      await channel.invokeMethod('setControlSize', {
+        'value': widget.controlSize.name,
+      });
       requireIntrinsicSizeUpdate = true;
     }
 
@@ -227,7 +247,9 @@ class _CNComboButtonState extends State<CNComboButton> {
     }
 
     if (oldWidget.image != widget.image) {
-      await channel.invokeMethod('setImage', {'value': widget.image?.toMap(context)});
+      await channel.invokeMethod('setImage', {
+        'value': widget.image?.toMap(context),
+      });
       requireIntrinsicSizeUpdate = true;
     }
 

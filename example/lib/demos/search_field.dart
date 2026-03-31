@@ -25,7 +25,10 @@ class SearchFieldDemoPage extends StatefulWidget {
 class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
   final List<CNControlSize> _sizes = CNControlSize.values;
   final List<CNTextFieldBezelStyle> _bezelStyles = CNTextFieldBezelStyle.values;
-  static const _demoFont = CNFont.monospacedSystem(CNFontSize.points(13), weight: CNFontWeight.medium);
+  static const _demoFont = CNFont.monospacedSystem(
+    CNFontSize.points(13),
+    weight: CNFontWeight.medium,
+  );
 
   CNControlSize _controlSize = CNControlSize.regular;
   CNTextFieldBezelStyle _bezelStyle = CNTextFieldBezelStyle.round;
@@ -49,7 +52,14 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
                   buttonIcon: const CNSymbol('chevron.down', size: 18),
                   buttonStyle: CNButtonStyle.plain,
                   size: 44,
-                  items: _sizes.map((size) => CNPopupMenuItem(label: size.name, checked: _controlSize == size)).toList(),
+                  items: _sizes
+                      .map(
+                        (size) => CNPopupMenuItem(
+                          label: size.name,
+                          checked: _controlSize == size,
+                        ),
+                      )
+                      .toList(),
                   onSelected: (value) {
                     setState(() => _controlSize = _sizes[value]);
                   },
@@ -65,7 +75,14 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
                   buttonIcon: const CNSymbol('chevron.down', size: 18),
                   buttonStyle: CNButtonStyle.plain,
                   size: 44,
-                  items: _bezelStyles.map((s) => CNPopupMenuItem(label: s.name, checked: _bezelStyle == s)).toList(),
+                  items: _bezelStyles
+                      .map(
+                        (s) => CNPopupMenuItem(
+                          label: s.name,
+                          checked: _bezelStyle == s,
+                        ),
+                      )
+                      .toList(),
                   onSelected: (value) {
                     setState(() => _bezelStyle = _bezelStyles[value]);
                   },
@@ -77,7 +94,10 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
               children: [
                 const Text('Suggestions'),
                 const SizedBox(width: 12),
-                CNSwitch(value: _suggestionsEnabled, onChanged: (v) => setState(() => _suggestionsEnabled = v)),
+                CNSwitch(
+                  value: _suggestionsEnabled,
+                  onChanged: (v) => setState(() => _suggestionsEnabled = v),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -88,11 +108,13 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
               placeholder: 'Search files, folders, or symbols',
               suggestions: _suggestionsEnabled ? _kDemoSuggestions : null,
               onSuggestionsRequested: (query) {
-                if(query.isEmpty) return [];
+                if (query.isEmpty) return [];
                 if (!_suggestionsEnabled) return const <String>[];
                 if (query.isEmpty) return _kDemoSuggestions;
                 final lower = query.toLowerCase();
-                return _kDemoSuggestions.where((item) => item.toLowerCase().contains(lower)).toList();
+                return _kDemoSuggestions
+                    .where((item) => item.toLowerCase().contains(lower))
+                    .toList();
               },
               controlSize: _controlSize,
               bezelStyle: _bezelStyle,
@@ -101,7 +123,9 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
                 setState(() => _query = value);
               },
               onSubmitted: (value) {
-                setState(() => _submittedQuery = value.isEmpty ? 'Empty query' : value);
+                setState(
+                  () => _submittedQuery = value.isEmpty ? 'Empty query' : value,
+                );
               },
             ),
             const SizedBox(height: 12),
@@ -124,7 +148,11 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
             const SizedBox(height: 24),
             const Text('Disabled'),
             const SizedBox(height: 12),
-            const CNSearchField(text: 'Archived projects', placeholder: 'Disabled search', width: 320),
+            const CNSearchField(
+              text: 'Archived projects',
+              placeholder: 'Disabled search',
+              width: 320,
+            ),
           ],
         ),
       ),

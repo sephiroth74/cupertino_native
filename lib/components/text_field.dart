@@ -8,26 +8,20 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-const double _kDefaultSearchFieldWidth = 180.0;
-const double _kDefaultSearchFieldHeight = 24.0;
+const double _kDefaultTextFieldWidth = 120.0;
+const double _kDefaultTextFieldHeight = 24.0;
 
-/// Callback invoked by native code when updated suggestions are needed.
-typedef CNSearchSuggestionsRequested =
-    FutureOr<List<String>> Function(String query);
-
-/// A native macOS search field backed by NSSearchField.
-class CNSearchField extends StatefulWidget {
-  /// Creates a native search field.
-  const CNSearchField({
+/// A native macOS text field backed by NSTextField.
+class CNTextField extends StatefulWidget {
+  /// Creates a native text field.
+  const CNTextField({
     super.key,
-    required this.text,
+    this.controller,
     this.placeholder,
     this.textColor,
     this.placeholderColor,
     this.backgroundColor,
     this.font,
-    this.suggestions,
-    this.onSuggestionsRequested,
     this.controlSize = CNControlSize.regular,
     this.bezelStyle = CNTextFieldBezelStyle.round,
     this.width,
@@ -35,19 +29,19 @@ class CNSearchField extends StatefulWidget {
     this.onSubmitted,
   });
 
-  /// The current text shown in the field.
-  final String text;
+  /// Controls the text being edited.
+  final TextEditingController? controller;
 
   /// Placeholder string shown when the field is empty.
   final String? placeholder;
 
-  /// The text color of the search field.
+  /// The text color of the text field.
   final Color? textColor;
 
-  /// The placeholder color of the search field.
+  /// The placeholder color of the text field.
   final Color? placeholderColor;
 
-  /// The background color drawn behind the search field text area.
+  /// The background color drawn behind the text field text area.
   final Color? backgroundColor;
 
   /// Optional native NSFont descriptor.
@@ -59,38 +53,34 @@ class CNSearchField extends StatefulWidget {
   /// The size of the native AppKit control.
   final CNControlSize controlSize;
 
-  /// Optional list of suggestion strings shown in the native completion dropdown
-  /// as the user types. Filtering is case-insensitive and uses substring matching.
-  /// Pass null or an empty list to disable suggestions.
-  final List<String>? suggestions;
-
-  /// Callback used to fetch suggestions from Flutter when native code requests
-  /// updates while the user types.
-  final CNSearchSuggestionsRequested? onSuggestionsRequested;
-
-  /// The border/bezel style of the search field.
+  /// The border/bezel style of the text field.
   final CNTextFieldBezelStyle bezelStyle;
 
-  /// Called whenever the user changes the search text.
+  /// Called whenever the user changes the text.
   final ValueChanged<String>? onChanged;
 
-  /// Called when the user submits the search text.
+  /// Called when the user submits the text.
   final ValueChanged<String>? onSubmitted;
 
-  /// Whether the native control accepts user interaction.
   bool get enabled => onChanged != null || onSubmitted != null;
 
   @override
-  State<CNSearchField> createState() => _CNSearchFieldState();
+  State<CNTextField> createState() => _CNTextFieldState();
 }
 
-class _CNSearchFieldState extends State<CNSearchField> {
+class _CNTextFieldState extends State<CNTextField> {
   MethodChannel? _channel;
+  late TextEditingController _controller;
+  bool _isUpdatingFromNative = false;
+  TextSelection? _pendingSelection;
 
   double? _intrinsicWidth;
   double? _intrinsicHeight;
 
-  String? _lastText;
+  String? _lastTextSent;
+  int? _lastSelectionBaseSent;
+  int? _lastSelectionExtentSent;
+
   String? _lastPlaceholder;
   int? _lastTextColor;
   int? _lastPlaceholderColor;
@@ -98,21 +88,37 @@ class _CNSearchFieldState extends State<CNSearchField> {
   CNFont? _lastFont;
   CNControlSize? _lastControlSize;
   CNTextFieldBezelStyle? _lastBezelStyle;
-  List<String>? _lastSuggestions;
   bool? _lastEnabled;
   bool? _lastIsDark;
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? TextEditingController();
+    _controller.addListener(_onControllerChanged);
+  }
+
+  @override
   void dispose() {
+    _controller.removeListener(_onControllerChanged);
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
     _channel?.setMethodCallHandler(null);
     super.dispose();
   }
 
   @override
-  void didUpdateWidget(covariant CNSearchField oldWidget) {
+  void didUpdateWidget(covariant CNTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?.removeListener(_onControllerChanged);
+      _controller =
+          widget.controller ?? TextEditingController(text: _controller.text);
+      _controller.addListener(_onControllerChanged);
+    }
     _syncPropsToNativeIfNeeded();
   }
 
@@ -122,16 +128,48 @@ class _CNSearchFieldState extends State<CNSearchField> {
     _syncBrightnessIfNeeded();
   }
 
+  void _onControllerChanged() {
+    if (_isUpdatingFromNative) {
+      return;
+    }
+
+    // Send text to native if changed
+    if (_controller.text != _lastTextSent) {
+      _lastTextSent = _controller.text;
+      _channel?.invokeMethod('setText', {'value': _controller.text});
+    }
+
+    // Send selection to native if changed
+    final selection = _controller.selection;
+    if (selection.isValid) {
+      if (selection.baseOffset != _lastSelectionBaseSent ||
+          selection.extentOffset != _lastSelectionExtentSent) {
+        _lastSelectionBaseSent = selection.baseOffset;
+        _lastSelectionExtentSent = selection.extentOffset;
+        _channel?.invokeMethod('setSelection', {
+          'base': selection.baseOffset,
+          'extent': selection.extentOffset,
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
-      return Placeholder();
+      return const Placeholder();
     }
 
-    const viewType = 'CupertinoNativeSearchField';
+    const viewType = 'CupertinoNativeTextField';
 
     final creationParams = <String, dynamic>{
-      'text': widget.text,
+      'text': _controller.text,
+      'selectionBase': _controller.selection.isValid
+          ? _controller.selection.baseOffset
+          : null,
+      'selectionExtent': _controller.selection.isValid
+          ? _controller.selection.extentOffset
+          : null,
       'placeholder': widget.placeholder,
       'textColor': resolveColorToArgb(widget.textColor, context),
       'placeholderColor': resolveColorToArgb(widget.placeholderColor, context),
@@ -139,7 +177,6 @@ class _CNSearchFieldState extends State<CNSearchField> {
       'font': widget.font?.toMap(),
       'controlSize': widget.controlSize.name,
       'bezelStyle': widget.bezelStyle.name,
-      'suggestions': widget.suggestions,
       'enabled': widget.enabled,
       'isDark': _isDark,
     };
@@ -151,12 +188,12 @@ class _CNSearchFieldState extends State<CNSearchField> {
             _intrinsicWidth ??
             (constraints.hasBoundedWidth
                 ? constraints.maxWidth
-                : _kDefaultSearchFieldWidth);
+                : _kDefaultTextFieldWidth);
         final height =
             _intrinsicHeight ??
             (constraints.hasBoundedHeight
                 ? constraints.maxHeight
-                : _kDefaultSearchFieldHeight);
+                : _kDefaultTextFieldHeight);
 
         return Align(
           alignment: Alignment.centerLeft,
@@ -181,10 +218,15 @@ class _CNSearchFieldState extends State<CNSearchField> {
   }
 
   void _onPlatformViewCreated(int id) {
-    final channel = MethodChannel('CupertinoNativeSearchField_$id');
+    final channel = MethodChannel('CupertinoNativeTextField_$id');
     _channel = channel;
     channel.setMethodCallHandler(_onMethodCall);
     _cacheCurrentProps();
+    _lastTextSent = _controller.text;
+    if (_controller.selection.isValid) {
+      _lastSelectionBaseSent = _controller.selection.baseOffset;
+      _lastSelectionExtentSent = _controller.selection.extentOffset;
+    }
     _syncBrightnessIfNeeded();
     _requestIntrinsicSize();
   }
@@ -193,37 +235,80 @@ class _CNSearchFieldState extends State<CNSearchField> {
     switch (call.method) {
       case 'textChanged':
         final value = (call.arguments as String?) ?? '';
-        _lastText = value;
-        widget.onChanged?.call(value);
+        if (_controller.text != value) {
+          _isUpdatingFromNative = true;
+          _lastTextSent = value;
+
+          TextSelection newSelection;
+          if (_pendingSelection != null &&
+              _pendingSelection!.baseOffset <= value.length &&
+              _pendingSelection!.extentOffset <= value.length) {
+            newSelection = _pendingSelection!;
+            _pendingSelection = null;
+          } else {
+            final previousSelection = _controller.selection;
+            newSelection = previousSelection.copyWith(
+              baseOffset: previousSelection.baseOffset.clamp(0, value.length),
+              extentOffset: previousSelection.extentOffset.clamp(
+                0,
+                value.length,
+              ),
+            );
+          }
+
+          _controller.value = TextEditingValue(
+            text: value,
+            selection: newSelection,
+          );
+
+          _isUpdatingFromNative = false;
+          widget.onChanged?.call(value);
+        }
+        break;
+      case 'selectionChanged':
+        final args = call.arguments as Map<dynamic, dynamic>?;
+        if (args != null) {
+          final base = args['base'] as int?;
+          final extent = args['extent'] as int?;
+          if (base != null && extent != null && base >= 0 && extent >= 0) {
+            final currentSelection = _controller.selection;
+            if (currentSelection.baseOffset != base ||
+                currentSelection.extentOffset != extent) {
+              final selection = TextSelection(
+                baseOffset: base,
+                extentOffset: extent,
+              );
+              _isUpdatingFromNative = true;
+              _lastSelectionBaseSent = base;
+              _lastSelectionExtentSent = extent;
+              if (base <= _controller.text.length &&
+                  extent <= _controller.text.length) {
+                _controller.selection = selection;
+                _pendingSelection = null;
+              } else {
+                _pendingSelection = selection;
+              }
+              _isUpdatingFromNative = false;
+            } else {
+              // debugPrint('Selection already set');
+            }
+          } else {
+            // debugPrint('Invalid selection');
+          }
+        } else {
+          // debugPrint('Invalid selection args');
+        }
         break;
       case 'submitted':
         final value = (call.arguments as String?) ?? '';
-        _lastText = value;
         widget.onSubmitted?.call(value);
         break;
-      case 'requestSuggestions':
-        final args = call.arguments as Map<dynamic, dynamic>?;
-        final query = (args?['query'] as String?) ?? '';
-
-        if (widget.onSuggestionsRequested != null) {
-          final results = await widget.onSuggestionsRequested!(query);
-          return results;
-        }
-
-        final source = widget.suggestions ?? <String>[];
-        if (query.isEmpty) return source;
-
-        final lower = query.toLowerCase();
-        return source
-            .where((item) => item.toLowerCase().contains(lower))
-            .toList();
     }
 
     return null;
   }
 
   void _cacheCurrentProps() {
-    _lastText = widget.text;
     _lastPlaceholder = widget.placeholder;
     _lastTextColor = resolveColorToArgb(widget.textColor, context);
     _lastPlaceholderColor = resolveColorToArgb(
@@ -234,7 +319,6 @@ class _CNSearchFieldState extends State<CNSearchField> {
     _lastFont = widget.font;
     _lastControlSize = widget.controlSize;
     _lastBezelStyle = widget.bezelStyle;
-    _lastSuggestions = widget.suggestions;
     _lastEnabled = widget.enabled;
     _lastIsDark = _isDark;
   }
@@ -244,11 +328,6 @@ class _CNSearchFieldState extends State<CNSearchField> {
     if (channel == null) return;
 
     bool requiresIntrinsicSize = false;
-
-    if (_lastText != widget.text) {
-      await channel.invokeMethod('setText', {'value': widget.text});
-      _lastText = widget.text;
-    }
 
     if (_lastPlaceholder != widget.placeholder) {
       await channel.invokeMethod('setPlaceholder', {
@@ -307,13 +386,6 @@ class _CNSearchFieldState extends State<CNSearchField> {
       });
       _lastBezelStyle = widget.bezelStyle;
       requiresIntrinsicSize = true;
-    }
-
-    if (!listEquals(_lastSuggestions, widget.suggestions)) {
-      await channel.invokeMethod('setSuggestions', {
-        'value': widget.suggestions ?? <String>[],
-      });
-      _lastSuggestions = widget.suggestions;
     }
 
     if (requiresIntrinsicSize) {

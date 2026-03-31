@@ -29,7 +29,8 @@ class _PathControlDemoPageState extends State<PathControlDemoPage> {
   void _handlePressed(String url) {
     setState(() {
       _pathControlPath = url;
-      _pathControlIsDirectory = FileSystemEntity.typeSync(url) == FileSystemEntityType.directory;
+      _pathControlIsDirectory =
+          FileSystemEntity.typeSync(url) == FileSystemEntityType.directory;
     });
   }
 

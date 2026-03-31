@@ -44,7 +44,12 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
         CNMenuItem.separator(),
         CNMenuItem(
           title: 'Delete',
-          image: CNImage(systemSymbolName: 'trash', symbolConfiguration: CNSymbolConfiguration.hierarchical(CupertinoColors.systemRed)),
+          image: CNImage(
+            systemSymbolName: 'trash',
+            symbolConfiguration: CNSymbolConfiguration.hierarchical(
+              CupertinoColors.systemRed,
+            ),
+          ),
         ),
       ],
     );
@@ -111,7 +116,9 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const Text('Right-click inside the card to open the native context menu.'),
+            const Text(
+              'Right-click inside the card to open the native context menu.',
+            ),
             const SizedBox(height: 12),
             CNContextMenuRegion(
               menu: menu,
@@ -124,11 +131,20 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(color: CupertinoColors.secondarySystemGroupedBackground, borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                  color: CupertinoColors.secondarySystemGroupedBackground,
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Project Item', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    Text(
+                      'Project Item',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     SizedBox(height: 8),
                     Text('Use secondary click to open actions.'),
                   ],
@@ -149,13 +165,24 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(color: CupertinoColors.tertiarySystemGroupedBackground, borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                  color: CupertinoColors.tertiarySystemGroupedBackground,
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Editor Area', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    Text(
+                      'Editor Area',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     SizedBox(height: 8),
-                    Text('Right-click to test a multi-level context menu without icons.'),
+                    Text(
+                      'Right-click to test a multi-level context menu without icons.',
+                    ),
                   ],
                 ),
               ),

@@ -65,7 +65,9 @@ class _ColorWellDemoPageState extends State<ColorWellDemoPage> {
               ),
             ),
             const SizedBox(height: 12),
-            Text('ARGB: 0x${_color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}'),
+            Text(
+              'ARGB: 0x${_color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}',
+            ),
           ],
         ),
       ),

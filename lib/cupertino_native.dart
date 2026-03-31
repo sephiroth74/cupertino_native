@@ -20,6 +20,7 @@ export 'components/image.dart';
 export 'components/menu.dart';
 export 'components/date_picker.dart';
 export 'components/search_field.dart';
+export 'components/text_field.dart';
 export 'components/alert.dart';
 export 'components/popover.dart';
 export 'components/context_menu.dart';

@@ -17,7 +17,11 @@ enum CNAlertStyle {
 /// Action button for [CNAlert.show].
 class CNAlertAction {
   /// Creates an alert action.
-  const CNAlertAction(this.title, {this.isDefault = false, this.isDestructive = false});
+  const CNAlertAction(
+    this.title, {
+    this.isDefault = false,
+    this.isDestructive = false,
+  });
 
   /// Button title.
   final String title;
@@ -29,7 +33,11 @@ class CNAlertAction {
   final bool isDestructive;
 
   /// Serializes this action for method-channel transport.
-  Map<String, dynamic> toMap() => {'title': title, 'isDefault': isDefault, 'isDestructive': isDestructive};
+  Map<String, dynamic> toMap() => {
+    'title': title,
+    'isDefault': isDefault,
+    'isDestructive': isDestructive,
+  };
 }
 
 /// Utility API to show native alerts.
@@ -63,7 +71,9 @@ class CNAlert {
         'suppressionButtonLabel': suppressionButtonLabel,
         'suppressionInitiallySelected': suppressionInitiallySelected,
       });
-      final resultMap = response is Map ? Map<Object?, Object?>.from(response) : const <Object?, Object?>{};
+      final resultMap = response is Map
+          ? Map<Object?, Object?>.from(response)
+          : const <Object?, Object?>{};
       final selected = (resultMap['selectedIndex'] as num?)?.toInt();
       final suppressionSelected = resultMap['suppressionSelected'] as bool?;
       if (selected != null) {

@@ -34,7 +34,8 @@ class _PopoverDemoPageState extends State<PopoverDemoPage> {
                   title: 'Project Actions',
                   message: 'Choose what to do with the current project item.',
                   actions: _actions,
-                  onSelected: (index) => setState(() => _lastSelectedIndex = index),
+                  onSelected: (index) =>
+                      setState(() => _lastSelectedIndex = index),
                 ),
               ],
             ),
@@ -46,9 +47,13 @@ class _PopoverDemoPageState extends State<PopoverDemoPage> {
                 CNPopoverButton.icon(
                   buttonIcon: const CNSymbol('info.circle', size: 18),
                   title: 'About This Item',
-                  message: 'This popover is anchored to a round icon button and uses native AppKit presentation.',
-                  actions: const [CNPopoverAction(label: 'Close', isDefault: true)],
-                  onSelected: (index) => setState(() => _lastSelectedIndex = index),
+                  message:
+                      'This popover is anchored to a round icon button and uses native AppKit presentation.',
+                  actions: const [
+                    CNPopoverAction(label: 'Close', isDefault: true),
+                  ],
+                  onSelected: (index) =>
+                      setState(() => _lastSelectedIndex = index),
                 ),
               ],
             ),
@@ -59,22 +64,36 @@ class _PopoverDemoPageState extends State<PopoverDemoPage> {
                 const Spacer(),
                 CNPopoverButton(
                   title: 'Invite Collaborators',
-                  message: 'Share this workspace with your team members, then configure edit permissions from settings.',
+                  message:
+                      'Share this workspace with your team members, then configure edit permissions from settings.',
                   actions: const [
                     CNPopoverAction(label: 'Share', isDefault: true),
                     CNPopoverAction(label: 'Later'),
                   ],
                   preferredEdge: CNPopoverEdge.right,
-                  onSelected: (index) => setState(() => _lastSelectedIndex = index),
+                  onSelected: (index) =>
+                      setState(() => _lastSelectedIndex = index),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(color: CupertinoColors.systemBlue, borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.systemBlue,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(CupertinoIcons.person_2_fill, color: CupertinoColors.white),
+                        Icon(
+                          CupertinoIcons.person_2_fill,
+                          color: CupertinoColors.white,
+                        ),
                         SizedBox(width: 8),
-                        Text('Invite', style: TextStyle(color: CupertinoColors.white)),
+                        Text(
+                          'Invite',
+                          style: TextStyle(color: CupertinoColors.white),
+                        ),
                       ],
                     ),
                   ),

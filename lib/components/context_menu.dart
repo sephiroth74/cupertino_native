@@ -42,8 +42,13 @@ class _CNContextMenuRegionState extends State<CNContextMenuRegion> {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.deferToChild,
-      onSecondaryTapDown: widget.enabled ? (details) => _openContextMenu(details.globalPosition) : null,
-      onLongPressStart: widget.enabled && defaultTargetPlatform != TargetPlatform.macOS ? (details) => _openFallbackMenu(context) : null,
+      onSecondaryTapDown: widget.enabled
+          ? (details) => _openContextMenu(details.globalPosition)
+          : null,
+      onLongPressStart:
+          widget.enabled && defaultTargetPlatform != TargetPlatform.macOS
+          ? (details) => _openFallbackMenu(context)
+          : null,
       child: widget.child,
     );
   }
@@ -60,7 +65,9 @@ class _CNContextMenuRegionState extends State<CNContextMenuRegion> {
       'y': globalPosition.dy,
     });
 
-    final resultMap = response is Map ? Map<Object?, Object?>.from(response) : const <Object?, Object?>{};
+    final resultMap = response is Map
+        ? Map<Object?, Object?>.from(response)
+        : const <Object?, Object?>{};
 
     if (resultMap.isEmpty) {
       widget.onCanceled?.call();
@@ -83,7 +90,9 @@ class _CNContextMenuRegionState extends State<CNContextMenuRegion> {
   }
 
   Future<void> _openFallbackMenu(BuildContext context) async {
-    final selectableItems = widget.menu.items.where((item) => !item.isSeparator && item.enabled).toList();
+    final selectableItems = widget.menu.items
+        .where((item) => !item.isSeparator && item.enabled)
+        .toList();
     if (selectableItems.isEmpty) {
       widget.onCanceled?.call();
       return;
@@ -95,9 +104,15 @@ class _CNContextMenuRegionState extends State<CNContextMenuRegion> {
         return CupertinoActionSheet(
           actions: [
             for (var i = 0; i < selectableItems.length; i++)
-              CupertinoActionSheetAction(onPressed: () => Navigator.of(ctx).pop(i), child: Text(selectableItems[i].title)),
+              CupertinoActionSheetAction(
+                onPressed: () => Navigator.of(ctx).pop(i),
+                child: Text(selectableItems[i].title),
+              ),
           ],
-          cancelButton: CupertinoActionSheetAction(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
         );
       },
     );
