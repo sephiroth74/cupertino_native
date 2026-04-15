@@ -8,15 +8,17 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-const double _kDefaultTextFieldWidth = 120.0;
-const double _kDefaultTextFieldHeight = 24.0;
+const double _kDefaultComboBoxWidth = 120.0;
+const double _kDefaultComboBoxHeight = 24.0;
 
-/// A native macOS text field backed by NSTextField.
-class CNTextField extends StatefulWidget {
-  /// Creates a native text field.
-  const CNTextField({
+/// A native macOS combo box backed by NSComboBox.
+class CNComboBox extends StatefulWidget {
+  /// Creates a native combo box.
+  const CNComboBox({
     super.key,
-    this.controller,
+    required this.items,
+    required this.text,
+    this.behavior = CNComboBoxBehavior.editable,
     this.placeholder,
     this.textColor,
     this.placeholderColor,
@@ -30,19 +32,25 @@ class CNTextField extends StatefulWidget {
     this.onSubmitted,
   });
 
-  /// Controls the text being edited.
-  final TextEditingController? controller;
+  /// The list of items to display in the dropdown.
+  final List<String> items;
+
+  /// The current text shown in the field.
+  final String text;
+
+  /// Controls the interaction mode of the combo box.
+  final CNComboBoxBehavior behavior;
 
   /// Placeholder string shown when the field is empty.
   final String? placeholder;
 
-  /// The text color of the text field.
+  /// The text color of the combo box.
   final Color? textColor;
 
-  /// The placeholder color of the text field.
+  /// The placeholder color of the combo box.
   final Color? placeholderColor;
 
-  /// The background color drawn behind the text field text area.
+  /// The background color drawn behind the text area.
   final Color? backgroundColor;
 
   /// Optional native NSFont descriptor.
@@ -57,7 +65,7 @@ class CNTextField extends StatefulWidget {
   /// The size of the native AppKit control.
   final CNControlSize controlSize;
 
-  /// The border/bezel style of the text field.
+  /// The border/bezel style of the combo box.
   final CNTextFieldBezelStyle bezelStyle;
 
   /// Called whenever the user changes the text.
@@ -66,25 +74,22 @@ class CNTextField extends StatefulWidget {
   /// Called when the user submits the text.
   final ValueChanged<String>? onSubmitted;
 
+  /// Whether the native control accepts user interaction.
   bool get enabled => onChanged != null || onSubmitted != null;
 
   @override
-  State<CNTextField> createState() => _CNTextFieldState();
+  State<CNComboBox> createState() => _CNComboBoxState();
 }
 
-class _CNTextFieldState extends State<CNTextField> {
+class _CNComboBoxState extends State<CNComboBox> {
   MethodChannel? _channel;
-  late TextEditingController _controller;
-  bool _isUpdatingFromNative = false;
-  TextSelection? _pendingSelection;
 
   double? _intrinsicWidth;
   double? _intrinsicHeight;
 
-  String? _lastTextSent;
-  int? _lastSelectionBaseSent;
-  int? _lastSelectionExtentSent;
-
+  String? _lastText;
+  CNComboBoxBehavior? _lastBehavior;
+  List<String>? _lastItems;
   String? _lastPlaceholder;
   int? _lastTextColor;
   int? _lastPlaceholderColor;
@@ -98,32 +103,22 @@ class _CNTextFieldState extends State<CNTextField> {
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = widget.controller ?? TextEditingController();
-    _controller.addListener(_onControllerChanged);
+  void _log(String message) {
+    if (kDebugMode) {
+      debugPrint('[CNComboBox ${identityHashCode(this)}] $message');
+    }
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_onControllerChanged);
-    if (widget.controller == null) {
-      _controller.dispose();
-    }
+    _log('dispose');
     _channel?.setMethodCallHandler(null);
     super.dispose();
   }
 
   @override
-  void didUpdateWidget(covariant CNTextField oldWidget) {
+  void didUpdateWidget(covariant CNComboBox oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller) {
-      oldWidget.controller?.removeListener(_onControllerChanged);
-      _controller =
-          widget.controller ?? TextEditingController(text: _controller.text);
-      _controller.addListener(_onControllerChanged);
-    }
     _syncPropsToNativeIfNeeded();
   }
 
@@ -133,48 +128,18 @@ class _CNTextFieldState extends State<CNTextField> {
     _syncBrightnessIfNeeded();
   }
 
-  void _onControllerChanged() {
-    if (_isUpdatingFromNative) {
-      return;
-    }
-
-    // Send text to native if changed
-    if (_controller.text != _lastTextSent) {
-      _lastTextSent = _controller.text;
-      _channel?.invokeMethod('setText', {'value': _controller.text});
-    }
-
-    // Send selection to native if changed
-    final selection = _controller.selection;
-    if (selection.isValid) {
-      if (selection.baseOffset != _lastSelectionBaseSent ||
-          selection.extentOffset != _lastSelectionExtentSent) {
-        _lastSelectionBaseSent = selection.baseOffset;
-        _lastSelectionExtentSent = selection.extentOffset;
-        _channel?.invokeMethod('setSelection', {
-          'base': selection.baseOffset,
-          'extent': selection.extentOffset,
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
       return const Placeholder();
     }
 
-    const viewType = 'CupertinoNativeTextField';
+    const viewType = 'CupertinoNativeComboBox';
 
     final creationParams = <String, dynamic>{
-      'text': _controller.text,
-      'selectionBase': _controller.selection.isValid
-          ? _controller.selection.baseOffset
-          : null,
-      'selectionExtent': _controller.selection.isValid
-          ? _controller.selection.extentOffset
-          : null,
+      'items': widget.items,
+      'text': widget.text,
+      'behavior': widget.behavior.name,
       'placeholder': widget.placeholder,
       'textColor': resolveColorToArgb(widget.textColor, context),
       'placeholderColor': resolveColorToArgb(widget.placeholderColor, context),
@@ -194,27 +159,27 @@ class _CNTextFieldState extends State<CNTextField> {
             _intrinsicWidth ??
             (constraints.hasBoundedWidth
                 ? constraints.maxWidth
-                : _kDefaultTextFieldWidth);
+                : _kDefaultComboBoxWidth);
         final height =
             _intrinsicHeight ??
             (constraints.hasBoundedHeight
                 ? constraints.maxHeight
-                : _kDefaultTextFieldHeight);
+                : _kDefaultComboBoxHeight);
 
         return Align(
           alignment: Alignment.centerLeft,
           child: SizedBox(
-            width: constraints.hasBoundedWidth
-                ? width.clamp(0.0, constraints.maxWidth)
-                : width,
-            height: height,
+            width: width + 2,
+            height: height + 2,
             child: AppKitView(
               viewType: viewType,
               creationParamsCodec: const StandardMessageCodec(),
               creationParams: creationParams,
               onPlatformViewCreated: _onPlatformViewCreated,
-              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+              gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{
+                Factory<OneSequenceGestureRecognizer>(
+                  EagerGestureRecognizer.new,
+                ),
               },
             ),
           ),
@@ -224,97 +189,41 @@ class _CNTextFieldState extends State<CNTextField> {
   }
 
   void _onPlatformViewCreated(int id) {
-    final channel = MethodChannel('CupertinoNativeTextField_$id');
+    _log('onPlatformViewCreated id=$id');
+    final channel = MethodChannel('CupertinoNativeComboBox_$id');
     _channel = channel;
     channel.setMethodCallHandler(_onMethodCall);
     _cacheCurrentProps();
-    _lastTextSent = _controller.text;
-    if (_controller.selection.isValid) {
-      _lastSelectionBaseSent = _controller.selection.baseOffset;
-      _lastSelectionExtentSent = _controller.selection.extentOffset;
-    }
     _syncBrightnessIfNeeded();
     _requestIntrinsicSize();
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
+    _log('Native -> Dart method=${call.method}');
     switch (call.method) {
       case 'textChanged':
         final value = (call.arguments as String?) ?? '';
-        if (_controller.text != value) {
-          _isUpdatingFromNative = true;
-          _lastTextSent = value;
-
-          TextSelection newSelection;
-          if (_pendingSelection != null &&
-              _pendingSelection!.baseOffset <= value.length &&
-              _pendingSelection!.extentOffset <= value.length) {
-            newSelection = _pendingSelection!;
-            _pendingSelection = null;
-          } else {
-            final previousSelection = _controller.selection;
-            newSelection = previousSelection.copyWith(
-              baseOffset: previousSelection.baseOffset.clamp(0, value.length),
-              extentOffset: previousSelection.extentOffset.clamp(
-                0,
-                value.length,
-              ),
-            );
-          }
-
-          _controller.value = TextEditingValue(
-            text: value,
-            selection: newSelection,
-          );
-
-          _isUpdatingFromNative = false;
-          widget.onChanged?.call(value);
-        }
-        break;
-      case 'selectionChanged':
-        final args = call.arguments as Map<dynamic, dynamic>?;
-        if (args != null) {
-          final base = args['base'] as int?;
-          final extent = args['extent'] as int?;
-          if (base != null && extent != null && base >= 0 && extent >= 0) {
-            final currentSelection = _controller.selection;
-            if (currentSelection.baseOffset != base ||
-                currentSelection.extentOffset != extent) {
-              final selection = TextSelection(
-                baseOffset: base,
-                extentOffset: extent,
-              );
-              _isUpdatingFromNative = true;
-              _lastSelectionBaseSent = base;
-              _lastSelectionExtentSent = extent;
-              if (base <= _controller.text.length &&
-                  extent <= _controller.text.length) {
-                _controller.selection = selection;
-                _pendingSelection = null;
-              } else {
-                _pendingSelection = selection;
-              }
-              _isUpdatingFromNative = false;
-            } else {
-              // debugPrint('Selection already set');
-            }
-          } else {
-            // debugPrint('Invalid selection');
-          }
-        } else {
-          // debugPrint('Invalid selection args');
-        }
+        _lastText = value;
+        _log('Native -> Dart textChanged value="$value"');
+        widget.onChanged?.call(value);
         break;
       case 'submitted':
         final value = (call.arguments as String?) ?? '';
+        _log('Native -> Dart submitted value="$value"');
         widget.onSubmitted?.call(value);
         break;
+      case 'debugLog':
+        final value = (call.arguments as String?) ?? '';
+        _log(value);
+        break;
     }
-
     return null;
   }
 
   void _cacheCurrentProps() {
+    _lastText = widget.text;
+    _lastBehavior = widget.behavior;
+    _lastItems = widget.items;
     _lastPlaceholder = widget.placeholder;
     _lastTextColor = resolveColorToArgb(widget.textColor, context);
     _lastPlaceholderColor = resolveColorToArgb(
@@ -336,32 +245,60 @@ class _CNTextFieldState extends State<CNTextField> {
 
     bool requiresIntrinsicSize = false;
 
+    if (_lastText != widget.text) {
+      _log('setText value="${widget.text}"');
+      await channel.invokeMethod('setText', {'value': widget.text});
+      _lastText = widget.text;
+    }
+
+    if (_lastBehavior != widget.behavior) {
+      _log('setBehavior value=${widget.behavior.name}');
+      await channel.invokeMethod('setBehavior', {
+        'value': widget.behavior.name,
+      });
+      _lastBehavior = widget.behavior;
+    }
+
+    if (!listEquals(_lastItems, widget.items)) {
+      _log('setItems items=${widget.items.length}');
+      await channel.invokeMethod('setItems', {'value': widget.items});
+      _lastItems = widget.items;
+      requiresIntrinsicSize = true;
+    }
+
     if (_lastPlaceholder != widget.placeholder) {
+      _log('setPlaceholder value="${widget.placeholder}"');
       await channel.invokeMethod('setPlaceholder', {
         'value': widget.placeholder,
       });
       _lastPlaceholder = widget.placeholder;
     }
 
+    if (!mounted) return;
     final textColor = resolveColorToArgb(widget.textColor, context);
     if (_lastTextColor != textColor) {
+      _log('setTextColor');
       await channel.invokeMethod('setTextColor', {'value': textColor});
       _lastTextColor = textColor;
     }
 
+    if (!mounted) return;
     final placeholderColor = resolveColorToArgb(
       widget.placeholderColor,
       context,
     );
     if (_lastPlaceholderColor != placeholderColor) {
+      _log('setPlaceholderColor');
       await channel.invokeMethod('setPlaceholderColor', {
         'value': placeholderColor,
       });
       _lastPlaceholderColor = placeholderColor;
     }
 
+    if (!mounted) return;
     final backgroundColor = resolveColorToArgb(widget.backgroundColor, context);
     if (_lastBackgroundColor != backgroundColor) {
+      _log('setBackgroundColor');
       await channel.invokeMethod('setBackgroundColor', {
         'value': backgroundColor,
       });
@@ -369,12 +306,14 @@ class _CNTextFieldState extends State<CNTextField> {
     }
 
     if (_lastFont != widget.font) {
+      _log('setFont');
       await channel.invokeMethod('setFont', {'value': widget.font?.toMap()});
       _lastFont = widget.font;
       requiresIntrinsicSize = true;
     }
 
     if (_lastPlaceholderFont != widget.placeholderFont) {
+      _log('setPlaceholderFont');
       await channel.invokeMethod('setPlaceholderFont', {
         'value': widget.placeholderFont?.toMap(),
       });
@@ -383,11 +322,13 @@ class _CNTextFieldState extends State<CNTextField> {
     }
 
     if (_lastEnabled != widget.enabled) {
+      _log('setEnabled value=${widget.enabled}');
       await channel.invokeMethod('setEnabled', {'value': widget.enabled});
       _lastEnabled = widget.enabled;
     }
 
     if (_lastControlSize != widget.controlSize) {
+      _log('setControlSize value=${widget.controlSize.name}');
       await channel.invokeMethod('setControlSize', {
         'value': widget.controlSize.name,
       });
@@ -396,6 +337,7 @@ class _CNTextFieldState extends State<CNTextField> {
     }
 
     if (_lastBezelStyle != widget.bezelStyle) {
+      _log('setBezelStyle value=${widget.bezelStyle.name}');
       await channel.invokeMethod('setBezelStyle', {
         'value': widget.bezelStyle.name,
       });
@@ -404,6 +346,7 @@ class _CNTextFieldState extends State<CNTextField> {
     }
 
     if (requiresIntrinsicSize) {
+      _log('syncPropsToNativeIfNeeded requesting intrinsic size');
       _requestIntrinsicSize();
     }
   }
@@ -413,6 +356,7 @@ class _CNTextFieldState extends State<CNTextField> {
     if (channel == null) return;
 
     if (_lastIsDark != _isDark) {
+      _log('setIsDark value=$_isDark');
       await channel.invokeMethod('setIsDark', {'value': _isDark});
       _lastIsDark = _isDark;
     }
@@ -423,14 +367,16 @@ class _CNTextFieldState extends State<CNTextField> {
     if (channel == null) return;
 
     try {
+      _log('requestIntrinsicSize start');
       SchedulerBinding.instance.scheduleFrame();
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
-        final channel = _channel;
-        if (channel == null) return;
-        final size = await channel.invokeMethod<Map>('getIntrinsicSize');
+        final ch = _channel;
+        if (ch == null) return;
+        final size = await ch.invokeMethod<Map>('getIntrinsicSize');
         final width = (size?['width'] as num?)?.toDouble();
         final height = (size?['height'] as num?)?.toDouble();
+        _log('requestIntrinsicSize result width=$width height=$height');
 
         if (width != null && height != null && mounted) {
           setState(() {
@@ -439,6 +385,8 @@ class _CNTextFieldState extends State<CNTextField> {
           });
         }
       });
-    } catch (_) {}
+    } catch (e) {
+      _log('requestIntrinsicSize error=$e');
+    }
   }
 }

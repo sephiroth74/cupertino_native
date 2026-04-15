@@ -5,6 +5,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
     private let channel: FlutterMethodChannel
     private let textField = MyTextField(frame: .zero)
     private var placeholderColor: NSColor?
+    private var placeholderFont: NSFont?
     private var isUpdatingFromDart = false
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
@@ -53,6 +54,12 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
             let font = FontUtils.fontFromDictionary(fontDict)
         {
             textField.font = font
+        }
+
+        if let fontDict = args["placeholderFont"] as? [String: Any],
+            let font = FontUtils.fontFromDictionary(fontDict)
+        {
+            placeholderFont = font
         }
 
         if let enabled = (args["enabled"] as? NSNumber)?.boolValue {
@@ -215,6 +222,21 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                     result(
                         FlutterError(code: "bad_args", message: "Missing font value", details: nil))
                 }
+            case "setPlaceholderFont":
+                if let args = call.arguments as? [String: Any] {
+                    if let fontDict = args["value"] as? [String: Any],
+                        let font = FontUtils.fontFromDictionary(fontDict)
+                    {
+                        self.placeholderFont = font
+                    } else {
+                        self.placeholderFont = nil
+                    }
+                    self.applyPlaceholderColor()
+                    result(nil)
+                } else {
+                    result(
+                        FlutterError(code: "bad_args", message: "Missing placeholderFont value", details: nil))
+                }
             case "setEnabled":
                 if let args = call.arguments as? [String: Any],
                     let value = (args["value"] as? NSNumber)?.boolValue
@@ -286,12 +308,19 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
             return
         }
 
-        if let placeholderColor {
+        let currentFontSize = textField.font?.pointSize ?? NSFont.systemFontSize
+        let fontToUse = placeholderFont ?? NSFont.systemFont(ofSize: currentFontSize)
+
+        if placeholderColor != nil || placeholderFont != nil {
             textField.placeholderAttributedString = NSAttributedString(
                 string: placeholder,
-                attributes: [.foregroundColor: placeholderColor])
+                attributes: [
+                    .foregroundColor: placeholderColor ?? NSColor.placeholderTextColor,
+                    .font: fontToUse,
+                ])
         } else {
-            textField.placeholderAttributedString = NSAttributedString(string: placeholder)
+            textField.placeholderAttributedString = nil
+            textField.placeholderString = placeholder
         }
     }
 

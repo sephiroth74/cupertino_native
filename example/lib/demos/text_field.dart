@@ -10,9 +10,7 @@ class TextFieldDemoPage extends StatefulWidget {
 }
 
 class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
-  final TextEditingController _controller = TextEditingController(
-    text: 'Initial text',
-  );
+  final TextEditingController _controller = TextEditingController(text: '');
   String _selectionInfo = '';
 
   @override
@@ -57,6 +55,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
               child: CNTextField(
                 controller: _controller,
                 placeholder: 'Enter something...',
+                placeholderColor: CupertinoColors.systemGrey,
                 bezelStyle: CNTextFieldBezelStyle.round,
                 width: 320,
                 onChanged: (value) {
@@ -72,37 +71,18 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                CupertinoButton.filled(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: const Text('Set Text'),
+                CNButton(
+                  style: CNButtonStyle.filled,
+                  label: 'Set Text',
                   onPressed: () {
                     _controller.text = 'Flutter says hi!';
                   },
                 ),
-                CupertinoButton.filled(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: const Text('Clear Text'),
+                CNButton(
+                  style: CNButtonStyle.filled,
+                  label: 'Clear Text',
                   onPressed: () {
                     _controller.clear();
-                  },
-                ),
-                CupertinoButton.filled(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: const Text('Select All'),
-                  onPressed: () {
-                    _controller.selection = TextSelection(
-                      baseOffset: 0,
-                      extentOffset: _controller.text.length,
-                    );
                   },
                 ),
               ],
@@ -120,6 +100,20 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                 CNFontSize.points(16),
                 weight: CNFontWeight.bold,
               ),
+              width: 320,
+              bezelStyle: CNTextFieldBezelStyle.round,
+              onChanged: (_) {},
+            ),
+            const SizedBox(height: 12),
+            CNTextField(
+              controller: TextEditingController(text: ''),
+              placeholder: 'Styled placeholder...',
+              placeholderColor: CupertinoColors.systemRed.withOpacity(0.8),
+              placeholderFont: const CNFont.monospacedSystem(
+                CNFontSize.points(16),
+                weight: CNFontWeight.bold,
+              ),
+              backgroundColor: CupertinoColors.systemFill,
               width: 320,
               bezelStyle: CNTextFieldBezelStyle.round,
               onChanged: (_) {},

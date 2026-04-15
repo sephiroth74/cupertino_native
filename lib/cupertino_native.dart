@@ -16,6 +16,7 @@ export 'components/level_indicator.dart';
 export 'components/stepper.dart';
 export 'components/checkbox.dart';
 export 'components/combo_button.dart';
+export 'components/combo_box.dart';
 export 'components/image.dart';
 export 'components/menu.dart';
 export 'components/date_picker.dart';
@@ -39,6 +40,7 @@ export 'style/level_indicator_style.dart';
 export 'style/combo_button_style.dart';
 export 'style/text_field_bezel_style.dart';
 export 'style/font.dart';
+export 'style/combo_box_behavior.dart';
 
 import 'cupertino_native_platform_interface.dart';
 

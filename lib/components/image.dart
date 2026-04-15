@@ -5,7 +5,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 /// Represents an image that can be used in various components, such as menu items or buttons.
 /// This class encapsulates the necessary information to render a system symbol on Apple platforms,

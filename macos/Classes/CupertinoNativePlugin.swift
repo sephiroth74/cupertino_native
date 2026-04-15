@@ -68,6 +68,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     let textFieldFactory = CupertinoTextFieldFactory(messenger: registrar.messenger)
     registrar.register(textFieldFactory, withId: "CupertinoNativeTextField")
 
+    let comboBoxFactory = CupertinoComboBoxFactory(messenger: registrar.messenger)
+    registrar.register(comboBoxFactory, withId: "CupertinoNativeComboBox")
+
     let imageFactory = CupertinoImageFactory(messenger: registrar.messenger)
     registrar.register(imageFactory, withId: "CupertinoNativeImage")
   }

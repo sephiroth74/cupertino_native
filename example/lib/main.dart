@@ -18,6 +18,7 @@ import 'demos/checkboxes.dart';
 import 'demos/date_picker.dart';
 import 'demos/search_field.dart';
 import 'demos/text_field.dart';
+import 'demos/combo_box.dart';
 import 'demos/alert.dart';
 import 'demos/popover.dart';
 import 'demos/context_menu.dart';
@@ -372,6 +373,20 @@ class HomePage extends StatelessWidget {
                   Navigator.of(context).push(
                     CupertinoPageRoute(
                       builder: (_) => const TextFieldDemoPage(),
+                    ),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Combo Box'),
+                leading: CNIcon(
+                  symbol: CNSymbol('list.bullet.rectangle', color: accentColor),
+                ),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(
+                      builder: (_) => const ComboBoxDemoPage(),
                     ),
                   );
                 },
