@@ -252,7 +252,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
         switch raw {
         case "none":
             comboBox.isEditable = false
-            comboBox.isEnabled = false
+            comboBox.isEnabled = true
         case "selectable":
             comboBox.isEditable = false
             comboBox.isEnabled = true

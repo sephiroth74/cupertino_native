@@ -18,10 +18,12 @@ import 'demos/checkboxes.dart';
 import 'demos/date_picker.dart';
 import 'demos/search_field.dart';
 import 'demos/text_field.dart';
+import 'demos/secure_text_field.dart';
 import 'demos/combo_box.dart';
 import 'demos/alert.dart';
 import 'demos/popover.dart';
 import 'demos/context_menu.dart';
+import 'demos/sheet.dart';
 
 void main() {
   runApp(const MyApp());
@@ -378,6 +380,20 @@ class HomePage extends StatelessWidget {
                 },
               ),
               CupertinoListTile(
+                title: Text('Secure Text Field'),
+                leading: CNIcon(
+                  symbol: CNSymbol('lock.shield', color: accentColor),
+                ),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(
+                      builder: (_) => const SecureTextFieldDemoPage(),
+                    ),
+                  );
+                },
+              ),
+              CupertinoListTile(
                 title: Text('Combo Box'),
                 leading: CNIcon(
                   symbol: CNSymbol('list.bullet.rectangle', color: accentColor),
@@ -432,6 +448,21 @@ class HomePage extends StatelessWidget {
                     CupertinoPageRoute(
                       builder: (_) => const ContextMenuDemoPage(),
                     ),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Sheet'),
+                leading: CNIcon(
+                  symbol: CNSymbol(
+                    'square.and.line.vertical.and.square',
+                    color: accentColor,
+                  ),
+                ),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(builder: (_) => const SheetDemoPage()),
                   );
                 },
               ),

@@ -68,6 +68,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     let textFieldFactory = CupertinoTextFieldFactory(messenger: registrar.messenger)
     registrar.register(textFieldFactory, withId: "CupertinoNativeTextField")
 
+    let secureTextFieldFactory = CupertinoSecureTextFieldFactory(messenger: registrar.messenger)
+    registrar.register(secureTextFieldFactory, withId: "CupertinoNativeSecureTextField")
+
     let comboBoxFactory = CupertinoComboBoxFactory(messenger: registrar.messenger)
     registrar.register(comboBoxFactory, withId: "CupertinoNativeComboBox")
 
@@ -107,6 +110,16 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         return
       }
       handler.showContextMenu(args: args, result: result)
+    case "showSheet":
+      guard let args = call.arguments as? [String: Any] else {
+        result(
+          FlutterError(
+            code: "invalid_args",
+            message: "showSheet expects a map of arguments",
+            details: nil))
+        return
+      }
+      showSheet(args: args, result: result)
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -194,6 +207,58 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     }
 
     return parsed.isEmpty ? [["title": "OK", "isDefault": true]] : parsed
+  }
+
+  private func showSheet(args: [String: Any], result: @escaping FlutterResult) {
+    guard let window = CupertinoNativePlugin.registrar?.view?.window else {
+      result(
+        FlutterError(
+          code: "window_unavailable",
+          message: "Unable to find host window for sheet presentation",
+          details: nil))
+      return
+    }
+
+    let title = (args["title"] as? String) ?? ""
+    let message = (args["message"] as? String) ?? ""
+    let styleRaw = (args["style"] as? String) ?? "informational"
+    let rawActions = parseAlertActions(args["actions"])
+
+    DispatchQueue.main.async {
+      let alert = NSAlert()
+      alert.messageText = title.isEmpty ? "Sheet" : title
+      alert.informativeText = message
+
+      switch styleRaw {
+      case "warning":
+        alert.alertStyle = .warning
+      case "critical":
+        alert.alertStyle = .critical
+      default:
+        alert.alertStyle = .informational
+      }
+
+      for action in rawActions {
+        let actionTitle = (action["title"] as? String) ?? "OK"
+        let button = alert.addButton(withTitle: actionTitle)
+        if #available(macOS 11.0, *) {
+          button.hasDestructiveAction = (action["isDestructive"] as? Bool) == true
+        }
+      }
+
+      for (index, action) in rawActions.enumerated() {
+        if (action["isDefault"] as? Bool) == true, index < alert.buttons.count {
+          alert.buttons[index].keyEquivalent = "\r"
+          break
+        }
+      }
+
+      alert.beginSheetModal(for: window) { response in
+        let firstRaw = NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
+        let selectedIndex = Int(response.rawValue - firstRaw)
+        result(max(selectedIndex, 0))
+      }
+    }
   }
 }
 
