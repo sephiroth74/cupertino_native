@@ -240,6 +240,7 @@ class _CNLevelIndicatorState extends State<CNLevelIndicator> {
       await ch.invokeMethod('setIsEditable', {'value': widget.isEditable});
     }
 
+    if (!mounted) return;
     if (oldWidget.fillColor != widget.fillColor) {
       // ignore: use_build_context_synchronously
       await ch.invokeMethod('setFillColor', {
@@ -247,6 +248,7 @@ class _CNLevelIndicatorState extends State<CNLevelIndicator> {
       });
     }
 
+    if (!mounted) return;
     if (oldWidget.warningColor != widget.warningColor) {
       // ignore: use_build_context_synchronously
       await ch.invokeMethod('setWarningColor', {
@@ -254,6 +256,7 @@ class _CNLevelIndicatorState extends State<CNLevelIndicator> {
       });
     }
 
+    if (!mounted) return;
     if (oldWidget.criticalColor != widget.criticalColor) {
       // ignore: use_build_context_synchronously
       await ch.invokeMethod('setCriticalColor', {
@@ -261,15 +264,19 @@ class _CNLevelIndicatorState extends State<CNLevelIndicator> {
       });
     }
 
+    if (!mounted) return;
     if (oldWidget.warningValue != widget.warningValue) {
       await ch.invokeMethod('setWarningValue', {'value': widget.warningValue});
     }
+
+    if (!mounted) return;
     if (oldWidget.criticalValue != widget.criticalValue) {
       await ch.invokeMethod('setCriticalValue', {
         'value': widget.criticalValue,
       });
     }
 
+    if (!mounted) return;
     if (needsIntrinsicSize) {
       requestIntrinsicSize();
     }

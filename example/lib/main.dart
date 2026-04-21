@@ -25,6 +25,7 @@ import 'demos/alert.dart';
 import 'demos/popover.dart';
 import 'demos/context_menu.dart';
 import 'demos/sheet.dart';
+import 'demos/toolbar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -478,6 +479,21 @@ class HomePage extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     CupertinoPageRoute(builder: (_) => const SheetDemoPage()),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Toolbar'),
+                leading: CNIcon(
+                  symbol: CNSymbol(
+                    'rectangle.topthird.inset.filled',
+                    color: accentColor,
+                  ),
+                ),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(builder: (_) => const ToolbarDemoPage()),
                   );
                 },
               ),

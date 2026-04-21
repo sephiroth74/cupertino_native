@@ -436,6 +436,7 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
       _lastBehavior = widget.behavior;
       _lastPreferredEdge = widget.preferredEdge;
     }
+    if (!mounted) return;
     if (_lastIconName != widget.buttonIcon?.name ||
         _lastIconSize != widget.buttonIcon?.size ||
         _lastIconColor !=
@@ -454,10 +455,14 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
         'buttonIconGradientEnabled': widget.buttonIcon?.gradient,
         if (widget.isIconButton) 'round': true,
       });
+
+      if (!mounted) return;
       _lastIconName = widget.buttonIcon?.name;
       _lastIconSize = widget.buttonIcon?.size;
       _lastIconColor = resolveColorToArgb(widget.buttonIcon?.color, context);
     }
+
+    if (!mounted) return;
     if (_lastButtonTitle != widget.buttonLabel &&
         widget.buttonLabel != null &&
         !widget.hasChild) {

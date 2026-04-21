@@ -248,6 +248,7 @@ class _CNDatePickerState extends State<CNDatePicker> {
       _lastIsEnabled = _isEnabled;
     }
 
+    if (!mounted) return;
     if (oldWidget.datePickerStyle != widget.datePickerStyle) {
       await channel.invokeMethod('setDatePickerStyle', {
         'value': widget.datePickerStyle.name,
@@ -255,6 +256,7 @@ class _CNDatePickerState extends State<CNDatePicker> {
       requiresIntrinsicSizeUpdate = true;
     }
 
+    if (!mounted) return;
     // check if the datePickerElements lists are different, ignoring order
     final oldElementsSet = oldWidget.datePickerElements.toSet();
     final newElementsSet = widget.datePickerElements.toSet();
@@ -267,6 +269,7 @@ class _CNDatePickerState extends State<CNDatePicker> {
       requiresIntrinsicSizeUpdate = true;
     }
 
+    if (!mounted) return;
     if (oldWidget.width != widget.width) {
       requiresIntrinsicSizeUpdate = true;
     }
@@ -276,58 +279,68 @@ class _CNDatePickerState extends State<CNDatePicker> {
       requiresIntrinsicSizeUpdate = true;
     }
 
+    if (!mounted) return;
     if (oldWidget.backgroundColor != widget.backgroundColor) {
       await channel.invokeMethod('setBackgroundColor', {
         'value': resolveColorToArgb(widget.backgroundColor, context),
       });
     }
 
+    if (!mounted) return;
     if (oldWidget.textColor != widget.textColor) {
       await channel.invokeMethod('setTextColor', {
         'value': resolveColorToArgb(widget.textColor, context),
       });
     }
 
+    if (!mounted) return;
     if (oldWidget.minDate != widget.minDate) {
       await channel.invokeMethod('setMinDate', {
         'value': widget.minDate?.millisecondsSinceEpoch,
       });
     }
 
+    if (!mounted) return;
     if (oldWidget.maxDate != widget.maxDate) {
       await channel.invokeMethod('setMaxDate', {
         'value': widget.maxDate?.millisecondsSinceEpoch,
       });
     }
 
+    if (!mounted) return;
     if (oldWidget.locale != widget.locale) {
       await channel.invokeMethod('setLocale', {
         'value': widget.locale?.toLanguageTag(),
       });
     }
 
+    if (!mounted) return;
     if (oldWidget.isBordered != widget.isBordered) {
       await channel.invokeMethod('setIsBordered', {'value': widget.isBordered});
     }
 
+    if (!mounted) return;
     if (oldWidget.drawsBackground != widget.drawsBackground) {
       await channel.invokeMethod('setDrawsBackground', {
         'value': widget.drawsBackground,
       });
     }
 
+    if (!mounted) return;
     if (oldWidget.dateValue != widget.dateValue) {
       await channel.invokeMethod('setDateValue', {
         'value': widget.dateValue?.millisecondsSinceEpoch,
       });
     }
 
+    if (!mounted) return;
     if (oldWidget.datePickerMode != widget.datePickerMode) {
       await channel.invokeMethod('setDatePickerMode', {
         'value': widget.datePickerMode.name,
       });
     }
 
+    if (!mounted) return;
     if (requiresIntrinsicSizeUpdate) {
       _requestIntrinsicSize();
     }

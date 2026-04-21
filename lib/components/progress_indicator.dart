@@ -221,6 +221,7 @@ class _CNProgressIndicatorState extends State<CNProgressIndicator> {
     return null;
   }
 
+  // ignore: unused_element
   Future<void> _startAnimation() async {
     final ch = _channel;
     if (ch == null) return;
@@ -231,6 +232,7 @@ class _CNProgressIndicatorState extends State<CNProgressIndicator> {
     }
   }
 
+  // ignore: unused_element
   Future<void> _stopAnimation() async {
     final ch = _channel;
     if (ch == null) return;

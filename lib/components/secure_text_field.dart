@@ -336,12 +336,14 @@ class _CNSecureTextFieldState extends State<CNSecureTextField> {
       _lastPlaceholder = widget.placeholder;
     }
 
+    if (!mounted) return;
     final textColor = resolveColorToArgb(widget.textColor, context);
     if (_lastTextColor != textColor) {
       await channel.invokeMethod('setTextColor', {'value': textColor});
       _lastTextColor = textColor;
     }
 
+    if (!mounted) return;
     final placeholderColor = resolveColorToArgb(
       widget.placeholderColor,
       context,
@@ -353,6 +355,7 @@ class _CNSecureTextFieldState extends State<CNSecureTextField> {
       _lastPlaceholderColor = placeholderColor;
     }
 
+    if (!mounted) return;
     final backgroundColor = resolveColorToArgb(widget.backgroundColor, context);
     if (_lastBackgroundColor != backgroundColor) {
       await channel.invokeMethod('setBackgroundColor', {
@@ -361,12 +364,14 @@ class _CNSecureTextFieldState extends State<CNSecureTextField> {
       _lastBackgroundColor = backgroundColor;
     }
 
+    if (!mounted) return;
     if (_lastFont != widget.font) {
       await channel.invokeMethod('setFont', {'value': widget.font?.toMap()});
       _lastFont = widget.font;
       requiresIntrinsicSize = true;
     }
 
+    if (!mounted) return;
     if (_lastPlaceholderFont != widget.placeholderFont) {
       await channel.invokeMethod('setPlaceholderFont', {
         'value': widget.placeholderFont?.toMap(),
@@ -375,11 +380,13 @@ class _CNSecureTextFieldState extends State<CNSecureTextField> {
       requiresIntrinsicSize = true;
     }
 
+    if (!mounted) return;
     if (_lastEnabled != widget.enabled) {
       await channel.invokeMethod('setEnabled', {'value': widget.enabled});
       _lastEnabled = widget.enabled;
     }
 
+    if (!mounted) return;
     if (_lastControlSize != widget.controlSize) {
       await channel.invokeMethod('setControlSize', {
         'value': widget.controlSize.name,
@@ -388,6 +395,7 @@ class _CNSecureTextFieldState extends State<CNSecureTextField> {
       requiresIntrinsicSize = true;
     }
 
+    if (!mounted) return;
     if (_lastBezelStyle != widget.bezelStyle) {
       await channel.invokeMethod('setBezelStyle', {
         'value': widget.bezelStyle.name,
@@ -396,6 +404,7 @@ class _CNSecureTextFieldState extends State<CNSecureTextField> {
       requiresIntrinsicSize = true;
     }
 
+    if (!mounted) return;
     if (requiresIntrinsicSize) {
       _requestIntrinsicSize();
     }

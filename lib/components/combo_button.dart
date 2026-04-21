@@ -246,6 +246,7 @@ class _CNComboButtonState extends State<CNComboButton> {
       requireIntrinsicSizeUpdate = true;
     }
 
+    if (!mounted) return;
     if (oldWidget.image != widget.image) {
       await channel.invokeMethod('setImage', {
         'value': widget.image?.toMap(context),
@@ -253,11 +254,13 @@ class _CNComboButtonState extends State<CNComboButton> {
       requireIntrinsicSizeUpdate = true;
     }
 
+    if (!mounted) return;
     if (oldWidget.style != widget.style) {
       await channel.invokeMethod('setStyle', {'value': widget.style.name});
       requireIntrinsicSizeUpdate = true;
     }
 
+    if (!mounted) return;
     if (requireIntrinsicSizeUpdate) {
       _requestIntrinsicSize();
     }

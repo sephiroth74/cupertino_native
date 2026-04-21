@@ -155,6 +155,7 @@ class CNSlider extends StatefulWidget {
   /// Wheter the slider allows only tick mark values.
   final bool allowsTickMarkValuesOnly;
 
+  // ignore: public_member_api_docs
   bool get isEnabled => onChanged != null;
 
   @override
@@ -388,6 +389,7 @@ class _CNSliderState extends State<CNSlider> {
       needsIntrinsicSize = true;
     }
 
+    if (!mounted) return;
     if (oldWidget.color != widget.color) {
       await channel.invokeMethod('setTint', {
         'value': resolveColorToArgb(widget.color, context),

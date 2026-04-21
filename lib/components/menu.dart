@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 
 /// A menu model used by [CNComboButton].
+// ignore: must_be_immutable
 class CNMenu extends ChangeNotifier with EquatableMixin {
   /// The top-level menu items.
   final List<CNMenuItem> items;

@@ -4,10 +4,12 @@ import FlutterMacOS
 public class CupertinoNativePlugin: NSObject, FlutterPlugin {
   static var registrar: FlutterPluginRegistrar?
   static var contextMenuHandler: CupertinoContextMenuHandler?
+  static var toolbarManager: CupertinoToolbarManager?
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     CupertinoNativePlugin.registrar = registrar
     CupertinoNativePlugin.contextMenuHandler = CupertinoContextMenuHandler(registrar: registrar)
+    CupertinoNativePlugin.toolbarManager = CupertinoToolbarManager(messenger: registrar.messenger)
     let channel = FlutterMethodChannel(
       name: "cupertino_native", binaryMessenger: registrar.messenger)
     let instance = CupertinoNativePlugin()
@@ -123,6 +125,18 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         return
       }
       showSheet(args: args, result: result)
+    case "setToolbar":
+      guard let args = call.arguments as? [String: Any] else {
+        result(
+          FlutterError(
+            code: "invalid_args",
+            message: "setToolbar expects a map of arguments",
+            details: nil))
+        return
+      }
+      setToolbar(args: args, result: result)
+    case "clearToolbar":
+      clearToolbar(result: result)
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -262,6 +276,50 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         result(max(selectedIndex, 0))
       }
     }
+  }
+
+  private func setToolbar(args: [String: Any], result: @escaping FlutterResult) {
+    guard let window = CupertinoNativePlugin.registrar?.view?.window else {
+      result(
+        FlutterError(
+          code: "window_unavailable",
+          message: "Unable to find host window for toolbar configuration",
+          details: nil))
+      return
+    }
+
+    guard let manager = CupertinoNativePlugin.toolbarManager else {
+      result(
+        FlutterError(
+          code: "toolbar_manager_unavailable",
+          message: "Toolbar manager is not initialized",
+          details: nil))
+      return
+    }
+
+    manager.setToolbar(window: window, args: args, result: result)
+  }
+
+  private func clearToolbar(result: @escaping FlutterResult) {
+    guard let window = CupertinoNativePlugin.registrar?.view?.window else {
+      result(
+        FlutterError(
+          code: "window_unavailable",
+          message: "Unable to find host window for toolbar configuration",
+          details: nil))
+      return
+    }
+
+    guard let manager = CupertinoNativePlugin.toolbarManager else {
+      result(
+        FlutterError(
+          code: "toolbar_manager_unavailable",
+          message: "Toolbar manager is not initialized",
+          details: nil))
+      return
+    }
+
+    manager.clearToolbar(window: window, result: result)
   }
 }
 
