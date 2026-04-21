@@ -179,7 +179,6 @@ class CupertinoComboButtonNSView: NSView {
     }
 
     @objc private func menuItemSelected(_ sender: NSMenuItem) {
-        NSLog("Menu item selected: \(sender.title) with identifier: \(sender.identifier)")
         channel.invokeMethod(
             "menuItemSelected",
             arguments: [
