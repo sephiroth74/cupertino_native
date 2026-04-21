@@ -19,6 +19,7 @@ import 'demos/date_picker.dart';
 import 'demos/search_field.dart';
 import 'demos/text_field.dart';
 import 'demos/secure_text_field.dart';
+import 'demos/text_view.dart';
 import 'demos/combo_box.dart';
 import 'demos/alert.dart';
 import 'demos/popover.dart';
@@ -389,6 +390,20 @@ class HomePage extends StatelessWidget {
                   Navigator.of(context).push(
                     CupertinoPageRoute(
                       builder: (_) => const SecureTextFieldDemoPage(),
+                    ),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Text View / Text Area'),
+                leading: CNIcon(
+                  symbol: CNSymbol('text.justify.left', color: accentColor),
+                ),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(
+                      builder: (_) => const TextViewDemoPage(),
                     ),
                   );
                 },

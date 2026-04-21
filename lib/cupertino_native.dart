@@ -23,6 +23,7 @@ export 'components/date_picker.dart';
 export 'components/search_field.dart';
 export 'components/text_field.dart';
 export 'components/secure_text_field.dart';
+export 'components/text_view.dart';
 export 'components/alert.dart';
 export 'components/popover.dart';
 export 'components/context_menu.dart';

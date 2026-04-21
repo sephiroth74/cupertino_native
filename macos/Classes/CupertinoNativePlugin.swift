@@ -71,6 +71,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     let secureTextFieldFactory = CupertinoSecureTextFieldFactory(messenger: registrar.messenger)
     registrar.register(secureTextFieldFactory, withId: "CupertinoNativeSecureTextField")
 
+    let textViewFactory = CupertinoTextViewFactory(messenger: registrar.messenger)
+    registrar.register(textViewFactory, withId: "CupertinoNativeTextView")
+
     let comboBoxFactory = CupertinoComboBoxFactory(messenger: registrar.messenger)
     registrar.register(comboBoxFactory, withId: "CupertinoNativeComboBox")
 
