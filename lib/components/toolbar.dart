@@ -48,10 +48,19 @@ enum CNToolbarItemKind {
 /// Menu item used by [CNToolbarItem.comboButton].
 class CNToolbarMenuItem {
   /// Creates a toolbar combo-button menu item.
-  const CNToolbarMenuItem({required this.id, required this.title, this.tag, this.enabled = true}) : isSeparator = false;
+  const CNToolbarMenuItem({
+    required this.id,
+    required this.title,
+    this.tag,
+    this.enabled = true,
+  }) : isSeparator = false;
 
   /// Creates a separator entry for the combo-button menu.
-  const CNToolbarMenuItem.separator({required this.id}) : title = '', tag = null, enabled = false, isSeparator = true;
+  const CNToolbarMenuItem.separator({required this.id})
+    : title = '',
+      tag = null,
+      enabled = false,
+      isSeparator = true;
 
   /// Stable identifier for this menu item.
   final String id;
@@ -69,30 +78,46 @@ class CNToolbarMenuItem {
   final bool isSeparator;
 
   /// Serializes this item for method-channel transport.
-  Map<String, dynamic> toMap() => {'id': id, 'title': title, 'tag': tag, 'enabled': enabled, 'isSeparator': isSeparator};
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'title': title,
+    'tag': tag,
+    'enabled': enabled,
+    'isSeparator': isSeparator,
+  };
 }
 
 /// A single toolbar item definition.
 class CNToolbarItem {
   /// Creates a toolbar button item.
-  const CNToolbarItem({required this.id, required this.label, this.toolTip, this.systemSymbolName})
-    : kind = CNToolbarItemKind.button,
-      text = null,
-      placeholder = null,
-      width = null,
-      items = null,
-      behavior = null,
-      menuItems = null,
-      comboButtonStyle = null;
+  const CNToolbarItem({
+    required this.id,
+    required this.label,
+    this.toolTip,
+    this.systemSymbolName,
+  }) : kind = CNToolbarItemKind.button,
+       text = null,
+       placeholder = null,
+       width = null,
+       items = null,
+       behavior = null,
+       menuItems = null,
+       comboButtonStyle = null;
 
   /// Creates a toolbar search field item.
-  const CNToolbarItem.searchField({required this.id, this.label = 'Search', this.toolTip, this.text = '', this.placeholder, this.width = 180})
-    : kind = CNToolbarItemKind.searchField,
-      systemSymbolName = null,
-      items = null,
-      behavior = null,
-      menuItems = null,
-      comboButtonStyle = null;
+  const CNToolbarItem.searchField({
+    required this.id,
+    this.label = 'Search',
+    this.toolTip,
+    this.text = '',
+    this.placeholder,
+    this.width = 180,
+  }) : kind = CNToolbarItemKind.searchField,
+       systemSymbolName = null,
+       items = null,
+       behavior = null,
+       menuItems = null,
+       comboButtonStyle = null;
 
   /// Creates a toolbar combo box item.
   const CNToolbarItem.comboBox({
@@ -228,7 +253,9 @@ class CNToolbarEvent {
 /// Utility API to configure native macOS window toolbars.
 class CNToolbar {
   static const MethodChannel _channel = MethodChannel('cupertino_native');
-  static const MethodChannel _eventsChannel = MethodChannel('cupertino_native/toolbar_events');
+  static const MethodChannel _eventsChannel = MethodChannel(
+    'cupertino_native/toolbar_events',
+  );
 
   static bool _eventsHandlerInstalled = false;
   static ValueChanged<String>? _onItemPressed;
@@ -278,14 +305,19 @@ class CNToolbar {
           final dynamic idRaw = args['id'];
           if (idRaw is String) {
             _onItemPressed?.call(idRaw);
-            _onEvent?.call(CNToolbarEvent(itemId: idRaw, type: 'buttonPressed'));
+            _onEvent?.call(
+              CNToolbarEvent(itemId: idRaw, type: 'buttonPressed'),
+            );
           }
         }
       } else if (call.method == 'onToolbarEvent') {
         final args = call.arguments;
         if (args is Map) {
-          final event = CNToolbarEvent.fromMap(Map<Object?, Object?>.from(args));
-          if (event.type == 'buttonPressed' || event.type == 'comboButtonPressed') {
+          final event = CNToolbarEvent.fromMap(
+            Map<Object?, Object?>.from(args),
+          );
+          if (event.type == 'buttonPressed' ||
+              event.type == 'comboButtonPressed') {
             _onItemPressed?.call(event.itemId);
           }
           _onEvent?.call(event);

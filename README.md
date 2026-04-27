@@ -203,6 +203,50 @@ CNContextMenuRegion(
 )
 ```
 
+### Split View
+
+```dart
+final controller = CNSplitViewController();
+
+CNSplitView(
+  controller: controller,
+  axis: CNSplitAxis.horizontal,
+  initialFraction: 0.35,
+  minFraction: 0.2,
+  maxFraction: 0.8,
+  dividerThickness: 6,
+  dividerInteractiveThickness: 18,
+  dividerDoubleTapAction: CNSplitDividerDoubleTapAction.reset,
+  dividerSemanticLabel: 'Project split divider',
+  snapFractions: const [0.25, 0.5, 0.75],
+  snapThreshold: 0.04,
+  snapReleaseThreshold: 0.065,
+  first: CNSplitPane(
+    minExtent: 160,
+    child: SidebarWidget(),
+  ),
+  second: CNSplitPane(
+    minExtent: 240,
+    child: ContentWidget(),
+  ),
+)
+```
+
+Practical notes:
+
+- Use `minExtent` on both panes to avoid overly compressed UIs during window resize.
+- Keep `dividerInteractiveThickness` larger than `dividerThickness` for easier drag hit-testing.
+- Enable snapping (`snapFractions`) for predictable editor/sidebar presets.
+- Use `snapReleaseThreshold` (>= `snapThreshold`) to control how quickly the
+  divider exits a snapped state.
+- Keyboard shortcuts are enabled by default:
+  - `Alt+Left/Right` or `Alt+Up/Down` to resize.
+  - `Alt+1` / `Alt+2` to toggle first/second pane.
+- For macOS-only visual polish without changing layout behavior:
+  - `macOSDividerStyle: CNSplitMacOSDividerStyle.grabber`
+  - `enableMacOSDividerVisualEffects: true`
+
+
 ## What's left to do?
 So far, this is more of a proof of concept than a full package (although the included components do work). Future improvements include:
 

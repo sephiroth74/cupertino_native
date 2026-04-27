@@ -26,6 +26,7 @@ import 'demos/popover.dart';
 import 'demos/context_menu.dart';
 import 'demos/sheet.dart';
 import 'demos/toolbar.dart';
+import 'demos/split_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -494,6 +495,20 @@ class HomePage extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     CupertinoPageRoute(builder: (_) => const ToolbarDemoPage()),
+                  );
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Split View'),
+                leading: CNIcon(
+                  symbol: CNSymbol('rectangle.split.2x1', color: accentColor),
+                ),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(
+                      builder: (_) => const SplitViewDemoPage(),
+                    ),
                   );
                 },
               ),
