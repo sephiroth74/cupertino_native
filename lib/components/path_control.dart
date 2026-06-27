@@ -21,30 +21,6 @@ const _kDefaultHeight = 24.0;
 /// )
 /// ```
 class CNPathControl extends StatefulWidget {
-  /// The path to display.
-  final Uri url;
-
-  /// Whether the path is a directory.
-  final bool isDirectory;
-
-  /// Callback for when a path is pressed.
-  final ValueChanged<String>? onPressed;
-
-  /// The size of the control.
-  final CNControlSize controlSize;
-
-  /// The style of the control.
-  final CNPathControlStyle controlStyle;
-
-  /// Accent/tint color.
-  final Color? tint;
-
-  /// Allowed file types (extensions).
-  final List<String>? allowedTypes;
-
-  /// Whether the path is editable.
-  final bool editable;
-
   /// Creates a new instance of [CNPathControl].
   const CNPathControl({
     super.key,
@@ -58,32 +34,51 @@ class CNPathControl extends StatefulWidget {
     this.editable = true,
   });
 
+  /// Allowed file types (extensions).
+  final List<String>? allowedTypes;
+
+  /// The size of the control.
+  final CNControlSize controlSize;
+
+  /// The style of the control.
+  final CNPathControlStyle controlStyle;
+
+  /// Whether the path is editable.
+  final bool editable;
+
+  /// Whether the path is a directory.
+  final bool isDirectory;
+
+  /// Callback for when a path is pressed.
+  final ValueChanged<String>? onPressed;
+
+  /// Accent/tint color.
+  final Color? tint;
+
+  /// The path to display.
+  final Uri url;
+
   @override
   State<CNPathControl> createState() => _CNPathControlState();
 }
 
 class _CNPathControlState extends State<CNPathControl> {
   MethodChannel? _channel;
-  bool? _lastIsDark;
-  Uri? _lastUri;
-  bool? _lastIsDirectory;
-  double? _intrinsicWidth;
   double? _intrinsicHeight;
-  CNPathControlStyle? _lastStyle;
-  CNControlSize? _lastControlSize;
+  double? _intrinsicWidth;
   List<String>? _lastAllowedTypes;
+  CNControlSize? _lastControlSize;
   bool? _lastEditable;
+  bool? _lastIsDark;
+  bool? _lastIsDirectory;
+  CNPathControlStyle? _lastStyle;
   int? _lastTint;
-
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-
-  Color? get _effectiveTint =>
-      widget.tint ?? CupertinoTheme.of(context).primaryColor;
+  Uri? _lastUri;
 
   @override
-  void dispose() {
-    _channel?.setMethodCallHandler(null);
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
   }
 
   @override
@@ -93,64 +88,15 @@ class _CNPathControlState extends State<CNPathControl> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
+  void dispose() {
+    _channel?.setMethodCallHandler(null);
+    super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
-      return Placeholder();
-    }
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
-    const viewType = 'CupertinoNativePathControl';
-
-    final creationParams = <String, dynamic>{
-      'path': widget.url.toString(),
-      'style': widget.controlStyle.name,
-      'controlSize': widget.controlSize.name,
-      'isDirectory': widget.isDirectory,
-      'tint': resolveColorToArgb(_effectiveTint, context),
-      'enabled': widget.onPressed != null,
-      'allowedTypes': widget.allowedTypes,
-      'isDark': _isDark,
-      'editable': widget.editable,
-    };
-
-    final platformView = AppKitView(
-      viewType: viewType,
-      creationParams: creationParams,
-      creationParamsCodec: const StandardMessageCodec(),
-      onPlatformViewCreated: _onCreated,
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-      },
-    );
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final hasBoundedWidth = constraints.hasBoundedWidth;
-        final hasBoundedHeight = constraints.hasBoundedHeight;
-        final preferIntrinsicWidth = !hasBoundedWidth;
-        final preferIntrinsicHeight = !hasBoundedHeight;
-        double? width;
-        if (preferIntrinsicWidth) {
-          width = _intrinsicWidth ?? _kDefaultWidth;
-        } else {
-          width = _intrinsicWidth;
-        }
-        double? height;
-        if (preferIntrinsicHeight) {
-          height = _intrinsicHeight ?? _kDefaultHeight;
-        } else {
-          height = _intrinsicHeight;
-        }
-
-        return SizedBox(width: width, height: height, child: platformView);
-      },
-    );
-  }
+  Color? get _effectiveTint =>
+      widget.tint ?? CupertinoTheme.of(context).primaryColor;
 
   void _onCreated(int id) {
     final ch = MethodChannel('CupertinoNativePathControl_$id');
@@ -262,5 +208,59 @@ class _CNPathControlState extends State<CNPathControl> {
     if (needsIntrinsicSize) {
       _requestIntrinsicSize();
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
+      return Placeholder();
+    }
+
+    const viewType = 'CupertinoNativePathControl';
+
+    final creationParams = <String, dynamic>{
+      'path': widget.url.toString(),
+      'style': widget.controlStyle.name,
+      'controlSize': widget.controlSize.name,
+      'isDirectory': widget.isDirectory,
+      'tint': resolveColorToArgb(_effectiveTint, context),
+      'enabled': widget.onPressed != null,
+      'allowedTypes': widget.allowedTypes,
+      'isDark': _isDark,
+      'editable': widget.editable,
+    };
+
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParams: creationParams,
+      creationParamsCodec: const StandardMessageCodec(),
+      onPlatformViewCreated: _onCreated,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+      },
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedWidth = constraints.hasBoundedWidth;
+        final hasBoundedHeight = constraints.hasBoundedHeight;
+        final preferIntrinsicWidth = !hasBoundedWidth;
+        final preferIntrinsicHeight = !hasBoundedHeight;
+        double? width;
+        if (preferIntrinsicWidth) {
+          width = _intrinsicWidth ?? _kDefaultWidth;
+        } else {
+          width = _intrinsicWidth;
+        }
+        double? height;
+        if (preferIntrinsicHeight) {
+          height = _intrinsicHeight ?? _kDefaultHeight;
+        } else {
+          height = _intrinsicHeight;
+        }
+
+        return SizedBox(width: width, height: height, child: platformView);
+      },
+    );
   }
 }

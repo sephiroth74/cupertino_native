@@ -27,29 +27,14 @@ class CNTextView extends StatefulWidget {
     this.onChanged,
   });
 
-  /// Controls the text being edited.
-  final TextEditingController? controller;
-
-  /// Placeholder string shown when the field is empty.
-  final String? placeholder;
-
-  /// The text color of the text view.
-  final Color? textColor;
-
-  /// The placeholder color of the text view.
-  final Color? placeholderColor;
-
   /// The background color drawn behind the text area.
   final Color? backgroundColor;
 
+  /// Controls the text being edited.
+  final TextEditingController? controller;
+
   /// Optional native NSFont descriptor.
   final CNFont? font;
-
-  /// Optional native NSFont descriptor for placeholder text.
-  final CNFont? placeholderFont;
-
-  /// Optional fixed width for the native control.
-  final double? width;
 
   /// Fixed height for the native control.
   final double height;
@@ -57,11 +42,26 @@ class CNTextView extends StatefulWidget {
   /// Called whenever the user changes the text.
   final ValueChanged<String>? onChanged;
 
-  /// Whether the native control should be interactive.
-  bool get enabled => onChanged != null;
+  /// Placeholder string shown when the field is empty.
+  final String? placeholder;
+
+  /// The placeholder color of the text view.
+  final Color? placeholderColor;
+
+  /// Optional native NSFont descriptor for placeholder text.
+  final CNFont? placeholderFont;
+
+  /// The text color of the text view.
+  final Color? textColor;
+
+  /// Optional fixed width for the native control.
+  final double? width;
 
   @override
   State<CNTextView> createState() => _CNTextViewState();
+
+  /// Whether the native control should be interactive.
+  bool get enabled => onChanged != null;
 }
 
 /// Alias of [CNTextView] for developers preferring "Text Area" naming.
@@ -71,38 +71,23 @@ class _CNTextViewState extends State<CNTextView> {
   MethodChannel? _channel;
   late TextEditingController _controller;
   bool _isUpdatingFromNative = false;
-  TextSelection? _pendingSelection;
-
-  String? _lastTextSent;
+  int? _lastBackgroundColor;
+  bool? _lastEnabled;
+  CNFont? _lastFont;
+  bool? _lastIsDark;
+  String? _lastPlaceholder;
+  int? _lastPlaceholderColor;
+  CNFont? _lastPlaceholderFont;
   int? _lastSelectionBaseSent;
   int? _lastSelectionExtentSent;
-
-  String? _lastPlaceholder;
   int? _lastTextColor;
-  int? _lastPlaceholderColor;
-  int? _lastBackgroundColor;
-  CNFont? _lastFont;
-  CNFont? _lastPlaceholderFont;
-  bool? _lastEnabled;
-  bool? _lastIsDark;
-
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+  String? _lastTextSent;
+  TextSelection? _pendingSelection;
 
   @override
-  void initState() {
-    super.initState();
-    _controller = widget.controller ?? TextEditingController();
-    _controller.addListener(_onControllerChanged);
-  }
-
-  @override
-  void dispose() {
-    _controller.removeListener(_onControllerChanged);
-    if (widget.controller == null) {
-      _controller.dispose();
-    }
-    _channel?.setMethodCallHandler(null);
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
   }
 
   @override
@@ -118,10 +103,23 @@ class _CNTextViewState extends State<CNTextView> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
+  void dispose() {
+    _controller.removeListener(_onControllerChanged);
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
+    _channel?.setMethodCallHandler(null);
+    super.dispose();
   }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? TextEditingController();
+    _controller.addListener(_onControllerChanged);
+  }
+
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   void _onControllerChanged() {
     if (_isUpdatingFromNative) {
@@ -145,72 +143,6 @@ class _CNTextViewState extends State<CNTextView> {
         });
       }
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
-      return SizedBox(
-        width: widget.width ?? _kDefaultTextViewWidth,
-        height: widget.height,
-        child: CupertinoTextField(
-          controller: _controller,
-          placeholder: widget.placeholder,
-          maxLines: null,
-          readOnly: !widget.enabled,
-          onChanged: widget.onChanged,
-        ),
-      );
-    }
-
-    const viewType = 'CupertinoNativeTextView';
-
-    final creationParams = <String, dynamic>{
-      'text': _controller.text,
-      'selectionBase': _controller.selection.isValid
-          ? _controller.selection.baseOffset
-          : null,
-      'selectionExtent': _controller.selection.isValid
-          ? _controller.selection.extentOffset
-          : null,
-      'placeholder': widget.placeholder,
-      'textColor': resolveColorToArgb(widget.textColor, context),
-      'placeholderColor': resolveColorToArgb(widget.placeholderColor, context),
-      'backgroundColor': resolveColorToArgb(widget.backgroundColor, context),
-      'font': widget.font?.toMap(),
-      'placeholderFont': widget.placeholderFont?.toMap(),
-      'enabled': widget.enabled,
-      'isDark': _isDark,
-    };
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width =
-            widget.width ??
-            (constraints.hasBoundedWidth
-                ? constraints.maxWidth
-                : _kDefaultTextViewWidth);
-
-        return Align(
-          alignment: Alignment.centerLeft,
-          child: SizedBox(
-            width: constraints.hasBoundedWidth
-                ? width.clamp(0.0, constraints.maxWidth)
-                : width,
-            height: widget.height,
-            child: AppKitView(
-              viewType: viewType,
-              creationParamsCodec: const StandardMessageCodec(),
-              creationParams: creationParams,
-              onPlatformViewCreated: _onPlatformViewCreated,
-              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-              },
-            ),
-          ),
-        );
-      },
-    );
   }
 
   void _onPlatformViewCreated(int id) {
@@ -370,5 +302,71 @@ class _CNTextViewState extends State<CNTextView> {
       await channel.invokeMethod('setIsDark', {'value': _isDark});
       _lastIsDark = _isDark;
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
+      return SizedBox(
+        width: widget.width ?? _kDefaultTextViewWidth,
+        height: widget.height,
+        child: CupertinoTextField(
+          controller: _controller,
+          placeholder: widget.placeholder,
+          maxLines: null,
+          readOnly: !widget.enabled,
+          onChanged: widget.onChanged,
+        ),
+      );
+    }
+
+    const viewType = 'CupertinoNativeTextView';
+
+    final creationParams = <String, dynamic>{
+      'text': _controller.text,
+      'selectionBase': _controller.selection.isValid
+          ? _controller.selection.baseOffset
+          : null,
+      'selectionExtent': _controller.selection.isValid
+          ? _controller.selection.extentOffset
+          : null,
+      'placeholder': widget.placeholder,
+      'textColor': resolveColorToArgb(widget.textColor, context),
+      'placeholderColor': resolveColorToArgb(widget.placeholderColor, context),
+      'backgroundColor': resolveColorToArgb(widget.backgroundColor, context),
+      'font': widget.font?.toMap(),
+      'placeholderFont': widget.placeholderFont?.toMap(),
+      'enabled': widget.enabled,
+      'isDark': _isDark,
+    };
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width =
+            widget.width ??
+            (constraints.hasBoundedWidth
+                ? constraints.maxWidth
+                : _kDefaultTextViewWidth);
+
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            width: constraints.hasBoundedWidth
+                ? width.clamp(0.0, constraints.maxWidth)
+                : width,
+            height: widget.height,
+            child: AppKitView(
+              viewType: viewType,
+              creationParamsCodec: const StandardMessageCodec(),
+              creationParams: creationParams,
+              onPlatformViewCreated: _onPlatformViewCreated,
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+              },
+            ),
+          ),
+        );
+      },
+    );
   }
 }

@@ -32,41 +32,23 @@ class CNComboBox extends StatefulWidget {
     this.onSubmitted,
   });
 
-  /// The list of items to display in the dropdown.
-  final List<String> items;
-
-  /// The current text shown in the field.
-  final String text;
+  /// The background color drawn behind the text area.
+  final Color? backgroundColor;
 
   /// Controls the interaction mode of the combo box.
   final CNComboBoxBehavior behavior;
 
-  /// Placeholder string shown when the field is empty.
-  final String? placeholder;
-
-  /// The text color of the combo box.
-  final Color? textColor;
-
-  /// The placeholder color of the combo box.
-  final Color? placeholderColor;
-
-  /// The background color drawn behind the text area.
-  final Color? backgroundColor;
-
-  /// Optional native NSFont descriptor.
-  final CNFont? font;
-
-  /// Optional native NSFont descriptor for the placeholder text.
-  final CNFont? placeholderFont;
-
-  /// Optional fixed width for the native control.
-  final double? width;
+  /// The border/bezel style of the combo box.
+  final CNTextFieldBezelStyle bezelStyle;
 
   /// The size of the native AppKit control.
   final CNControlSize controlSize;
 
-  /// The border/bezel style of the combo box.
-  final CNTextFieldBezelStyle bezelStyle;
+  /// Optional native NSFont descriptor.
+  final CNFont? font;
+
+  /// The list of items to display in the dropdown.
+  final List<String> items;
 
   /// Called whenever the user changes the text.
   final ValueChanged<String>? onChanged;
@@ -74,46 +56,53 @@ class CNComboBox extends StatefulWidget {
   /// Called when the user submits the text.
   final ValueChanged<String>? onSubmitted;
 
-  /// Whether the native control accepts user interaction.
-  bool get enabled => onChanged != null || onSubmitted != null;
+  /// Placeholder string shown when the field is empty.
+  final String? placeholder;
+
+  /// The placeholder color of the combo box.
+  final Color? placeholderColor;
+
+  /// Optional native NSFont descriptor for the placeholder text.
+  final CNFont? placeholderFont;
+
+  /// The current text shown in the field.
+  final String text;
+
+  /// The text color of the combo box.
+  final Color? textColor;
+
+  /// Optional fixed width for the native control.
+  final double? width;
 
   @override
   State<CNComboBox> createState() => _CNComboBoxState();
+
+  /// Whether the native control accepts user interaction.
+  bool get enabled => onChanged != null || onSubmitted != null;
 }
 
 class _CNComboBoxState extends State<CNComboBox> {
   MethodChannel? _channel;
-
-  double? _intrinsicWidth;
   double? _intrinsicHeight;
-
-  String? _lastText;
+  double? _intrinsicWidth;
+  int? _lastBackgroundColor;
   CNComboBoxBehavior? _lastBehavior;
+  CNTextFieldBezelStyle? _lastBezelStyle;
+  CNControlSize? _lastControlSize;
+  bool? _lastEnabled;
+  CNFont? _lastFont;
+  bool? _lastIsDark;
   List<String>? _lastItems;
   String? _lastPlaceholder;
-  int? _lastTextColor;
   int? _lastPlaceholderColor;
-  int? _lastBackgroundColor;
-  CNFont? _lastFont;
   CNFont? _lastPlaceholderFont;
-  CNControlSize? _lastControlSize;
-  CNTextFieldBezelStyle? _lastBezelStyle;
-  bool? _lastEnabled;
-  bool? _lastIsDark;
-
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-
-  void _log(String message) {
-    if (kDebugMode) {
-      debugPrint('[CNComboBox ${identityHashCode(this)}] $message');
-    }
-  }
+  String? _lastText;
+  int? _lastTextColor;
 
   @override
-  void dispose() {
-    _log('dispose');
-    _channel?.setMethodCallHandler(null);
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
   }
 
   @override
@@ -123,69 +112,18 @@ class _CNComboBoxState extends State<CNComboBox> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
+  void dispose() {
+    _log('dispose');
+    _channel?.setMethodCallHandler(null);
+    super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
-      return const Placeholder();
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+
+  void _log(String message) {
+    if (kDebugMode) {
+      debugPrint('[CNComboBox ${identityHashCode(this)}] $message');
     }
-
-    const viewType = 'CupertinoNativeComboBox';
-
-    final creationParams = <String, dynamic>{
-      'items': widget.items,
-      'text': widget.text,
-      'behavior': widget.behavior.name,
-      'placeholder': widget.placeholder,
-      'textColor': resolveColorToArgb(widget.textColor, context),
-      'placeholderColor': resolveColorToArgb(widget.placeholderColor, context),
-      'backgroundColor': resolveColorToArgb(widget.backgroundColor, context),
-      'font': widget.font?.toMap(),
-      'placeholderFont': widget.placeholderFont?.toMap(),
-      'controlSize': widget.controlSize.name,
-      'bezelStyle': widget.bezelStyle.name,
-      'enabled': widget.enabled,
-      'isDark': _isDark,
-    };
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width =
-            widget.width ??
-            _intrinsicWidth ??
-            (constraints.hasBoundedWidth
-                ? constraints.maxWidth
-                : _kDefaultComboBoxWidth);
-        final height =
-            _intrinsicHeight ??
-            (constraints.hasBoundedHeight
-                ? constraints.maxHeight
-                : _kDefaultComboBoxHeight);
-
-        return Align(
-          alignment: Alignment.centerLeft,
-          child: SizedBox(
-            width: width + 2,
-            height: height + 2,
-            child: AppKitView(
-              viewType: viewType,
-              creationParamsCodec: const StandardMessageCodec(),
-              creationParams: creationParams,
-              onPlatformViewCreated: _onPlatformViewCreated,
-              gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{
-                Factory<OneSequenceGestureRecognizer>(
-                  EagerGestureRecognizer.new,
-                ),
-              },
-            ),
-          ),
-        );
-      },
-    );
   }
 
   void _onPlatformViewCreated(int id) {
@@ -388,5 +326,65 @@ class _CNComboBoxState extends State<CNComboBox> {
     } catch (e) {
       _log('requestIntrinsicSize error=$e');
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
+      return const Placeholder();
+    }
+
+    const viewType = 'CupertinoNativeComboBox';
+
+    final creationParams = <String, dynamic>{
+      'items': widget.items,
+      'text': widget.text,
+      'behavior': widget.behavior.name,
+      'placeholder': widget.placeholder,
+      'textColor': resolveColorToArgb(widget.textColor, context),
+      'placeholderColor': resolveColorToArgb(widget.placeholderColor, context),
+      'backgroundColor': resolveColorToArgb(widget.backgroundColor, context),
+      'font': widget.font?.toMap(),
+      'placeholderFont': widget.placeholderFont?.toMap(),
+      'controlSize': widget.controlSize.name,
+      'bezelStyle': widget.bezelStyle.name,
+      'enabled': widget.enabled,
+      'isDark': _isDark,
+    };
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width =
+            widget.width ??
+            _intrinsicWidth ??
+            (constraints.hasBoundedWidth
+                ? constraints.maxWidth
+                : _kDefaultComboBoxWidth);
+        final height =
+            _intrinsicHeight ??
+            (constraints.hasBoundedHeight
+                ? constraints.maxHeight
+                : _kDefaultComboBoxHeight);
+
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            width: width + 2,
+            height: height + 2,
+            child: AppKitView(
+              viewType: viewType,
+              creationParamsCodec: const StandardMessageCodec(),
+              creationParams: creationParams,
+              onPlatformViewCreated: _onPlatformViewCreated,
+              gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{
+                Factory<OneSequenceGestureRecognizer>(
+                  EagerGestureRecognizer.new,
+                ),
+              },
+            ),
+          ),
+        );
+      },
+    );
   }
 }

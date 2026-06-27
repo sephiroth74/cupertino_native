@@ -49,67 +49,65 @@ class CNButton extends StatefulWidget {
        shrinkWrap = false,
        super();
 
-  /// Button text (null in icon mode).
-  final String? label; // null in icon mode
-  /// Button icon (non-null in icon mode).
-  final CNSymbol? icon; // non-null in icon mode
-  /// Callback when pressed.
-  final VoidCallback? onPressed;
+  /// Control size.
+  final CNControlSize controlSize;
 
   /// Whether the control is interactive and tappable.
   final bool enabled;
 
-  /// Accent/tint color.
-  final Color? tint;
-
   /// Control height.
   final double? height;
 
-  /// Fixed width used in icon/round mode.
-  final double? width; // fixed when round/icon mode
+  /// Button icon (non-null in icon mode).
+  final CNSymbol? icon; // non-null in icon mode
+
+  /// Button text (null in icon mode).
+  final String? label; // null in icon mode
+
+  /// Callback when pressed.
+  final VoidCallback? onPressed;
+
+  /// Whether the icon variant (round) is used.
+  final bool round;
+
   /// If true, sizes the control to its intrinsic width.
   final bool shrinkWrap;
 
   /// Visual style to apply.
   final CNButtonStyle style;
 
-  /// Control size.
-  final CNControlSize controlSize;
+  /// Accent/tint color.
+  final Color? tint;
 
-  /// Whether the icon variant (round) is used.
-  final bool round;
-
-  /// Whether this instance is configured as the icon variant.
-  bool get isIcon => icon != null;
+  /// Fixed width used in icon/round mode.
+  final double? width; // fixed when round/icon mode
 
   @override
   State<CNButton> createState() => _CNButtonState();
+
+  /// Whether this instance is configured as the icon variant.
+  bool get isIcon => icon != null;
 }
 
 class _CNButtonState extends State<CNButton> {
   MethodChannel? _channel;
-  bool? _lastIsDark;
-  int? _lastTint;
-  String? _lastTitle;
+  Offset? _downPosition;
+  double? _intrinsicHeight;
+  double? _intrinsicWidth;
+  CNControlSize? _lastControlSize;
+  int? _lastIconColor;
   String? _lastIconName;
   double? _lastIconSize;
-  int? _lastIconColor;
-  double? _intrinsicWidth;
-  double? _intrinsicHeight;
+  bool? _lastIsDark;
   CNButtonStyle? _lastStyle;
-  CNControlSize? _lastControlSize;
-  Offset? _downPosition;
+  int? _lastTint;
+  String? _lastTitle;
   bool _pressed = false;
 
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-
-  Color? get _effectiveTint =>
-      widget.tint ?? CupertinoTheme.of(context).primaryColor;
-
   @override
-  void dispose() {
-    _channel?.setMethodCallHandler(null);
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
   }
 
   @override
@@ -119,119 +117,15 @@ class _CNButtonState extends State<CNButton> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
+  void dispose() {
+    _channel?.setMethodCallHandler(null);
+    super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
-      // Fallback Flutter implementation
-      return SizedBox(
-        height: widget.height ?? _kDefaultHeight,
-        width: widget.isIcon && widget.round
-            ? (widget.width ?? widget.height ?? _kDefaultHeight)
-            : null,
-        child: CupertinoButton(
-          padding: widget.isIcon
-              ? const EdgeInsets.all(4)
-              : const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          onPressed: (widget.enabled && widget.onPressed != null)
-              ? widget.onPressed
-              : null,
-          child: widget.isIcon
-              ? Icon(CupertinoIcons.ellipsis, size: widget.icon?.size)
-              : Text(widget.label ?? ''),
-        ),
-      );
-    }
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
-    const viewType = 'CupertinoNativeButton';
-
-    final creationParams = <String, dynamic>{
-      if (widget.label != null) 'buttonTitle': widget.label,
-      if (widget.icon != null) 'buttonIconName': widget.icon!.name,
-      if (widget.icon?.size != null) 'buttonIconSize': widget.icon!.size,
-      if (widget.icon?.color != null)
-        'buttonIconColor': resolveColorToArgb(widget.icon!.color, context),
-      if (widget.icon?.mode != null)
-        'buttonIconRenderingMode': widget.icon!.mode!.name,
-      if (widget.icon?.paletteColors != null)
-        'buttonIconPaletteColors': widget.icon!.paletteColors!
-            .map((c) => resolveColorToArgb(c, context))
-            .toList(),
-      if (widget.icon?.gradient != null)
-        'buttonIconGradientEnabled': widget.icon!.gradient,
-      if (widget.isIcon) 'round': true,
-      'buttonStyle': widget.style.name,
-      'enabled': (widget.enabled && widget.onPressed != null),
-      'isDark': _isDark,
-      'style': encodeStyle(context, tint: _effectiveTint),
-      'controlSize': widget.controlSize.name,
-      'tint': resolveColorToArgb(_effectiveTint, context),
-    };
-
-    final platformView = AppKitView(
-      viewType: viewType,
-      creationParams: creationParams,
-      creationParamsCodec: const StandardMessageCodec(),
-      onPlatformViewCreated: _onCreated,
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-      },
-    );
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final hasBoundedWidth = constraints.hasBoundedWidth;
-        final hasBoundedHeight = constraints.hasBoundedHeight;
-        final preferIntrinsicWidth = widget.shrinkWrap || !hasBoundedWidth;
-        final preferIntrinsicHeight = widget.shrinkWrap || !hasBoundedHeight;
-        double? width;
-        if (widget.isIcon) {
-          width = widget.width ?? widget.height ?? _kDefaultHeight;
-        } else if (preferIntrinsicWidth) {
-          width = _intrinsicWidth ?? _kDefaultWidth;
-        } else {
-          width = _intrinsicWidth;
-        }
-        double? height;
-        if (widget.isIcon) {
-          height = widget.height ?? widget.width ?? _kDefaultHeight;
-        } else if (preferIntrinsicHeight) {
-          height = _intrinsicHeight ?? _kDefaultHeight;
-        } else {
-          height = _intrinsicHeight;
-        }
-
-        return Listener(
-          onPointerDown: (e) {
-            _downPosition = e.position;
-            _setPressed(true);
-          },
-          onPointerMove: (e) {
-            final start = _downPosition;
-            if (start != null && _pressed) {
-              final moved = (e.position - start).distance;
-              if (moved > kTouchSlop) {
-                _setPressed(false);
-              }
-            }
-          },
-          onPointerUp: (_) {
-            _setPressed(false);
-            _downPosition = null;
-          },
-          onPointerCancel: (_) {
-            _setPressed(false);
-            _downPosition = null;
-          },
-          child: SizedBox(width: width, height: height, child: platformView),
-        );
-      },
-    );
-  }
+  Color? get _effectiveTint =>
+      widget.tint ?? CupertinoTheme.of(context).primaryColor;
 
   void _onCreated(int id) {
     final ch = MethodChannel('CupertinoNativeButton_$id');
@@ -375,5 +269,114 @@ class _CNButtonState extends State<CNButton> {
     try {
       await ch.invokeMethod('setPressed', {'pressed': pressed});
     } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
+      // Fallback Flutter implementation
+      return SizedBox(
+        height: widget.height ?? _kDefaultHeight,
+        width: widget.isIcon && widget.round
+            ? (widget.width ?? widget.height ?? _kDefaultHeight)
+            : null,
+        child: CupertinoButton(
+          padding: widget.isIcon
+              ? const EdgeInsets.all(4)
+              : const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          onPressed: (widget.enabled && widget.onPressed != null)
+              ? widget.onPressed
+              : null,
+          child: widget.isIcon
+              ? Icon(CupertinoIcons.ellipsis, size: widget.icon?.size)
+              : Text(widget.label ?? ''),
+        ),
+      );
+    }
+
+    const viewType = 'CupertinoNativeButton';
+
+    final creationParams = <String, dynamic>{
+      if (widget.label != null) 'buttonTitle': widget.label,
+      if (widget.icon != null) 'buttonIconName': widget.icon!.name,
+      if (widget.icon?.size != null) 'buttonIconSize': widget.icon!.size,
+      if (widget.icon?.color != null)
+        'buttonIconColor': resolveColorToArgb(widget.icon!.color, context),
+      if (widget.icon?.mode != null)
+        'buttonIconRenderingMode': widget.icon!.mode!.name,
+      if (widget.icon?.paletteColors != null)
+        'buttonIconPaletteColors': widget.icon!.paletteColors!
+            .map((c) => resolveColorToArgb(c, context))
+            .toList(),
+      if (widget.icon?.gradient != null)
+        'buttonIconGradientEnabled': widget.icon!.gradient,
+      if (widget.isIcon) 'round': true,
+      'buttonStyle': widget.style.name,
+      'enabled': (widget.enabled && widget.onPressed != null),
+      'isDark': _isDark,
+      'style': encodeStyle(context, tint: _effectiveTint),
+      'controlSize': widget.controlSize.name,
+      'tint': resolveColorToArgb(_effectiveTint, context),
+    };
+
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParams: creationParams,
+      creationParamsCodec: const StandardMessageCodec(),
+      onPlatformViewCreated: _onCreated,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+      },
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedWidth = constraints.hasBoundedWidth;
+        final hasBoundedHeight = constraints.hasBoundedHeight;
+        final preferIntrinsicWidth = widget.shrinkWrap || !hasBoundedWidth;
+        final preferIntrinsicHeight = widget.shrinkWrap || !hasBoundedHeight;
+        double? width;
+        if (widget.isIcon) {
+          width = widget.width ?? widget.height ?? _kDefaultHeight;
+        } else if (preferIntrinsicWidth) {
+          width = _intrinsicWidth ?? _kDefaultWidth;
+        } else {
+          width = _intrinsicWidth;
+        }
+        double? height;
+        if (widget.isIcon) {
+          height = widget.height ?? widget.width ?? _kDefaultHeight;
+        } else if (preferIntrinsicHeight) {
+          height = _intrinsicHeight ?? _kDefaultHeight;
+        } else {
+          height = _intrinsicHeight;
+        }
+
+        return Listener(
+          onPointerDown: (e) {
+            _downPosition = e.position;
+            _setPressed(true);
+          },
+          onPointerMove: (e) {
+            final start = _downPosition;
+            if (start != null && _pressed) {
+              final moved = (e.position - start).distance;
+              if (moved > kTouchSlop) {
+                _setPressed(false);
+              }
+            }
+          },
+          onPointerUp: (_) {
+            _setPressed(false);
+            _downPosition = null;
+          },
+          onPointerCancel: (_) {
+            _setPressed(false);
+            _downPosition = null;
+          },
+          child: SizedBox(width: width, height: height, child: platformView),
+        );
+      },
+    );
   }
 }

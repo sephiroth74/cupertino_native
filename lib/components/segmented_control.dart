@@ -27,44 +27,44 @@ class CNSegmentedControl extends StatefulWidget {
     this.iconRenderingMode,
   });
 
-  /// Segment labels to display, in order.
-  final List<String> labels;
-
-  /// The index of the selected segment.
-  final int selectedIndex;
-
-  /// Called when the user selects a segment.
-  final ValueChanged<int> onValueChanged;
+  /// Accent/tint color used for the control.
+  final Color? color;
 
   /// Whether the control is interactive.
   final bool enabled;
 
-  /// Accent/tint color used for the control.
-  final Color? color;
-
   /// Control height.
   final double height;
-
-  /// If true, sizes the control to its intrinsic width.
-  final bool shrinkWrap;
-
-  /// Optional SF Symbols for segments; complements [labels].
-  final List<CNSymbol>? sfSymbols;
-
-  /// Overrides the symbol size (for all segments).
-  final double? iconSize;
 
   /// Global icon color override.
   final Color? iconColor;
 
-  /// Global icon palette colors override.
-  final List<Color>? iconPaletteColors;
-
   /// Enables gradient rendering where supported.
   final bool? iconGradientEnabled;
 
+  /// Global icon palette colors override.
+  final List<Color>? iconPaletteColors;
+
   /// Global icon rendering mode.
   final CNSymbolRenderingMode? iconRenderingMode;
+
+  /// Overrides the symbol size (for all segments).
+  final double? iconSize;
+
+  /// Segment labels to display, in order.
+  final List<String> labels;
+
+  /// Called when the user selects a segment.
+  final ValueChanged<int> onValueChanged;
+
+  /// The index of the selected segment.
+  final int selectedIndex;
+
+  /// Optional SF Symbols for segments; complements [labels].
+  final List<CNSymbol>? sfSymbols;
+
+  /// If true, sizes the control to its intrinsic width.
+  final bool shrinkWrap;
 
   @override
   State<CNSegmentedControl> createState() => _CNSegmentedControlState();
@@ -72,19 +72,16 @@ class CNSegmentedControl extends StatefulWidget {
 
 class _CNSegmentedControlState extends State<CNSegmentedControl> {
   MethodChannel? _channel;
-
-  int? _lastSelected;
+  double? _intrinsicWidth;
   bool? _lastEnabled;
   bool? _lastIsDark;
+  int? _lastSelected;
   int? _lastTint;
-  double? _intrinsicWidth;
-
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   @override
-  void dispose() {
-    _channel?.setMethodCallHandler(null);
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
   }
 
   @override
@@ -94,9 +91,88 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void dispose() {
+    _channel?.setMethodCallHandler(null);
+    super.dispose();
+  }
+
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+
+  void _onPlatformViewCreated(int id) {
+    final channel = MethodChannel('CupertinoNativeSegmentedControl_$id');
+    _channel = channel;
+    channel.setMethodCallHandler(_onMethodCall);
+    _cacheCurrentProps();
     _syncBrightnessIfNeeded();
+    _requestIntrinsicSize();
+  }
+
+  Future<dynamic> _onMethodCall(MethodCall call) async {
+    if (call.method == 'valueChanged') {
+      final args = call.arguments as Map?;
+      final idx = (args?['index'] as num?)?.toInt();
+      if (idx != null) {
+        widget.onValueChanged(idx);
+        _lastSelected = idx;
+      }
+    }
+    return null;
+  }
+
+  void _cacheCurrentProps() {
+    _lastSelected = widget.selectedIndex;
+    _lastEnabled = widget.enabled;
+    _lastIsDark = _isDark;
+    _lastTint = resolveColorToArgb(widget.color, context);
+  }
+
+  Future<void> _syncPropsToNativeIfNeeded() async {
+    final channel = _channel;
+    if (channel == null) return;
+
+    final tint = resolveColorToArgb(widget.color, context);
+
+    if (_lastEnabled != widget.enabled) {
+      await channel.invokeMethod('setEnabled', {'enabled': widget.enabled});
+      _lastEnabled = widget.enabled;
+    }
+    if (_lastSelected != widget.selectedIndex) {
+      await channel.invokeMethod('setSelectedIndex', {
+        'index': widget.selectedIndex,
+      });
+      _lastSelected = widget.selectedIndex;
+    }
+    if (_lastTint != tint && tint != null) {
+      await channel.invokeMethod('setStyle', {'tint': tint});
+      _lastTint = tint;
+    }
+  }
+
+  Future<void> _requestIntrinsicSize() async {
+    final channel = _channel;
+    if (channel == null) return;
+    try {
+      final size = await channel.invokeMethod<Map>('getIntrinsicSize');
+      final w = (size?['width'] as num?)?.toDouble();
+      if (w != null && mounted) {
+        setState(() => _intrinsicWidth = w);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _syncBrightnessIfNeeded() async {
+    final channel = _channel;
+    if (channel == null) return;
+    final isDark = _isDark;
+    final tint = resolveColorToArgb(widget.color, context);
+    if (_lastIsDark != isDark) {
+      await channel.invokeMethod('setBrightness', {'isDark': isDark});
+      _lastIsDark = isDark;
+    }
+    if (_lastTint != tint && tint != null) {
+      await channel.invokeMethod('setStyle', {'tint': tint});
+      _lastTint = tint;
+    }
   }
 
   @override
@@ -182,82 +258,5 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
     }
 
     return SizedBox(height: widget.height, child: platformView);
-  }
-
-  void _onPlatformViewCreated(int id) {
-    final channel = MethodChannel('CupertinoNativeSegmentedControl_$id');
-    _channel = channel;
-    channel.setMethodCallHandler(_onMethodCall);
-    _cacheCurrentProps();
-    _syncBrightnessIfNeeded();
-    _requestIntrinsicSize();
-  }
-
-  Future<dynamic> _onMethodCall(MethodCall call) async {
-    if (call.method == 'valueChanged') {
-      final args = call.arguments as Map?;
-      final idx = (args?['index'] as num?)?.toInt();
-      if (idx != null) {
-        widget.onValueChanged(idx);
-        _lastSelected = idx;
-      }
-    }
-    return null;
-  }
-
-  void _cacheCurrentProps() {
-    _lastSelected = widget.selectedIndex;
-    _lastEnabled = widget.enabled;
-    _lastIsDark = _isDark;
-    _lastTint = resolveColorToArgb(widget.color, context);
-  }
-
-  Future<void> _syncPropsToNativeIfNeeded() async {
-    final channel = _channel;
-    if (channel == null) return;
-
-    final tint = resolveColorToArgb(widget.color, context);
-
-    if (_lastEnabled != widget.enabled) {
-      await channel.invokeMethod('setEnabled', {'enabled': widget.enabled});
-      _lastEnabled = widget.enabled;
-    }
-    if (_lastSelected != widget.selectedIndex) {
-      await channel.invokeMethod('setSelectedIndex', {
-        'index': widget.selectedIndex,
-      });
-      _lastSelected = widget.selectedIndex;
-    }
-    if (_lastTint != tint && tint != null) {
-      await channel.invokeMethod('setStyle', {'tint': tint});
-      _lastTint = tint;
-    }
-  }
-
-  Future<void> _requestIntrinsicSize() async {
-    final channel = _channel;
-    if (channel == null) return;
-    try {
-      final size = await channel.invokeMethod<Map>('getIntrinsicSize');
-      final w = (size?['width'] as num?)?.toDouble();
-      if (w != null && mounted) {
-        setState(() => _intrinsicWidth = w);
-      }
-    } catch (_) {}
-  }
-
-  Future<void> _syncBrightnessIfNeeded() async {
-    final channel = _channel;
-    if (channel == null) return;
-    final isDark = _isDark;
-    final tint = resolveColorToArgb(widget.color, context);
-    if (_lastIsDark != isDark) {
-      await channel.invokeMethod('setBrightness', {'isDark': isDark});
-      _lastIsDark = isDark;
-    }
-    if (_lastTint != tint && tint != null) {
-      await channel.invokeMethod('setStyle', {'tint': tint});
-      _lastTint = tint;
-    }
   }
 }

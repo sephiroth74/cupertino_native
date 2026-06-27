@@ -9,9 +9,9 @@ class CheckboxDemoPage extends StatefulWidget {
 }
 
 class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
+  bool _allowMixedState = false;
   CNCheckboxState _checkboxValue = CNCheckboxState.off;
   bool _checkboxesEnabled = true;
-  bool _allowMixedState = false;
   CNControlSize _size = CNControlSize.regular;
 
   @override

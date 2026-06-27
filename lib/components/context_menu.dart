@@ -19,17 +19,17 @@ class CNContextMenuRegion extends StatefulWidget {
   /// Child that acts as trigger region.
   final Widget child;
 
+  /// Whether the region is interactive.
+  final bool enabled;
+
   /// Menu model to render natively.
   final CNMenu menu;
-
-  /// Called when a leaf menu item is selected.
-  final ValueChanged<CNMenuItem> onMenuItemSelected;
 
   /// Called when the menu closes without selection.
   final VoidCallback? onCanceled;
 
-  /// Whether the region is interactive.
-  final bool enabled;
+  /// Called when a leaf menu item is selected.
+  final ValueChanged<CNMenuItem> onMenuItemSelected;
 
   @override
   State<CNContextMenuRegion> createState() => _CNContextMenuRegionState();
@@ -37,21 +37,6 @@ class CNContextMenuRegion extends StatefulWidget {
 
 class _CNContextMenuRegionState extends State<CNContextMenuRegion> {
   static const MethodChannel _channel = MethodChannel('cupertino_native');
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.deferToChild,
-      onSecondaryTapDown: widget.enabled
-          ? (details) => _openContextMenu(details.globalPosition)
-          : null,
-      onLongPressStart:
-          widget.enabled && defaultTargetPlatform != TargetPlatform.macOS
-          ? (details) => _openFallbackMenu(context)
-          : null,
-      child: widget.child,
-    );
-  }
 
   Future<void> _openContextMenu(Offset globalPosition) async {
     if (defaultTargetPlatform != TargetPlatform.macOS) {
@@ -123,5 +108,20 @@ class _CNContextMenuRegionState extends State<CNContextMenuRegion> {
     }
 
     widget.onMenuItemSelected(selectableItems[selectedIndex]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.deferToChild,
+      onSecondaryTapDown: widget.enabled
+          ? (details) => _openContextMenu(details.globalPosition)
+          : null,
+      onLongPressStart:
+          widget.enabled && defaultTargetPlatform != TargetPlatform.macOS
+          ? (details) => _openFallbackMenu(context)
+          : null,
+      child: widget.child,
+    );
   }
 }

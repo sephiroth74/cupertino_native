@@ -15,6 +15,12 @@ class _TabBarDemoPageState extends State<TabBarDemoPage>
   int _index = 0;
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     _controller = TabController(length: 4, vsync: this);
@@ -22,12 +28,6 @@ class _TabBarDemoPageState extends State<TabBarDemoPage>
       final i = _controller.index;
       if (i != _index) setState(() => _index = i);
     });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -84,6 +84,7 @@ class _TabBarDemoPageState extends State<TabBarDemoPage>
 
 class _ImageTabPage extends StatelessWidget {
   const _ImageTabPage({required this.asset, required this.label});
+
   final String asset;
   final String label;
 

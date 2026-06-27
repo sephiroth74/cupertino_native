@@ -20,17 +20,8 @@ class CNIcon extends StatefulWidget {
     this.height,
   });
 
-  /// The SF Symbol to render.
-  final CNSymbol symbol;
-
-  /// Overrides the symbol's size.
-  final double? size;
-
   /// Overrides the symbol's color for monochrome/hierarchical modes.
   final Color? color;
-
-  /// Overrides the rendering mode.
-  final CNSymbolRenderingMode? mode;
 
   /// Whether to enable the system gradient when available.
   final bool? gradient;
@@ -38,21 +29,27 @@ class CNIcon extends StatefulWidget {
   /// Optional fixed height; defaults to the icon's size.
   final double? height;
 
+  /// Overrides the rendering mode.
+  final CNSymbolRenderingMode? mode;
+
+  /// Overrides the symbol's size.
+  final double? size;
+
+  /// The SF Symbol to render.
+  final CNSymbol symbol;
+
   @override
   State<CNIcon> createState() => _CNIconState();
 }
 
 class _CNIconState extends State<CNIcon> {
   MethodChannel? _channel;
+  int? _lastColor;
+  bool? _lastGradient;
   bool? _lastIsDark;
+  String? _lastMode;
   String? _lastName;
   double? _lastSize;
-  int? _lastColor;
-  String? _lastMode;
-  bool? _lastGradient;
-  // No intrinsic sizing storage; icons use explicit size.
-
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   @override
   void didChangeDependencies() {
@@ -72,55 +69,11 @@ class _CNIconState extends State<CNIcon> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
-      final symbol = widget.symbol;
-      final iconData = CupertinoIcons.question_circle;
-      return Icon(
-        iconData,
-        size: widget.size ?? symbol.size,
-        color: widget.color ?? symbol.color,
-      );
-    }
+  // No intrinsic sizing API: platform view is wrapped with fixed constraints.
 
-    const viewType = 'CupertinoNativeIcon';
+  // No intrinsic sizing storage; icons use explicit size.
 
-    final symbol = widget.symbol;
-    final creationParams = <String, dynamic>{
-      'name': symbol.name,
-      'isDark': _isDark,
-      'style': <String, dynamic>{
-        'iconSize': (widget.size ?? symbol.size),
-        if ((widget.color ?? symbol.color) != null)
-          'iconColor': resolveColorToArgb(
-            widget.color ?? symbol.color,
-            context,
-          ),
-        if ((widget.mode ?? symbol.mode) != null)
-          'iconRenderingMode': (widget.mode ?? symbol.mode)!.name,
-        if ((widget.gradient ?? symbol.gradient) != null)
-          'iconGradientEnabled': (widget.gradient ?? symbol.gradient) == true,
-        if (symbol.paletteColors != null)
-          'iconPaletteColors': symbol.paletteColors!
-              .map((c) => resolveColorToArgb(c, context))
-              .toList(),
-      },
-    };
-
-    final platformView = AppKitView(
-      viewType: viewType,
-      creationParamsCodec: const StandardMessageCodec(),
-      creationParams: creationParams,
-      onPlatformViewCreated: _onPlatformViewCreated,
-    );
-
-    // Ensure the platform view always has finite constraints
-    final fallbackSize = widget.size ?? widget.symbol.size;
-    final h = widget.height ?? fallbackSize;
-    final w = fallbackSize;
-    return SizedBox(width: w, height: h, child: platformView);
-  }
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   void _onPlatformViewCreated(int id) {
     _channel = MethodChannel('CupertinoNativeIcon_$id')
@@ -197,5 +150,53 @@ class _CNIconState extends State<CNIcon> {
     }
   }
 
-  // No intrinsic sizing API: platform view is wrapped with fixed constraints.
+  @override
+  Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      final symbol = widget.symbol;
+      final iconData = CupertinoIcons.question_circle;
+      return Icon(
+        iconData,
+        size: widget.size ?? symbol.size,
+        color: widget.color ?? symbol.color,
+      );
+    }
+
+    const viewType = 'CupertinoNativeIcon';
+
+    final symbol = widget.symbol;
+    final creationParams = <String, dynamic>{
+      'name': symbol.name,
+      'isDark': _isDark,
+      'style': <String, dynamic>{
+        'iconSize': (widget.size ?? symbol.size),
+        if ((widget.color ?? symbol.color) != null)
+          'iconColor': resolveColorToArgb(
+            widget.color ?? symbol.color,
+            context,
+          ),
+        if ((widget.mode ?? symbol.mode) != null)
+          'iconRenderingMode': (widget.mode ?? symbol.mode)!.name,
+        if ((widget.gradient ?? symbol.gradient) != null)
+          'iconGradientEnabled': (widget.gradient ?? symbol.gradient) == true,
+        if (symbol.paletteColors != null)
+          'iconPaletteColors': symbol.paletteColors!
+              .map((c) => resolveColorToArgb(c, context))
+              .toList(),
+      },
+    };
+
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParamsCodec: const StandardMessageCodec(),
+      creationParams: creationParams,
+      onPlatformViewCreated: _onPlatformViewCreated,
+    );
+
+    // Ensure the platform view always has finite constraints
+    final fallbackSize = widget.size ?? widget.symbol.size;
+    final h = widget.height ?? fallbackSize;
+    final w = fallbackSize;
+    return SizedBox(width: w, height: h, child: platformView);
+  }
 }

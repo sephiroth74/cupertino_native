@@ -8,48 +8,6 @@ import 'package:flutter/services.dart';
 /// A MacOS native level indicator rendered by the host platform.
 /// On unsupported platforms, this renders a placeholder.
 class CNLevelIndicator extends StatefulWidget {
-  /// Level indicator style. This controls the overall appearance of the control and
-  /// behavior of the level indicator.
-  final CNLevelIndicatorStyle levelIndicatorStyle;
-
-  /// Whether the level indicator sends value change events continuously as the
-  final bool isContinuous;
-
-  /// Whether the level indicator is editable by the user. When false, the control
-  final bool isEditable;
-
-  /// Called when the user changes the value of the level indicator. The new
-  final ValueChanged<double>? onChanged;
-
-  /// The current value of the level indicator. This is clamped to be between
-  final double value;
-
-  /// The minimum value of the level indicator. Defaults to 0.0.
-  final double minValue;
-
-  /// The maximum value of the level indicator. Defaults to 1.0.
-  final double maxValue;
-
-  /// The fill color of the level indicator.
-  final Color? fillColor;
-
-  /// The warning color of the level indicator, used when the value is in a
-  final Color? warningColor;
-
-  /// The critical color of the level indicator, used when the value is in a
-  final Color? criticalColor;
-
-  /// The value at which the level indicator starts showing the warning color. If
-  /// null, the warning color is not used.
-  final double? warningValue;
-
-  /// The value at which the level indicator starts showing the critical color. If
-  /// null, the critical color is not used.
-  final double? criticalValue;
-
-  /// Whether the level indicator is enabled. This is true if [onChanged] is not null.
-  bool get isEnabled => onChanged != null;
-
   /// Creates a [CNLevelIndicator] with the given properties.
   const CNLevelIndicator({
     super.key,
@@ -67,27 +25,62 @@ class CNLevelIndicator extends StatefulWidget {
     this.criticalValue,
   });
 
+  /// The critical color of the level indicator, used when the value is in a
+  final Color? criticalColor;
+
+  /// The value at which the level indicator starts showing the critical color. If
+  /// null, the critical color is not used.
+  final double? criticalValue;
+
+  /// The fill color of the level indicator.
+  final Color? fillColor;
+
+  /// Whether the level indicator sends value change events continuously as the
+  final bool isContinuous;
+
+  /// Whether the level indicator is editable by the user. When false, the control
+  final bool isEditable;
+
+  /// Level indicator style. This controls the overall appearance of the control and
+  /// behavior of the level indicator.
+  final CNLevelIndicatorStyle levelIndicatorStyle;
+
+  /// The maximum value of the level indicator. Defaults to 1.0.
+  final double maxValue;
+
+  /// The minimum value of the level indicator. Defaults to 0.0.
+  final double minValue;
+
+  /// Called when the user changes the value of the level indicator. The new
+  final ValueChanged<double>? onChanged;
+
+  /// The current value of the level indicator. This is clamped to be between
+  final double value;
+
+  /// The warning color of the level indicator, used when the value is in a
+  final Color? warningColor;
+
+  /// The value at which the level indicator starts showing the warning color. If
+  /// null, the warning color is not used.
+  final double? warningValue;
+
   @override
   State<CNLevelIndicator> createState() => _CNLevelIndicatorState();
+
+  /// Whether the level indicator is enabled. This is true if [onChanged] is not null.
+  bool get isEnabled => onChanged != null;
 }
 
 class _CNLevelIndicatorState extends State<CNLevelIndicator> {
   MethodChannel? channel;
-  double? intrinsicWidth;
   double? intrinsicHeight;
+  double? intrinsicWidth;
   bool lastIsDark = false;
 
-  bool get isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    channel?.setMethodCallHandler(null);
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    syncBrightnessIfNeeded();
   }
 
   @override
@@ -97,67 +90,17 @@ class _CNLevelIndicatorState extends State<CNLevelIndicator> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    syncBrightnessIfNeeded();
+  void dispose() {
+    channel?.setMethodCallHandler(null);
+    super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    // Fallback to Flutter Slider on unsupported platforms.
-    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
-      return Placeholder();
-    }
-
-    const viewType = 'CupertinoNativeLevelIndicator';
-    final creationParams = <String, dynamic>{
-      'min': widget.minValue,
-      'max': widget.maxValue,
-      'value': widget.value,
-      'isDark': isDark,
-      'isEnabled': widget.isEnabled,
-      'levelIndicatorStyle': widget.levelIndicatorStyle.name,
-      'isContinuous': widget.isContinuous,
-      'isEditable': widget.isEditable,
-      'fillColor': resolveColorToArgb(widget.fillColor, context),
-      'warningColor': resolveColorToArgb(widget.warningColor, context),
-      'criticalColor': resolveColorToArgb(widget.criticalColor, context),
-      'warningValue': widget.warningValue,
-      'criticalValue': widget.criticalValue,
-    };
-
-    final platformView = AppKitView(
-      viewType: viewType,
-      creationParams: creationParams,
-      creationParamsCodec: const StandardMessageCodec(),
-      onPlatformViewCreated: onPlatformViewCreated,
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-        Factory<HorizontalDragGestureRecognizer>(
-          () => HorizontalDragGestureRecognizer(),
-        ),
-        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-      },
-    );
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final hasBoundedWidth = constraints.hasBoundedWidth;
-
-        final preferIntrinsicWidth = !hasBoundedWidth;
-
-        double? width;
-        if (preferIntrinsicWidth) {
-          width = intrinsicWidth ?? 44.0;
-        } else {
-          width = intrinsicWidth;
-        }
-        double? height;
-        height = intrinsicHeight ?? 24.0;
-
-        return SizedBox(width: width, height: height, child: platformView);
-      },
-    );
+  void initState() {
+    super.initState();
   }
+
+  bool get isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   void onPlatformViewCreated(int id) {
     channel = MethodChannel('CupertinoNativeLevelIndicator_$id');
@@ -290,5 +233,62 @@ class _CNLevelIndicatorState extends State<CNLevelIndicator> {
       await ch.invokeMethod('setIsDark', {'value': isDark});
       lastIsDark = isDark;
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Fallback to Flutter Slider on unsupported platforms.
+    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
+      return Placeholder();
+    }
+
+    const viewType = 'CupertinoNativeLevelIndicator';
+    final creationParams = <String, dynamic>{
+      'min': widget.minValue,
+      'max': widget.maxValue,
+      'value': widget.value,
+      'isDark': isDark,
+      'isEnabled': widget.isEnabled,
+      'levelIndicatorStyle': widget.levelIndicatorStyle.name,
+      'isContinuous': widget.isContinuous,
+      'isEditable': widget.isEditable,
+      'fillColor': resolveColorToArgb(widget.fillColor, context),
+      'warningColor': resolveColorToArgb(widget.warningColor, context),
+      'criticalColor': resolveColorToArgb(widget.criticalColor, context),
+      'warningValue': widget.warningValue,
+      'criticalValue': widget.criticalValue,
+    };
+
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParams: creationParams,
+      creationParamsCodec: const StandardMessageCodec(),
+      onPlatformViewCreated: onPlatformViewCreated,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<HorizontalDragGestureRecognizer>(
+          () => HorizontalDragGestureRecognizer(),
+        ),
+        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+      },
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedWidth = constraints.hasBoundedWidth;
+
+        final preferIntrinsicWidth = !hasBoundedWidth;
+
+        double? width;
+        if (preferIntrinsicWidth) {
+          width = intrinsicWidth ?? 44.0;
+        } else {
+          width = intrinsicWidth;
+        }
+        double? height;
+        height = intrinsicHeight ?? 24.0;
+
+        return SizedBox(width: width, height: height, child: platformView);
+      },
+    );
   }
 }

@@ -12,8 +12,8 @@ class SegmentedControlDemoPage extends StatefulWidget {
 class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
   int _basicSegmentedControlIndex = 0;
   int _coloredSegmentedControlIndex = 1;
-  int _shrinkWrappedSegmentedControlIndex = 0;
   int _iconSegmentedControlIndex = 0;
+  int _shrinkWrappedSegmentedControlIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -96,11 +96,12 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
                 ],
                 selectedIndex: _iconSegmentedControlIndex,
                 iconColor: CupertinoColors.systemBlue,
+                iconSize: 12.0,
                 iconRenderingMode: CNSymbolRenderingMode.hierarchical,
-                shrinkWrap: true,
+                shrinkWrap: false,
                 onValueChanged: (i) =>
                     setState(() => _iconSegmentedControlIndex = i),
-                height: 48,
+                height: 36,
               ),
             ),
           ],

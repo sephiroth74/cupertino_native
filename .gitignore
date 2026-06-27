@@ -35,3 +35,5 @@ example/macos/Build
 SPLIT_VIEW_IMPLEMENTATION_PLAN.md
 WIDGETS_STATUS.md
 ANALISI_WIDGET_STRUTTURA.md
+.vscode/settings.json
+.vscode/tasks.json

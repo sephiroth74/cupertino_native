@@ -9,8 +9,8 @@ class SliderDemoPage extends StatefulWidget {
 }
 
 class _SliderDemoPageState extends State<SliderDemoPage> {
-  double _defaultSliderValue = .5;
   double _coloredSliderValue = 50;
+  double _defaultSliderValue = .5;
   CNControlSize _size = CNControlSize.regular;
 
   void _onSliderChange(double v) {

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'demos/slider.dart';
 import 'demos/switch.dart';
 import 'demos/segmented_control.dart';
+import 'demos/picker.dart';
 import 'demos/tab_bar.dart';
 import 'demos/icon.dart';
 import 'demos/image.dart';
@@ -40,8 +41,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool _isDarkMode = false;
   Color _accentColor = CupertinoColors.systemBlue;
+  bool _isDarkMode = false;
 
   void _toggleTheme() {
     setState(() {
@@ -82,10 +83,10 @@ class HomePage extends StatelessWidget {
     required this.onSelectAccentColor,
   });
 
-  final bool isDarkMode;
-  final VoidCallback onToggleTheme;
   final Color accentColor;
+  final bool isDarkMode;
   final ValueChanged<Color> onSelectAccentColor;
+  final VoidCallback onToggleTheme;
 
   static const _systemColors = <MapEntry<String, Color>>[
     MapEntry('Red', CupertinoColors.systemRed),
@@ -117,9 +118,7 @@ class HomePage extends StatelessWidget {
               title: 'Accent Color',
               image: CNImage(
                 systemSymbolName: 'circle.fill',
-                symbolConfiguration: CNSymbolConfiguration.monochrome(
-                  accentColor,
-                ),
+                symbolConfiguration: CNSymbolConfiguration.monochrome(accentColor),
               ),
               menu: CNMenu(
                 items: _systemColors.map((entry) {
@@ -127,13 +126,9 @@ class HomePage extends StatelessWidget {
                     title: entry.key,
                     image: CNImage(
                       systemSymbolName: 'circle.fill',
-                      symbolConfiguration: CNSymbolConfiguration.monochrome(
-                        entry.value,
-                      ),
+                      symbolConfiguration: CNSymbolConfiguration.monochrome(entry.value),
                     ),
-                    state: accentColor == entry.value
-                        ? CNMenuItemState.on
-                        : CNMenuItemState.off,
+                    state: accentColor == entry.value ? CNMenuItemState.on : CNMenuItemState.off,
                     tag: entry.value.toARGB32(),
                     enabled: true,
                   );
@@ -148,10 +143,7 @@ class HomePage extends StatelessWidget {
               },
             ),
             const SizedBox(width: 8),
-            CNButton.icon(
-              icon: CNSymbol(isDarkMode ? 'sun.max' : 'moon', size: 18),
-              onPressed: onToggleTheme,
-            ),
+            CNButton.icon(icon: CNSymbol(isDarkMode ? 'sun.max' : 'moon', size: 18), onPressed: onToggleTheme),
           ],
         ),
       ),
@@ -163,54 +155,42 @@ class HomePage extends StatelessWidget {
             children: [
               CupertinoListTile(
                 title: Text('Slider'),
-                leading: CNIcon(
-                  symbol: CNSymbol('slider.horizontal.3', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('slider.horizontal.3', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => const SliderDemoPage()),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SliderDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Switch'),
-                leading: CNIcon(
-                  symbol: CNSymbol('switch.2', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('switch.2', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => const SwitchDemoPage()),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SwitchDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Checkbox'),
-                leading: CNIcon(
-                  symbol: CNSymbol('checkmark.square', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('checkmark.square', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const CheckboxDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const CheckboxDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Segmented Control'),
-                leading: CNIcon(
-                  symbol: CNSymbol('rectangle.split.3x1', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const SegmentedControlDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SegmentedControlDemoPage()));
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Picker (SwiftUI)'),
+                leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1.fill', color: accentColor)),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const PickerDemoPage()));
                 },
               ),
               CupertinoListTile(
@@ -218,9 +198,7 @@ class HomePage extends StatelessWidget {
                 leading: CNIcon(symbol: CNSymbol('app', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => const IconDemoPage()),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const IconDemoPage()));
                 },
               ),
               CupertinoListTile(
@@ -228,63 +206,39 @@ class HomePage extends StatelessWidget {
                 leading: CNIcon(symbol: CNSymbol('photo', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => const ImageDemoPage()),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ImageDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Popup Menu Button'),
-                leading: CNIcon(
-                  symbol: CNSymbol('ellipsis.circle', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('ellipsis.circle', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const PopupMenuButtonDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const PopupMenuButtonDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Button'),
-                leading: CNIcon(
-                  symbol: CNSymbol('hand.tap', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('hand.tap', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => const ButtonDemoPage()),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ButtonDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Combo Button'),
-                leading: CNIcon(
-                  symbol: CNSymbol('chevron.down.square', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('chevron.down.square', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const ComboButtonDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ComboButtonDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Color Well'),
-                leading: CNIcon(
-                  symbol: CNSymbol('paintpalette', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('paintpalette', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const ColorWellDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ColorWellDemoPage()));
                 },
               ),
               CupertinoListTile(
@@ -292,25 +246,15 @@ class HomePage extends StatelessWidget {
                 leading: CNIcon(symbol: CNSymbol('folder', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const PathControlDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const PathControlDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Progress Indicators'),
-                leading: CNIcon(
-                  symbol: CNSymbol('hourglass', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('hourglass', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const ProgressIndicatorsPageDemo(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ProgressIndicatorsPageDemo()));
                 },
               ),
               CupertinoListTile(
@@ -318,198 +262,111 @@ class HomePage extends StatelessWidget {
                 leading: CNIcon(symbol: CNSymbol('gauge', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const LevelIndicatorDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const LevelIndicatorDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Steppers'),
-                leading: CNIcon(
-                  symbol: CNSymbol('plusminus', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('plusminus', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => const StepperDemoPage()),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const StepperDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Date Picker'),
-                leading: CNIcon(
-                  symbol: CNSymbol('calendar', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('calendar', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const DatePickerDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const DatePickerDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Search Field'),
-                leading: CNIcon(
-                  symbol: CNSymbol('magnifyingglass', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('magnifyingglass', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const SearchFieldDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SearchFieldDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Text Field'),
-                leading: CNIcon(
-                  symbol: CNSymbol(
-                    'character.cursor.ibeam',
-                    color: accentColor,
-                  ),
-                ),
+                leading: CNIcon(symbol: CNSymbol('character.cursor.ibeam', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const TextFieldDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const TextFieldDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Secure Text Field'),
-                leading: CNIcon(
-                  symbol: CNSymbol('lock.shield', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('lock.shield', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const SecureTextFieldDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SecureTextFieldDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Text View / Text Area'),
-                leading: CNIcon(
-                  symbol: CNSymbol('text.justify.left', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('text.justify.left', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const TextViewDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const TextViewDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Combo Box'),
-                leading: CNIcon(
-                  symbol: CNSymbol('list.bullet.rectangle', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('list.bullet.rectangle', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const ComboBoxDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ComboBoxDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Alert'),
-                leading: CNIcon(
-                  symbol: CNSymbol(
-                    'exclamationmark.bubble',
-                    color: accentColor,
-                  ),
-                ),
+                leading: CNIcon(symbol: CNSymbol('exclamationmark.bubble', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => const AlertDemoPage()),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const AlertDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Popover'),
-                leading: CNIcon(
-                  symbol: CNSymbol(
-                    'rectangle.on.rectangle',
-                    color: accentColor,
-                  ),
-                ),
+                leading: CNIcon(symbol: CNSymbol('rectangle.on.rectangle', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => const PopoverDemoPage()),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const PopoverDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Context Menu'),
-                leading: CNIcon(
-                  symbol: CNSymbol('ellipsis.rectangle', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('ellipsis.rectangle', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const ContextMenuDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ContextMenuDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Sheet'),
-                leading: CNIcon(
-                  symbol: CNSymbol(
-                    'square.and.line.vertical.and.square',
-                    color: accentColor,
-                  ),
-                ),
+                leading: CNIcon(symbol: CNSymbol('square.and.line.vertical.and.square', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => const SheetDemoPage()),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SheetDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Toolbar'),
-                leading: CNIcon(
-                  symbol: CNSymbol(
-                    'rectangle.topthird.inset.filled',
-                    color: accentColor,
-                  ),
-                ),
+                leading: CNIcon(symbol: CNSymbol('rectangle.topthird.inset.filled', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => const ToolbarDemoPage()),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ToolbarDemoPage()));
                 },
               ),
               CupertinoListTile(
                 title: Text('Split View'),
-                leading: CNIcon(
-                  symbol: CNSymbol('rectangle.split.2x1', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('rectangle.split.2x1', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (_) => const SplitViewDemoPage(),
-                    ),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SplitViewDemoPage()));
                 },
               ),
             ],
@@ -519,14 +376,10 @@ class HomePage extends StatelessWidget {
             children: [
               CupertinoListTile(
                 title: Text('Tab Bar'),
-                leading: CNIcon(
-                  symbol: CNSymbol('square.grid.2x2', color: accentColor),
-                ),
+                leading: CNIcon(symbol: CNSymbol('square.grid.2x2', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(builder: (_) => const TabBarDemoPage()),
-                  );
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const TabBarDemoPage()));
                 },
               ),
             ],

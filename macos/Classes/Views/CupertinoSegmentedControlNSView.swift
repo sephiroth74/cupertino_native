@@ -12,6 +12,9 @@ class CupertinoSegmentedControlNSView: NSView {
   private var perSymbolGradientEnabled: [NSNumber?] = []
   private var defaultIconRenderingMode: String? = nil
   private var defaultIconGradientEnabled: Bool = false
+  private var defaultIconColor: NSColor? = nil
+  private var perSymbolColors: [NSColor?] = []
+  private var tintColor: NSColor? = nil
 
   init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
     self.channel = FlutterMethodChannel(name: "CupertinoNativeSegmentedControl_\(viewId)", binaryMessenger: messenger)
@@ -29,6 +32,7 @@ class CupertinoSegmentedControlNSView: NSView {
       if let sizes = dict["sfSymbolSizes"] as? [NSNumber] { self.perSymbolSizes = sizes.map { CGFloat(truncating: $0) } }
       if let modes = dict["sfSymbolRenderingModes"] as? [String?] { self.perSymbolModes = modes }
       if let gradients = dict["sfSymbolGradientEnabled"] as? [NSNumber?] { self.perSymbolGradientEnabled = gradients }
+      if let colors = dict["sfSymbolColors"] as? [NSNumber] { self.perSymbolColors = colors.map { NSColor(srgbRed: CGFloat(($0.intValue >> 16) & 0xFF) / 255.0, green: CGFloat(($0.intValue >> 8) & 0xFF) / 255.0, blue: CGFloat($0.intValue & 0xFF) / 255.0, alpha: CGFloat(($0.intValue >> 24) & 0xFF) / 255.0) } }
       if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
       if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
       if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
@@ -36,6 +40,12 @@ class CupertinoSegmentedControlNSView: NSView {
         if let s = style["iconSize"] as? NSNumber { self.defaultIconSize = CGFloat(truncating: s) }
         if let mode = style["iconRenderingMode"] as? String { self.defaultIconRenderingMode = mode }
         if let g = style["iconGradientEnabled"] as? NSNumber { self.defaultIconGradientEnabled = g.boolValue }
+        if let color = style["iconColor"] as? NSNumber {
+          self.defaultIconColor = ColorUtils.colorFromARGB(color.intValue)
+        }
+        if let tint = style["tint"] as? NSNumber {
+          self.tintColor = ColorUtils.colorFromARGB(tint.intValue)
+        }
       }
     }
 
@@ -53,6 +63,9 @@ class CupertinoSegmentedControlNSView: NSView {
 
     control.target = self
     control.action = #selector(onChanged(_:))
+    
+    // Add KVO observer to track segment changes
+    control.addObserver(self, forKeyPath: "selectedSegment", options: .new, context: nil)
 
     addSubview(control)
     control.translatesAutoresizingMaskIntoConstraints = false
@@ -82,6 +95,9 @@ class CupertinoSegmentedControlNSView: NSView {
       case "setStyle":
         if let args = call.arguments as? [String: Any] {
           if let s = args["iconSize"] as? NSNumber { self.defaultIconSize = CGFloat(truncating: s) }
+          if let tint = args["tint"] as? NSNumber {
+            self.tintColor = ColorUtils.colorFromARGB(tint.intValue)
+          }
           self.configureSegments()
           result(nil)
         } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
@@ -98,6 +114,16 @@ class CupertinoSegmentedControlNSView: NSView {
 
   required init?(coder: NSCoder) { return nil }
 
+  override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+    if keyPath == "selectedSegment" {
+      configureSegments()
+    }
+  }
+
+  deinit {
+    control.removeObserver(self, forKeyPath: "selectedSegment")
+  }
+
   private func configureSegments() {
     let count = max(labels.count, symbols.count)
     control.segmentCount = count
@@ -109,28 +135,37 @@ class CupertinoSegmentedControlNSView: NSView {
             image = image.withSymbolConfiguration(cfg) ?? image
           }
         }
-        // Rendering mode selection (best-effort)
+        
+        // Determine if this segment is selected
+        let isSelected = (i == control.selectedSegment)
+        
+        // Use tint color for selected segment, otherwise use default icon color
+        let iconColor = isSelected ? tintColor : ((i < perSymbolColors.count && perSymbolColors[i] != nil) ? perSymbolColors[i] : defaultIconColor)
+        
+        // Apply rendering mode
         let mode = (i < perSymbolModes.count ? perSymbolModes[i] : nil) ?? defaultIconRenderingMode
-        if let mode = mode {
+        if let mode = mode, #available(macOS 12.0, *) {
           switch mode {
           case "hierarchical":
-            // Best-effort: requires a color; use no-op if none provided globally
-            if #available(macOS 12.0, *) {
-              // No per-icon color; rely on defaults
-              // If needed, this can consult a global default icon color in future
-            }
-          case "palette":
-            // macOS lacks easy per-icon palette with NSImage API; rely on contentTintColor
-            break
-          case "multicolor":
-            if #available(macOS 12.0, *) {
-              let cfg = NSImage.SymbolConfiguration.preferringMulticolor()
+            if let color = iconColor {
+              let cfg = NSImage.SymbolConfiguration(hierarchicalColor: color)
               image = image.withSymbolConfiguration(cfg) ?? image
             }
+          case "palette":
+            let paletteColors = NSImage.SymbolConfiguration.preferringMulticolor()
+            image = image.withSymbolConfiguration(paletteColors) ?? image
+          case "multicolor":
+            let cfg = NSImage.SymbolConfiguration.preferringMulticolor()
+            image = image.withSymbolConfiguration(cfg) ?? image
           default:
-            break
+            if let color = iconColor {
+              image = image.tinted(with: color) ?? image
+            }
           }
+        } else if let color = iconColor {
+          image = image.tinted(with: color) ?? image
         }
+        
         control.setImage(image, forSegment: i)
       } else if i < labels.count {
         control.setLabel(labels[i], forSegment: i)
@@ -150,5 +185,18 @@ class CupertinoSegmentedControlNSView: NSView {
     let g = CGFloat((argb >> 8) & 0xFF) / 255.0
     let b = CGFloat(argb & 0xFF) / 255.0
     return NSColor(srgbRed: r, green: g, blue: b, alpha: a)
+  }
+}
+
+// MARK: - NSImage Extension for Tinting
+extension NSImage {
+  func tinted(with color: NSColor) -> NSImage? {
+    let image = copy() as! NSImage
+    image.lockFocus()
+    color.set()
+    let imageRect = NSRect(origin: .zero, size: image.size)
+    imageRect.fill(using: .sourceAtop)
+    image.unlockFocus()
+    return image
   }
 }

@@ -5,8 +5,8 @@ repository: https://github.com/sephiroth74/cupertino_native
 issue_tracker: https://github.com/sephiroth74/cupertino_native/issues
 
 environment:
-  sdk: ^3.9.0
-  flutter: '>=3.3.0'
+  sdk: '>=3.8.0 <4.0.0'
+  flutter: '>=3.44.0'
 
 dependencies:
   equatable: ^2.0.8

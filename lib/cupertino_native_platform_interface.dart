@@ -8,9 +8,8 @@ abstract class CupertinoNativePlatform extends PlatformInterface {
   /// Constructs a CupertinoNativePlatform.
   CupertinoNativePlatform() : super(token: _token);
 
-  static final Object _token = Object();
-
   static CupertinoNativePlatform _instance = MethodChannelCupertinoNative();
+  static final Object _token = Object();
 
   /// The default instance of [CupertinoNativePlatform] to use.
   ///

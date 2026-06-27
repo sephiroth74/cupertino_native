@@ -21,49 +21,47 @@ class CNStepper extends StatefulWidget {
   }) : assert(min < max),
        assert(step > 0);
 
-  /// Current value of the stepper.
-  final double value;
-
-  /// Callback invoked when the user changes the value.
-  final ValueChanged<double>? onChanged;
-
-  /// Minimum value.
-  final double min;
-
-  /// Maximum value.
-  final double max;
-
-  /// Increment step for each action.
-  final double step;
+  /// Control size of the stepper.
+  final CNControlSize controlSize;
 
   /// Whether holding the stepper repeats the action.
   final bool isAutorepeat;
 
+  /// Maximum value.
+  final double max;
+
+  /// Minimum value.
+  final double min;
+
+  /// Callback invoked when the user changes the value.
+  final ValueChanged<double>? onChanged;
+
+  /// Increment step for each action.
+  final double step;
+
+  /// Current value of the stepper.
+  final double value;
+
   /// Whether the value wraps at min/max.
   final bool valueWraps;
 
-  /// Control size of the stepper.
-  final CNControlSize controlSize;
+  @override
+  State<CNStepper> createState() => _CNStepperState();
 
   /// Whether the stepper is enabled.
   bool get isEnabled => onChanged != null;
-
-  @override
-  State<CNStepper> createState() => _CNStepperState();
 }
 
 class _CNStepperState extends State<CNStepper> {
   MethodChannel? _channel;
-  double? _intrinsicWidth;
   double? _intrinsicHeight;
+  double? _intrinsicWidth;
   bool _lastIsDark = false;
 
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-
   @override
-  void dispose() {
-    _channel?.setMethodCallHandler(null);
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
   }
 
   @override
@@ -73,57 +71,12 @@ class _CNStepperState extends State<CNStepper> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
+  void dispose() {
+    _channel?.setMethodCallHandler(null);
+    super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
-      return Placeholder();
-    }
-
-    const viewType = 'CupertinoNativeStepper';
-    final creationParams = <String, dynamic>{
-      'min': widget.min,
-      'max': widget.max,
-      'value': widget.value,
-      'step': widget.step,
-      'isEnabled': widget.isEnabled,
-      'isAutorepeat': widget.isAutorepeat,
-      'valueWraps': widget.valueWraps,
-      'controlSize': widget.controlSize.name,
-      'isDark': _isDark,
-    };
-
-    final platformView = AppKitView(
-      viewType: viewType,
-      creationParams: creationParams,
-      creationParamsCodec: const StandardMessageCodec(),
-      onPlatformViewCreated: _onPlatformViewCreated,
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-      },
-    );
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final hasBoundedWidth = constraints.hasBoundedWidth;
-        final preferIntrinsicWidth = !hasBoundedWidth;
-
-        double? width;
-        if (preferIntrinsicWidth) {
-          width = _intrinsicWidth ?? 20.0;
-        } else {
-          width = _intrinsicWidth;
-        }
-        final height = _intrinsicHeight ?? 26.0;
-
-        return SizedBox(width: width, height: height, child: platformView);
-      },
-    );
-  }
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   void _onPlatformViewCreated(int id) {
     _channel = MethodChannel('CupertinoNativeStepper_$id');
@@ -227,5 +180,52 @@ class _CNStepperState extends State<CNStepper> {
       await ch.invokeMethod('setIsDark', {'value': _isDark});
       _lastIsDark = _isDark;
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      return Placeholder();
+    }
+
+    const viewType = 'CupertinoNativeStepper';
+    final creationParams = <String, dynamic>{
+      'min': widget.min,
+      'max': widget.max,
+      'value': widget.value,
+      'step': widget.step,
+      'isEnabled': widget.isEnabled,
+      'isAutorepeat': widget.isAutorepeat,
+      'valueWraps': widget.valueWraps,
+      'controlSize': widget.controlSize.name,
+      'isDark': _isDark,
+    };
+
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParams: creationParams,
+      creationParamsCodec: const StandardMessageCodec(),
+      onPlatformViewCreated: _onPlatformViewCreated,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+      },
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedWidth = constraints.hasBoundedWidth;
+        final preferIntrinsicWidth = !hasBoundedWidth;
+
+        double? width;
+        if (preferIntrinsicWidth) {
+          width = _intrinsicWidth ?? 20.0;
+        } else {
+          width = _intrinsicWidth;
+        }
+        final height = _intrinsicHeight ?? 26.0;
+
+        return SizedBox(width: width, height: height, child: platformView);
+      },
+    );
   }
 }

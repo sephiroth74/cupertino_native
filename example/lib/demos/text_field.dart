@@ -14,17 +14,17 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
   String _selectionInfo = '';
 
   @override
-  void initState() {
-    super.initState();
-    _controller.addListener(_updateSelectionInfo);
-    _updateSelectionInfo();
-  }
-
-  @override
   void dispose() {
     _controller.removeListener(_updateSelectionInfo);
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_updateSelectionInfo);
+    _updateSelectionInfo();
   }
 
   void _updateSelectionInfo() {

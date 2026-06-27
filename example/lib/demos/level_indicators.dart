@@ -10,10 +10,10 @@ class LevelIndicatorDemoPage extends StatefulWidget {
 }
 
 class _LevelIndicatorDemoPageState extends State<LevelIndicatorDemoPage> {
+  double _maxValue = 10.0;
+  double _minValue = 0.0;
   // CNLevelIndicatorController controller = CNLevelIndicatorController(value: 3, minValue: 0, maxValue: 5);
   double _value = 5.0;
-  double _minValue = 0.0;
-  double _maxValue = 10.0;
 
   void _onLevelChange(double v) {
     setState(() {

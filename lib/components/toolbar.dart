@@ -62,20 +62,20 @@ class CNToolbarMenuItem {
       enabled = false,
       isSeparator = true;
 
+  /// Whether the item can be selected.
+  final bool enabled;
+
   /// Stable identifier for this menu item.
   final String id;
 
-  /// Visible title.
-  final String title;
+  /// Whether this entry is a separator.
+  final bool isSeparator;
 
   /// Optional integer tag.
   final int? tag;
 
-  /// Whether the item can be selected.
-  final bool enabled;
-
-  /// Whether this entry is a separator.
-  final bool isSeparator;
+  /// Visible title.
+  final String title;
 
   /// Serializes this item for method-channel transport.
   Map<String, dynamic> toMap() => {
@@ -99,21 +99,6 @@ class CNToolbarItem {
        text = null,
        placeholder = null,
        width = null,
-       items = null,
-       behavior = null,
-       menuItems = null,
-       comboButtonStyle = null;
-
-  /// Creates a toolbar search field item.
-  const CNToolbarItem.searchField({
-    required this.id,
-    this.label = 'Search',
-    this.toolTip,
-    this.text = '',
-    this.placeholder,
-    this.width = 180,
-  }) : kind = CNToolbarItemKind.searchField,
-       systemSymbolName = null,
        items = null,
        behavior = null,
        menuItems = null,
@@ -149,17 +134,44 @@ class CNToolbarItem {
        items = null,
        behavior = null;
 
-  /// Kind of item to render.
-  final CNToolbarItemKind kind;
+  /// Creates a toolbar search field item.
+  const CNToolbarItem.searchField({
+    required this.id,
+    this.label = 'Search',
+    this.toolTip,
+    this.text = '',
+    this.placeholder,
+    this.width = 180,
+  }) : kind = CNToolbarItemKind.searchField,
+       systemSymbolName = null,
+       items = null,
+       behavior = null,
+       menuItems = null,
+       comboButtonStyle = null;
+
+  /// Interaction mode for toolbar combo-box items.
+  final CNComboBoxBehavior? behavior;
+
+  /// Visual style for toolbar combo-button items.
+  final CNComboButtonStyle? comboButtonStyle;
 
   /// Stable identifier for this item.
   final String id;
 
+  /// Available items for toolbar combo-box items.
+  final List<String>? items;
+
+  /// Kind of item to render.
+  final CNToolbarItemKind kind;
+
   /// Visible label for this item.
   final String label;
 
-  /// Optional tooltip.
-  final String? toolTip;
+  /// Menu items for toolbar combo-button items.
+  final List<CNToolbarMenuItem>? menuItems;
+
+  /// Placeholder for search or combo-box items.
+  final String? placeholder;
 
   /// Optional SF Symbol name for icon.
   final String? systemSymbolName;
@@ -167,23 +179,11 @@ class CNToolbarItem {
   /// Current text value for search or combo-box items.
   final String? text;
 
-  /// Placeholder for search or combo-box items.
-  final String? placeholder;
+  /// Optional tooltip.
+  final String? toolTip;
 
   /// Preferred width for custom toolbar views.
   final double? width;
-
-  /// Available items for toolbar combo-box items.
-  final List<String>? items;
-
-  /// Interaction mode for toolbar combo-box items.
-  final CNComboBoxBehavior? behavior;
-
-  /// Menu items for toolbar combo-button items.
-  final List<CNToolbarMenuItem>? menuItems;
-
-  /// Visual style for toolbar combo-button items.
-  final CNComboButtonStyle? comboButtonStyle;
 
   /// Serializes this item for method-channel transport.
   Map<String, dynamic> toMap() => {
@@ -215,27 +215,6 @@ class CNToolbarEvent {
     this.menuItemTag,
   });
 
-  /// Stable identifier of the toolbar item that produced the event.
-  final String itemId;
-
-  /// Event type, such as `buttonPressed`, `searchChanged`, `comboBoxChanged`.
-  final String type;
-
-  /// Optional text payload.
-  final String? text;
-
-  /// Optional selected index for combo-box events.
-  final int? selectedIndex;
-
-  /// Optional selected menu item identifier.
-  final String? menuItemId;
-
-  /// Optional selected menu item title.
-  final String? menuItemTitle;
-
-  /// Optional selected menu item tag.
-  final int? menuItemTag;
-
   /// Deserializes a toolbar event from the native payload.
   factory CNToolbarEvent.fromMap(Map<Object?, Object?> map) {
     return CNToolbarEvent(
@@ -248,6 +227,27 @@ class CNToolbarEvent {
       menuItemTag: (map['menuItemTag'] as num?)?.toInt(),
     );
   }
+
+  /// Stable identifier of the toolbar item that produced the event.
+  final String itemId;
+
+  /// Optional selected menu item identifier.
+  final String? menuItemId;
+
+  /// Optional selected menu item tag.
+  final int? menuItemTag;
+
+  /// Optional selected menu item title.
+  final String? menuItemTitle;
+
+  /// Optional selected index for combo-box events.
+  final int? selectedIndex;
+
+  /// Optional text payload.
+  final String? text;
+
+  /// Event type, such as `buttonPressed`, `searchChanged`, `comboBoxChanged`.
+  final String type;
 }
 
 /// Utility API to configure native macOS window toolbars.
@@ -258,8 +258,8 @@ class CNToolbar {
   );
 
   static bool _eventsHandlerInstalled = false;
-  static ValueChanged<String>? _onItemPressed;
   static ValueChanged<CNToolbarEvent>? _onEvent;
+  static ValueChanged<String>? _onItemPressed;
 
   /// Sets or replaces the native toolbar on the host window.
   static Future<void> setItems({

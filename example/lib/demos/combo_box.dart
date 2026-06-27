@@ -11,8 +11,6 @@ class ComboBoxDemoPage extends StatefulWidget {
 class _ComboBoxDemoPageState extends State<ComboBoxDemoPage> {
   // Plain String state — no TextEditingController needed.
   String _editableText = 'Apple';
-  String _selectableText = 'Banana';
-  String _noneText = 'Cherry';
 
   final List<String> _items = [
     'Apple',
@@ -23,6 +21,9 @@ class _ComboBoxDemoPageState extends State<ComboBoxDemoPage> {
     'Fig',
     'Grape',
   ];
+
+  String _noneText = 'Cherry';
+  String _selectableText = 'Banana';
 
   @override
   Widget build(BuildContext context) {

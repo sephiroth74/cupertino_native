@@ -10,11 +10,11 @@ class CNTabBarItem {
   /// Creates a tab bar item description.
   const CNTabBarItem({this.label, this.icon});
 
-  /// Optional tab item label.
-  final String? label;
-
   /// Optional SF Symbol for the item.
   final CNSymbol? icon;
+
+  /// Optional tab item label.
+  final String? label;
 }
 
 /// A Cupertino-native tab bar. Uses native NSTabView style visuals.
@@ -35,37 +35,38 @@ class CNTabBar extends StatefulWidget {
     this.splitSpacing = 8.0,
   });
 
-  /// Items to display in the tab bar.
-  final List<CNTabBarItem> items;
+  /// Background color for the bar.
+  final Color? backgroundColor;
 
   /// The index of the currently selected item.
   final int currentIndex;
 
-  /// Called when the user selects a new item.
-  final ValueChanged<int> onTap;
-
-  /// Accent/tint color.
-  final Color? tint;
-
-  /// Background color for the bar.
-  final Color? backgroundColor;
+  /// Fixed height; if null uses intrinsic height reported by native view.
+  final double? height;
 
   /// Default icon size when item icon does not specify one.
   final double? iconSize;
 
-  /// Fixed height; if null uses intrinsic height reported by native view.
-  final double? height;
+  /// Items to display in the tab bar.
+  final List<CNTabBarItem> items;
+
+  /// Called when the user selects a new item.
+  final ValueChanged<int> onTap;
+
+  /// How many trailing items to pin right when [split] is true.
+  final int rightCount; // how many trailing items to pin right when split
+
+  /// When true, centers the split groups more tightly.
+  final bool shrinkCentered;
 
   /// When true, splits items between left and right sections.
   final bool split;
 
-  /// How many trailing items to pin right when [split] is true.
-  final int rightCount; // how many trailing items to pin right when split
-  /// When true, centers the split groups more tightly.
-  final bool shrinkCentered;
-
   /// Gap between left/right halves when split.
   final double splitSpacing; // gap between left/right halves when split
+
+  /// Accent/tint color.
+  final Color? tint;
 
   @override
   State<CNTabBar> createState() => _CNTabBarState();
@@ -73,21 +74,24 @@ class CNTabBar extends StatefulWidget {
 
 class _CNTabBarState extends State<CNTabBar> {
   MethodChannel? _channel;
-  int? _lastIndex;
-  int? _lastTint;
-  int? _lastBg;
-  bool? _lastIsDark;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
+  int? _lastBg;
+  int? _lastIndex;
+  bool? _lastIsDark;
   List<String>? _lastLabels;
-  List<String>? _lastSymbols;
-  bool? _lastSplit;
   int? _lastRightCount;
+  bool? _lastSplit;
   double? _lastSplitSpacing;
+  List<String>? _lastSymbols;
+  int? _lastTint;
 
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-  Color? get _effectiveTint =>
-      widget.tint ?? CupertinoTheme.of(context).primaryColor;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
+    _syncPropsToNativeIfNeeded();
+  }
 
   @override
   void didUpdateWidget(covariant CNTabBar oldWidget) {
@@ -101,73 +105,10 @@ class _CNTabBarState extends State<CNTabBar> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
-      // Simple Flutter fallback using CupertinoTabBar for non-Apple platforms.
-      return SizedBox(
-        height: widget.height,
-        child: CupertinoTabBar(
-          items: [
-            for (final item in widget.items)
-              BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.circle),
-                label: item.label,
-              ),
-          ],
-          currentIndex: widget.currentIndex,
-          onTap: widget.onTap,
-          backgroundColor: widget.backgroundColor,
-          inactiveColor: CupertinoColors.inactiveGray,
-          activeColor: widget.tint ?? CupertinoTheme.of(context).primaryColor,
-        ),
-      );
-    }
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
-    final labels = widget.items.map((e) => e.label ?? '').toList();
-    final symbols = widget.items.map((e) => e.icon?.name ?? '').toList();
-    final sizes = widget.items
-        .map((e) => (widget.iconSize ?? e.icon?.size))
-        .toList();
-    final colors = widget.items
-        .map((e) => resolveColorToArgb(e.icon?.color, context))
-        .toList();
-
-    final creationParams = <String, dynamic>{
-      'labels': labels,
-      'sfSymbols': symbols,
-      'sfSymbolSizes': sizes,
-      'sfSymbolColors': colors,
-      'selectedIndex': widget.currentIndex,
-      'isDark': _isDark,
-      'split': widget.split,
-      'rightCount': widget.rightCount,
-      'splitSpacing': widget.splitSpacing,
-      'style': encodeStyle(context, tint: _effectiveTint)
-        ..addAll({
-          if (widget.backgroundColor != null)
-            'backgroundColor': resolveColorToArgb(
-              widget.backgroundColor,
-              context,
-            ),
-        }),
-    };
-
-    final viewType = 'CupertinoNativeTabBar';
-    final platformView = AppKitView(
-      viewType: viewType,
-      creationParams: creationParams,
-      creationParamsCodec: const StandardMessageCodec(),
-      onPlatformViewCreated: _onCreated,
-    );
-
-    final h = widget.height ?? _intrinsicHeight ?? 50.0;
-    if (!widget.split && widget.shrinkCentered) {
-      final w = _intrinsicWidth;
-      return SizedBox(height: h, width: w, child: platformView);
-    }
-    return SizedBox(height: h, child: platformView);
-  }
+  Color? get _effectiveTint =>
+      widget.tint ?? CupertinoTheme.of(context).primaryColor;
 
   void _onCreated(int id) {
     final ch = MethodChannel('CupertinoNativeTabBar_$id');
@@ -254,13 +195,6 @@ class _CNTabBarState extends State<CNTabBar> {
     }
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
-    _syncPropsToNativeIfNeeded();
-  }
-
   Future<void> _syncBrightnessIfNeeded() async {
     final ch = _channel;
     if (ch == null) return;
@@ -290,5 +224,73 @@ class _CNTabBarState extends State<CNTabBar> {
         if (w != null && w > 0) _intrinsicWidth = w;
       });
     } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      // Simple Flutter fallback using CupertinoTabBar for non-Apple platforms.
+      return SizedBox(
+        height: widget.height,
+        child: CupertinoTabBar(
+          items: [
+            for (final item in widget.items)
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.circle),
+                label: item.label,
+              ),
+          ],
+          currentIndex: widget.currentIndex,
+          onTap: widget.onTap,
+          backgroundColor: widget.backgroundColor,
+          inactiveColor: CupertinoColors.inactiveGray,
+          activeColor: widget.tint ?? CupertinoTheme.of(context).primaryColor,
+        ),
+      );
+    }
+
+    final labels = widget.items.map((e) => e.label ?? '').toList();
+    final symbols = widget.items.map((e) => e.icon?.name ?? '').toList();
+    final sizes = widget.items
+        .map((e) => (widget.iconSize ?? e.icon?.size))
+        .toList();
+    final colors = widget.items
+        .map((e) => resolveColorToArgb(e.icon?.color, context))
+        .toList();
+
+    final creationParams = <String, dynamic>{
+      'labels': labels,
+      'sfSymbols': symbols,
+      'sfSymbolSizes': sizes,
+      'sfSymbolColors': colors,
+      'selectedIndex': widget.currentIndex,
+      'isDark': _isDark,
+      'split': widget.split,
+      'rightCount': widget.rightCount,
+      'splitSpacing': widget.splitSpacing,
+      'style': encodeStyle(context, tint: _effectiveTint)
+        ..addAll({
+          if (widget.backgroundColor != null)
+            'backgroundColor': resolveColorToArgb(
+              widget.backgroundColor,
+              context,
+            ),
+        }),
+    };
+
+    final viewType = 'CupertinoNativeTabBar';
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParams: creationParams,
+      creationParamsCodec: const StandardMessageCodec(),
+      onPlatformViewCreated: _onCreated,
+    );
+
+    final h = widget.height ?? _intrinsicHeight ?? 50.0;
+    if (!widget.split && widget.shrinkCentered) {
+      final w = _intrinsicWidth;
+      return SizedBox(height: h, width: w, child: platformView);
+    }
+    return SizedBox(height: h, child: platformView);
   }
 }

@@ -10,30 +10,6 @@ const double _kDefaultComboButtonHeight = 24.0;
 
 /// A native macOS combo button that can show a menu attached to a button.
 class CNComboButton extends StatefulWidget {
-  /// The explicit menu model used by the combo button.
-  final CNMenu? menu;
-
-  /// Convenience list of string items used to build a menu internally.
-  final List<String>? items;
-
-  /// The control size used by the native AppKit control.
-  final CNControlSize controlSize;
-
-  /// The button title displayed in the native control.
-  final String title;
-
-  /// An optional image to display in the combo button.
-  final CNImage? image;
-
-  /// The visual combo button style.
-  final CNComboButtonStyle style;
-
-  /// Callback invoked when the main button area is pressed.
-  final ValueChanged<CNComboButton>? onPressed;
-
-  /// Callback invoked when a menu item is selected.
-  final ValueChanged<CNMenuItem>? onMenuItemSelected;
-
   /// Creates a combo button backed by either [menu] or [items].
   const CNComboButton({
     super.key,
@@ -54,6 +30,30 @@ class CNComboButton extends StatefulWidget {
          'Must provide either menu or items.',
        );
 
+  /// The control size used by the native AppKit control.
+  final CNControlSize controlSize;
+
+  /// An optional image to display in the combo button.
+  final CNImage? image;
+
+  /// Convenience list of string items used to build a menu internally.
+  final List<String>? items;
+
+  /// The explicit menu model used by the combo button.
+  final CNMenu? menu;
+
+  /// Callback invoked when a menu item is selected.
+  final ValueChanged<CNMenuItem>? onMenuItemSelected;
+
+  /// Callback invoked when the main button area is pressed.
+  final ValueChanged<CNComboButton>? onPressed;
+
+  /// The visual combo button style.
+  final CNComboButtonStyle style;
+
+  /// The button title displayed in the native control.
+  final String title;
+
   @override
   State<CNComboButton> createState() => _CNComboButtonState();
 
@@ -64,23 +64,15 @@ class CNComboButton extends StatefulWidget {
 class _CNComboButtonState extends State<CNComboButton> {
   MethodChannel? _channel;
   CNMenu? _internalMenu;
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-  double? _intrinsicWidth;
   double? _intrinsicHeight;
+  double? _intrinsicWidth;
   bool _lastIsDark = false;
   CNMenu? _lastMenu;
 
-  CNMenu get menu {
-    if (widget.menu != null) return widget.menu!;
-    return _internalMenu ??= CNMenu(
-      items: widget.items!.map((item) => CNMenuItem(title: item)).toList(),
-    );
-  }
-
   @override
-  void initState() {
-    super.initState();
-    menu.addListener(_onMenuChanged);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
   }
 
   @override
@@ -98,71 +90,19 @@ class _CNComboButtonState extends State<CNComboButton> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
+  void initState() {
+    super.initState();
+    menu.addListener(_onMenuChanged);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
-      return Placeholder();
-    }
-
-    const viewType = 'CupertinoNativeComboButton';
-
-    final creationParams = <String, dynamic>{
-      'enabled': widget.enabled,
-      'isDark': _isDark,
-      'controlSize': widget.controlSize.name,
-      'title': widget.title,
-      'image': widget.image?.toMap(context),
-      'style': widget.style.name,
-      'menu': menu.toJson(context),
-    };
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        bool hasBoundedWidth = constraints.hasBoundedWidth;
-        bool hasBoundedHeight = constraints.hasBoundedHeight;
-
-        double? width;
-        double? height;
-
-        if (hasBoundedWidth) {
-          width = constraints.minWidth > 0
-              ? constraints.minWidth
-              : constraints.maxWidth;
-        } else if (_intrinsicWidth != null && _intrinsicWidth! > 0) {
-          width = _intrinsicWidth;
-        } else {
-          width = _kDefaultComboButtonWidth;
-        }
-
-        if (_intrinsicHeight != null && _intrinsicHeight! > 0) {
-          height = _intrinsicHeight;
-        } else if (hasBoundedHeight) {
-          height = constraints.maxHeight;
-        } else {
-          height = _kDefaultComboButtonHeight;
-        }
-
-        return SizedBox(
-          width: width,
-          height: height,
-          child: AppKitView(
-            viewType: viewType,
-            creationParamsCodec: const StandardMessageCodec(),
-            creationParams: creationParams,
-            onPlatformViewCreated: _onPlatformViewCreated,
-            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-            },
-          ),
-        );
-      },
+  CNMenu get menu {
+    if (widget.menu != null) return widget.menu!;
+    return _internalMenu ??= CNMenu(
+      items: widget.items!.map((item) => CNMenuItem(title: item)).toList(),
     );
   }
+
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   void _onPlatformViewCreated(int id) {
     final channel = MethodChannel('CupertinoNativeComboButton_$id');
@@ -296,11 +236,70 @@ class _CNComboButtonState extends State<CNComboButton> {
   void _onIntrinsicSizeChanged(double? width, double? height) {
     if (width != null && height != null && mounted) {
       setState(() {
-        debugPrint('Intrinsic size updated: $width x $height');
-
         _intrinsicWidth = width > -1 ? width : null;
         _intrinsicHeight = height > -1 ? height : null;
       });
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
+      return Placeholder();
+    }
+
+    const viewType = 'CupertinoNativeComboButton';
+
+    final creationParams = <String, dynamic>{
+      'enabled': widget.enabled,
+      'isDark': _isDark,
+      'controlSize': widget.controlSize.name,
+      'title': widget.title,
+      'image': widget.image?.toMap(context),
+      'style': widget.style.name,
+      'menu': menu.toJson(context),
+    };
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        bool hasBoundedWidth = constraints.hasBoundedWidth;
+        bool hasBoundedHeight = constraints.hasBoundedHeight;
+
+        double? width;
+        double? height;
+
+        if (hasBoundedWidth) {
+          width = constraints.minWidth > 0
+              ? constraints.minWidth
+              : constraints.maxWidth;
+        } else if (_intrinsicWidth != null && _intrinsicWidth! > 0) {
+          width = _intrinsicWidth;
+        } else {
+          width = _kDefaultComboButtonWidth;
+        }
+
+        if (_intrinsicHeight != null && _intrinsicHeight! > 0) {
+          height = _intrinsicHeight;
+        } else if (hasBoundedHeight) {
+          height = constraints.maxHeight;
+        } else {
+          height = _kDefaultComboButtonHeight;
+        }
+
+        return SizedBox(
+          width: width,
+          height: height,
+          child: AppKitView(
+            viewType: viewType,
+            creationParamsCodec: const StandardMessageCodec(),
+            creationParams: creationParams,
+            onPlatformViewCreated: _onPlatformViewCreated,
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+            },
+          ),
+        );
+      },
+    );
   }
 }

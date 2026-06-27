@@ -28,14 +28,6 @@ const Map<CNControlSize, double> _kDefaultSwitchHeight = {
 class CNSwitchController {
   MethodChannel? _channel;
 
-  void _attach(MethodChannel channel) {
-    _channel = channel;
-  }
-
-  void _detach() {
-    _channel = null;
-  }
-
   /// Sets the switch [value]. When [animated] is true the change is animated
   /// on the native control.
   Future<void> setValue(bool value, {bool animated = false}) async {
@@ -52,6 +44,14 @@ class CNSwitchController {
     final channel = _channel;
     if (channel == null) return;
     await channel.invokeMethod('setIsEnabled', {'value': enabled});
+  }
+
+  void _attach(MethodChannel channel) {
+    _channel = channel;
+  }
+
+  void _detach() {
+    _channel = null;
   }
 }
 
@@ -70,56 +70,44 @@ class CNSwitch extends StatefulWidget {
     this.color,
   });
 
-  /// Whether the switch is on.
-  final bool value;
-
-  /// Whether the switch is interactive.
-  bool get enabled => onChanged != null;
-
-  /// Callback invoked when the user toggles the value.
-  final ValueChanged<bool>? onChanged;
-
-  /// Optional controller to imperatively control the native view.
-  final CNSwitchController? controller;
+  /// Optional tint color to apply to the switch.
+  final Color? color;
 
   /// The size of the switch control.
   final CNControlSize controlSize;
 
-  /// Optional tint color to apply to the switch.
-  final Color? color;
+  /// Optional controller to imperatively control the native view.
+  final CNSwitchController? controller;
+
+  /// Callback invoked when the user toggles the value.
+  final ValueChanged<bool>? onChanged;
+
+  /// Whether the switch is on.
+  final bool value;
 
   @override
   State<CNSwitch> createState() => _CNSwitchState();
+
+  /// Whether the switch is interactive.
+  bool get enabled => onChanged != null;
 }
 
 class _CNSwitchState extends State<CNSwitch> {
   MethodChannel? _channel;
-  double? _intrinsicWidth;
+  CNSwitchController? _internalController;
   double? _intrinsicHeight;
-
-  bool? _lastValue;
-  bool? _lastIsDark;
-  bool? _lastEnabled;
+  double? _intrinsicWidth;
   CNControlSize? _lastControlSize;
   Color? _lastEffectiveColor;
-
+  bool? _lastEnabled;
+  bool? _lastIsDark;
+  bool? _lastValue;
   int _pendingToggleId = 0;
 
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-
-  Color? get _effectiveColor =>
-      widget.color ?? CupertinoTheme.of(context).primaryColor;
-
-  CNSwitchController? _internalController;
-
-  CNSwitchController get _controller =>
-      widget.controller ?? (_internalController ??= CNSwitchController());
-
   @override
-  void dispose() {
-    _channel?.setMethodCallHandler(null);
-    _controller._detach();
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
   }
 
   @override
@@ -129,70 +117,19 @@ class _CNSwitchState extends State<CNSwitch> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
+  void dispose() {
+    _channel?.setMethodCallHandler(null);
+    _controller._detach();
+    super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Fallback to Flutter Switch on unsupported platforms.
-    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
-      return Placeholder();
-    }
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
-    const viewType = 'CupertinoNativeSwitch';
+  Color? get _effectiveColor =>
+      widget.color ?? CupertinoTheme.of(context).primaryColor;
 
-    final creationParams = <String, dynamic>{
-      'value': widget.value,
-      'enabled': widget.enabled,
-      'isDark': _isDark,
-      'controlSize': widget.controlSize.name,
-      'tint': resolveColorToArgb(_effectiveColor, context),
-    };
-
-    // macOS
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final bool hasBoundedWidth = constraints.hasBoundedWidth;
-        final bool hasBoundedHeight = constraints.hasBoundedHeight;
-        double? width;
-        double? height;
-
-        if (hasBoundedWidth) {
-          width = constraints.maxWidth;
-        } else if (_intrinsicWidth != null) {
-          width = _intrinsicWidth;
-        }
-
-        if (hasBoundedHeight) {
-          height = constraints.maxHeight;
-        } else if (_intrinsicHeight != null) {
-          height = _intrinsicHeight;
-        }
-
-        width ??= _kDefaultSwitchWidth[widget.controlSize];
-        height ??= _kDefaultSwitchHeight[widget.controlSize];
-
-        return SizedBox(
-          height: height,
-          width: width,
-          child: AppKitView(
-            viewType: viewType,
-            creationParamsCodec: const StandardMessageCodec(),
-            creationParams: creationParams,
-            onPlatformViewCreated: _onPlatformViewCreated,
-            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-              Factory<HorizontalDragGestureRecognizer>(
-                () => HorizontalDragGestureRecognizer(),
-              ),
-              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-            },
-          ),
-        );
-      },
-    );
-  }
+  CNSwitchController get _controller =>
+      widget.controller ?? (_internalController ??= CNSwitchController());
 
   void _onPlatformViewCreated(int id) {
     final channel = MethodChannel('CupertinoNativeSwitch_$id');
@@ -321,5 +258,65 @@ class _CNSwitchState extends State<CNSwitch> {
         _intrinsicHeight = height > -1 ? height : null;
       });
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Fallback to Flutter Switch on unsupported platforms.
+    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
+      return Placeholder();
+    }
+
+    const viewType = 'CupertinoNativeSwitch';
+
+    final creationParams = <String, dynamic>{
+      'value': widget.value,
+      'enabled': widget.enabled,
+      'isDark': _isDark,
+      'controlSize': widget.controlSize.name,
+      'tint': resolveColorToArgb(_effectiveColor, context),
+    };
+
+    // macOS
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool hasBoundedWidth = constraints.hasBoundedWidth;
+        final bool hasBoundedHeight = constraints.hasBoundedHeight;
+        double? width;
+        double? height;
+
+        if (hasBoundedWidth) {
+          width = constraints.maxWidth;
+        } else if (_intrinsicWidth != null) {
+          width = _intrinsicWidth;
+        }
+
+        if (hasBoundedHeight) {
+          height = constraints.maxHeight;
+        } else if (_intrinsicHeight != null) {
+          height = _intrinsicHeight;
+        }
+
+        width ??= _kDefaultSwitchWidth[widget.controlSize];
+        height ??= _kDefaultSwitchHeight[widget.controlSize];
+
+        return SizedBox(
+          height: height,
+          width: width,
+          child: AppKitView(
+            viewType: viewType,
+            creationParamsCodec: const StandardMessageCodec(),
+            creationParams: creationParams,
+            onPlatformViewCreated: _onPlatformViewCreated,
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+              Factory<HorizontalDragGestureRecognizer>(
+                () => HorizontalDragGestureRecognizer(),
+              ),
+              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+            },
+          ),
+        );
+      },
+    );
   }
 }

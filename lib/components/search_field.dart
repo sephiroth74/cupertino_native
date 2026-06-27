@@ -35,41 +35,17 @@ class CNSearchField extends StatefulWidget {
     this.onSubmitted,
   });
 
-  /// The current text shown in the field.
-  final String text;
-
-  /// Placeholder string shown when the field is empty.
-  final String? placeholder;
-
-  /// The text color of the search field.
-  final Color? textColor;
-
-  /// The placeholder color of the search field.
-  final Color? placeholderColor;
-
   /// The background color drawn behind the search field text area.
   final Color? backgroundColor;
 
-  /// Optional native NSFont descriptor.
-  final CNFont? font;
-
-  /// Optional fixed width for the native control.
-  final double? width;
+  /// The border/bezel style of the search field.
+  final CNTextFieldBezelStyle bezelStyle;
 
   /// The size of the native AppKit control.
   final CNControlSize controlSize;
 
-  /// Optional list of suggestion strings shown in the native completion dropdown
-  /// as the user types. Filtering is case-insensitive and uses substring matching.
-  /// Pass null or an empty list to disable suggestions.
-  final List<String>? suggestions;
-
-  /// Callback used to fetch suggestions from Flutter when native code requests
-  /// updates while the user types.
-  final CNSearchSuggestionsRequested? onSuggestionsRequested;
-
-  /// The border/bezel style of the search field.
-  final CNTextFieldBezelStyle bezelStyle;
+  /// Optional native NSFont descriptor.
+  final CNFont? font;
 
   /// Called whenever the user changes the search text.
   final ValueChanged<String>? onChanged;
@@ -77,37 +53,57 @@ class CNSearchField extends StatefulWidget {
   /// Called when the user submits the search text.
   final ValueChanged<String>? onSubmitted;
 
-  /// Whether the native control accepts user interaction.
-  bool get enabled => onChanged != null || onSubmitted != null;
+  /// Callback used to fetch suggestions from Flutter when native code requests
+  /// updates while the user types.
+  final CNSearchSuggestionsRequested? onSuggestionsRequested;
+
+  /// Placeholder string shown when the field is empty.
+  final String? placeholder;
+
+  /// The placeholder color of the search field.
+  final Color? placeholderColor;
+
+  /// Optional list of suggestion strings shown in the native completion dropdown
+  /// as the user types. Filtering is case-insensitive and uses substring matching.
+  /// Pass null or an empty list to disable suggestions.
+  final List<String>? suggestions;
+
+  /// The current text shown in the field.
+  final String text;
+
+  /// The text color of the search field.
+  final Color? textColor;
+
+  /// Optional fixed width for the native control.
+  final double? width;
 
   @override
   State<CNSearchField> createState() => _CNSearchFieldState();
+
+  /// Whether the native control accepts user interaction.
+  bool get enabled => onChanged != null || onSubmitted != null;
 }
 
 class _CNSearchFieldState extends State<CNSearchField> {
   MethodChannel? _channel;
-
-  double? _intrinsicWidth;
   double? _intrinsicHeight;
-
-  String? _lastText;
-  String? _lastPlaceholder;
-  int? _lastTextColor;
-  int? _lastPlaceholderColor;
+  double? _intrinsicWidth;
   int? _lastBackgroundColor;
-  CNFont? _lastFont;
-  CNControlSize? _lastControlSize;
   CNTextFieldBezelStyle? _lastBezelStyle;
-  List<String>? _lastSuggestions;
+  CNControlSize? _lastControlSize;
   bool? _lastEnabled;
+  CNFont? _lastFont;
   bool? _lastIsDark;
-
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+  String? _lastPlaceholder;
+  int? _lastPlaceholderColor;
+  List<String>? _lastSuggestions;
+  String? _lastText;
+  int? _lastTextColor;
 
   @override
-  void dispose() {
-    _channel?.setMethodCallHandler(null);
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
   }
 
   @override
@@ -117,68 +113,12 @@ class _CNSearchFieldState extends State<CNSearchField> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
+  void dispose() {
+    _channel?.setMethodCallHandler(null);
+    super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
-      return Placeholder();
-    }
-
-    const viewType = 'CupertinoNativeSearchField';
-
-    final creationParams = <String, dynamic>{
-      'text': widget.text,
-      'placeholder': widget.placeholder,
-      'textColor': resolveColorToArgb(widget.textColor, context),
-      'placeholderColor': resolveColorToArgb(widget.placeholderColor, context),
-      'backgroundColor': resolveColorToArgb(widget.backgroundColor, context),
-      'font': widget.font?.toMap(),
-      'controlSize': widget.controlSize.name,
-      'bezelStyle': widget.bezelStyle.name,
-      'suggestions': widget.suggestions,
-      'enabled': widget.enabled,
-      'isDark': _isDark,
-    };
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width =
-            widget.width ??
-            _intrinsicWidth ??
-            (constraints.hasBoundedWidth
-                ? constraints.maxWidth
-                : _kDefaultSearchFieldWidth);
-        final height =
-            _intrinsicHeight ??
-            (constraints.hasBoundedHeight
-                ? constraints.maxHeight
-                : _kDefaultSearchFieldHeight);
-
-        return Align(
-          alignment: Alignment.centerLeft,
-          child: SizedBox(
-            width: constraints.hasBoundedWidth
-                ? width.clamp(0.0, constraints.maxWidth)
-                : width,
-            height: height,
-            child: AppKitView(
-              viewType: viewType,
-              creationParamsCodec: const StandardMessageCodec(),
-              creationParams: creationParams,
-              onPlatformViewCreated: _onPlatformViewCreated,
-              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
   void _onPlatformViewCreated(int id) {
     final channel = MethodChannel('CupertinoNativeSearchField_$id');
@@ -362,5 +302,63 @@ class _CNSearchFieldState extends State<CNSearchField> {
         }
       });
     } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
+      return Placeholder();
+    }
+
+    const viewType = 'CupertinoNativeSearchField';
+
+    final creationParams = <String, dynamic>{
+      'text': widget.text,
+      'placeholder': widget.placeholder,
+      'textColor': resolveColorToArgb(widget.textColor, context),
+      'placeholderColor': resolveColorToArgb(widget.placeholderColor, context),
+      'backgroundColor': resolveColorToArgb(widget.backgroundColor, context),
+      'font': widget.font?.toMap(),
+      'controlSize': widget.controlSize.name,
+      'bezelStyle': widget.bezelStyle.name,
+      'suggestions': widget.suggestions,
+      'enabled': widget.enabled,
+      'isDark': _isDark,
+    };
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width =
+            widget.width ??
+            _intrinsicWidth ??
+            (constraints.hasBoundedWidth
+                ? constraints.maxWidth
+                : _kDefaultSearchFieldWidth);
+        final height =
+            _intrinsicHeight ??
+            (constraints.hasBoundedHeight
+                ? constraints.maxHeight
+                : _kDefaultSearchFieldHeight);
+
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            width: constraints.hasBoundedWidth
+                ? width.clamp(0.0, constraints.maxWidth)
+                : width,
+            height: height,
+            child: AppKitView(
+              viewType: viewType,
+              creationParamsCodec: const StandardMessageCodec(),
+              creationParams: creationParams,
+              onPlatformViewCreated: _onPlatformViewCreated,
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+              },
+            ),
+          ),
+        );
+      },
+    );
   }
 }

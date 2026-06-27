@@ -15,9 +15,8 @@ class PathControlDemoPage extends StatefulWidget {
 
 class _PathControlDemoPageState extends State<PathControlDemoPage> {
   final _memoizer = AsyncMemoizer<void>();
-
-  String _pathControlPath = '/Users';
   bool _pathControlIsDirectory = true;
+  String _pathControlPath = '/Users';
 
   Future<void> _fetchInitialDirectory() async {
     return _memoizer.runOnce(() async {

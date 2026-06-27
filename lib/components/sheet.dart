@@ -23,14 +23,14 @@ class CNSheetAction {
     this.isDestructive = false,
   });
 
-  /// Button title.
-  final String title;
-
   /// Whether this is the default action.
   final bool isDefault;
 
   /// Whether this is a destructive action.
   final bool isDestructive;
+
+  /// Button title.
+  final String title;
 
   /// Serializes this action for method-channel transport.
   Map<String, dynamic> toMap() => {

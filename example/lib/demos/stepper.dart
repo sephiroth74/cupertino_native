@@ -9,10 +9,10 @@ class StepperDemoPage extends StatefulWidget {
 }
 
 class _StepperDemoPageState extends State<StepperDemoPage> {
-  double _value = 5;
-  double _wrappedValue = 0;
   double _coarseValue = 10;
   CNControlSize _size = CNControlSize.regular;
+  double _value = 5;
+  double _wrappedValue = 0;
 
   @override
   Widget build(BuildContext context) {

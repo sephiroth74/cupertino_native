@@ -5,9 +5,6 @@ import 'package:flutter/widgets.dart';
 /// A menu model used by [CNComboButton].
 // ignore: must_be_immutable
 class CNMenu extends ChangeNotifier with EquatableMixin {
-  /// The top-level menu items.
-  final List<CNMenuItem> items;
-
   /// Creates a menu with the provided [items].
   CNMenu({required this.items}) {
     // Listen to all items for changes
@@ -20,6 +17,21 @@ class CNMenu extends ChangeNotifier with EquatableMixin {
   factory CNMenu.empty() {
     return CNMenu(items: []);
   }
+
+  /// The top-level menu items.
+  final List<CNMenuItem> items;
+
+  @override
+  void dispose() {
+    for (final item in items) {
+      item.removeListener(notifyListeners);
+      item.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  List<Object?> get props => [items];
 
   /// Serializes the menu to JSON for platform channel communication.
   String toJson(BuildContext context) {
@@ -50,18 +62,6 @@ class CNMenu extends ChangeNotifier with EquatableMixin {
     }
     return null;
   }
-
-  @override
-  void dispose() {
-    for (final item in items) {
-      item.removeListener(notifyListeners);
-      item.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
-  List<Object?> get props => [items];
 }
 
 /// Represents the state of a CNMenuItem
@@ -81,34 +81,6 @@ enum CNMenuItemState {
 /// It also has a state (on, off, mixed) and an enabled/disabled status.
 // ignore: must_be_immutable
 class CNMenuItem extends ChangeNotifier with EquatableMixin {
-  static int _identifierCounter = 0;
-
-  /// Whether this entry is a visual separator.
-  final bool isSeparator;
-
-  /// The state of the menu item, which can be on, off, or mixed (indeterminate).
-  final CNMenuItemState state;
-
-  /// An optional integer tag that can be used to identify the item.
-  final int? tag;
-
-  /// The title of the menu item, which is displayed to the user.
-  final String title;
-
-  /// An optional symbol image associated with the menu item, which can be rendered according to the provided symbol configuration.
-  final CNImage? image;
-
-  /// An optional submenu that can be displayed when the user interacts with this menu item.
-  final CNMenu? submenu;
-
-  /// Whether the menu item is enabled or disabled. Disabled items are typically shown in a dimmed state and cannot be interacted with.
-  final bool enabled;
-
-  final int _identifier;
-
-  /// A unique identifier for this menu item, used for platform communication. It is generated automatically and should not be set manually.
-  String get identifier => isSeparator ? '' : 'menuItem_$_identifier';
-
   /// Creates a new CNMenuItem with the given properties. The [title] is required, while other properties are optional.
   /// The [state] defaults to [CNMenuItemState.off], and [enabled] defaults to true.
   /// The [tag] can be used to store an arbitrary integer value for identification purposes.
@@ -132,6 +104,46 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
       enabled = false,
       isSeparator = true,
       _identifier = _identifierCounter++;
+
+  /// Whether the menu item is enabled or disabled. Disabled items are typically shown in a dimmed state and cannot be interacted with.
+  final bool enabled;
+
+  /// An optional symbol image associated with the menu item, which can be rendered according to the provided symbol configuration.
+  final CNImage? image;
+
+  /// Whether this entry is a visual separator.
+  final bool isSeparator;
+
+  /// The state of the menu item, which can be on, off, or mixed (indeterminate).
+  final CNMenuItemState state;
+
+  /// An optional submenu that can be displayed when the user interacts with this menu item.
+  final CNMenu? submenu;
+
+  /// An optional integer tag that can be used to identify the item.
+  final int? tag;
+
+  /// The title of the menu item, which is displayed to the user.
+  final String title;
+
+  static int _identifierCounter = 0;
+
+  final int _identifier;
+
+  @override
+  List<Object?> get props => [
+    _identifier,
+    isSeparator,
+    state,
+    tag,
+    title,
+    image,
+    submenu,
+    enabled,
+  ];
+
+  /// A unique identifier for this menu item, used for platform communication. It is generated automatically and should not be set manually.
+  String get identifier => isSeparator ? '' : 'menuItem_$_identifier';
 
   /// Converts this menu item to a JSON string representation, which is used for communication with the native platform.
   /// The JSON includes all relevant properties of the menu item, such as title, tag, state, symbol configuration, enabled status, and submenu (if any).
@@ -157,16 +169,4 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
     }
     ''';
   }
-
-  @override
-  List<Object?> get props => [
-    _identifier,
-    isSeparator,
-    state,
-    tag,
-    title,
-    image,
-    submenu,
-    enabled,
-  ];
 }

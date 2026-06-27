@@ -5,6 +5,7 @@ export 'cupertino_native_method_channel.dart';
 export 'components/slider.dart';
 export 'components/switch.dart';
 export 'components/segmented_control.dart';
+export 'components/picker.dart';
 export 'components/icon.dart';
 export 'components/tab_bar.dart';
 export 'components/popup_menu_button.dart';
@@ -34,6 +35,7 @@ export 'components/toolbar.dart';
 export 'model/control_size.dart';
 export 'model/slider_tickmark_position.dart';
 export 'model/checkbox_state.dart';
+export 'model/picker_style.dart';
 
 export 'style/sf_symbol.dart';
 export 'style/button_style.dart';

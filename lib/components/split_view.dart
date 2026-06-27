@@ -71,22 +71,22 @@ class CNSplitPane {
   /// Widget rendered inside the pane.
   final Widget child;
 
-  /// Optional pane-specific initial fraction override.
-  ///
-  /// If provided, it takes precedence over [CNSplitView.initialFraction].
-  final double? initialFraction;
-
-  /// Minimum pane extent in logical pixels.
-  final double minExtent;
-
-  /// Optional maximum pane extent in logical pixels.
-  final double? maxExtent;
-
   /// Whether this pane may be collapsed.
   final bool collapsible;
 
   /// Optional stable identifier.
   final String? id;
+
+  /// Optional pane-specific initial fraction override.
+  ///
+  /// If provided, it takes precedence over [CNSplitView.initialFraction].
+  final double? initialFraction;
+
+  /// Optional maximum pane extent in logical pixels.
+  final double? maxExtent;
+
+  /// Minimum pane extent in logical pixels.
+  final double minExtent;
 }
 
 /// Runtime metrics for [CNSplitView].
@@ -105,23 +105,23 @@ class CNSplitMetrics {
   /// Current split axis.
   final CNSplitAxis axis;
 
-  /// Total available extent along the split axis.
-  final double totalExtent;
-
-  /// First pane extent.
-  final double firstExtent;
-
-  /// Second pane extent.
-  final double secondExtent;
-
   /// Divider thickness.
   final double dividerThickness;
 
   /// Whether first pane is collapsed.
   final bool firstCollapsed;
 
+  /// First pane extent.
+  final double firstExtent;
+
   /// Whether second pane is collapsed.
   final bool secondCollapsed;
+
+  /// Second pane extent.
+  final double secondExtent;
+
+  /// Total available extent along the split axis.
+  final double totalExtent;
 
   @override
   bool operator ==(Object other) {
@@ -150,29 +150,11 @@ class CNSplitMetrics {
 
 /// Controller for querying and changing [CNSplitView] state.
 class CNSplitViewController extends ChangeNotifier {
-  CNSplitMetrics? _metrics;
   _SplitViewControllerBinding? _binding;
+  CNSplitMetrics? _metrics;
 
   /// Latest metrics reported by the attached split view.
   CNSplitMetrics? get metrics => _metrics;
-
-  void _attach(_SplitViewControllerBinding binding) {
-    _binding = binding;
-  }
-
-  void _detach(_SplitViewControllerBinding binding) {
-    if (identical(_binding, binding)) {
-      _binding = null;
-    }
-  }
-
-  void _setMetrics(CNSplitMetrics value) {
-    if (_metrics == value) {
-      return;
-    }
-    _metrics = value;
-    notifyListeners();
-  }
 
   /// Sets split fraction where $0$ is fully second pane and $1$ fully first pane.
   void setFraction(double value) {
@@ -217,6 +199,24 @@ class CNSplitViewController extends ChangeNotifier {
   /// Toggles second pane collapsed state.
   void toggleSecond() {
     _binding?.toggleSecond();
+  }
+
+  void _attach(_SplitViewControllerBinding binding) {
+    _binding = binding;
+  }
+
+  void _detach(_SplitViewControllerBinding binding) {
+    if (identical(_binding, binding)) {
+      _binding = null;
+    }
+  }
+
+  void _setMetrics(CNSplitMetrics value) {
+    if (_metrics == value) {
+      return;
+    }
+    _metrics = value;
+    notifyListeners();
   }
 }
 
@@ -281,20 +281,20 @@ class CNSplitView extends StatefulWidget {
        ),
        assert(snapFractions.every((value) => value > 0 && value < 1));
 
-  /// First pane descriptor.
-  final CNSplitPane first;
-
-  /// Second pane descriptor.
-  final CNSplitPane second;
+  /// Whether keyboard shortcuts should autofocus when the widget appears.
+  final bool autofocusKeyboardShortcuts;
 
   /// Split axis.
   final CNSplitAxis axis;
 
+  /// Pane collapse policy.
+  final CNSplitCollapseBehavior collapseBehavior;
+
   /// Optional external controller.
   final CNSplitViewController? controller;
 
-  /// Divider visual thickness.
-  final double dividerThickness;
+  /// Action to trigger on divider double-click.
+  final CNSplitDividerDoubleTapAction dividerDoubleTapAction;
 
   /// Divider interactive thickness used for hit-testing drag gestures.
   ///
@@ -304,46 +304,46 @@ class CNSplitView extends StatefulWidget {
   /// Semantic label exposed to assistive technologies for the divider.
   final String dividerSemanticLabel;
 
-  /// Action to trigger on divider double-click.
-  final CNSplitDividerDoubleTapAction dividerDoubleTapAction;
+  /// Divider visual thickness.
+  final double dividerThickness;
+
+  /// Enables built-in keyboard shortcuts for pane resizing/collapsing.
+  final bool enableKeyboardShortcuts;
+
+  /// Enables macOS-only divider visual effects while preserving Flutter layout.
+  final bool enableMacOSDividerVisualEffects;
+
+  /// First pane descriptor.
+  final CNSplitPane first;
+
+  /// Initial fraction for first pane.
+  final double initialFraction;
+
+  /// Number of logical pixels moved by each keyboard resize command.
+  final double keyboardResizeStep;
 
   /// macOS-specific divider style.
   final CNSplitMacOSDividerStyle macOSDividerStyle;
 
-  /// Enables macOS-only divider visual effects while preserving Flutter layout.
-  final bool enableMacOSDividerVisualEffects;
+  /// Global maximum fraction for first pane.
+  final double maxFraction;
+
+  /// Global minimum fraction for first pane.
+  final double minFraction;
+
+  /// Emitted when split metrics change.
+  final ValueChanged<CNSplitMetrics>? onChanged;
 
   /// Clip behavior applied to pane content.
   ///
   /// Useful to keep complex children constrained during aggressive resizes.
   final Clip paneClipBehavior;
 
-  /// Enables built-in keyboard shortcuts for pane resizing/collapsing.
-  final bool enableKeyboardShortcuts;
-
-  /// Whether keyboard shortcuts should autofocus when the widget appears.
-  final bool autofocusKeyboardShortcuts;
-
-  /// Number of logical pixels moved by each keyboard resize command.
-  final double keyboardResizeStep;
-
-  /// Global minimum fraction for first pane.
-  final double minFraction;
-
-  /// Global maximum fraction for first pane.
-  final double maxFraction;
-
-  /// Initial fraction for first pane.
-  final double initialFraction;
-
-  /// Pane collapse policy.
-  final CNSplitCollapseBehavior collapseBehavior;
+  /// Second pane descriptor.
+  final CNSplitPane second;
 
   /// Optional snap points for upcoming drag interactions.
   final List<double> snapFractions;
-
-  /// Snap threshold for drag interactions.
-  final double snapThreshold;
 
   /// Optional release threshold for snap hysteresis.
   ///
@@ -351,8 +351,8 @@ class CNSplitView extends StatefulWidget {
   /// a smooth "magnetic" snap without sticky behavior.
   final double? snapReleaseThreshold;
 
-  /// Emitted when split metrics change.
-  final ValueChanged<CNSplitMetrics>? onChanged;
+  /// Snap threshold for drag interactions.
+  final double snapThreshold;
 
   @override
   State<CNSplitView> createState() => _CNSplitViewState();
@@ -360,39 +360,45 @@ class CNSplitView extends StatefulWidget {
 
 class _CNSplitViewState extends State<CNSplitView>
     implements _SplitViewControllerBinding {
-  late double _fraction;
-  double? _lastAvailableExtent;
-  double? _dragStartFraction;
-  double? _dragRawFraction;
   double? _activeSnapFraction;
-  bool _isDividerDragging = false;
+  double? _dragRawFraction;
+  double? _dragStartFraction;
   bool _firstCollapsed = false;
-  bool _secondCollapsed = false;
-  double? _restoreFraction;
+  late double _fraction;
+  bool _isDividerDragging = false;
+  double? _lastAvailableExtent;
   CNSplitMetrics? _lastPublishedMetrics;
-
-  CNSplitViewController? get _controller => widget.controller;
-
-  double get _effectiveDividerThickness =>
-      math.max(widget.dividerThickness, widget.dividerInteractiveThickness);
-
-  bool get _isMacOS => defaultTargetPlatform == TargetPlatform.macOS;
-
-  MouseCursor get _resizeCursor => widget.axis == CNSplitAxis.horizontal
-      ? SystemMouseCursors.resizeColumn
-      : SystemMouseCursors.resizeRow;
-
-  double get _defaultInitialFraction =>
-      (widget.first.initialFraction ?? widget.initialFraction)
-          .clamp(widget.minFraction, widget.maxFraction)
-          .toDouble();
+  double? _restoreFraction;
+  bool _secondCollapsed = false;
 
   @override
-  void initState() {
-    super.initState();
-    _fraction = _defaultInitialFraction;
-    _restoreFraction = _fraction;
-    _controller?._attach(this);
+  void collapseFirst() {
+    if (!_canCollapseFirst()) {
+      return;
+    }
+    setState(() {
+      if (_firstCollapsed) {
+        return;
+      }
+      _restoreFraction = _normalizedFraction(_fraction);
+      _firstCollapsed = true;
+      _secondCollapsed = false;
+    });
+  }
+
+  @override
+  void collapseSecond() {
+    if (!_canCollapseSecond()) {
+      return;
+    }
+    setState(() {
+      if (_secondCollapsed) {
+        return;
+      }
+      _restoreFraction = _normalizedFraction(_fraction);
+      _secondCollapsed = true;
+      _firstCollapsed = false;
+    });
   }
 
   @override
@@ -417,81 +423,113 @@ class _CNSplitViewState extends State<CNSplitView>
   }
 
   @override
-  Widget build(BuildContext context) {
-    final base = MouseRegion(
-      cursor: _isDividerDragging ? _resizeCursor : MouseCursor.defer,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final totalAxisExtent = widget.axis == CNSplitAxis.horizontal
-              ? constraints.maxWidth
-              : constraints.maxHeight;
-
-          final availableExtent = math.max<double>(
-            0.0,
-            totalAxisExtent - _effectiveDividerThickness,
-          );
-          _lastAvailableExtent = availableExtent;
-
-          final computed = _computeExtents(availableExtent);
-          final firstExtent = computed.firstExtent;
-          final secondExtent = computed.secondExtent;
-
-          final metrics = CNSplitMetrics(
-            axis: widget.axis,
-            totalExtent: availableExtent,
-            firstExtent: firstExtent,
-            secondExtent: secondExtent,
-            dividerThickness: widget.dividerThickness,
-            firstCollapsed: _firstCollapsed,
-            secondCollapsed: _secondCollapsed,
-          );
-
-          _publishMetrics(metrics);
-
-          final divider = _buildDivider(context);
-          if (widget.axis == CNSplitAxis.horizontal) {
-            return Row(
-              children: [
-                SizedBox(
-                  width: firstExtent,
-                  child: _buildPane(widget.first.child),
-                ),
-                divider,
-                SizedBox(
-                  width: secondExtent,
-                  child: _buildPane(widget.second.child),
-                ),
-              ],
-            );
-          }
-
-          return Column(
-            children: [
-              SizedBox(
-                height: firstExtent,
-                child: _buildPane(widget.first.child),
-              ),
-              divider,
-              SizedBox(
-                height: secondExtent,
-                child: _buildPane(widget.second.child),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-
-    if (!widget.enableKeyboardShortcuts) {
-      return base;
+  void expandFirst() {
+    if (!_firstCollapsed) {
+      return;
     }
-
-    return Focus(
-      autofocus: widget.autofocusKeyboardShortcuts,
-      canRequestFocus: true,
-      child: CallbackShortcuts(bindings: _buildShortcutBindings(), child: base),
+    final fallback = _normalizedFraction(
+      _restoreFraction ?? _defaultInitialFraction,
     );
+    setState(() {
+      _firstCollapsed = false;
+      _fraction = fallback;
+      _restoreFraction = fallback;
+    });
   }
+
+  @override
+  void expandSecond() {
+    if (!_secondCollapsed) {
+      return;
+    }
+    final fallback = _normalizedFraction(
+      _restoreFraction ?? _defaultInitialFraction,
+    );
+    setState(() {
+      _secondCollapsed = false;
+      _fraction = fallback;
+      _restoreFraction = fallback;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fraction = _defaultInitialFraction;
+    _restoreFraction = _fraction;
+    _controller?._attach(this);
+  }
+
+  @override
+  void setFirstExtent(double value) {
+    final extent = _lastAvailableExtent;
+    if (extent == null || extent <= 0) {
+      return;
+    }
+    setFraction((value / extent).clamp(0.0, 1.0).toDouble());
+  }
+
+  @override
+  void setFraction(double value) {
+    final extent = _lastAvailableExtent;
+    final clamped = extent == null || extent <= 0
+        ? value.clamp(widget.minFraction, widget.maxFraction).toDouble()
+        : _clampFractionForExtent(value, extent);
+
+    setState(() {
+      _firstCollapsed = false;
+      _secondCollapsed = false;
+      _fraction = clamped;
+      _restoreFraction = clamped;
+      _dragStartFraction = null;
+      _dragRawFraction = null;
+      _activeSnapFraction = null;
+      _isDividerDragging = false;
+    });
+  }
+
+  @override
+  void setSecondExtent(double value) {
+    final extent = _lastAvailableExtent;
+    if (extent == null || extent <= 0) {
+      return;
+    }
+    setFraction((1.0 - (value / extent)).clamp(0.0, 1.0).toDouble());
+  }
+
+  @override
+  void toggleFirst() {
+    if (_firstCollapsed) {
+      expandFirst();
+      return;
+    }
+    collapseFirst();
+  }
+
+  @override
+  void toggleSecond() {
+    if (_secondCollapsed) {
+      expandSecond();
+      return;
+    }
+    collapseSecond();
+  }
+
+  CNSplitViewController? get _controller => widget.controller;
+
+  double get _effectiveDividerThickness =>
+      math.max(widget.dividerThickness, widget.dividerInteractiveThickness);
+
+  bool get _isMacOS => defaultTargetPlatform == TargetPlatform.macOS;
+
+  MouseCursor get _resizeCursor => widget.axis == CNSplitAxis.horizontal
+      ? SystemMouseCursors.resizeColumn
+      : SystemMouseCursors.resizeRow;
+
+  double get _defaultInitialFraction =>
+      (widget.first.initialFraction ?? widget.initialFraction)
+          .clamp(widget.minFraction, widget.maxFraction)
+          .toDouble();
 
   Map<ShortcutActivator, VoidCallback> _buildShortcutBindings() {
     final bindings = <ShortcutActivator, VoidCallback>{
@@ -930,118 +968,80 @@ class _CNSplitViewState extends State<CNSplitView>
   }
 
   @override
-  void setFraction(double value) {
-    final extent = _lastAvailableExtent;
-    final clamped = extent == null || extent <= 0
-        ? value.clamp(widget.minFraction, widget.maxFraction).toDouble()
-        : _clampFractionForExtent(value, extent);
+  Widget build(BuildContext context) {
+    final base = MouseRegion(
+      cursor: _isDividerDragging ? _resizeCursor : MouseCursor.defer,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final totalAxisExtent = widget.axis == CNSplitAxis.horizontal
+              ? constraints.maxWidth
+              : constraints.maxHeight;
 
-    setState(() {
-      _firstCollapsed = false;
-      _secondCollapsed = false;
-      _fraction = clamped;
-      _restoreFraction = clamped;
-      _dragStartFraction = null;
-      _dragRawFraction = null;
-      _activeSnapFraction = null;
-      _isDividerDragging = false;
-    });
-  }
+          final availableExtent = math.max<double>(
+            0.0,
+            totalAxisExtent - _effectiveDividerThickness,
+          );
+          _lastAvailableExtent = availableExtent;
 
-  @override
-  void setFirstExtent(double value) {
-    final extent = _lastAvailableExtent;
-    if (extent == null || extent <= 0) {
-      return;
-    }
-    setFraction((value / extent).clamp(0.0, 1.0).toDouble());
-  }
+          final computed = _computeExtents(availableExtent);
+          final firstExtent = computed.firstExtent;
+          final secondExtent = computed.secondExtent;
 
-  @override
-  void setSecondExtent(double value) {
-    final extent = _lastAvailableExtent;
-    if (extent == null || extent <= 0) {
-      return;
-    }
-    setFraction((1.0 - (value / extent)).clamp(0.0, 1.0).toDouble());
-  }
+          final metrics = CNSplitMetrics(
+            axis: widget.axis,
+            totalExtent: availableExtent,
+            firstExtent: firstExtent,
+            secondExtent: secondExtent,
+            dividerThickness: widget.dividerThickness,
+            firstCollapsed: _firstCollapsed,
+            secondCollapsed: _secondCollapsed,
+          );
 
-  @override
-  void collapseFirst() {
-    if (!_canCollapseFirst()) {
-      return;
-    }
-    setState(() {
-      if (_firstCollapsed) {
-        return;
-      }
-      _restoreFraction = _normalizedFraction(_fraction);
-      _firstCollapsed = true;
-      _secondCollapsed = false;
-    });
-  }
+          _publishMetrics(metrics);
 
-  @override
-  void collapseSecond() {
-    if (!_canCollapseSecond()) {
-      return;
-    }
-    setState(() {
-      if (_secondCollapsed) {
-        return;
-      }
-      _restoreFraction = _normalizedFraction(_fraction);
-      _secondCollapsed = true;
-      _firstCollapsed = false;
-    });
-  }
+          final divider = _buildDivider(context);
+          if (widget.axis == CNSplitAxis.horizontal) {
+            return Row(
+              children: [
+                SizedBox(
+                  width: firstExtent,
+                  child: _buildPane(widget.first.child),
+                ),
+                divider,
+                SizedBox(
+                  width: secondExtent,
+                  child: _buildPane(widget.second.child),
+                ),
+              ],
+            );
+          }
 
-  @override
-  void expandFirst() {
-    if (!_firstCollapsed) {
-      return;
-    }
-    final fallback = _normalizedFraction(
-      _restoreFraction ?? _defaultInitialFraction,
+          return Column(
+            children: [
+              SizedBox(
+                height: firstExtent,
+                child: _buildPane(widget.first.child),
+              ),
+              divider,
+              SizedBox(
+                height: secondExtent,
+                child: _buildPane(widget.second.child),
+              ),
+            ],
+          );
+        },
+      ),
     );
-    setState(() {
-      _firstCollapsed = false;
-      _fraction = fallback;
-      _restoreFraction = fallback;
-    });
-  }
 
-  @override
-  void expandSecond() {
-    if (!_secondCollapsed) {
-      return;
+    if (!widget.enableKeyboardShortcuts) {
+      return base;
     }
-    final fallback = _normalizedFraction(
-      _restoreFraction ?? _defaultInitialFraction,
+
+    return Focus(
+      autofocus: widget.autofocusKeyboardShortcuts,
+      canRequestFocus: true,
+      child: CallbackShortcuts(bindings: _buildShortcutBindings(), child: base),
     );
-    setState(() {
-      _secondCollapsed = false;
-      _fraction = fallback;
-      _restoreFraction = fallback;
-    });
-  }
-
-  @override
-  void toggleFirst() {
-    if (_firstCollapsed) {
-      expandFirst();
-      return;
-    }
-    collapseFirst();
-  }
-
-  @override
-  void toggleSecond() {
-    if (_secondCollapsed) {
-      expandSecond();
-      return;
-    }
-    collapseSecond();
   }
 }
 

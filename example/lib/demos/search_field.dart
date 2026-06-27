@@ -23,18 +23,18 @@ class SearchFieldDemoPage extends StatefulWidget {
 }
 
 class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
-  final List<CNControlSize> _sizes = CNControlSize.values;
-  final List<CNTextFieldBezelStyle> _bezelStyles = CNTextFieldBezelStyle.values;
   static const _demoFont = CNFont.monospacedSystem(
     CNFontSize.points(13),
     weight: CNFontWeight.medium,
   );
 
-  CNControlSize _controlSize = CNControlSize.regular;
   CNTextFieldBezelStyle _bezelStyle = CNTextFieldBezelStyle.round;
-  bool _suggestionsEnabled = true;
+  final List<CNTextFieldBezelStyle> _bezelStyles = CNTextFieldBezelStyle.values;
+  CNControlSize _controlSize = CNControlSize.regular;
   String _query = '';
+  final List<CNControlSize> _sizes = CNControlSize.values;
   String _submittedQuery = 'None';
+  bool _suggestionsEnabled = true;
 
   @override
   Widget build(BuildContext context) {

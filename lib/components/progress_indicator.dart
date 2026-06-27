@@ -21,24 +21,6 @@ const _kDefaultHeightBarRegular = 20.0;
 /// Embeds a native UIActivityIndicatorView/NSProgressIndicator for authentic visuals and behavior on macOS.
 /// Falls back to [CupertinoActivityIndicator] on other platforms.
 class CNProgressIndicator extends StatefulWidget {
-  /// The style of the progress indicator.
-  final CNProgressStyle style;
-
-  /// The size of the progress indicator.
-  final CNControlSize size;
-
-  /// The value of the progress indicator.
-  final double value;
-
-  /// The minimum value of the progress indicator.
-  final double minValue;
-
-  /// The maximum value of the progress indicator.
-  final double maxValue;
-
-  /// Whether the progress indicator is indeterminate.
-  final bool indeterminate;
-
   /// Default constructor for a progress indicator.
   const CNProgressIndicator({
     super.key,
@@ -49,22 +31,6 @@ class CNProgressIndicator extends StatefulWidget {
     this.minValue = 0.0,
     this.maxValue = 1.0,
   });
-
-  /// Creates a circular progress indicator.
-  factory CNProgressIndicator.circular({
-    required bool indeterminate,
-    CNControlSize size = CNControlSize.regular,
-    double value = 0.0,
-    double minValue = 0.0,
-    double maxValue = 1.0,
-  }) => CNProgressIndicator(
-    style: CNProgressStyle.spinning,
-    size: size,
-    indeterminate: indeterminate,
-    value: value,
-    minValue: minValue,
-    maxValue: maxValue,
-  );
 
   /// Creates a bar progress indicator.
   factory CNProgressIndicator.bar({
@@ -82,22 +48,73 @@ class CNProgressIndicator extends StatefulWidget {
     maxValue: maxValue,
   );
 
+  /// Creates a circular progress indicator.
+  factory CNProgressIndicator.circular({
+    required bool indeterminate,
+    CNControlSize size = CNControlSize.regular,
+    double value = 0.0,
+    double minValue = 0.0,
+    double maxValue = 1.0,
+  }) => CNProgressIndicator(
+    style: CNProgressStyle.spinning,
+    size: size,
+    indeterminate: indeterminate,
+    value: value,
+    minValue: minValue,
+    maxValue: maxValue,
+  );
+
+  /// Whether the progress indicator is indeterminate.
+  final bool indeterminate;
+
+  /// The maximum value of the progress indicator.
+  final double maxValue;
+
+  /// The minimum value of the progress indicator.
+  final double minValue;
+
+  /// The size of the progress indicator.
+  final CNControlSize size;
+
+  /// The style of the progress indicator.
+  final CNProgressStyle style;
+
+  /// The value of the progress indicator.
+  final double value;
+
   @override
   State<CNProgressIndicator> createState() => _CNProgressIndicatorState();
 }
 
 class _CNProgressIndicatorState extends State<CNProgressIndicator> {
   MethodChannel? _channel;
-  bool? _lastIsDark;
-  late CNProgressStyle _lastStyle;
+  double? _intrinsicHeight;
+  double? _intrinsicWidth;
   late CNControlSize _lastControlSize;
   late bool _lastIndeterminate;
-  late double _lastValue;
-  late double _lastMinValue;
+  bool? _lastIsDark;
   late double _lastMaxValue;
+  late double _lastMinValue;
+  late CNProgressStyle _lastStyle;
+  late double _lastValue;
 
-  double? _intrinsicWidth;
-  double? _intrinsicHeight;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(covariant CNProgressIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncPropsToNativeIfNeeded();
+  }
+
+  @override
+  void dispose() {
+    _channel?.setMethodCallHandler(null);
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -111,92 +128,6 @@ class _CNProgressIndicatorState extends State<CNProgressIndicator> {
   }
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
-      return Placeholder();
-    }
-
-    const viewType = 'CupertinoNativeProgressIndicator';
-
-    final creationParams = <String, dynamic>{
-      'progressStyle': widget.style.name,
-      'progressSize': widget.size.name,
-      'progressIndeterminate': widget.indeterminate,
-      'progressValue': widget.value,
-      'progressMinValue': widget.minValue,
-      'progressMaxValue': widget.maxValue,
-      'isDark': _isDark,
-    };
-
-    final platformView = AppKitView(
-      viewType: viewType,
-      creationParams: creationParams,
-      creationParamsCodec: const StandardMessageCodec(),
-      onPlatformViewCreated: _onCreated,
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-      },
-    );
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final hasBoundedWidth = constraints.hasBoundedWidth;
-        final hasBoundedHeight = constraints.hasBoundedHeight;
-        final preferIntrinsicWidth = !hasBoundedWidth;
-        final preferIntrinsicHeight = !hasBoundedHeight;
-        double? width;
-        if (preferIntrinsicWidth) {
-          width =
-              _intrinsicWidth ??
-              (_lastStyle == CNProgressStyle.spinning
-                  ? (_lastControlSize.index >= CNControlSize.regular.index
-                        ? _kDefaultWidthSpinningRegular
-                        : _kDefaultWidthSpinningSmall)
-                  : (_lastControlSize.index >= CNControlSize.regular.index
-                        ? _kDefaultWidthBarRegular
-                        : _kDefaultWidthBarSmall));
-        } else {
-          width = hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth;
-        }
-        double? height;
-        if (preferIntrinsicHeight) {
-          height =
-              _intrinsicHeight ??
-              (_lastStyle == CNProgressStyle.spinning
-                  ? (_lastControlSize.index >= CNControlSize.regular.index
-                        ? _kDefaultHeightSpinningRegular
-                        : _kDefaultHeightSpinningSmall)
-                  : (_lastControlSize.index >= CNControlSize.regular.index
-                        ? _kDefaultHeightBarRegular
-                        : _kDefaultHeightBarSmall));
-        } else {
-          height = hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight;
-        }
-
-        return SizedBox(width: width, height: height, child: platformView);
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    _channel?.setMethodCallHandler(null);
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(covariant CNProgressIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _syncPropsToNativeIfNeeded();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
-  }
 
   void _onCreated(int id) {
     final ch = MethodChannel('CupertinoNativeProgressIndicator_$id');
@@ -325,5 +256,73 @@ class _CNProgressIndicatorState extends State<CNProgressIndicator> {
     if (needsIntrinsicSize) {
       _requestIntrinsicSize();
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
+      return Placeholder();
+    }
+
+    const viewType = 'CupertinoNativeProgressIndicator';
+
+    final creationParams = <String, dynamic>{
+      'progressStyle': widget.style.name,
+      'progressSize': widget.size.name,
+      'progressIndeterminate': widget.indeterminate,
+      'progressValue': widget.value,
+      'progressMinValue': widget.minValue,
+      'progressMaxValue': widget.maxValue,
+      'isDark': _isDark,
+    };
+
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParams: creationParams,
+      creationParamsCodec: const StandardMessageCodec(),
+      onPlatformViewCreated: _onCreated,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+      },
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedWidth = constraints.hasBoundedWidth;
+        final hasBoundedHeight = constraints.hasBoundedHeight;
+        final preferIntrinsicWidth = !hasBoundedWidth;
+        final preferIntrinsicHeight = !hasBoundedHeight;
+        double? width;
+        if (preferIntrinsicWidth) {
+          width =
+              _intrinsicWidth ??
+              (_lastStyle == CNProgressStyle.spinning
+                  ? (_lastControlSize.index >= CNControlSize.regular.index
+                        ? _kDefaultWidthSpinningRegular
+                        : _kDefaultWidthSpinningSmall)
+                  : (_lastControlSize.index >= CNControlSize.regular.index
+                        ? _kDefaultWidthBarRegular
+                        : _kDefaultWidthBarSmall));
+        } else {
+          width = hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth;
+        }
+        double? height;
+        if (preferIntrinsicHeight) {
+          height =
+              _intrinsicHeight ??
+              (_lastStyle == CNProgressStyle.spinning
+                  ? (_lastControlSize.index >= CNControlSize.regular.index
+                        ? _kDefaultHeightSpinningRegular
+                        : _kDefaultHeightSpinningSmall)
+                  : (_lastControlSize.index >= CNControlSize.regular.index
+                        ? _kDefaultHeightBarRegular
+                        : _kDefaultHeightBarSmall));
+        } else {
+          height = hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight;
+        }
+
+        return SizedBox(width: width, height: height, child: platformView);
+      },
+    );
   }
 }

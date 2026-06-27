@@ -11,50 +11,6 @@ class ToolbarDemoPage extends StatefulWidget {
 class _ToolbarDemoPageState extends State<ToolbarDemoPage> {
   String _lastPressed = 'No toolbar item event yet';
 
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Toolbar')),
-      child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            const Text(
-              'Configure native window toolbar',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Text(_lastPressed),
-            const SizedBox(height: 16),
-            CNButton(
-              label: 'Set Primary Toolbar',
-              style: CNButtonStyle.filled,
-              onPressed: _setPrimaryToolbar,
-            ),
-            const SizedBox(height: 12),
-            CNButton(
-              label: 'Set Compact Toolbar',
-              style: CNButtonStyle.filled,
-              onPressed: _setCompactToolbar,
-            ),
-            const SizedBox(height: 12),
-            CNButton(
-              label: 'Set Toolbar With Inputs',
-              style: CNButtonStyle.filled,
-              onPressed: _setInputToolbar,
-            ),
-            const SizedBox(height: 12),
-            CNButton(
-              label: 'Clear Toolbar',
-              style: CNButtonStyle.gray,
-              onPressed: _clearToolbar,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Future<void> _setPrimaryToolbar() async {
     await CNToolbar.setItems(
       identifier: 'primary_toolbar',
@@ -191,5 +147,49 @@ class _ToolbarDemoPageState extends State<ToolbarDemoPage> {
           _lastPressed = '${event.type}: ${event.itemId}';
       }
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(middle: Text('Toolbar')),
+      child: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            const Text(
+              'Configure native window toolbar',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Text(_lastPressed),
+            const SizedBox(height: 16),
+            CNButton(
+              label: 'Set Primary Toolbar',
+              style: CNButtonStyle.filled,
+              onPressed: _setPrimaryToolbar,
+            ),
+            const SizedBox(height: 12),
+            CNButton(
+              label: 'Set Compact Toolbar',
+              style: CNButtonStyle.filled,
+              onPressed: _setCompactToolbar,
+            ),
+            const SizedBox(height: 12),
+            CNButton(
+              label: 'Set Toolbar With Inputs',
+              style: CNButtonStyle.filled,
+              onPressed: _setInputToolbar,
+            ),
+            const SizedBox(height: 12),
+            CNButton(
+              label: 'Clear Toolbar',
+              style: CNButtonStyle.gray,
+              onPressed: _clearToolbar,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -14,17 +14,17 @@ class _SecureTextFieldDemoPageState extends State<SecureTextFieldDemoPage> {
   String _valueInfo = '';
 
   @override
-  void initState() {
-    super.initState();
-    _controller.addListener(_updateValueInfo);
-    _updateValueInfo();
-  }
-
-  @override
   void dispose() {
     _controller.removeListener(_updateValueInfo);
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_updateValueInfo);
+    _updateValueInfo();
   }
 
   void _updateValueInfo() {

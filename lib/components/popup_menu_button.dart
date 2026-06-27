@@ -23,17 +23,17 @@ class CNPopupMenuItem extends CNPopupMenuEntry {
     this.checked = false,
   });
 
-  /// Display label for the item.
-  final String label;
-
-  /// Optional SF Symbol shown before the label.
-  final CNSymbol? icon;
+  /// Whether the item should display a check mark.
+  final bool checked;
 
   /// Whether the item can be selected.
   final bool enabled;
 
-  /// Whether the item should display a check mark.
-  final bool checked;
+  /// Optional SF Symbol shown before the label.
+  final CNSymbol? icon;
+
+  /// Display label for the item.
+  final String label;
 }
 
 /// A visual divider between popup menu items.
@@ -66,21 +66,6 @@ class CNPopupMenuButton extends StatefulWidget {
        shrinkWrap = false,
        buttonStyle = CNButtonStyle.plain;
 
-  /// Creates a text-labeled popup menu button.
-  const CNPopupMenuButton.label({
-    super.key,
-    required this.buttonLabel,
-    required this.items,
-    required this.onSelected,
-    this.tint,
-    this.height = 32.0,
-    this.shrinkWrap = false,
-    this.buttonStyle = CNButtonStyle.plain,
-  }) : child = null,
-       buttonIcon = null,
-       width = null,
-       round = false;
-
   /// Creates a round, icon-only popup menu button.
   const CNPopupMenuButton.icon({
     super.key,
@@ -98,69 +83,77 @@ class CNPopupMenuButton extends StatefulWidget {
        shrinkWrap = false,
        super();
 
-  /// Custom child widget to display (non-null when using child constructor).
-  final Widget? child;
+  /// Creates a text-labeled popup menu button.
+  const CNPopupMenuButton.label({
+    super.key,
+    required this.buttonLabel,
+    required this.items,
+    required this.onSelected,
+    this.tint,
+    this.height = 32.0,
+    this.shrinkWrap = false,
+    this.buttonStyle = CNButtonStyle.plain,
+  }) : child = null,
+       buttonIcon = null,
+       width = null,
+       round = false;
+
+  /// Icon for the button (non-null in icon mode).
+  final CNSymbol? buttonIcon; // non-null in icon mode
 
   /// Text for the button (null when using [buttonIcon] or [child]).
   final String? buttonLabel; // null in icon mode or child mode
-  /// Icon for the button (non-null in icon mode).
-  final CNSymbol? buttonIcon; // non-null in icon mode
-  // Fixed size (width = height) when in icon mode.
-  /// Fixed width in icon mode; otherwise computed/intrinsic.
-  final double? width;
 
-  /// Whether this is the round icon variant.
-  final bool round; // internal: text=false, icon=true
+  /// Visual style to apply to the button.
+  final CNButtonStyle buttonStyle;
+
+  /// Custom child widget to display (non-null when using child constructor).
+  final Widget? child;
+
+  /// Control height; icon mode uses diameter semantics. Null when using [child].
+  final double? height;
+
   /// Entries that populate the popup menu.
   final List<CNPopupMenuEntry> items;
 
   /// Called with the selected index when the user makes a selection.
   final ValueChanged<int> onSelected;
 
-  /// Tint color for the control.
-  final Color? tint;
-
-  /// Control height; icon mode uses diameter semantics. Null when using [child].
-  final double? height;
+  /// Whether this is the round icon variant.
+  final bool round; // internal: text=false, icon=true
 
   /// If true, sizes the control to its intrinsic width.
   final bool shrinkWrap;
 
-  /// Visual style to apply to the button.
-  final CNButtonStyle buttonStyle;
+  /// Tint color for the control.
+  final Color? tint;
+
+  // Fixed size (width = height) when in icon mode.
+  /// Fixed width in icon mode; otherwise computed/intrinsic.
+  final double? width;
+
+  @override
+  State<CNPopupMenuButton> createState() => _CNPopupMenuButtonState();
 
   /// Whether this instance is configured as an icon button variant.
   bool get isIconButton => buttonIcon != null;
 
   /// Whether this instance uses a custom child widget.
   bool get hasChild => child != null;
-
-  @override
-  State<CNPopupMenuButton> createState() => _CNPopupMenuButtonState();
 }
 
 class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
   MethodChannel? _channel;
-  bool? _lastIsDark;
-  int? _lastTint;
-  String? _lastTitle;
+  Offset? _downPosition;
+  double? _intrinsicWidth;
+  int? _lastIconColor;
   String? _lastIconName;
   double? _lastIconSize;
-  int? _lastIconColor;
-  double? _intrinsicWidth;
+  bool? _lastIsDark;
   CNButtonStyle? _lastStyle;
-  Offset? _downPosition;
+  int? _lastTint;
+  String? _lastTitle;
   bool _pressed = false;
-
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-  Color? get _effectiveTint =>
-      widget.tint ?? CupertinoTheme.of(context).primaryColor;
-
-  @override
-  void didUpdateWidget(covariant CNPopupMenuButton oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _syncPropsToNativeIfNeeded();
-  }
 
   @override
   void didChangeDependencies() {
@@ -169,9 +162,196 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
   }
 
   @override
+  void didUpdateWidget(covariant CNPopupMenuButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncPropsToNativeIfNeeded();
+  }
+
+  @override
   void dispose() {
     _channel?.setMethodCallHandler(null);
     super.dispose();
+  }
+
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+
+  Color? get _effectiveTint =>
+      widget.tint ?? CupertinoTheme.of(context).primaryColor;
+
+  void _onCreated(int id) {
+    final ch = MethodChannel('CupertinoNativePopupMenuButton_$id');
+    _channel = ch;
+    ch.setMethodCallHandler(_onMethodCall);
+    _lastTint = resolveColorToArgb(_effectiveTint, context);
+    _lastIsDark = _isDark;
+    _lastTitle = widget.buttonLabel;
+    _lastIconName = widget.buttonIcon?.name;
+    _lastIconSize = widget.buttonIcon?.size;
+    _lastIconColor = resolveColorToArgb(widget.buttonIcon?.color, context);
+    _lastStyle = widget.buttonStyle;
+    if (!widget.isIconButton && !widget.hasChild) {
+      _requestIntrinsicSize();
+    }
+  }
+
+  Future<dynamic> _onMethodCall(MethodCall call) async {
+    if (call.method == 'itemSelected') {
+      final args = call.arguments as Map?;
+      final idx = (args?['index'] as num?)?.toInt();
+      if (idx != null) widget.onSelected(idx);
+    }
+    return null;
+  }
+
+  Future<void> _requestIntrinsicSize() async {
+    final ch = _channel;
+    if (ch == null) return;
+    try {
+      final size = await ch.invokeMethod<Map>('getIntrinsicSize');
+      final w = (size?['width'] as num?)?.toDouble();
+      if (w != null && mounted) {
+        setState(() => _intrinsicWidth = w);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _syncPropsToNativeIfNeeded() async {
+    final ch = _channel;
+    if (ch == null) return;
+    // Prepare popup items upfront to avoid using BuildContext after awaits.
+    final updLabels = <String>[];
+    final updSymbols = <String>[];
+    final updIsDivider = <bool>[];
+    final updEnabled = <bool>[];
+    final updChecked = <bool>[];
+    final updSizes = <double?>[];
+    final updColors = <int?>[];
+    final updModes = <String?>[];
+    final updPalettes = <List<int?>?>[];
+    final updGradients = <bool?>[];
+    for (final e in widget.items) {
+      if (e is CNPopupMenuDivider) {
+        updLabels.add('');
+        updSymbols.add('');
+        updIsDivider.add(true);
+        updEnabled.add(false);
+        updChecked.add(false);
+        updSizes.add(null);
+        updColors.add(null);
+        updModes.add(null);
+        updPalettes.add(null);
+        updGradients.add(null);
+      } else if (e is CNPopupMenuItem) {
+        updLabels.add(e.label);
+        updSymbols.add(e.icon?.name ?? '');
+        updIsDivider.add(false);
+        updEnabled.add(e.enabled);
+        updChecked.add(e.checked);
+        updSizes.add(e.icon?.size);
+        updColors.add(resolveColorToArgb(e.icon?.color, context));
+        updModes.add(e.icon?.mode?.name);
+        updPalettes.add(
+          e.icon?.paletteColors
+              ?.map((c) => resolveColorToArgb(c, context))
+              .toList(),
+        );
+        updGradients.add(e.icon?.gradient);
+      }
+    }
+    // Capture context-dependent values before any awaits
+    final tint = resolveColorToArgb(_effectiveTint, context);
+    final preIconName = widget.buttonIcon?.name;
+    final preIconSize = widget.buttonIcon?.size;
+    final preIconColor = resolveColorToArgb(widget.buttonIcon?.color, context);
+    if (_lastTint != tint && tint != null) {
+      await ch.invokeMethod('setStyle', {'tint': tint});
+      _lastTint = tint;
+    }
+    if (_lastStyle != widget.buttonStyle) {
+      await ch.invokeMethod('setStyle', {
+        'buttonStyle': widget.buttonStyle.name,
+      });
+      _lastStyle = widget.buttonStyle;
+    }
+    if (_lastTitle != widget.buttonLabel &&
+        widget.buttonLabel != null &&
+        !widget.hasChild) {
+      await ch.invokeMethod('setButtonTitle', {'title': widget.buttonLabel});
+      _lastTitle = widget.buttonLabel;
+      _requestIntrinsicSize();
+    }
+
+    if (widget.isIconButton && !widget.hasChild) {
+      final iconName = preIconName;
+      final iconSize = preIconSize;
+      final iconColor = preIconColor;
+      final updates = <String, dynamic>{};
+      if (_lastIconName != iconName && iconName != null) {
+        updates['buttonIconName'] = iconName;
+        _lastIconName = iconName;
+      }
+      if (_lastIconSize != iconSize && iconSize != null) {
+        updates['buttonIconSize'] = iconSize;
+        _lastIconSize = iconSize;
+      }
+      if (_lastIconColor != iconColor && iconColor != null) {
+        updates['buttonIconColor'] = iconColor;
+        _lastIconColor = iconColor;
+      }
+      if (widget.buttonIcon?.mode != null) {
+        updates['buttonIconRenderingMode'] = widget.buttonIcon!.mode!.name;
+      }
+      if (widget.buttonIcon?.paletteColors != null) {
+        updates['buttonIconPaletteColors'] = widget.buttonIcon!.paletteColors!
+            .map((c) => resolveColorToArgb(c, context))
+            .toList();
+      }
+      if (widget.buttonIcon?.gradient != null) {
+        updates['buttonIconGradientEnabled'] = widget.buttonIcon!.gradient;
+      }
+      if (updates.isNotEmpty) {
+        await ch.invokeMethod('setButtonIcon', updates);
+      }
+    }
+
+    await ch.invokeMethod('setItems', {
+      'labels': updLabels,
+      'sfSymbols': updSymbols,
+      'isDivider': updIsDivider,
+      'enabled': updEnabled,
+      'checked': updChecked,
+      'sfSymbolSizes': updSizes,
+      'sfSymbolColors': updColors,
+      'sfSymbolRenderingModes': updModes,
+      'sfSymbolPaletteColors': updPalettes,
+      'sfSymbolGradientEnabled': updGradients,
+    });
+  }
+
+  Future<void> _syncBrightnessIfNeeded() async {
+    final ch = _channel;
+    if (ch == null) return;
+    // Capture values before awaiting
+    final isDark = _isDark;
+    final tint = resolveColorToArgb(_effectiveTint, context);
+    if (_lastIsDark != isDark) {
+      await ch.invokeMethod('setBrightness', {'isDark': isDark});
+      _lastIsDark = isDark;
+    }
+    if (_lastTint != tint && tint != null) {
+      await ch.invokeMethod('setStyle', {'tint': tint});
+      _lastTint = tint;
+    }
+  }
+
+  Future<void> _setPressed(bool pressed) async {
+    final ch = _channel;
+    if (ch == null) return;
+    if (_pressed == pressed) return;
+    _pressed = pressed;
+    try {
+      await ch.invokeMethod('setPressed', {'pressed': pressed});
+    } catch (_) {}
   }
 
   @override
@@ -421,181 +601,5 @@ class _CNPopupMenuButtonState extends State<CNPopupMenuButton> {
         );
       },
     );
-  }
-
-  void _onCreated(int id) {
-    final ch = MethodChannel('CupertinoNativePopupMenuButton_$id');
-    _channel = ch;
-    ch.setMethodCallHandler(_onMethodCall);
-    _lastTint = resolveColorToArgb(_effectiveTint, context);
-    _lastIsDark = _isDark;
-    _lastTitle = widget.buttonLabel;
-    _lastIconName = widget.buttonIcon?.name;
-    _lastIconSize = widget.buttonIcon?.size;
-    _lastIconColor = resolveColorToArgb(widget.buttonIcon?.color, context);
-    _lastStyle = widget.buttonStyle;
-    if (!widget.isIconButton && !widget.hasChild) {
-      _requestIntrinsicSize();
-    }
-  }
-
-  Future<dynamic> _onMethodCall(MethodCall call) async {
-    if (call.method == 'itemSelected') {
-      final args = call.arguments as Map?;
-      final idx = (args?['index'] as num?)?.toInt();
-      if (idx != null) widget.onSelected(idx);
-    }
-    return null;
-  }
-
-  Future<void> _requestIntrinsicSize() async {
-    final ch = _channel;
-    if (ch == null) return;
-    try {
-      final size = await ch.invokeMethod<Map>('getIntrinsicSize');
-      final w = (size?['width'] as num?)?.toDouble();
-      if (w != null && mounted) {
-        setState(() => _intrinsicWidth = w);
-      }
-    } catch (_) {}
-  }
-
-  Future<void> _syncPropsToNativeIfNeeded() async {
-    final ch = _channel;
-    if (ch == null) return;
-    // Prepare popup items upfront to avoid using BuildContext after awaits.
-    final updLabels = <String>[];
-    final updSymbols = <String>[];
-    final updIsDivider = <bool>[];
-    final updEnabled = <bool>[];
-    final updChecked = <bool>[];
-    final updSizes = <double?>[];
-    final updColors = <int?>[];
-    final updModes = <String?>[];
-    final updPalettes = <List<int?>?>[];
-    final updGradients = <bool?>[];
-    for (final e in widget.items) {
-      if (e is CNPopupMenuDivider) {
-        updLabels.add('');
-        updSymbols.add('');
-        updIsDivider.add(true);
-        updEnabled.add(false);
-        updChecked.add(false);
-        updSizes.add(null);
-        updColors.add(null);
-        updModes.add(null);
-        updPalettes.add(null);
-        updGradients.add(null);
-      } else if (e is CNPopupMenuItem) {
-        updLabels.add(e.label);
-        updSymbols.add(e.icon?.name ?? '');
-        updIsDivider.add(false);
-        updEnabled.add(e.enabled);
-        updChecked.add(e.checked);
-        updSizes.add(e.icon?.size);
-        updColors.add(resolveColorToArgb(e.icon?.color, context));
-        updModes.add(e.icon?.mode?.name);
-        updPalettes.add(
-          e.icon?.paletteColors
-              ?.map((c) => resolveColorToArgb(c, context))
-              .toList(),
-        );
-        updGradients.add(e.icon?.gradient);
-      }
-    }
-    // Capture context-dependent values before any awaits
-    final tint = resolveColorToArgb(_effectiveTint, context);
-    final preIconName = widget.buttonIcon?.name;
-    final preIconSize = widget.buttonIcon?.size;
-    final preIconColor = resolveColorToArgb(widget.buttonIcon?.color, context);
-    if (_lastTint != tint && tint != null) {
-      await ch.invokeMethod('setStyle', {'tint': tint});
-      _lastTint = tint;
-    }
-    if (_lastStyle != widget.buttonStyle) {
-      await ch.invokeMethod('setStyle', {
-        'buttonStyle': widget.buttonStyle.name,
-      });
-      _lastStyle = widget.buttonStyle;
-    }
-    if (_lastTitle != widget.buttonLabel &&
-        widget.buttonLabel != null &&
-        !widget.hasChild) {
-      await ch.invokeMethod('setButtonTitle', {'title': widget.buttonLabel});
-      _lastTitle = widget.buttonLabel;
-      _requestIntrinsicSize();
-    }
-
-    if (widget.isIconButton && !widget.hasChild) {
-      final iconName = preIconName;
-      final iconSize = preIconSize;
-      final iconColor = preIconColor;
-      final updates = <String, dynamic>{};
-      if (_lastIconName != iconName && iconName != null) {
-        updates['buttonIconName'] = iconName;
-        _lastIconName = iconName;
-      }
-      if (_lastIconSize != iconSize && iconSize != null) {
-        updates['buttonIconSize'] = iconSize;
-        _lastIconSize = iconSize;
-      }
-      if (_lastIconColor != iconColor && iconColor != null) {
-        updates['buttonIconColor'] = iconColor;
-        _lastIconColor = iconColor;
-      }
-      if (widget.buttonIcon?.mode != null) {
-        updates['buttonIconRenderingMode'] = widget.buttonIcon!.mode!.name;
-      }
-      if (widget.buttonIcon?.paletteColors != null) {
-        updates['buttonIconPaletteColors'] = widget.buttonIcon!.paletteColors!
-            .map((c) => resolveColorToArgb(c, context))
-            .toList();
-      }
-      if (widget.buttonIcon?.gradient != null) {
-        updates['buttonIconGradientEnabled'] = widget.buttonIcon!.gradient;
-      }
-      if (updates.isNotEmpty) {
-        await ch.invokeMethod('setButtonIcon', updates);
-      }
-    }
-
-    await ch.invokeMethod('setItems', {
-      'labels': updLabels,
-      'sfSymbols': updSymbols,
-      'isDivider': updIsDivider,
-      'enabled': updEnabled,
-      'checked': updChecked,
-      'sfSymbolSizes': updSizes,
-      'sfSymbolColors': updColors,
-      'sfSymbolRenderingModes': updModes,
-      'sfSymbolPaletteColors': updPalettes,
-      'sfSymbolGradientEnabled': updGradients,
-    });
-  }
-
-  Future<void> _syncBrightnessIfNeeded() async {
-    final ch = _channel;
-    if (ch == null) return;
-    // Capture values before awaiting
-    final isDark = _isDark;
-    final tint = resolveColorToArgb(_effectiveTint, context);
-    if (_lastIsDark != isDark) {
-      await ch.invokeMethod('setBrightness', {'isDark': isDark});
-      _lastIsDark = isDark;
-    }
-    if (_lastTint != tint && tint != null) {
-      await ch.invokeMethod('setStyle', {'tint': tint});
-      _lastTint = tint;
-    }
-  }
-
-  Future<void> _setPressed(bool pressed) async {
-    final ch = _channel;
-    if (ch == null) return;
-    if (_pressed == pressed) return;
-    _pressed = pressed;
-    try {
-      await ch.invokeMethod('setPressed', {'pressed': pressed});
-    } catch (_) {}
   }
 }

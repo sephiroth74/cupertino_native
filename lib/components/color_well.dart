@@ -49,22 +49,12 @@ class CNColorWell extends StatefulWidget {
 
 class _CNColorWellState extends State<CNColorWell> {
   MethodChannel? _channel;
-  bool _lastIsDark = false;
+  double? _intrinsicHeight;
+  double? _intrinsicWidth;
   Color? _lastColor;
+  bool _lastIsDark = false;
   CNColorWellStyle _lastStyle = CNColorWellStyle.regular;
   bool _lastSupportsAlpha = true;
-  double? _intrinsicWidth;
-  double? _intrinsicHeight;
-
-  bool get isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-
-  bool get enabled => widget.onColorChanged != null;
-
-  @override
-  void didUpdateWidget(covariant CNColorWell oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _syncPropsToNativeIfNeeded();
-  }
 
   @override
   void didChangeDependencies() {
@@ -73,50 +63,14 @@ class _CNColorWellState extends State<CNColorWell> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    const viewType = 'CupertinoNativeColorWell';
-    final creationParams = <String, dynamic>{
-      'color': resolveColorToArgb(widget.color, context),
-      'style': widget.style.name,
-      'enabled': enabled,
-      'isDark': isDark,
-      'continuous': true,
-      'supportsAlpha': widget.supportsAlpha,
-    };
-
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
-      return Placeholder();
-    }
-
-    final platformView = AppKitView(
-      viewType: viewType,
-      creationParams: creationParams,
-      creationParamsCodec: const StandardMessageCodec(),
-      onPlatformViewCreated: _onCreated,
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-        // Forward taps to native; let Flutter keep drags for scrolling.
-        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-      },
-    );
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final hasWidth = constraints.hasBoundedWidth;
-        final hasHeight = constraints.hasBoundedHeight;
-        double width = hasWidth ? constraints.maxWidth : _kDefaultWidth;
-        double height = hasHeight ? constraints.maxHeight : _kDefaultHeight;
-
-        if (_intrinsicWidth != null &&
-            _intrinsicHeight != null &&
-            !hasWidth &&
-            !hasHeight) {
-          width = _intrinsicWidth!;
-          height = _intrinsicHeight!;
-        }
-        return SizedBox(width: width, height: height, child: platformView);
-      },
-    );
+  void didUpdateWidget(covariant CNColorWell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncPropsToNativeIfNeeded();
   }
+
+  bool get isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+
+  bool get enabled => widget.onColorChanged != null;
 
   void _onCreated(int id) {
     final ch = MethodChannel('CupertinoNativeColorWell_$id');
@@ -195,5 +149,51 @@ class _CNColorWellState extends State<CNColorWell> {
       await ch.invokeMethod('setBrightness', {'isDark': isDark});
       _lastIsDark = isDark;
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const viewType = 'CupertinoNativeColorWell';
+    final creationParams = <String, dynamic>{
+      'color': resolveColorToArgb(widget.color, context),
+      'style': widget.style.name,
+      'enabled': enabled,
+      'isDark': isDark,
+      'continuous': true,
+      'supportsAlpha': widget.supportsAlpha,
+    };
+
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      return Placeholder();
+    }
+
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParams: creationParams,
+      creationParamsCodec: const StandardMessageCodec(),
+      onPlatformViewCreated: _onCreated,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        // Forward taps to native; let Flutter keep drags for scrolling.
+        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+      },
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasWidth = constraints.hasBoundedWidth;
+        final hasHeight = constraints.hasBoundedHeight;
+        double width = hasWidth ? constraints.maxWidth : _kDefaultWidth;
+        double height = hasHeight ? constraints.maxHeight : _kDefaultHeight;
+
+        if (_intrinsicWidth != null &&
+            _intrinsicHeight != null &&
+            !hasWidth &&
+            !hasHeight) {
+          width = _intrinsicWidth!;
+          height = _intrinsicHeight!;
+        }
+        return SizedBox(width: width, height: height, child: platformView);
+      },
+    );
   }
 }

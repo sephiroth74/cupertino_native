@@ -11,6 +11,58 @@ class SheetDemoPage extends StatefulWidget {
 class _SheetDemoPageState extends State<SheetDemoPage> {
   int? _lastSelectedIndex;
 
+  Widget _buildSheetButton({
+    required String title,
+    required CNSheetStyle style,
+    required String message,
+  }) {
+    return CupertinoButton.filled(
+      onPressed: () =>
+          _showSimpleSheet(title: title, style: style, message: message),
+      child: Text(title),
+    );
+  }
+
+  Future<void> _showSimpleSheet({
+    required String title,
+    required CNSheetStyle style,
+    required String message,
+  }) async {
+    final selected = await CNSheet.show(
+      context,
+      title: title,
+      message: message,
+      style: style,
+      actions: const [CNSheetAction('OK', isDefault: true)],
+    );
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _lastSelectedIndex = selected;
+    });
+  }
+
+  Future<void> _showCustomActionsSheet() async {
+    final selected = await CNSheet.show(
+      context,
+      title: 'Document Actions',
+      message: 'Choose what to do with the selected document.',
+      style: CNSheetStyle.warning,
+      actions: const [
+        CNSheetAction('Save', isDefault: true),
+        CNSheetAction('Duplicate'),
+        CNSheetAction('Delete', isDestructive: true),
+      ],
+    );
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _lastSelectedIndex = selected;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -67,57 +119,5 @@ class _SheetDemoPageState extends State<SheetDemoPage> {
         ),
       ),
     );
-  }
-
-  Widget _buildSheetButton({
-    required String title,
-    required CNSheetStyle style,
-    required String message,
-  }) {
-    return CupertinoButton.filled(
-      onPressed: () =>
-          _showSimpleSheet(title: title, style: style, message: message),
-      child: Text(title),
-    );
-  }
-
-  Future<void> _showSimpleSheet({
-    required String title,
-    required CNSheetStyle style,
-    required String message,
-  }) async {
-    final selected = await CNSheet.show(
-      context,
-      title: title,
-      message: message,
-      style: style,
-      actions: const [CNSheetAction('OK', isDefault: true)],
-    );
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      _lastSelectedIndex = selected;
-    });
-  }
-
-  Future<void> _showCustomActionsSheet() async {
-    final selected = await CNSheet.show(
-      context,
-      title: 'Document Actions',
-      message: 'Choose what to do with the selected document.',
-      style: CNSheetStyle.warning,
-      actions: const [
-        CNSheetAction('Save', isDefault: true),
-        CNSheetAction('Duplicate'),
-        CNSheetAction('Delete', isDestructive: true),
-      ],
-    );
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      _lastSelectedIndex = selected;
-    });
   }
 }

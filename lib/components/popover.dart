@@ -17,9 +17,6 @@ class CNPopoverAction {
     this.isDestructive = false,
   });
 
-  /// Visible label.
-  final String label;
-
   /// Whether the action can be pressed.
   final bool enabled;
 
@@ -28,6 +25,9 @@ class CNPopoverAction {
 
   /// Whether the action is destructive.
   final bool isDestructive;
+
+  /// Visible label.
+  final String label;
 }
 
 /// Native popover behavior on macOS.
@@ -79,26 +79,6 @@ class CNPopoverButton extends StatefulWidget {
        shrinkWrap = false,
        buttonStyle = CNButtonStyle.plain;
 
-  /// Creates a text-labeled popover button.
-  const CNPopoverButton.label({
-    super.key,
-    required this.buttonLabel,
-    required this.message,
-    required this.actions,
-    required this.onSelected,
-    this.title,
-    this.tint,
-    this.height = 32,
-    this.shrinkWrap = false,
-    this.buttonStyle = CNButtonStyle.plain,
-    this.behavior = CNPopoverBehavior.transient,
-    this.preferredEdge = CNPopoverEdge.bottom,
-    this.popoverWidth = 280,
-  }) : child = null,
-       buttonIcon = null,
-       width = null,
-       round = false;
-
   /// Creates a round icon-only popover button.
   const CNPopoverButton.icon({
     super.key,
@@ -121,90 +101,100 @@ class CNPopoverButton extends StatefulWidget {
        shrinkWrap = false,
        super();
 
-  /// Optional custom trigger child.
-  final Widget? child;
-
-  /// Optional button label for text mode.
-  final String? buttonLabel;
-
-  /// Optional button icon for icon mode.
-  final CNSymbol? buttonIcon;
-
-  /// Optional popover title.
-  final String? title;
-
-  /// Required popover message.
-  final String message;
+  /// Creates a text-labeled popover button.
+  const CNPopoverButton.label({
+    super.key,
+    required this.buttonLabel,
+    required this.message,
+    required this.actions,
+    required this.onSelected,
+    this.title,
+    this.tint,
+    this.height = 32,
+    this.shrinkWrap = false,
+    this.buttonStyle = CNButtonStyle.plain,
+    this.behavior = CNPopoverBehavior.transient,
+    this.preferredEdge = CNPopoverEdge.bottom,
+    this.popoverWidth = 280,
+  }) : child = null,
+       buttonIcon = null,
+       width = null,
+       round = false;
 
   /// Available actions in the popover.
   final List<CNPopoverAction> actions;
 
-  /// Callback invoked with the selected action index.
-  final ValueChanged<int> onSelected;
-
-  /// Optional tint color for the trigger.
-  final Color? tint;
-
   /// Popover behavior.
   final CNPopoverBehavior behavior;
 
-  /// Preferred edge of the trigger.
-  final CNPopoverEdge preferredEdge;
+  /// Optional button icon for icon mode.
+  final CNSymbol? buttonIcon;
 
-  /// Desired popover content width.
-  final double popoverWidth;
+  /// Optional button label for text mode.
+  final String? buttonLabel;
 
-  /// Fixed width in icon mode.
-  final double? width;
+  /// Visual style to apply to the trigger.
+  final CNButtonStyle buttonStyle;
 
-  /// Whether the icon variant is round.
-  final bool round;
+  /// Optional custom trigger child.
+  final Widget? child;
 
   /// Trigger height.
   final double? height;
 
+  /// Required popover message.
+  final String message;
+
+  /// Callback invoked with the selected action index.
+  final ValueChanged<int> onSelected;
+
+  /// Desired popover content width.
+  final double popoverWidth;
+
+  /// Preferred edge of the trigger.
+  final CNPopoverEdge preferredEdge;
+
+  /// Whether the icon variant is round.
+  final bool round;
+
   /// If true, uses intrinsic width for text mode.
   final bool shrinkWrap;
 
-  /// Visual style to apply to the trigger.
-  final CNButtonStyle buttonStyle;
+  /// Optional tint color for the trigger.
+  final Color? tint;
+
+  /// Optional popover title.
+  final String? title;
+
+  /// Fixed width in icon mode.
+  final double? width;
+
+  @override
+  State<CNPopoverButton> createState() => _CNPopoverButtonState();
 
   /// Whether this instance is configured as an icon button variant.
   bool get isIconButton => buttonIcon != null;
 
   /// Whether this instance uses a custom child widget.
   bool get hasChild => child != null;
-
-  @override
-  State<CNPopoverButton> createState() => _CNPopoverButtonState();
 }
 
 class _CNPopoverButtonState extends State<CNPopoverButton> {
   MethodChannel? _channel;
-  bool? _lastIsDark;
-  int? _lastTint;
-  String? _lastButtonTitle;
-  String? _lastTitle;
-  String? _lastMessage;
+  double? _intrinsicWidth;
   String? _lastActionsSignature;
-  double? _lastPopoverWidth;
+  CNPopoverBehavior? _lastBehavior;
+  String? _lastButtonTitle;
+  int? _lastIconColor;
   String? _lastIconName;
   double? _lastIconSize;
-  int? _lastIconColor;
-  CNButtonStyle? _lastStyle;
-  CNPopoverBehavior? _lastBehavior;
+  bool? _lastIsDark;
+  String? _lastMessage;
+  double? _lastPopoverWidth;
   CNPopoverEdge? _lastPreferredEdge;
-  double? _intrinsicWidth;
-
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-  Color? get _effectiveTint =>
-      widget.tint ?? CupertinoTheme.of(context).primaryColor;
-
-  @override
-  void didUpdateWidget(covariant CNPopoverButton oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _syncPropsToNativeIfNeeded();
-  }
+  CNButtonStyle? _lastStyle;
+  int? _lastTint;
+  String? _lastTitle;
 
   @override
   void didChangeDependencies() {
@@ -213,95 +203,21 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
   }
 
   @override
+  void didUpdateWidget(covariant CNPopoverButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncPropsToNativeIfNeeded();
+  }
+
+  @override
   void dispose() {
     _channel?.setMethodCallHandler(null);
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
-      return _buildFallback(context);
-    }
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
-    const viewType = 'CupertinoNativePopover';
-    final creationParams = <String, dynamic>{
-      if (widget.hasChild) 'transparentOverlay': true,
-      if (widget.buttonLabel != null) 'buttonTitle': widget.buttonLabel,
-      if (widget.buttonIcon != null) 'buttonIconName': widget.buttonIcon!.name,
-      if (widget.buttonIcon?.size != null)
-        'buttonIconSize': widget.buttonIcon!.size,
-      if (widget.buttonIcon?.color != null)
-        'buttonIconColor': resolveColorToArgb(
-          widget.buttonIcon!.color,
-          context,
-        ),
-      if (widget.buttonIcon?.mode != null)
-        'buttonIconRenderingMode': widget.buttonIcon!.mode!.name,
-      if (widget.buttonIcon?.paletteColors != null)
-        'buttonIconPaletteColors': widget.buttonIcon!.paletteColors!
-            .map((c) => resolveColorToArgb(c, context))
-            .toList(),
-      if (widget.buttonIcon?.gradient != null)
-        'buttonIconGradientEnabled': widget.buttonIcon!.gradient,
-      if (widget.isIconButton) 'round': true,
-      'buttonStyle': widget.buttonStyle.name,
-      'isDark': _isDark,
-      'behavior': widget.behavior.name,
-      'preferredEdge': widget.preferredEdge.name,
-      'popoverWidth': widget.popoverWidth,
-      'popoverTitle': widget.title,
-      'popoverMessage': widget.message,
-      'actions': [
-        for (final action in widget.actions)
-          {
-            'label': action.label,
-            'enabled': action.enabled,
-            'isDefault': action.isDefault,
-            'isDestructive': action.isDestructive,
-          },
-      ],
-      'style': encodeStyle(context, tint: _effectiveTint),
-    };
-
-    final platformView = AppKitView(
-      viewType: viewType,
-      creationParams: creationParams,
-      creationParamsCodec: const StandardMessageCodec(),
-      onPlatformViewCreated: _onCreated,
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-      },
-    );
-
-    if (widget.hasChild) {
-      return Stack(
-        children: [
-          widget.child!,
-          Positioned.fill(child: platformView),
-        ],
-      );
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final preferIntrinsic =
-            widget.shrinkWrap || !constraints.hasBoundedWidth;
-        double? width;
-        if (widget.isIconButton) {
-          width = widget.width ?? widget.height;
-        } else if (preferIntrinsic) {
-          width = _intrinsicWidth ?? 100;
-        }
-
-        return SizedBox(
-          height: widget.height,
-          width: width,
-          child: platformView,
-        );
-      },
-    );
-  }
+  Color? get _effectiveTint =>
+      widget.tint ?? CupertinoTheme.of(context).primaryColor;
 
   Widget _buildFallback(BuildContext context) {
     Future<void> showFallback() async {
@@ -499,5 +415,90 @@ class _CNPopoverButtonState extends State<CNPopoverButton> {
         setState(() => _intrinsicWidth = width);
       }
     } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      return _buildFallback(context);
+    }
+
+    const viewType = 'CupertinoNativePopover';
+    final creationParams = <String, dynamic>{
+      if (widget.hasChild) 'transparentOverlay': true,
+      if (widget.buttonLabel != null) 'buttonTitle': widget.buttonLabel,
+      if (widget.buttonIcon != null) 'buttonIconName': widget.buttonIcon!.name,
+      if (widget.buttonIcon?.size != null)
+        'buttonIconSize': widget.buttonIcon!.size,
+      if (widget.buttonIcon?.color != null)
+        'buttonIconColor': resolveColorToArgb(
+          widget.buttonIcon!.color,
+          context,
+        ),
+      if (widget.buttonIcon?.mode != null)
+        'buttonIconRenderingMode': widget.buttonIcon!.mode!.name,
+      if (widget.buttonIcon?.paletteColors != null)
+        'buttonIconPaletteColors': widget.buttonIcon!.paletteColors!
+            .map((c) => resolveColorToArgb(c, context))
+            .toList(),
+      if (widget.buttonIcon?.gradient != null)
+        'buttonIconGradientEnabled': widget.buttonIcon!.gradient,
+      if (widget.isIconButton) 'round': true,
+      'buttonStyle': widget.buttonStyle.name,
+      'isDark': _isDark,
+      'behavior': widget.behavior.name,
+      'preferredEdge': widget.preferredEdge.name,
+      'popoverWidth': widget.popoverWidth,
+      'popoverTitle': widget.title,
+      'popoverMessage': widget.message,
+      'actions': [
+        for (final action in widget.actions)
+          {
+            'label': action.label,
+            'enabled': action.enabled,
+            'isDefault': action.isDefault,
+            'isDestructive': action.isDestructive,
+          },
+      ],
+      'style': encodeStyle(context, tint: _effectiveTint),
+    };
+
+    final platformView = AppKitView(
+      viewType: viewType,
+      creationParams: creationParams,
+      creationParamsCodec: const StandardMessageCodec(),
+      onPlatformViewCreated: _onCreated,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+      },
+    );
+
+    if (widget.hasChild) {
+      return Stack(
+        children: [
+          widget.child!,
+          Positioned.fill(child: platformView),
+        ],
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final preferIntrinsic =
+            widget.shrinkWrap || !constraints.hasBoundedWidth;
+        double? width;
+        if (widget.isIconButton) {
+          width = widget.width ?? widget.height;
+        } else if (preferIntrinsic) {
+          width = _intrinsicWidth ?? 100;
+        }
+
+        return SizedBox(
+          height: widget.height,
+          width: width,
+          child: platformView,
+        );
+      },
+    );
   }
 }

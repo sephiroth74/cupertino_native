@@ -11,48 +11,6 @@ typedef CNDatePickerChanged = void Function(DateTime date, Duration interval);
 
 /// A Cupertino-style date picker widget that wraps the native NSDatePicker on macOS.
 class CNDatePicker extends StatefulWidget {
-  /// The mode of the date picker, determining whether it allows selection of a single date or a date range.
-  final CNDatePickerMode datePickerMode;
-
-  /// The style of the date picker, determining its visual appearance and layout.
-  final CNDatePickerStyle datePickerStyle;
-
-  /// The elements to display in the date picker, such as year, month, day, hour, minute, etc.
-  final List<CNDatePickerElements> datePickerElements;
-
-  /// Whether the date picker should have a border.
-  final bool isBordered;
-
-  /// The initial date value of the date picker. For range mode, this represents the start date.
-  final DateTime? dateValue;
-
-  /// Whether the date picker should draw a background.
-  final bool drawsBackground;
-
-  /// The background color of the date picker. If null, the default system background color is used.
-  final Color? backgroundColor;
-
-  /// The text color of the date picker. If null, the default system text color is used.
-  final Color? textColor;
-
-  /// The minimum selectable date in the date picker. If null, there is no minimum limit.
-  final DateTime? minDate;
-
-  /// The maximum selectable date in the date picker. If null, there is no maximum limit.
-  final DateTime? maxDate;
-
-  /// The locale to use for the date picker. If null, the system locale is used.
-  final Locale? locale;
-
-  /// Whether the date picker is enabled for user interaction. If false, the date picker is disabled and does not respond to user input.
-  final CNDatePickerChanged? onDateChanged;
-
-  /// An optional fixed width for the date picker. If null, the date picker will size itself based on its content and available space.
-  final double? width;
-
-  /// Optional native NSFont descriptor.
-  final CNFont? font;
-
   /// Creates a new CNDatePicker with the specified configuration.
   const CNDatePicker({
     super.key,
@@ -72,104 +30,63 @@ class CNDatePicker extends StatefulWidget {
     this.width,
   });
 
+  /// The background color of the date picker. If null, the default system background color is used.
+  final Color? backgroundColor;
+
+  /// The elements to display in the date picker, such as year, month, day, hour, minute, etc.
+  final List<CNDatePickerElements> datePickerElements;
+
+  /// The mode of the date picker, determining whether it allows selection of a single date or a date range.
+  final CNDatePickerMode datePickerMode;
+
+  /// The style of the date picker, determining its visual appearance and layout.
+  final CNDatePickerStyle datePickerStyle;
+
+  /// The initial date value of the date picker. For range mode, this represents the start date.
+  final DateTime? dateValue;
+
+  /// Whether the date picker should draw a background.
+  final bool drawsBackground;
+
+  /// Optional native NSFont descriptor.
+  final CNFont? font;
+
+  /// Whether the date picker should have a border.
+  final bool isBordered;
+
+  /// The locale to use for the date picker. If null, the system locale is used.
+  final Locale? locale;
+
+  /// The maximum selectable date in the date picker. If null, there is no maximum limit.
+  final DateTime? maxDate;
+
+  /// The minimum selectable date in the date picker. If null, there is no minimum limit.
+  final DateTime? minDate;
+
+  /// Whether the date picker is enabled for user interaction. If false, the date picker is disabled and does not respond to user input.
+  final CNDatePickerChanged? onDateChanged;
+
+  /// The text color of the date picker. If null, the default system text color is used.
+  final Color? textColor;
+
+  /// An optional fixed width for the date picker. If null, the date picker will size itself based on its content and available space.
+  final double? width;
+
   @override
   State<CNDatePicker> createState() => _CNDatePickerState();
 }
 
 class _CNDatePickerState extends State<CNDatePicker> {
   MethodChannel? _channel;
-
+  double? _intrinsicHeight;
+  double? _intrinsicWidth;
   bool _lastIsDark = false;
   bool _lastIsEnabled = false;
 
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-  bool get _isEnabled => widget.onDateChanged != null;
-
-  double? _intrinsicWidth;
-  double? _intrinsicHeight;
-
   @override
-  void dispose() {
-    _channel?.setMethodCallHandler(null);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
-      return Placeholder();
-    }
-
-    const viewType = 'CupertinoNativeDatePicker';
-
-    final creationParams = <String, dynamic>{
-      'isDark': _isDark,
-      'datePickerMode': widget.datePickerMode.name,
-      'datePickerStyle': widget.datePickerStyle.name,
-      'datePickerElements': widget.datePickerElements
-          .map((e) => e.name)
-          .toList(),
-      'isBordered': widget.isBordered,
-      'dateValue': widget.dateValue?.millisecondsSinceEpoch,
-      'drawsBackground': widget.drawsBackground,
-      'backgroundColor': resolveColorToArgb(widget.backgroundColor, context),
-      'textColor': resolveColorToArgb(widget.textColor, context),
-      'minDate': widget.minDate?.millisecondsSinceEpoch,
-      'maxDate': widget.maxDate?.millisecondsSinceEpoch,
-      'font': widget.font?.toMap(),
-      'locale': widget.locale?.toLanguageTag(),
-      'isEnabled': _isEnabled,
-    };
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        bool hasBoundedWidth = constraints.hasBoundedWidth;
-        bool hasBoundedHeight = constraints.hasBoundedHeight;
-
-        double? width;
-        double? height;
-
-        if (widget.datePickerStyle == CNDatePickerStyle.clockAndCalendar) {
-          // we must use the intrinsic sizes, or the max available constraints, in case the intrinsic sizes are not available yet
-          width =
-              _intrinsicWidth ??
-              (hasBoundedWidth ? constraints.maxWidth : null);
-          height =
-              _intrinsicHeight ??
-              (hasBoundedHeight ? constraints.maxHeight : null);
-        } else {
-          // for textField styles we can expand to fill the available width, but height should be intrinsic or max 32
-          width =
-              widget.width ??
-              _intrinsicWidth ??
-              (hasBoundedWidth ? constraints.maxWidth : null);
-          height =
-              _intrinsicHeight ??
-              (hasBoundedHeight ? constraints.maxHeight : 21.0);
-        }
-
-        if (hasBoundedWidth && width != null) {
-          width = width.clamp(0.0, constraints.maxWidth);
-        }
-
-        return Align(
-          alignment: Alignment.centerLeft,
-          child: SizedBox(
-            width: width,
-            height: height,
-            child: AppKitView(
-              viewType: viewType,
-              creationParamsCodec: const StandardMessageCodec(),
-              creationParams: creationParams,
-              onPlatformViewCreated: _onPlatformViewCreated,
-              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-              },
-            ),
-          ),
-        );
-      },
-    );
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
   }
 
   @override
@@ -179,10 +96,14 @@ class _CNDatePickerState extends State<CNDatePicker> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
+  void dispose() {
+    _channel?.setMethodCallHandler(null);
+    super.dispose();
   }
+
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+
+  bool get _isEnabled => widget.onDateChanged != null;
 
   void _onPlatformViewCreated(int id) {
     final channel = MethodChannel('CupertinoNativeDatePicker_$id');
@@ -224,8 +145,6 @@ class _CNDatePickerState extends State<CNDatePicker> {
   void _onIntrinsicSizeChanged(double? width, double? height) {
     if (width != null && height != null && mounted) {
       setState(() {
-        debugPrint('Intrinsic size updated: $width x $height');
-
         _intrinsicWidth = width > -1 ? width : null;
         _intrinsicHeight = height > -1 ? height : null;
       });
@@ -355,6 +274,84 @@ class _CNDatePickerState extends State<CNDatePicker> {
       await channel.invokeMethod('setIsDark', {'value': isDark});
       _lastIsDark = isDark;
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
+      return Placeholder();
+    }
+
+    const viewType = 'CupertinoNativeDatePicker';
+
+    final creationParams = <String, dynamic>{
+      'isDark': _isDark,
+      'datePickerMode': widget.datePickerMode.name,
+      'datePickerStyle': widget.datePickerStyle.name,
+      'datePickerElements': widget.datePickerElements
+          .map((e) => e.name)
+          .toList(),
+      'isBordered': widget.isBordered,
+      'dateValue': widget.dateValue?.millisecondsSinceEpoch,
+      'drawsBackground': widget.drawsBackground,
+      'backgroundColor': resolveColorToArgb(widget.backgroundColor, context),
+      'textColor': resolveColorToArgb(widget.textColor, context),
+      'minDate': widget.minDate?.millisecondsSinceEpoch,
+      'maxDate': widget.maxDate?.millisecondsSinceEpoch,
+      'font': widget.font?.toMap(),
+      'locale': widget.locale?.toLanguageTag(),
+      'isEnabled': _isEnabled,
+    };
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        bool hasBoundedWidth = constraints.hasBoundedWidth;
+        bool hasBoundedHeight = constraints.hasBoundedHeight;
+
+        double? width;
+        double? height;
+
+        if (widget.datePickerStyle == CNDatePickerStyle.clockAndCalendar) {
+          // we must use the intrinsic sizes, or the max available constraints, in case the intrinsic sizes are not available yet
+          width =
+              _intrinsicWidth ??
+              (hasBoundedWidth ? constraints.maxWidth : null);
+          height =
+              _intrinsicHeight ??
+              (hasBoundedHeight ? constraints.maxHeight : null);
+        } else {
+          // for textField styles we can expand to fill the available width, but height should be intrinsic or max 32
+          width =
+              widget.width ??
+              _intrinsicWidth ??
+              (hasBoundedWidth ? constraints.maxWidth : null);
+          height =
+              _intrinsicHeight ??
+              (hasBoundedHeight ? constraints.maxHeight : 21.0);
+        }
+
+        if (hasBoundedWidth && width != null) {
+          width = width.clamp(0.0, constraints.maxWidth);
+        }
+
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            width: width,
+            height: height,
+            child: AppKitView(
+              viewType: viewType,
+              creationParamsCodec: const StandardMessageCodec(),
+              creationParams: creationParams,
+              onPlatformViewCreated: _onPlatformViewCreated,
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+              },
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 

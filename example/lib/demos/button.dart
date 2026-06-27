@@ -9,8 +9,8 @@ class ButtonDemoPage extends StatefulWidget {
 }
 
 class _ButtonDemoPageState extends State<ButtonDemoPage> {
-  String _last = 'None';
   CNControlSize _controlSize = CNControlSize.regular;
+  String _last = 'None';
   bool _shrinkWrap = true;
   final List<CNControlSize> _sizes = CNControlSize.values;
 
@@ -32,7 +32,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                 const SizedBox(width: 12),
                 CNPopupMenuButton.icon(
                   buttonIcon: const CNSymbol('chevron.down', size: 18),
-                  buttonStyle: CNButtonStyle.plain,
+                  buttonStyle: CNButtonStyle.bordered,
                   size: 44.0,
                   items: _sizes
                       .map(
@@ -46,8 +46,18 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                     setState(() => _controlSize = _sizes[value]);
                   },
                 ),
+                const SizedBox(width: 24),
+                const Text('Shrink Wrap: '),
+                const SizedBox(width: 12),
+                CNSwitch(
+                  value: _shrinkWrap,
+                  onChanged: (value) {
+                    setState(() => _shrinkWrap = value);
+                  },
+                ),
               ],
             ),
+            const SizedBox(height: 12),
             Wrap(
               spacing: 12,
               runSpacing: 12,
@@ -108,6 +118,12 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   style: CNButtonStyle.prominentGlass,
                   onPressed: () => _set('ProminentGlass'),
                   shrinkWrap: _shrinkWrap,
+                  controlSize: _controlSize,
+                ),
+                CNButton.icon(
+                  icon: const CNSymbol('heart.fill', size: 18),
+                  style: CNButtonStyle.filled,
+                  onPressed: () => _set('Icon'),
                   controlSize: _controlSize,
                 ),
                 CNButton(

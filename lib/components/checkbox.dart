@@ -39,49 +39,44 @@ class CNCheckbox extends StatefulWidget {
   /// Whether the checkbox supports a mixed state. If true, the checkbox can have a third "indeterminate" state in addition to on/off.
   final bool allowMixedState;
 
-  /// An optional title to display next to the checkbox.
-  final String? title;
-
-  /// The state of the checkbox.
-  final CNCheckboxState state;
-
-  /// Whether the checkbox is interactive.
-  bool get enabled => onChanged != null;
-
-  /// Callback invoked when the user toggles the value.
-  final ValueChanged<CNCheckboxState>? onChanged;
+  /// Optional tint color to apply to the checkbox.
+  final Color? color;
 
   /// The size of the checkbox control.
   final CNControlSize controlSize;
 
-  /// Optional tint color to apply to the checkbox.
-  final Color? color;
+  /// Callback invoked when the user toggles the value.
+  final ValueChanged<CNCheckboxState>? onChanged;
+
+  /// The state of the checkbox.
+  final CNCheckboxState state;
+
+  /// An optional title to display next to the checkbox.
+  final String? title;
 
   @override
   State<CNCheckbox> createState() => _CNCheckboxState();
+
+  /// Whether the checkbox is interactive.
+  bool get enabled => onChanged != null;
 }
 
 class _CNCheckboxState extends State<CNCheckbox> {
   MethodChannel? _channel;
-  double? _intrinsicWidth;
   double? _intrinsicHeight;
-
-  String? _lastTitle;
-  CNCheckboxState? _lastState;
-  bool? _lastIsDark;
-  bool? _lastEnabled;
-  CNControlSize? _lastControlSize;
-  Color? _lastTint;
+  double? _intrinsicWidth;
   bool _lastAllowMixedState = false;
-
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-
-  Color? get _tint => widget.color ?? CupertinoTheme.of(context).primaryColor;
+  CNControlSize? _lastControlSize;
+  bool? _lastEnabled;
+  bool? _lastIsDark;
+  CNCheckboxState? _lastState;
+  Color? _lastTint;
+  String? _lastTitle;
 
   @override
-  void dispose() {
-    _channel?.setMethodCallHandler(null);
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
   }
 
   @override
@@ -91,69 +86,14 @@ class _CNCheckboxState extends State<CNCheckbox> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
+  void dispose() {
+    _channel?.setMethodCallHandler(null);
+    super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Fallback to Flutter Checkbox on unsupported platforms.
-    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
-      return Placeholder();
-    }
+  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
-    const viewType = 'CupertinoNativeCheckbox';
-
-    final creationParams = <String, dynamic>{
-      'state': widget.state.value,
-      'enabled': widget.enabled,
-      'isDark': _isDark,
-      'controlSize': widget.controlSize.name,
-      'tint': resolveColorToArgb(_tint, context),
-      'title': widget.title,
-      'allowMixedState': widget.allowMixedState,
-    };
-
-    // macOS
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final bool hasBoundedWidth = constraints.hasBoundedWidth;
-        final bool hasBoundedHeight = constraints.hasBoundedHeight;
-        double? width;
-        double? height;
-
-        if (hasBoundedWidth) {
-          width = constraints.maxWidth;
-        } else if (_intrinsicWidth != null) {
-          width = _intrinsicWidth;
-        }
-
-        if (hasBoundedHeight) {
-          height = constraints.maxHeight;
-        } else if (_intrinsicHeight != null) {
-          height = _intrinsicHeight;
-        }
-
-        width ??= _kDefaultSwitchWidth[widget.controlSize];
-        height ??= _kDefaultSwitchHeight[widget.controlSize];
-
-        return SizedBox(
-          height: height,
-          width: width,
-          child: AppKitView(
-            viewType: viewType,
-            creationParamsCodec: const StandardMessageCodec(),
-            creationParams: creationParams,
-            onPlatformViewCreated: _onPlatformViewCreated,
-            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-            },
-          ),
-        );
-      },
-    );
-  }
+  Color? get _tint => widget.color ?? CupertinoTheme.of(context).primaryColor;
 
   void _onPlatformViewCreated(int id) {
     final channel = MethodChannel('CupertinoNativeCheckbox_$id');
@@ -286,5 +226,64 @@ class _CNCheckboxState extends State<CNCheckbox> {
         _intrinsicHeight = height > -1 ? height : null;
       });
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Fallback to Flutter Checkbox on unsupported platforms.
+    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
+      return Placeholder();
+    }
+
+    const viewType = 'CupertinoNativeCheckbox';
+
+    final creationParams = <String, dynamic>{
+      'state': widget.state.value,
+      'enabled': widget.enabled,
+      'isDark': _isDark,
+      'controlSize': widget.controlSize.name,
+      'tint': resolveColorToArgb(_tint, context),
+      'title': widget.title,
+      'allowMixedState': widget.allowMixedState,
+    };
+
+    // macOS
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool hasBoundedWidth = constraints.hasBoundedWidth;
+        final bool hasBoundedHeight = constraints.hasBoundedHeight;
+        double? width;
+        double? height;
+
+        if (hasBoundedWidth) {
+          width = constraints.maxWidth;
+        } else if (_intrinsicWidth != null) {
+          width = _intrinsicWidth;
+        }
+
+        if (hasBoundedHeight) {
+          height = constraints.maxHeight;
+        } else if (_intrinsicHeight != null) {
+          height = _intrinsicHeight;
+        }
+
+        width ??= _kDefaultSwitchWidth[widget.controlSize];
+        height ??= _kDefaultSwitchHeight[widget.controlSize];
+
+        return SizedBox(
+          height: height,
+          width: width,
+          child: AppKitView(
+            viewType: viewType,
+            creationParamsCodec: const StandardMessageCodec(),
+            creationParams: creationParams,
+            onPlatformViewCreated: _onPlatformViewCreated,
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+            },
+          ),
+        );
+      },
+    );
   }
 }

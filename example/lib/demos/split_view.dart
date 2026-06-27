@@ -9,17 +9,17 @@ class SplitViewDemoPage extends StatefulWidget {
 }
 
 class _SplitViewDemoPageState extends State<SplitViewDemoPage> {
+  CNSplitAxis _axis = CNSplitAxis.horizontal;
   final CNSplitViewController _controller = CNSplitViewController();
+  bool _enableMacOSDividerEffects = true;
+  String _metricsText = 'No metrics yet';
   final TextEditingController _nativeTextController = TextEditingController(
     text: 'Native NSTextView embedded in Split View',
   );
 
-  CNSplitAxis _axis = CNSplitAxis.horizontal;
-  bool _snapEnabled = true;
-  bool _showNativeTextView = true;
-  bool _enableMacOSDividerEffects = true;
   double _previewScale = 0.35;
-  String _metricsText = 'No metrics yet';
+  bool _showNativeTextView = true;
+  bool _snapEnabled = true;
 
   @override
   void dispose() {
@@ -287,9 +287,9 @@ class _PaneCard extends StatelessWidget {
     required this.child,
   });
 
-  final String title;
-  final String subtitle;
   final Widget child;
+  final String subtitle;
+  final String title;
 
   @override
   Widget build(BuildContext context) {

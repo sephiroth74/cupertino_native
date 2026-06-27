@@ -10,12 +10,6 @@ import 'package:flutter/services.dart';
 /// This class encapsulates the necessary information to render a system symbol on Apple platforms,
 /// along with optional configuration for customizing its appearance.
 class CNImage extends StatefulWidget {
-  /// The name of the system symbol to render, which corresponds to an SF Symbol on Apple platforms.
-  final String systemSymbolName;
-
-  /// An optional symbol configuration that can be used to customize the appearance of the menu item.
-  final CNSymbolConfiguration symbolConfiguration;
-
   /// Creates a CNImage with the given [systemSymbolName] and an optional [symbolConfiguration].
   const CNImage({
     super.key,
@@ -24,6 +18,15 @@ class CNImage extends StatefulWidget {
       type: CNSymbolConfigurationType.defaultConfiguration,
     ),
   });
+
+  /// An optional symbol configuration that can be used to customize the appearance of the menu item.
+  final CNSymbolConfiguration symbolConfiguration;
+
+  /// The name of the system symbol to render, which corresponds to an SF Symbol on Apple platforms.
+  final String systemSymbolName;
+
+  @override
+  State<CNImage> createState() => _CNImageState();
 
   /// Serializes this image to a map for platform channel communication.
   Map<String, dynamic> toMap(BuildContext context) {
@@ -37,15 +40,12 @@ class CNImage extends StatefulWidget {
   String toJson(BuildContext context) {
     return jsonEncode(toMap(context));
   }
-
-  @override
-  State<CNImage> createState() => _CNImageState();
 }
 
 class _CNImageState extends State<CNImage> {
   MethodChannel? _channel;
-  String? _lastSystemSymbolName;
   CNSymbolConfiguration? _lastSymbolConfiguration;
+  String? _lastSystemSymbolName;
 
   @override
   void didUpdateWidget(covariant CNImage oldWidget) {
@@ -57,22 +57,6 @@ class _CNImageState extends State<CNImage> {
   void dispose() {
     _channel?.setMethodCallHandler(null);
     super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
-      return const Icon(CupertinoIcons.question_circle);
-    }
-
-    final creationParams = widget.toMap(context);
-
-    return AppKitView(
-      viewType: 'CupertinoNativeImage',
-      creationParamsCodec: const StandardMessageCodec(),
-      creationParams: creationParams,
-      onPlatformViewCreated: _onPlatformViewCreated,
-    );
   }
 
   void _onPlatformViewCreated(int id) {
@@ -100,6 +84,22 @@ class _CNImageState extends State<CNImage> {
       _cacheCurrentProps();
     }
   }
+
+  @override
+  Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      return const Icon(CupertinoIcons.question_circle);
+    }
+
+    final creationParams = widget.toMap(context);
+
+    return AppKitView(
+      viewType: 'CupertinoNativeImage',
+      creationParamsCodec: const StandardMessageCodec(),
+      creationParams: creationParams,
+      onPlatformViewCreated: _onPlatformViewCreated,
+    );
+  }
 }
 
 /// Symbol rendering modes for menu item icons.
@@ -122,18 +122,6 @@ enum CNSymbolConfigurationType {
 
 /// Configuration for symbol rendering on a [CNMenuItem].
 class CNSymbolConfiguration extends Equatable {
-  /// The selected symbol rendering mode.
-  final CNSymbolConfigurationType type;
-
-  /// Optional color for hierarchical rendering.
-  final Color? hierarchicalColor;
-
-  /// Optional colors for palette rendering.
-  final List<Color>? paletteColors;
-
-  /// Optional color for monochrome rendering.
-  final Color? monochromeColor;
-
   /// Creates a symbol configuration with the specified properties. The [type] determines which properties are relevant for rendering.
   const CNSymbolConfiguration({
     required this.type,
@@ -172,6 +160,10 @@ class CNSymbolConfiguration extends Equatable {
     );
   }
 
+  /// Creates a multicolor symbol configuration.
+  factory CNSymbolConfiguration.multicolor() =>
+      CNSymbolConfiguration._(type: CNSymbolConfigurationType.multicolor);
+
   /// Creates a palette symbol configuration.
   factory CNSymbolConfiguration.palette(List<Color>? colors) {
     return CNSymbolConfiguration._(
@@ -180,9 +172,25 @@ class CNSymbolConfiguration extends Equatable {
     );
   }
 
-  /// Creates a multicolor symbol configuration.
-  factory CNSymbolConfiguration.multicolor() =>
-      CNSymbolConfiguration._(type: CNSymbolConfigurationType.multicolor);
+  /// Optional color for hierarchical rendering.
+  final Color? hierarchicalColor;
+
+  /// Optional color for monochrome rendering.
+  final Color? monochromeColor;
+
+  /// Optional colors for palette rendering.
+  final List<Color>? paletteColors;
+
+  /// The selected symbol rendering mode.
+  final CNSymbolConfigurationType type;
+
+  @override
+  List<Object?> get props => [
+    type,
+    hierarchicalColor,
+    monochromeColor,
+    paletteColors,
+  ];
 
   /// Serializes the symbol configuration to JSON for native consumption.
   Map<String, dynamic> toMap(BuildContext context) {
@@ -215,12 +223,4 @@ class CNSymbolConfiguration extends Equatable {
   String toJson(BuildContext context) {
     return jsonEncode(toMap(context));
   }
-
-  @override
-  List<Object?> get props => [
-    type,
-    hierarchicalColor,
-    monochromeColor,
-    paletteColors,
-  ];
 }
