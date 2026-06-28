@@ -10,7 +10,6 @@ import 'demos/image.dart';
 import 'demos/popup_menu_button.dart';
 import 'demos/menu_button.dart';
 import 'demos/button.dart';
-import 'demos/combo_button.dart';
 import 'demos/color_well.dart';
 import 'demos/path_control.dart';
 import 'demos/progress_indicators.dart';
@@ -26,6 +25,7 @@ import 'demos/combo_box.dart';
 import 'demos/alert.dart';
 import 'demos/popover.dart';
 import 'demos/context_menu.dart';
+import 'demos/label.dart';
 import 'demos/sheet.dart';
 import 'demos/toolbar.dart';
 import 'demos/split_view.dart';
@@ -110,11 +110,10 @@ class HomePage extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CNComboButton(
+            CNMenuButton(
+              buttonLabel: 'Accent Color',
+              buttonIcon: CNSymbol('circle.fill', mode: CNSymbolRenderingMode.monochrome),
               controlSize: CNControlSize.regular,
-              style: CNComboButtonStyle.split,
-              title: 'Accent Color',
-              image: CNImage(systemSymbolName: 'circle.fill', symbolConfiguration: CNSymbolConfiguration.monochrome(accentColor)),
               menu: CNMenu(
                 items: _systemColors.map((entry) {
                   return CNMenuItem(
@@ -129,10 +128,7 @@ class HomePage extends StatelessWidget {
                   );
                 }).toList(),
               ),
-              onPressed: (value) {
-                debugPrint('onPressed($value)');
-              },
-              onMenuItemSelected: (value) {
+              onSelected: (value) {
                 final selectedColor = Color(value.tag as int);
                 onSelectAccentColor(selectedColor);
               },
@@ -221,19 +217,19 @@ class HomePage extends StatelessWidget {
                 },
               ),
               CupertinoListTile(
+                title: Text('Label'),
+                leading: CNIcon(symbol: CNSymbol('textformat', color: accentColor)),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const LabelDemoPage()));
+                },
+              ),
+              CupertinoListTile(
                 title: Text('Button'),
                 leading: CNIcon(symbol: CNSymbol('hand.tap', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ButtonDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Combo Button'),
-                leading: CNIcon(symbol: CNSymbol('chevron.down.square', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ComboButtonDemoPage()));
                 },
               ),
               CupertinoListTile(

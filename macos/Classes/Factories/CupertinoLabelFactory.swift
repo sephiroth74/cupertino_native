@@ -1,7 +1,7 @@
 import Cocoa
 import FlutterMacOS
 
-class CupertinoComboButtonViewFactory: NSObject, FlutterPlatformViewFactory {
+class CupertinoLabelViewFactory: NSObject, FlutterPlatformViewFactory {
   private let messenger: FlutterBinaryMessenger
 
   init(messenger: FlutterBinaryMessenger) {
@@ -14,6 +14,6 @@ class CupertinoComboButtonViewFactory: NSObject, FlutterPlatformViewFactory {
   }
 
   func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
-    return CupertinoComboButtonNSView(viewId: viewId, args: args, messenger: messenger)
+    return CupertinoLabelNSView(viewId: viewId, args: args, messenger: messenger)
   }
 }

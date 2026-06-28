@@ -247,19 +247,32 @@ class _CNMenuButtonState extends State<CNMenuButton> {
       'style': encodeStyle(context, tint: _effectiveTint),
     };
 
-    // Constrain the platform view height to avoid unbounded height inside
-    // scrollable parents. Use the native intrinsic height when available,
-    // otherwise fall back to a reasonable default.
+    // Constrain the platform view size to avoid infinite width when this
+    // button is placed in unbounded horizontal layouts like rows.
     final height = _intrinsicHeight ?? 28.0;
-    return SizedBox(
-      height: height,
-      child: AppKitView(
-        viewType: 'CupertinoNativeMenuButton',
-        creationParamsCodec: const StandardMessageCodec(),
-        creationParams: creationParams,
-        onPlatformViewCreated: _onCreated,
-        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{Factory<TapGestureRecognizer>(() => TapGestureRecognizer())},
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.hasBoundedWidth
+            ? (_intrinsicWidth != null ? _intrinsicWidth!.clamp(0.0, constraints.maxWidth) : constraints.maxWidth)
+            : (_intrinsicWidth ?? 100.0);
+
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            width: width,
+            height: height,
+            child: AppKitView(
+              viewType: 'CupertinoNativeMenuButton',
+              creationParamsCodec: const StandardMessageCodec(),
+              creationParams: creationParams,
+              onPlatformViewCreated: _onCreated,
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }

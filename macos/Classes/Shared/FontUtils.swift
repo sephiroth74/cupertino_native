@@ -1,4 +1,5 @@
 import Cocoa
+import SwiftUI
 
 class FontUtils {
     static func fontFromDictionary(_ dict: [String: Any]) -> NSFont? {
@@ -47,6 +48,13 @@ class FontUtils {
         default:
             return nil
         }
+    }
+
+    static func swiftUIFontFromDictionary(_ dict: [String: Any]) -> Font? {
+        if let systemFont = fontFromDictionary(dict) {
+            return Font(systemFont)
+        }
+        return nil
     }
 
     private static func sizeFromDictionary(_ dict: [String: Any]) -> CGFloat {

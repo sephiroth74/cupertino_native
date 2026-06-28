@@ -37,9 +37,7 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Checkbox Demo'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('Checkbox Demo')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -54,8 +52,7 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
                 const SizedBox(width: 16),
                 CNSwitch(
                   value: _allowMixedState,
-                  onChanged: (v) =>
-                      setState(() => _allowMixedState = v == true),
+                  onChanged: (v) => setState(() => _allowMixedState = v == true),
                   controlSize: CNControlSize.small,
                 ),
                 const SizedBox(width: 32),
@@ -63,37 +60,29 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
                 const SizedBox(width: 16),
                 CNSwitch(
                   value: _checkboxesEnabled,
-                  onChanged: (v) =>
-                      setState(() => _checkboxesEnabled = v == true),
+                  onChanged: (v) => setState(() => _checkboxesEnabled = v == true),
                   controlSize: CNControlSize.small,
                 ),
                 const SizedBox(width: 32),
                 const Text('Size'),
                 const SizedBox(width: 16),
                 ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minWidth: 150,
-                    maxWidth: 250,
-                  ),
-                  child: CNComboButton(
-                    title: _size.name.toUpperCase(),
-                    style: CNComboButtonStyle.split,
+                  constraints: const BoxConstraints(minWidth: 150, maxWidth: 250),
+                  child: CNMenuButton.label(
+                    buttonLabel: _size.name.toUpperCase(),
+                    controlSize: _size,
                     menu: CNMenu(
                       items: [
                         CNMenuItem(
                           title: 'Mini',
                           tag: 0,
-                          state: _size == CNControlSize.mini
-                              ? CNMenuItemState.on
-                              : CNMenuItemState.off,
+                          state: _size == CNControlSize.mini ? CNMenuItemState.on : CNMenuItemState.off,
                           image: CNImage(systemSymbolName: "1.calendar"),
                         ),
                         CNMenuItem(
                           title: 'Small',
                           tag: 1,
-                          state: _size == CNControlSize.small
-                              ? CNMenuItemState.on
-                              : CNMenuItemState.off,
+                          state: _size == CNControlSize.small ? CNMenuItemState.on : CNMenuItemState.off,
                           image: CNImage(
                             systemSymbolName: "2.calendar",
                             symbolConfiguration: CNSymbolConfiguration.palette([
@@ -106,40 +95,25 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
                         CNMenuItem(
                           title: 'Regular',
                           tag: 2,
-                          state: _size == CNControlSize.regular
-                              ? CNMenuItemState.on
-                              : CNMenuItemState.off,
+                          state: _size == CNControlSize.regular ? CNMenuItemState.on : CNMenuItemState.off,
                           image: CNImage(
                             systemSymbolName: "3.calendar",
-                            symbolConfiguration:
-                                CNSymbolConfiguration.monochrome(
-                                  CupertinoColors.systemGreen,
-                                ),
+                            symbolConfiguration: CNSymbolConfiguration.monochrome(CupertinoColors.systemGreen),
                           ),
                         ),
                         CNMenuItem(
                           title: 'Large',
                           tag: 3,
-                          state: _size == CNControlSize.large
-                              ? CNMenuItemState.on
-                              : CNMenuItemState.off,
+                          state: _size == CNControlSize.large ? CNMenuItemState.on : CNMenuItemState.off,
                           image: CNImage(
                             systemSymbolName: "4.calendar",
-                            symbolConfiguration:
-                                CNSymbolConfiguration.hierarchical(
-                                  CupertinoColors.systemBlue,
-                                ),
+                            symbolConfiguration: CNSymbolConfiguration.hierarchical(CupertinoColors.systemBlue),
                           ),
                         ),
                       ],
                     ),
-                    onPressed: (sender) {
-                      debugPrint('onPressed($sender)');
-                    },
-                    onMenuItemSelected: (value) {
-                      debugPrint(
-                        'Size selected: ${value.title} (tag: ${value.tag})',
-                      );
+                    onSelected: (value) {
+                      debugPrint('Size selected: ${value.title} (tag: ${value.tag})');
 
                       setState(() {
                         switch (value.tag) {

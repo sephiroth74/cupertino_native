@@ -30,6 +30,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     let iconFactory = CupertinoIconViewFactory(messenger: registrar.messenger)
     registrar.register(iconFactory, withId: "CupertinoNativeIcon")
 
+    let labelFactory = CupertinoLabelViewFactory(messenger: registrar.messenger)
+    registrar.register(labelFactory, withId: "CupertinoNativeLabel")
+
     let tabBarFactory = CupertinoTabBarViewFactory(messenger: registrar.messenger)
     registrar.register(tabBarFactory, withId: "CupertinoNativeTabBar")
 
@@ -63,9 +66,6 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
     let checkboxFactory = CupertinoCheckboxViewFactory(messenger: registrar.messenger)
     registrar.register(checkboxFactory, withId: "CupertinoNativeCheckbox")
-
-    let comboButtonFactory = CupertinoComboButtonViewFactory(messenger: registrar.messenger)
-    registrar.register(comboButtonFactory, withId: "CupertinoNativeComboButton")
 
     let datePickerFactory = CupertinoDatePickerViewFactory(messenger: registrar.messenger)
     registrar.register(datePickerFactory, withId: "CupertinoNativeDatePicker")
