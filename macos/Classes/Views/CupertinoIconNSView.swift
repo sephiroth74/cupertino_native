@@ -1,137 +1,138 @@
-import FlutterMacOS
 import Cocoa
+import FlutterMacOS
 
 class CupertinoIconNSView: NSView {
-  private let channel: FlutterMethodChannel
-  private let imageView: NSImageView
+    private let channel: FlutterMethodChannel
+    private let imageView: NSImageView
 
-  private var name: String = ""
-  private var isDark: Bool = false
-  private var size: CGFloat?
-  private var color: NSColor?
-  private var palette: [NSColor] = []
-  private var renderingMode: String?
-  private var gradientEnabled: Bool = false
+    private var name: String = ""
+    private var isDark: Bool = false
+    private var size: CGFloat?
+    private var color: NSColor?
+    private var palette: [NSColor] = []
+    private var renderingMode: String?
+    private var gradientEnabled: Bool = false
 
-  init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
-    self.channel = FlutterMethodChannel(name: "CupertinoNativeIcon_\(viewId)", binaryMessenger: messenger)
-    self.imageView = NSImageView(frame: .zero)
+    init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
+        channel = FlutterMethodChannel(name: "CupertinoNativeIcon_\(viewId)", binaryMessenger: messenger)
+        imageView = NSImageView(frame: .zero)
 
-    if let dict = args as? [String: Any] {
-      if let s = dict["name"] as? String { self.name = s }
-      if let b = dict["isDark"] as? NSNumber { self.isDark = b.boolValue }
-      if let style = dict["style"] as? [String: Any] {
-        if let v = style["iconSize"] as? NSNumber { self.size = CGFloat(truncating: v) }
-        if let v = style["iconColor"] as? NSNumber { self.color = ColorUtils.colorFromARGB(v.intValue) }
-        if let arr = style["iconPaletteColors"] as? [NSNumber] { self.palette = arr.map { ColorUtils.colorFromARGB($0.intValue) } }
-        if let mode = style["iconRenderingMode"] as? String { self.renderingMode = mode }
-        if let g = style["iconGradientEnabled"] as? NSNumber { self.gradientEnabled = g.boolValue }
-      }
+        if let dict = args as? [String: Any] {
+            if let s = dict["name"] as? String { name = s }
+            if let b = dict["isDark"] as? NSNumber { isDark = b.boolValue }
+            if let style = dict["style"] as? [String: Any] {
+                if let v = style["iconSize"] as? NSNumber { size = CGFloat(truncating: v) }
+                if let v = style["iconColor"] as? NSNumber { color = ColorUtils.colorFromARGB(v.intValue) }
+                if let arr = style["iconPaletteColors"] as? [NSNumber] { palette = arr.map { ColorUtils.colorFromARGB($0.intValue) } }
+                if let mode = style["iconRenderingMode"] as? String { renderingMode = mode }
+                if let g = style["iconGradientEnabled"] as? NSNumber { gradientEnabled = g.boolValue }
+            }
+        }
+
+        super.init(frame: .zero)
+
+        wantsLayer = true
+        layer?.backgroundColor = NSColor.clear.cgColor
+        appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.imageScaling = .scaleProportionallyUpOrDown
+        addSubview(imageView)
+        NSLayoutConstraint.activate([
+            imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            imageView.topAnchor.constraint(equalTo: topAnchor),
+            imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
+
+        rebuild()
+
+        channel.setMethodCallHandler { [weak self] call, result in
+            guard let self = self else { result(nil); return }
+            switch call.method {
+            case "getIntrinsicSize":
+                if let img = self.imageView.image {
+                    result(["width": Double(img.size.width), "height": Double(img.size.height)])
+                } else {
+                    result(["width": 0.0, "height": 0.0])
+                }
+            case "setSymbol":
+                if let args = call.arguments as? [String: Any], let n = args["name"] as? String {
+                    self.name = n
+                    self.rebuild()
+                    result(nil)
+                } else { result(FlutterError(code: "bad_args", message: "Missing name", details: nil)) }
+            case "setStyle":
+                if let args = call.arguments as? [String: Any] {
+                    if let v = args["iconSize"] as? NSNumber { self.size = CGFloat(truncating: v) }
+                    if let v = args["iconColor"] as? NSNumber { self.color = ColorUtils.colorFromARGB(v.intValue) }
+                    if let arr = args["iconPaletteColors"] as? [NSNumber] { self.palette = arr.map { ColorUtils.colorFromARGB($0.intValue) } }
+                    if let mode = args["iconRenderingMode"] as? String { self.renderingMode = mode }
+                    if let g = args["iconGradientEnabled"] as? NSNumber { self.gradientEnabled = g.boolValue }
+                    self.rebuild()
+                    result(nil)
+                } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
+            case "setBrightness":
+                if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
+                    self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+                    result(nil)
+                } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        }
     }
 
-    super.init(frame: .zero)
+    required init?(coder _: NSCoder) {
+        return nil
+    }
 
-    wantsLayer = true
-    layer?.backgroundColor = NSColor.clear.cgColor
-    appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+    private func rebuild() {
+        guard var image = NSImage(systemSymbolName: name, accessibilityDescription: nil) else {
+            imageView.image = nil
+            return
+        }
 
-    imageView.translatesAutoresizingMaskIntoConstraints = false
-    imageView.imageScaling = .scaleProportionallyUpOrDown
-    addSubview(imageView)
-    NSLayoutConstraint.activate([
-      imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
-      imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
-      imageView.topAnchor.constraint(equalTo: topAnchor),
-      imageView.bottomAnchor.constraint(equalTo: bottomAnchor)
-    ])
+        if let s = size {
+            if #available(macOS 12.0, *) {
+                let cfg = NSImage.SymbolConfiguration(pointSize: s, weight: .regular)
+                image = image.withSymbolConfiguration(cfg) ?? image
+            }
+        }
 
-    rebuild()
-
-    channel.setMethodCallHandler { [weak self] call, result in
-      guard let self = self else { result(nil); return }
-      switch call.method {
-      case "getIntrinsicSize":
-        if let img = self.imageView.image {
-          result(["width": Double(img.size.width), "height": Double(img.size.height)])
+        if let mode = renderingMode {
+            switch mode {
+            case "monochrome":
+                if let c = color {
+                    image = image.tinted(with: c)
+                } else {
+                    image = image.tinted(with: .black)
+                }
+            case "hierarchical":
+                if #available(macOS 12.0, *), let c = color {
+                    let cfg = NSImage.SymbolConfiguration(hierarchicalColor: c)
+                    image = image.withSymbolConfiguration(cfg) ?? image
+                }
+            case "multicolor":
+                if #available(macOS 12.0, *) {
+                    let cfg = NSImage.SymbolConfiguration.preferringMulticolor()
+                    image = image.withSymbolConfiguration(cfg) ?? image
+                }
+            case "palette":
+                // Palette rendering is not fully supported per-icon in AppKit; best-effort with no-op here.
+                break
+            default:
+                break
+            }
+        } else if let c = color {
+            image = image.tinted(with: c)
         } else {
-          result(["width": 0.0, "height": 0.0])
+            // Default to black instead of system tint when no color/mode provided
+            image = image.tinted(with: .black)
         }
-      case "setSymbol":
-        if let args = call.arguments as? [String: Any], let n = args["name"] as? String {
-          self.name = n
-          self.rebuild()
-          result(nil)
-        } else { result(FlutterError(code: "bad_args", message: "Missing name", details: nil)) }
-      case "setStyle":
-        if let args = call.arguments as? [String: Any] {
-          if let v = args["iconSize"] as? NSNumber { self.size = CGFloat(truncating: v) }
-          if let v = args["iconColor"] as? NSNumber { self.color = ColorUtils.colorFromARGB(v.intValue) }
-          if let arr = args["iconPaletteColors"] as? [NSNumber] { self.palette = arr.map { ColorUtils.colorFromARGB($0.intValue) } }
-          if let mode = args["iconRenderingMode"] as? String { self.renderingMode = mode }
-          if let g = args["iconGradientEnabled"] as? NSNumber { self.gradientEnabled = g.boolValue }
-          self.rebuild()
-          result(nil)
-        } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
-      case "setBrightness":
-        if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
-          self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-          result(nil)
-        } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
-      default:
-        result(FlutterMethodNotImplemented)
-      }
+
+        // Gradient toggle is no-op until supported natively on macOS
+
+        imageView.image = image
     }
-  }
-
-  required init?(coder: NSCoder) { return nil }
-
-  private func rebuild() {
-    guard var image = NSImage(systemSymbolName: name, accessibilityDescription: nil) else {
-      imageView.image = nil
-      return
-    }
-
-    if let s = size {
-      if #available(macOS 12.0, *) {
-        let cfg = NSImage.SymbolConfiguration(pointSize: s, weight: .regular)
-        image = image.withSymbolConfiguration(cfg) ?? image
-      }
-    }
-
-    if let mode = renderingMode {
-      switch mode {
-      case "monochrome":
-        if let c = color {
-          image = image.tinted(with: c)
-        } else {
-          image = image.tinted(with: .black)
-        }
-      case "hierarchical":
-        if #available(macOS 12.0, *), let c = color {
-          let cfg = NSImage.SymbolConfiguration(hierarchicalColor: c)
-          image = image.withSymbolConfiguration(cfg) ?? image
-        }
-      case "multicolor":
-        if #available(macOS 12.0, *) {
-          let cfg = NSImage.SymbolConfiguration.preferringMulticolor()
-          image = image.withSymbolConfiguration(cfg) ?? image
-        }
-      case "palette":
-        // Palette rendering is not fully supported per-icon in AppKit; best-effort with no-op here.
-        break
-      default:
-        break
-      }
-    } else if let c = color {
-      image = image.tinted(with: c)
-    } else {
-      // Default to black instead of system tint when no color/mode provided
-      image = image.tinted(with: .black)
-    }
-
-    // Gradient toggle is no-op until supported natively on macOS
-
-    imageView.image = image
-  }
 }
-

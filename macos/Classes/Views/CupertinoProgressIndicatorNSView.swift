@@ -12,18 +12,18 @@ class CupertinoProgressIndicatorNSView: NSView {
     private var currentProgressIndeterminate: Bool = false
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
-        self.progressIndicator = NSProgressIndicator()
-        self.channel = FlutterMethodChannel(
+        progressIndicator = NSProgressIndicator()
+        channel = FlutterMethodChannel(
             name: "CupertinoNativeProgressIndicator_\(viewId)", binaryMessenger: messenger
         )
         super.init(frame: .zero)
 
-        var progressStyle: String = "spinning"
-        var progressSize: String = "regular"
-        var progressValue: Double = 0.0
-        var progressMaxValue: Double = 1.0
-        var progressIndeterminate: Bool = false
-        var isDark: Bool = false
+        var progressStyle = "spinning"
+        var progressSize = "regular"
+        var progressValue = 0.0
+        var progressMaxValue = 1.0
+        var progressIndeterminate = false
+        var isDark = false
 
         if let dict = args as? [String: Any] {
             if let ps = dict["progressStyle"] as? String { progressStyle = ps }
@@ -81,12 +81,12 @@ class CupertinoProgressIndicatorNSView: NSView {
         _setupChannel()
     }
 
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewDidMoveToSuperview() {
-    }
+    override func viewDidMoveToSuperview() {}
 
     override func viewWillMove(toSuperview newSuperview: NSView?) {
         if newSuperview == nil {
@@ -116,7 +116,7 @@ class CupertinoProgressIndicatorNSView: NSView {
                 result(["width": Double(s.width), "height": Double(s.height)])
             case "setBrightness":
                 if let args = call.arguments as? [String: Any],
-                    let isDark = (args["isDark"] as? NSNumber)?.boolValue
+                   let isDark = (args["isDark"] as? NSNumber)?.boolValue
                 {
                     self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)

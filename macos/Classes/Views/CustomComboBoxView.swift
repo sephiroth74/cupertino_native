@@ -21,7 +21,8 @@ class CustomComboBoxView: NSView, NSTextFieldDelegate, NSTableViewDelegate, NSTa
         setupUI()
     }
 
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
@@ -71,7 +72,8 @@ class CustomComboBoxView: NSView, NSTextFieldDelegate, NSTableViewDelegate, NSTa
             textField.topAnchor.constraint(equalTo: topAnchor),
             textField.bottomAnchor.constraint(equalTo: bottomAnchor),
             textField.trailingAnchor.constraint(
-                equalTo: dropdownButton.leadingAnchor, constant: -4),
+                equalTo: dropdownButton.leadingAnchor, constant: -4
+            ),
 
             dropdownButton.trailingAnchor.constraint(equalTo: trailingAnchor),
             dropdownButton.topAnchor.constraint(equalTo: topAnchor),
@@ -86,7 +88,7 @@ class CustomComboBoxView: NSView, NSTextFieldDelegate, NSTableViewDelegate, NSTa
         tableView.reloadData()
     }
 
-    @objc private func togglePopover(_ sender: Any) {
+    @objc private func togglePopover(_: Any) {
         debugLog("togglePopover called, isPopoverOpen=\(isPopoverOpen)")
 
         if isPopoverOpen {
@@ -118,7 +120,8 @@ class CustomComboBoxView: NSView, NSTextFieldDelegate, NSTableViewDelegate, NSTa
             self.debugLog("openPopover executing")
             self.popover.show(
                 relativeTo: rectInWindow, of: self.dropdownButton.window!.contentView!,
-                preferredEdge: .minY)
+                preferredEdge: .minY
+            )
         }
     }
 
@@ -130,11 +133,11 @@ class CustomComboBoxView: NSView, NSTextFieldDelegate, NSTableViewDelegate, NSTa
 
     // MARK: - NSTableViewDataSource
 
-    func numberOfRows(in tableView: NSTableView) -> Int {
+    func numberOfRows(in _: NSTableView) -> Int {
         return items.count
     }
 
-    func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int)
+    func tableView(_: NSTableView, objectValueFor _: NSTableColumn?, row: Int)
         -> Any?
     {
         return items[row]
@@ -142,9 +145,9 @@ class CustomComboBoxView: NSView, NSTextFieldDelegate, NSTableViewDelegate, NSTa
 
     // MARK: - NSTableViewDelegate
 
-    func tableViewSelectionDidChange(_ notification: Notification) {
+    func tableViewSelectionDidChange(_: Notification) {
         let selectedRow = tableView.selectedRow
-        guard selectedRow >= 0 && selectedRow < items.count else {
+        guard selectedRow >= 0, selectedRow < items.count else {
             debugLog("tableViewSelectionDidChange invalid row=\(selectedRow)")
             return
         }
@@ -160,7 +163,7 @@ class CustomComboBoxView: NSView, NSTextFieldDelegate, NSTableViewDelegate, NSTa
 // MARK: - NSPopoverDelegate
 
 extension CustomComboBoxView: NSPopoverDelegate {
-    func popoverDidClose(_ notification: Notification) {
+    func popoverDidClose(_: Notification) {
         debugLog("popoverDidClose")
         isPopoverOpen = false
     }

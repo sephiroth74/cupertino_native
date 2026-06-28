@@ -1,6 +1,6 @@
 import Cocoa
 
-final class CupertinoImageDeserializer {
+enum CupertinoImageDeserializer {
     static func deserialize(dict: [String: Any]) -> NSImage? {
         guard let systemSymbolName = dict["systemSymbolName"] as? String else {
             return nil
@@ -8,7 +8,7 @@ final class CupertinoImageDeserializer {
 
         let baseImage = NSImage(systemSymbolName: systemSymbolName, accessibilityDescription: nil)
         guard let symbolConfig = dict["symbolConfiguration"] as? [String: Any],
-            let type = symbolConfig["type"] as? String
+              let type = symbolConfig["type"] as? String
         else {
             return baseImage
         }
@@ -41,8 +41,8 @@ final class CupertinoImageDeserializer {
     static func deserialize(jsonString: String) -> NSImage? {
         do {
             if let imageDict = try JSONSerialization.jsonObject(
-                with: Data(jsonString.utf8), options: []) as? [String: Any]
-            {
+                with: Data(jsonString.utf8), options: []
+            ) as? [String: Any] {
                 return deserialize(dict: imageDict)
             }
         } catch {

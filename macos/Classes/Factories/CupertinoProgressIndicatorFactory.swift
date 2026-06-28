@@ -16,5 +16,4 @@ class CupertinoProgressIndicatorViewFactory: NSObject, FlutterPlatformViewFactor
     func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
         return CupertinoProgressIndicatorNSView(viewId: viewId, args: args, messenger: messenger)
     }
-
 }

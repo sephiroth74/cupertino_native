@@ -18,9 +18,10 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
     private var suggestions: [String] = []
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
-        self.channel = FlutterMethodChannel(
+        channel = FlutterMethodChannel(
             name: "CupertinoNativeSearchField_\(viewId)",
-            binaryMessenger: messenger)
+            binaryMessenger: messenger
+        )
         super.init(frame: .zero)
 
         parseArgs(args)
@@ -28,7 +29,8 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
         configureChannel()
     }
 
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
@@ -60,7 +62,7 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
         }
 
         if let fontDict = args["font"] as? [String: Any],
-            let font = FontUtils.fontFromDictionary(fontDict)
+           let font = FontUtils.fontFromDictionary(fontDict)
         {
             searchField.font = font
         }
@@ -121,15 +123,15 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                 let size = self.searchField.intrinsicContentSize
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setText":
-                if let args = call.arguments as? [String: Any], let value = args["value"] as? String
-                {
+                if let args = call.arguments as? [String: Any], let value = args["value"] as? String {
                     self.isUpdatingFromDart = true
                     self.searchField.stringValue = value
                     self.isUpdatingFromDart = false
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing text value", details: nil))
+                        FlutterError(code: "bad_args", message: "Missing text value", details: nil)
+                    )
                 }
             case "setPlaceholder":
                 if let args = call.arguments as? [String: Any] {
@@ -139,7 +141,9 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing placeholder value", details: nil))
+                            code: "bad_args", message: "Missing placeholder value", details: nil
+                        )
+                    )
                 }
             case "setTextColor":
                 if let args = call.arguments as? [String: Any] {
@@ -149,7 +153,9 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing textColor value", details: nil))
+                            code: "bad_args", message: "Missing textColor value", details: nil
+                        )
+                    )
                 }
             case "setPlaceholderColor":
                 if let args = call.arguments as? [String: Any] {
@@ -162,7 +168,9 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                         FlutterError(
                             code: "bad_args",
                             message: "Missing placeholderColor value",
-                            details: nil))
+                            details: nil
+                        )
+                    )
                 }
             case "setBackgroundColor":
                 if let args = call.arguments as? [String: Any] {
@@ -179,12 +187,14 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                         FlutterError(
                             code: "bad_args",
                             message: "Missing backgroundColor value",
-                            details: nil))
+                            details: nil
+                        )
+                    )
                 }
             case "setFont":
                 if let args = call.arguments as? [String: Any] {
                     if let fontDict = args["value"] as? [String: Any],
-                        let font = FontUtils.fontFromDictionary(fontDict)
+                       let font = FontUtils.fontFromDictionary(fontDict)
                     {
                         self.searchField.font = font
                     } else {
@@ -193,60 +203,69 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing font value", details: nil))
+                        FlutterError(code: "bad_args", message: "Missing font value", details: nil)
+                    )
                 }
             case "setEnabled":
                 if let args = call.arguments as? [String: Any],
-                    let value = (args["value"] as? NSNumber)?.boolValue
+                   let value = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.searchField.isEnabled = value
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing enabled value", details: nil))
+                            code: "bad_args", message: "Missing enabled value", details: nil
+                        )
+                    )
                 }
             case "setControlSize":
-                if let args = call.arguments as? [String: Any], let value = args["value"] as? String
-                {
+                if let args = call.arguments as? [String: Any], let value = args["value"] as? String {
                     self.searchField.controlSize = Self.parseControlSize(value)
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing controlSize value", details: nil))
+                            code: "bad_args", message: "Missing controlSize value", details: nil
+                        )
+                    )
                 }
             case "setIsDark":
                 if let args = call.arguments as? [String: Any],
-                    let value = (args["value"] as? NSNumber)?.boolValue
+                   let value = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.appearance = NSAppearance(named: value ? .darkAqua : .aqua)
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing isDark value", details: nil))
+                            code: "bad_args", message: "Missing isDark value", details: nil
+                        )
+                    )
                 }
             case "setBezelStyle":
-                if let args = call.arguments as? [String: Any], let value = args["value"] as? String
-                {
+                if let args = call.arguments as? [String: Any], let value = args["value"] as? String {
                     Self.applyBezelStyle(value, to: self.searchField)
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing bezelStyle value", details: nil))
+                            code: "bad_args", message: "Missing bezelStyle value", details: nil
+                        )
+                    )
                 }
             case "setSuggestions":
                 if let args = call.arguments as? [String: Any],
-                    let value = args["value"] as? [String]
+                   let value = args["value"] as? [String]
                 {
                     self.suggestions = value
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing suggestions value", details: nil))
+                            code: "bad_args", message: "Missing suggestions value", details: nil
+                        )
+                    )
                 }
             default:
                 result(FlutterMethodNotImplemented)
@@ -258,17 +277,17 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
         channel.invokeMethod("submitted", arguments: sender.stringValue)
     }
 
-    func controlTextDidChange(_ obj: Notification) {
+    func controlTextDidChange(_: Notification) {
         guard !isUpdatingFromDart else { return }
         channel.invokeMethod("textChanged", arguments: searchField.stringValue)
     }
 
     func control(
-        _ control: NSControl,
-        textView: NSTextView,
-        completions words: [String],
-        forPartialWordRange charRange: NSRange,
-        indexOfSelectedItem index: UnsafeMutablePointer<Int>
+        _: NSControl,
+        textView _: NSTextView,
+        completions _: [String],
+        forPartialWordRange _: NSRange,
+        indexOfSelectedItem _: UnsafeMutablePointer<Int>
     ) -> [String] {
         let query = searchField.stringValue
         guard !query.isEmpty, !suggestions.isEmpty else { return [] }
@@ -298,7 +317,7 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
     }
 
     @available(macOS 15.0, *)
-    func textField(_ textField: NSTextField, didSelect item: SearchSuggestionItem) {
+    func textField(_: NSTextField, didSelect item: SearchSuggestionItem) {
         let value = item.representedValue
         isUpdatingFromDart = true
         searchField.stringValue = value
@@ -322,7 +341,8 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
         if let placeholderColor {
             searchField.placeholderAttributedString = NSAttributedString(
                 string: placeholder,
-                attributes: [.foregroundColor: placeholderColor])
+                attributes: [.foregroundColor: placeholderColor]
+            )
         } else {
             searchField.placeholderAttributedString = NSAttributedString(string: placeholder)
         }

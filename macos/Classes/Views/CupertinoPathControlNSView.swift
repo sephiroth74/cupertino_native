@@ -7,7 +7,7 @@ import UniformTypeIdentifiers
 class CupertinoPathControlNSView: NSView {
     private let registrar: FlutterPluginRegistrar
     private let channel: FlutterMethodChannel
-    private var coordinator: Coordinator? = nil
+    private var coordinator: Coordinator?
     private let pathControl: NSPathControl
     private var currentPathStyle: String = "standard"
     private var currentPathSize: String = "regular"
@@ -15,27 +15,28 @@ class CupertinoPathControlNSView: NSView {
     private var isEnabled: Bool = true
     private var currentPath: String = "/"
     private var currentIsDirectory: Bool = false
-    private var currentTint: NSColor? = nil
+    private var currentTint: NSColor?
     private var currentEditable: Bool = true
 
     init(viewId: Int64, args: Any?, registrar: FlutterPluginRegistrar) {
         self.registrar = registrar
-        self.pathControl = NSPathControl()
-        self.channel = FlutterMethodChannel(
-            name: "CupertinoNativePathControl_\(viewId)", binaryMessenger: registrar.messenger)
+        pathControl = NSPathControl()
+        channel = FlutterMethodChannel(
+            name: "CupertinoNativePathControl_\(viewId)", binaryMessenger: registrar.messenger
+        )
         super.init(frame: .zero)
 
-        self.coordinator = Coordinator(parent: self)
+        coordinator = Coordinator(parent: self)
 
-        var path: String = "/"
+        var path = "/"
         var isDirectory = false
-        var controlSize: String = "regular"
-        var controlStyle: String = "standard"
-        var isDark: Bool = false
+        var controlSize = "regular"
+        var controlStyle = "standard"
+        var isDark = false
         var tint: NSColor? = nil
-        var enabled: Bool = true
+        var enabled = true
         var allowedTypes: [String] = []
-        var editable: Bool = true
+        var editable = true
 
         if let dict = args as? [String: Any] {
             if let v = dict["isDirectory"] as? NSNumber { isDirectory = v.boolValue }
@@ -138,7 +139,7 @@ class CupertinoPathControlNSView: NSView {
                 }
             case "setControlSize":
                 if let args = call.arguments as? [String: Any],
-                    let cs = args["controlSize"] as? String
+                   let cs = args["controlSize"] as? String
                 {
                     self.currentPathSize = cs
                     switch cs {
@@ -159,11 +160,13 @@ class CupertinoPathControlNSView: NSView {
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing control size", details: nil))
+                            code: "bad_args", message: "Missing control size", details: nil
+                        )
+                    )
                 }
             case "setPath":
                 if let args = call.arguments as? [String: Any], let path = args["path"] as? String,
-                    let isDirectory = args["isDirectory"] as? Bool
+                   let isDirectory = args["isDirectory"] as? Bool
                 {
                     self.currentPath = path
                     self.currentIsDirectory = isDirectory
@@ -173,8 +176,7 @@ class CupertinoPathControlNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing path", details: nil))
                 }
             case "setEnabled":
-                if let args = call.arguments as? [String: Any], let e = args["enabled"] as? NSNumber
-                {
+                if let args = call.arguments as? [String: Any], let e = args["enabled"] as? NSNumber {
                     self.isEnabled = e.boolValue
                     self.pathControl.isEnabled = self.isEnabled
                     result(nil)
@@ -183,7 +185,7 @@ class CupertinoPathControlNSView: NSView {
                 }
             case "setBrightness":
                 if let args = call.arguments as? [String: Any],
-                    let isDark = (args["isDark"] as? NSNumber)?.boolValue
+                   let isDark = (args["isDark"] as? NSNumber)?.boolValue
                 {
                     self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
@@ -192,7 +194,7 @@ class CupertinoPathControlNSView: NSView {
                 }
             case "setAllowedTypes":
                 if let args = call.arguments as? [String: Any],
-                    let at = args["allowedTypes"] as? [String]
+                   let at = args["allowedTypes"] as? [String]
                 {
                     self.currentAllowedTypes = at
                     self.pathControl.allowedTypes = at
@@ -200,25 +202,26 @@ class CupertinoPathControlNSView: NSView {
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing allowedTypes", details: nil))
+                            code: "bad_args", message: "Missing allowedTypes", details: nil
+                        )
+                    )
                 }
             case "setEditable":
-                if let args = call.arguments as? [String: Any], let e = args["editable"] as? NSNumber
-                {
+                if let args = call.arguments as? [String: Any], let e = args["editable"] as? NSNumber {
                     self.currentEditable = e.boolValue
                     self.pathControl.isEditable = self.currentEditable
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing editable", details: nil))
                 }
-
             default:
                 result(FlutterMethodNotImplemented)
             }
         }
     }
 
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
@@ -244,8 +247,8 @@ class CupertinoPathControlNSView: NSView {
             }
         }
 
-        @objc func otherItemClick(_ sender: NSMenuItem) {
-            guard let parent = self.parent else { return }
+        @objc func otherItemClick(_: NSMenuItem) {
+            guard let parent = parent else { return }
             guard parent.currentEditable else { return }
             guard let appWindow = parent.registrar.getFlutterWindow() else { return }
 

@@ -67,12 +67,35 @@ class _CNLabelState extends State<CNLabel> {
     _syncPropsToNativeIfNeeded(oldWidget);
   }
 
+  @override
+  void dispose() {
+    _channel?.setMethodCallHandler(null);
+    super.dispose();
+  }
+
   Future<void> _onPlatformViewCreated(int id) async {
-    final channel = MethodChannel('CupertinoNativeLabel_\$id');
+    final channel = MethodChannel('CupertinoNativeLabel_$id');
     _channel = channel;
-    channel.setMethodCallHandler((_) async => null);
+    channel.setMethodCallHandler(_onMethodCall);
     _cacheProps();
     await _requestIntrinsicSize();
+  }
+
+  Future<dynamic> _onMethodCall(MethodCall call) async {
+    if (call.method == 'intrinsicSizeChanged') {
+      final args = call.arguments as Map?;
+      _onIntrinsicSizeChanged((args?['width'] as num?)?.toDouble(), (args?['height'] as num?)?.toDouble());
+    }
+    return null;
+  }
+
+  void _onIntrinsicSizeChanged(double? width, double? height) {
+    debugPrint('_onIntrinsicSizeChanged: width=$width, height=$height');
+    if (!mounted || width == null || height == null) return;
+    setState(() {
+      _intrinsicWidth = width > -1 ? width : null;
+      _intrinsicHeight = height > -1 ? height + 28 : null;
+    });
   }
 
   void _cacheProps() {
@@ -196,6 +219,7 @@ class _CNLabelState extends State<CNLabel> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        debugPrint('CNLabel build: constraints=$constraints, _intrinsicWidth=$_intrinsicWidth, _intrinsicHeight=$_intrinsicHeight');
         final width = constraints.hasBoundedWidth
             ? (_intrinsicWidth != null ? _intrinsicWidth!.clamp(0.0, constraints.maxWidth) : constraints.maxWidth)
             : (_intrinsicWidth ?? 100.0);

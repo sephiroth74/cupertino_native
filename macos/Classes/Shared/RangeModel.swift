@@ -1,5 +1,5 @@
-import Cocoa
 internal import Combine
+import Cocoa
 import Foundation
 
 class RangeModel: NSObject {
@@ -16,13 +16,13 @@ class RangeModel: NSObject {
 
     var onChange: ((Double) -> Void)?
 
-    public func updateValues(minValue: Double, maxValue: Double, value: Double) {
+    func updateValues(minValue: Double, maxValue: Double, value: Double) {
         guard minValue < maxValue else {
             NSLog("minValue must be less than maxValue")
             return
         }
 
-        guard value >= minValue && value <= maxValue else {
+        guard value >= minValue, value <= maxValue else {
             NSLog("value must be between minValue and maxValue")
             return
         }
@@ -32,19 +32,19 @@ class RangeModel: NSObject {
         self.value = value
     }
 
-    public func updateRange(minValue: Double, maxValue: Double) {
+    func updateRange(minValue: Double, maxValue: Double) {
         guard minValue < maxValue else {
             NSLog("minValue must be less than maxValue")
             return
         }
-        
+
         self.minValue = minValue
         self.maxValue = maxValue
-        
-        if self.value < minValue {
-            self.value = minValue
-        } else if self.value > maxValue {
-            self.value = maxValue
+
+        if value < minValue {
+            value = minValue
+        } else if value > maxValue {
+            value = maxValue
         }
-    }    
+    }
 }

@@ -15,7 +15,7 @@ private final class CupertinoPopoverContentViewController: NSViewController {
         width: CGFloat,
         onSelect: @escaping (Int) -> Void
     ) {
-        self.popoverTitle = title
+        popoverTitle = title
         self.message = message
         self.actions = actions
         self.width = width
@@ -24,7 +24,7 @@ private final class CupertinoPopoverContentViewController: NSViewController {
     }
 
     @available(*, unavailable)
-    required init?(coder: NSCoder) {
+    required init?(coder _: NSCoder) {
         nil
     }
 
@@ -58,7 +58,8 @@ private final class CupertinoPopoverContentViewController: NSViewController {
         for (index, action) in actions.enumerated() {
             let label = (action["label"] as? String) ?? "Action"
             let button = NSButton(
-                title: label, target: self, action: #selector(handleButtonPress(_:)))
+                title: label, target: self, action: #selector(handleButtonPress(_:))
+            )
             button.tag = index
             button.isEnabled = (action["enabled"] as? Bool) ?? true
             button.bezelStyle = .rounded
@@ -84,7 +85,7 @@ private final class CupertinoPopoverContentViewController: NSViewController {
             stack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -16),
         ])
 
-        self.view = container
+        view = container
     }
 
     override func viewDidLayout() {
@@ -111,7 +112,8 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
-            name: "CupertinoNativePopover_\(viewId)", binaryMessenger: messenger)
+            name: "CupertinoNativePopover_\(viewId)", binaryMessenger: messenger
+        )
         button = NSButton(title: "", target: nil, action: nil)
         super.init(frame: .zero)
 
@@ -170,11 +172,12 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
         } else {
             if let title { button.title = title }
             if let iconName,
-                var image = NSImage(systemSymbolName: iconName, accessibilityDescription: nil)
+               var image = NSImage(systemSymbolName: iconName, accessibilityDescription: nil)
             {
                 if #available(macOS 12.0, *), let iconSize {
                     let configuration = NSImage.SymbolConfiguration(
-                        pointSize: iconSize, weight: .regular)
+                        pointSize: iconSize, weight: .regular
+                    )
                     image = image.withSymbolConfiguration(configuration) ?? image
                 }
                 if let iconColor { image = image.tinted(with: iconColor) }
@@ -235,7 +238,7 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
                     if #available(macOS 10.14, *), let value = args["tint"] as? NSNumber {
                         let color = ColorUtils.colorFromARGB(value.intValue)
                         if let styleName = args["buttonStyle"] as? String,
-                            ["filled", "borderedProminent", "prominentGlass"].contains(styleName)
+                           ["filled", "borderedProminent", "prominentGlass"].contains(styleName)
                         {
                             self.button.bezelColor = color
                             self.button.contentTintColor = .white
@@ -263,8 +266,7 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
                     result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
                 }
             case "setButtonTitle":
-                if let args = call.arguments as? [String: Any], let value = args["title"] as? String
-                {
+                if let args = call.arguments as? [String: Any], let value = args["title"] as? String {
                     self.button.title = value
                     result(nil)
                 } else {
@@ -273,13 +275,14 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
             case "setButtonIcon":
                 if let args = call.arguments as? [String: Any] {
                     if let name = args["buttonIconName"] as? String,
-                        var image = NSImage(systemSymbolName: name, accessibilityDescription: nil)
+                       var image = NSImage(systemSymbolName: name, accessibilityDescription: nil)
                     {
                         if #available(macOS 12.0, *),
-                            let value = args["buttonIconSize"] as? NSNumber
+                           let value = args["buttonIconSize"] as? NSNumber
                         {
                             let configuration = NSImage.SymbolConfiguration(
-                                pointSize: CGFloat(truncating: value), weight: .regular)
+                                pointSize: CGFloat(truncating: value), weight: .regular
+                            )
                             image = image.withSymbolConfiguration(configuration) ?? image
                         }
                         if let value = args["buttonIconColor"] as? NSNumber {
@@ -296,11 +299,12 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing icon args", details: nil))
+                        FlutterError(code: "bad_args", message: "Missing icon args", details: nil)
+                    )
                 }
             case "setBrightness":
                 if let args = call.arguments as? [String: Any],
-                    let isDark = (args["isDark"] as? NSNumber)?.boolValue
+                   let isDark = (args["isDark"] as? NSNumber)?.boolValue
                 {
                     self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
@@ -320,7 +324,9 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing popover content", details: nil))
+                            code: "bad_args", message: "Missing popover content", details: nil
+                        )
+                    )
                 }
             case "setPopoverBehavior":
                 if let args = call.arguments as? [String: Any] {
@@ -334,7 +340,9 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing popover behavior", details: nil))
+                            code: "bad_args", message: "Missing popover behavior", details: nil
+                        )
+                    )
                 }
             default:
                 result(FlutterMethodNotImplemented)
@@ -343,7 +351,7 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
     }
 
     @available(*, unavailable)
-    required init?(coder: NSCoder) {
+    required init?(coder _: NSCoder) {
         nil
     }
 

@@ -4,27 +4,28 @@ import SwiftUI
 
 class CupertinoDatePickerNSView: NSView {
     private let channel: FlutterMethodChannel
-    private let datePicker: NSDatePicker = NSDatePicker()
+    private let datePicker: NSDatePicker = .init()
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
-        self.channel = FlutterMethodChannel(
-            name: "CupertinoNativeDatePicker_\(viewId)", binaryMessenger: messenger)
+        channel = FlutterMethodChannel(
+            name: "CupertinoNativeDatePicker_\(viewId)", binaryMessenger: messenger
+        )
         super.init(frame: .zero)
 
         var datePickerStyle: NSDatePicker.Style = .textField
         var datePickerMode: NSDatePicker.Mode = .single
         var datePickerElements: NSDatePicker.ElementFlags = [.yearMonthDay]
-        var isBordered: Bool = false
+        var isBordered = false
         var dateValue: Date? = nil
-        var drawsBackground: Bool = true
-        var isDark: Bool = false
-        var backgroundColor: NSColor = NSColor.controlBackgroundColor
-        var textColor: NSColor = NSColor.controlTextColor
+        var drawsBackground = true
+        var isDark = false
+        var backgroundColor = NSColor.controlBackgroundColor
+        var textColor = NSColor.controlTextColor
         var minDate: Date? = nil
         var maxDate: Date? = nil
         var font: NSFont? = nil
         var locale: Locale? = nil
-        var isEnabled: Bool = true
+        var isEnabled = true
 
         if let dict = args as? [String: Any] {
             if let styleStr = dict["datePickerStyle"] as? String {
@@ -63,38 +64,38 @@ class CupertinoDatePickerNSView: NSView {
             if let v = dict["isEnabled"] as? Bool { isEnabled = v }
         }
 
-        self.datePicker.datePickerStyle = datePickerStyle
-        self.datePicker.datePickerMode = datePickerMode
-        self.datePicker.datePickerElements = datePickerElements
-        self.datePicker.isBordered = isBordered
-        self.datePicker.dateValue = dateValue ?? Date()
-        self.datePicker.drawsBackground = drawsBackground
-        self.datePicker.backgroundColor = backgroundColor
-        self.datePicker.textColor = textColor
-        self.datePicker.minDate = minDate
-        self.datePicker.maxDate = maxDate
-        self.datePicker.locale = locale
-        self.datePicker.isEnabled = isEnabled
-        self.datePicker.font =
+        datePicker.datePickerStyle = datePickerStyle
+        datePicker.datePickerMode = datePickerMode
+        datePicker.datePickerElements = datePickerElements
+        datePicker.isBordered = isBordered
+        datePicker.dateValue = dateValue ?? Date()
+        datePicker.drawsBackground = drawsBackground
+        datePicker.backgroundColor = backgroundColor
+        datePicker.textColor = textColor
+        datePicker.minDate = minDate
+        datePicker.maxDate = maxDate
+        datePicker.locale = locale
+        datePicker.isEnabled = isEnabled
+        datePicker.font =
             font
-            ?? NSFont.systemFont(ofSize: NSFont.systemFontSize, weight: NSFont.Weight.regular)
+                ?? NSFont.systemFont(ofSize: NSFont.systemFontSize, weight: NSFont.Weight.regular)
 
-        self.datePicker.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-        self.datePicker.target = self
-        self.datePicker.action = #selector(dateChanged)
+        datePicker.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+        datePicker.target = self
+        datePicker.action = #selector(dateChanged)
 
-        addSubview(self.datePicker)
+        addSubview(datePicker)
 
-        self.datePicker.translatesAutoresizingMaskIntoConstraints = false
+        datePicker.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            self.datePicker.leadingAnchor.constraint(equalTo: leadingAnchor),
-            self.datePicker.trailingAnchor.constraint(equalTo: trailingAnchor),
-            self.datePicker.topAnchor.constraint(equalTo: topAnchor),
-            self.datePicker.bottomAnchor.constraint(equalTo: bottomAnchor),
+            datePicker.leadingAnchor.constraint(equalTo: leadingAnchor),
+            datePicker.trailingAnchor.constraint(equalTo: trailingAnchor),
+            datePicker.topAnchor.constraint(equalTo: topAnchor),
+            datePicker.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
 
-        self.channel.setMethodCallHandler { call, result in
+        channel.setMethodCallHandler { call, result in
             NSLog(
                 "Received method call: \(call.method)"
             )
@@ -105,7 +106,7 @@ class CupertinoDatePickerNSView: NSView {
 
             case "setIsDark":
                 if let args = call.arguments as? [String: Any],
-                    let isDark = (args["value"] as? NSNumber)?.boolValue
+                   let isDark = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.datePicker.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
@@ -115,7 +116,7 @@ class CupertinoDatePickerNSView: NSView {
 
             case "setIsEnabled":
                 if let args = call.arguments as? [String: Any],
-                    let enabled = (args["value"] as? NSNumber)?.boolValue
+                   let enabled = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.datePicker.isEnabled = enabled
                     result(nil)
@@ -125,7 +126,7 @@ class CupertinoDatePickerNSView: NSView {
 
             case "setDatePickerStyle":
                 if let args = call.arguments as? [String: Any],
-                    let styleStr = args["value"] as? String
+                   let styleStr = args["value"] as? String
                 {
                     self.datePicker.datePickerStyle = Self.datePickerStyleFromString(styleStr)
                     result(nil)
@@ -135,20 +136,21 @@ class CupertinoDatePickerNSView: NSView {
 
             case "setDatePickerElements":
                 if let args = call.arguments as? [String: Any],
-                    let elementsArr = args["value"] as? [String]
+                   let elementsArr = args["value"] as? [String]
                 {
                     self.datePicker.datePickerElements =
                         Self.datePickerElementsFromStrings(elementsArr)
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing elements", details: nil))
+                        FlutterError(code: "bad_args", message: "Missing elements", details: nil)
+                    )
                 }
 
             case "setFont":
                 if let args = call.arguments as? [String: Any],
-                    let fontDict = args["value"] as? [String: Any],
-                    let font = FontUtils.fontFromDictionary(fontDict)
+                   let fontDict = args["value"] as? [String: Any],
+                   let font = FontUtils.fontFromDictionary(fontDict)
                 {
                     self.datePicker.font = font
                     result(nil)
@@ -158,7 +160,7 @@ class CupertinoDatePickerNSView: NSView {
 
             case "setBackgroundColor":
                 if let args = call.arguments as? [String: Any],
-                    let colorInt = args["value"] as? Int
+                   let colorInt = args["value"] as? Int
                 {
                     self.datePicker.backgroundColor = ColorUtils.colorFromARGB(colorInt)
                     result(nil)
@@ -168,7 +170,7 @@ class CupertinoDatePickerNSView: NSView {
 
             case "setTextColor":
                 if let args = call.arguments as? [String: Any],
-                    let colorInt = args["value"] as? Int
+                   let colorInt = args["value"] as? Int
                 {
                     self.datePicker.textColor = ColorUtils.colorFromARGB(colorInt)
                     result(nil)
@@ -178,29 +180,31 @@ class CupertinoDatePickerNSView: NSView {
 
             case "setMinDate":
                 if let args = call.arguments as? [String: Any],
-                    let timestamp = args["value"] as? TimeInterval
+                   let timestamp = args["value"] as? TimeInterval
                 {
                     self.datePicker.minDate = Date(timeIntervalSince1970: timestamp / 1000)
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil))
+                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil)
+                    )
                 }
 
             case "setMaxDate":
                 if let args = call.arguments as? [String: Any],
-                    let timestamp = args["value"] as? TimeInterval
+                   let timestamp = args["value"] as? TimeInterval
                 {
                     self.datePicker.maxDate = Date(timeIntervalSince1970: timestamp / 1000)
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil))
+                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil)
+                    )
                 }
 
             case "setLocale":
                 if let args = call.arguments as? [String: Any],
-                    let localeStr = args["value"] as? String
+                   let localeStr = args["value"] as? String
                 {
                     self.datePicker.locale = Locale(identifier: localeStr)
                     result(nil)
@@ -210,41 +214,45 @@ class CupertinoDatePickerNSView: NSView {
 
             case "setIsBordered":
                 if let args = call.arguments as? [String: Any],
-                    let bordered = (args["value"] as? NSNumber)?.boolValue
+                   let bordered = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.datePicker.isBordered = bordered
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing bordered", details: nil))
+                        FlutterError(code: "bad_args", message: "Missing bordered", details: nil)
+                    )
                 }
 
             case "setDrawsBackground":
                 if let args = call.arguments as? [String: Any],
-                    let draws = (args["value"] as? NSNumber)?.boolValue
+                   let draws = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.datePicker.drawsBackground = draws
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing drawsBackground", details: nil))
+                            code: "bad_args", message: "Missing drawsBackground", details: nil
+                        )
+                    )
                 }
 
             case "setDateValue":
                 if let args = call.arguments as? [String: Any],
-                    let timestamp = args["value"] as? TimeInterval
+                   let timestamp = args["value"] as? TimeInterval
                 {
                     self.datePicker.dateValue = Date(timeIntervalSince1970: timestamp / 1000)
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil))
+                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil)
+                    )
                 }
 
             case "setDatePickerMode":
                 if let args = call.arguments as? [String: Any],
-                    let modeStr = args["value"] as? String
+                   let modeStr = args["value"] as? String
                 {
                     self.datePicker.datePickerMode = Self.datePickerModeFromString(modeStr)
                     result(nil)
@@ -258,19 +266,21 @@ class CupertinoDatePickerNSView: NSView {
         }
     }
 
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
     @objc private func dateChanged() {
-        let date = self.datePicker.dateValue
-        let interval = self.datePicker.timeInterval
+        let date = datePicker.dateValue
+        let interval = datePicker.timeInterval
 
         let timestamp = date.timeIntervalSince1970 * 1000
         let intervalMs = interval * 1000
 
         channel.invokeMethod(
-            "onDateChanged", arguments: ["timestamp": timestamp, "interval": intervalMs])
+            "onDateChanged", arguments: ["timestamp": timestamp, "interval": intervalMs]
+        )
     }
 
     private static func datePickerModeFromString(_ mode: String) -> NSDatePicker.Mode {
@@ -307,8 +317,7 @@ class CupertinoDatePickerNSView: NSView {
         return result
     }
 
-    private static func datePickerElementFromString(_ element: String) -> NSDatePicker.ElementFlags?
-    {
+    private static func datePickerElementFromString(_ element: String) -> NSDatePicker.ElementFlags? {
         switch element {
         case "hourMinute":
             return NSDatePicker.ElementFlags.hourMinute

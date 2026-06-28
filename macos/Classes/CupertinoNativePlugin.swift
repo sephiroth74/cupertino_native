@@ -2,335 +2,357 @@ import Cocoa
 import FlutterMacOS
 
 public class CupertinoNativePlugin: NSObject, FlutterPlugin {
-  static var registrar: FlutterPluginRegistrar?
-  static var contextMenuHandler: CupertinoContextMenuHandler?
-  static var toolbarManager: CupertinoToolbarManager?
+    static var registrar: FlutterPluginRegistrar?
+    static var contextMenuHandler: CupertinoContextMenuHandler?
+    static var toolbarManager: CupertinoToolbarManager?
 
-  public static func register(with registrar: FlutterPluginRegistrar) {
-    CupertinoNativePlugin.registrar = registrar
-    CupertinoNativePlugin.contextMenuHandler = CupertinoContextMenuHandler(registrar: registrar)
-    CupertinoNativePlugin.toolbarManager = CupertinoToolbarManager(messenger: registrar.messenger)
-    let channel = FlutterMethodChannel(
-      name: "cupertino_native", binaryMessenger: registrar.messenger)
-    let instance = CupertinoNativePlugin()
-    registrar.addMethodCallDelegate(instance, channel: channel)
+    public static func register(with registrar: FlutterPluginRegistrar) {
+        CupertinoNativePlugin.registrar = registrar
+        CupertinoNativePlugin.contextMenuHandler = CupertinoContextMenuHandler(registrar: registrar)
+        CupertinoNativePlugin.toolbarManager = CupertinoToolbarManager(messenger: registrar.messenger)
+        let channel = FlutterMethodChannel(
+            name: "cupertino_native", binaryMessenger: registrar.messenger
+        )
+        let instance = CupertinoNativePlugin()
+        registrar.addMethodCallDelegate(instance, channel: channel)
 
-    let sliderFactory = CupertinoSliderViewFactory(messenger: registrar.messenger)
-    registrar.register(sliderFactory, withId: "CupertinoNativeSlider")
+        let sliderFactory = CupertinoSliderViewFactory(messenger: registrar.messenger)
+        registrar.register(sliderFactory, withId: "CupertinoNativeSlider")
 
-    let switchFactory = CupertinoSwitchViewFactory(messenger: registrar.messenger)
-    registrar.register(switchFactory, withId: "CupertinoNativeSwitch")
+        let switchFactory = CupertinoSwitchViewFactory(messenger: registrar.messenger)
+        registrar.register(switchFactory, withId: "CupertinoNativeSwitch")
 
-    let segmentedFactory = CupertinoSegmentedControlViewFactory(messenger: registrar.messenger)
-    registrar.register(segmentedFactory, withId: "CupertinoNativeSegmentedControl")
+        let segmentedFactory = CupertinoSegmentedControlViewFactory(messenger: registrar.messenger)
+        registrar.register(segmentedFactory, withId: "CupertinoNativeSegmentedControl")
 
-    let pickerFactory = CupertinoPickerViewFactory(messenger: registrar.messenger)
-    registrar.register(pickerFactory, withId: "CupertinoNativePicker")
+        let pickerFactory = CupertinoPickerViewFactory(messenger: registrar.messenger)
+        registrar.register(pickerFactory, withId: "CupertinoNativePicker")
 
-    let iconFactory = CupertinoIconViewFactory(messenger: registrar.messenger)
-    registrar.register(iconFactory, withId: "CupertinoNativeIcon")
+        let iconFactory = CupertinoIconViewFactory(messenger: registrar.messenger)
+        registrar.register(iconFactory, withId: "CupertinoNativeIcon")
 
-    let labelFactory = CupertinoLabelViewFactory(messenger: registrar.messenger)
-    registrar.register(labelFactory, withId: "CupertinoNativeLabel")
+        let labelFactory = CupertinoLabelViewFactory(messenger: registrar.messenger)
+        registrar.register(labelFactory, withId: "CupertinoNativeLabel")
 
-    let tabBarFactory = CupertinoTabBarViewFactory(messenger: registrar.messenger)
-    registrar.register(tabBarFactory, withId: "CupertinoNativeTabBar")
+        let tabBarFactory = CupertinoTabBarViewFactory(messenger: registrar.messenger)
+        registrar.register(tabBarFactory, withId: "CupertinoNativeTabBar")
 
-    let popupMenuFactory = CupertinoPopupMenuButtonViewFactory(messenger: registrar.messenger)
-    registrar.register(popupMenuFactory, withId: "CupertinoNativePopupMenuButton")
+        let popupMenuFactory = CupertinoPopupMenuButtonViewFactory(messenger: registrar.messenger)
+        registrar.register(popupMenuFactory, withId: "CupertinoNativePopupMenuButton")
 
-    let menuButtonFactory = CupertinoMenuButtonViewFactory(messenger: registrar.messenger)
-    registrar.register(menuButtonFactory, withId: "CupertinoNativeMenuButton")
+        let menuButtonFactory = CupertinoMenuButtonViewFactory(messenger: registrar.messenger)
+        registrar.register(menuButtonFactory, withId: "CupertinoNativeMenuButton")
 
-    let popoverFactory = CupertinoPopoverViewFactory(messenger: registrar.messenger)
-    registrar.register(popoverFactory, withId: "CupertinoNativePopover")
+        let popoverFactory = CupertinoPopoverViewFactory(messenger: registrar.messenger)
+        registrar.register(popoverFactory, withId: "CupertinoNativePopover")
 
-    let buttonFactory = CupertinoButtonViewFactory(messenger: registrar.messenger)
-    registrar.register(buttonFactory, withId: "CupertinoNativeButton")
+        let buttonFactory = CupertinoButtonViewFactory(messenger: registrar.messenger)
+        registrar.register(buttonFactory, withId: "CupertinoNativeButton")
 
-    let colorWellFactory = CupertinoColorWellViewFactory(messenger: registrar.messenger)
-    registrar.register(colorWellFactory, withId: "CupertinoNativeColorWell")
+        let colorWellFactory = CupertinoColorWellViewFactory(messenger: registrar.messenger)
+        registrar.register(colorWellFactory, withId: "CupertinoNativeColorWell")
 
-    let pathControlFactory = CupertinoPathControlViewFactory(registrar: registrar)
-    registrar.register(pathControlFactory, withId: "CupertinoNativePathControl")
+        let pathControlFactory = CupertinoPathControlViewFactory(registrar: registrar)
+        registrar.register(pathControlFactory, withId: "CupertinoNativePathControl")
 
-    let progressIndicatorFactory = CupertinoProgressIndicatorViewFactory(
-      messenger: registrar.messenger)
-    registrar.register(progressIndicatorFactory, withId: "CupertinoNativeProgressIndicator")
+        let progressIndicatorFactory = CupertinoProgressIndicatorViewFactory(
+            messenger: registrar.messenger
+        )
+        registrar.register(progressIndicatorFactory, withId: "CupertinoNativeProgressIndicator")
 
-    let levelIndicatorFactory = CupertinoLevelIndicatorViewFactory(messenger: registrar.messenger)
-    registrar.register(levelIndicatorFactory, withId: "CupertinoNativeLevelIndicator")
+        let levelIndicatorFactory = CupertinoLevelIndicatorViewFactory(messenger: registrar.messenger)
+        registrar.register(levelIndicatorFactory, withId: "CupertinoNativeLevelIndicator")
 
-    let stepperFactory = CupertinoStepperViewFactory(messenger: registrar.messenger)
-    registrar.register(stepperFactory, withId: "CupertinoNativeStepper")
+        let stepperFactory = CupertinoStepperViewFactory(messenger: registrar.messenger)
+        registrar.register(stepperFactory, withId: "CupertinoNativeStepper")
 
-    let checkboxFactory = CupertinoCheckboxViewFactory(messenger: registrar.messenger)
-    registrar.register(checkboxFactory, withId: "CupertinoNativeCheckbox")
+        let checkboxFactory = CupertinoCheckboxViewFactory(messenger: registrar.messenger)
+        registrar.register(checkboxFactory, withId: "CupertinoNativeCheckbox")
 
-    let datePickerFactory = CupertinoDatePickerViewFactory(messenger: registrar.messenger)
-    registrar.register(datePickerFactory, withId: "CupertinoNativeDatePicker")
+        let datePickerFactory = CupertinoDatePickerViewFactory(messenger: registrar.messenger)
+        registrar.register(datePickerFactory, withId: "CupertinoNativeDatePicker")
 
-    let searchFieldFactory = CupertinoSearchFieldViewFactory(messenger: registrar.messenger)
-    registrar.register(searchFieldFactory, withId: "CupertinoNativeSearchField")
+        let searchFieldFactory = CupertinoSearchFieldViewFactory(messenger: registrar.messenger)
+        registrar.register(searchFieldFactory, withId: "CupertinoNativeSearchField")
 
-    let textFieldFactory = CupertinoTextFieldFactory(messenger: registrar.messenger)
-    registrar.register(textFieldFactory, withId: "CupertinoNativeTextField")
+        let textFieldFactory = CupertinoTextFieldFactory(messenger: registrar.messenger)
+        registrar.register(textFieldFactory, withId: "CupertinoNativeTextField")
 
-    let secureTextFieldFactory = CupertinoSecureTextFieldFactory(messenger: registrar.messenger)
-    registrar.register(secureTextFieldFactory, withId: "CupertinoNativeSecureTextField")
+        let secureTextFieldFactory = CupertinoSecureTextFieldFactory(messenger: registrar.messenger)
+        registrar.register(secureTextFieldFactory, withId: "CupertinoNativeSecureTextField")
 
-    let textViewFactory = CupertinoTextViewFactory(messenger: registrar.messenger)
-    registrar.register(textViewFactory, withId: "CupertinoNativeTextView")
+        let textViewFactory = CupertinoTextViewFactory(messenger: registrar.messenger)
+        registrar.register(textViewFactory, withId: "CupertinoNativeTextView")
 
-    let comboBoxFactory = CupertinoComboBoxFactory(messenger: registrar.messenger)
-    registrar.register(comboBoxFactory, withId: "CupertinoNativeComboBox")
+        let comboBoxFactory = CupertinoComboBoxFactory(messenger: registrar.messenger)
+        registrar.register(comboBoxFactory, withId: "CupertinoNativeComboBox")
 
-    let imageFactory = CupertinoImageFactory(messenger: registrar.messenger)
-    registrar.register(imageFactory, withId: "CupertinoNativeImage")
-  }
-
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    switch call.method {
-    case "getPlatformVersion":
-      result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
-    case "showAlert":
-      guard let args = call.arguments as? [String: Any] else {
-        result(
-          FlutterError(
-            code: "invalid_args",
-            message: "showAlert expects a map of arguments",
-            details: nil))
-        return
-      }
-      showAlert(args: args, result: result)
-    case "showContextMenu":
-      guard let args = call.arguments as? [String: Any] else {
-        result(
-          FlutterError(
-            code: "invalid_args",
-            message: "showContextMenu expects a map of arguments",
-            details: nil))
-        return
-      }
-      guard let handler = CupertinoNativePlugin.contextMenuHandler else {
-        result(
-          FlutterError(
-            code: "handler_unavailable",
-            message: "Context menu handler is not initialized",
-            details: nil))
-        return
-      }
-      handler.showContextMenu(args: args, result: result)
-    case "showSheet":
-      guard let args = call.arguments as? [String: Any] else {
-        result(
-          FlutterError(
-            code: "invalid_args",
-            message: "showSheet expects a map of arguments",
-            details: nil))
-        return
-      }
-      showSheet(args: args, result: result)
-    case "setToolbar":
-      guard let args = call.arguments as? [String: Any] else {
-        result(
-          FlutterError(
-            code: "invalid_args",
-            message: "setToolbar expects a map of arguments",
-            details: nil))
-        return
-      }
-      setToolbar(args: args, result: result)
-    case "clearToolbar":
-      clearToolbar(result: result)
-    default:
-      result(FlutterMethodNotImplemented)
+        let imageFactory = CupertinoImageFactory(messenger: registrar.messenger)
+        registrar.register(imageFactory, withId: "CupertinoNativeImage")
     }
-  }
 
-  private func showAlert(args: [String: Any], result: @escaping FlutterResult) {
-    let title = (args["title"] as? String) ?? ""
-    let message = (args["message"] as? String) ?? ""
-    let styleRaw = (args["style"] as? String) ?? "informational"
-    let rawActions = parseAlertActions(args["actions"])
-    let suppressionButtonLabel = args["suppressionButtonLabel"] as? String
-    let suppressionInitiallySelected = (args["suppressionInitiallySelected"] as? Bool) == true
-
-    DispatchQueue.main.async {
-      let alert = NSAlert()
-      alert.messageText = title.isEmpty ? "Alert" : title
-      alert.informativeText = message
-
-      switch styleRaw {
-      case "warning":
-        alert.alertStyle = .warning
-      case "critical":
-        alert.alertStyle = .critical
-      default:
-        alert.alertStyle = .informational
-      }
-
-      if let suppressionButtonLabel, !suppressionButtonLabel.isEmpty {
-        alert.showsSuppressionButton = true
-        alert.suppressionButton?.title = suppressionButtonLabel
-        alert.suppressionButton?.state = suppressionInitiallySelected ? .on : .off
-      }
-
-      for action in rawActions {
-        let actionTitle = (action["title"] as? String) ?? "OK"
-        let button = alert.addButton(withTitle: actionTitle)
-        if #available(macOS 11.0, *) {
-          button.hasDestructiveAction = (action["isDestructive"] as? Bool) == true
+    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        switch call.method {
+        case "getPlatformVersion":
+            result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
+        case "showAlert":
+            guard let args = call.arguments as? [String: Any] else {
+                result(
+                    FlutterError(
+                        code: "invalid_args",
+                        message: "showAlert expects a map of arguments",
+                        details: nil
+                    )
+                )
+                return
+            }
+            showAlert(args: args, result: result)
+        case "showContextMenu":
+            guard let args = call.arguments as? [String: Any] else {
+                result(
+                    FlutterError(
+                        code: "invalid_args",
+                        message: "showContextMenu expects a map of arguments",
+                        details: nil
+                    )
+                )
+                return
+            }
+            guard let handler = CupertinoNativePlugin.contextMenuHandler else {
+                result(
+                    FlutterError(
+                        code: "handler_unavailable",
+                        message: "Context menu handler is not initialized",
+                        details: nil
+                    )
+                )
+                return
+            }
+            handler.showContextMenu(args: args, result: result)
+        case "showSheet":
+            guard let args = call.arguments as? [String: Any] else {
+                result(
+                    FlutterError(
+                        code: "invalid_args",
+                        message: "showSheet expects a map of arguments",
+                        details: nil
+                    )
+                )
+                return
+            }
+            showSheet(args: args, result: result)
+        case "setToolbar":
+            guard let args = call.arguments as? [String: Any] else {
+                result(
+                    FlutterError(
+                        code: "invalid_args",
+                        message: "setToolbar expects a map of arguments",
+                        details: nil
+                    )
+                )
+                return
+            }
+            setToolbar(args: args, result: result)
+        case "clearToolbar":
+            clearToolbar(result: result)
+        default:
+            result(FlutterMethodNotImplemented)
         }
-        if actionTitle.lowercased() == "cancel" {
-          button.keyEquivalent = "\u{1b}"
+    }
+
+    private func showAlert(args: [String: Any], result: @escaping FlutterResult) {
+        let title = (args["title"] as? String) ?? ""
+        let message = (args["message"] as? String) ?? ""
+        let styleRaw = (args["style"] as? String) ?? "informational"
+        let rawActions = parseAlertActions(args["actions"])
+        let suppressionButtonLabel = args["suppressionButtonLabel"] as? String
+        let suppressionInitiallySelected = (args["suppressionInitiallySelected"] as? Bool) == true
+
+        DispatchQueue.main.async {
+            let alert = NSAlert()
+            alert.messageText = title.isEmpty ? "Alert" : title
+            alert.informativeText = message
+
+            switch styleRaw {
+            case "warning":
+                alert.alertStyle = .warning
+            case "critical":
+                alert.alertStyle = .critical
+            default:
+                alert.alertStyle = .informational
+            }
+
+            if let suppressionButtonLabel, !suppressionButtonLabel.isEmpty {
+                alert.showsSuppressionButton = true
+                alert.suppressionButton?.title = suppressionButtonLabel
+                alert.suppressionButton?.state = suppressionInitiallySelected ? .on : .off
+            }
+
+            for action in rawActions {
+                let actionTitle = (action["title"] as? String) ?? "OK"
+                let button = alert.addButton(withTitle: actionTitle)
+                if #available(macOS 11.0, *) {
+                    button.hasDestructiveAction = (action["isDestructive"] as? Bool) == true
+                }
+                if actionTitle.lowercased() == "cancel" {
+                    button.keyEquivalent = "\u{1b}"
+                }
+            }
+
+            for (index, action) in rawActions.enumerated() {
+                if (action["isDefault"] as? Bool) == true, index < alert.buttons.count {
+                    alert.buttons[index].keyEquivalent = "\r"
+                    break
+                }
+            }
+
+            let response = alert.runModal()
+            let firstRaw = NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
+            let selectedIndex = Int(response.rawValue - firstRaw)
+            let suppressionSelected = alert.suppressionButton?.state == .on
+            result([
+                "selectedIndex": max(selectedIndex, 0),
+                "suppressionSelected": suppressionSelected,
+            ])
         }
-      }
+    }
 
-      for (index, action) in rawActions.enumerated() {
-        if (action["isDefault"] as? Bool) == true, index < alert.buttons.count {
-          alert.buttons[index].keyEquivalent = "\r"
-          break
+    private func parseAlertActions(_ raw: Any?) -> [[String: Any]] {
+        guard let list = raw as? [Any], !list.isEmpty else {
+            return [["title": "OK", "isDefault": true]]
         }
-      }
 
-      let response = alert.runModal()
-      let firstRaw = NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
-      let selectedIndex = Int(response.rawValue - firstRaw)
-      let suppressionSelected = alert.suppressionButton?.state == .on
-      result([
-        "selectedIndex": max(selectedIndex, 0),
-        "suppressionSelected": suppressionSelected,
-      ])
-    }
-  }
+        var parsed = [[String: Any]]()
+        parsed.reserveCapacity(list.count)
 
-  private func parseAlertActions(_ raw: Any?) -> [[String: Any]] {
-    guard let list = raw as? [Any], !list.isEmpty else {
-      return [["title": "OK", "isDefault": true]]
-    }
-
-    var parsed = [[String: Any]]()
-    parsed.reserveCapacity(list.count)
-
-    for item in list {
-      if let dict = item as? [String: Any] {
-        parsed.append(dict)
-      } else if let dict = item as? [AnyHashable: Any] {
-        var normalized = [String: Any]()
-        for (key, value) in dict {
-          if let stringKey = key as? String {
-            normalized[stringKey] = value
-          }
+        for item in list {
+            if let dict = item as? [String: Any] {
+                parsed.append(dict)
+            } else if let dict = item as? [AnyHashable: Any] {
+                var normalized = [String: Any]()
+                for (key, value) in dict {
+                    if let stringKey = key as? String {
+                        normalized[stringKey] = value
+                    }
+                }
+                if !normalized.isEmpty {
+                    parsed.append(normalized)
+                }
+            }
         }
-        if !normalized.isEmpty {
-          parsed.append(normalized)
+
+        return parsed.isEmpty ? [["title": "OK", "isDefault": true]] : parsed
+    }
+
+    private func showSheet(args: [String: Any], result: @escaping FlutterResult) {
+        guard let window = CupertinoNativePlugin.registrar?.view?.window else {
+            result(
+                FlutterError(
+                    code: "window_unavailable",
+                    message: "Unable to find host window for sheet presentation",
+                    details: nil
+                )
+            )
+            return
         }
-      }
-    }
 
-    return parsed.isEmpty ? [["title": "OK", "isDefault": true]] : parsed
-  }
+        let title = (args["title"] as? String) ?? ""
+        let message = (args["message"] as? String) ?? ""
+        let styleRaw = (args["style"] as? String) ?? "informational"
+        let rawActions = parseAlertActions(args["actions"])
 
-  private func showSheet(args: [String: Any], result: @escaping FlutterResult) {
-    guard let window = CupertinoNativePlugin.registrar?.view?.window else {
-      result(
-        FlutterError(
-          code: "window_unavailable",
-          message: "Unable to find host window for sheet presentation",
-          details: nil))
-      return
-    }
+        DispatchQueue.main.async {
+            let alert = NSAlert()
+            alert.messageText = title.isEmpty ? "Sheet" : title
+            alert.informativeText = message
 
-    let title = (args["title"] as? String) ?? ""
-    let message = (args["message"] as? String) ?? ""
-    let styleRaw = (args["style"] as? String) ?? "informational"
-    let rawActions = parseAlertActions(args["actions"])
+            switch styleRaw {
+            case "warning":
+                alert.alertStyle = .warning
+            case "critical":
+                alert.alertStyle = .critical
+            default:
+                alert.alertStyle = .informational
+            }
 
-    DispatchQueue.main.async {
-      let alert = NSAlert()
-      alert.messageText = title.isEmpty ? "Sheet" : title
-      alert.informativeText = message
+            for action in rawActions {
+                let actionTitle = (action["title"] as? String) ?? "OK"
+                let button = alert.addButton(withTitle: actionTitle)
+                if #available(macOS 11.0, *) {
+                    button.hasDestructiveAction = (action["isDestructive"] as? Bool) == true
+                }
+            }
 
-      switch styleRaw {
-      case "warning":
-        alert.alertStyle = .warning
-      case "critical":
-        alert.alertStyle = .critical
-      default:
-        alert.alertStyle = .informational
-      }
+            for (index, action) in rawActions.enumerated() {
+                if (action["isDefault"] as? Bool) == true, index < alert.buttons.count {
+                    alert.buttons[index].keyEquivalent = "\r"
+                    break
+                }
+            }
 
-      for action in rawActions {
-        let actionTitle = (action["title"] as? String) ?? "OK"
-        let button = alert.addButton(withTitle: actionTitle)
-        if #available(macOS 11.0, *) {
-          button.hasDestructiveAction = (action["isDestructive"] as? Bool) == true
+            alert.beginSheetModal(for: window) { response in
+                let firstRaw = NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
+                let selectedIndex = Int(response.rawValue - firstRaw)
+                result(max(selectedIndex, 0))
+            }
         }
-      }
+    }
 
-      for (index, action) in rawActions.enumerated() {
-        if (action["isDefault"] as? Bool) == true, index < alert.buttons.count {
-          alert.buttons[index].keyEquivalent = "\r"
-          break
+    private func setToolbar(args: [String: Any], result: @escaping FlutterResult) {
+        guard let window = CupertinoNativePlugin.registrar?.view?.window else {
+            result(
+                FlutterError(
+                    code: "window_unavailable",
+                    message: "Unable to find host window for toolbar configuration",
+                    details: nil
+                )
+            )
+            return
         }
-      }
 
-      alert.beginSheetModal(for: window) { response in
-        let firstRaw = NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
-        let selectedIndex = Int(response.rawValue - firstRaw)
-        result(max(selectedIndex, 0))
-      }
-    }
-  }
+        guard let manager = CupertinoNativePlugin.toolbarManager else {
+            result(
+                FlutterError(
+                    code: "toolbar_manager_unavailable",
+                    message: "Toolbar manager is not initialized",
+                    details: nil
+                )
+            )
+            return
+        }
 
-  private func setToolbar(args: [String: Any], result: @escaping FlutterResult) {
-    guard let window = CupertinoNativePlugin.registrar?.view?.window else {
-      result(
-        FlutterError(
-          code: "window_unavailable",
-          message: "Unable to find host window for toolbar configuration",
-          details: nil))
-      return
+        manager.setToolbar(window: window, args: args, result: result)
     }
 
-    guard let manager = CupertinoNativePlugin.toolbarManager else {
-      result(
-        FlutterError(
-          code: "toolbar_manager_unavailable",
-          message: "Toolbar manager is not initialized",
-          details: nil))
-      return
+    private func clearToolbar(result: @escaping FlutterResult) {
+        guard let window = CupertinoNativePlugin.registrar?.view?.window else {
+            result(
+                FlutterError(
+                    code: "window_unavailable",
+                    message: "Unable to find host window for toolbar configuration",
+                    details: nil
+                )
+            )
+            return
+        }
+
+        guard let manager = CupertinoNativePlugin.toolbarManager else {
+            result(
+                FlutterError(
+                    code: "toolbar_manager_unavailable",
+                    message: "Toolbar manager is not initialized",
+                    details: nil
+                )
+            )
+            return
+        }
+
+        manager.clearToolbar(window: window, result: result)
     }
-
-    manager.setToolbar(window: window, args: args, result: result)
-  }
-
-  private func clearToolbar(result: @escaping FlutterResult) {
-    guard let window = CupertinoNativePlugin.registrar?.view?.window else {
-      result(
-        FlutterError(
-          code: "window_unavailable",
-          message: "Unable to find host window for toolbar configuration",
-          details: nil))
-      return
-    }
-
-    guard let manager = CupertinoNativePlugin.toolbarManager else {
-      result(
-        FlutterError(
-          code: "toolbar_manager_unavailable",
-          message: "Toolbar manager is not initialized",
-          details: nil))
-      return
-    }
-
-    manager.clearToolbar(window: window, result: result)
-  }
 }
 
 extension FlutterPluginRegistrar {
-  func getFlutterWindow() -> NSWindow? {
-    return view?.window
-  }
+    func getFlutterWindow() -> NSWindow? {
+        return view?.window
+    }
 }

@@ -29,6 +29,7 @@ import 'demos/label.dart';
 import 'demos/sheet.dart';
 import 'demos/toolbar.dart';
 import 'demos/split_view.dart';
+import 'demos/group_box.dart';
 
 void main() {
   runApp(const MyApp());
@@ -342,6 +343,14 @@ class HomePage extends StatelessWidget {
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ContextMenuDemoPage()));
+                },
+              ),
+              CupertinoListTile(
+                title: Text('GroupBox'),
+                leading: CNIcon(symbol: CNSymbol('textformat', color: accentColor)),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const GroupBoxDemoPage()));
                 },
               ),
               CupertinoListTile(

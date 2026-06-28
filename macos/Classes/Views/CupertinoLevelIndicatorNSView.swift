@@ -4,11 +4,12 @@ import SwiftUI
 
 class CupertinoLevelIndicatorNSView: NSView {
     private let channel: FlutterMethodChannel
-    @objc let model: RangeModel = RangeModel()
+    @objc let model: RangeModel = .init()
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
-        self.channel = FlutterMethodChannel(
-            name: "CupertinoNativeLevelIndicator_\(viewId)", binaryMessenger: messenger)
+        channel = FlutterMethodChannel(
+            name: "CupertinoNativeLevelIndicator_\(viewId)", binaryMessenger: messenger
+        )
 
         let levelIndicator = NSLevelIndicator()
 
@@ -17,10 +18,10 @@ class CupertinoLevelIndicatorNSView: NSView {
         var maxValue: Double = 1
         var warningValue: Double? = nil
         var criticalValue: Double? = nil
-        var isEnabled: Bool = true
-        var isEditable: Bool = true
-        var isContinuous: Bool = true
-        var isDark: Bool = false
+        var isEnabled = true
+        var isEditable = true
+        var isContinuous = true
+        var isDark = false
         var fillColor: NSColor? = nil
         var warningColor: NSColor? = nil
         var criticalColor: NSColor? = nil
@@ -52,13 +53,13 @@ class CupertinoLevelIndicatorNSView: NSView {
 
         super.init(frame: .zero)
 
-        self.model.updateValues(minValue: minValue, maxValue: maxValue, value: initialValue)
+        model.updateValues(minValue: minValue, maxValue: maxValue, value: initialValue)
 
-        levelIndicator.bind(.value, to: self.model, withKeyPath: "value", options: nil)
-        levelIndicator.bind(.minValue, to: self.model, withKeyPath: "minValue", options: nil)
-        levelIndicator.bind(.maxValue, to: self.model, withKeyPath: "maxValue", options: nil)
+        levelIndicator.bind(.value, to: model, withKeyPath: "value", options: nil)
+        levelIndicator.bind(.minValue, to: model, withKeyPath: "minValue", options: nil)
+        levelIndicator.bind(.maxValue, to: model, withKeyPath: "maxValue", options: nil)
 
-        self.model.onChange = { value in
+        model.onChange = { value in
             self.channel.invokeMethod("valueChanged", arguments: ["value": value])
         }
 
@@ -104,8 +105,8 @@ class CupertinoLevelIndicatorNSView: NSView {
                 result(["width": size.width, "height": size.height])
             case "updateRange":
                 if let args = call.arguments as? [String: Any],
-                    let min = (args["min"] as? NSNumber)?.doubleValue,
-                    let max = (args["max"] as? NSNumber)?.doubleValue
+                   let min = (args["min"] as? NSNumber)?.doubleValue,
+                   let max = (args["max"] as? NSNumber)?.doubleValue
                 {
                     self.model.updateRange(minValue: min, maxValue: max)
                     result(nil)
@@ -114,22 +115,24 @@ class CupertinoLevelIndicatorNSView: NSView {
                 }
             case "setValue":
                 if let args = call.arguments as? [String: Any],
-                    let value = (args["value"] as? NSNumber)?.doubleValue
+                   let value = (args["value"] as? NSNumber)?.doubleValue
                 {
-                    if value >= self.model.minValue && value <= self.model.maxValue {
+                    if value >= self.model.minValue, value <= self.model.maxValue {
                         self.model.value = value
                         result(nil)
                     } else {
                         result(
                             FlutterError(
-                                code: "bad_args", message: "Value out of range", details: nil))
+                                code: "bad_args", message: "Value out of range", details: nil
+                            )
+                        )
                     }
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setIsEnabled":
                 if let args = call.arguments as? [String: Any],
-                    let enabled = (args["value"] as? NSNumber)?.boolValue
+                   let enabled = (args["value"] as? NSNumber)?.boolValue
                 {
                     levelIndicator.isEnabled = enabled
                     result(nil)
@@ -138,7 +141,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                 }
             case "setIsEditable":
                 if let args = call.arguments as? [String: Any],
-                    let editable = (args["value"] as? NSNumber)?.boolValue
+                   let editable = (args["value"] as? NSNumber)?.boolValue
                 {
                     levelIndicator.isEditable = editable
                     result(nil)
@@ -147,7 +150,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                 }
             case "setIsContinuous":
                 if let args = call.arguments as? [String: Any],
-                    let continuous = (args["value"] as? NSNumber)?.boolValue
+                   let continuous = (args["value"] as? NSNumber)?.boolValue
                 {
                     levelIndicator.isContinuous = continuous
                     result(nil)
@@ -156,7 +159,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                 }
             case "setIsDark":
                 if let args = call.arguments as? [String: Any],
-                    let isDark = (args["value"] as? NSNumber)?.boolValue
+                   let isDark = (args["value"] as? NSNumber)?.boolValue
                 {
                     levelIndicator.appearance =
                         NSAppearance(named: isDark ? .darkAqua : .aqua)
@@ -166,7 +169,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                 }
             case "setLevelIndicatorStyle":
                 if let args = call.arguments as? [String: Any],
-                    let styleStr = args["value"] as? String
+                   let styleStr = args["value"] as? String
                 {
                     levelIndicator.levelIndicatorStyle =
                         Self.levelIndicatorStyleFromString(styleStr)
@@ -176,7 +179,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                 }
             case "setFillColor":
                 if let args = call.arguments as? [String: Any],
-                    let fillColorNum = args["value"] as? NSNumber
+                   let fillColorNum = args["value"] as? NSNumber
                 {
                     levelIndicator.fillColor = ColorUtils.colorFromARGB(fillColorNum.intValue)
                     result(nil)
@@ -185,7 +188,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                 }
             case "setWarningColor":
                 if let args = call.arguments as? [String: Any],
-                    let warningColorNum = args["value"] as? NSNumber
+                   let warningColorNum = args["value"] as? NSNumber
                 {
                     levelIndicator.warningFillColor = ColorUtils.colorFromARGB(warningColorNum.intValue)
                     result(nil)
@@ -194,17 +197,18 @@ class CupertinoLevelIndicatorNSView: NSView {
                 }
             case "setCriticalColor":
                 if let args = call.arguments as? [String: Any],
-                    let criticalColorNum = args["value"] as? NSNumber
+                   let criticalColorNum = args["value"] as? NSNumber
                 {
                     levelIndicator.criticalFillColor = ColorUtils.colorFromARGB(
-                        criticalColorNum.intValue)
+                        criticalColorNum.intValue
+                    )
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setWarningValue":
                 if let args = call.arguments as? [String: Any],
-                    let warningValue = (args["value"] as? NSNumber)?.doubleValue
+                   let warningValue = (args["value"] as? NSNumber)?.doubleValue
                 {
                     levelIndicator.warningValue = warningValue
                     result(nil)
@@ -213,7 +217,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                 }
             case "setCriticalValue":
                 if let args = call.arguments as? [String: Any],
-                    let criticalValue = (args["value"] as? NSNumber)?.doubleValue
+                   let criticalValue = (args["value"] as? NSNumber)?.doubleValue
                 {
                     levelIndicator.criticalValue = criticalValue
                     result(nil)
@@ -226,7 +230,8 @@ class CupertinoLevelIndicatorNSView: NSView {
         }
     }
 
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 

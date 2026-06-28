@@ -6,7 +6,7 @@ final class CupertinoToolbarManager {
     private let eventsChannel: FlutterMethodChannel
 
     init(messenger: FlutterBinaryMessenger) {
-        self.eventsChannel = FlutterMethodChannel(
+        eventsChannel = FlutterMethodChannel(
             name: "cupertino_native/toolbar_events",
             binaryMessenger: messenger
         )
@@ -95,7 +95,9 @@ final class CupertinoToolbarManager {
                     items: items,
                     behavior: behavior,
                     menuItems: menuItems,
-                    comboButtonStyle: comboButtonStyle))
+                    comboButtonStyle: comboButtonStyle
+                )
+            )
         }
 
         return parsed
@@ -135,7 +137,9 @@ final class CupertinoToolbarManager {
                     title: (dict["title"] as? String) ?? id,
                     tag: (dict["tag"] as? NSNumber)?.intValue,
                     enabled: (dict["enabled"] as? Bool) ?? true,
-                    isSeparator: (dict["isSeparator"] as? Bool) ?? false))
+                    isSeparator: (dict["isSeparator"] as? Bool) ?? false
+                )
+            )
         }
 
         return parsed
@@ -204,22 +208,22 @@ private final class ToolbarDelegate: NSObject, NSToolbarDelegate {
     init(items: [ToolbarItemModel], eventsChannel: FlutterMethodChannel) {
         self.items = items
         self.eventsChannel = eventsChannel
-        self.ids = items.map { NSToolbarItem.Identifier($0.id) }
+        ids = items.map { NSToolbarItem.Identifier($0.id) }
         super.init()
     }
 
-    func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+    func toolbarAllowedItemIdentifiers(_: NSToolbar) -> [NSToolbarItem.Identifier] {
         return ids + [.flexibleSpace, .space, .separator]
     }
 
-    func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+    func toolbarDefaultItemIdentifiers(_: NSToolbar) -> [NSToolbarItem.Identifier] {
         return ids
     }
 
     func toolbar(
-        _ toolbar: NSToolbar,
+        _: NSToolbar,
         itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
-        willBeInsertedIntoToolbar flag: Bool
+        willBeInsertedIntoToolbar _: Bool
     ) -> NSToolbarItem? {
         guard let model = items.first(where: { $0.id == itemIdentifier.rawValue }) else {
             return nil
@@ -250,7 +254,8 @@ private final class ToolbarDelegate: NSObject, NSToolbarDelegate {
 
         if let symbolName = model.systemSymbolName {
             item.image = NSImage(
-                systemSymbolName: symbolName, accessibilityDescription: model.label)
+                systemSymbolName: symbolName, accessibilityDescription: model.label
+            )
         }
 
         return item
@@ -307,13 +312,15 @@ private final class ToolbarDelegate: NSObject, NSToolbarDelegate {
     @objc
     private func onToolbarItemPressed(_ sender: NSToolbarItem) {
         eventsChannel.invokeMethod(
-            "onToolbarItemPressed", arguments: ["id": sender.itemIdentifier.rawValue])
+            "onToolbarItemPressed", arguments: ["id": sender.itemIdentifier.rawValue]
+        )
         eventsChannel.invokeMethod(
             "onToolbarEvent",
             arguments: [
                 "id": sender.itemIdentifier.rawValue,
                 "type": "buttonPressed",
-            ])
+            ]
+        )
     }
 }
 
@@ -322,7 +329,7 @@ private final class ToolbarSearchField: NSSearchField, NSSearchFieldDelegate {
     private let eventsChannel: FlutterMethodChannel
 
     init(model: ToolbarItemModel, eventsChannel: FlutterMethodChannel) {
-        self.itemId = model.id
+        itemId = model.id
         self.eventsChannel = eventsChannel
         let width = model.width ?? 180
         super.init(frame: NSRect(x: 0, y: 0, width: width, height: 28))
@@ -334,7 +341,8 @@ private final class ToolbarSearchField: NSSearchField, NSSearchFieldDelegate {
         action = #selector(onSubmit(_:))
     }
 
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
@@ -342,25 +350,27 @@ private final class ToolbarSearchField: NSSearchField, NSSearchFieldDelegate {
         NSSize(width: frame.width, height: 28)
     }
 
-    func controlTextDidChange(_ obj: Notification) {
+    func controlTextDidChange(_: Notification) {
         eventsChannel.invokeMethod(
             "onToolbarEvent",
             arguments: [
                 "id": itemId,
                 "type": "searchChanged",
                 "text": stringValue,
-            ])
+            ]
+        )
     }
 
     @objc
-    private func onSubmit(_ sender: NSSearchField) {
+    private func onSubmit(_: NSSearchField) {
         eventsChannel.invokeMethod(
             "onToolbarEvent",
             arguments: [
                 "id": itemId,
                 "type": "searchSubmitted",
                 "text": stringValue,
-            ])
+            ]
+        )
     }
 }
 
@@ -369,7 +379,7 @@ private final class ToolbarComboBox: NSComboBox, NSComboBoxDelegate, NSTextField
     private let eventsChannel: FlutterMethodChannel
 
     init(model: ToolbarItemModel, eventsChannel: FlutterMethodChannel) {
-        self.itemId = model.id
+        itemId = model.id
         self.eventsChannel = eventsChannel
         let width = model.width ?? 160
         super.init(frame: NSRect(x: 0, y: 0, width: width, height: 28))
@@ -386,7 +396,8 @@ private final class ToolbarComboBox: NSComboBox, NSComboBoxDelegate, NSTextField
         applyBehavior(model.behavior ?? "editable")
     }
 
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
@@ -394,16 +405,16 @@ private final class ToolbarComboBox: NSComboBox, NSComboBoxDelegate, NSTextField
         NSSize(width: frame.width, height: 28)
     }
 
-    func comboBoxSelectionDidChange(_ notification: Notification) {
+    func comboBoxSelectionDidChange(_: Notification) {
         emitChange(type: "comboBoxChanged")
     }
 
-    func controlTextDidChange(_ obj: Notification) {
+    func controlTextDidChange(_: Notification) {
         emitChange(type: "comboBoxChanged")
     }
 
     @objc
-    private func onSubmit(_ sender: NSComboBox) {
+    private func onSubmit(_: NSComboBox) {
         emitChange(type: "comboBoxSubmitted")
     }
 
@@ -442,11 +453,11 @@ private final class ToolbarComboButton: NSSegmentedControl {
     private let comboButtonStyle: String
 
     init(model: ToolbarItemModel, eventsChannel: FlutterMethodChannel) {
-        self.itemId = model.id
-        self.itemLabel = model.label
+        itemId = model.id
+        itemLabel = model.label
         self.eventsChannel = eventsChannel
-        self.menuItems = model.menuItems
-        self.comboButtonStyle = model.comboButtonStyle ?? "split"
+        menuItems = model.menuItems
+        comboButtonStyle = model.comboButtonStyle ?? "split"
 
         let width = model.width ?? 160
         super.init(frame: NSRect(x: 0, y: 0, width: width, height: 28))
@@ -461,17 +472,20 @@ private final class ToolbarComboButton: NSSegmentedControl {
         if let symbolName = model.systemSymbolName, model.label.isEmpty {
             setImage(
                 NSImage(systemSymbolName: symbolName, accessibilityDescription: model.label),
-                forSegment: 0)
+                forSegment: 0
+            )
         }
 
         setImage(
             NSImage(systemSymbolName: "chevron.down", accessibilityDescription: "Menu"),
-            forSegment: 1)
+            forSegment: 1
+        )
         target = self
         action = #selector(onSegmentPressed(_:))
     }
 
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
@@ -480,7 +494,7 @@ private final class ToolbarComboButton: NSSegmentedControl {
     }
 
     @objc
-    private func onSegmentPressed(_ sender: NSSegmentedControl) {
+    private func onSegmentPressed(_: NSSegmentedControl) {
         defer { selectedSegment = -1 }
 
         if selectedSegment == 0 {
@@ -489,7 +503,8 @@ private final class ToolbarComboButton: NSSegmentedControl {
                 arguments: [
                     "id": itemId,
                     "type": "comboButtonPressed",
-                ])
+                ]
+            )
             return
         }
 
@@ -503,14 +518,16 @@ private final class ToolbarComboButton: NSSegmentedControl {
             let item = NSMenuItem(
                 title: menuItemModel.title,
                 action: #selector(onMenuItemSelected(_:)),
-                keyEquivalent: "")
+                keyEquivalent: ""
+            )
             item.target = self
             item.isEnabled = menuItemModel.enabled
             item.representedObject = ToolbarMenuItemPayload(
                 itemId: itemId,
                 menuItemId: menuItemModel.id,
                 menuItemTitle: menuItemModel.title,
-                menuItemTag: menuItemModel.tag)
+                menuItemTag: menuItemModel.tag
+            )
             menu.addItem(item)
         }
 

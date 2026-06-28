@@ -3,12 +3,13 @@ import FlutterMacOS
 
 class CupertinoStepperNSView: NSView {
     private let channel: FlutterMethodChannel
-    private let stepper: NSStepper = NSStepper()
+    private let stepper: NSStepper = .init()
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
-        self.channel = FlutterMethodChannel(
+        channel = FlutterMethodChannel(
             name: "CupertinoNativeStepper_\(viewId)",
-            binaryMessenger: messenger)
+            binaryMessenger: messenger
+        )
 
         let stepper = self.stepper
 
@@ -16,10 +17,10 @@ class CupertinoStepperNSView: NSView {
         var minValue: Double = 0
         var maxValue: Double = 100
         var increment: Double = 1
-        var isEnabled: Bool = true
-        var isAutorepeat: Bool = true
-        var valueWraps: Bool = false
-        var isDark: Bool = false
+        var isEnabled = true
+        var isAutorepeat = true
+        var valueWraps = false
+        var isDark = false
         var controlSize: NSControl.ControlSize = .regular
 
         if let dict = args as? [String: Any] {
@@ -69,23 +70,25 @@ class CupertinoStepperNSView: NSView {
                 result(["width": size.width, "height": size.height])
             case "setValue":
                 if let args = call.arguments as? [String: Any],
-                    let value = (args["value"] as? NSNumber)?.doubleValue
+                   let value = (args["value"] as? NSNumber)?.doubleValue
                 {
-                    if value >= stepper.minValue && value <= stepper.maxValue {
+                    if value >= stepper.minValue, value <= stepper.maxValue {
                         stepper.doubleValue = value
                         result(nil)
                     } else {
                         result(
                             FlutterError(
-                                code: "bad_args", message: "Value out of range", details: nil))
+                                code: "bad_args", message: "Value out of range", details: nil
+                            )
+                        )
                     }
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setRange":
                 if let args = call.arguments as? [String: Any],
-                    let min = (args["min"] as? NSNumber)?.doubleValue,
-                    let max = (args["max"] as? NSNumber)?.doubleValue
+                   let min = (args["min"] as? NSNumber)?.doubleValue,
+                   let max = (args["max"] as? NSNumber)?.doubleValue
                 {
                     stepper.minValue = min
                     stepper.maxValue = max
@@ -97,7 +100,7 @@ class CupertinoStepperNSView: NSView {
                 }
             case "setIncrement":
                 if let args = call.arguments as? [String: Any],
-                    let increment = (args["value"] as? NSNumber)?.doubleValue
+                   let increment = (args["value"] as? NSNumber)?.doubleValue
                 {
                     stepper.increment = increment
                     result(nil)
@@ -106,7 +109,7 @@ class CupertinoStepperNSView: NSView {
                 }
             case "setIsEnabled":
                 if let args = call.arguments as? [String: Any],
-                    let enabled = (args["value"] as? NSNumber)?.boolValue
+                   let enabled = (args["value"] as? NSNumber)?.boolValue
                 {
                     stepper.isEnabled = enabled
                     result(nil)
@@ -115,7 +118,7 @@ class CupertinoStepperNSView: NSView {
                 }
             case "setIsAutorepeat":
                 if let args = call.arguments as? [String: Any],
-                    let isAutorepeat = (args["value"] as? NSNumber)?.boolValue
+                   let isAutorepeat = (args["value"] as? NSNumber)?.boolValue
                 {
                     stepper.autorepeat = isAutorepeat
                     result(nil)
@@ -124,7 +127,7 @@ class CupertinoStepperNSView: NSView {
                 }
             case "setValueWraps":
                 if let args = call.arguments as? [String: Any],
-                    let valueWraps = (args["value"] as? NSNumber)?.boolValue
+                   let valueWraps = (args["value"] as? NSNumber)?.boolValue
                 {
                     stepper.valueWraps = valueWraps
                     result(nil)
@@ -133,7 +136,7 @@ class CupertinoStepperNSView: NSView {
                 }
             case "setIsDark":
                 if let args = call.arguments as? [String: Any],
-                    let isDark = (args["value"] as? NSNumber)?.boolValue
+                   let isDark = (args["value"] as? NSNumber)?.boolValue
                 {
                     stepper.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
@@ -142,7 +145,7 @@ class CupertinoStepperNSView: NSView {
                 }
             case "setControlSize":
                 if let args = call.arguments as? [String: Any],
-                    let size = args["value"] as? String
+                   let size = args["value"] as? String
                 {
                     stepper.controlSize = ControlSizeUtils.controlSizeFromString(size)
                     result(nil)
@@ -154,7 +157,7 @@ class CupertinoStepperNSView: NSView {
             }
         }
 
-        self.postsFrameChangedNotifications = true
+        postsFrameChangedNotifications = true
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(viewSizeChanged),
@@ -167,21 +170,22 @@ class CupertinoStepperNSView: NSView {
         super.viewWillMove(toWindow: newWindow)
 
         if newWindow == nil {
-            self.postsFrameChangedNotifications = false
+            postsFrameChangedNotifications = false
             NotificationCenter.default.removeObserver(
-                self, name: NSView.frameDidChangeNotification, object: self)
+                self, name: NSView.frameDidChangeNotification, object: self
+            )
         }
-
     }
 
-    @objc func viewSizeChanged(_ notification: Notification) {
+    @objc func viewSizeChanged(_: Notification) {
         let size = stepper.intrinsicContentSize
 
         channel.invokeMethod(
-            "intrinsicSizeChanged", arguments: ["width": size.width, "height": size.height])
+            "intrinsicSizeChanged", arguments: ["width": size.width, "height": size.height]
+        )
     }
 
-    required init?(coder: NSCoder) {
+    required init?(coder _: NSCoder) {
         return nil
     }
 
