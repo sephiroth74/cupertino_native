@@ -8,6 +8,7 @@ import 'demos/tab_bar.dart';
 import 'demos/icon.dart';
 import 'demos/image.dart';
 import 'demos/popup_menu_button.dart';
+import 'demos/menu_button.dart';
 import 'demos/button.dart';
 import 'demos/combo_button.dart';
 import 'demos/color_well.dart';
@@ -60,10 +61,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return CupertinoApp(
       debugShowCheckedModeBanner: false,
-      theme: CupertinoThemeData(
-        brightness: _isDarkMode ? Brightness.dark : Brightness.light,
-        primaryColor: _accentColor,
-      ),
+      theme: CupertinoThemeData(brightness: _isDarkMode ? Brightness.dark : Brightness.light, primaryColor: _accentColor),
       home: HomePage(
         isDarkMode: _isDarkMode,
         onToggleTheme: _toggleTheme,
@@ -116,10 +114,7 @@ class HomePage extends StatelessWidget {
               controlSize: CNControlSize.regular,
               style: CNComboButtonStyle.split,
               title: 'Accent Color',
-              image: CNImage(
-                systemSymbolName: 'circle.fill',
-                symbolConfiguration: CNSymbolConfiguration.monochrome(accentColor),
-              ),
+              image: CNImage(systemSymbolName: 'circle.fill', symbolConfiguration: CNSymbolConfiguration.monochrome(accentColor)),
               menu: CNMenu(
                 items: _systemColors.map((entry) {
                   return CNMenuItem(
@@ -215,6 +210,14 @@ class HomePage extends StatelessWidget {
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const PopupMenuButtonDemoPage()));
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Menu Button'),
+                leading: CNIcon(symbol: CNSymbol('ellipsis.circle', color: accentColor)),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const MenuButtonDemoPage()));
                 },
               ),
               CupertinoListTile(

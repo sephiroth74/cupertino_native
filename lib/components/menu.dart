@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:cupertino_native/components/image.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 
-/// A menu model used by [CNComboButton].
+/// A menu model used by [CNMenuButton].
+///
+/// This model is shared by other menu-based controls and supports nested
+/// submenus, separators, and optional icon/subtitle metadata.
 // ignore: must_be_immutable
 class CNMenu extends ChangeNotifier with EquatableMixin {
   /// Creates a menu with the provided [items].
@@ -34,13 +39,12 @@ class CNMenu extends ChangeNotifier with EquatableMixin {
   List<Object?> get props => [items];
 
   /// Serializes the menu to JSON for platform channel communication.
+  Map<String, dynamic> toMap(BuildContext context) {
+    return {'items': items.map((item) => item.toMap(context)).toList()};
+  }
+
   String toJson(BuildContext context) {
-    final itemsJson = items.map((item) => item.toJson(context)).join(', ');
-    return '''
-    {
-      "items": [$itemsJson]
-    }
-    ''';
+    return jsonEncode(toMap(context));
   }
 
   /// Returns the first menu item with the given platform [identifier].
@@ -86,7 +90,9 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
   /// The [tag] can be used to store an arbitrary integer value for identification purposes.
   CNMenuItem({
     required this.title,
+    this.subtitle,
     this.tag,
+    this.systemImageName,
     this.image,
     this.submenu,
     this.state = CNMenuItemState.off,
@@ -97,6 +103,8 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
   /// Creates a separator entry for [CNMenu].
   CNMenuItem.separator()
     : title = '',
+      subtitle = null,
+      systemImageName = null,
       tag = null,
       image = null,
       submenu = null,
@@ -120,6 +128,12 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
   /// An optional submenu that can be displayed when the user interacts with this menu item.
   final CNMenu? submenu;
 
+  /// An optional subtitle displayed below the primary title.
+  final String? subtitle;
+
+  /// Optional system icon name, e.g. `book`.
+  final String? systemImageName;
+
   /// An optional integer tag that can be used to identify the item.
   final int? tag;
 
@@ -131,42 +145,33 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
   final int _identifier;
 
   @override
-  List<Object?> get props => [
-    _identifier,
-    isSeparator,
-    state,
-    tag,
-    title,
-    image,
-    submenu,
-    enabled,
-  ];
+  List<Object?> get props => [_identifier, isSeparator, state, tag, title, subtitle, systemImageName, image, submenu, enabled];
 
   /// A unique identifier for this menu item, used for platform communication. It is generated automatically and should not be set manually.
   String get identifier => isSeparator ? '' : 'menuItem_$_identifier';
 
   /// Converts this menu item to a JSON string representation, which is used for communication with the native platform.
   /// The JSON includes all relevant properties of the menu item, such as title, tag, state, symbol configuration, enabled status, and submenu (if any).
-  String toJson(BuildContext context) {
+  Map<String, dynamic> toMap(BuildContext context) {
     if (isSeparator) {
-      return '''
-    {
-      "separator": true
-    }
-    ''';
+      return {'separator': true};
     }
 
-    return '''
-    {
-      "separator": false,
-      "title": "$title",
-      "tag": $tag,
-      "identifier": "menuItem_$_identifier",
-      "state": "${state.name}",
-      "image": ${image?.toJson(context) ?? 'null'},
-      "enabled": $enabled,
-      "submenu": ${submenu?.toJson(context) ?? 'null'}
-    }
-    ''';
+    return {
+      'separator': false,
+      'title': title,
+      'subtitle': subtitle,
+      'systemImageName': systemImageName,
+      'tag': tag,
+      'identifier': 'menuItem_$_identifier',
+      'state': state.name,
+      'image': image?.toMap(context),
+      'enabled': enabled,
+      'submenu': submenu?.toMap(context),
+    };
+  }
+
+  String toJson(BuildContext context) {
+    return jsonEncode(toMap(context));
   }
 }
