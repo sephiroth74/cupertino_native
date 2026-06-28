@@ -15,11 +15,15 @@ class GroupBoxDemoPage extends StatelessWidget {
           children: [
             const Text('GroupBox with title and content'),
             const SizedBox(height: 8),
-            GroupBox.label(
-              'GroupBox Title',
+            GroupBox(
+              label: const Text('GroupBox Title', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [Text('This is the content of the GroupBox.'), Text('You can add more widgets here.')],
+                children: const [
+                  SizedBox(height: 8),
+                  Text('This is the content of the GroupBox.'),
+                  Text('You can add more widgets here.'),
+                ],
               ),
             ),
             const SizedBox(height: 16),
@@ -27,14 +31,10 @@ class GroupBoxDemoPage extends StatelessWidget {
             const SizedBox(height: 8),
             GroupBox(
               style: GroupBoxStyle.border,
-              label: CNLabel(
-                text: 'Optional Title',
-                icon: CNSymbol('paperclip'),
-                font: const CNFont.titleBar(CNFontSize.points(16)),
-              ),
+              label: CNLabel(text: 'Optional Title', icon: CNSymbol('paperclip'), font: const CNFont.label(CNFontSize.points(20))),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [Text('This GroupBox has no title.'), Text('It only contains content.')],
+                children: const [SizedBox(height: 8), Text('This GroupBox has no title.'), Text('It only contains content.')],
               ),
             ),
           ],

@@ -154,7 +154,6 @@ private struct LabelContent: View {
 
     var body: some View {
         styledLabel
-            .padding(0)
     }
 
     private var styledLabel: some View {

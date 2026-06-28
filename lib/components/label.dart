@@ -90,11 +90,10 @@ class _CNLabelState extends State<CNLabel> {
   }
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
-    debugPrint('_onIntrinsicSizeChanged: width=$width, height=$height');
     if (!mounted || width == null || height == null) return;
     setState(() {
       _intrinsicWidth = width > -1 ? width : null;
-      _intrinsicHeight = height > -1 ? height + 28 : null;
+      _intrinsicHeight = height > -1 ? height : null;
     });
   }
 
@@ -219,7 +218,6 @@ class _CNLabelState extends State<CNLabel> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        debugPrint('CNLabel build: constraints=$constraints, _intrinsicWidth=$_intrinsicWidth, _intrinsicHeight=$_intrinsicHeight');
         final width = constraints.hasBoundedWidth
             ? (_intrinsicWidth != null ? _intrinsicWidth!.clamp(0.0, constraints.maxWidth) : constraints.maxWidth)
             : (_intrinsicWidth ?? 100.0);
