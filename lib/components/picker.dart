@@ -90,7 +90,7 @@ class CNPicker extends StatefulWidget {
 
   /// Whether the picker should shrink-wrap its content.
   final bool shrinkWrap;
-  
+
   /// Optional secondary label/subtitle.
   final String? sublabel;
 

@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 import 'toolbar_button_item.dart';
 import 'toolbar_controller.dart';
 import 'toolbar_item.dart';
@@ -11,6 +13,7 @@ class CNToolbar {
   /// Example:
   /// ```dart
   /// await CNToolbar.create(
+  ///   context: context,
   ///   title: 'Mail',
   ///   items: [
   ///     CNToolbarButtonItem(
@@ -24,9 +27,14 @@ class CNToolbar {
   ///   ],
   /// );
   /// ```
-  static Future<void> create({required String title, required List<CNToolbarItem> items, bool showSearch = false}) async {
+  static Future<void> create({
+    required BuildContext context,
+    required String title,
+    required List<CNToolbarItem> items,
+    bool showSearch = false,
+  }) async {
     _controller.init();
-    await _controller.makeToolbar(title: title, items: items, showSearch: showSearch);
+    await _controller.makeToolbar(title: title, items: items, showSearch: showSearch, context: context);
   }
 
   /// Remove and dispose the toolbar

@@ -1,37 +1,30 @@
+import 'package:flutter/painting.dart';
+
 import 'toolbar_placement.dart';
 
 /// Base class for all toolbar items
 abstract class CNToolbarItem {
-  /// Unique identifier for this toolbar item
-  final String id;
-
-  /// Display label or title
-  final String label;
-
-  /// Where to place this item in the toolbar
-  final CNToolbarItemPlacement placement;
-
-  /// Hex color for tint (#RRGGBB)
-  final String? tintColor;
+  // ignore: public_member_api_docs
+  const CNToolbarItem({required this.id, this.placement = CNToolbarItemPlacement.automatic, this.tint, this.disabled = false});
 
   /// Whether this item is disabled
   final bool disabled;
 
-  const CNToolbarItem({
-    required this.id,
-    required this.label,
-    this.placement = CNToolbarItemPlacement.automatic,
-    this.tintColor,
-    this.disabled = false,
-  });
+  /// Unique identifier for this toolbar item
+  final String id;
+
+  /// Where to place this item in the toolbar
+  final CNToolbarItemPlacement placement;
+
+  /// Tint/accent color for this item
+  final Color? tint;
 
   /// Convert to dictionary for native platform channel
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'label': label,
       'placement': placement.toNativeString(),
-      'tintColor': tintColor,
+      'tint': tint,
       'disabled': disabled,
       'kind': kind,
       ...customProperties(),

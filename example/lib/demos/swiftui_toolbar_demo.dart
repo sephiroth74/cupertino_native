@@ -15,6 +15,12 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
   String? _searchQuery;
 
   @override
+  void dispose() {
+    CNToolbar.remove();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
 
@@ -26,12 +32,32 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
   Future<void> _setupToolbar() async {
     try {
       await CNToolbar.create(
+        context: context,
         title: 'Mail',
         showSearch: true,
         items: [
           CNToolbarButtonItem(
+            id: 'share',
+            systemSymbolName: 'square.and.arrow.up',
+            onPressed: () {
+              setState(() {
+                _lastAction = 'Action: share';
+              });
+            },
+            placement: CNToolbarItemPlacement.navigation
+          ),
+          CNToolbarButtonItem(
+            id: 'home',
+            systemSymbolName: 'house',
+            onPressed: () {
+              setState(() {
+                _lastAction = 'Action: home';
+              });
+            },
+            placement: CNToolbarItemPlacement.principal,
+          ),          
+          CNToolbarButtonItem(
             id: 'compose',
-            label: 'Compose',
             systemSymbolName: 'square.and.pencil',
             onPressed: () {
               setState(() {
@@ -41,7 +67,6 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
           ),
           CNToolbarButtonItem(
             id: 'flag',
-            label: 'Flag',
             systemSymbolName: 'flag',
             onPressed: () {
               setState(() {
@@ -51,7 +76,6 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
           ),
           CNToolbarButtonItem(
             id: 'delete',
-            label: 'Delete',
             systemSymbolName: 'trash',
             onPressed: () {
               setState(() {
@@ -78,12 +102,6 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
     } catch (e) {
       debugPrint('Error setting up toolbar: $e');
     }
-  }
-
-  @override
-  void dispose() {
-    CNToolbar.remove();
-    super.dispose();
   }
 
   @override

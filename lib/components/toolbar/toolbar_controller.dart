@@ -1,24 +1,27 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:flutter/cupertino.dart';
 
+import '../../channel/params.dart';
 import 'toolbar_button_item.dart';
 import 'toolbar_item.dart';
 
 /// Controller for managing toolbar lifecycle and events
 class CNToolbarController {
   // ignore: public_member_api_docs
-  static const platform = MethodChannel('cupertino_native');
-  // ignore: public_member_api_docs
   static const eventChannel = EventChannel('cupertino_native/toolbar_events');
 
-  /// Map of itemId -> callback for button presses
-  final Map<String, VoidCallback> _buttonCallbacks = {};
+  // ignore: public_member_api_docs
+  static const platform = MethodChannel('cupertino_native');
 
   /// Callback for search text changes
   void Function(String)? _onSearchChanged;
 
   /// Callback for search submission
   void Function(String)? _onSearchSubmitted;
+
+  /// Map of itemId -> callback for button presses
+  final Map<String, VoidCallback> _buttonCallbacks = {};
 
   /// Subscription to toolbar events
   StreamSubscription? _eventSubscription;
@@ -33,7 +36,12 @@ class CNToolbarController {
   }
 
   /// Create toolbar with given items and title
-  Future<void> makeToolbar({required String title, required List<CNToolbarItem> items, bool showSearch = false}) async {
+  Future<void> makeToolbar({
+    required String title,
+    required List<CNToolbarItem> items,
+    bool showSearch = false,
+    required BuildContext context,
+  }) async {
     try {
       // Register callbacks from button items
       _clearButtonCallbacks();
@@ -44,7 +52,14 @@ class CNToolbarController {
       }
 
       // Send toolbar configuration to native side
-      final itemsList = items.map((item) => item.toMap()).toList();
+      final itemsList = items.map((item) {
+        final itemMap = item.toMap();
+        // Convert Color to ARGB int using resolveColorToArgb
+        if (item.tint != null) {
+          itemMap['tint'] = resolveColorToArgb(item.tint, context);
+        }
+        return itemMap;
+      }).toList();
       await platform.invokeMethod('makeToolbar', {'title': title, 'items': itemsList, 'showSearch': showSearch});
 
       _isCreated = true;
@@ -67,6 +82,33 @@ class CNToolbarController {
       print('Error clearing toolbar: $e');
       rethrow;
     }
+  }
+
+  /// Register a button callback
+  void registerButtonCallback(String itemId, VoidCallback callback) {
+    _buttonCallbacks[itemId] = callback;
+  }
+
+  /// Unregister a button callback
+  void unregisterButtonCallback(String itemId) {
+    _buttonCallbacks.remove(itemId);
+  }
+
+  /// Register callback for search text changes
+  void onSearchChanged(void Function(String) callback) {
+    _onSearchChanged = callback;
+  }
+
+  /// Register callback for search submission
+  void onSearchSubmitted(void Function(String) callback) {
+    _onSearchSubmitted = callback;
+  }
+
+  /// Dispose resources
+  void dispose() async {
+    await clearToolbar();
+    await _eventSubscription?.cancel();
+    _eventSubscription = null;
   }
 
   /// Listen to toolbar events from native side
@@ -117,32 +159,5 @@ class CNToolbarController {
   /// Clear all registered callbacks
   void _clearButtonCallbacks() {
     _buttonCallbacks.clear();
-  }
-
-  /// Register a button callback
-  void registerButtonCallback(String itemId, VoidCallback callback) {
-    _buttonCallbacks[itemId] = callback;
-  }
-
-  /// Unregister a button callback
-  void unregisterButtonCallback(String itemId) {
-    _buttonCallbacks.remove(itemId);
-  }
-
-  /// Register callback for search text changes
-  void onSearchChanged(void Function(String) callback) {
-    _onSearchChanged = callback;
-  }
-
-  /// Register callback for search submission
-  void onSearchSubmitted(void Function(String) callback) {
-    _onSearchSubmitted = callback;
-  }
-
-  /// Dispose resources
-  void dispose() async {
-    await clearToolbar();
-    await _eventSubscription?.cancel();
-    _eventSubscription = null;
   }
 }

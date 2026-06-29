@@ -23,11 +23,11 @@ class CNTab {
   /// Creates a [CNTab] with a required [item] and [child].
   const CNTab(this.item, {required this.child});
 
-  /// The picker item used as the tab label (text or icon).
-  final CNPickerItem item;
-
   /// The widget displayed when this tab is selected.
   final Widget child;
+
+  /// The picker item used as the tab label (text or icon).
+  final CNPickerItem item;
 }
 
 /// A macOS-native-style tab view using [CNPicker] as a segmented control header.
@@ -47,14 +47,14 @@ class CNTabView extends StatefulWidget {
   /// The list of tabs to display.
   final List<CNTab> children;
 
+  /// Size of the segmented control.
+  final CNControlSize controlSize;
+
   /// Controls which tab is selected.
   final CNTabController controller;
 
   /// Whether the tab selector is interactive.
   final bool enabled;
-
-  /// Size of the segmented control.
-  final CNControlSize controlSize;
 
   @override
   State<CNTabView> createState() => _CNTabViewState();
@@ -64,14 +64,6 @@ class _CNTabViewState extends State<CNTabView> {
   late CNTabController _controller;
   final GlobalKey _pickerKey = GlobalKey();
   Size _pickerSize = Size.zero;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = widget.controller;
-    _controller.addListener(_onTabChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _measurePicker());
-  }
 
   @override
   void didUpdateWidget(covariant CNTabView oldWidget) {
@@ -87,6 +79,14 @@ class _CNTabViewState extends State<CNTabView> {
   void dispose() {
     _controller.removeListener(_onTabChanged);
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller;
+    _controller.addListener(_onTabChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measurePicker());
   }
 
   void _onTabChanged() {

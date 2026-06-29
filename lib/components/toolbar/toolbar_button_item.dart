@@ -1,10 +1,23 @@
+import 'package:flutter/cupertino.dart';
+
 import 'toolbar_item.dart';
-import 'toolbar_placement.dart';
 
 /// A toolbar button item
 class CNToolbarButtonItem extends CNToolbarItem {
-  /// SF Symbol name (e.g., 'square.and.pencil')
-  final String? systemSymbolName;
+  // ignore: public_member_api_docs
+  const CNToolbarButtonItem({
+    required super.id,
+    super.placement,
+    super.tint,
+    super.disabled,
+    this.label,
+    this.systemSymbolName,
+    this.buttonStyle,
+    this.onPressed,
+  }) : assert(systemSymbolName != null || label != null, 'Either systemSymbolName or label must be provided for a button item');
+
+  /// Optional display label for this button
+  final String? label;
 
   /// Button style (e.g., 'borderedProminent')
   final String? buttonStyle;
@@ -13,25 +26,16 @@ class CNToolbarButtonItem extends CNToolbarItem {
   /// This is NOT serialized - it's stored locally for event handling
   final VoidCallback? onPressed;
 
-  // ignore: public_member_api_docs
-  const CNToolbarButtonItem({
-    required String id,
-    required String label,
-    CNToolbarItemPlacement placement = CNToolbarItemPlacement.automatic,
-    String? tintColor,
-    bool disabled = false,
-    this.systemSymbolName,
-    this.buttonStyle,
-    this.onPressed,
-  }) : super(id: id, label: label, placement: placement, tintColor: tintColor, disabled: disabled);
-
-  @override
-  String get kind => 'button';
+  /// SF Symbol name (e.g., 'square.and.pencil')
+  final String? systemSymbolName;
 
   @override
   Map<String, dynamic> customProperties() {
-    return {'systemSymbolName': systemSymbolName, 'buttonStyle': buttonStyle};
+    return {'systemSymbolName': systemSymbolName, 'buttonStyle': buttonStyle, 'label': label};
   }
+
+  @override
+  String get kind => 'button';
 }
 
 /// Callback type for button press

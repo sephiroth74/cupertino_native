@@ -6,28 +6,8 @@ class CNGlassMaterial {
   /// Creates a glass material with specified blur radius, base color, and opacity.
   const CNGlassMaterial({required this.blurRadius, required this.baseColor, required this.opacity});
 
-  /// Blur radius in pixels
-  final double blurRadius;
-
-  /// Base color (typically near-white)
-  final Color baseColor;
-
-  /// Alpha opacity value (0-1)
-  final double opacity;
-
-  /// Ultra Thin material: 15px blur, 36% opacity
-  static const CNGlassMaterial ultraThin = CNGlassMaterial(
-    blurRadius: 15,
-    baseColor: Color(0xFFF6F6F6), // #F6F6F6
-    opacity: 0.36,
-  );
-
-  /// Thin material: 15px blur, 48% opacity
-  static const CNGlassMaterial thin = CNGlassMaterial(
-    blurRadius: 15,
-    baseColor: Color(0xFFF6F6F6), // #F6F6F6
-    opacity: 0.48,
-  );
+  /// List of all glass materials, ordered from thinnest to thickest
+  static const List<CNGlassMaterial> all = [ultraThin, thin, medium, thick, ultraThick];
 
   /// Medium material: 15px blur, 60% opacity
   static const CNGlassMaterial medium = CNGlassMaterial(
@@ -43,6 +23,13 @@ class CNGlassMaterial {
     opacity: 0.72,
   );
 
+  /// Thin material: 15px blur, 48% opacity
+  static const CNGlassMaterial thin = CNGlassMaterial(
+    blurRadius: 15,
+    baseColor: Color(0xFFF6F6F6), // #F6F6F6
+    opacity: 0.48,
+  );
+
   /// Ultra Thick material: 15px blur, 84% opacity
   static const CNGlassMaterial ultraThick = CNGlassMaterial(
     blurRadius: 15,
@@ -50,8 +37,21 @@ class CNGlassMaterial {
     opacity: 0.84,
   );
 
-  /// List of all glass materials, ordered from thinnest to thickest
-  static const List<CNGlassMaterial> all = [ultraThin, thin, medium, thick, ultraThick];
+  /// Ultra Thin material: 15px blur, 36% opacity
+  static const CNGlassMaterial ultraThin = CNGlassMaterial(
+    blurRadius: 15,
+    baseColor: Color(0xFFF6F6F6), // #F6F6F6
+    opacity: 0.36,
+  );
+
+  /// Base color (typically near-white)
+  final Color baseColor;
+
+  /// Blur radius in pixels
+  final double blurRadius;
+
+  /// Alpha opacity value (0-1)
+  final double opacity;
 }
 
 /// Liquid Glass effect component with depth and tinting
@@ -66,8 +66,8 @@ class CNLiquidGlassEffect {
     required this.glassOpacity,
   });
 
-  /// Component size category
-  final CNLiquidGlassSize size;
+  /// Glass overlay opacity
+  final double glassOpacity;
 
   /// Shadow blur radius
   final double shadowBlur;
@@ -75,11 +75,11 @@ class CNLiquidGlassEffect {
   /// Shadow opacity (0-1)
   final double shadowOpacity;
 
+  /// Component size category
+  final CNLiquidGlassSize size;
+
   /// Tint color applied to glass effect
   final CupertinoDynamicColor tintColor;
-
-  /// Glass overlay opacity
-  final double glassOpacity;
 
   /// Large Liquid Glass - Light mode
   /// Shadow: 8px blur, 12% opacity

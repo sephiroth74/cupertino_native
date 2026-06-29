@@ -24,7 +24,7 @@ struct CNToolbarItemModel {
     let placement: CNToolbarItemPlacement
     let systemSymbolName: String?
     let disabled: Bool
-    let tintColor: NSColor?
+    let tint: NSColor?
     let buttonStyle: String?
 }
 
@@ -65,14 +65,14 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
             let hostingView = NSHostingView(rootView: toolbarView)
             hostingView.sceneBridgingOptions = [.toolbars]
             hostingView.autoresizingMask = []
-            
+
             if let existingHostingView = self.hostingViews[window.windowNumber] {
                 existingHostingView.removeFromSuperview()
             }
-            
+
             window.contentView?.addSubview(hostingView)
             self.hostingViews[window.windowNumber] = hostingView
-            
+
             print("Toolbar added to window \(window.windowNumber)")
             result(nil)
         }
@@ -122,21 +122,18 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
 
             guard let id = dict["id"] as? String, !id.isEmpty else { continue }
 
-            let label = (dict["label"] as? String) ?? id
+            let label = (dict["label"] as? String) ?? ""
             let placementRaw = (dict["placement"] as? String) ?? "automatic"
             let placement = CNToolbarItemPlacement(rawValue: placementRaw) ?? .automatic
             let symbol = dict["systemSymbolName"] as? String
             let disabled = (dict["disabled"] as? Bool) ?? false
-            let tintColorHex = dict["tintColor"] as? String
             let buttonStyle = dict["buttonStyle"] as? String
 
-            let tintColor = tintColorHex.flatMap { hex -> NSColor? in
-                let hex = hex.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
-                guard let rgbValue = UInt32(hex, radix: 16) else { return nil }
-                let red = CGFloat((rgbValue >> 16) & 0xFF) / 255.0
-                let green = CGFloat((rgbValue >> 8) & 0xFF) / 255.0
-                let blue = CGFloat(rgbValue & 0xFF) / 255.0
-                return NSColor(red: red, green: green, blue: blue, alpha: 1.0)
+            var tint: NSColor? = nil
+
+            // Parse tint color from ARGB int
+            if let tintInt = dict["tint"] as? Int {
+                tint = ColorUtils.colorFromARGB(tintInt)
             }
 
             parsed.append(CNToolbarItemModel(
@@ -145,7 +142,7 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                 placement: placement,
                 systemSymbolName: symbol,
                 disabled: disabled,
-                tintColor: tintColor,
+                tint: tint,
                 buttonStyle: buttonStyle
             ))
         }
@@ -181,16 +178,16 @@ struct CNToolbarView: View {
             isPresented: .constant(showSearch),
             prompt: "Search"
         )
-        .onChange(of: searchText) { oldValue, newValue in
+        .onChange(of: searchText) { _, newValue in
             onEvent([
                 "type": "searchChanged",
-                "query": newValue
+                "query": newValue,
             ])
         }
         .onSubmit(of: .search) {
             onEvent([
                 "type": "searchSubmitted",
-                "query": searchText
+                "query": searchText,
             ])
         }
     }
@@ -199,14 +196,18 @@ struct CNToolbarView: View {
         let baseButton = Button(action: {
             onEvent(["id": item.id, "type": "buttonPressed"])
         }) {
-            if let symbol = item.systemSymbolName {
+            // if has both image and label
+            if let symbol = item.systemSymbolName, !item.label.isEmpty {
+                Label(item.label, systemImage: symbol)
+                    .labelStyle(.titleAndIcon)
+            } else if let symbol = item.systemSymbolName {
                 Image(systemName: symbol)
             } else {
                 Text(item.label)
             }
         }
         .disabled(item.disabled)
-        .tint(getTintColor(for: item))
+        .foregroundColor(getTintColor(for: item))
 
         switch item.buttonStyle {
         case "bordered":
@@ -230,11 +231,11 @@ struct CNToolbarView: View {
         }
     }
 
-    private func getTintColor(for item: CNToolbarItemModel) -> Color {
-        if let tintColor = item.tintColor {
+    private func getTintColor(for item: CNToolbarItemModel) -> Color? {
+        if let tintColor = item.tint {
             return Color(nsColor: tintColor)
         }
-        return .accentColor
+        return nil
     }
 
     private func mapPlacement(_ placement: CNToolbarItemPlacement) -> ToolbarItemPlacement {
