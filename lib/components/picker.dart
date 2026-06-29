@@ -47,6 +47,7 @@ class CNPickerItem {
   }
 }
 
+/// A Cupertino-native picker with segmented control style.
 class CNPicker extends StatefulWidget {
   /// Creates a Cupertino-native picker.
   const CNPicker({
@@ -87,7 +88,9 @@ class CNPicker extends StatefulWidget {
   /// The index of the selected option.
   final int selectedIndex;
 
+  /// Whether the picker should shrink-wrap its content.
   final bool shrinkWrap;
+  
   /// Optional secondary label/subtitle.
   final String? sublabel;
 

@@ -48,6 +48,8 @@ export 'style/path_control_style.dart';
 export 'style/progress_style.dart';
 export 'style/slider_type.dart';
 export 'style/level_indicator_style.dart';
+export 'style/macos26_colors.dart';
+export 'style/macos26_materials.dart';
 // combo button removed
 export 'style/text_field_bezel_style.dart';
 export 'style/font.dart';
