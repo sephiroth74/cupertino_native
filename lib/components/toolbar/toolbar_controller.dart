@@ -6,11 +6,19 @@ import 'toolbar_item.dart';
 
 /// Controller for managing toolbar lifecycle and events
 class CNToolbarController {
+  // ignore: public_member_api_docs
   static const platform = MethodChannel('cupertino_native');
+  // ignore: public_member_api_docs
   static const eventChannel = EventChannel('cupertino_native/toolbar_events');
 
   /// Map of itemId -> callback for button presses
   final Map<String, VoidCallback> _buttonCallbacks = {};
+
+  /// Callback for search text changes
+  void Function(String)? _onSearchChanged;
+
+  /// Callback for search submission
+  void Function(String)? _onSearchSubmitted;
 
   /// Subscription to toolbar events
   StreamSubscription? _eventSubscription;
@@ -78,17 +86,25 @@ class CNToolbarController {
     if (event is! Map) return;
 
     final data = Map<String, dynamic>.from(event as Map);
-    final itemId = data['id'] as String?;
     final eventType = data['type'] as String?;
-
-    if (itemId == null) return;
+    final itemId = data['id'] as String?;
+    final query = data['query'] as String?;
 
     switch (eventType) {
       case 'buttonPressed':
-        _buttonCallbacks[itemId]?.call();
+        if (itemId != null) {
+          _buttonCallbacks[itemId]?.call();
+        }
         break;
       case 'searchChanged':
-        // Handle search field changes (future)
+        if (query != null) {
+          _onSearchChanged?.call(query);
+        }
+        break;
+      case 'searchSubmitted':
+        if (query != null) {
+          _onSearchSubmitted?.call(query);
+        }
         break;
       case 'pickerChanged':
         // Handle picker changes (future)
@@ -111,6 +127,16 @@ class CNToolbarController {
   /// Unregister a button callback
   void unregisterButtonCallback(String itemId) {
     _buttonCallbacks.remove(itemId);
+  }
+
+  /// Register callback for search text changes
+  void onSearchChanged(void Function(String) callback) {
+    _onSearchChanged = callback;
+  }
+
+  /// Register callback for search submission
+  void onSearchSubmitted(void Function(String) callback) {
+    _onSearchSubmitted = callback;
   }
 
   /// Dispose resources

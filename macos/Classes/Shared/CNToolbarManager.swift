@@ -64,9 +64,16 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
 
             let hostingView = NSHostingView(rootView: toolbarView)
             hostingView.sceneBridgingOptions = [.toolbars]
-            window.contentView = hostingView
+            hostingView.autoresizingMask = []
+            
+            if let existingHostingView = self.hostingViews[window.windowNumber] {
+                existingHostingView.removeFromSuperview()
+            }
+            
+            window.contentView?.addSubview(hostingView)
             self.hostingViews[window.windowNumber] = hostingView
-
+            
+            print("Toolbar added to window \(window.windowNumber)")
             result(nil)
         }
     }
@@ -74,7 +81,11 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
     func clearToolbar(window: NSWindow, result: @escaping FlutterResult) {
         DispatchQueue.main.async {
             self.hostingViews.removeValue(forKey: window.windowNumber)
-            window.contentView = nil
+            window.contentView?.subviews.forEach { subview in
+                if let hostingView = subview as? NSHostingView<CNToolbarView> {
+                    hostingView.removeFromSuperview()
+                }
+            }
             result(nil)
         }
     }
@@ -92,6 +103,7 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
     }
 
     func sendEvent(_ data: [String: Any]) {
+        print("Sending event: \(data)")
         DispatchQueue.main.async {
             self.eventSink?(data)
         }
@@ -155,14 +167,7 @@ struct CNToolbarView: View {
         VStack(spacing: 0) {
             HStack {
                 Text(title)
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                Spacer()
             }
-            .padding()
-            .background(Color(.controlBackgroundColor))
-
-            Spacer()
         }
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
@@ -176,6 +181,18 @@ struct CNToolbarView: View {
             isPresented: .constant(showSearch),
             prompt: "Search"
         )
+        .onChange(of: searchText) { oldValue, newValue in
+            onEvent([
+                "type": "searchChanged",
+                "query": newValue
+            ])
+        }
+        .onSubmit(of: .search) {
+            onEvent([
+                "type": "searchSubmitted",
+                "query": searchText
+            ])
+        }
     }
 
     private func buildButton(for item: CNToolbarItemModel) -> some View {
@@ -198,6 +215,16 @@ struct CNToolbarView: View {
             return AnyView(baseButton.buttonStyle(.plain))
         case "borderless":
             return AnyView(baseButton.buttonStyle(.borderless))
+        case "link":
+            return AnyView(baseButton.buttonStyle(.link))
+        case "automatic":
+            return AnyView(baseButton.buttonStyle(.automatic))
+        case "borderedProminent":
+            return AnyView(baseButton.buttonStyle(.borderedProminent))
+        case "glass":
+            return AnyView(baseButton.buttonStyle(.glass))
+        case "glassProminent":
+            return AnyView(baseButton.buttonStyle(.glassProminent))
         default:
             return AnyView(baseButton)
         }

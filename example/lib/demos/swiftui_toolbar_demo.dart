@@ -17,7 +17,10 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
   @override
   void initState() {
     super.initState();
-    _setupToolbar();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setupToolbar();
+    });
   }
 
   Future<void> _setupToolbar() async {
@@ -58,6 +61,20 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
           ),
         ],
       );
+
+      // Register search callbacks
+      CNToolbar.onSearchChanged((query) {
+        setState(() {
+          _searchQuery = query;
+        });
+      });
+
+      CNToolbar.onSearchSubmitted((query) {
+        setState(() {
+          _lastAction = 'Action: search submitted with "$query"';
+          _searchQuery = query;
+        });
+      });
     } catch (e) {
       debugPrint('Error setting up toolbar: $e');
     }
@@ -72,7 +89,10 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(middle: const Text('SwiftUI Toolbar Demo')),
+      navigationBar: CupertinoNavigationBar(
+        leading: CupertinoNavigationBarBackButton(onPressed: () => Navigator.of(context).pop()),
+        middle: const Text('Toolbar Demo'),
+      ),
       child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -85,7 +105,7 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('SwiftUI Toolbar Status', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const Text('Toolbar Status', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
                       Text('Last Action: ${_lastAction ?? 'None'}', style: const TextStyle(fontSize: 14)),
                       if (_searchQuery != null && _searchQuery!.isNotEmpty) ...[

@@ -49,4 +49,14 @@ class CNToolbar {
   static void unregisterCallback(String itemId) {
     _controller.unregisterButtonCallback(itemId);
   }
+
+  /// Register a callback for search text changes
+  static void onSearchChanged(void Function(String) callback) {
+    _controller.onSearchChanged(callback);
+  }
+
+  /// Register a callback for search submission
+  static void onSearchSubmitted(void Function(String) callback) {
+    _controller.onSearchSubmitted(callback);
+  }
 }
