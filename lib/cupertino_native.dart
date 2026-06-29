@@ -33,6 +33,7 @@ export 'components/context_menu.dart';
 export 'components/sheet.dart';
 export 'components/toolbar.dart';
 export 'components/group_box.dart';
+export 'components/tab_view.dart';
 
 export 'model/control_size.dart';
 export 'model/slider_tickmark_position.dart';

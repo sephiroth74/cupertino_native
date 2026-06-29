@@ -46,7 +46,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                       child: CNPicker(
                         label: 'Control Size',
                         sublabel: 'Select Control Size',
-                        items: CNControlSize.values.map((e) => e.name).toList(),
+                        items: CNControlSize.values.map((e) => CNPickerItem.text(e.name)).toList(),
                         selectedIndex: _controlSizeIndex,
                         pickerStyle: CNPickerStyle.menu,
                         controlSize: CNControlSize.large,
@@ -67,7 +67,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: CNPicker(
-                        items: CNPickerStyle.values.map((e) => e.name).toList(),
+                        items: CNPickerStyle.values.map((e) => CNPickerItem.text(e.name)).toList(),
                         selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle),
                         pickerStyle: CNPickerStyle.segmented,
                         controlSize: _controlSize,
@@ -87,16 +87,18 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: CNPicker(
-                        icons: [
-                          CNSymbol('square.split.2x1'),
-                          CNSymbol('circle.inset.filled'),
-                          CNSymbol('list.bullet'),
-                          CNSymbol('gearshape'),
-                          CNSymbol('rectangle.portrait'),
-                          CNSymbol('paintpalette'),
+                        items: [
+                          CNPickerItem.icon(CNSymbol('square.split.2x1')),
+                          CNPickerItem.icon(CNSymbol('circle.inset.filled')),
+                          CNPickerItem.icon(CNSymbol('list.bullet')),
+                          CNPickerItem.icon(CNSymbol('gearshape')),
+                          CNPickerItem.icon(CNSymbol('rectangle.portrait')),
+                          CNPickerItem.icon(CNSymbol('paintpalette')),
                         ],
                         selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle),
                         pickerStyle: CNPickerStyle.palette,
+                        color: CupertinoColors.systemCyan,
+                        enabled: false,
                         controlSize: _controlSize,
                         onValueChanged: (i) => setState(() {
                           _pickerStyle = CNPickerStyle.values[i];
@@ -115,7 +117,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                       alignment: Alignment.centerLeft,
                       child: CNPicker(
                         label: 'Radio Group Picker',
-                        items: CNPickerStyle.values.map((e) => e.name).toList(),
+                        items: CNPickerStyle.values.map((e) => CNPickerItem.text(e.name)).toList(),
                         selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle),
                         pickerStyle: CNPickerStyle.radioGroup,
                         controlSize: _controlSize,
@@ -147,7 +149,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                         child: CNPicker(
                           label: 'Picker Style',
                           sublabel: 'Select Picker Style',
-                          items: CNPickerStyle.values.map((e) => e.name).toList(),
+                          items: CNPickerStyle.values.map((e) => CNPickerItem.text(e.name)).toList(),
                           selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle),
                           pickerStyle: CNPickerStyle.menu,
                           controlSize: _controlSize,

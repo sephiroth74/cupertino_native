@@ -30,6 +30,7 @@ import 'demos/sheet.dart';
 import 'demos/toolbar.dart';
 import 'demos/split_view.dart';
 import 'demos/group_box.dart';
+import 'demos/tab_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -170,7 +171,7 @@ class HomePage extends StatelessWidget {
                 },
               ),
               CupertinoListTile(
-                title: Text('Segmented Control'),
+                title: Text('Segmented Control (deprecated)'),
                 leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
@@ -178,13 +179,21 @@ class HomePage extends StatelessWidget {
                 },
               ),
               CupertinoListTile(
-                title: Text('Picker (SwiftUI)'),
+                title: Text('Picker'),
                 leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1.fill', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const PickerDemoPage()));
                 },
               ),
+              CupertinoListTile(
+                title: Text('TabView'),
+                leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1', color: accentColor)),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const TabViewDemoPage()));
+                },
+              ),              
               CupertinoListTile(
                 title: Text('Icon'),
                 leading: CNIcon(symbol: CNSymbol('app', color: accentColor)),

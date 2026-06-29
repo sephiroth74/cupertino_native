@@ -90,15 +90,13 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
               child: CNSegmentedControl(
                 labels: const [],
                 sfSymbols: const [
-                  CNSymbol('list.clipboard'),
-                  CNSymbol('leaf.arrow.trianglehead.clockwise'),
-                  CNSymbol('figure.walk.diamond'),
+                  CNSymbol('list.clipboard', size: 12),
+                  CNSymbol('leaf.arrow.trianglehead.clockwise', size: 12),
+                  CNSymbol('figure.walk.diamond', size: 12),
                 ],
                 selectedIndex: _iconSegmentedControlIndex,
-                iconColor: CupertinoColors.systemBlue,
-                iconSize: 12.0,
-                iconRenderingMode: CNSymbolRenderingMode.hierarchical,
-                shrinkWrap: false,
+                iconRenderingMode: CNSymbolRenderingMode.monochrome,
+                shrinkWrap: true,
                 onValueChanged: (i) =>
                     setState(() => _iconSegmentedControlIndex = i),
                 height: 36,

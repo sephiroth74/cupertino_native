@@ -7,21 +7,12 @@ class CupertinoPickerNSView: NSView {
     private var hostingView: NSHostingView<PickerContent>?
     private var measuredSize: NSSize?
     private var selection: Int = 0
-    private var items: [String] = []
+    private var items: [[String: Any]] = []
     private var label: String?
     private var sublabel: String?
-    private var symbols: [String] = []
     private var enabled: Bool = true
     private var isDark: Bool = false
     private var tintColor: NSColor?
-    private var defaultIconSize: CGFloat?
-    private var defaultIconColor: NSColor?
-    private var perSymbolColors: [NSColor?] = []
-    private var perSymbolSizes: [CGFloat?] = []
-    private var perSymbolModes: [String?] = []
-    private var perSymbolGradientEnabled: [NSNumber?] = []
-    private var defaultIconRenderingMode: String?
-    private var defaultIconGradientEnabled: Bool = false
     private var controlSize: String = "regular"
     private var pickerStyle: String = "segmented"
 
@@ -31,28 +22,15 @@ class CupertinoPickerNSView: NSView {
         var selectedIndex = 0
 
         if let dict = args as? [String: Any] {
-            if let arr = dict["items"] as? [String] { items = arr }
+            if let arr = dict["items"] as? [[String: Any]] { items = arr }
             if let lbl = dict["label"] as? String { label = lbl }
             if let sublbl = dict["sublabel"] as? String { sublabel = sublbl }
-            if let arr = dict["sfSymbols"] as? [String] { symbols = arr }
             if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
             if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
             if let size = dict["controlSize"] as? String { controlSize = size }
             if let style = dict["pickerStyle"] as? String { pickerStyle = style }
-            if let sizes = dict["sfSymbolSizes"] as? [NSNumber] { perSymbolSizes = sizes.map { CGFloat(truncating: $0) } }
-            if let modes = dict["sfSymbolRenderingModes"] as? [String?] { perSymbolModes = modes }
-            if let gradients = dict["sfSymbolGradientEnabled"] as? [NSNumber?] { perSymbolGradientEnabled = gradients }
-            if let colors = dict["sfSymbolColors"] as? [NSNumber] {
-                perSymbolColors = colors.map { NSColor(srgbRed: CGFloat(($0.intValue >> 16) & 0xFF) / 255.0, green: CGFloat(($0.intValue >> 8) & 0xFF) / 255.0, blue: CGFloat($0.intValue & 0xFF) / 255.0, alpha: CGFloat(($0.intValue >> 24) & 0xFF) / 255.0) }
-            }
             if let style = dict["style"] as? [String: Any] {
-                if let s = style["iconSize"] as? NSNumber { defaultIconSize = CGFloat(truncating: s) }
-                if let mode = style["iconRenderingMode"] as? String { defaultIconRenderingMode = mode }
-                if let g = style["iconGradientEnabled"] as? NSNumber { defaultIconGradientEnabled = g.boolValue }
-                if let color = style["iconColor"] as? NSNumber {
-                    defaultIconColor = ColorUtils.colorFromARGB(color.intValue)
-                }
                 if let tint = style["tint"] as? NSNumber {
                     tintColor = ColorUtils.colorFromARGB(tint.intValue)
                 }
@@ -98,7 +76,6 @@ class CupertinoPickerNSView: NSView {
                 } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
             case "setStyle":
                 if let args = call.arguments as? [String: Any] {
-                    if let s = args["iconSize"] as? NSNumber { self.defaultIconSize = CGFloat(truncating: s) }
                     if let tint = args["tint"] as? NSNumber {
                         self.tintColor = ColorUtils.colorFromARGB(tint.intValue)
                     }
@@ -134,20 +111,11 @@ class CupertinoPickerNSView: NSView {
             items: items,
             label: label,
             sublabel: sublabel,
-            symbols: symbols,
             selectedIndex: selection,
             enabled: enabled,
             tintColor: tintColor,
             controlSize: SwiftUtils.controlSizeFromString(controlSize),
             pickerStyle: pickerStyle,
-            defaultIconSize: defaultIconSize,
-            defaultIconColor: defaultIconColor,
-            perSymbolColors: perSymbolColors,
-            perSymbolSizes: perSymbolSizes,
-            perSymbolModes: perSymbolModes,
-            perSymbolGradientEnabled: perSymbolGradientEnabled,
-            defaultIconRenderingMode: defaultIconRenderingMode,
-            defaultIconGradientEnabled: defaultIconGradientEnabled,
             onSelectionChange: { [weak self] newIndex in
                 self?.selection = newIndex
                 self?.channel.invokeMethod("valueChanged", arguments: ["index": newIndex])
@@ -181,23 +149,14 @@ class CupertinoPickerNSView: NSView {
 // MARK: - SwiftUI Components
 
 struct PickerModel {
-    let items: [String]
+    let items: [[String: Any]]
     let label: String?
     let sublabel: String?
-    let symbols: [String]
     let selectedIndex: Int
     let enabled: Bool
     let tintColor: NSColor?
     let controlSize: ControlSize
     let pickerStyle: String
-    let defaultIconSize: CGFloat?
-    let defaultIconColor: NSColor?
-    let perSymbolColors: [NSColor?]
-    let perSymbolSizes: [CGFloat?]
-    let perSymbolModes: [String?]
-    let perSymbolGradientEnabled: [NSNumber?]
-    let defaultIconRenderingMode: String?
-    let defaultIconGradientEnabled: Bool
     let onSelectionChange: (Int) -> Void
     let onSizeChange: (CGSize) -> Void
 }
@@ -241,20 +200,10 @@ struct PickerContent: View {
 
     private var basePicker: some View {
         let picker = Picker(selection: $selection) {
-            ForEach(0 ..< max(model.items.count, model.symbols.count), id: \.self) { index in
-                let hasSymbol = index < model.symbols.count && !model.symbols[index].isEmpty
-                let hasLabel = index < model.items.count && !model.items[index].isEmpty
-
-                if hasSymbol {
-                    Image(systemName: model.symbols[index])
-                        .tag(index)
-                } else if hasLabel {
-                    Text(model.items[index])
-                        .tag(index)
-                } else {
-                    Text("")
-                        .tag(index)
-                }
+            ForEach(model.items.indices, id: \.self) { index in
+                let item = model.items[index]
+                itemView(for: item)
+                    .tag(index)
             }
         } label: {
             if let label = model.label {
@@ -276,12 +225,121 @@ struct PickerContent: View {
             model.onSizeChange(newValue)
         }
 
-        if model.label != nil {
-            return AnyView(List {
-                picker
-            })
+        if let tintColor = model.tintColor {
+            let tintedPicker = picker.tint(Color(nsColor: tintColor))
+            if model.label != nil {
+                return AnyView(List {
+                    tintedPicker
+                })
+            } else {
+                return AnyView(tintedPicker)
+            }
         } else {
-            return AnyView(picker)
+            if model.label != nil {
+                return AnyView(List {
+                    picker
+                })
+            } else {
+                return AnyView(picker)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func itemView(for item: [String: Any]) -> some View {
+        let type = item["type"] as? String ?? "text"
+        if type == "icon", let symbolName = item["symbolName"] as? String {
+            AnyView(buildStyledImage(symbolName: symbolName, from: item))
+        } else {
+            Text(item["text"] as? String ?? "")
+        }
+    }
+
+    private func buildStyledImage(symbolName: String, from item: [String: Any]) -> some View {
+        var result: any View = Image(systemName: symbolName)
+
+        // Apply font size if present
+        if let sizeValue = item["symbolSize"] as? NSNumber {
+            result = Image(systemName: symbolName)
+                .font(.system(size: CGFloat(truncating: sizeValue)))
+        }
+
+        // Apply rendering mode if present
+        if let renderingMode = symbolRenderingModeFromString(from: item["symbolRenderingMode"] as? String) {
+            if let sizeValue = item["symbolSize"] as? NSNumber {
+                result = Image(systemName: symbolName)
+                    .font(.system(size: CGFloat(truncating: sizeValue)))
+                    .symbolRenderingMode(renderingMode)
+            } else {
+                result = Image(systemName: symbolName)
+                    .symbolRenderingMode(renderingMode)
+            }
+        }
+
+        // Apply color styling
+        if let colorValue = item["symbolColor"] as? NSNumber {
+            let color = Color(nsColor: ColorUtils.colorFromARGB(colorValue.intValue))
+            if let renderingMode = symbolRenderingModeFromString(from: item["symbolRenderingMode"] as? String) {
+                if let sizeValue = item["symbolSize"] as? NSNumber {
+                    result = Image(systemName: symbolName)
+                        .font(.system(size: CGFloat(truncating: sizeValue)))
+                        .symbolRenderingMode(renderingMode)
+                        .foregroundColor(color)
+                } else {
+                    result = Image(systemName: symbolName)
+                        .symbolRenderingMode(renderingMode)
+                        .foregroundColor(color)
+                }
+            } else {
+                if let sizeValue = item["symbolSize"] as? NSNumber {
+                    result = Image(systemName: symbolName)
+                        .font(.system(size: CGFloat(truncating: sizeValue)))
+                        .foregroundColor(color)
+                } else {
+                    result = Image(systemName: symbolName)
+                        .foregroundColor(color)
+                }
+            }
+        } else if let paletteValues = item["symbolPaletteColors"] as? [NSNumber] {
+            let paletteColors = paletteValues.map { Color(nsColor: ColorUtils.colorFromARGB($0.intValue)) }
+            if let renderingMode = symbolRenderingModeFromString(from: item["symbolRenderingMode"] as? String) {
+                if let sizeValue = item["symbolSize"] as? NSNumber {
+                    result = Image(systemName: symbolName)
+                        .font(.system(size: CGFloat(truncating: sizeValue)))
+                        .symbolRenderingMode(renderingMode)
+                        .foregroundColor(paletteColors.first ?? .black)
+                } else {
+                    result = Image(systemName: symbolName)
+                        .symbolRenderingMode(renderingMode)
+                        .foregroundColor(paletteColors.first ?? .black)
+                }
+            } else {
+                if let sizeValue = item["symbolSize"] as? NSNumber {
+                    result = Image(systemName: symbolName)
+                        .font(.system(size: CGFloat(truncating: sizeValue)))
+                        .foregroundColor(paletteColors.first ?? .black)
+                } else {
+                    result = Image(systemName: symbolName)
+                        .foregroundColor(paletteColors.first ?? .black)
+                }
+            }
+        }
+
+        return AnyView(result)
+    }
+
+    private func symbolRenderingModeFromString(from raw: String?) -> SymbolRenderingMode? {
+        switch raw {
+        case "monochrome":
+            return .monochrome
+        case "hierarchical":
+            return .hierarchical
+        case "multicolor":
+            return .multicolor
+        case "palette":
+            return .palette
+        default:
+            return nil
         }
     }
 }

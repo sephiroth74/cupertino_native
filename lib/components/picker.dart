@@ -10,6 +10,43 @@ import '../style/sf_symbol.dart';
 /// A Cupertino-native picker with segmented control style.
 ///
 /// Embeds a native SwiftUI Picker for pixel-perfect fidelity on macOS.
+class CNPickerItem {
+  /// Creates an icon-based picker item.
+  const CNPickerItem.icon(this.icon) : text = null;
+
+  /// Creates a text-based picker item.
+  const CNPickerItem.text(this.text) : icon = null;
+
+  /// The symbol for an icon item.
+  final CNSymbol? icon;
+
+  /// The display text for a text item.
+  final String? text;
+
+  /// Converts the picker item to a platform-friendly map.
+  Map<String, dynamic> toMap(BuildContext context) {
+    if (text != null) {
+      return {'type': 'text', 'text': text};
+    }
+    if (icon != null) {
+      return {
+        'type': 'icon',
+        'symbolName': icon!.name,
+        if (icon!.color != null)
+          'symbolColor': resolveColorToArgb(icon!.color, context),
+        if (icon!.paletteColors != null)
+          'symbolPaletteColors': icon!.paletteColors!
+              .map((c) => resolveColorToArgb(c, context))
+              .toList(),
+        if (icon!.mode != null) 'symbolRenderingMode': icon!.mode!.name,
+        if (icon!.gradient != null) 'symbolGradientEnabled': icon!.gradient,
+        if (icon!.size != null) 'symbolSize': icon!.size,
+      };
+    }
+    return {'type': 'text', 'text': ''};
+  }
+}
+
 class CNPicker extends StatefulWidget {
   /// Creates a Cupertino-native picker.
   const CNPicker({
@@ -22,19 +59,9 @@ class CNPicker extends StatefulWidget {
     this.color,
     this.controlSize = CNControlSize.regular,
     this.pickerStyle = CNPickerStyle.segmented,
-    List<String>? items,
-    List<CNSymbol>? icons,
-    this.iconSize,
-    this.iconColor,
-    this.iconPaletteColors,
-    this.iconGradientEnabled,
-    this.iconRenderingMode,
-  }) : assert(items != null || icons != null, 'Either items or icons must be provided.'),
-       assert(items == null || icons == null, 'Cannot provide both items and icons.'),
-       assert(items == null || items.length > 0, 'Items list cannot be empty.'),
-       assert(icons == null || icons.length > 0, 'Icons list cannot be empty.'),
-       this.items = items ?? const [],
-       this.icons = icons ?? const [];
+    this.shrinkWrap = false,
+    required this.items,
+  }) : assert(items.length > 0, 'Items list cannot be empty.');
 
   /// Accent/tint color used for the picker.
   final Color? color;
@@ -45,26 +72,8 @@ class CNPicker extends StatefulWidget {
   /// Whether the picker is interactive.
   final bool enabled;
 
-  /// Global icon color override.
-  final Color? iconColor;
-
-  /// Enables gradient rendering where supported.
-  final bool? iconGradientEnabled;
-
-  /// Global icon palette colors override.
-  final List<Color>? iconPaletteColors;
-
-  /// Global icon rendering mode.
-  final CNSymbolRenderingMode? iconRenderingMode;
-
-  /// Overrides the symbol size (for all options).
-  final double? iconSize;
-
-  /// Optional SF Symbols for options; complements [labels].
-  final List<CNSymbol> icons;
-
   /// Picker items to display, in order.
-  final List<String> items;
+  final List<CNPickerItem> items;
 
   /// Optional primary label.
   final String? label;
@@ -78,6 +87,7 @@ class CNPicker extends StatefulWidget {
   /// The index of the selected option.
   final int selectedIndex;
 
+  final bool shrinkWrap;
   /// Optional secondary label/subtitle.
   final String? sublabel;
 
@@ -129,7 +139,10 @@ class _CNPickerState extends State<CNPicker> {
       final result = await _channel?.invokeMethod<Map>('getIntrinsicSize');
       if (result != null) {
         debugPrint('Picker intrinsic size: $result');
-        _onIntrinsicSizeChanged((result['width'] as num?)?.toDouble(), (result['height'] as num?)?.toDouble());
+        _onIntrinsicSizeChanged(
+          (result['width'] as num?)?.toDouble(),
+          (result['height'] as num?)?.toDouble(),
+        );
       }
     } catch (e) {
       // Fallback to default height
@@ -143,7 +156,7 @@ class _CNPickerState extends State<CNPicker> {
     debugPrint('_onIntrinsicSizeChanged: width=$width, height=$height');
     setState(() {
       _intrinsicWidth = width > -1 ? width : null;
-      _intrinsicHeight = height > -1 ? height + 28 : null;
+      _intrinsicHeight = height > -1 ? height : null;
     });
   }
 
@@ -157,7 +170,10 @@ class _CNPickerState extends State<CNPicker> {
       }
     } else if (call.method == 'intrinsicSizeChanged') {
       final args = call.arguments as Map?;
-      _onIntrinsicSizeChanged((args?['width'] as num?)?.toDouble(), (args?['height'] as num?)?.toDouble());
+      _onIntrinsicSizeChanged(
+        (args?['width'] as num?)?.toDouble(),
+        (args?['height'] as num?)?.toDouble(),
+      );
     }
     return null;
   }
@@ -182,7 +198,9 @@ class _CNPickerState extends State<CNPicker> {
       _lastEnabled = widget.enabled;
     }
     if (_lastSelected != widget.selectedIndex) {
-      await channel.invokeMethod('setSelectedIndex', {'index': widget.selectedIndex});
+      await channel.invokeMethod('setSelectedIndex', {
+        'index': widget.selectedIndex,
+      });
       _lastSelected = widget.selectedIndex;
     }
     if (_lastTint != tint && tint != null) {
@@ -190,12 +208,16 @@ class _CNPickerState extends State<CNPicker> {
       _lastTint = tint;
     }
     if (_lastControlSize != widget.controlSize) {
-      await channel.invokeMethod('setControlSize', {'controlSize': widget.controlSize.name});
+      await channel.invokeMethod('setControlSize', {
+        'controlSize': widget.controlSize.name,
+      });
       _lastControlSize = widget.controlSize;
       _queryIntrinsicSize();
     }
     if (_lastPickerStyle != widget.pickerStyle) {
-      await channel.invokeMethod('setPickerStyle', {'pickerStyle': widget.pickerStyle.name});
+      await channel.invokeMethod('setPickerStyle', {
+        'pickerStyle': widget.pickerStyle.name,
+      });
       _lastPickerStyle = widget.pickerStyle;
       _queryIntrinsicSize();
     }
@@ -224,7 +246,7 @@ class _CNPickerState extends State<CNPicker> {
 
     const viewType = 'CupertinoNativePicker';
     final creationParams = <String, dynamic>{
-      'items': widget.items,
+      'items': widget.items.map((item) => item.toMap(context)).toList(),
       'selectedIndex': widget.selectedIndex,
       'enabled': widget.enabled,
       'isDark': _isDark,
@@ -232,63 +254,79 @@ class _CNPickerState extends State<CNPicker> {
       'pickerStyle': widget.pickerStyle.name,
       if (widget.label != null) 'label': widget.label,
       if (widget.sublabel != null) 'sublabel': widget.sublabel,
-      'style': encodeStyle(context, tint: widget.color)
-        ..addAll({
-          if (widget.iconSize != null) 'iconSize': widget.iconSize,
-          if (widget.iconColor != null) 'iconColor': resolveColorToArgb(widget.iconColor, context),
-          if (widget.iconPaletteColors != null)
-            'iconPaletteColors': widget.iconPaletteColors!.map((c) => resolveColorToArgb(c, context)).toList(),
-          if (widget.iconGradientEnabled != null) 'iconGradientEnabled': widget.iconGradientEnabled,
-          if (widget.iconRenderingMode != null) 'iconRenderingMode': widget.iconRenderingMode!.name,
-        }),
-      if (widget.icons != null) 'sfSymbols': widget.icons!.map((e) => e.name).toList(),
-      if (widget.icons != null) 'sfSymbolSizes': widget.icons!.map((e) => e.size).toList(),
-      if (widget.icons != null)
-        'sfSymbolColors': widget.icons!.map((e) => resolveColorToArgb(e.color, context)).toList(),
-      if (widget.icons != null)
-        'sfSymbolPaletteColors': widget.icons!
-            .map((e) => (e.paletteColors ?? []).map((c) => resolveColorToArgb(c, context)).toList())
-            .toList(),
-      if (widget.icons != null) 'sfSymbolRenderingModes': widget.icons!.map((e) => e.mode?.name).toList(),
-      if (widget.icons != null) 'sfSymbolGradientEnabled': widget.icons!.map((e) => e.gradient).toList(),
+      'style': encodeStyle(context, tint: widget.color),
     };
+
+    final child = AppKitView(
+      viewType: viewType,
+      creationParamsCodec: const StandardMessageCodec(),
+      creationParams: creationParams,
+      onPlatformViewCreated: _onPlatformViewCreated,
+    );
+
+    if (widget.shrinkWrap) {
+      double? width = _intrinsicWidth;
+      double? height = _intrinsicHeight;
+
+      if (width == null || height == null) {
+        width = 100.0; // Fallback width if unconstrained and no intrinsic size
+        height = 38.0; // Default height for unbounded layouts
+      }
+      if (width == double.infinity) {
+        width = 100.0; // Fallback width if unconstrained and no intrinsic size
+      }
+      if (height == double.infinity) {
+        height = 38.0; // Default height for unbounded layouts
+      }
+
+      return SizedBox(
+        height: height,
+        width: width,
+        child: child,
+      );
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
         debugPrint('Picker constraints: $constraints');
         final bool hasBoundedWidth = constraints.hasBoundedWidth;
         final bool hasBoundedHeight = constraints.hasBoundedHeight;
-        debugPrint('Picker hasBoundedWidth=$hasBoundedWidth, hasBoundedHeight=$hasBoundedHeight');
+        debugPrint(
+          'Picker hasBoundedWidth=$hasBoundedWidth, hasBoundedHeight=$hasBoundedHeight',
+        );
 
         double? width;
         double? height;
 
-        if (hasBoundedWidth) {
+        if (hasBoundedWidth && !widget.shrinkWrap) {
           width = constraints.maxWidth;
         } else if (_intrinsicWidth != null) {
           width = _intrinsicWidth;
+        } else {
+          width = double.infinity;
         }
 
-        if (hasBoundedHeight) {
-          height = constraints.maxHeight;
-        } else if (_intrinsicHeight != null) {
+        if (_intrinsicHeight != null) {
           height = _intrinsicHeight;
+        } else if (hasBoundedHeight) {
+          height = constraints.maxHeight;
+        } else {
+          height = 38.0; // Default height for unbounded layouts
         }
 
         width ??= double.infinity;
-        height ??= 38.0;
 
         debugPrint('Picker final size: width=$width, height=$height');
+
+        if (width == double.infinity) {
+          width =
+              100.0; // Fallback width if unconstrained and no intrinsic size
+        }
 
         return SizedBox(
           height: height,
           width: width,
-          child: AppKitView(
-            viewType: viewType,
-            creationParamsCodec: const StandardMessageCodec(),
-            creationParams: creationParams,
-            onPlatformViewCreated: _onPlatformViewCreated,
-          ),
+          child: child,
         );
       },
     );

@@ -22,13 +22,23 @@ class GroupBox extends StatelessWidget {
     this.style = GroupBoxStyle.border,
     this.padding,
     this.borderDecoration,
+    this.color,
+    this.borderRadius
   });
 
   /// An optional decoration for the border of the GroupBox.
   final BoxDecoration? borderDecoration;
 
+  /// The border radius of the GroupBox. If not specified, it defaults to 8.0.
+  /// If [borderDecoration] is provided, this value will be ignored.
+  final double? borderRadius;
+
   /// The content to be grouped.
   final Widget child;
+
+  /// The background color of the GroupBox. If not specified, it defaults to the system background color.
+  /// If [borderDecoration] is provided, this color will be ignored.
+  final Color? color;
 
   /// An optional label to display alongside the title.
   final Widget? label;
@@ -46,9 +56,9 @@ class GroupBox extends StatelessWidget {
           return borderDecoration!;
         }
         return BoxDecoration(
-          color: CupertinoColors.tertiarySystemGroupedBackground,
+          color: color ?? CupertinoColors.tertiarySystemGroupedBackground,
           border: Border.all(color: CupertinoColors.separator.resolveFrom(context).withAlpha(51), width: 1),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(borderRadius ?? 8),
         );
       case GroupBoxStyle.borderless:
         return const BoxDecoration();
