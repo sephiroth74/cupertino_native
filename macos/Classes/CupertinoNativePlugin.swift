@@ -4,12 +4,12 @@ import FlutterMacOS
 public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     static var registrar: FlutterPluginRegistrar?
     static var contextMenuHandler: CupertinoContextMenuHandler?
-    static var toolbarManager: CupertinoToolbarManager?
+    static var toolbarManager: CNToolbarManager?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         CupertinoNativePlugin.registrar = registrar
         CupertinoNativePlugin.contextMenuHandler = CupertinoContextMenuHandler(registrar: registrar)
-        CupertinoNativePlugin.toolbarManager = CupertinoToolbarManager(messenger: registrar.messenger)
+        CupertinoNativePlugin.toolbarManager = CNToolbarManager(messenger: registrar.messenger)
         let channel = FlutterMethodChannel(
             name: "cupertino_native", binaryMessenger: registrar.messenger
         )
@@ -141,18 +141,18 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 return
             }
             showSheet(args: args, result: result)
-        case "setToolbar":
+        case "makeToolbar":
             guard let args = call.arguments as? [String: Any] else {
                 result(
                     FlutterError(
                         code: "invalid_args",
-                        message: "setToolbar expects a map of arguments",
+                        message: "makeToolbar expects a map of arguments",
                         details: nil
                     )
                 )
                 return
             }
-            setToolbar(args: args, result: result)
+            makeToolbar(args: args, result: result)
         case "clearToolbar":
             clearToolbar(result: result)
         default:
@@ -298,7 +298,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         }
     }
 
-    private func setToolbar(args: [String: Any], result: @escaping FlutterResult) {
+    private func makeToolbar(args: [String: Any], result: @escaping FlutterResult) {
         guard let window = CupertinoNativePlugin.registrar?.view?.window else {
             result(
                 FlutterError(
@@ -321,7 +321,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
             return
         }
 
-        manager.setToolbar(window: window, args: args, result: result)
+        manager.makeToolbar(window: window, args: args, result: result)
     }
 
     private func clearToolbar(result: @escaping FlutterResult) {

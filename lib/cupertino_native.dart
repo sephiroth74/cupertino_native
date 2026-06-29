@@ -31,7 +31,6 @@ export 'components/alert.dart';
 export 'components/popover.dart';
 export 'components/context_menu.dart';
 export 'components/sheet.dart';
-export 'components/toolbar.dart';
 export 'components/group_box.dart';
 export 'components/tab_view.dart';
 

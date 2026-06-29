@@ -27,10 +27,10 @@ import 'demos/popover.dart';
 import 'demos/context_menu.dart';
 import 'demos/label.dart';
 import 'demos/sheet.dart';
-import 'demos/toolbar.dart';
 import 'demos/split_view.dart';
 import 'demos/group_box.dart';
 import 'demos/tab_view.dart';
+import 'demos/swiftui_toolbar_demo.dart';
 
 void main() {
   runApp(const MyApp());
@@ -193,7 +193,7 @@ class HomePage extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const TabViewDemoPage()));
                 },
-              ),              
+              ),
               CupertinoListTile(
                 title: Text('Icon'),
                 leading: CNIcon(symbol: CNSymbol('app', color: accentColor)),
@@ -371,19 +371,19 @@ class HomePage extends StatelessWidget {
                 },
               ),
               CupertinoListTile(
-                title: Text('Toolbar'),
-                leading: CNIcon(symbol: CNSymbol('rectangle.topthird.inset.filled', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ToolbarDemoPage()));
-                },
-              ),
-              CupertinoListTile(
                 title: Text('Split View'),
                 leading: CNIcon(symbol: CNSymbol('rectangle.split.2x1', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SplitViewDemoPage()));
+                },
+              ),
+              CupertinoListTile(
+                title: Text('SwiftUI Toolbar'),
+                leading: CNIcon(symbol: CNSymbol('macwindow', color: accentColor)),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SwiftUIToolbarDemo()));
                 },
               ),
             ],
