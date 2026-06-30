@@ -39,9 +39,9 @@ struct CNToolbarItemModel {
 
 extension CNToolbarItemModel: Equatable {
     static func == (lhs: CNToolbarItemModel, rhs: CNToolbarItemModel) -> Bool {
-        return lhs.id == rhs.id && 
-               lhs.selectedValue == rhs.selectedValue &&
-               lhs.isOn == rhs.isOn
+        return lhs.id == rhs.id &&
+            lhs.selectedValue == rhs.selectedValue &&
+            lhs.isOn == rhs.isOn
     }
 }
 
@@ -405,7 +405,7 @@ struct DynamicToolbarContent: ToolbarContent {
     private func buildPickerMenu(for item: CNToolbarItemModel, options: [String]) -> some View {
         // Get initial selected value
         let initialValue = item.selectedValue ?? (options.first ?? "")
-        
+
         // Use binding to pickerValues for state management
         let picker = Picker(item.label ?? "Select", selection: Binding<String>(
             get: { pickerValues[item.id] ?? initialValue },
@@ -440,7 +440,7 @@ struct DynamicToolbarContent: ToolbarContent {
     private func buildToggleControl(for item: CNToolbarItemModel) -> some View {
         // Get initial toggle state
         let initialState = item.isOn ?? false
-        
+
         // Use binding to toggleValues for state management
         let toggle = Toggle(isOn: Binding<Bool>(
             get: { toggleValues[item.id] ?? initialState },
@@ -520,7 +520,7 @@ struct CNToolbarView: View {
         // Initialize pickerValues with selectedValue from all pickers and toggleValues from all toggles
         var pickerVals: [String: String] = [:]
         var toggleVals: [String: Bool] = [:]
-        
+
         func extractValues(from itemList: [CNToolbarItemModel]) {
             for item in itemList {
                 if item.kind == "picker", let selectedValue = item.selectedValue {
@@ -532,7 +532,7 @@ struct CNToolbarView: View {
                 }
             }
         }
-        
+
         extractValues(from: items)
         pickerValues = pickerVals
         toggleValues = toggleVals

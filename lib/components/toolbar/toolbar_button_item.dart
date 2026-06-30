@@ -15,11 +15,11 @@ class CNToolbarButtonItem extends CNToolbarItem {
     this.onPressed,
   }) : assert(systemSymbolName != null || label != null, 'Either systemSymbolName or label must be provided for a button item');
 
-  /// Optional display label for this button
-  final String? label;
-
   /// Button style (e.g., 'borderedProminent')
   final String? buttonStyle;
+
+  /// Optional display label for this button
+  final String? label;
 
   /// Callback when button is pressed
   /// This is NOT serialized - it's stored locally for event handling

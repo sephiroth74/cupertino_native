@@ -16,21 +16,21 @@ class CNToolbarToggleItem extends CNToolbarItem {
     this.onChanged,
   });
 
+  /// Callback when toggle state changes
+  /// This is NOT serialized - it's stored locally for event handling
+  final void Function(bool)? onChanged;
+
+  /// Current on/off state
+  final bool isOn;
+
   /// Optional display label for this toggle
   final String? label;
 
   /// Optional SF Symbol name for the toggle
   final String? systemSymbolName;
 
-  /// Current on/off state
-  final bool isOn;
-
   /// Toggle style: 'switch', 'button', 'automatic' (macOS specific)
   final String? toggleStyle;
-
-  /// Callback when toggle state changes
-  /// This is NOT serialized - it's stored locally for event handling
-  final void Function(bool)? onChanged;
 
   @override
   Map<String, dynamic> customProperties() {

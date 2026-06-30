@@ -12,12 +12,11 @@ class SwiftUIToolbarDemo extends StatefulWidget {
 }
 
 class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
+  bool _isDarkMode = false;
   String? _lastAction;
   String? _searchQuery;
-
-  List<String> _viewModes = ['List', 'Grid', 'Compact'];
   String _selectedViewMode = 'List';
-  bool _isDarkMode = false;
+  List<String> _viewModes = ['List', 'Grid', 'Compact'];
 
   @override
   void dispose() {

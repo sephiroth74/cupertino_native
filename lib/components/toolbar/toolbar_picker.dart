@@ -17,21 +17,21 @@ class CNToolbarPickerItem extends CNToolbarItem {
     this.pickerStyle,
   });
 
-  /// Optional display label for this picker
-  final String? label;
+  /// Callback when selection changes
+  /// This is NOT serialized - it's stored locally for event handling
+  final void Function(String)? onChanged;
 
   /// List of available options in the picker
   final List<String> items;
 
-  /// Currently selected value
-  final String? selectedValue;
+  /// Optional display label for this picker
+  final String? label;
 
   /// Picker style (macOS specific)
   final CNPickerStyle? pickerStyle;
 
-  /// Callback when selection changes
-  /// This is NOT serialized - it's stored locally for event handling
-  final void Function(String)? onChanged;
+  /// Currently selected value
+  final String? selectedValue;
 
   @override
   Map<String, dynamic> customProperties() {

@@ -26,17 +26,17 @@ class CNToolbarController {
   /// Map of itemId -> callback for button presses
   final Map<String, VoidCallback> _buttonCallbacks = {};
 
-  /// Map of itemId -> callback for picker selection changes
-  final Map<String, void Function(String)> _pickerCallbacks = {};
-
-  /// Map of itemId -> callback for toggle state changes
-  final Map<String, void Function(bool)> _toggleCallbacks = {};
-
   /// Subscription to toolbar events
   StreamSubscription? _eventSubscription;
 
   /// Whether toolbar is currently created
   bool _isCreated = false;
+
+  /// Map of itemId -> callback for picker selection changes
+  final Map<String, void Function(String)> _pickerCallbacks = {};
+
+  /// Map of itemId -> callback for toggle state changes
+  final Map<String, void Function(bool)> _toggleCallbacks = {};
 
   /// Initialize the controller and listen to toolbar events
   void init() {
