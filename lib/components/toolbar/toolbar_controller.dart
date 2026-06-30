@@ -6,6 +6,7 @@ import '../../channel/params.dart';
 import 'toolbar_button_item.dart';
 import 'toolbar_group.dart';
 import 'toolbar_item.dart';
+import 'toolbar_picker.dart';
 
 /// Controller for managing toolbar lifecycle and events
 class CNToolbarController {
@@ -23,6 +24,9 @@ class CNToolbarController {
 
   /// Map of itemId -> callback for button presses
   final Map<String, VoidCallback> _buttonCallbacks = {};
+
+  /// Map of itemId -> callback for picker selection changes
+  final Map<String, void Function(String)> _pickerCallbacks = {};
 
   /// Subscription to toolbar events
   StreamSubscription? _eventSubscription;
@@ -128,11 +132,17 @@ class CNToolbarController {
     final eventType = data['type'] as String?;
     final itemId = data['id'] as String?;
     final query = data['query'] as String?;
+    final value = data['value'] as String?;
 
     switch (eventType) {
       case 'buttonPressed':
         if (itemId != null) {
           _buttonCallbacks[itemId]?.call();
+        }
+        break;
+      case 'pickerChanged':
+        if (itemId != null && value != null) {
+          _pickerCallbacks[itemId]?.call(value);
         }
         break;
       case 'searchChanged':
@@ -156,6 +166,7 @@ class CNToolbarController {
   /// Clear all registered callbacks
   void _clearButtonCallbacks() {
     _buttonCallbacks.clear();
+    _pickerCallbacks.clear();
   }
 
   /// Recursively register callbacks from items and groups
@@ -163,6 +174,8 @@ class CNToolbarController {
     for (final item in items) {
       if (item is CNToolbarButtonItem && item.onPressed != null) {
         _buttonCallbacks[item.id] = item.onPressed!;
+      } else if (item is CNToolbarPickerItem && item.onChanged != null) {
+        _pickerCallbacks[item.id] = item.onChanged!;
       } else if (item is CNToolbarGroup) {
         _registerCallbacksRecursive(item.items);
       }

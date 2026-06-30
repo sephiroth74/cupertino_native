@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native/components/toolbar/toolbar.dart';
+import 'package:cupertino_native/model/picker_style.dart';
 import 'package:flutter/cupertino.dart';
 
 class SwiftUIToolbarDemo extends StatefulWidget {
@@ -13,6 +14,9 @@ class SwiftUIToolbarDemo extends StatefulWidget {
 class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
   String? _lastAction;
   String? _searchQuery;
+
+  List<String> _viewModes = ['List', 'Grid', 'Compact'];
+  String _selectedViewMode = 'List';
 
   @override
   void dispose() {
@@ -42,11 +46,11 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
             placement: CNToolbarItemPlacement.navigation,
             items: [
               CNToolbarButtonItem(
-                id: 'back',
-                systemSymbolName: 'chevron.left',
+                id: 'share',
+                systemSymbolName: 'square.and.arrow.up',
                 onPressed: () {
                   setState(() {
-                    _lastAction = 'Action: back';
+                    _lastAction = 'Action: share';
                   });
                 },
               ),
@@ -74,6 +78,21 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
             id: 'actions',
             placement: CNToolbarItemPlacement.status,
             items: [
+              CNToolbarPickerItem(
+                id: 'view-mode',
+                label: 'View',
+                items: _viewModes,
+                selectedValue: _selectedViewMode,
+                pickerStyle: CNPickerStyle.menu,
+                onChanged: (value) {
+                  setState(() {
+                    _lastAction = 'Action: changed view to $value';
+                    _selectedViewMode = value;
+                  });
+                  // Recreate toolbar to reflect picker state change
+                  _setupToolbar();
+                },
+              ),
               CNToolbarButtonItem(
                 id: 'compose',
                 systemSymbolName: 'square.and.pencil',
