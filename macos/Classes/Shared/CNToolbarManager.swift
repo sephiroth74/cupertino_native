@@ -7,6 +7,7 @@ import SwiftUI
 enum CNToolbarItemKind: String {
     case button
     case picker
+    case toggle
 }
 
 enum CNToolbarItemPlacement: String {
@@ -21,7 +22,7 @@ enum CNToolbarItemPlacement: String {
 
 struct CNToolbarItemModel {
     let id: String
-    let kind: String // "button", "picker", or "group"
+    let kind: String // "button", "picker", "toggle" or "group"
     let label: String?
     let placement: CNToolbarItemPlacement
     let systemSymbolName: String?
@@ -32,12 +33,15 @@ struct CNToolbarItemModel {
     let items: [String]? // For picker items (list of options)
     let selectedValue: String? // For picker items (currently selected value)
     let pickerStyle: String? // For picker items (menu, segmented, etc.)
+    let isOn: Bool? // For toggle items (current state)
+    let toggleStyle: String? // For toggle items (switch, button, automatic)
 }
 
 extension CNToolbarItemModel: Equatable {
     static func == (lhs: CNToolbarItemModel, rhs: CNToolbarItemModel) -> Bool {
         return lhs.id == rhs.id && 
-               lhs.selectedValue == rhs.selectedValue
+               lhs.selectedValue == rhs.selectedValue &&
+               lhs.isOn == rhs.isOn
     }
 }
 
@@ -160,7 +164,9 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     children: groupChildren,
                     items: nil,
                     selectedValue: nil,
-                    pickerStyle: nil
+                    pickerStyle: nil,
+                    isOn: nil,
+                    toggleStyle: nil
                 ))
             } else if kind == "picker" {
                 // Parse picker item
@@ -181,7 +187,32 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     children: nil,
                     items: items,
                     selectedValue: selectedValue,
-                    pickerStyle: pickerStyle
+                    pickerStyle: pickerStyle,
+                    isOn: nil,
+                    toggleStyle: nil
+                ))
+            } else if kind == "toggle" {
+                // Parse toggle item
+                let label = (dict["label"] as? String) ?? ""
+                let symbol = dict["systemSymbolName"] as? String
+                let isOn = (dict["isOn"] as? Bool) ?? false
+                let toggleStyle = (dict["toggleStyle"] as? String) ?? "switch"
+
+                parsed.append(CNToolbarItemModel(
+                    id: id,
+                    kind: "toggle",
+                    label: label,
+                    placement: placement,
+                    systemSymbolName: symbol,
+                    disabled: disabled,
+                    tint: tint,
+                    buttonStyle: nil,
+                    children: nil,
+                    items: nil,
+                    selectedValue: nil,
+                    pickerStyle: nil,
+                    isOn: isOn,
+                    toggleStyle: toggleStyle
                 ))
             } else {
                 // Parse button item
@@ -201,7 +232,9 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     children: nil,
                     items: nil,
                     selectedValue: nil,
-                    pickerStyle: nil
+                    pickerStyle: nil,
+                    isOn: nil,
+                    toggleStyle: nil
                 ))
             }
         }
@@ -218,6 +251,7 @@ struct DynamicToolbarContent: ToolbarContent {
     let getTintColor: (CNToolbarItemModel) -> Color?
     let getButtonStyle: (CNToolbarItemModel) -> String
     @Binding var pickerValues: [String: String]
+    @Binding var toggleValues: [String: Bool]
 
     /// Groups items by their placement
     /// Returns: [placement: [group_id: [children]]]
@@ -317,6 +351,8 @@ struct DynamicToolbarContent: ToolbarContent {
                     ForEach(children, id: \.id) { child in
                         if child.kind == "picker" {
                             buildPickerMenu(for: child, options: child.items ?? [])
+                        } else if child.kind == "toggle" {
+                            buildToggleControl(for: child)
                         } else {
                             buildButton(for: child)
                         }
@@ -400,6 +436,42 @@ struct DynamicToolbarContent: ToolbarContent {
             return AnyView(picker.pickerStyle(.menu))
         }
     }
+
+    private func buildToggleControl(for item: CNToolbarItemModel) -> some View {
+        // Get initial toggle state
+        let initialState = item.isOn ?? false
+        
+        // Use binding to toggleValues for state management
+        let toggle = Toggle(isOn: Binding<Bool>(
+            get: { toggleValues[item.id] ?? initialState },
+            set: { newValue in
+                toggleValues[item.id] = newValue
+                onEvent(["id": item.id, "type": "toggleChanged", "value": newValue])
+            }
+        )) {
+            if let symbol = item.systemSymbolName, let label = item.label, !label.isEmpty {
+                Label(label, systemImage: symbol)
+                    .labelStyle(.titleAndIcon)
+            } else if let symbol = item.systemSymbolName {
+                Label("", systemImage: symbol)
+            } else if let label = item.label, !label.isEmpty {
+                Text(label)
+            }
+        }
+        .disabled(item.disabled)
+        .foregroundColor(getTintColor(item))
+
+        // Apply toggle style based on configuration
+        let style = item.toggleStyle ?? "switch"
+        switch style {
+        case "button":
+            return AnyView(toggle.toggleStyle(.button))
+        case "switch":
+            fallthrough
+        default:
+            return AnyView(toggle.toggleStyle(.switch))
+        }
+    }
 }
 
 struct CNToolbarView: View {
@@ -410,6 +482,7 @@ struct CNToolbarView: View {
 
     @State private var searchText = ""
     @State private var pickerValues: [String: String] = [:]
+    @State private var toggleValues: [String: Bool] = [:]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -444,21 +517,25 @@ struct CNToolbarView: View {
     }
 
     private func initializePickerValues() {
-        // Initialize pickerValues with selectedValue from all pickers
-        var newValues: [String: String] = [:]
+        // Initialize pickerValues with selectedValue from all pickers and toggleValues from all toggles
+        var pickerVals: [String: String] = [:]
+        var toggleVals: [String: Bool] = [:]
         
-        func extractPickers(from itemList: [CNToolbarItemModel]) {
+        func extractValues(from itemList: [CNToolbarItemModel]) {
             for item in itemList {
                 if item.kind == "picker", let selectedValue = item.selectedValue {
-                    newValues[item.id] = selectedValue
+                    pickerVals[item.id] = selectedValue
+                } else if item.kind == "toggle", let isOn = item.isOn {
+                    toggleVals[item.id] = isOn
                 } else if item.kind == "group", let children = item.children {
-                    extractPickers(from: children)
+                    extractValues(from: children)
                 }
             }
         }
         
-        extractPickers(from: items)
-        pickerValues = newValues
+        extractValues(from: items)
+        pickerValues = pickerVals
+        toggleValues = toggleVals
     }
 
     private func buildToolbarContent() -> some ToolbarContent {
@@ -468,7 +545,8 @@ struct CNToolbarView: View {
             mapPlacement: mapPlacement,
             getTintColor: getTintColor,
             getButtonStyle: { item in item.buttonStyle ?? "automatic" },
-            pickerValues: $pickerValues
+            pickerValues: $pickerValues,
+            toggleValues: $toggleValues
         )
     }
 

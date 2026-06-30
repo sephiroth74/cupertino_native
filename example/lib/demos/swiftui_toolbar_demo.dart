@@ -17,6 +17,7 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
 
   List<String> _viewModes = ['List', 'Grid', 'Compact'];
   String _selectedViewMode = 'List';
+  bool _isDarkMode = false;
 
   @override
   void dispose() {
@@ -91,6 +92,19 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
                   });
                   // Recreate toolbar to reflect picker state change
                   _setupToolbar();
+                },
+              ),
+              CNToolbarToggleItem(
+                id: 'dark-mode',
+                label: 'Dark',
+                systemSymbolName: 'moon.fill',
+                isOn: _isDarkMode,
+                toggleStyle: 'button',
+                onChanged: (value) {
+                  setState(() {
+                    _isDarkMode = value;
+                    _lastAction = 'Action: dark mode ${value ? 'ON' : 'OFF'}';
+                  });
                 },
               ),
               CNToolbarButtonItem(

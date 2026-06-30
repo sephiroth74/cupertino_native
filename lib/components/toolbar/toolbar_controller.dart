@@ -7,6 +7,7 @@ import 'toolbar_button_item.dart';
 import 'toolbar_group.dart';
 import 'toolbar_item.dart';
 import 'toolbar_picker.dart';
+import 'toolbar_toggle_item.dart';
 
 /// Controller for managing toolbar lifecycle and events
 class CNToolbarController {
@@ -27,6 +28,9 @@ class CNToolbarController {
 
   /// Map of itemId -> callback for picker selection changes
   final Map<String, void Function(String)> _pickerCallbacks = {};
+
+  /// Map of itemId -> callback for toggle state changes
+  final Map<String, void Function(bool)> _toggleCallbacks = {};
 
   /// Subscription to toolbar events
   StreamSubscription? _eventSubscription;
@@ -95,6 +99,16 @@ class CNToolbarController {
     _buttonCallbacks.remove(itemId);
   }
 
+  /// Register a toggle callback
+  void registerToggleCallback(String itemId, void Function(bool) callback) {
+    _toggleCallbacks[itemId] = callback;
+  }
+
+  /// Unregister a toggle callback
+  void unregisterToggleCallback(String itemId) {
+    _toggleCallbacks.remove(itemId);
+  }
+
   /// Register callback for search text changes
   void onSearchChanged(void Function(String) callback) {
     _onSearchChanged = callback;
@@ -132,7 +146,7 @@ class CNToolbarController {
     final eventType = data['type'] as String?;
     final itemId = data['id'] as String?;
     final query = data['query'] as String?;
-    final value = data['value'] as String?;
+    final value = data['value'];
 
     switch (eventType) {
       case 'buttonPressed':
@@ -141,8 +155,13 @@ class CNToolbarController {
         }
         break;
       case 'pickerChanged':
-        if (itemId != null && value != null) {
+        if (itemId != null && value is String) {
           _pickerCallbacks[itemId]?.call(value);
+        }
+        break;
+      case 'toggleChanged':
+        if (itemId != null && value is bool) {
+          _toggleCallbacks[itemId]?.call(value);
         }
         break;
       case 'searchChanged':
@@ -155,9 +174,6 @@ class CNToolbarController {
           _onSearchSubmitted?.call(query);
         }
         break;
-      case 'pickerChanged':
-        // Handle picker changes (future)
-        break;
       default:
         debugPrint('Unknown event type: $eventType');
     }
@@ -167,6 +183,7 @@ class CNToolbarController {
   void _clearButtonCallbacks() {
     _buttonCallbacks.clear();
     _pickerCallbacks.clear();
+    _toggleCallbacks.clear();
   }
 
   /// Recursively register callbacks from items and groups
@@ -176,6 +193,8 @@ class CNToolbarController {
         _buttonCallbacks[item.id] = item.onPressed!;
       } else if (item is CNToolbarPickerItem && item.onChanged != null) {
         _pickerCallbacks[item.id] = item.onChanged!;
+      } else if (item is CNToolbarToggleItem && item.onChanged != null) {
+        _toggleCallbacks[item.id] = item.onChanged!;
       } else if (item is CNToolbarGroup) {
         _registerCallbacksRecursive(item.items);
       }
