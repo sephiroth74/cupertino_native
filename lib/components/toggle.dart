@@ -21,6 +21,7 @@ enum CNToggleStyle {
 
 /// Extension to convert enum to string
 extension CNToggleStyleExtension on CNToggleStyle {
+  // ignore: public_member_api_docs
   String toShortString() {
     switch (this) {
       case CNToggleStyle.automatic:
@@ -87,18 +88,13 @@ class CNToggle extends StatefulWidget {
     this.onChanged,
     this.label,
     this.systemSymbolName,
-    this.enabled = true,
     this.toggleStyle = CNToggleStyle.switch_,
     this.controlSize = CNControlSize.regular,
-    this.controller,
     this.tint,
-  });
+  }) : enabled = onChanged != null;
 
   /// The size of the control, which affects its appearance.
   final CNControlSize controlSize;
-
-  /// Optional controller for imperative updates.
-  final CNToggleController? controller;
 
   /// Whether the toggle is enabled for interaction.
   final bool enabled;
@@ -159,7 +155,7 @@ class _CNToggleState extends State<CNToggle> {
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ?? CNToggleController();
+    _controller = CNToggleController();
   }
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
