@@ -166,7 +166,6 @@ class _ToggleDemoState extends State<ToggleDemo> {
                 child: CNToggle(
                   value: _checkboxStyle,
                   label: 'Enable Feature',
-                  systemSymbolName: 'checkmark.square.fill',
                   toggleStyle: CNToggleStyle.checkbox,
                   onChanged: (value) {
                     setState(() {

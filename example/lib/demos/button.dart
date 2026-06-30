@@ -49,7 +49,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                 const SizedBox(width: 24),
                 const Text('Shrink Wrap: '),
                 const SizedBox(width: 12),
-                CNSwitch(
+                CNToggle(
                   value: _shrinkWrap,
                   onChanged: (value) {
                     setState(() => _shrinkWrap = value);

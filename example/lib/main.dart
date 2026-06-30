@@ -1,7 +1,6 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 import 'demos/slider.dart';
-import 'demos/switch.dart';
 import 'demos/toggle_demo.dart';
 import 'demos/segmented_control.dart';
 import 'demos/picker.dart';
@@ -16,7 +15,6 @@ import 'demos/path_control.dart';
 import 'demos/progress_indicators.dart';
 import 'demos/level_indicators.dart';
 import 'demos/stepper.dart';
-import 'demos/checkboxes.dart';
 import 'demos/date_picker.dart';
 import 'demos/search_field.dart';
 import 'demos/text_field.dart';
@@ -155,30 +153,16 @@ class HomePage extends StatelessWidget {
                   Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SliderDemoPage()));
                 },
               ),
-              CupertinoListTile(
-                title: Text('Switch'),
-                leading: CNIcon(symbol: CNSymbol('switch.2', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SwitchDemoPage()));
-                },
-              ),
+
               CupertinoListTile(
                 title: Text('Toggle'),
-                leading: CNIcon(symbol: CNSymbol('toggle.2', color: accentColor)),
+                leading: CNIcon(symbol: CNSymbol('switch.2', color: accentColor)),
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ToggleDemo()));
                 },
               ),
-              CupertinoListTile(
-                title: Text('Checkbox'),
-                leading: CNIcon(symbol: CNSymbol('checkmark.square', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const CheckboxDemoPage()));
-                },
-              ),
+
               CupertinoListTile(
                 title: Text('Segmented Control (deprecated)'),
                 leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1', color: accentColor)),

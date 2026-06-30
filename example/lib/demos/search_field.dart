@@ -94,7 +94,7 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
               children: [
                 const Text('Suggestions'),
                 const SizedBox(width: 12),
-                CNSwitch(
+                CNToggle(
                   value: _suggestionsEnabled,
                   onChanged: (v) => setState(() => _suggestionsEnabled = v),
                 ),

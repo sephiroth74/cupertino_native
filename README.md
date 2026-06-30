@@ -53,18 +53,6 @@ CNSlider(
 )
 ```
 
-### Switch
-
-![Liquid Glass Switch](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/switch.png)
-
-```dart
-bool _on = true;
-
-CNSwitch(
-  value: _on,
-  onChanged: (v) => setState(() => _on = v),
-)
-```
 
 ### Segmented Control
 

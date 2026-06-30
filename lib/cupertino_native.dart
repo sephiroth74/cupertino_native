@@ -3,7 +3,6 @@
 export 'cupertino_native_platform_interface.dart';
 export 'cupertino_native_method_channel.dart';
 export 'components/slider.dart';
-export 'components/switch.dart';
 export 'components/toggle.dart';
 export 'components/segmented_control.dart';
 export 'components/picker.dart';
@@ -18,7 +17,6 @@ export 'components/path_control.dart';
 export 'components/progress_indicator.dart';
 export 'components/level_indicator.dart';
 export 'components/stepper.dart';
-export 'components/checkbox.dart';
 export 'components/combo_box.dart';
 export 'components/image.dart';
 export 'components/menu.dart';

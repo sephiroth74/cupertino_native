@@ -19,9 +19,6 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         let sliderFactory = CupertinoSliderViewFactory(messenger: registrar.messenger)
         registrar.register(sliderFactory, withId: "CupertinoNativeSlider")
 
-        let switchFactory = CupertinoSwitchViewFactory(messenger: registrar.messenger)
-        registrar.register(switchFactory, withId: "CupertinoNativeSwitch")
-
         let toggleFactory = CupertinoToggleViewFactory(messenger: registrar.messenger)
         registrar.register(toggleFactory, withId: "cupertino_native/toggle")
 
@@ -68,9 +65,6 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let stepperFactory = CupertinoStepperViewFactory(messenger: registrar.messenger)
         registrar.register(stepperFactory, withId: "CupertinoNativeStepper")
-
-        let checkboxFactory = CupertinoCheckboxViewFactory(messenger: registrar.messenger)
-        registrar.register(checkboxFactory, withId: "CupertinoNativeCheckbox")
 
         let datePickerFactory = CupertinoDatePickerViewFactory(messenger: registrar.messenger)
         registrar.register(datePickerFactory, withId: "CupertinoNativeDatePicker")
