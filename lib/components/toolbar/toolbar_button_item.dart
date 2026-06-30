@@ -7,7 +7,6 @@ class CNToolbarButtonItem extends CNToolbarItem {
   // ignore: public_member_api_docs
   const CNToolbarButtonItem({
     required super.id,
-    super.placement,
     super.tint,
     super.disabled,
     this.label,

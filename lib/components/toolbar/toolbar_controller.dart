@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../../channel/params.dart';
 import 'toolbar_button_item.dart';
+import 'toolbar_group.dart';
 import 'toolbar_item.dart';
 
 /// Controller for managing toolbar lifecycle and events
@@ -43,13 +44,9 @@ class CNToolbarController {
     required BuildContext context,
   }) async {
     try {
-      // Register callbacks from button items
+      // Register callbacks from button items (recursive through groups)
       _clearButtonCallbacks();
-      for (final item in items) {
-        if (item is CNToolbarButtonItem && item.onPressed != null) {
-          _buttonCallbacks[item.id] = item.onPressed!;
-        }
-      }
+      _registerCallbacksRecursive(items);
 
       // Send toolbar configuration to native side
       final itemsList = items.map((item) {
@@ -65,7 +62,7 @@ class CNToolbarController {
       _isCreated = true;
       init();
     } catch (e) {
-      print('Error creating toolbar: $e');
+      debugPrint('Error creating toolbar: $e');
       rethrow;
     }
   }
@@ -79,7 +76,7 @@ class CNToolbarController {
       await _eventSubscription?.cancel();
       _eventSubscription = null;
     } catch (e) {
-      print('Error clearing toolbar: $e');
+      debugPrint('Error clearing toolbar: $e');
       rethrow;
     }
   }
@@ -118,7 +115,7 @@ class CNToolbarController {
         _handleToolbarEvent(event);
       },
       onError: (error) {
-        print('Toolbar event error: $error');
+        debugPrint('Toolbar event error: $error');
       },
     );
   }
@@ -152,12 +149,23 @@ class CNToolbarController {
         // Handle picker changes (future)
         break;
       default:
-        print('Unknown event type: $eventType');
+        debugPrint('Unknown event type: $eventType');
     }
   }
 
   /// Clear all registered callbacks
   void _clearButtonCallbacks() {
     _buttonCallbacks.clear();
+  }
+
+  /// Recursively register callbacks from items and groups
+  void _registerCallbacksRecursive(List<CNToolbarItem> items) {
+    for (final item in items) {
+      if (item is CNToolbarButtonItem && item.onPressed != null) {
+        _buttonCallbacks[item.id] = item.onPressed!;
+      } else if (item is CNToolbarGroup) {
+        _registerCallbacksRecursive(item.items);
+      }
+    }
   }
 }

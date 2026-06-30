@@ -1,28 +1,30 @@
 import 'package:flutter/cupertino.dart';
 
-import 'toolbar_button_item.dart';
+import 'toolbar_group.dart';
 import 'toolbar_controller.dart';
-import 'toolbar_item.dart';
 
 /// Public API for creating and managing SwiftUI toolbar
 class CNToolbar {
   static final _controller = CNToolbarController();
 
-  /// Create and show a toolbar with the given items
+  /// Create and show a toolbar with the given groups
   ///
   /// Example:
   /// ```dart
   /// await CNToolbar.create(
   ///   context: context,
   ///   title: 'Mail',
-  ///   items: [
-  ///     CNToolbarButtonItem(
-  ///       id: 'compose',
-  ///       label: 'Compose',
-  ///       systemSymbolName: 'square.and.pencil',
-  ///       onPressed: () {
-  ///         print('Compose pressed!');
-  ///       },
+  ///   groups: [
+  ///     CNToolbarGroup(
+  ///       id: 'actions',
+  ///       placement: CNToolbarItemPlacement.status,
+  ///       items: [
+  ///         CNToolbarButtonItem(
+  ///           id: 'compose',
+  ///           label: 'Compose',
+  ///           systemSymbolName: 'square.and.pencil',
+  ///         ),
+  ///       ],
   ///     ),
   ///   ],
   /// );
@@ -30,11 +32,11 @@ class CNToolbar {
   static Future<void> create({
     required BuildContext context,
     required String title,
-    required List<CNToolbarItem> items,
+    required List<CNToolbarGroup> groups,
     bool showSearch = false,
   }) async {
     _controller.init();
-    await _controller.makeToolbar(title: title, items: items, showSearch: showSearch, context: context);
+    await _controller.makeToolbar(title: title, items: groups, showSearch: showSearch, context: context);
   }
 
   /// Remove and dispose the toolbar

@@ -1,11 +1,9 @@
 import 'package:flutter/painting.dart';
 
-import 'toolbar_placement.dart';
-
 /// Base class for all toolbar items
 abstract class CNToolbarItem {
   // ignore: public_member_api_docs
-  const CNToolbarItem({required this.id, this.placement = CNToolbarItemPlacement.automatic, this.tint, this.disabled = false});
+  const CNToolbarItem({required this.id, this.tint, this.disabled = false});
 
   /// Whether this item is disabled
   final bool disabled;
@@ -13,22 +11,12 @@ abstract class CNToolbarItem {
   /// Unique identifier for this toolbar item
   final String id;
 
-  /// Where to place this item in the toolbar
-  final CNToolbarItemPlacement placement;
-
   /// Tint/accent color for this item
   final Color? tint;
 
   /// Convert to dictionary for native platform channel
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'placement': placement.toNativeString(),
-      'tint': tint,
-      'disabled': disabled,
-      'kind': kind,
-      ...customProperties(),
-    };
+    return {'id': id, 'tint': tint, 'disabled': disabled, 'kind': kind, ...customProperties()};
   }
 
   /// Item kind (button, textField, search, picker, etc)

@@ -35,53 +35,73 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
         context: context,
         title: 'Mail',
         showSearch: true,
-        items: [
-          CNToolbarButtonItem(
-            id: 'share',
-            systemSymbolName: 'square.and.arrow.up',
-            onPressed: () {
-              setState(() {
-                _lastAction = 'Action: share';
-              });
-            },
-            placement: CNToolbarItemPlacement.navigation
+        groups: [
+          // Group on the left (navigation placement)
+          CNToolbarGroup(
+            id: 'nav',
+            placement: CNToolbarItemPlacement.navigation,
+            items: [
+              CNToolbarButtonItem(
+                id: 'back',
+                systemSymbolName: 'chevron.left',
+                onPressed: () {
+                  setState(() {
+                    _lastAction = 'Action: back';
+                  });
+                },
+              ),
+            ],
           ),
-          CNToolbarButtonItem(
-            id: 'home',
-            systemSymbolName: 'house',
-            onPressed: () {
-              setState(() {
-                _lastAction = 'Action: home';
-              });
-            },
+          // Group in the middle (principal placement)
+          CNToolbarGroup(
+            id: 'principal',
             placement: CNToolbarItemPlacement.principal,
-          ),          
-          CNToolbarButtonItem(
-            id: 'compose',
-            systemSymbolName: 'square.and.pencil',
-            onPressed: () {
-              setState(() {
-                _lastAction = 'Action: compose';
-              });
-            },
+            items: [
+              CNToolbarButtonItem(
+                id: 'home',
+                label: 'Home',
+                systemSymbolName: 'house',
+                onPressed: () {
+                  setState(() {
+                    _lastAction = 'Action: home';
+                  });
+                },
+              ),
+            ],
           ),
-          CNToolbarButtonItem(
-            id: 'flag',
-            systemSymbolName: 'flag',
-            onPressed: () {
-              setState(() {
-                _lastAction = 'Action: flag';
-              });
-            },
-          ),
-          CNToolbarButtonItem(
-            id: 'delete',
-            systemSymbolName: 'trash',
-            onPressed: () {
-              setState(() {
-                _lastAction = 'Action: delete';
-              });
-            },
+          // Grouped items on the right (status placement)
+          CNToolbarGroup(
+            id: 'actions',
+            placement: CNToolbarItemPlacement.status,
+            items: [
+              CNToolbarButtonItem(
+                id: 'compose',
+                systemSymbolName: 'square.and.pencil',
+                onPressed: () {
+                  setState(() {
+                    _lastAction = 'Action: compose';
+                  });
+                },
+              ),
+              CNToolbarButtonItem(
+                id: 'flag',
+                systemSymbolName: 'flag',
+                onPressed: () {
+                  setState(() {
+                    _lastAction = 'Action: flag';
+                  });
+                },
+              ),
+              CNToolbarButtonItem(
+                id: 'delete',
+                systemSymbolName: 'trash',
+                onPressed: () {
+                  setState(() {
+                    _lastAction = 'Action: delete';
+                  });
+                },
+              ),
+            ],
           ),
         ],
       );

@@ -1,5 +1,13 @@
 /// Toolbar item placement enum - maps to SwiftUI ToolbarItemPlacement
-enum CNToolbarItemPlacement { automatic, principal, navigation, status, confirmationAction, destructiveAction, cancellationAction }
+enum CNToolbarItemPlacement { 
+  automatic, 
+  principal, 
+  navigation, 
+  status, 
+  confirmationAction, 
+  destructiveAction, 
+  cancellationAction
+}
 
 // ignore: public_member_api_docs
 extension CNToolbarItemPlacementExt on CNToolbarItemPlacement {
