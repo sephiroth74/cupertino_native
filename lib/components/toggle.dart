@@ -1,3 +1,4 @@
+import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
@@ -88,29 +89,37 @@ class CNToggle extends StatefulWidget {
     this.systemSymbolName,
     this.enabled = true,
     this.toggleStyle = CNToggleStyle.switch_,
+    this.controlSize = CNControlSize.regular,
     this.controller,
+    this.tint,
   });
 
-  /// Whether the toggle is on or off.
-  final bool value;
+  /// The size of the control, which affects its appearance.
+  final CNControlSize controlSize;
 
-  /// Called when the user toggles the control.
-  final ValueChanged<bool>? onChanged;
-
-  /// Optional label text for the toggle.
-  final String? label;
-
-  /// Optional system symbol name (SF Symbol) to display with the label.
-  final String? systemSymbolName;
+  /// Optional controller for imperative updates.
+  final CNToggleController? controller;
 
   /// Whether the toggle is enabled for interaction.
   final bool enabled;
 
+  /// Optional label text for the toggle.
+  final String? label;
+
+  /// Called when the user toggles the control.
+  final ValueChanged<bool>? onChanged;
+
+  /// Optional system symbol name (SF Symbol) to display with the label.
+  final String? systemSymbolName;
+
+  /// Optional tint color for the toggle control.
+  final Color? tint;
+
   /// The style of the toggle control.
   final CNToggleStyle toggleStyle;
 
-  /// Optional controller for imperative updates.
-  final CNToggleController? controller;
+  /// Whether the toggle is on or off.
+  final bool value;
 
   @override
   State<CNToggle> createState() => _CNToggleState();
@@ -119,18 +128,14 @@ class CNToggle extends StatefulWidget {
 class _CNToggleState extends State<CNToggle> {
   MethodChannel? _channel;
   late CNToggleController _controller;
-  bool? _lastEnabled;
-  bool? _lastIsDark;
-  CNToggleStyle? _lastToggleStyle;
-  bool? _lastValue;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = widget.controller ?? CNToggleController();
-  }
+  CNControlSize? _lastControlSize;
+  bool? _lastEnabled;
+  bool? _lastIsDark;
+  Color? _lastTint;
+  CNToggleStyle? _lastToggleStyle;
+  bool? _lastValue;
 
   @override
   void didChangeDependencies() {
@@ -149,6 +154,12 @@ class _CNToggleState extends State<CNToggle> {
     _channel?.setMethodCallHandler(null);
     _controller._detach();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? CNToggleController();
   }
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
@@ -195,7 +206,7 @@ class _CNToggleState extends State<CNToggle> {
     if (!mounted || width == null || height == null) return;
     debugPrint('_onIntrinsicSizeChanged: width=$width, height=$height');
 
-    if(width == _intrinsicWidth && height == _intrinsicHeight) {
+    if (width == _intrinsicWidth && height == _intrinsicHeight) {
       return; // No change
     }
 
@@ -210,6 +221,8 @@ class _CNToggleState extends State<CNToggle> {
     _lastEnabled = widget.enabled;
     _lastIsDark = _isDark;
     _lastToggleStyle = widget.toggleStyle;
+    _lastControlSize = widget.controlSize;
+    _lastTint = widget.tint;
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
@@ -228,6 +241,16 @@ class _CNToggleState extends State<CNToggle> {
       await channel.invokeMethod('setToggleStyle', {'toggleStyle': widget.toggleStyle.toShortString()});
       _lastToggleStyle = widget.toggleStyle;
       _queryIntrinsicSize();
+    }
+    if (_lastControlSize != widget.controlSize) {
+      await channel.invokeMethod('setControlSize', {'controlSize': widget.controlSize.name});
+      _lastControlSize = widget.controlSize;
+      _queryIntrinsicSize();
+    }
+    if (_lastTint != widget.tint && mounted) {
+      final tintValue = resolveColorToArgb(widget.tint, context);
+      await channel.invokeMethod('setTint', {'tint': tintValue});
+      _lastTint = widget.tint;
     }
   }
 
@@ -255,6 +278,8 @@ class _CNToggleState extends State<CNToggle> {
       'systemSymbolName': widget.systemSymbolName,
       'toggleStyle': widget.toggleStyle.toShortString(),
       'isDark': _isDark,
+      'controlSize': widget.controlSize.name,
+      'tint': resolveColorToArgb(widget.tint, context),
     };
 
     final child = AppKitView(

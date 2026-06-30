@@ -10,12 +10,17 @@ class ToggleDemo extends StatefulWidget {
 }
 
 class _ToggleDemoState extends State<ToggleDemo> {
-  bool _darkMode = false;
-  bool _notifications = true;
-  bool _soundEnabled = false;
   bool _autoSave = true;
   bool _automaticStyle = false;
   bool _checkboxStyle = true;
+  CNControlSize _controlSize = CNControlSize.regular;
+  bool _darkMode = false;
+  bool _notifications = true;
+  bool _soundEnabled = false;
+
+  void _showNotification(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), duration: const Duration(milliseconds: 800)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +45,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                   label: 'Dark Mode',
                   systemSymbolName: 'moon.fill',
                   toggleStyle: CNToggleStyle.switch_,
+                  controlSize: _controlSize,
                   onChanged: (value) {
                     setState(() {
                       _darkMode = value;
@@ -62,6 +68,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                   label: 'Notifications',
                   systemSymbolName: 'bell.fill',
                   toggleStyle: CNToggleStyle.button,
+                  controlSize: _controlSize,
                   onChanged: (value) {
                     setState(() {
                       _notifications = value;
@@ -86,6 +93,8 @@ class _ToggleDemoState extends State<ToggleDemo> {
                       label: 'Sound',
                       systemSymbolName: 'speaker.wave.2.fill',
                       toggleStyle: CNToggleStyle.switch_,
+                      controlSize: _controlSize,
+                      tint: CupertinoColors.activeOrange,
                       onChanged: (value) {
                         setState(() {
                           _soundEnabled = value;
@@ -99,6 +108,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                       label: 'Auto-Save',
                       systemSymbolName: 'checkmark.circle.fill',
                       toggleStyle: CNToggleStyle.switch_,
+                      controlSize: _controlSize,
                       onChanged: (value) {
                         setState(() {
                           _autoSave = value;
@@ -125,6 +135,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                       value: _darkMode,
                       systemSymbolName: 'moon.fill',
                       toggleStyle: CNToggleStyle.button,
+                      controlSize: _controlSize,
                       onChanged: (value) {
                         setState(() {
                           _darkMode = value;
@@ -135,6 +146,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                       value: _notifications,
                       systemSymbolName: 'bell.fill',
                       toggleStyle: CNToggleStyle.button,
+                      controlSize: _controlSize,
                       onChanged: (value) {
                         setState(() {
                           _notifications = value;
@@ -145,6 +157,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                       value: _soundEnabled,
                       systemSymbolName: 'speaker.wave.2.fill',
                       toggleStyle: CNToggleStyle.button,
+                      controlSize: _controlSize,
                       onChanged: (value) {
                         setState(() {
                           _soundEnabled = value;
@@ -173,6 +186,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                     });
                     _showNotification('Checkbox toggle: ${value ? "enabled" : "disabled"}');
                   },
+                  controlSize: _controlSize,
                 ),
               ),
               const SizedBox(height: 24),
@@ -195,6 +209,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                     });
                     _showNotification('Automatic toggle: ${value ? "enabled" : "disabled"}');
                   },
+                  controlSize: _controlSize,
                 ),
               ),
               const SizedBox(height: 24),
@@ -212,6 +227,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                       value: _darkMode,
                       label: 'Switch Style',
                       systemSymbolName: 'switch.2',
+                      tint: MacOS26Colors.orange,
                       toggleStyle: CNToggleStyle.switch_,
                       onChanged: (value) {
                         setState(() {
@@ -224,17 +240,20 @@ class _ToggleDemoState extends State<ToggleDemo> {
                       value: _notifications,
                       label: 'Button Style',
                       systemSymbolName: 'button.rounded.fill',
+                      tint: MacOS26Colors.pink,
                       toggleStyle: CNToggleStyle.button,
                       onChanged: (value) {
                         setState(() {
                           _notifications = value;
                         });
                       },
+                      controlSize: CNControlSize.large,
                     ),
                     const SizedBox(height: 12),
                     CNToggle(
                       value: _checkboxStyle,
                       label: 'Checkbox Style',
+                      tint: MacOS26Colors.teal,
                       systemSymbolName: 'checkmark.square',
                       toggleStyle: CNToggleStyle.checkbox,
                       onChanged: (value) {
@@ -242,6 +261,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                           _checkboxStyle = value;
                         });
                       },
+                      controlSize: _controlSize,
                     ),
                     const SizedBox(height: 12),
                     CNToggle(
@@ -254,6 +274,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                           _automaticStyle = value;
                         });
                       },
+                      controlSize: _controlSize,
                     ),
                   ],
                 ),
@@ -263,9 +284,5 @@ class _ToggleDemoState extends State<ToggleDemo> {
         ),
       ),
     );
-  }
-
-  void _showNotification(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), duration: const Duration(milliseconds: 800)));
   }
 }

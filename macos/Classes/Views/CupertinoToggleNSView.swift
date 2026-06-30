@@ -16,13 +16,19 @@ class CupertinoToggleNSView: NSView {
         var label: String? = nil
         var systemSymbolName: String? = nil
         var toggleStyle = "switch"
-        
+        var controlSize = "regular"
+        var tint: NSColor? = nil
+
         if let dict = args as? [String: Any] {
             if let v = dict["value"] as? NSNumber { initialValue = v.boolValue }
             if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
             if let v = dict["label"] as? String { label = v }
             if let v = dict["systemSymbolName"] as? String { systemSymbolName = v }
             if let v = dict["toggleStyle"] as? String { toggleStyle = v }
+            if let v = dict["controlSize"] as? String { controlSize = v }
+            if let v = dict["tint"] as? Int {
+                tint = ColorUtils.colorFromARGB(v)
+            }
         }
 
         var channelRef: FlutterMethodChannel? = nil
@@ -32,6 +38,8 @@ class CupertinoToggleNSView: NSView {
             label: label,
             systemSymbolName: systemSymbolName,
             toggleStyle: toggleStyle,
+            controlSize: controlSize,
+            tint: tint,
             onChanged: { newValue in
                 channelRef?.invokeMethod("onChanged", arguments: ["value": newValue])
             },
@@ -83,6 +91,23 @@ class CupertinoToggleNSView: NSView {
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
                 }
+            case "setControlSize":
+                if let args = call.arguments as? [String: Any] {
+                    model.controlSize = (args["controlSize"] as? String) ?? "regular"
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing controlSize", details: nil))
+                }
+            case "setTint":
+                if let args = call.arguments as? [String: Any],
+                   let tintValue = args["tint"] as? Int
+                {
+                    let ns = ColorUtils.colorFromARGB(tintValue)
+                    model.tint = ns
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing tint", details: nil))
+                }
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -95,9 +120,12 @@ class CupertinoToggleNSView: NSView {
 }
 
 // MARK: - Toggle Model
+
 class ToggleModel: ObservableObject {
     @Published var value: Bool
     @Published var enabled: Bool
+    @Published var controlSize: String
+    @Published var tint: NSColor?
     let label: String?
     let systemSymbolName: String?
     let toggleStyle: String
@@ -110,6 +138,8 @@ class ToggleModel: ObservableObject {
         label: String?,
         systemSymbolName: String?,
         toggleStyle: String,
+        controlSize: String,
+        tint: NSColor?,
         onChanged: @escaping (Bool) -> Void,
         onSizeChanged: @escaping (CGSize) -> Void
     ) {
@@ -118,6 +148,8 @@ class ToggleModel: ObservableObject {
         self.label = label
         self.systemSymbolName = systemSymbolName
         self.toggleStyle = toggleStyle
+        self.controlSize = controlSize
+        self.tint = tint
         self.onChanged = onChanged
         self.onSizeChanged = onSizeChanged
     }
@@ -133,13 +165,14 @@ class ToggleModel: ObservableObject {
 }
 
 // MARK: - Toggle View
+
 struct CupertinoToggleView: View {
     @ObservedObject var model: ToggleModel
     @State private var measuredSize: CGSize = .zero
 
     var body: some View {
         buildToggle()
-        .onGeometryChange(for: CGSize.self) { proxy in
+            .onGeometryChange(for: CGSize.self) { proxy in
                 proxy.size
             } action: { newValue in
                 model.onSizeChanged(newValue)
@@ -163,7 +196,8 @@ struct CupertinoToggleView: View {
             }
         }
         .disabled(!model.enabled)
-        .opacity(model.enabled ? 1.0 : 0.5)
+        .controlSize(SwiftUtils.controlSizeFromString(model.controlSize))
+        .tint(model.tint != nil ? Color(model.tint!) : nil)
 
         // Apply style based on configuration
         switch model.toggleStyle {
