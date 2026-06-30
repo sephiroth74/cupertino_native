@@ -2,6 +2,7 @@ import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 import 'demos/slider.dart';
 import 'demos/switch.dart';
+import 'demos/toggle_demo.dart';
 import 'demos/segmented_control.dart';
 import 'demos/picker.dart';
 import 'demos/tab_bar.dart';
@@ -160,6 +161,14 @@ class HomePage extends StatelessWidget {
                 trailing: CupertinoListTileChevron(),
                 onTap: () {
                   Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SwitchDemoPage()));
+                },
+              ),
+              CupertinoListTile(
+                title: Text('Toggle'),
+                leading: CNIcon(symbol: CNSymbol('toggle.2', color: accentColor)),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ToggleDemo()));
                 },
               ),
               CupertinoListTile(

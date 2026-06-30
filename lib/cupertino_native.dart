@@ -4,6 +4,7 @@ export 'cupertino_native_platform_interface.dart';
 export 'cupertino_native_method_channel.dart';
 export 'components/slider.dart';
 export 'components/switch.dart';
+export 'components/toggle.dart';
 export 'components/segmented_control.dart';
 export 'components/picker.dart';
 export 'components/icon.dart';

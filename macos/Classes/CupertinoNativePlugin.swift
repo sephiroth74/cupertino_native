@@ -22,6 +22,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         let switchFactory = CupertinoSwitchViewFactory(messenger: registrar.messenger)
         registrar.register(switchFactory, withId: "CupertinoNativeSwitch")
 
+        let toggleFactory = CupertinoToggleViewFactory(messenger: registrar.messenger)
+        registrar.register(toggleFactory, withId: "cupertino_native/toggle")
+
         let segmentedFactory = CupertinoSegmentedControlViewFactory(messenger: registrar.messenger)
         registrar.register(segmentedFactory, withId: "CupertinoNativeSegmentedControl")
 
