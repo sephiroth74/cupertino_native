@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/cn_theme.dart';
+
 /// Layout axis for [CNSplitView].
 enum CNSplitAxis {
   /// Places panes left/right.
@@ -137,15 +139,7 @@ class CNSplitMetrics {
   }
 
   @override
-  int get hashCode => Object.hash(
-    axis,
-    totalExtent,
-    firstExtent,
-    secondExtent,
-    dividerThickness,
-    firstCollapsed,
-    secondCollapsed,
-  );
+  int get hashCode => Object.hash(axis, totalExtent, firstExtent, secondExtent, dividerThickness, firstCollapsed, secondCollapsed);
 }
 
 /// Controller for querying and changing [CNSplitView] state.
@@ -276,9 +270,7 @@ class CNSplitView extends StatefulWidget {
        assert(initialFraction >= minFraction && initialFraction <= maxFraction),
        assert(snapThreshold >= 0),
        assert(snapReleaseThreshold == null || snapReleaseThreshold > 0),
-       assert(
-         snapReleaseThreshold == null || snapReleaseThreshold >= snapThreshold,
-       ),
+       assert(snapReleaseThreshold == null || snapReleaseThreshold >= snapThreshold),
        assert(snapFractions.every((value) => value > 0 && value < 1));
 
   /// Whether keyboard shortcuts should autofocus when the widget appears.
@@ -358,8 +350,7 @@ class CNSplitView extends StatefulWidget {
   State<CNSplitView> createState() => _CNSplitViewState();
 }
 
-class _CNSplitViewState extends State<CNSplitView>
-    implements _SplitViewControllerBinding {
+class _CNSplitViewState extends State<CNSplitView> implements _SplitViewControllerBinding {
   double? _activeSnapFraction;
   double? _dragRawFraction;
   double? _dragStartFraction;
@@ -410,9 +401,7 @@ class _CNSplitViewState extends State<CNSplitView>
     }
 
     // Keep current state but enforce updated global bounds.
-    _fraction = _fraction
-        .clamp(widget.minFraction, widget.maxFraction)
-        .toDouble();
+    _fraction = _fraction.clamp(widget.minFraction, widget.maxFraction).toDouble();
     _restoreFraction = _normalizedFraction(_restoreFraction ?? _fraction);
   }
 
@@ -427,9 +416,7 @@ class _CNSplitViewState extends State<CNSplitView>
     if (!_firstCollapsed) {
       return;
     }
-    final fallback = _normalizedFraction(
-      _restoreFraction ?? _defaultInitialFraction,
-    );
+    final fallback = _normalizedFraction(_restoreFraction ?? _defaultInitialFraction);
     setState(() {
       _firstCollapsed = false;
       _fraction = fallback;
@@ -442,9 +429,7 @@ class _CNSplitViewState extends State<CNSplitView>
     if (!_secondCollapsed) {
       return;
     }
-    final fallback = _normalizedFraction(
-      _restoreFraction ?? _defaultInitialFraction,
-    );
+    final fallback = _normalizedFraction(_restoreFraction ?? _defaultInitialFraction);
     setState(() {
       _secondCollapsed = false;
       _fraction = fallback;
@@ -517,19 +502,15 @@ class _CNSplitViewState extends State<CNSplitView>
 
   CNSplitViewController? get _controller => widget.controller;
 
-  double get _effectiveDividerThickness =>
-      math.max(widget.dividerThickness, widget.dividerInteractiveThickness);
+  double get _effectiveDividerThickness => math.max(widget.dividerThickness, widget.dividerInteractiveThickness);
 
   bool get _isMacOS => defaultTargetPlatform == TargetPlatform.macOS;
 
-  MouseCursor get _resizeCursor => widget.axis == CNSplitAxis.horizontal
-      ? SystemMouseCursors.resizeColumn
-      : SystemMouseCursors.resizeRow;
+  MouseCursor get _resizeCursor =>
+      widget.axis == CNSplitAxis.horizontal ? SystemMouseCursors.resizeColumn : SystemMouseCursors.resizeRow;
 
   double get _defaultInitialFraction =>
-      (widget.first.initialFraction ?? widget.initialFraction)
-          .clamp(widget.minFraction, widget.maxFraction)
-          .toDouble();
+      (widget.first.initialFraction ?? widget.initialFraction).clamp(widget.minFraction, widget.maxFraction).toDouble();
 
   Map<ShortcutActivator, VoidCallback> _buildShortcutBindings() {
     final bindings = <ShortcutActivator, VoidCallback>{
@@ -538,27 +519,11 @@ class _CNSplitViewState extends State<CNSplitView>
     };
 
     if (widget.axis == CNSplitAxis.horizontal) {
-      bindings[const SingleActivator(
-        LogicalKeyboardKey.arrowLeft,
-        alt: true,
-      )] = () =>
-          _nudgeFirstPane(-widget.keyboardResizeStep);
-      bindings[const SingleActivator(
-        LogicalKeyboardKey.arrowRight,
-        alt: true,
-      )] = () =>
-          _nudgeFirstPane(widget.keyboardResizeStep);
+      bindings[const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true)] = () => _nudgeFirstPane(-widget.keyboardResizeStep);
+      bindings[const SingleActivator(LogicalKeyboardKey.arrowRight, alt: true)] = () => _nudgeFirstPane(widget.keyboardResizeStep);
     } else {
-      bindings[const SingleActivator(
-        LogicalKeyboardKey.arrowUp,
-        alt: true,
-      )] = () =>
-          _nudgeFirstPane(-widget.keyboardResizeStep);
-      bindings[const SingleActivator(
-        LogicalKeyboardKey.arrowDown,
-        alt: true,
-      )] = () =>
-          _nudgeFirstPane(widget.keyboardResizeStep);
+      bindings[const SingleActivator(LogicalKeyboardKey.arrowUp, alt: true)] = () => _nudgeFirstPane(-widget.keyboardResizeStep);
+      bindings[const SingleActivator(LogicalKeyboardKey.arrowDown, alt: true)] = () => _nudgeFirstPane(widget.keyboardResizeStep);
     }
 
     return bindings;
@@ -608,10 +573,7 @@ class _CNSplitViewState extends State<CNSplitView>
     final firstExtent = clampedFraction * availableExtent;
     final secondExtent = availableExtent - firstExtent;
 
-    return _ComputedExtents(
-      firstExtent: firstExtent,
-      secondExtent: secondExtent,
-    );
+    return _ComputedExtents(firstExtent: firstExtent, secondExtent: secondExtent);
   }
 
   double _normalizedFraction(double value) {
@@ -626,12 +588,8 @@ class _CNSplitViewState extends State<CNSplitView>
     final firstMin = widget.first.minExtent / availableExtent;
     final secondMin = widget.second.minExtent / availableExtent;
 
-    final firstMax = widget.first.maxExtent == null
-        ? 1.0
-        : widget.first.maxExtent! / availableExtent;
-    final secondMax = widget.second.maxExtent == null
-        ? 1.0
-        : widget.second.maxExtent! / availableExtent;
+    final firstMax = widget.first.maxExtent == null ? 1.0 : widget.first.maxExtent! / availableExtent;
+    final secondMax = widget.second.maxExtent == null ? 1.0 : widget.second.maxExtent! / availableExtent;
 
     var lower = widget.minFraction;
     var upper = widget.maxFraction;
@@ -652,23 +610,14 @@ class _CNSplitViewState extends State<CNSplitView>
   }
 
   Widget _buildDivider(BuildContext context) {
-    final color = CupertinoDynamicColor.resolve(
-      CupertinoColors.separator,
-      context,
-    );
-    final grabberColor = CupertinoDynamicColor.resolve(
-      CupertinoColors.tertiaryLabel,
-      context,
-    ).withValues(alpha: 0.55);
+    final theme = CNTheme.of(context);
+    final color = theme.separatorColor;
+    final grabberColor = theme.secondaryLabelColor.withValues(alpha: 0.55);
 
     final plainLine = Center(
       child: SizedBox(
-        width: widget.axis == CNSplitAxis.horizontal
-            ? widget.dividerThickness
-            : double.infinity,
-        height: widget.axis == CNSplitAxis.vertical
-            ? widget.dividerThickness
-            : double.infinity,
+        width: widget.axis == CNSplitAxis.horizontal ? widget.dividerThickness : double.infinity,
+        height: widget.axis == CNSplitAxis.vertical ? widget.dividerThickness : double.infinity,
         child: ColoredBox(color: color),
       ),
     );
@@ -702,30 +651,14 @@ class _CNSplitViewState extends State<CNSplitView>
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onDoubleTap: _onDividerDoubleTap,
-          onHorizontalDragStart: widget.axis == CNSplitAxis.horizontal
-              ? _onDividerDragStart
-              : null,
-          onHorizontalDragUpdate: widget.axis == CNSplitAxis.horizontal
-              ? _onDividerDragUpdate
-              : null,
-          onHorizontalDragEnd: widget.axis == CNSplitAxis.horizontal
-              ? _onDividerDragEnd
-              : null,
-          onHorizontalDragCancel: widget.axis == CNSplitAxis.horizontal
-              ? _onDividerDragCancel
-              : null,
-          onVerticalDragStart: widget.axis == CNSplitAxis.vertical
-              ? _onDividerDragStart
-              : null,
-          onVerticalDragUpdate: widget.axis == CNSplitAxis.vertical
-              ? _onDividerDragUpdate
-              : null,
-          onVerticalDragEnd: widget.axis == CNSplitAxis.vertical
-              ? _onDividerDragEnd
-              : null,
-          onVerticalDragCancel: widget.axis == CNSplitAxis.vertical
-              ? _onDividerDragCancel
-              : null,
+          onHorizontalDragStart: widget.axis == CNSplitAxis.horizontal ? _onDividerDragStart : null,
+          onHorizontalDragUpdate: widget.axis == CNSplitAxis.horizontal ? _onDividerDragUpdate : null,
+          onHorizontalDragEnd: widget.axis == CNSplitAxis.horizontal ? _onDividerDragEnd : null,
+          onHorizontalDragCancel: widget.axis == CNSplitAxis.horizontal ? _onDividerDragCancel : null,
+          onVerticalDragStart: widget.axis == CNSplitAxis.vertical ? _onDividerDragStart : null,
+          onVerticalDragUpdate: widget.axis == CNSplitAxis.vertical ? _onDividerDragUpdate : null,
+          onVerticalDragEnd: widget.axis == CNSplitAxis.vertical ? _onDividerDragEnd : null,
+          onVerticalDragCancel: widget.axis == CNSplitAxis.vertical ? _onDividerDragCancel : null,
           child: dividerBody,
         ),
       ),
@@ -782,9 +715,7 @@ class _CNSplitViewState extends State<CNSplitView>
       return;
     }
 
-    final delta = widget.axis == CNSplitAxis.horizontal
-        ? details.delta.dx
-        : details.delta.dy;
+    final delta = widget.axis == CNSplitAxis.horizontal ? details.delta.dx : details.delta.dy;
     final rawBase = _dragRawFraction ?? _fraction;
     final rawNext = rawBase + (delta / extent);
     final clampedRaw = _clampFractionForExtent(rawNext, extent);
@@ -816,9 +747,7 @@ class _CNSplitViewState extends State<CNSplitView>
     _dragStartFraction = null;
     _dragRawFraction = null;
     _activeSnapFraction = null;
-    final unchangedFromStart =
-        dragStartFraction != null &&
-        (_fraction - dragStartFraction).abs() < 0.0001;
+    final unchangedFromStart = dragStartFraction != null && (_fraction - dragStartFraction).abs() < 0.0001;
     if ((_fraction - snapped).abs() < 0.0001 && unchangedFromStart) {
       if (_isDividerDragging) {
         setState(() {
@@ -836,9 +765,7 @@ class _CNSplitViewState extends State<CNSplitView>
   }
 
   void _onDividerDragCancel() {
-    if (!_isDividerDragging &&
-        _dragStartFraction == null &&
-        _dragRawFraction == null) {
+    if (!_isDividerDragging && _dragStartFraction == null && _dragRawFraction == null) {
       return;
     }
     setState(() {
@@ -862,14 +789,8 @@ class _CNSplitViewState extends State<CNSplitView>
     }
 
     final engageThreshold = widget.snapThreshold;
-    final autoReleaseThreshold = math.max(
-      widget.snapThreshold * 2.0,
-      widget.snapThreshold + (8.0 / availableExtent),
-    );
-    final releaseThreshold =
-        (widget.snapReleaseThreshold ?? autoReleaseThreshold)
-            .clamp(engageThreshold, 1.0)
-            .toDouble();
+    final autoReleaseThreshold = math.max(widget.snapThreshold * 2.0, widget.snapThreshold + (8.0 / availableExtent));
+    final releaseThreshold = (widget.snapReleaseThreshold ?? autoReleaseThreshold).clamp(engageThreshold, 1.0).toDouble();
 
     final activeSnap = _activeSnapFraction;
     if (activeSnap != null) {
@@ -908,11 +829,7 @@ class _CNSplitViewState extends State<CNSplitView>
   }
 
   List<double> _effectiveSnapCandidates(double availableExtent) {
-    final normalized =
-        widget.snapFractions
-            .map((value) => _clampFractionForExtent(value, availableExtent))
-            .toList()
-          ..sort();
+    final normalized = widget.snapFractions.map((value) => _clampFractionForExtent(value, availableExtent)).toList()..sort();
 
     if (normalized.isEmpty) {
       return const <double>[];
@@ -973,14 +890,9 @@ class _CNSplitViewState extends State<CNSplitView>
       cursor: _isDividerDragging ? _resizeCursor : MouseCursor.defer,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final totalAxisExtent = widget.axis == CNSplitAxis.horizontal
-              ? constraints.maxWidth
-              : constraints.maxHeight;
+          final totalAxisExtent = widget.axis == CNSplitAxis.horizontal ? constraints.maxWidth : constraints.maxHeight;
 
-          final availableExtent = math.max<double>(
-            0.0,
-            totalAxisExtent - _effectiveDividerThickness,
-          );
+          final availableExtent = math.max<double>(0.0, totalAxisExtent - _effectiveDividerThickness);
           _lastAvailableExtent = availableExtent;
 
           final computed = _computeExtents(availableExtent);
@@ -1003,30 +915,18 @@ class _CNSplitViewState extends State<CNSplitView>
           if (widget.axis == CNSplitAxis.horizontal) {
             return Row(
               children: [
-                SizedBox(
-                  width: firstExtent,
-                  child: _buildPane(widget.first.child),
-                ),
+                SizedBox(width: firstExtent, child: _buildPane(widget.first.child)),
                 divider,
-                SizedBox(
-                  width: secondExtent,
-                  child: _buildPane(widget.second.child),
-                ),
+                SizedBox(width: secondExtent, child: _buildPane(widget.second.child)),
               ],
             );
           }
 
           return Column(
             children: [
-              SizedBox(
-                height: firstExtent,
-                child: _buildPane(widget.first.child),
-              ),
+              SizedBox(height: firstExtent, child: _buildPane(widget.first.child)),
               divider,
-              SizedBox(
-                height: secondExtent,
-                child: _buildPane(widget.second.child),
-              ),
+              SizedBox(height: secondExtent, child: _buildPane(widget.second.child)),
             ],
           );
         },
@@ -1046,10 +946,7 @@ class _CNSplitViewState extends State<CNSplitView>
 }
 
 class _ComputedExtents {
-  const _ComputedExtents({
-    required this.firstExtent,
-    required this.secondExtent,
-  });
+  const _ComputedExtents({required this.firstExtent, required this.secondExtent});
 
   final double firstExtent;
   final double secondExtent;
@@ -1061,6 +958,8 @@ class _MacOSDividerGrabber extends StatelessWidget {
   final CNSplitAxis axis;
   final Color color;
 
+  Color _backgroundColor(BuildContext context) => CNTheme.of(context).fillPrimaryColor.withValues(alpha: 0.45);
+
   @override
   Widget build(BuildContext context) {
     final isHorizontalSplit = axis == CNSplitAxis.horizontal;
@@ -1070,18 +969,12 @@ class _MacOSDividerGrabber extends StatelessWidget {
       (_) => Container(
         width: 3,
         height: 3,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(1.5),
-        ),
+        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(1.5)),
       ),
     );
 
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemFill.withValues(alpha: 0.45),
-        borderRadius: BorderRadius.circular(5),
-      ),
+      decoration: BoxDecoration(color: _backgroundColor(context), borderRadius: BorderRadius.circular(5)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
         child: isHorizontalSplit

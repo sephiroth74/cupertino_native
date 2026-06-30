@@ -30,6 +30,7 @@ import 'demos/split_view.dart';
 import 'demos/group_box.dart';
 import 'demos/tab_view.dart';
 import 'demos/swiftui_toolbar_demo.dart';
+import 'demos/theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -60,14 +61,19 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(
-      debugShowCheckedModeBanner: false,
-      theme: CupertinoThemeData(brightness: _isDarkMode ? Brightness.dark : Brightness.light, primaryColor: _accentColor),
-      home: HomePage(
-        isDarkMode: _isDarkMode,
-        onToggleTheme: _toggleTheme,
-        accentColor: _accentColor,
-        onSelectAccentColor: _setAccentColor,
+    final brightness = _isDarkMode ? Brightness.dark : Brightness.light;
+
+    return CNTheme(
+      data: CNThemeData(brightness: brightness, primaryColor: _accentColor),
+      child: CupertinoApp(
+        debugShowCheckedModeBanner: false,
+        theme: CupertinoThemeData(brightness: brightness, primaryColor: _accentColor),
+        home: HomePage(
+          isDarkMode: _isDarkMode,
+          onToggleTheme: _toggleTheme,
+          accentColor: _accentColor,
+          onSelectAccentColor: _setAccentColor,
+        ),
       ),
     );
   }
@@ -102,11 +108,13 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = CNTheme.of(context);
+
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: theme.groupedBackgroundColor,
       navigationBar: CupertinoNavigationBar(
         enableBackgroundFilterBlur: true,
-        backgroundColor: CupertinoColors.systemGroupedBackground,
+        backgroundColor: theme.groupedBackgroundColor,
         middle: const Text('Cupertino Native'),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -145,6 +153,15 @@ class HomePage extends StatelessWidget {
           CupertinoListSection.insetGrouped(
             header: Text('Components'),
             children: [
+              CupertinoListTile(
+                title: Text('Theme Tokens'),
+                leading: CNIcon(symbol: CNSymbol('paintbrush.pointed', color: accentColor)),
+                trailing: CupertinoListTileChevron(),
+                onTap: () {
+                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ThemeDemoPage()));
+                },
+              ),
+
               CupertinoListTile(
                 title: Text('Slider'),
                 leading: CNIcon(symbol: CNSymbol('slider.horizontal.3', color: accentColor)),

@@ -34,6 +34,65 @@ You will also need to install the Xcode 26 beta and use `xcode-select` to set it
 sudo xcode-select -s /Applications/Xcode-beta.app
 ```
 
+## Theming (CNTheme)
+
+The package now includes a semantic theme layer that works alongside existing widget APIs.
+
+### Quick start
+
+Wrap your app with `CNTheme` and provide `CNThemeData`:
+
+```dart
+return CNTheme(
+  data: CNThemeData(
+    brightness: Brightness.light,
+    primaryColor: CupertinoColors.systemBlue,
+  ),
+  child: CupertinoApp(
+    home: MyHomePage(),
+  ),
+);
+```
+
+### What is included
+
+- Semantic colors: `primaryColor`, `secondaryColor`, `destructiveColor`,
+  `labelColor`, `secondaryLabelColor`, `separatorColor`,
+  `fillPrimaryColor`, `fillSecondaryColor`, `fillTertiaryColor`, and surfaces.
+- Material tokens from macOS26 presets:
+  `materialUltraThin`, `materialThin`, `materialMedium`,
+  `materialThick`, `materialUltraThick`.
+- HIG-aligned typography via `CNTypography`:
+  `largeTitle`, `title1`, `title2`, `title3`, `headline`, `body`,
+  `callout`, `subheadline`, `footnote`, `caption1`, `caption2`.
+
+### Accessing theme values
+
+```dart
+final theme = CNTheme.of(context);
+
+Text(
+  'Hello',
+  style: theme.typography.body,
+)
+```
+
+### Override precedence
+
+When both global and local styles exist, resolution follows this order:
+
+1. Explicit widget parameter (`tint`, `textColor`, `backgroundColor`, etc.)
+2. Component-level override (where available)
+3. `CNThemeData` semantic default
+
+### Migration notes
+
+- Existing code that passes explicit colors/fonts keeps working unchanged.
+- If you omit explicit styling, migrated components now use semantic `CNThemeData`
+  defaults.
+- The example app includes a **Theme Tokens** page demonstrating colors,
+  materials, and typography.
+
 ## What's in the package
 
 This package ships a handful of native Liquid Glass widgets. Each widget exposes a simple, Flutter‑friendly API and falls back to a reasonable Flutter implementation on non‑Apple platforms.

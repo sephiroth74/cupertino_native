@@ -105,8 +105,7 @@ class _CNTextFieldState extends State<CNTextField> {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller?.removeListener(_onControllerChanged);
-      _controller =
-          widget.controller ?? TextEditingController(text: _controller.text);
+      _controller = widget.controller ?? TextEditingController(text: _controller.text);
       _controller.addListener(_onControllerChanged);
     }
     _syncPropsToNativeIfNeeded();
@@ -131,6 +130,12 @@ class _CNTextFieldState extends State<CNTextField> {
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
+  Color? get _effectiveTextColor => widget.textColor ?? CNTheme.of(context).labelColor;
+
+  Color? get _effectivePlaceholderColor => widget.placeholderColor ?? CNTheme.of(context).secondaryLabelColor;
+
+  Color? get _effectiveBackgroundColor => widget.backgroundColor ?? CNTheme.of(context).fillPrimaryColor;
+
   void _onControllerChanged() {
     if (_isUpdatingFromNative) {
       return;
@@ -145,14 +150,10 @@ class _CNTextFieldState extends State<CNTextField> {
     // Send selection to native if changed
     final selection = _controller.selection;
     if (selection.isValid) {
-      if (selection.baseOffset != _lastSelectionBaseSent ||
-          selection.extentOffset != _lastSelectionExtentSent) {
+      if (selection.baseOffset != _lastSelectionBaseSent || selection.extentOffset != _lastSelectionExtentSent) {
         _lastSelectionBaseSent = selection.baseOffset;
         _lastSelectionExtentSent = selection.extentOffset;
-        _channel?.invokeMethod('setSelection', {
-          'base': selection.baseOffset,
-          'extent': selection.extentOffset,
-        });
+        _channel?.invokeMethod('setSelection', {'base': selection.baseOffset, 'extent': selection.extentOffset});
       }
     }
   }
@@ -189,17 +190,11 @@ class _CNTextFieldState extends State<CNTextField> {
             final previousSelection = _controller.selection;
             newSelection = previousSelection.copyWith(
               baseOffset: previousSelection.baseOffset.clamp(0, value.length),
-              extentOffset: previousSelection.extentOffset.clamp(
-                0,
-                value.length,
-              ),
+              extentOffset: previousSelection.extentOffset.clamp(0, value.length),
             );
           }
 
-          _controller.value = TextEditingValue(
-            text: value,
-            selection: newSelection,
-          );
+          _controller.value = TextEditingValue(text: value, selection: newSelection);
 
           _isUpdatingFromNative = false;
           widget.onChanged?.call(value);
@@ -212,17 +207,12 @@ class _CNTextFieldState extends State<CNTextField> {
           final extent = args['extent'] as int?;
           if (base != null && extent != null && base >= 0 && extent >= 0) {
             final currentSelection = _controller.selection;
-            if (currentSelection.baseOffset != base ||
-                currentSelection.extentOffset != extent) {
-              final selection = TextSelection(
-                baseOffset: base,
-                extentOffset: extent,
-              );
+            if (currentSelection.baseOffset != base || currentSelection.extentOffset != extent) {
+              final selection = TextSelection(baseOffset: base, extentOffset: extent);
               _isUpdatingFromNative = true;
               _lastSelectionBaseSent = base;
               _lastSelectionExtentSent = extent;
-              if (base <= _controller.text.length &&
-                  extent <= _controller.text.length) {
+              if (base <= _controller.text.length && extent <= _controller.text.length) {
                 _controller.selection = selection;
                 _pendingSelection = null;
               } else {
@@ -250,12 +240,9 @@ class _CNTextFieldState extends State<CNTextField> {
 
   void _cacheCurrentProps() {
     _lastPlaceholder = widget.placeholder;
-    _lastTextColor = resolveColorToArgb(widget.textColor, context);
-    _lastPlaceholderColor = resolveColorToArgb(
-      widget.placeholderColor,
-      context,
-    );
-    _lastBackgroundColor = resolveColorToArgb(widget.backgroundColor, context);
+    _lastTextColor = resolveColorToArgb(_effectiveTextColor, context);
+    _lastPlaceholderColor = resolveColorToArgb(_effectivePlaceholderColor, context);
+    _lastBackgroundColor = resolveColorToArgb(_effectiveBackgroundColor, context);
     _lastFont = widget.font;
     _lastPlaceholderFont = widget.placeholderFont;
     _lastControlSize = widget.controlSize;
@@ -271,37 +258,28 @@ class _CNTextFieldState extends State<CNTextField> {
     bool requiresIntrinsicSize = false;
 
     if (_lastPlaceholder != widget.placeholder) {
-      await channel.invokeMethod('setPlaceholder', {
-        'value': widget.placeholder,
-      });
+      await channel.invokeMethod('setPlaceholder', {'value': widget.placeholder});
       _lastPlaceholder = widget.placeholder;
     }
 
     if (!mounted) return;
-    final textColor = resolveColorToArgb(widget.textColor, context);
+    final textColor = resolveColorToArgb(_effectiveTextColor, context);
     if (_lastTextColor != textColor) {
       await channel.invokeMethod('setTextColor', {'value': textColor});
       _lastTextColor = textColor;
     }
 
     if (!mounted) return;
-    final placeholderColor = resolveColorToArgb(
-      widget.placeholderColor,
-      context,
-    );
+    final placeholderColor = resolveColorToArgb(_effectivePlaceholderColor, context);
     if (_lastPlaceholderColor != placeholderColor) {
-      await channel.invokeMethod('setPlaceholderColor', {
-        'value': placeholderColor,
-      });
+      await channel.invokeMethod('setPlaceholderColor', {'value': placeholderColor});
       _lastPlaceholderColor = placeholderColor;
     }
 
     if (!mounted) return;
-    final backgroundColor = resolveColorToArgb(widget.backgroundColor, context);
+    final backgroundColor = resolveColorToArgb(_effectiveBackgroundColor, context);
     if (_lastBackgroundColor != backgroundColor) {
-      await channel.invokeMethod('setBackgroundColor', {
-        'value': backgroundColor,
-      });
+      await channel.invokeMethod('setBackgroundColor', {'value': backgroundColor});
       _lastBackgroundColor = backgroundColor;
     }
 
@@ -314,9 +292,7 @@ class _CNTextFieldState extends State<CNTextField> {
 
     if (!mounted) return;
     if (_lastPlaceholderFont != widget.placeholderFont) {
-      await channel.invokeMethod('setPlaceholderFont', {
-        'value': widget.placeholderFont?.toMap(),
-      });
+      await channel.invokeMethod('setPlaceholderFont', {'value': widget.placeholderFont?.toMap()});
       _lastPlaceholderFont = widget.placeholderFont;
       requiresIntrinsicSize = true;
     }
@@ -329,18 +305,14 @@ class _CNTextFieldState extends State<CNTextField> {
 
     if (!mounted) return;
     if (_lastControlSize != widget.controlSize) {
-      await channel.invokeMethod('setControlSize', {
-        'value': widget.controlSize.name,
-      });
+      await channel.invokeMethod('setControlSize', {'value': widget.controlSize.name});
       _lastControlSize = widget.controlSize;
       requiresIntrinsicSize = true;
     }
 
     if (!mounted) return;
     if (_lastBezelStyle != widget.bezelStyle) {
-      await channel.invokeMethod('setBezelStyle', {
-        'value': widget.bezelStyle.name,
-      });
+      await channel.invokeMethod('setBezelStyle', {'value': widget.bezelStyle.name});
       _lastBezelStyle = widget.bezelStyle;
       requiresIntrinsicSize = true;
     }
@@ -395,16 +367,12 @@ class _CNTextFieldState extends State<CNTextField> {
 
     final creationParams = <String, dynamic>{
       'text': _controller.text,
-      'selectionBase': _controller.selection.isValid
-          ? _controller.selection.baseOffset
-          : null,
-      'selectionExtent': _controller.selection.isValid
-          ? _controller.selection.extentOffset
-          : null,
+      'selectionBase': _controller.selection.isValid ? _controller.selection.baseOffset : null,
+      'selectionExtent': _controller.selection.isValid ? _controller.selection.extentOffset : null,
       'placeholder': widget.placeholder,
-      'textColor': resolveColorToArgb(widget.textColor, context),
-      'placeholderColor': resolveColorToArgb(widget.placeholderColor, context),
-      'backgroundColor': resolveColorToArgb(widget.backgroundColor, context),
+      'textColor': resolveColorToArgb(_effectiveTextColor, context),
+      'placeholderColor': resolveColorToArgb(_effectivePlaceholderColor, context),
+      'backgroundColor': resolveColorToArgb(_effectiveBackgroundColor, context),
       'font': widget.font?.toMap(),
       'placeholderFont': widget.placeholderFont?.toMap(),
       'controlSize': widget.controlSize.name,
@@ -416,23 +384,13 @@ class _CNTextFieldState extends State<CNTextField> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width =
-            widget.width ??
-            _intrinsicWidth ??
-            (constraints.hasBoundedWidth
-                ? constraints.maxWidth
-                : _kDefaultTextFieldWidth);
-        final height =
-            _intrinsicHeight ??
-            (constraints.hasBoundedHeight
-                ? constraints.maxHeight
-                : _kDefaultTextFieldHeight);
+            widget.width ?? _intrinsicWidth ?? (constraints.hasBoundedWidth ? constraints.maxWidth : _kDefaultTextFieldWidth);
+        final height = _intrinsicHeight ?? (constraints.hasBoundedHeight ? constraints.maxHeight : _kDefaultTextFieldHeight);
 
         return Align(
           alignment: Alignment.centerLeft,
           child: SizedBox(
-            width: constraints.hasBoundedWidth
-                ? width.clamp(0.0, constraints.maxWidth)
-                : width,
+            width: constraints.hasBoundedWidth ? width.clamp(0.0, constraints.maxWidth) : width,
             height: height,
             child: AppKitView(
               viewType: viewType,

@@ -127,7 +127,7 @@ class _CNProgressIndicatorState extends State<CNProgressIndicator> {
     _lastMaxValue = widget.maxValue;
   }
 
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+  bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
 
   void _onCreated(int id) {
     final ch = MethodChannel('CupertinoNativeProgressIndicator_$id');
@@ -218,22 +218,16 @@ class _CNProgressIndicatorState extends State<CNProgressIndicator> {
     bool needsIntrinsicSize = false;
 
     if (_lastStyle != widget.style) {
-      await ch.invokeMethod('updateProgress', {
-        'progressStyle': widget.style.name,
-      });
+      await ch.invokeMethod('updateProgress', {'progressStyle': widget.style.name});
       _lastStyle = widget.style;
     }
     if (_lastControlSize != widget.size) {
-      await ch.invokeMethod('updateProgress', {
-        'progressSize': widget.size.name,
-      });
+      await ch.invokeMethod('updateProgress', {'progressSize': widget.size.name});
       _lastControlSize = widget.size;
       needsIntrinsicSize = true;
     }
     if (_lastIndeterminate != widget.indeterminate) {
-      await ch.invokeMethod('updateProgress', {
-        'progressIndeterminate': widget.indeterminate,
-      });
+      await ch.invokeMethod('updateProgress', {'progressIndeterminate': widget.indeterminate});
       _lastIndeterminate = widget.indeterminate;
     }
     if (_lastValue != widget.value) {
@@ -241,15 +235,11 @@ class _CNProgressIndicatorState extends State<CNProgressIndicator> {
       _lastValue = widget.value;
     }
     if (_lastMinValue != widget.minValue) {
-      await ch.invokeMethod('updateProgress', {
-        'progressMinValue': widget.minValue,
-      });
+      await ch.invokeMethod('updateProgress', {'progressMinValue': widget.minValue});
       _lastMinValue = widget.minValue;
     }
     if (_lastMaxValue != widget.maxValue) {
-      await ch.invokeMethod('updateProgress', {
-        'progressMaxValue': widget.maxValue,
-      });
+      await ch.invokeMethod('updateProgress', {'progressMaxValue': widget.maxValue});
       _lastMaxValue = widget.maxValue;
     }
 
@@ -281,9 +271,7 @@ class _CNProgressIndicatorState extends State<CNProgressIndicator> {
       creationParams: creationParams,
       creationParamsCodec: const StandardMessageCodec(),
       onPlatformViewCreated: _onCreated,
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-      },
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{Factory<TapGestureRecognizer>(() => TapGestureRecognizer())},
     );
 
     return LayoutBuilder(
@@ -300,9 +288,7 @@ class _CNProgressIndicatorState extends State<CNProgressIndicator> {
                   ? (_lastControlSize.index >= CNControlSize.regular.index
                         ? _kDefaultWidthSpinningRegular
                         : _kDefaultWidthSpinningSmall)
-                  : (_lastControlSize.index >= CNControlSize.regular.index
-                        ? _kDefaultWidthBarRegular
-                        : _kDefaultWidthBarSmall));
+                  : (_lastControlSize.index >= CNControlSize.regular.index ? _kDefaultWidthBarRegular : _kDefaultWidthBarSmall));
         } else {
           width = hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth;
         }
@@ -314,9 +300,7 @@ class _CNProgressIndicatorState extends State<CNProgressIndicator> {
                   ? (_lastControlSize.index >= CNControlSize.regular.index
                         ? _kDefaultHeightSpinningRegular
                         : _kDefaultHeightSpinningSmall)
-                  : (_lastControlSize.index >= CNControlSize.regular.index
-                        ? _kDefaultHeightBarRegular
-                        : _kDefaultHeightBarSmall));
+                  : (_lastControlSize.index >= CNControlSize.regular.index ? _kDefaultHeightBarRegular : _kDefaultHeightBarSmall));
         } else {
           height = hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight;
         }

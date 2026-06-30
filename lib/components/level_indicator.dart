@@ -100,7 +100,7 @@ class _CNLevelIndicatorState extends State<CNLevelIndicator> {
     super.initState();
   }
 
-  bool get isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+  bool get isDark => CNTheme.brightnessOf(context) == Brightness.dark;
 
   void onPlatformViewCreated(int id) {
     channel = MethodChannel('CupertinoNativeLevelIndicator_$id');
@@ -149,17 +149,11 @@ class _CNLevelIndicatorState extends State<CNLevelIndicator> {
 
     bool needsIntrinsicSize = false;
 
-    if (oldWidget.minValue != widget.minValue ||
-        oldWidget.maxValue != widget.maxValue) {
-      await ch.invokeMethod('setRange', {
-        'min': widget.minValue,
-        'max': widget.maxValue,
-      });
+    if (oldWidget.minValue != widget.minValue || oldWidget.maxValue != widget.maxValue) {
+      await ch.invokeMethod('setRange', {'min': widget.minValue, 'max': widget.maxValue});
     }
 
-    final double clamped = widget.value
-        .clamp(widget.minValue, widget.maxValue)
-        .toDouble();
+    final double clamped = widget.value.clamp(widget.minValue, widget.maxValue).toDouble();
     if (oldWidget.value != clamped) {
       await ch.invokeMethod('setValue', {'value': clamped, 'animated': false});
     }
@@ -169,9 +163,7 @@ class _CNLevelIndicatorState extends State<CNLevelIndicator> {
     }
 
     if (oldWidget.levelIndicatorStyle != widget.levelIndicatorStyle) {
-      await ch.invokeMethod('setLevelIndicatorStyle', {
-        'value': widget.levelIndicatorStyle.name,
-      });
+      await ch.invokeMethod('setLevelIndicatorStyle', {'value': widget.levelIndicatorStyle.name});
       needsIntrinsicSize = true;
     }
 
@@ -186,25 +178,19 @@ class _CNLevelIndicatorState extends State<CNLevelIndicator> {
     if (!mounted) return;
     if (oldWidget.fillColor != widget.fillColor) {
       // ignore: use_build_context_synchronously
-      await ch.invokeMethod('setFillColor', {
-        'value': resolveColorToArgb(widget.fillColor, context),
-      });
+      await ch.invokeMethod('setFillColor', {'value': resolveColorToArgb(widget.fillColor, context)});
     }
 
     if (!mounted) return;
     if (oldWidget.warningColor != widget.warningColor) {
       // ignore: use_build_context_synchronously
-      await ch.invokeMethod('setWarningColor', {
-        'value': resolveColorToArgb(widget.warningColor, context),
-      });
+      await ch.invokeMethod('setWarningColor', {'value': resolveColorToArgb(widget.warningColor, context)});
     }
 
     if (!mounted) return;
     if (oldWidget.criticalColor != widget.criticalColor) {
       // ignore: use_build_context_synchronously
-      await ch.invokeMethod('setCriticalColor', {
-        'value': resolveColorToArgb(widget.criticalColor, context),
-      });
+      await ch.invokeMethod('setCriticalColor', {'value': resolveColorToArgb(widget.criticalColor, context)});
     }
 
     if (!mounted) return;
@@ -214,9 +200,7 @@ class _CNLevelIndicatorState extends State<CNLevelIndicator> {
 
     if (!mounted) return;
     if (oldWidget.criticalValue != widget.criticalValue) {
-      await ch.invokeMethod('setCriticalValue', {
-        'value': widget.criticalValue,
-      });
+      await ch.invokeMethod('setCriticalValue', {'value': widget.criticalValue});
     }
 
     if (!mounted) return;
@@ -265,9 +249,7 @@ class _CNLevelIndicatorState extends State<CNLevelIndicator> {
       creationParamsCodec: const StandardMessageCodec(),
       onPlatformViewCreated: onPlatformViewCreated,
       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-        Factory<HorizontalDragGestureRecognizer>(
-          () => HorizontalDragGestureRecognizer(),
-        ),
+        Factory<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer()),
         Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
       },
     );

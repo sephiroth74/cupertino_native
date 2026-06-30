@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 import '../channel/params.dart';
+import '../theme/cn_theme.dart';
 import '../style/sf_symbol.dart';
 
 /// A Cupertino-native segmented control.
@@ -96,7 +97,7 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
     super.dispose();
   }
 
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+  bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
 
   void _onPlatformViewCreated(int id) {
     final channel = MethodChannel('CupertinoNativeSegmentedControl_$id');
@@ -137,9 +138,7 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
       _lastEnabled = widget.enabled;
     }
     if (_lastSelected != widget.selectedIndex) {
-      await channel.invokeMethod('setSelectedIndex', {
-        'index': widget.selectedIndex,
-      });
+      await channel.invokeMethod('setSelectedIndex', {'index': widget.selectedIndex});
       _lastSelected = widget.selectedIndex;
     }
     if (_lastTint != tint && tint != null) {
@@ -181,14 +180,9 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
       return SizedBox(
         height: widget.height,
         child: CupertinoSegmentedControl<int>(
-          children: {
-            for (var i = 0; i < widget.labels.length; i++)
-              i: Text(widget.labels[i]),
-          },
+          children: {for (var i = 0; i < widget.labels.length; i++) i: Text(widget.labels[i])},
           groupValue: widget.selectedIndex,
-          onValueChanged: widget.enabled
-              ? (i) => widget.onValueChanged(i)
-              : (_) {},
+          onValueChanged: widget.enabled ? (i) => widget.onValueChanged(i) : (_) {},
         ),
       );
     }
@@ -202,41 +196,21 @@ class _CNSegmentedControlState extends State<CNSegmentedControl> {
       'style': encodeStyle(context, tint: widget.color)
         ..addAll({
           if (widget.iconSize != null) 'iconSize': widget.iconSize,
-          if (widget.iconColor != null)
-            'iconColor': resolveColorToArgb(widget.iconColor, context),
+          if (widget.iconColor != null) 'iconColor': resolveColorToArgb(widget.iconColor, context),
           if (widget.iconPaletteColors != null)
-            'iconPaletteColors': widget.iconPaletteColors!
-                .map((c) => resolveColorToArgb(c, context))
-                .toList(),
-          if (widget.iconGradientEnabled != null)
-            'iconGradientEnabled': widget.iconGradientEnabled,
-          if (widget.iconRenderingMode != null)
-            'iconRenderingMode': widget.iconRenderingMode!.name,
+            'iconPaletteColors': widget.iconPaletteColors!.map((c) => resolveColorToArgb(c, context)).toList(),
+          if (widget.iconGradientEnabled != null) 'iconGradientEnabled': widget.iconGradientEnabled,
+          if (widget.iconRenderingMode != null) 'iconRenderingMode': widget.iconRenderingMode!.name,
         }),
-      if (widget.sfSymbols != null)
-        'sfSymbols': widget.sfSymbols!.map((e) => e.name).toList(),
-      if (widget.sfSymbols != null)
-        'sfSymbolSizes': widget.sfSymbols!.map((e) => e.size).toList(),
-      if (widget.sfSymbols != null)
-        'sfSymbolColors': widget.sfSymbols!
-            .map((e) => resolveColorToArgb(e.color, context))
-            .toList(),
+      if (widget.sfSymbols != null) 'sfSymbols': widget.sfSymbols!.map((e) => e.name).toList(),
+      if (widget.sfSymbols != null) 'sfSymbolSizes': widget.sfSymbols!.map((e) => e.size).toList(),
+      if (widget.sfSymbols != null) 'sfSymbolColors': widget.sfSymbols!.map((e) => resolveColorToArgb(e.color, context)).toList(),
       if (widget.sfSymbols != null)
         'sfSymbolPaletteColors': widget.sfSymbols!
-            .map(
-              (e) => (e.paletteColors ?? [])
-                  .map((c) => resolveColorToArgb(c, context))
-                  .toList(),
-            )
+            .map((e) => (e.paletteColors ?? []).map((c) => resolveColorToArgb(c, context)).toList())
             .toList(),
-      if (widget.sfSymbols != null)
-        'sfSymbolRenderingModes': widget.sfSymbols!
-            .map((e) => e.mode?.name)
-            .toList(),
-      if (widget.sfSymbols != null)
-        'sfSymbolGradientEnabled': widget.sfSymbols!
-            .map((e) => e.gradient)
-            .toList(),
+      if (widget.sfSymbols != null) 'sfSymbolRenderingModes': widget.sfSymbols!.map((e) => e.mode?.name).toList(),
+      if (widget.sfSymbols != null) 'sfSymbolGradientEnabled': widget.sfSymbols!.map((e) => e.gradient).toList(),
     };
 
     final platformView = AppKitView(

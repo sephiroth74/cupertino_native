@@ -158,7 +158,12 @@ class _CNToggleState extends State<CNToggle> {
     _controller = CNToggleController();
   }
 
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+  bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
+
+  Color? get _effectiveTint {
+    final theme = CNTheme.of(context);
+    return widget.tint ?? theme.toggleTheme.tint ?? theme.accentColor;
+  }
 
   void _onPlatformViewCreated(int id) {
     final channel = MethodChannel('CupertinoNativeToggle_$id');
@@ -218,7 +223,7 @@ class _CNToggleState extends State<CNToggle> {
     _lastIsDark = _isDark;
     _lastToggleStyle = widget.toggleStyle;
     _lastControlSize = widget.controlSize;
-    _lastTint = widget.tint;
+    _lastTint = _effectiveTint;
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
@@ -243,10 +248,11 @@ class _CNToggleState extends State<CNToggle> {
       _lastControlSize = widget.controlSize;
       _queryIntrinsicSize();
     }
-    if (_lastTint != widget.tint && mounted) {
-      final tintValue = resolveColorToArgb(widget.tint, context);
+    final effectiveTint = _effectiveTint;
+    if (_lastTint != effectiveTint && mounted) {
+      final tintValue = resolveColorToArgb(effectiveTint, context);
       await channel.invokeMethod('setTint', {'tint': tintValue});
-      _lastTint = widget.tint;
+      _lastTint = effectiveTint;
     }
   }
 
@@ -275,7 +281,7 @@ class _CNToggleState extends State<CNToggle> {
       'toggleStyle': widget.toggleStyle.toShortString(),
       'isDark': _isDark,
       'controlSize': widget.controlSize.name,
-      'tint': resolveColorToArgb(widget.tint, context),
+      'tint': resolveColorToArgb(_effectiveTint, context),
     };
 
     final child = AppKitView(

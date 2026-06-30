@@ -1,5 +1,4 @@
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -16,10 +15,7 @@ class CNSliderController {
   Future<void> setValue(double value, {bool animated = false}) async {
     final channel = _channel;
     if (channel == null) return;
-    await channel.invokeMethod('setValue', {
-      'value': value,
-      'animated': animated,
-    });
+    await channel.invokeMethod('setValue', {'value': value, 'animated': animated});
   }
 
   /// Sets the valid [min] and [max] range of the slider.
@@ -188,14 +184,13 @@ class _CNSliderState extends State<CNSlider> {
     super.dispose();
   }
 
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+  bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
 
   bool get _enabled => widget.onChanged != null;
 
-  CNSliderController get _controller =>
-      widget.controller ?? (_internalController ??= CNSliderController());
+  CNSliderController get _controller => widget.controller ?? (_internalController ??= CNSliderController());
 
-  Color? get _tint => widget.color ?? CupertinoTheme.of(context).primaryColor;
+  Color? get _tint => widget.color ?? CNTheme.of(context).primaryColor;
 
   void _onPlatformViewCreated(int id) {
     final channel = MethodChannel('CupertinoNativeSlider_$id');
@@ -246,33 +241,21 @@ class _CNSliderState extends State<CNSlider> {
     bool needsIntrinsicSize = false;
 
     if (oldWidget.min != widget.min || oldWidget.max != widget.max) {
-      await channel.invokeMethod('setRange', {
-        'min': widget.min,
-        'max': widget.max,
-      });
+      await channel.invokeMethod('setRange', {'min': widget.min, 'max': widget.max});
     }
 
     if (oldWidget.isEnabled != widget.isEnabled) {
       await channel.invokeMethod('setIsEnabled', {'value': widget.isEnabled});
     }
 
-    final double clamped = widget.value
-        .clamp(widget.min, widget.max)
-        .toDouble();
+    final double clamped = widget.value.clamp(widget.min, widget.max).toDouble();
     if (oldWidget.value != clamped) {
-      await channel.invokeMethod('setValue', {
-        'value': clamped,
-        'animated': false,
-      });
+      await channel.invokeMethod('setValue', {'value': clamped, 'animated': false});
     }
 
     if (oldWidget.controlSize != widget.controlSize) {
-      await channel.invokeMethod('setControlSize', {
-        'value': widget.controlSize.name,
-      });
-      debugPrint(
-        'called setControlSize with value: ${widget.controlSize.name} for type: ${widget.sliderType}',
-      );
+      await channel.invokeMethod('setControlSize', {'value': widget.controlSize.name});
+      debugPrint('called setControlSize with value: ${widget.controlSize.name} for type: ${widget.sliderType}');
       needsIntrinsicSize = true;
     }
 
@@ -282,29 +265,21 @@ class _CNSliderState extends State<CNSlider> {
     }
 
     if (oldWidget.tickMarkPosition != widget.tickMarkPosition) {
-      await channel.invokeMethod('setTickMarkPosition', {
-        'value': widget.tickMarkPosition?.name,
-      });
+      await channel.invokeMethod('setTickMarkPosition', {'value': widget.tickMarkPosition?.name});
       needsIntrinsicSize = true;
     }
 
     if (oldWidget.allowsTickMarkValuesOnly != widget.allowsTickMarkValuesOnly) {
-      await channel.invokeMethod('setAllowsTickMarkValuesOnly', {
-        'value': widget.allowsTickMarkValuesOnly,
-      });
+      await channel.invokeMethod('setAllowsTickMarkValuesOnly', {'value': widget.allowsTickMarkValuesOnly});
     }
 
     if (oldWidget.sliderType != widget.sliderType) {
-      await channel.invokeMethod('setSliderType', {
-        'value': widget.sliderType.name,
-      });
+      await channel.invokeMethod('setSliderType', {'value': widget.sliderType.name});
       needsIntrinsicSize = true;
     }
 
     if (oldWidget.isContinuous != widget.isContinuous) {
-      await channel.invokeMethod('setIsContinuous', {
-        'value': widget.isContinuous,
-      });
+      await channel.invokeMethod('setIsContinuous', {'value': widget.isContinuous});
     }
 
     if (oldWidget.isVertical != widget.isVertical) {
@@ -314,9 +289,7 @@ class _CNSliderState extends State<CNSlider> {
 
     if (!mounted) return;
     if (oldWidget.color != widget.color) {
-      await channel.invokeMethod('setTint', {
-        'value': resolveColorToArgb(widget.color, context),
-      });
+      await channel.invokeMethod('setTint', {'value': resolveColorToArgb(widget.color, context)});
     }
 
     if (needsIntrinsicSize) {
@@ -365,12 +338,8 @@ class _CNSliderState extends State<CNSlider> {
       creationParamsCodec: const StandardMessageCodec(),
       onPlatformViewCreated: _onPlatformViewCreated,
       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-        Factory<HorizontalDragGestureRecognizer>(
-          () => HorizontalDragGestureRecognizer(),
-        ),
-        Factory<VerticalDragGestureRecognizer>(
-          () => VerticalDragGestureRecognizer(),
-        ),
+        Factory<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer()),
+        Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
         Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
       },
     );
@@ -381,12 +350,10 @@ class _CNSliderState extends State<CNSlider> {
         final hasBoundedHeight = constraints.hasBoundedHeight;
 
         // Use intrinsicWidth if type is circular, or linear and it's vertical
-        final useIntrinsicWidth =
-            widget.sliderType == CNSliderType.circular || widget.isVertical;
+        final useIntrinsicWidth = widget.sliderType == CNSliderType.circular || widget.isVertical;
 
         // Use intrinsicHeight if type is circular, or linear and it's not vertical
-        final useIntrinsicHeight =
-            widget.sliderType == CNSliderType.circular || !widget.isVertical;
+        final useIntrinsicHeight = widget.sliderType == CNSliderType.circular || !widget.isVertical;
 
         final preferIntrinsicWidth = !hasBoundedWidth && useIntrinsicWidth;
         final preferIntrinsicHeight = !hasBoundedHeight && useIntrinsicHeight;

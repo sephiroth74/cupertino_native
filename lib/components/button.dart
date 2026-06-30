@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import '../channel/params.dart';
 import '../style/sf_symbol.dart';
 import '../style/button_style.dart';
+import '../theme/cn_theme.dart';
 
 const double _kDefaultHeight = 64.0;
 const double _kDefaultWidth = 80.0;
@@ -124,8 +125,7 @@ class _CNButtonState extends State<CNButton> {
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
-  Color? get _effectiveTint =>
-      widget.tint ?? CupertinoTheme.of(context).primaryColor;
+  Color? get _effectiveTint => widget.tint ?? CNTheme.of(context).primaryColor;
 
   void _onCreated(int id) {
     final ch = MethodChannel('CupertinoNativeButton_$id');
@@ -190,16 +190,12 @@ class _CNButtonState extends State<CNButton> {
       _lastStyle = widget.style;
     }
     if (_lastControlSize != widget.controlSize) {
-      await ch.invokeMethod('setControlSize', {
-        'controlSize': widget.controlSize.name,
-      });
+      await ch.invokeMethod('setControlSize', {'controlSize': widget.controlSize.name});
       _lastControlSize = widget.controlSize;
       needsIntrinsicSize = true;
     }
     // Enabled state
-    await ch.invokeMethod('setEnabled', {
-      'enabled': (widget.enabled && widget.onPressed != null),
-    });
+    await ch.invokeMethod('setEnabled', {'enabled': (widget.enabled && widget.onPressed != null)});
     if (_lastTitle != widget.label && widget.label != null) {
       await ch.invokeMethod('setButtonTitle', {'title': widget.label});
       _lastTitle = widget.label;
@@ -231,9 +227,7 @@ class _CNButtonState extends State<CNButton> {
         updates['buttonIconRenderingMode'] = widget.icon!.mode!.name;
       }
       if (widget.icon?.paletteColors != null) {
-        updates['buttonIconPaletteColors'] = widget.icon!.paletteColors!
-            .map((c) => resolveColorToArgb(c, context))
-            .toList();
+        updates['buttonIconPaletteColors'] = widget.icon!.paletteColors!.map((c) => resolveColorToArgb(c, context)).toList();
       }
       if (widget.icon?.gradient != null) {
         updates['buttonIconGradientEnabled'] = widget.icon!.gradient;
@@ -277,19 +271,11 @@ class _CNButtonState extends State<CNButton> {
       // Fallback Flutter implementation
       return SizedBox(
         height: widget.height ?? _kDefaultHeight,
-        width: widget.isIcon && widget.round
-            ? (widget.width ?? widget.height ?? _kDefaultHeight)
-            : null,
+        width: widget.isIcon && widget.round ? (widget.width ?? widget.height ?? _kDefaultHeight) : null,
         child: CupertinoButton(
-          padding: widget.isIcon
-              ? const EdgeInsets.all(4)
-              : const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          onPressed: (widget.enabled && widget.onPressed != null)
-              ? widget.onPressed
-              : null,
-          child: widget.isIcon
-              ? Icon(CupertinoIcons.ellipsis, size: widget.icon?.size)
-              : Text(widget.label ?? ''),
+          padding: widget.isIcon ? const EdgeInsets.all(4) : const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          onPressed: (widget.enabled && widget.onPressed != null) ? widget.onPressed : null,
+          child: widget.isIcon ? Icon(CupertinoIcons.ellipsis, size: widget.icon?.size) : Text(widget.label ?? ''),
         ),
       );
     }
@@ -300,16 +286,11 @@ class _CNButtonState extends State<CNButton> {
       if (widget.label != null) 'buttonTitle': widget.label,
       if (widget.icon != null) 'buttonIconName': widget.icon!.name,
       if (widget.icon?.size != null) 'buttonIconSize': widget.icon!.size,
-      if (widget.icon?.color != null)
-        'buttonIconColor': resolveColorToArgb(widget.icon!.color, context),
-      if (widget.icon?.mode != null)
-        'buttonIconRenderingMode': widget.icon!.mode!.name,
+      if (widget.icon?.color != null) 'buttonIconColor': resolveColorToArgb(widget.icon!.color, context),
+      if (widget.icon?.mode != null) 'buttonIconRenderingMode': widget.icon!.mode!.name,
       if (widget.icon?.paletteColors != null)
-        'buttonIconPaletteColors': widget.icon!.paletteColors!
-            .map((c) => resolveColorToArgb(c, context))
-            .toList(),
-      if (widget.icon?.gradient != null)
-        'buttonIconGradientEnabled': widget.icon!.gradient,
+        'buttonIconPaletteColors': widget.icon!.paletteColors!.map((c) => resolveColorToArgb(c, context)).toList(),
+      if (widget.icon?.gradient != null) 'buttonIconGradientEnabled': widget.icon!.gradient,
       if (widget.isIcon) 'round': true,
       'buttonStyle': widget.style.name,
       'enabled': (widget.enabled && widget.onPressed != null),
@@ -324,9 +305,7 @@ class _CNButtonState extends State<CNButton> {
       creationParams: creationParams,
       creationParamsCodec: const StandardMessageCodec(),
       onPlatformViewCreated: _onCreated,
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-      },
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{Factory<TapGestureRecognizer>(() => TapGestureRecognizer())},
     );
 
     return LayoutBuilder(

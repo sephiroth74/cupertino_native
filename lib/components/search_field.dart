@@ -12,8 +12,7 @@ const double _kDefaultSearchFieldWidth = 180.0;
 const double _kDefaultSearchFieldHeight = 24.0;
 
 /// Callback invoked by native code when updated suggestions are needed.
-typedef CNSearchSuggestionsRequested =
-    FutureOr<List<String>> Function(String query);
+typedef CNSearchSuggestionsRequested = FutureOr<List<String>> Function(String query);
 
 /// A native macOS search field backed by NSSearchField.
 class CNSearchField extends StatefulWidget {
@@ -120,6 +119,12 @@ class _CNSearchFieldState extends State<CNSearchField> {
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
+  Color? get _effectiveTextColor => widget.textColor ?? CNTheme.of(context).labelColor;
+
+  Color? get _effectivePlaceholderColor => widget.placeholderColor ?? CNTheme.of(context).secondaryLabelColor;
+
+  Color? get _effectiveBackgroundColor => widget.backgroundColor ?? CNTheme.of(context).fillPrimaryColor;
+
   void _onPlatformViewCreated(int id) {
     final channel = MethodChannel('CupertinoNativeSearchField_$id');
     _channel = channel;
@@ -154,9 +159,7 @@ class _CNSearchFieldState extends State<CNSearchField> {
         if (query.isEmpty) return source;
 
         final lower = query.toLowerCase();
-        return source
-            .where((item) => item.toLowerCase().contains(lower))
-            .toList();
+        return source.where((item) => item.toLowerCase().contains(lower)).toList();
     }
 
     return null;
@@ -165,12 +168,9 @@ class _CNSearchFieldState extends State<CNSearchField> {
   void _cacheCurrentProps() {
     _lastText = widget.text;
     _lastPlaceholder = widget.placeholder;
-    _lastTextColor = resolveColorToArgb(widget.textColor, context);
-    _lastPlaceholderColor = resolveColorToArgb(
-      widget.placeholderColor,
-      context,
-    );
-    _lastBackgroundColor = resolveColorToArgb(widget.backgroundColor, context);
+    _lastTextColor = resolveColorToArgb(_effectiveTextColor, context);
+    _lastPlaceholderColor = resolveColorToArgb(_effectivePlaceholderColor, context);
+    _lastBackgroundColor = resolveColorToArgb(_effectiveBackgroundColor, context);
     _lastFont = widget.font;
     _lastControlSize = widget.controlSize;
     _lastBezelStyle = widget.bezelStyle;
@@ -191,37 +191,28 @@ class _CNSearchFieldState extends State<CNSearchField> {
     }
 
     if (_lastPlaceholder != widget.placeholder) {
-      await channel.invokeMethod('setPlaceholder', {
-        'value': widget.placeholder,
-      });
+      await channel.invokeMethod('setPlaceholder', {'value': widget.placeholder});
       _lastPlaceholder = widget.placeholder;
     }
 
     if (!mounted) return;
-    final textColor = resolveColorToArgb(widget.textColor, context);
+    final textColor = resolveColorToArgb(_effectiveTextColor, context);
     if (_lastTextColor != textColor) {
       await channel.invokeMethod('setTextColor', {'value': textColor});
       _lastTextColor = textColor;
     }
 
     if (!mounted) return;
-    final placeholderColor = resolveColorToArgb(
-      widget.placeholderColor,
-      context,
-    );
+    final placeholderColor = resolveColorToArgb(_effectivePlaceholderColor, context);
     if (_lastPlaceholderColor != placeholderColor) {
-      await channel.invokeMethod('setPlaceholderColor', {
-        'value': placeholderColor,
-      });
+      await channel.invokeMethod('setPlaceholderColor', {'value': placeholderColor});
       _lastPlaceholderColor = placeholderColor;
     }
 
     if (!mounted) return;
-    final backgroundColor = resolveColorToArgb(widget.backgroundColor, context);
+    final backgroundColor = resolveColorToArgb(_effectiveBackgroundColor, context);
     if (_lastBackgroundColor != backgroundColor) {
-      await channel.invokeMethod('setBackgroundColor', {
-        'value': backgroundColor,
-      });
+      await channel.invokeMethod('setBackgroundColor', {'value': backgroundColor});
       _lastBackgroundColor = backgroundColor;
     }
 
@@ -240,27 +231,21 @@ class _CNSearchFieldState extends State<CNSearchField> {
 
     if (!mounted) return;
     if (_lastControlSize != widget.controlSize) {
-      await channel.invokeMethod('setControlSize', {
-        'value': widget.controlSize.name,
-      });
+      await channel.invokeMethod('setControlSize', {'value': widget.controlSize.name});
       _lastControlSize = widget.controlSize;
       requiresIntrinsicSize = true;
     }
 
     if (!mounted) return;
     if (_lastBezelStyle != widget.bezelStyle) {
-      await channel.invokeMethod('setBezelStyle', {
-        'value': widget.bezelStyle.name,
-      });
+      await channel.invokeMethod('setBezelStyle', {'value': widget.bezelStyle.name});
       _lastBezelStyle = widget.bezelStyle;
       requiresIntrinsicSize = true;
     }
 
     if (!mounted) return;
     if (!listEquals(_lastSuggestions, widget.suggestions)) {
-      await channel.invokeMethod('setSuggestions', {
-        'value': widget.suggestions ?? <String>[],
-      });
+      await channel.invokeMethod('setSuggestions', {'value': widget.suggestions ?? <String>[]});
       _lastSuggestions = widget.suggestions;
     }
 
@@ -315,9 +300,9 @@ class _CNSearchFieldState extends State<CNSearchField> {
     final creationParams = <String, dynamic>{
       'text': widget.text,
       'placeholder': widget.placeholder,
-      'textColor': resolveColorToArgb(widget.textColor, context),
-      'placeholderColor': resolveColorToArgb(widget.placeholderColor, context),
-      'backgroundColor': resolveColorToArgb(widget.backgroundColor, context),
+      'textColor': resolveColorToArgb(_effectiveTextColor, context),
+      'placeholderColor': resolveColorToArgb(_effectivePlaceholderColor, context),
+      'backgroundColor': resolveColorToArgb(_effectiveBackgroundColor, context),
       'font': widget.font?.toMap(),
       'controlSize': widget.controlSize.name,
       'bezelStyle': widget.bezelStyle.name,
@@ -329,23 +314,13 @@ class _CNSearchFieldState extends State<CNSearchField> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width =
-            widget.width ??
-            _intrinsicWidth ??
-            (constraints.hasBoundedWidth
-                ? constraints.maxWidth
-                : _kDefaultSearchFieldWidth);
-        final height =
-            _intrinsicHeight ??
-            (constraints.hasBoundedHeight
-                ? constraints.maxHeight
-                : _kDefaultSearchFieldHeight);
+            widget.width ?? _intrinsicWidth ?? (constraints.hasBoundedWidth ? constraints.maxWidth : _kDefaultSearchFieldWidth);
+        final height = _intrinsicHeight ?? (constraints.hasBoundedHeight ? constraints.maxHeight : _kDefaultSearchFieldHeight);
 
         return Align(
           alignment: Alignment.centerLeft,
           child: SizedBox(
-            width: constraints.hasBoundedWidth
-                ? width.clamp(0.0, constraints.maxWidth)
-                : width,
+            width: constraints.hasBoundedWidth ? width.clamp(0.0, constraints.maxWidth) : width,
             height: height,
             child: AppKitView(
               viewType: viewType,

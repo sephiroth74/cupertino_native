@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/cn_theme.dart';
+
 /// A native menu button backed by SwiftUI on macOS.
 ///
 /// This widget renders a native menu button and supports nested submenus,
@@ -114,7 +116,7 @@ class _CNMenuButtonState extends State<CNMenuButton> {
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
-  Color? get _effectiveTint => widget.tint ?? CupertinoTheme.of(context).primaryColor;
+  Color? get _effectiveTint => widget.tint ?? CNTheme.of(context).primaryColor;
 
   void _onCreated(int id) {
     _channel = MethodChannel('CupertinoNativeMenuButton_$id')..setMethodCallHandler(_onMethodCall);

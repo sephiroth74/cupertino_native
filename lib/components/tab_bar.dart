@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import '../channel/params.dart';
 import '../style/sf_symbol.dart';
+import '../theme/cn_theme.dart';
 
 /// Immutable data describing a single tab bar item.
 class CNTabBarItem {
@@ -107,8 +108,7 @@ class _CNTabBarState extends State<CNTabBar> {
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
-  Color? get _effectiveTint =>
-      widget.tint ?? CupertinoTheme.of(context).primaryColor;
+  Color? get _effectiveTint => widget.tint ?? CNTheme.of(context).primaryColor;
 
   void _onCreated(int id) {
     final ch = MethodChannel('CupertinoNativeTabBar_$id');
@@ -165,13 +165,8 @@ class _CNTabBarState extends State<CNTabBar> {
     // Items update (for hot reload or dynamic changes)
     final labels = widget.items.map((e) => e.label ?? '').toList();
     final symbols = widget.items.map((e) => e.icon?.name ?? '').toList();
-    if (_lastLabels?.join('|') != labels.join('|') ||
-        _lastSymbols?.join('|') != symbols.join('|')) {
-      await ch.invokeMethod('setItems', {
-        'labels': labels,
-        'sfSymbols': symbols,
-        'selectedIndex': widget.currentIndex,
-      });
+    if (_lastLabels?.join('|') != labels.join('|') || _lastSymbols?.join('|') != symbols.join('|')) {
+      await ch.invokeMethod('setItems', {'labels': labels, 'sfSymbols': symbols, 'selectedIndex': widget.currentIndex});
       _lastLabels = labels;
       _lastSymbols = symbols;
       // Re-measure width in case content changed
@@ -179,9 +174,7 @@ class _CNTabBarState extends State<CNTabBar> {
     }
 
     // Layout updates (split / insets)
-    if (_lastSplit != widget.split ||
-        _lastRightCount != widget.rightCount ||
-        _lastSplitSpacing != widget.splitSpacing) {
+    if (_lastSplit != widget.split || _lastRightCount != widget.rightCount || _lastSplitSpacing != widget.splitSpacing) {
       await ch.invokeMethod('setLayout', {
         'split': widget.split,
         'rightCount': widget.rightCount,
@@ -233,30 +226,20 @@ class _CNTabBarState extends State<CNTabBar> {
       return SizedBox(
         height: widget.height,
         child: CupertinoTabBar(
-          items: [
-            for (final item in widget.items)
-              BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.circle),
-                label: item.label,
-              ),
-          ],
+          items: [for (final item in widget.items) BottomNavigationBarItem(icon: Icon(CupertinoIcons.circle), label: item.label)],
           currentIndex: widget.currentIndex,
           onTap: widget.onTap,
           backgroundColor: widget.backgroundColor,
           inactiveColor: CupertinoColors.inactiveGray,
-          activeColor: widget.tint ?? CupertinoTheme.of(context).primaryColor,
+          activeColor: widget.tint ?? CNTheme.of(context).primaryColor,
         ),
       );
     }
 
     final labels = widget.items.map((e) => e.label ?? '').toList();
     final symbols = widget.items.map((e) => e.icon?.name ?? '').toList();
-    final sizes = widget.items
-        .map((e) => (widget.iconSize ?? e.icon?.size))
-        .toList();
-    final colors = widget.items
-        .map((e) => resolveColorToArgb(e.icon?.color, context))
-        .toList();
+    final sizes = widget.items.map((e) => (widget.iconSize ?? e.icon?.size)).toList();
+    final colors = widget.items.map((e) => resolveColorToArgb(e.icon?.color, context)).toList();
 
     final creationParams = <String, dynamic>{
       'labels': labels,
@@ -269,13 +252,7 @@ class _CNTabBarState extends State<CNTabBar> {
       'rightCount': widget.rightCount,
       'splitSpacing': widget.splitSpacing,
       'style': encodeStyle(context, tint: _effectiveTint)
-        ..addAll({
-          if (widget.backgroundColor != null)
-            'backgroundColor': resolveColorToArgb(
-              widget.backgroundColor,
-              context,
-            ),
-        }),
+        ..addAll({if (widget.backgroundColor != null) 'backgroundColor': resolveColorToArgb(widget.backgroundColor, context)}),
     };
 
     final viewType = 'CupertinoNativeTabBar';

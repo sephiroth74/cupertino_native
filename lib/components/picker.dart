@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../channel/params.dart';
 import '../model/control_size.dart';
 import '../style/sf_symbol.dart';
+import '../theme/cn_theme.dart';
 
 /// A Cupertino-native picker with segmented control style.
 ///
@@ -32,12 +33,9 @@ class CNPickerItem {
       return {
         'type': 'icon',
         'symbolName': icon!.name,
-        if (icon!.color != null)
-          'symbolColor': resolveColorToArgb(icon!.color, context),
+        if (icon!.color != null) 'symbolColor': resolveColorToArgb(icon!.color, context),
         if (icon!.paletteColors != null)
-          'symbolPaletteColors': icon!.paletteColors!
-              .map((c) => resolveColorToArgb(c, context))
-              .toList(),
+          'symbolPaletteColors': icon!.paletteColors!.map((c) => resolveColorToArgb(c, context)).toList(),
         if (icon!.mode != null) 'symbolRenderingMode': icon!.mode!.name,
         if (icon!.gradient != null) 'symbolGradientEnabled': icon!.gradient,
         if (icon!.size != null) 'symbolSize': icon!.size,
@@ -127,7 +125,9 @@ class _CNPickerState extends State<CNPicker> {
     super.dispose();
   }
 
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+  bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
+
+  Color? get _effectiveTint => widget.color ?? CNTheme.of(context).primaryColor;
 
   void _onPlatformViewCreated(int id) {
     final channel = MethodChannel('CupertinoNativePicker_$id');
@@ -142,10 +142,7 @@ class _CNPickerState extends State<CNPicker> {
       final result = await _channel?.invokeMethod<Map>('getIntrinsicSize');
       if (result != null) {
         debugPrint('Picker intrinsic size: $result');
-        _onIntrinsicSizeChanged(
-          (result['width'] as num?)?.toDouble(),
-          (result['height'] as num?)?.toDouble(),
-        );
+        _onIntrinsicSizeChanged((result['width'] as num?)?.toDouble(), (result['height'] as num?)?.toDouble());
       }
     } catch (e) {
       // Fallback to default height
@@ -173,10 +170,7 @@ class _CNPickerState extends State<CNPicker> {
       }
     } else if (call.method == 'intrinsicSizeChanged') {
       final args = call.arguments as Map?;
-      _onIntrinsicSizeChanged(
-        (args?['width'] as num?)?.toDouble(),
-        (args?['height'] as num?)?.toDouble(),
-      );
+      _onIntrinsicSizeChanged((args?['width'] as num?)?.toDouble(), (args?['height'] as num?)?.toDouble());
     }
     return null;
   }
@@ -185,7 +179,7 @@ class _CNPickerState extends State<CNPicker> {
     _lastSelected = widget.selectedIndex;
     _lastEnabled = widget.enabled;
     _lastIsDark = _isDark;
-    _lastTint = resolveColorToArgb(widget.color, context);
+    _lastTint = resolveColorToArgb(_effectiveTint, context);
     _lastControlSize = widget.controlSize;
     _lastPickerStyle = widget.pickerStyle;
   }
@@ -194,16 +188,14 @@ class _CNPickerState extends State<CNPicker> {
     final channel = _channel;
     if (channel == null) return;
 
-    final tint = resolveColorToArgb(widget.color, context);
+    final tint = resolveColorToArgb(_effectiveTint, context);
 
     if (_lastEnabled != widget.enabled) {
       await channel.invokeMethod('setEnabled', {'enabled': widget.enabled});
       _lastEnabled = widget.enabled;
     }
     if (_lastSelected != widget.selectedIndex) {
-      await channel.invokeMethod('setSelectedIndex', {
-        'index': widget.selectedIndex,
-      });
+      await channel.invokeMethod('setSelectedIndex', {'index': widget.selectedIndex});
       _lastSelected = widget.selectedIndex;
     }
     if (_lastTint != tint && tint != null) {
@@ -211,16 +203,12 @@ class _CNPickerState extends State<CNPicker> {
       _lastTint = tint;
     }
     if (_lastControlSize != widget.controlSize) {
-      await channel.invokeMethod('setControlSize', {
-        'controlSize': widget.controlSize.name,
-      });
+      await channel.invokeMethod('setControlSize', {'controlSize': widget.controlSize.name});
       _lastControlSize = widget.controlSize;
       _queryIntrinsicSize();
     }
     if (_lastPickerStyle != widget.pickerStyle) {
-      await channel.invokeMethod('setPickerStyle', {
-        'pickerStyle': widget.pickerStyle.name,
-      });
+      await channel.invokeMethod('setPickerStyle', {'pickerStyle': widget.pickerStyle.name});
       _lastPickerStyle = widget.pickerStyle;
       _queryIntrinsicSize();
     }
@@ -230,7 +218,7 @@ class _CNPickerState extends State<CNPicker> {
     final channel = _channel;
     if (channel == null) return;
     final isDark = _isDark;
-    final tint = resolveColorToArgb(widget.color, context);
+    final tint = resolveColorToArgb(_effectiveTint, context);
     if (_lastIsDark != isDark) {
       await channel.invokeMethod('setBrightness', {'isDark': isDark});
       _lastIsDark = isDark;
@@ -257,7 +245,7 @@ class _CNPickerState extends State<CNPicker> {
       'pickerStyle': widget.pickerStyle.name,
       if (widget.label != null) 'label': widget.label,
       if (widget.sublabel != null) 'sublabel': widget.sublabel,
-      'style': encodeStyle(context, tint: widget.color),
+      'style': encodeStyle(context, tint: _effectiveTint),
     };
 
     final child = AppKitView(
@@ -282,11 +270,7 @@ class _CNPickerState extends State<CNPicker> {
         height = 38.0; // Default height for unbounded layouts
       }
 
-      return SizedBox(
-        height: height,
-        width: width,
-        child: child,
-      );
+      return SizedBox(height: height, width: width, child: child);
     }
 
     return LayoutBuilder(
@@ -294,9 +278,7 @@ class _CNPickerState extends State<CNPicker> {
         debugPrint('Picker constraints: $constraints');
         final bool hasBoundedWidth = constraints.hasBoundedWidth;
         final bool hasBoundedHeight = constraints.hasBoundedHeight;
-        debugPrint(
-          'Picker hasBoundedWidth=$hasBoundedWidth, hasBoundedHeight=$hasBoundedHeight',
-        );
+        debugPrint('Picker hasBoundedWidth=$hasBoundedWidth, hasBoundedHeight=$hasBoundedHeight');
 
         double? width;
         double? height;
@@ -322,15 +304,10 @@ class _CNPickerState extends State<CNPicker> {
         debugPrint('Picker final size: width=$width, height=$height');
 
         if (width == double.infinity) {
-          width =
-              100.0; // Fallback width if unconstrained and no intrinsic size
+          width = 100.0; // Fallback width if unconstrained and no intrinsic size
         }
 
-        return SizedBox(
-          height: height,
-          width: width,
-          child: child,
-        );
+        return SizedBox(height: height, width: width, child: child);
       },
     );
   }

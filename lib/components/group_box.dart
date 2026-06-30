@@ -23,7 +23,7 @@ class GroupBox extends StatelessWidget {
     this.padding,
     this.borderDecoration,
     this.color,
-    this.borderRadius
+    this.borderRadius,
   });
 
   /// An optional decoration for the border of the GroupBox.
@@ -55,9 +55,10 @@ class GroupBox extends StatelessWidget {
         if (borderDecoration != null) {
           return borderDecoration!;
         }
+        final theme = CNTheme.of(context);
         return BoxDecoration(
-          color: color ?? CupertinoColors.tertiarySystemGroupedBackground,
-          border: Border.all(color: CupertinoColors.separator.resolveFrom(context).withAlpha(51), width: 1),
+          color: color ?? theme.fillTertiaryColor,
+          border: Border.all(color: theme.separatorColor.withAlpha(51), width: 1),
           borderRadius: BorderRadius.circular(borderRadius ?? 8),
         );
       case GroupBoxStyle.borderless:

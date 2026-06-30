@@ -1,6 +1,7 @@
 import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/style/font.dart';
 import 'package:cupertino_native/style/sf_symbol.dart';
+import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -196,9 +197,10 @@ class _CNLabelState extends State<CNLabel> {
   @override
   Widget build(BuildContext context) {
     if (defaultTargetPlatform != TargetPlatform.macOS) {
+      final theme = CNTheme.of(context);
       return Text(
         widget.text,
-        style: TextStyle(color: widget.color, fontSize: widget.font?.size.points),
+        style: theme.typography.body.copyWith(color: widget.color ?? theme.labelColor, fontSize: widget.font?.size.points),
       );
     }
 

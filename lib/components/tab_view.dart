@@ -144,8 +144,8 @@ class _CNTabViewState extends State<CNTabView> {
             child: GroupBox(
               padding: EdgeInsets.only(top: halfPickerHeight + 8, left: 16, right: 16, bottom: 16),
               borderDecoration: BoxDecoration(
-                color: MacOS26Colors.fillQuinary.resolveFrom(context),
-                border: Border.all(color: CupertinoColors.separator.resolveFrom(context).withAlpha(25), width: 1),
+                color: CNTheme.of(context).fillTertiaryColor,
+                border: Border.all(color: CNTheme.of(context).separatorColor.withAlpha(25), width: 1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: IndexedStack(index: _controller.selectedIndex, children: widget.children.map((t) => t.child).toList()),
@@ -165,7 +165,7 @@ class _CNTabViewState extends State<CNTabView> {
                   width: _pickerSize.width,
                   height: _pickerSize.height,
                   decoration: BoxDecoration(
-                    color: CupertinoColors.secondarySystemGroupedBackground,
+                    color: CNTheme.of(context).groupedBackgroundColor,
                     borderRadius: BorderRadius.circular(borderRadius),
                   ),
                 ),
