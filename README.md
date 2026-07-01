@@ -142,6 +142,8 @@ CNButton.icon(
   icon: const CNSymbol('heart.fill'),
   onPressed: () {},
 )
+
+// Style is optional; default is CNButtonStyle.automatic.
 ```
 
 ### Icon (SF Symbols)
