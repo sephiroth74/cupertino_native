@@ -1,11 +1,11 @@
 import 'package:cupertino_native/model/control_size.dart';
+import 'package:cupertino_native/style/sf_symbol.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 
 import '../channel/params.dart';
-import '../style/sf_symbol.dart';
 import '../style/button_style.dart';
 import '../theme/cn_theme.dart';
 
@@ -13,38 +13,67 @@ const double _kDefaultHeight = 64.0;
 const double _kDefaultWidth = 80.0;
 const double _kDefaultSize = 44.0;
 
+/// Represents the image scale for a [CNButton] with a system image.
+enum CNImageScale {
+  /// Small image scale.
+  small,
+  /// Medium image scale.
+  medium,
+  /// Large image scale.
+  large,
+}
+
+/// Semantic role for button actions.
+enum CNButtonRole {
+  /// Default role.
+  none,
+
+  /// Cancel role.
+  cancel,
+
+  /// Destructive role.
+  destructive,
+
+  /// Close role.
+  close,
+}
+
 /// A Cupertino-native push button.
 ///
-/// Embeds a native NSButton for authentic visuals and behavior on
+/// Embeds a native SwiftUI Button for authentic visuals and behavior on
 /// macOS. Falls back to [CupertinoButton] on other platforms.
 class CNButton extends StatefulWidget {
   /// Creates a text button variant of [CNButton].
   const CNButton({
     super.key,
-    required this.label,
+    this.label,
+    this.systemImage,
+    this.role = CNButtonRole.none,
     this.onPressed,
     this.enabled = true,
     this.tint,
     this.height,
     this.shrinkWrap = false,
-    this.style = CNButtonStyle.plain,
+    this.style = CNButtonStyle.automatic,
     this.controlSize = CNControlSize.regular,
-  }) : icon = null,
-       width = null,
-       round = false;
+    this.imageScale = CNImageScale.medium,
+    this.symbolRenderingMode,
+  }) : width = null;
 
-  /// Creates a round, icon-only variant of [CNButton].
-  const CNButton.icon({
+  /// Creates an icon-only variant of [CNButton].
+  const CNButton.systemImage(
+    String this.systemImage, {
     super.key,
-    required this.icon,
     this.onPressed,
     this.enabled = true,
     this.tint,
     double size = _kDefaultSize,
-    this.style = CNButtonStyle.glass,
+    this.style = CNButtonStyle.automatic,
     this.controlSize = CNControlSize.regular,
+    this.role = CNButtonRole.none,
+    this.imageScale = CNImageScale.medium,
+    this.symbolRenderingMode,
   }) : label = null,
-       round = true,
        width = size,
        height = size,
        shrinkWrap = false,
@@ -59,17 +88,17 @@ class CNButton extends StatefulWidget {
   /// Control height.
   final double? height;
 
-  /// Button icon (non-null in icon mode).
-  final CNSymbol? icon; // non-null in icon mode
+  /// Optional button systemImage.
+  final String? systemImage;
+
+  /// Semantic role for the button action.
+  final CNButtonRole role;
 
   /// Button text (null in icon mode).
   final String? label; // null in icon mode
 
   /// Callback when pressed.
   final VoidCallback? onPressed;
-
-  /// Whether the icon variant (round) is used.
-  final bool round;
 
   /// If true, sizes the control to its intrinsic width.
   final bool shrinkWrap;
@@ -80,14 +109,23 @@ class CNButton extends StatefulWidget {
   /// Accent/tint color.
   final Color? tint;
 
-  /// Fixed width used in icon/round mode.
-  final double? width; // fixed when round/icon mode
+  /// Fixed width used in icon mode.
+  final double? width; // fixed when icon mode
+
+  /// Image scale for system image buttons.
+  final CNImageScale imageScale;
+
+  /// Optional symbol rendering mode for system image buttons.
+  final CNSymbolRenderingMode? symbolRenderingMode;
 
   @override
   State<CNButton> createState() => _CNButtonState();
 
-  /// Whether this instance is configured as the icon variant.
-  bool get isIcon => icon != null;
+  /// Whether this instance has a system image.
+  bool get hasSystemImage => systemImage != null;
+
+  /// Whether this instance is configured as system image-only variant.
+  bool get isSystemImageOnly => label == null && systemImage != null;
 }
 
 class _CNButtonState extends State<CNButton> {
@@ -96,13 +134,14 @@ class _CNButtonState extends State<CNButton> {
   double? _intrinsicHeight;
   double? _intrinsicWidth;
   CNControlSize? _lastControlSize;
-  int? _lastIconColor;
   String? _lastIconName;
-  double? _lastIconSize;
   bool? _lastIsDark;
+  CNButtonRole? _lastRole;
   CNButtonStyle? _lastStyle;
   int? _lastTint;
   String? _lastTitle;
+  CNImageScale? _lastImageScale;
+  CNSymbolRenderingMode? _lastSymbolRenderingMode;
   bool _pressed = false;
 
   @override
@@ -125,7 +164,11 @@ class _CNButtonState extends State<CNButton> {
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
-  Color? get _effectiveTint => widget.tint ?? CNTheme.of(context).primaryColor;
+  Color? get _effectiveTint => widget.tint;
+
+  String? get _iconName => widget.systemImage;
+
+  String get _role => widget.role.name;
 
   void _onCreated(int id) {
     final ch = MethodChannel('CupertinoNativeButton_$id');
@@ -134,14 +177,13 @@ class _CNButtonState extends State<CNButton> {
     _lastTint = resolveColorToArgb(_effectiveTint, context);
     _lastIsDark = _isDark;
     _lastTitle = widget.label;
-    _lastIconName = widget.icon?.name;
-    _lastIconSize = widget.icon?.size;
-    _lastIconColor = resolveColorToArgb(widget.icon?.color, context);
+    _lastIconName = _iconName;
+    _lastRole = widget.role;
     _lastStyle = widget.style;
     _lastControlSize = widget.controlSize;
-    if (!widget.isIcon) {
-      _requestIntrinsicSize();
-    }
+    _lastImageScale = widget.imageScale;
+    _lastSymbolRenderingMode = widget.symbolRenderingMode;
+    _requestIntrinsicSize();
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
@@ -176,9 +218,7 @@ class _CNButtonState extends State<CNButton> {
     final ch = _channel;
     if (ch == null) return;
     final tint = resolveColorToArgb(_effectiveTint, context);
-    final preIconName = widget.icon?.name;
-    final preIconSize = widget.icon?.size;
-    final preIconColor = resolveColorToArgb(widget.icon?.color, context);
+    final preIconName = _iconName;
     bool needsIntrinsicSize = false;
 
     if (_lastTint != tint && tint != null) {
@@ -188,12 +228,24 @@ class _CNButtonState extends State<CNButton> {
     if (_lastStyle != widget.style) {
       await ch.invokeMethod('setStyle', {'buttonStyle': widget.style.name});
       _lastStyle = widget.style;
+      needsIntrinsicSize = true;
+    }
+    if (_lastRole != widget.role) {
+      await ch.invokeMethod('setStyle', {'buttonRole': _role});
+      _lastRole = widget.role;
     }
     if (_lastControlSize != widget.controlSize) {
       await ch.invokeMethod('setControlSize', {'controlSize': widget.controlSize.name});
       _lastControlSize = widget.controlSize;
       needsIntrinsicSize = true;
     }
+
+    if(_lastImageScale != widget.imageScale) {
+      await ch.invokeMethod('setImageScale', {'imageScale': widget.imageScale.name});
+      _lastImageScale = widget.imageScale;
+      needsIntrinsicSize = true;
+    }
+
     // Enabled state
     await ch.invokeMethod('setEnabled', {'enabled': (widget.enabled && widget.onPressed != null)});
     if (_lastTitle != widget.label && widget.label != null) {
@@ -202,39 +254,32 @@ class _CNButtonState extends State<CNButton> {
       needsIntrinsicSize = true;
     }
 
-    if (needsIntrinsicSize) {
-      _requestIntrinsicSize();
-    }
-
-    if (widget.isIcon) {
+    if (widget.hasSystemImage) {
       final iconName = preIconName;
-      final iconSize = preIconSize;
-      final iconColor = preIconColor;
       final updates = <String, dynamic>{};
       if (_lastIconName != iconName && iconName != null) {
         updates['buttonIconName'] = iconName;
         _lastIconName = iconName;
+        needsIntrinsicSize = true;
       }
-      if (_lastIconSize != iconSize && iconSize != null) {
-        updates['buttonIconSize'] = iconSize;
-        _lastIconSize = iconSize;
+      if (_lastImageScale != widget.imageScale) {
+        updates['imageScale'] = widget.imageScale.name;
+        _lastImageScale = widget.imageScale;
+        needsIntrinsicSize = true;
       }
-      if (_lastIconColor != iconColor && iconColor != null) {
-        updates['buttonIconColor'] = iconColor;
-        _lastIconColor = iconColor;
+
+      if (_lastSymbolRenderingMode != widget.symbolRenderingMode) {
+        updates['symbolRenderingMode'] = widget.symbolRenderingMode?.name;
+        _lastSymbolRenderingMode = widget.symbolRenderingMode;
       }
-      if (widget.icon?.mode != null) {
-        updates['buttonIconRenderingMode'] = widget.icon!.mode!.name;
-      }
-      if (widget.icon?.paletteColors != null) {
-        updates['buttonIconPaletteColors'] = widget.icon!.paletteColors!.map((c) => resolveColorToArgb(c, context)).toList();
-      }
-      if (widget.icon?.gradient != null) {
-        updates['buttonIconGradientEnabled'] = widget.icon!.gradient;
-      }
+
       if (updates.isNotEmpty) {
         await ch.invokeMethod('setButtonIcon', updates);
       }
+    }
+
+    if (needsIntrinsicSize) {
+      _requestIntrinsicSize();
     }
   }
 
@@ -269,35 +314,23 @@ class _CNButtonState extends State<CNButton> {
   Widget build(BuildContext context) {
     if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
       // Fallback Flutter implementation
-      return SizedBox(
-        height: widget.height ?? _kDefaultHeight,
-        width: widget.isIcon && widget.round ? (widget.width ?? widget.height ?? _kDefaultHeight) : null,
-        child: CupertinoButton(
-          padding: widget.isIcon ? const EdgeInsets.all(4) : const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          onPressed: (widget.enabled && widget.onPressed != null) ? widget.onPressed : null,
-          child: widget.isIcon ? Icon(CupertinoIcons.ellipsis, size: widget.icon?.size) : Text(widget.label ?? ''),
-        ),
-      );
+      return SizedBox.shrink();
     }
 
     const viewType = 'CupertinoNativeButton';
 
     final creationParams = <String, dynamic>{
       if (widget.label != null) 'buttonTitle': widget.label,
-      if (widget.icon != null) 'buttonIconName': widget.icon!.name,
-      if (widget.icon?.size != null) 'buttonIconSize': widget.icon!.size,
-      if (widget.icon?.color != null) 'buttonIconColor': resolveColorToArgb(widget.icon!.color, context),
-      if (widget.icon?.mode != null) 'buttonIconRenderingMode': widget.icon!.mode!.name,
-      if (widget.icon?.paletteColors != null)
-        'buttonIconPaletteColors': widget.icon!.paletteColors!.map((c) => resolveColorToArgb(c, context)).toList(),
-      if (widget.icon?.gradient != null) 'buttonIconGradientEnabled': widget.icon!.gradient,
-      if (widget.isIcon) 'round': true,
+      if (_iconName != null) 'buttonIconName': _iconName,
+      'buttonRole': _role,
       'buttonStyle': widget.style.name,
       'enabled': (widget.enabled && widget.onPressed != null),
       'isDark': _isDark,
       'style': encodeStyle(context, tint: _effectiveTint),
       'controlSize': widget.controlSize.name,
       'tint': resolveColorToArgb(_effectiveTint, context),
+      'imageScale': widget.imageScale.name,
+      'symbolRenderingMode': widget.symbolRenderingMode?.name,
     };
 
     final platformView = AppKitView(
@@ -315,17 +348,13 @@ class _CNButtonState extends State<CNButton> {
         final preferIntrinsicWidth = widget.shrinkWrap || !hasBoundedWidth;
         final preferIntrinsicHeight = widget.shrinkWrap || !hasBoundedHeight;
         double? width;
-        if (widget.isIcon) {
-          width = widget.width ?? widget.height ?? _kDefaultHeight;
-        } else if (preferIntrinsicWidth) {
+        if (preferIntrinsicWidth) {
           width = _intrinsicWidth ?? _kDefaultWidth;
         } else {
           width = _intrinsicWidth;
         }
         double? height;
-        if (widget.isIcon) {
-          height = widget.height ?? widget.width ?? _kDefaultHeight;
-        } else if (preferIntrinsicHeight) {
+        if (preferIntrinsicHeight) {
           height = _intrinsicHeight ?? _kDefaultHeight;
         } else {
           height = _intrinsicHeight;

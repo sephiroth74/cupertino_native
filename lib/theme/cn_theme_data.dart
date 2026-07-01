@@ -176,14 +176,11 @@ class CNThemeData extends Equatable {
   /// Separator and stroke color.
   final Color separatorColor;
 
-  /// HIG-aligned text styles.
-  final CNTypography typography;
-
   /// Widget-specific toggle theme overrides.
   final CNToggleThemeData toggleTheme;
 
-  /// Alias of [primaryColor] for accent-driven controls.
-  Color get accentColor => primaryColor;
+  /// HIG-aligned text styles.
+  final CNTypography typography;
 
   @override
   List<Object?> get props => [
@@ -207,6 +204,9 @@ class CNThemeData extends Equatable {
     materialUltraThick,
     toggleTheme,
   ];
+
+  /// Alias of [primaryColor] for accent-driven controls.
+  Color get accentColor => primaryColor;
 
   /// Returns true when [brightness] is dark.
   bool get isDark => brightness == Brightness.dark;

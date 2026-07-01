@@ -17,23 +17,4 @@ class SwiftUtils {
             return ControlSize.regular
         }
     }
-
-    static func pickerStyleFromString(_ style: String?) -> PickerStyle {
-        switch style {
-        case "segmented":
-            return SegmentedPickerStyle()
-        case "automatic":
-            return DefaultPickerStyle()
-        case "inline":
-            return InlinePickerStyle()
-        case "menu":
-            return MenuPickerStyle()
-        case "palette":
-            return PalettePickerStyle()
-        case "radioGroup":
-            return RadioGroupPickerStyle()
-        default:
-            return SegmentedPickerStyle()
-        }
-    }
 }

@@ -9,9 +9,7 @@ class TextViewDemoPage extends StatefulWidget {
 }
 
 class _TextViewDemoPageState extends State<TextViewDemoPage> {
-  final TextEditingController _controller = TextEditingController(
-    text: 'Line 1\nLine 2\nLine 3',
-  );
+  final TextEditingController _controller = TextEditingController(text: 'Line 1\nLine 2\nLine 3');
 
   @override
   void dispose() {
@@ -27,10 +25,7 @@ class _TextViewDemoPageState extends State<TextViewDemoPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const Text(
-              'CNTextView (multiline)',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            const Text('CNTextView (multiline)', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             CNTextView(
               controller: _controller,
@@ -49,16 +44,13 @@ class _TextViewDemoPageState extends State<TextViewDemoPage> {
               runSpacing: 8,
               children: [
                 CNButton(
-                  style: CNButtonStyle.filled,
                   label: 'Set Sample',
                   onPressed: () {
-                    _controller.text =
-                        'Project Notes\n- Finish Text View API\n- Add tests\n- Update docs';
+                    _controller.text = 'Project Notes\n- Finish Text View API\n- Add tests\n- Update docs';
                     setState(() {});
                   },
                 ),
                 CNButton(
-                  style: CNButtonStyle.filled,
                   label: 'Clear',
                   onPressed: () {
                     _controller.clear();
@@ -68,10 +60,7 @@ class _TextViewDemoPageState extends State<TextViewDemoPage> {
               ],
             ),
             const SizedBox(height: 32),
-            const Text(
-              'CNTextArea alias',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            const Text('CNTextArea alias', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             CNTextArea(
               placeholder: 'Text Area alias works exactly like CNTextView.',

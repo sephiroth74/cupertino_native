@@ -1,196 +1,102 @@
 import Cocoa
 import FlutterMacOS
+import SwiftUI
 
 class CupertinoButtonNSView: NSView {
     private let channel: FlutterMethodChannel
-    private let button: NSButton
-    private var isEnabled: Bool = true
-    private var currentButtonStyle: String = "automatic"
-    private var currentControlSize: String = "regular"
+    private var hostingController: NSHostingController<CupertinoButtonView>!
+    private var model: ButtonModel!
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
             name: "CupertinoNativeButton_\(viewId)", binaryMessenger: messenger
         )
-        button = NSButton(title: "", target: nil, action: nil)
         super.init(frame: .zero)
 
         var title: String? = nil
         var iconName: String? = nil
-        var iconSize: CGFloat? = nil
-        var iconColor: NSColor? = nil
-        var makeRound = false
-        var buttonStyle = "automatic"
-        var controlSize = "regular"
+        var buttonStyle: any PrimitiveButtonStyle = DefaultButtonStyle()
+        var controlSize: ControlSize = .regular
         var isDark = false
-        var tint: NSColor? = nil
+        var tint: Color? = nil
         var enabled = true
-        var iconMode: String? = nil
-        var iconPalette: [NSNumber] = []
+        var buttonRole = "none"
+        var imageScale = "medium"
+        var symbolRenderingMode: SymbolRenderingMode? = nil
 
         if let dict = args as? [String: Any] {
             if let t = dict["buttonTitle"] as? String { title = t }
             if let s = dict["buttonIconName"] as? String { iconName = s }
-            if let s = dict["buttonIconSize"] as? NSNumber { iconSize = CGFloat(truncating: s) }
-            if let c = dict["buttonIconColor"] as? NSNumber { iconColor = ColorUtils.colorFromARGB(c.intValue) }
-            if let r = dict["round"] as? NSNumber { makeRound = r.boolValue }
-            if let bs = dict["buttonStyle"] as? String { buttonStyle = bs }
+            if let bs = dict["buttonStyle"] as? String { buttonStyle = bs.toButtonStyle() }
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
             if let style = dict["style"] as? [String: Any], let n = style["tint"] as? NSNumber {
-                tint = ColorUtils.colorFromARGB(n.intValue)
+                tint = n.intValue.toARGB()
             }
             if let e = dict["enabled"] as? NSNumber { enabled = e.boolValue }
-            if let m = dict["buttonIconRenderingMode"] as? String { iconMode = m }
-            if let pal = dict["buttonIconPaletteColors"] as? [NSNumber] { iconPalette = pal }
-            if let cs = dict["controlSize"] as? String { controlSize = cs }
+            if let role = dict["buttonRole"] as? String { buttonRole = role }
+            if let cs = dict["controlSize"] as? String { controlSize = cs.toControlSize() ?? .regular }
+            if let iscale = dict["imageScale"] as? String { imageScale = iscale }
+            if let srm = dict["symbolRenderingMode"] as? String {
+                symbolRenderingMode = srm.toSymbolRenderingMode()
+            }
         }
 
         wantsLayer = true
         layer?.backgroundColor = NSColor.clear.cgColor
         appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
 
-        if let t = title { button.title = t }
-        if let name = iconName,
-           var image = NSImage(systemSymbolName: name, accessibilityDescription: nil)
-        {
-            if #available(macOS 12.0, *), let sz = iconSize {
-                let cfg = NSImage.SymbolConfiguration(pointSize: sz, weight: .regular)
-                image = image.withSymbolConfiguration(cfg) ?? image
-            }
-            if let mode = iconMode {
-                switch mode {
-                case "hierarchical":
-                    if #available(macOS 12.0, *), let c = iconColor {
-                        let cfg = NSImage.SymbolConfiguration(hierarchicalColor: c)
-                        image = image.withSymbolConfiguration(cfg) ?? image
-                    }
-                case "palette":
-                    if #available(macOS 12.0, *), !iconPalette.isEmpty {
-                        let cols = iconPalette.map { ColorUtils.colorFromARGB($0.intValue) }
-                        let cfg = NSImage.SymbolConfiguration(paletteColors: cols)
-                        image = image.withSymbolConfiguration(cfg) ?? image
-                    }
-                case "multicolor":
-                    if #available(macOS 12.0, *) {
-                        let cfg = NSImage.SymbolConfiguration.preferringMulticolor()
-                        image = image.withSymbolConfiguration(cfg) ?? image
-                    }
-                case "monochrome":
-                    if let c = iconColor { image = image.buttonTinted(with: c) }
-                default:
-                    break
-                }
-            } else if let c = iconColor {
-                image = image.buttonTinted(with: c)
-            }
-            button.image = image
-            button.imagePosition = .imageOnly
-        }
-        // Map button styles best-effort to AppKit
-        switch buttonStyle {
-        case "plain":
-            button.bezelStyle = .texturedRounded
-            button.isBordered = false
-        case "gray": button.bezelStyle = .texturedRounded
-        case "tinted": button.bezelStyle = .texturedRounded
-        case "bordered": button.bezelStyle = .rounded
-        case "borderedProminent": button.bezelStyle = .rounded
-        case "filled": button.bezelStyle = .rounded
-        case "glass": button.bezelStyle = if #available(macOS 26.0, *) { .glass } else { .texturedRounded }
-        case "prominentGlass": button.bezelStyle = if #available(macOS 26.0, *) { .glass } else { .texturedRounded }
-        default: button.bezelStyle = .rounded
-        }
+        var channelRef: FlutterMethodChannel? = nil
+        model = ButtonModel(
+            title: title,
+            iconName: iconName,
+            buttonRole: buttonRole,
+            buttonStyle: buttonStyle,
+            controlSize: controlSize,
+            tint: tint,
+            isEnabled: enabled,
+            imageScale: imageScale,
+            symbolRenderingMode: symbolRenderingMode,
+            onPressed: {
+                channelRef?.invokeMethod("pressed", arguments: nil)
+            },
+            onSizeChanged: { _ in }
+        )
 
-        switch controlSize {
-        case "mini": button.controlSize = .mini
-        case "small": button.controlSize = .small
-        case "regular": button.controlSize = .regular
-        case "large": button.controlSize = .large
-        case "extraLarge":
-            button.controlSize =
-                if #available(macOS 26.0, *) {
-                    .extraLarge
-                } else {
-                    .large
-                }
-        default: button.controlSize = .regular
-        }
+        hostingController = NSHostingController(rootView: CupertinoButtonView(model: model))
+        hostingController.view.wantsLayer = true
+        hostingController.view.layer?.backgroundColor = NSColor.clear.cgColor
 
-        if makeRound { button.bezelStyle = .circular }
-        button.setButtonType(.momentaryPushIn)
-
-        var attributes: [NSAttributedString.Key: Any] = [:]
-
-        if #available(macOS 10.14, *), let c = tint {
-            if ["filled", "borderedProminent", "prominentGlass"].contains(buttonStyle) {
-                button.bezelColor = c
-                attributes[.foregroundColor] = NSColor.labelColor
-            } else {
-                attributes[.foregroundColor] = c
-            }
-        }
-
-        button.attributedTitle = NSAttributedString(string: button.title, attributes: attributes)
-
-        button.isEnabled = enabled
-
-        currentButtonStyle = buttonStyle
-        currentControlSize = controlSize
-        isEnabled = enabled
-
-        addSubview(button)
-        button.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(hostingController.view)
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            button.leadingAnchor.constraint(equalTo: leadingAnchor),
-            button.trailingAnchor.constraint(equalTo: trailingAnchor),
-            button.topAnchor.constraint(equalTo: topAnchor),
-            button.bottomAnchor.constraint(equalTo: bottomAnchor),
+            hostingController.view.leadingAnchor.constraint(equalTo: leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: trailingAnchor),
+            hostingController.view.topAnchor.constraint(equalTo: topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
 
-        button.target = self
-        button.action = #selector(onPressed(_:))
+        channelRef = channel
 
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self = self else {
                 result(nil)
                 return
             }
+
             switch call.method {
             case "getIntrinsicSize":
-                let s = self.button.intrinsicContentSize
+                let s = self.hostingController.view.fittingSize
                 result(["width": Double(s.width), "height": Double(s.height)])
             case "setStyle":
                 if let args = call.arguments as? [String: Any] {
-                    if #available(macOS 10.14, *), let n = args["tint"] as? NSNumber {
-                        let color = ColorUtils.colorFromARGB(n.intValue)
-                        if ["filled", "borderedProminent", "prominentGlass"].contains(self.currentButtonStyle) {
-                            self.button.bezelColor = color
-                            self.button.contentTintColor = .white
-                        } else {
-                            self.button.contentTintColor = color
-                        }
+                    if let n = args["tint"] as? NSNumber {
+                        self.model.tint = n.intValue.toARGB()
                     }
                     if let bs = args["buttonStyle"] as? String {
-                        self.currentButtonStyle = bs
-                        switch bs {
-                        case "plain":
-                            self.button.bezelStyle = .texturedRounded
-                            self.button.isBordered = false
-                        case "gray": self.button.bezelStyle = .texturedRounded
-                        case "tinted": self.button.bezelStyle = .texturedRounded
-                        case "bordered": self.button.bezelStyle = .rounded
-                        case "borderedProminent": self.button.bezelStyle = .rounded
-                        case "filled": self.button.bezelStyle = .rounded
-                        case "glass": self.button.bezelStyle = .texturedRounded
-                        case "prominentGlass": self.button.bezelStyle = .texturedRounded
-                        default: self.button.bezelStyle = .rounded
-                        }
-                        if bs != "plain" { self.button.isBordered = true }
-                        if #available(macOS 10.14, *), let c = self.button.contentTintColor,
-                           ["filled", "borderedProminent"].contains(self.currentButtonStyle)
-                        {
-                            self.button.bezelColor = c
-                        }
+                        self.model.buttonStyle = bs.toButtonStyle()
+                    }
+                    if let role = args["buttonRole"] as? String {
+                        self.model.buttonRole = role
                     }
                     result(nil)
                 } else {
@@ -198,89 +104,40 @@ class CupertinoButtonNSView: NSView {
                 }
             case "setControlSize":
                 if let args = call.arguments as? [String: Any], let cs = args["controlSize"] as? String {
-                    self.currentControlSize = cs
-                    switch cs {
-                    case "mini": self.button.controlSize = .mini
-                    case "small": self.button.controlSize = .small
-                    case "regular": self.button.controlSize = .regular
-                    case "large": self.button.controlSize = .large
-                    case "extraLarge":
-                        self.button.controlSize =
-                            if #available(macOS 26.0, *) {
-                                .extraLarge
-                            } else {
-                                .large
-                            }
-                    default: self.button.controlSize = .regular
-                    }
+                    self.model.controlSize = cs.toControlSize() ?? .regular
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing control size", details: nil))
                 }
+            case "setImageScale":
+                if let args = call.arguments as? [String: Any], let iscale = args["imageScale"] as? String {
+                    self.model.imageScale = iscale
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing image scale", details: nil))
+                }
             case "setButtonTitle":
                 if let args = call.arguments as? [String: Any], let t = args["title"] as? String {
-                    self.button.title = t
-                    self.button.image = nil
+                    self.model.title = t
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing title", details: nil))
                 }
             case "setEnabled":
                 if let args = call.arguments as? [String: Any], let e = args["enabled"] as? NSNumber {
-                    self.isEnabled = e.boolValue
-                    self.button.isEnabled = self.isEnabled
+                    self.model.isEnabled = e.boolValue
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
                 }
             case "setButtonIcon":
                 if let args = call.arguments as? [String: Any] {
-                    if let name = args["buttonIconName"] as? String,
-                       var image = NSImage(systemSymbolName: name, accessibilityDescription: nil)
-                    {
-                        if #available(macOS 12.0, *), let sz = args["buttonIconSize"] as? NSNumber {
-                            let cfg = NSImage.SymbolConfiguration(
-                                pointSize: CGFloat(truncating: sz), weight: .regular
-                            )
-                            image = image.withSymbolConfiguration(cfg) ?? image
-                        }
-                        if let mode = args["buttonIconRenderingMode"] as? String {
-                            switch mode {
-                            case "hierarchical":
-                                if #available(macOS 12.0, *), let c = args["buttonIconColor"] as? NSNumber {
-                                    let cfg = NSImage.SymbolConfiguration(
-                                        hierarchicalColor: ColorUtils.colorFromARGB(c.intValue)
-                                    )
-                                    image = image.withSymbolConfiguration(cfg) ?? image
-                                }
-                            case "palette":
-                                if #available(macOS 12.0, *),
-                                   let pal = args["buttonIconPaletteColors"] as? [NSNumber]
-                                {
-                                    let cols = pal.map { ColorUtils.colorFromARGB($0.intValue) }
-                                    let cfg = NSImage.SymbolConfiguration(paletteColors: cols)
-                                    image = image.withSymbolConfiguration(cfg) ?? image
-                                }
-                            case "multicolor":
-                                if #available(macOS 12.0, *) {
-                                    let cfg = NSImage.SymbolConfiguration.preferringMulticolor()
-                                    image = image.withSymbolConfiguration(cfg) ?? image
-                                }
-                            case "monochrome":
-                                if let c = args["buttonIconColor"] as? NSNumber {
-                                    image = image.tinted(with: ColorUtils.colorFromARGB(c.intValue))
-                                }
-                            default:
-                                break
-                            }
-                        } else if let c = args["buttonIconColor"] as? NSNumber {
-                            image = image.tinted(with: ColorUtils.colorFromARGB(c.intValue))
-                        }
-                        self.button.image = image
-                        self.button.title = ""
-                        self.button.imagePosition = .imageOnly
+                    if let name = args["buttonIconName"] as? String {
+                        self.model.iconName = name
                     }
-                    if let r = args["round"] as? NSNumber, r.boolValue { self.button.bezelStyle = .circular }
+                    if let srm = args["symbolRenderingMode"] as? String {
+                        self.model.symbolRenderingMode = srm.toSymbolRenderingMode()
+                    }
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing icon args", details: nil))
@@ -296,7 +153,7 @@ class CupertinoButtonNSView: NSView {
                 }
             case "setPressed":
                 if let args = call.arguments as? [String: Any], let p = args["pressed"] as? NSNumber {
-                    self.alphaValue = p.boolValue ? 0.7 : 1.0
+                    self.model.isPressed = p.boolValue
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing pressed", details: nil))
@@ -310,23 +167,132 @@ class CupertinoButtonNSView: NSView {
     required init?(coder _: NSCoder) {
         return nil
     }
+}
 
-    @objc private func onPressed(_: NSButton) {
-        guard isEnabled else { return }
-        channel.invokeMethod("pressed", arguments: nil)
+private final class ButtonModel: ObservableObject {
+    @Published var title: String?
+    @Published var iconName: String?
+    @Published var buttonRole: String
+    @Published var buttonStyle: any PrimitiveButtonStyle
+    @Published var controlSize: ControlSize
+    @Published var tint: Color?
+    @Published var isEnabled: Bool
+    @Published var isPressed: Bool = false
+    @Published var imageScale: String
+    @Published var symbolRenderingMode: SymbolRenderingMode?
+    let onPressed: () -> Void
+    let onSizeChanged: (CGSize) -> Void
+
+    init(
+        title: String?,
+        iconName: String?,
+        buttonRole: String,
+        buttonStyle: any PrimitiveButtonStyle,
+        controlSize: ControlSize,
+        tint: Color?,
+        isEnabled: Bool,
+        imageScale: String,
+        symbolRenderingMode: SymbolRenderingMode?,
+        onPressed: @escaping () -> Void,
+        onSizeChanged: @escaping (CGSize) -> Void
+    ) {
+        self.title = title
+        self.iconName = iconName
+        self.buttonRole = buttonRole
+        self.buttonStyle = buttonStyle
+        self.controlSize = controlSize
+        self.tint = tint
+        self.isEnabled = isEnabled
+        self.imageScale = imageScale
+        self.symbolRenderingMode = symbolRenderingMode
+        self.onPressed = onPressed
+        self.onSizeChanged = onSizeChanged
     }
 }
 
-private extension NSImage {
-    func buttonTinted(with color: NSColor) -> NSImage {
-        guard isTemplate else { return self }
-        let image = copy() as! NSImage
-        image.lockFocus()
-        color.set()
-        let imageRect = NSRect(origin: .zero, size: image.size)
-        imageRect.fill(using: .sourceAtop)
-        image.unlockFocus()
-        image.isTemplate = false
-        return image
+private struct CupertinoButtonView: View {
+    @ObservedObject var model: ButtonModel
+
+    private var imageScaleValue: Image.Scale {
+        switch model.imageScale {
+        case "small":
+            return .small
+        case "large":
+            return .large
+        default:
+            return .medium
+        }
+    }
+
+    private var roleValue: ButtonRole? {
+        switch model.buttonRole {
+        case "cancel":
+            return .cancel
+        case "destructive":
+            return .destructive
+        case "confirm":
+            return .confirm
+        case "close":
+            return .close
+        default:
+            return nil
+        }
+    }
+
+    var body: some View {
+        buildButton()
+            .onGeometryChange(for: CGSize.self) { proxy in
+                proxy.size
+            } action: { newSize in
+                model.onSizeChanged(newSize)
+            }
+    }
+
+    private func onButtonPressed() {
+        guard model.isEnabled else { return }
+        model.onPressed()
+    }
+
+    private func buildButton() -> some View {
+        let title = model.title?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasTitle = (title?.isEmpty == false)
+        let hasIcon = (model.iconName?.isEmpty == false)
+
+        let baseButton: AnyView
+        if hasTitle, hasIcon {
+            baseButton = AnyView(Button {
+                onButtonPressed()
+            } label: {
+                HStack {
+                    Image(systemName: model.iconName!)
+                    Text(title!)
+                }
+            })
+        } else if hasTitle {
+            baseButton = AnyView(Button(title!, role: roleValue, action: onButtonPressed))
+        } else if hasIcon {
+            baseButton = AnyView(Button {
+                onButtonPressed()
+            } label: {
+                Image(systemName: model.iconName!)
+            })
+        } else {
+            baseButton = AnyView(Button("", role: roleValue, action: onButtonPressed))
+        }
+
+        let button = baseButton
+            .disabled(!model.isEnabled)
+            .controlSize(model.controlSize)
+            .opacity(model.isPressed ? 0.7 : 1.0)
+            .imageScale(imageScaleValue)
+            .symbolRenderingMode(model.symbolRenderingMode)
+            .buttonStyle(model.buttonStyle)
+
+        if model.tint != nil {
+            let tintedButton = button.tint(model.tint!)
+            return AnyView(tintedButton)
+        }
+
+        return AnyView(button)
     }
 }

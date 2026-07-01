@@ -8,6 +8,9 @@ import '../model/control_size.dart';
 import '../style/sf_symbol.dart';
 import '../theme/cn_theme.dart';
 
+const double _kDefaultPickerHeight = 38.0;
+const double _kDefaultPickerWidth = 300.0;
+
 /// A Cupertino-native picker with segmented control style.
 ///
 /// Embeds a native SwiftUI Picker for pixel-perfect fidelity on macOS.
@@ -59,8 +62,12 @@ class CNPicker extends StatefulWidget {
     this.controlSize = CNControlSize.regular,
     this.pickerStyle = CNPickerStyle.segmented,
     this.shrinkWrap = false,
+    this.asList = false,
     required this.items,
   }) : assert(items.length > 0, 'Items list cannot be empty.');
+
+  /// Whether the picker should be displayed as a list (true) or segmented control (false).
+  final bool asList;
 
   /// Accent/tint color used for the picker.
   final Color? color;
@@ -100,6 +107,7 @@ class _CNPickerState extends State<CNPicker> {
   MethodChannel? _channel;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
+  bool? _lastAsList;
   CNControlSize? _lastControlSize;
   bool? _lastEnabled;
   bool? _lastIsDark;
@@ -135,6 +143,7 @@ class _CNPickerState extends State<CNPicker> {
     channel.setMethodCallHandler(_onMethodCall);
     _cacheCurrentProps();
     _syncBrightnessIfNeeded();
+    _queryIntrinsicSize();
   }
 
   Future<void> _queryIntrinsicSize() async {
@@ -182,6 +191,7 @@ class _CNPickerState extends State<CNPicker> {
     _lastTint = resolveColorToArgb(_effectiveTint, context);
     _lastControlSize = widget.controlSize;
     _lastPickerStyle = widget.pickerStyle;
+    _lastAsList = widget.asList;
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
@@ -210,6 +220,11 @@ class _CNPickerState extends State<CNPicker> {
     if (_lastPickerStyle != widget.pickerStyle) {
       await channel.invokeMethod('setPickerStyle', {'pickerStyle': widget.pickerStyle.name});
       _lastPickerStyle = widget.pickerStyle;
+      _queryIntrinsicSize();
+    }
+    if (_lastAsList != widget.asList) {
+      await channel.invokeMethod('setAsList', {'asList': widget.asList});
+      _lastAsList = widget.asList;
       _queryIntrinsicSize();
     }
   }
@@ -243,6 +258,7 @@ class _CNPickerState extends State<CNPicker> {
       'isDark': _isDark,
       'controlSize': widget.controlSize.name,
       'pickerStyle': widget.pickerStyle.name,
+      'asList': widget.asList,
       if (widget.label != null) 'label': widget.label,
       if (widget.sublabel != null) 'sublabel': widget.sublabel,
       'style': encodeStyle(context, tint: _effectiveTint),
@@ -255,24 +271,6 @@ class _CNPickerState extends State<CNPicker> {
       onPlatformViewCreated: _onPlatformViewCreated,
     );
 
-    if (widget.shrinkWrap) {
-      double? width = _intrinsicWidth;
-      double? height = _intrinsicHeight;
-
-      if (width == null || height == null) {
-        width = 100.0; // Fallback width if unconstrained and no intrinsic size
-        height = 38.0; // Default height for unbounded layouts
-      }
-      if (width == double.infinity) {
-        width = 100.0; // Fallback width if unconstrained and no intrinsic size
-      }
-      if (height == double.infinity) {
-        height = 38.0; // Default height for unbounded layouts
-      }
-
-      return SizedBox(height: height, width: width, child: child);
-    }
-
     return LayoutBuilder(
       builder: (context, constraints) {
         debugPrint('Picker constraints: $constraints');
@@ -283,28 +281,41 @@ class _CNPickerState extends State<CNPicker> {
         double? width;
         double? height;
 
-        if (hasBoundedWidth && !widget.shrinkWrap) {
+        if (widget.shrinkWrap) {
+          if (hasBoundedWidth) {
+            final targetWidth = _intrinsicWidth ?? _kDefaultPickerWidth;
+            width = targetWidth.clamp(0.0, constraints.maxWidth);
+          } else {
+            width = _intrinsicWidth ?? _kDefaultPickerWidth;
+          }
+
+          if (hasBoundedHeight) {
+            final targetHeight = _intrinsicHeight ?? _kDefaultPickerHeight;
+            height = targetHeight.clamp(0.0, constraints.maxHeight);
+          } else {
+            height = _intrinsicHeight ?? _kDefaultPickerHeight;
+          }
+        } else if (hasBoundedWidth) {
           width = constraints.maxWidth;
-        } else if (_intrinsicWidth != null) {
-          width = _intrinsicWidth;
+          if (_intrinsicHeight != null) {
+            height = _intrinsicHeight;
+          } else if (hasBoundedHeight) {
+            height = constraints.maxHeight;
+          } else {
+            height = _kDefaultPickerHeight;
+          }
         } else {
-          width = double.infinity;
+          width = _intrinsicWidth ?? _kDefaultPickerWidth;
+          height = _intrinsicHeight ?? (hasBoundedHeight ? constraints.maxHeight : _kDefaultPickerHeight);
         }
-
-        if (_intrinsicHeight != null) {
-          height = _intrinsicHeight;
-        } else if (hasBoundedHeight) {
-          height = constraints.maxHeight;
-        } else {
-          height = 38.0; // Default height for unbounded layouts
-        }
-
-        width ??= double.infinity;
 
         debugPrint('Picker final size: width=$width, height=$height');
 
         if (width == double.infinity) {
-          width = 100.0; // Fallback width if unconstrained and no intrinsic size
+          width = _intrinsicWidth ?? _kDefaultPickerWidth;
+        }
+        if (height == double.infinity) {
+          height = _intrinsicHeight ?? _kDefaultPickerHeight;
         }
 
         return SizedBox(height: height, width: width, child: child);

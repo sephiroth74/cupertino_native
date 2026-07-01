@@ -13,10 +13,7 @@ class _SplitViewDemoPageState extends State<SplitViewDemoPage> {
   final CNSplitViewController _controller = CNSplitViewController();
   bool _enableMacOSDividerEffects = true;
   String _metricsText = 'No metrics yet';
-  final TextEditingController _nativeTextController = TextEditingController(
-    text: 'Native NSTextView embedded in Split View',
-  );
-
+  final TextEditingController _nativeTextController = TextEditingController(text: 'Native NSTextView embedded in Split View');
   double _previewScale = 0.35;
   bool _showNativeTextView = true;
   bool _snapEnabled = true;
@@ -30,10 +27,7 @@ class _SplitViewDemoPageState extends State<SplitViewDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final paneBackground = CupertinoDynamicColor.resolve(
-      CupertinoColors.systemGrey6,
-      context,
-    );
+    final paneBackground = CupertinoDynamicColor.resolve(CupertinoColors.systemGrey6, context);
 
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(middle: Text('Split View')),
@@ -48,14 +42,8 @@ class _SplitViewDemoPageState extends State<SplitViewDemoPage> {
                   CupertinoSlidingSegmentedControl<CNSplitAxis>(
                     groupValue: _axis,
                     children: const {
-                      CNSplitAxis.horizontal: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Text('Horizontal'),
-                      ),
-                      CNSplitAxis.vertical: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Text('Vertical'),
-                      ),
+                      CNSplitAxis.horizontal: Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text('Horizontal')),
+                      CNSplitAxis.vertical: Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text('Vertical')),
                     },
                     onValueChanged: (value) {
                       if (value == null) {
@@ -80,13 +68,7 @@ class _SplitViewDemoPageState extends State<SplitViewDemoPage> {
                         },
                       ),
                       const Spacer(),
-                      Text(
-                        _metricsText,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: CupertinoColors.secondaryLabel,
-                        ),
-                      ),
+                      Text(_metricsText, style: const TextStyle(fontSize: 12, color: CupertinoColors.secondaryLabel)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -127,40 +109,29 @@ class _SplitViewDemoPageState extends State<SplitViewDemoPage> {
                       CNButton(
                         label: '30 / 70',
                         onPressed: () => _controller.setFraction(0.3),
-                        style: CNButtonStyle.filled,
+                        style: CNButtonStyle.borderedProminent,
                       ),
                       CNButton(
                         label: '50 / 50',
                         onPressed: () => _controller.setFraction(0.5),
-                        style: CNButtonStyle.filled,
+                        style: CNButtonStyle.borderedProminent,
                       ),
-                      CNButton(
-                        label: 'Collapse First',
-                        onPressed: _controller.collapseFirst,
-                        style: CNButtonStyle.gray,
-                      ),
-                      CNButton(
-                        label: 'Collapse Second',
-                        onPressed: _controller.collapseSecond,
-                        style: CNButtonStyle.gray,
-                      ),
+                      CNButton(label: 'Collapse First', onPressed: _controller.collapseFirst, style: CNButtonStyle.bordered),
+                      CNButton(label: 'Collapse Second', onPressed: _controller.collapseSecond, style: CNButtonStyle.bordered),
                       CNButton(
                         label: 'Expand Both',
                         onPressed: () {
                           _controller.expandFirst();
                           _controller.expandSecond();
                         },
-                        style: CNButtonStyle.gray,
+                        style: CNButtonStyle.bordered,
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   const Text(
                     'Tip: double-click divider to reset. Keyboard: Alt+Arrow to resize, Alt+1/Alt+2 to toggle panes.',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: CupertinoColors.secondaryLabel,
-                    ),
+                    style: TextStyle(fontSize: 12, color: CupertinoColors.secondaryLabel),
                   ),
                 ],
               ),
@@ -175,9 +146,7 @@ class _SplitViewDemoPageState extends State<SplitViewDemoPage> {
                   initialFraction: 0.35,
                   minFraction: 0.2,
                   maxFraction: 0.8,
-                  snapFractions: _snapEnabled
-                      ? const <double>[0.25, 0.5, 0.75]
-                      : const <double>[],
+                  snapFractions: _snapEnabled ? const <double>[0.25, 0.5, 0.75] : const <double>[],
                   snapThreshold: 0.04,
                   snapReleaseThreshold: 0.065,
                   dividerInteractiveThickness: 18,
@@ -192,10 +161,8 @@ class _SplitViewDemoPageState extends State<SplitViewDemoPage> {
                       subtitle: 'Scrollable + interactive controls',
                       child: ListView.builder(
                         itemCount: 30,
-                        itemBuilder: (context, index) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Text('Item ${index + 1}'),
-                        ),
+                        itemBuilder: (context, index) =>
+                            Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Text('Item ${index + 1}')),
                       ),
                     ),
                   ),
@@ -210,10 +177,7 @@ class _SplitViewDemoPageState extends State<SplitViewDemoPage> {
                           const SizedBox(height: 10),
                           CupertinoTextField(
                             placeholder: 'Type here (Flutter text field)',
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 8,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                           ),
                           const SizedBox(height: 12),
                           Row(
@@ -240,15 +204,11 @@ class _SplitViewDemoPageState extends State<SplitViewDemoPage> {
                             curve: Curves.easeOutCubic,
                             height: 48 + (_previewScale * 80),
                             decoration: BoxDecoration(
-                              color: CupertinoColors.systemBlue.withValues(
-                                alpha: 0.12,
-                              ),
+                              color: CupertinoColors.systemBlue.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             alignment: Alignment.center,
-                            child: Text(
-                              'Animated preview ${(_previewScale * 100).round()}%',
-                            ),
+                            child: Text('Animated preview ${(_previewScale * 100).round()}%'),
                           ),
                           if (_showNativeTextView) ...[
                             const SizedBox(height: 12),
@@ -281,11 +241,7 @@ class _SplitViewDemoPageState extends State<SplitViewDemoPage> {
 }
 
 class _PaneCard extends StatelessWidget {
-  const _PaneCard({
-    required this.title,
-    required this.subtitle,
-    required this.child,
-  });
+  const _PaneCard({required this.title, required this.subtitle, required this.child});
 
   final Widget child;
   final String subtitle;
@@ -293,16 +249,10 @@ class _PaneCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final background = CupertinoDynamicColor.resolve(
-      CupertinoColors.systemBackground,
-      context,
-    );
+    final background = CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context);
 
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(10),
-      ),
+      decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(10)),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final maxHeight = constraints.maxHeight;
@@ -319,10 +269,7 @@ class _PaneCard extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: compact ? 15 : 17,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: compact ? 15 : 17),
                 ),
                 if (showSubtitle) ...[
                   const SizedBox(height: 4),
@@ -330,16 +277,10 @@ class _PaneCard extends StatelessWidget {
                     subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: CupertinoColors.secondaryLabel,
-                    ),
+                    style: const TextStyle(fontSize: 12, color: CupertinoColors.secondaryLabel),
                   ),
                 ],
-                if (showBody) ...[
-                  const SizedBox(height: 10),
-                  Expanded(child: child),
-                ],
+                if (showBody) ...[const SizedBox(height: 10), Expanded(child: child)],
               ],
             ),
           );

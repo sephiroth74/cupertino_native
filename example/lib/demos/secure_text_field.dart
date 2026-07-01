@@ -5,8 +5,7 @@ class SecureTextFieldDemoPage extends StatefulWidget {
   const SecureTextFieldDemoPage({super.key});
 
   @override
-  State<SecureTextFieldDemoPage> createState() =>
-      _SecureTextFieldDemoPageState();
+  State<SecureTextFieldDemoPage> createState() => _SecureTextFieldDemoPageState();
 }
 
 class _SecureTextFieldDemoPageState extends State<SecureTextFieldDemoPage> {
@@ -37,17 +36,12 @@ class _SecureTextFieldDemoPageState extends State<SecureTextFieldDemoPage> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Secure Text Field'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('Secure Text Field')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const Text(
-              'Default Secure Text Field',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            const Text('Default Secure Text Field', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             CNSecureTextField(
               controller: _controller,
@@ -64,14 +58,12 @@ class _SecureTextFieldDemoPageState extends State<SecureTextFieldDemoPage> {
               runSpacing: 8,
               children: [
                 CNButton(
-                  style: CNButtonStyle.filled,
                   label: 'Set Sample',
                   onPressed: () {
                     _controller.text = 's3cr3t-passw0rd';
                   },
                 ),
                 CNButton(
-                  style: CNButtonStyle.filled,
                   label: 'Clear',
                   onPressed: () {
                     _controller.clear();
@@ -80,24 +72,15 @@ class _SecureTextFieldDemoPageState extends State<SecureTextFieldDemoPage> {
               ],
             ),
             const SizedBox(height: 32),
-            const Text(
-              'Styled Secure Text Field',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            const Text('Styled Secure Text Field', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             CNSecureTextField(
               controller: TextEditingController(text: ''),
               placeholder: 'Styled secure input',
               placeholderColor: CupertinoColors.systemGrey,
-              placeholderFont: const CNFont.monospacedSystem(
-                CNFontSize.points(14),
-                weight: CNFontWeight.medium,
-              ),
+              placeholderFont: const CNFont.monospacedSystem(CNFontSize.points(14), weight: CNFontWeight.medium),
               backgroundColor: CupertinoColors.systemYellow.withOpacity(0.25),
-              font: const CNFont.system(
-                CNFontSize.points(15),
-                weight: CNFontWeight.semibold,
-              ),
+              font: const CNFont.system(CNFontSize.points(15), weight: CNFontWeight.semibold),
               controlSize: CNControlSize.regular,
               bezelStyle: CNTextFieldBezelStyle.round,
               width: 320,

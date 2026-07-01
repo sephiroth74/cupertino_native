@@ -14,7 +14,8 @@ class CupertinoPickerNSView: NSView {
     private var isDark: Bool = false
     private var tintColor: NSColor?
     private var controlSize: String = "regular"
-    private var pickerStyle: String = "segmented"
+    private var pickerStyle: any PickerStyle = DefaultPickerStyle()
+    private var asList: Bool = false
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(name: "CupertinoNativePicker_\(viewId)", binaryMessenger: messenger)
@@ -29,7 +30,8 @@ class CupertinoPickerNSView: NSView {
             if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
             if let size = dict["controlSize"] as? String { controlSize = size }
-            if let style = dict["pickerStyle"] as? String { pickerStyle = style }
+            if let style = dict["pickerStyle"] as? String { pickerStyle = style.toPickerStyle() }
+            if let displayAsList = dict["asList"] as? NSNumber { asList = displayAsList.boolValue }
             if let style = dict["style"] as? [String: Any] {
                 if let tint = style["tint"] as? NSNumber {
                     tintColor = ColorUtils.colorFromARGB(tint.intValue)
@@ -90,10 +92,16 @@ class CupertinoPickerNSView: NSView {
                 } else { result(FlutterError(code: "bad_args", message: "Missing controlSize", details: nil)) }
             case "setPickerStyle":
                 if let args = call.arguments as? [String: Any], let styleName = args["pickerStyle"] as? String {
-                    self.pickerStyle = styleName
+                    self.pickerStyle = styleName.toPickerStyle()
                     self.createPickerContent()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing pickerStyle", details: nil)) }
+            case "setAsList":
+                if let args = call.arguments as? [String: Any], let displayAsList = (args["asList"] as? NSNumber)?.boolValue {
+                    self.asList = displayAsList
+                    self.createPickerContent()
+                    result(nil)
+                } else { result(FlutterError(code: "bad_args", message: "Missing asList", details: nil)) }
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -116,7 +124,9 @@ class CupertinoPickerNSView: NSView {
             tintColor: tintColor,
             controlSize: SwiftUtils.controlSizeFromString(controlSize),
             pickerStyle: pickerStyle,
+            displayAsList: asList,
             onSelectionChange: { [weak self] newIndex in
+                NSLog("Picker selection changed to index: \(newIndex)")
                 self?.selection = newIndex
                 self?.channel.invokeMethod("valueChanged", arguments: ["index": newIndex])
             },
@@ -156,7 +166,8 @@ struct PickerModel {
     let enabled: Bool
     let tintColor: NSColor?
     let controlSize: ControlSize
-    let pickerStyle: String
+    let pickerStyle: any PickerStyle
+    let displayAsList: Bool
     let onSelectionChange: (Int) -> Void
     let onSizeChange: (CGSize) -> Void
 }
@@ -164,6 +175,7 @@ struct PickerModel {
 struct PickerContent: View {
     @State var size: CGSize = .zero
     @State var selection: Int
+    @State private var listBaselineSize: CGSize?
     let model: PickerModel
 
     init(model: PickerModel) {
@@ -172,34 +184,24 @@ struct PickerContent: View {
     }
 
     var body: some View {
-        Group {
-            if model.pickerStyle == "segmented" {
-                basePicker
-                    .pickerStyle(.segmented)
-            } else if model.pickerStyle == "automatic" {
-                basePicker
-                    .pickerStyle(.automatic)
-            } else if model.pickerStyle == "inline" {
-                basePicker
-                    .pickerStyle(.inline)
-            } else if model.pickerStyle == "menu" {
-                basePicker
-                    .pickerStyle(.menu)
-            } else if model.pickerStyle == "palette" {
-                basePicker
-                    .pickerStyle(.palette)
-            } else if model.pickerStyle == "radioGroup" {
-                basePicker
-                    .pickerStyle(.radioGroup)
-            } else {
-                basePicker
-                    .pickerStyle(.segmented)
-            }
-        }
+        basePicker
     }
 
     private var basePicker: some View {
-        let picker = Picker(selection: $selection) {
+        let selectionBinding = Binding<Int>(
+            get: { selection },
+            set: { newValue in
+                guard selection != newValue else {
+                    selection = newValue
+                    return
+                }
+
+                selection = newValue
+                model.onSelectionChange(newValue)
+            }
+        )
+
+        let picker = Picker(selection: selectionBinding) {
             ForEach(model.items.indices, id: \.self) { index in
                 let item = model.items[index]
                 itemView(for: item)
@@ -208,40 +210,73 @@ struct PickerContent: View {
         } label: {
             if let label = model.label {
                 Text(label)
-            }
-            if let sublabel = model.sublabel {
-                Text(sublabel)
+                if let sublabel = model.sublabel {
+                    Text(sublabel)
+                }
             }
         }
-        .controlSize(model.controlSize)
-        .disabled(!model.enabled)
-        .onChange(of: selection) { newValue in
-            model.onSelectionChange(newValue)
-        }
-        .onGeometryChange(for: CGSize.self) { proxy in
-            proxy.size
-        } action: { newValue in
-            size = newValue
-            model.onSizeChange(newValue)
+        pickerStyle(model.pickerStyle)
+            .controlSize(model.controlSize)
+            .disabled(!model.enabled)
+            .onGeometryChange(for: CGSize.self) { proxy in
+                proxy.size
+            } action: { newValue in
+                reportMeasuredSize(newValue, fromListContainer: model.label != nil)
+            }
+
+        let shouldUseListContainer = model.label != nil && model.displayAsList
+
+        func reportMeasuredSize(_ newValue: CGSize, fromListContainer: Bool) {
+            let adjusted: CGSize
+
+            if fromListContainer {
+                // List can create a feedback loop with intrinsic sizing updates.
+                // Keep a stable baseline and apply the compensation once.
+                if let baseline = listBaselineSize {
+                    let widthChanged = abs(newValue.width - baseline.width) > 0.5
+                    let becameSmaller = newValue.height < baseline.height
+                    if widthChanged || becameSmaller {
+                        listBaselineSize = newValue
+                    }
+                } else {
+                    listBaselineSize = newValue
+                }
+
+                let baseline = listBaselineSize ?? newValue
+                adjusted = CGSize(
+                    width: baseline.width,
+                    height: baseline.height + 28.0
+                )
+            } else {
+                adjusted = newValue
+            }
+
+            // Avoid spamming Flutter with repeated identical values.
+            if abs(size.width - adjusted.width) < 0.5, abs(size.height - adjusted.height) < 0.5 {
+                return
+            }
+
+            size = adjusted
+            model.onSizeChange(adjusted)
         }
 
         if let tintColor = model.tintColor {
             let tintedPicker = picker.tint(Color(nsColor: tintColor))
-            if model.label != nil {
+            if shouldUseListContainer {
                 return AnyView(List {
                     tintedPicker
-                })
+                }.padding(0))
             } else {
                 return AnyView(tintedPicker)
             }
         } else {
-            if model.label != nil {
+            if shouldUseListContainer {
                 return AnyView(List {
                     picker
-                })
-            } else {
-                return AnyView(picker)
+                }.padding(0))
             }
+
+            return AnyView(picker)
         }
     }
 
