@@ -9,14 +9,14 @@ class ButtonDemoPage extends StatefulWidget {
 }
 
 class _ButtonDemoPageState extends State<ButtonDemoPage> {
+  CNButtonStyle _buttonStyle = CNButtonStyle.automatic;
   CNControlSize _controlSize = CNControlSize.large;
+  CNImageScale _imageScale = CNImageScale.large;
   String _last = 'None';
   bool _shrinkWrap = true;
   final List<CNControlSize> _sizes = CNControlSize.values;
-  final Color? _tint = null;
-  CNImageScale _imageScale = CNImageScale.large;
   CNSymbolRenderingMode _symbolRenderingMode = CNSymbolRenderingMode.hierarchical;
-  CNButtonStyle _buttonStyle = CNButtonStyle.automatic;
+  final Color? _tint = null;
 
   void _set(String what) => setState(() => _last = what);
 

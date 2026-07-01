@@ -147,7 +147,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
     }
 
     private func describeEvent(_ event: NSEvent) -> String {
-        let location = NSStringFromPoint(event.locationInWindow)
+        let _ = NSStringFromPoint(event.locationInWindow)
         return
             "type=\(event.type.rawValue)"
     }

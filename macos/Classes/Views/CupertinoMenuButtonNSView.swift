@@ -229,7 +229,7 @@ private struct MenuButtonContent: View {
             .focusable(model.focusable)
             .padding(0)
             .background(SizeReader(size: $measuredSize))
-            .onChange(of: measuredSize) { newSize in
+            .onChange(of: measuredSize, initial: true) { newSize, _ in
                 onSizeChanged(newSize)
             }
     }

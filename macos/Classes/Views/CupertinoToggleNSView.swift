@@ -108,6 +108,19 @@ class CupertinoToggleNSView: NSView {
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing tint", details: nil))
                 }
+            case "setBrightness":
+                if let args = call.arguments as? [String: Any],
+                   let isDark = (args["isDark"] as? NSNumber)?.boolValue
+                {
+                    if isDark {
+                        NSApp.appearance = NSAppearance(named: .darkAqua)
+                    } else {
+                        NSApp.appearance = NSAppearance(named: .aqua)
+                    }
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing brightness", details: nil))
+                }
             default:
                 result(FlutterMethodNotImplemented)
             }

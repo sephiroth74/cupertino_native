@@ -88,11 +88,8 @@ class CNButton extends StatefulWidget {
   /// Control height.
   final double? height;
 
-  /// Optional button systemImage.
-  final String? systemImage;
-
-  /// Semantic role for the button action.
-  final CNButtonRole role;
+  /// Image scale for system image buttons.
+  final CNImageScale imageScale;
 
   /// Button text (null in icon mode).
   final String? label; // null in icon mode
@@ -100,23 +97,26 @@ class CNButton extends StatefulWidget {
   /// Callback when pressed.
   final VoidCallback? onPressed;
 
+  /// Semantic role for the button action.
+  final CNButtonRole role;
+
   /// If true, sizes the control to its intrinsic width.
   final bool shrinkWrap;
 
   /// Visual style to apply.
   final CNButtonStyle style;
 
+  /// Optional symbol rendering mode for system image buttons.
+  final CNSymbolRenderingMode? symbolRenderingMode;
+
+  /// Optional button systemImage.
+  final String? systemImage;
+
   /// Accent/tint color.
   final Color? tint;
 
   /// Fixed width used in icon mode.
   final double? width; // fixed when icon mode
-
-  /// Image scale for system image buttons.
-  final CNImageScale imageScale;
-
-  /// Optional symbol rendering mode for system image buttons.
-  final CNSymbolRenderingMode? symbolRenderingMode;
 
   @override
   State<CNButton> createState() => _CNButtonState();
@@ -135,13 +135,13 @@ class _CNButtonState extends State<CNButton> {
   double? _intrinsicWidth;
   CNControlSize? _lastControlSize;
   String? _lastIconName;
+  CNImageScale? _lastImageScale;
   bool? _lastIsDark;
   CNButtonRole? _lastRole;
   CNButtonStyle? _lastStyle;
+  CNSymbolRenderingMode? _lastSymbolRenderingMode;
   int? _lastTint;
   String? _lastTitle;
-  CNImageScale? _lastImageScale;
-  CNSymbolRenderingMode? _lastSymbolRenderingMode;
   bool _pressed = false;
 
   @override

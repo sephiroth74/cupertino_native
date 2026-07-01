@@ -217,12 +217,12 @@ struct PickerContent: View {
         }
         pickerStyle(model.pickerStyle)
             .controlSize(model.controlSize)
-            .disabled(!model.enabled)
             .onGeometryChange(for: CGSize.self) { proxy in
                 proxy.size
             } action: { newValue in
                 reportMeasuredSize(newValue, fromListContainer: model.label != nil)
             }
+            .disabled(!model.enabled)
 
         let shouldUseListContainer = model.label != nil && model.displayAsList
 
