@@ -143,7 +143,13 @@ class HomePage extends StatelessWidget {
               },
             ),
             const SizedBox(width: 8),
-            CNButton.systemImage(isDarkMode ? 'sun.max' : 'moon', onPressed: onToggleTheme),
+            CNToggle(
+              systemSymbolName: isDarkMode ? 'sun.max' : 'moon',
+              onChanged: (value) {
+                onToggleTheme();
+              },
+              value: isDarkMode,
+            ),
           ],
         ),
       ),
