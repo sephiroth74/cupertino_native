@@ -18,8 +18,8 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(
         middle: Text('Date Picker Demo'),
       ),
       child: SafeArea(

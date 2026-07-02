@@ -6,8 +6,8 @@ class ImageDemoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Image')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Image')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

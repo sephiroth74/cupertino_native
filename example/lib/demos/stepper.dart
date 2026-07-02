@@ -16,8 +16,8 @@ class _StepperDemoPageState extends State<StepperDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Stepper')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Stepper')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),

@@ -1,9 +1,13 @@
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/painting.dart';
 
 /// Base class for all toolbar items
 abstract class CNToolbarItem {
   // ignore: public_member_api_docs
-  const CNToolbarItem({required this.id, this.tint, this.disabled = false});
+  const CNToolbarItem({required this.id, this.tint, this.disabled = false, this.controlSize = CNControlSize.regular});
+
+  /// Control size for this item
+  final CNControlSize controlSize;
 
   /// Whether this item is disabled
   final bool disabled;
@@ -16,7 +20,7 @@ abstract class CNToolbarItem {
 
   /// Convert to dictionary for native platform channel
   Map<String, dynamic> toMap() {
-    return {'id': id, 'tint': tint, 'disabled': disabled, 'kind': kind, ...customProperties()};
+    return {'id': id, 'tint': tint, 'disabled': disabled, 'controlSize': controlSize.name, 'kind': kind, ...customProperties()};
   }
 
   /// Item kind (button, textField, search, picker, etc)

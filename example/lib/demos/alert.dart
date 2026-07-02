@@ -56,8 +56,8 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Alert')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Alert')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

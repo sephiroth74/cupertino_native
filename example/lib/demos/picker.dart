@@ -22,8 +22,8 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Picker (SwiftUI)')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Picker (SwiftUI)')),
       child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),

@@ -48,8 +48,8 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
       ],
     );
 
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Menu Button')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Menu Button')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -58,8 +58,8 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerLeft,
-              child: CNMenuButton.label(
-                buttonLabel: 'File',
+              child: CNMenuButton(
+                label: 'File',
                 menu: simpleMenu,
                 onSelected: (item) => _setLastAction('Selected: ${item.title}'),
                 menuStyle: _menuStyle,
@@ -72,8 +72,9 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
             Align(
               alignment: Alignment.centerLeft,
               child: CNMenuButton(
-                buttonLabel: 'More',
-                buttonIcon: const CNSymbol('scribble'),
+                label: 'More',
+                symbolRenderingMode: CNSymbolRenderingMode.monochrome,
+                systemImage: 'ellipsis.circle',
                 menu: nestedMenu,
                 onSelected: (item) => _setLastAction('Selected: ${item.title}'),
                 menuStyle: _menuStyle,
@@ -85,8 +86,8 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerLeft,
-              child: CNMenuButton.label(
-                buttonLabel: 'Custom',
+              child: CNMenuButton(
+                label: 'Custom',
                 menu: simpleMenu,
                 onSelected: (item) => _setLastAction('Selected: ${item.title}'),
                 controlSize: _controlSize,

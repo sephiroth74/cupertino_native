@@ -38,8 +38,8 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Text Field')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Text Field')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

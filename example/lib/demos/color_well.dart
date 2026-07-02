@@ -13,8 +13,8 @@ class _ColorWellDemoPageState extends State<ColorWellDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Color Well')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Color Well')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

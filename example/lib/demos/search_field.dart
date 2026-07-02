@@ -38,8 +38,8 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Search Field')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Search Field')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

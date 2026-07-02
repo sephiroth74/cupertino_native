@@ -27,8 +27,8 @@ class _ComboBoxDemoPageState extends State<ComboBoxDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Combo Box')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Combo Box')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

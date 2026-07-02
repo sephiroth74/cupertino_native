@@ -32,8 +32,8 @@ class _PopupMenuButtonDemoPageState extends State<PopupMenuButtonDemoPage> {
       ),
     ];
 
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(
         middle: Text('Popup Menu Button'),
       ),
       child: SafeArea(

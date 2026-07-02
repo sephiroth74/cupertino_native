@@ -1,5 +1,6 @@
 import 'package:cupertino_native/model/control_size.dart';
 import 'package:cupertino_native/style/sf_symbol.dart';
+import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -7,7 +8,6 @@ import 'package:flutter/services.dart';
 
 import '../channel/params.dart';
 import '../style/button_style.dart';
-import '../theme/cn_theme.dart';
 
 const double _kDefaultHeight = 64.0;
 const double _kDefaultWidth = 80.0;
@@ -162,7 +162,7 @@ class _CNButtonState extends State<CNButton> {
     super.dispose();
   }
 
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
+  bool get _isDark => CNTheme.of(context).brightness == Brightness.dark;
 
   Color? get _effectiveTint => widget.tint;
 

@@ -247,7 +247,7 @@ class CNSplitView extends StatefulWidget {
     this.dividerInteractiveThickness = 14.0,
     this.dividerSemanticLabel = 'Split view divider',
     this.dividerDoubleTapAction = CNSplitDividerDoubleTapAction.none,
-    this.macOSDividerStyle = CNSplitMacOSDividerStyle.automatic,
+    this.macOSDividerStyle = CNSplitMacOSDividerStyle.plain,
     this.enableMacOSDividerVisualEffects = true,
     this.paneClipBehavior = Clip.hardEdge,
     this.enableKeyboardShortcuts = true,
@@ -260,6 +260,8 @@ class CNSplitView extends StatefulWidget {
     this.snapFractions = const <double>[],
     this.snapThreshold = 0.02,
     this.snapReleaseThreshold,
+    this.programmaticAnimationDuration = const Duration(milliseconds: 220),
+    this.programmaticAnimationCurve = Curves.easeOutCubic,
     this.onChanged,
   }) : assert(dividerThickness > 0),
        assert(dividerInteractiveThickness > 0),
@@ -331,6 +333,12 @@ class CNSplitView extends StatefulWidget {
   /// Useful to keep complex children constrained during aggressive resizes.
   final Clip paneClipBehavior;
 
+  /// Animation curve used for programmatic pane changes (collapse/expand).
+  final Curve programmaticAnimationCurve;
+
+  /// Animation duration used for programmatic pane changes (collapse/expand).
+  final Duration programmaticAnimationDuration;
+
   /// Second pane descriptor.
   final CNSplitPane second;
 
@@ -352,6 +360,7 @@ class CNSplitView extends StatefulWidget {
 
 class _CNSplitViewState extends State<CNSplitView> implements _SplitViewControllerBinding {
   double? _activeSnapFraction;
+  bool _animateCollapseExpand = false;
   double? _dragRawFraction;
   double? _dragStartFraction;
   bool _firstCollapsed = false;
@@ -367,10 +376,11 @@ class _CNSplitViewState extends State<CNSplitView> implements _SplitViewControll
     if (!_canCollapseFirst()) {
       return;
     }
+    if (_firstCollapsed) {
+      return;
+    }
     setState(() {
-      if (_firstCollapsed) {
-        return;
-      }
+      _animateCollapseExpand = true;
       _restoreFraction = _normalizedFraction(_fraction);
       _firstCollapsed = true;
       _secondCollapsed = false;
@@ -382,10 +392,11 @@ class _CNSplitViewState extends State<CNSplitView> implements _SplitViewControll
     if (!_canCollapseSecond()) {
       return;
     }
+    if (_secondCollapsed) {
+      return;
+    }
     setState(() {
-      if (_secondCollapsed) {
-        return;
-      }
+      _animateCollapseExpand = true;
       _restoreFraction = _normalizedFraction(_fraction);
       _secondCollapsed = true;
       _firstCollapsed = false;
@@ -418,6 +429,7 @@ class _CNSplitViewState extends State<CNSplitView> implements _SplitViewControll
     }
     final fallback = _normalizedFraction(_restoreFraction ?? _defaultInitialFraction);
     setState(() {
+      _animateCollapseExpand = true;
       _firstCollapsed = false;
       _fraction = fallback;
       _restoreFraction = fallback;
@@ -431,6 +443,7 @@ class _CNSplitViewState extends State<CNSplitView> implements _SplitViewControll
     }
     final fallback = _normalizedFraction(_restoreFraction ?? _defaultInitialFraction);
     setState(() {
+      _animateCollapseExpand = true;
       _secondCollapsed = false;
       _fraction = fallback;
       _restoreFraction = fallback;
@@ -462,6 +475,7 @@ class _CNSplitViewState extends State<CNSplitView> implements _SplitViewControll
         : _clampFractionForExtent(value, extent);
 
     setState(() {
+      _animateCollapseExpand = false;
       _firstCollapsed = false;
       _secondCollapsed = false;
       _fraction = clamped;
@@ -697,6 +711,7 @@ class _CNSplitViewState extends State<CNSplitView> implements _SplitViewControll
   void _onDividerDragStart(DragStartDetails details) {
     _dragStartFraction = _normalizedFraction(_fraction);
     setState(() {
+      _animateCollapseExpand = false;
       _isDividerDragging = true;
       _dragRawFraction = _dragStartFraction;
       _activeSnapFraction = null;
@@ -886,6 +901,20 @@ class _CNSplitViewState extends State<CNSplitView> implements _SplitViewControll
 
   @override
   Widget build(BuildContext context) {
+    final animateProgrammatic = _animateCollapseExpand && !_isDividerDragging;
+    final programmaticDuration = animateProgrammatic ? widget.programmaticAnimationDuration : Duration.zero;
+
+    if (animateProgrammatic) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_animateCollapseExpand) {
+          return;
+        }
+        setState(() {
+          _animateCollapseExpand = false;
+        });
+      });
+    }
+
     final base = MouseRegion(
       cursor: _isDividerDragging ? _resizeCursor : MouseCursor.defer,
       child: LayoutBuilder(
@@ -915,18 +944,38 @@ class _CNSplitViewState extends State<CNSplitView> implements _SplitViewControll
           if (widget.axis == CNSplitAxis.horizontal) {
             return Row(
               children: [
-                SizedBox(width: firstExtent, child: _buildPane(widget.first.child)),
+                AnimatedContainer(
+                  duration: programmaticDuration,
+                  curve: widget.programmaticAnimationCurve,
+                  width: firstExtent,
+                  child: _buildPane(widget.first.child),
+                ),
                 divider,
-                SizedBox(width: secondExtent, child: _buildPane(widget.second.child)),
+                AnimatedContainer(
+                  duration: programmaticDuration,
+                  curve: widget.programmaticAnimationCurve,
+                  width: secondExtent,
+                  child: _buildPane(widget.second.child),
+                ),
               ],
             );
           }
 
           return Column(
             children: [
-              SizedBox(height: firstExtent, child: _buildPane(widget.first.child)),
+              AnimatedContainer(
+                duration: programmaticDuration,
+                curve: widget.programmaticAnimationCurve,
+                height: firstExtent,
+                child: _buildPane(widget.first.child),
+              ),
               divider,
-              SizedBox(height: secondExtent, child: _buildPane(widget.second.child)),
+              AnimatedContainer(
+                duration: programmaticDuration,
+                curve: widget.programmaticAnimationCurve,
+                height: secondExtent,
+                child: _buildPane(widget.second.child),
+              ),
             ],
           );
         },

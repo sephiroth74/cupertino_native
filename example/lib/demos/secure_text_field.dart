@@ -35,8 +35,8 @@ class _SecureTextFieldDemoPageState extends State<SecureTextFieldDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Secure Text Field')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Secure Text Field')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

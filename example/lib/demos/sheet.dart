@@ -65,8 +65,8 @@ class _SheetDemoPageState extends State<SheetDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Sheet')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Sheet')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

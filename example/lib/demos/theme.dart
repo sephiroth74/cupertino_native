@@ -8,8 +8,8 @@ class ThemeDemoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = CNTheme.of(context);
 
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(middle: Text('Theme Tokens', style: theme.typography.headline)),
+    return CNPageScaffold(
+      navigationBar: CNNavigationBar(middle: Text('Theme Tokens', style: theme.typography.headline)),
       child: SafeArea(
         child: ListView(
           children: [

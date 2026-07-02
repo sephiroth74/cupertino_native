@@ -22,8 +22,8 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Button')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Button')),
       child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),

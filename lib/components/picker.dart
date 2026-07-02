@@ -41,7 +41,7 @@ class CNPickerItem {
           'symbolPaletteColors': icon!.paletteColors!.map((c) => resolveColorToArgb(c, context)).toList(),
         if (icon!.mode != null) 'symbolRenderingMode': icon!.mode!.name,
         if (icon!.gradient != null) 'symbolGradientEnabled': icon!.gradient,
-        if (icon!.size != null) 'symbolSize': icon!.size,
+        'symbolSize': icon!.size,
       };
     }
     return {'type': 'text', 'text': ''};

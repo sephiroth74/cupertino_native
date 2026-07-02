@@ -18,6 +18,8 @@ enum CNToolbarItemPlacement: String {
     case confirmationAction
     case destructiveAction
     case cancellationAction
+    case secondaryAction
+    case primaryAction
 }
 
 struct CNToolbarItemModel {
@@ -35,6 +37,7 @@ struct CNToolbarItemModel {
     let pickerStyle: String? // For picker items (menu, segmented, etc.)
     let isOn: Bool? // For toggle items (current state)
     let toggleStyle: String? // For toggle items (switch, button, automatic)
+    let controlSize: ControlSize // For toggle items (mini, small, regular, large)
 }
 
 extension CNToolbarItemModel: Equatable {
@@ -53,7 +56,6 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
     private let eventsChannel: FlutterEventChannel
 
     init(messenger: FlutterBinaryMessenger) {
-        print("Initializing CNToolbarManager")
         let eventChannel = FlutterEventChannel(
             name: "cupertino_native/toolbar_events",
             binaryMessenger: messenger
@@ -64,7 +66,7 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
     }
 
     func makeToolbar(window: NSWindow, args: [String: Any], result: @escaping FlutterResult) {
-        print("Making toolbar with args: \(args)")
+        // print("Making toolbar with args: \(args)")
         let title = (args["title"] as? String) ?? "Toolbar"
         let items = parseToolbarItems(args["items"])
         let showSearch = (args["showSearch"] as? Bool) ?? false
@@ -143,6 +145,7 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
             let placementRaw = (dict["placement"] as? String) ?? "automatic"
             let placement = CNToolbarItemPlacement(rawValue: placementRaw) ?? .automatic
             let disabled = (dict["disabled"] as? Bool) ?? false
+            let controlSize = (dict["controlSize"] as? String ?? "regular").toControlSize() ?? .regular
 
             var tint: NSColor? = nil
             if let tintInt = dict["tint"] as? Int {
@@ -166,7 +169,8 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     selectedValue: nil,
                     pickerStyle: nil,
                     isOn: nil,
-                    toggleStyle: nil
+                    toggleStyle: nil,
+                    controlSize: controlSize
                 ))
             } else if kind == "picker" {
                 // Parse picker item
@@ -189,7 +193,8 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     selectedValue: selectedValue,
                     pickerStyle: pickerStyle,
                     isOn: nil,
-                    toggleStyle: nil
+                    toggleStyle: nil,
+                    controlSize: controlSize
                 ))
             } else if kind == "toggle" {
                 // Parse toggle item
@@ -212,7 +217,8 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     selectedValue: nil,
                     pickerStyle: nil,
                     isOn: isOn,
-                    toggleStyle: toggleStyle
+                    toggleStyle: toggleStyle,
+                    controlSize: controlSize
                 ))
             } else {
                 // Parse button item
@@ -234,7 +240,8 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     selectedValue: nil,
                     pickerStyle: nil,
                     isOn: nil,
-                    toggleStyle: nil
+                    toggleStyle: nil,
+                    controlSize: controlSize
                 ))
             }
         }
@@ -420,6 +427,7 @@ struct DynamicToolbarContent: ToolbarContent {
         }
         .disabled(item.disabled)
         .foregroundColor(getTintColor(item))
+        .controlSize(item.controlSize)
 
         // Apply picker style based on configuration
         let style = item.pickerStyle ?? "menu"
@@ -460,6 +468,7 @@ struct DynamicToolbarContent: ToolbarContent {
         }
         .disabled(item.disabled)
         .foregroundColor(getTintColor(item))
+        .controlSize(item.controlSize)
 
         // Apply toggle style based on configuration
         let style = item.toggleStyle ?? "switch"
@@ -566,6 +575,7 @@ struct CNToolbarView: View {
         }
         .disabled(item.disabled)
         .foregroundColor(getTintColor(for: item))
+        .controlSize(item.controlSize)
 
         switch item.buttonStyle {
         case "bordered":
@@ -612,6 +622,10 @@ struct CNToolbarView: View {
             return .destructiveAction
         case .cancellationAction:
             return .cancellationAction
+        case .secondaryAction:
+            return .secondaryAction
+        case .primaryAction:
+            return .primaryAction
         }
     }
 }

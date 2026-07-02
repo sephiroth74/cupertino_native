@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-
 import 'toolbar_item.dart';
 
 /// A toolbar button item

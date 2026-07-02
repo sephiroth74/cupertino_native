@@ -142,7 +142,7 @@ class CNToolbarController {
   void _handleToolbarEvent(dynamic event) {
     if (event is! Map) return;
 
-    final data = Map<String, dynamic>.from(event as Map);
+    final data = Map<String, dynamic>.from(event);
     final eventType = data['type'] as String?;
     final itemId = data['id'] as String?;
     final query = data['query'] as String?;

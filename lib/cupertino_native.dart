@@ -32,7 +32,12 @@ export 'components/context_menu.dart';
 export 'components/sheet.dart';
 export 'components/group_box.dart';
 export 'components/tab_view.dart';
+export 'components/page_scaffold.dart';
+export 'components/navigation_bar.dart';
+export 'components/page_route.dart';
+export 'components/list.dart';
 export 'components/toolbar/toolbar.dart';
+export 'components/window/window.dart';
 
 export 'model/control_size.dart';
 export 'model/slider_tickmark_position.dart';

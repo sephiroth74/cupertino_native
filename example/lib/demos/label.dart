@@ -6,8 +6,8 @@ class LabelDemoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Label')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Label')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

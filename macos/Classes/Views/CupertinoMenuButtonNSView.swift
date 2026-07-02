@@ -24,10 +24,14 @@ class CupertinoMenuButtonNSView: NSView {
         self.args = args as? [String: Any] ?? [:]
         super.init(frame: .zero)
 
+        let isDark = (self.args["isDark"] as? NSNumber)?.boolValue ?? false
+
         wantsLayer = true
         layer?.backgroundColor = NSColor.clear.cgColor
         createHostingView()
         setupMethodCallHandler()
+
+        appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
     }
 
     private func parseMenuItems(_ menuDict: [String: Any]) -> [MenuItemModel] {
@@ -98,6 +102,9 @@ class CupertinoMenuButtonNSView: NSView {
     private func setupMethodCallHandler() {
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self else { result(nil); return }
+
+            print("Received method call: \(call.method) with arguments: \(String(describing: call.arguments))")
+
             switch call.method {
             case "getIntrinsicSize":
                 let size = self.hostingView?.intrinsicContentSize ?? NSSize(width: NSView.noIntrinsicMetric, height: NSView.noIntrinsicMetric)
@@ -118,22 +125,17 @@ class CupertinoMenuButtonNSView: NSView {
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
                 }
-            case "setButtonTitle":
+            case "setLabel":
                 if let args = call.arguments as? [String: Any] {
-                    self.args["buttonTitle"] = args["buttonTitle"]
+                    self.args["label"] = args["label"]
                     self.createHostingView()
                     result(nil)
                 } else {
-                    result(FlutterError(code: "bad_args", message: "Missing buttonTitle", details: nil))
+                    result(FlutterError(code: "bad_args", message: "Missing label", details: nil))
                 }
-            case "setButtonIcon":
+            case "setSystemImage":
                 if let args = call.arguments as? [String: Any] {
-                    self.args["buttonIconName"] = args["buttonIconName"]
-                    self.args["buttonIconSize"] = args["buttonIconSize"]
-                    self.args["buttonIconColor"] = args["buttonIconColor"]
-                    self.args["buttonIconRenderingMode"] = args["buttonIconRenderingMode"]
-                    self.args["buttonIconPaletteColors"] = args["buttonIconPaletteColors"]
-                    self.args["buttonIconGradientEnabled"] = args["buttonIconGradientEnabled"]
+                    self.args["systemImage"] = args["systemImage"]
                     self.createHostingView()
                     result(nil)
                 } else {
@@ -141,8 +143,7 @@ class CupertinoMenuButtonNSView: NSView {
                 }
             case "setStyle":
                 if let args = call.arguments as? [String: Any] {
-                    self.args["buttonStyle"] = args["buttonStyle"]
-                    self.args["tint"] = args["tint"]
+                    self.args["style"] = args["style"]
                     self.createHostingView()
                     result(nil)
                 } else {
@@ -164,6 +165,14 @@ class CupertinoMenuButtonNSView: NSView {
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing focusable", details: nil))
                 }
+            case "setTint":
+                if let args = call.arguments as? [String: Any], let tintValue = args["tint"] as? NSNumber {
+                    self.args["tint"] = tintValue
+                    self.createHostingView()
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing tint", details: nil))
+                }
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -172,35 +181,31 @@ class CupertinoMenuButtonNSView: NSView {
 
     private func parseArguments(_ args: [String: Any]) -> MenuButtonModel {
         let menuDict = args["menu"] as? [String: Any] ?? [:]
+
+        print("Parsing menu button arguments: \(args)")
+
         return MenuButtonModel(
             items: parseMenuItems(menuDict),
-            buttonTitle: args["buttonTitle"] as? String,
-            buttonIconName: args["buttonIconName"] as? String,
-            buttonIconSize: (args["buttonIconSize"] as? NSNumber).map { CGFloat(truncating: $0) },
-            buttonIconColor: (args["buttonIconColor"] as? NSNumber).map { ColorUtils.colorFromARGB($0.intValue) },
-            menuStyle: args["menuStyle"] as? String ?? "automatic",
-            controlSize: args["controlSize"] as? String ?? "regular",
+            label: args["label"] as? String,
+            systemImage: args["systemImage"] as? String,
+            menuStyle: args["style"] as? String ?? "automatic",
+            controlSize: ((args["controlSize"] as? String)?.toControlSize()) ?? .regular,
             focusable: (args["focusable"] as? NSNumber)?.boolValue ?? false,
-            tintColor: (args["style"] as? [String: Any]).flatMap { style in
-                if let tint = style["tint"] as? NSNumber {
-                    return ColorUtils.colorFromARGB(tint.intValue)
-                }
-                return nil
-            }
+            tint: (args["tint"] as? NSNumber).map { $0.intValue.toARGB() },
+            symbolRenderingMode: (args["symbolRenderingMode"] as? String)?.toSymbolRenderingMode()
         )
     }
 }
 
 private struct MenuButtonModel {
     let items: [MenuItemModel]
-    let buttonTitle: String?
-    let buttonIconName: String?
-    let buttonIconSize: CGFloat?
-    let buttonIconColor: NSColor?
+    let label: String?
+    let systemImage: String?
     let menuStyle: String
-    let controlSize: String
+    let controlSize: ControlSize
     let focusable: Bool
-    let tintColor: NSColor?
+    let tint: Color?
+    let symbolRenderingMode: SymbolRenderingMode?
 }
 
 private struct MenuItemModel {
@@ -224,8 +229,10 @@ private struct MenuButtonContent: View {
 
     var body: some View {
         menuView
-            .controlSize(SwiftUtils.controlSizeFromString(model.controlSize))
+            .controlSize(model.controlSize)
             .modifier(ConditionalMenuStyle(name: model.menuStyle))
+            .modifier(TintModifier(tint: model.tint))
+            .modifier(SymbolRenderingModeModifier(mode: model.symbolRenderingMode))
             .focusable(model.focusable)
             .padding(0)
             .background(SizeReader(size: $measuredSize))
@@ -244,17 +251,19 @@ private struct MenuButtonContent: View {
 
     @ViewBuilder
     private var buttonLabelView: some View {
-        if let iconName = model.buttonIconName, !iconName.isEmpty,
-           let title = model.buttonTitle, !title.isEmpty
+        if let systemImage = model.systemImage, !systemImage.isEmpty,
+           let label = model.label, !label.isEmpty
         {
-            Label(title, systemImage: iconName)
-        } else if let iconName = model.buttonIconName, !iconName.isEmpty {
-            Image(systemName: iconName)
-        } else if let title = model.buttonTitle {
-            Text(title)
+            Label(label, systemImage: systemImage)
+        } else if let systemImage = model.systemImage, !systemImage.isEmpty {
+            Image(systemName: systemImage)
+        } else if let label = model.label, !label.isEmpty {
+            Text(label)
         } else {
             Text("Menu")
         }
+
+        // TODO: we must apply the optional color and/or rendering mode to the icon if it exists
     }
 
     @ViewBuilder
@@ -279,6 +288,30 @@ private struct MenuButtonContent: View {
             Image(nsImage: image)
         } else if let systemImage = item.systemImageName {
             Image(systemName: systemImage)
+        }
+    }
+
+    private struct TintModifier: ViewModifier {
+        let tint: Color?
+
+        func body(content: Content) -> some View {
+            if let tint = tint {
+                content.tint(tint)
+            } else {
+                content
+            }
+        }
+    }
+
+    private struct SymbolRenderingModeModifier: ViewModifier {
+        let mode: SymbolRenderingMode?
+
+        func body(content: Content) -> some View {
+            if let mode = mode {
+                content.symbolRenderingMode(mode)
+            } else {
+                content
+            }
         }
     }
 

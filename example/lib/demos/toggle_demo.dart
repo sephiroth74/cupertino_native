@@ -24,8 +24,8 @@ class _ToggleDemoState extends State<ToggleDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Toggle Demo')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Toggle Demo')),
       child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),

@@ -17,8 +17,8 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(
         middle: Text('Segmented Control'),
       ),
       child: SafeArea(

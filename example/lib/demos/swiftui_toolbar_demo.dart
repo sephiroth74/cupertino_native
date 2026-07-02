@@ -98,7 +98,7 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
                 label: 'Dark',
                 systemSymbolName: 'moon.fill',
                 isOn: _isDarkMode,
-                toggleStyle: 'button',
+                toggleStyle: CNToggleStyle.button,
                 onChanged: (value) {
                   setState(() {
                     _isDarkMode = value;
@@ -158,9 +158,9 @@ class _SwiftUIToolbarDemoState extends State<SwiftUIToolbarDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        leading: CupertinoNavigationBarBackButton(onPressed: () => Navigator.of(context).pop()),
+    return CNPageScaffold(
+      navigationBar: CNNavigationBar(
+        leading: CNNavigationBarBackButton(onPressed: () => Navigator.of(context).pop()),
         middle: const Text('Toolbar Demo'),
       ),
       child: SafeArea(

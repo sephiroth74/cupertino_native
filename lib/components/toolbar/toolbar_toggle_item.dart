@@ -1,4 +1,5 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_native/components/toggle.dart';
+import 'package:cupertino_native/model/control_size.dart';
 
 import 'toolbar_item.dart';
 
@@ -9,10 +10,11 @@ class CNToolbarToggleItem extends CNToolbarItem {
     required super.id,
     super.tint,
     super.disabled,
+    super.controlSize,
     this.label,
     this.systemSymbolName,
     required this.isOn,
-    this.toggleStyle,
+    this.toggleStyle = CNToggleStyle.automatic,
     this.onChanged,
   });
 
@@ -20,7 +22,7 @@ class CNToolbarToggleItem extends CNToolbarItem {
   /// This is NOT serialized - it's stored locally for event handling
   final void Function(bool)? onChanged;
 
-  /// Current on/off state
+    /// Current on/off state
   final bool isOn;
 
   /// Optional display label for this toggle
@@ -30,11 +32,11 @@ class CNToolbarToggleItem extends CNToolbarItem {
   final String? systemSymbolName;
 
   /// Toggle style: 'switch', 'button', 'automatic' (macOS specific)
-  final String? toggleStyle;
+  final CNToggleStyle toggleStyle;
 
   @override
   Map<String, dynamic> customProperties() {
-    return {'label': label, 'systemSymbolName': systemSymbolName, 'isOn': isOn, 'toggleStyle': toggleStyle};
+    return {'label': label, 'systemSymbolName': systemSymbolName, 'isOn': isOn, 'toggleStyle': toggleStyle.name};
   }
 
   @override

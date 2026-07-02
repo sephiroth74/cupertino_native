@@ -29,8 +29,8 @@ class _SplitViewDemoPageState extends State<SplitViewDemoPage> {
   Widget build(BuildContext context) {
     final paneBackground = CupertinoDynamicColor.resolve(CupertinoColors.systemGrey6, context);
 
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Split View')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Split View')),
       child: SafeArea(
         child: Column(
           children: [

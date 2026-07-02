@@ -15,8 +15,8 @@ class _ProgressIndicatorsPageDemoState
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Slider')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Slider')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),

@@ -13,7 +13,18 @@ enum CNToolbarItemPlacement {
   /// The placement is in the destructive action area of the toolbar
   destructiveAction, 
   /// The placement is in the cancellation action area of the toolbar
-  cancellationAction
+  cancellationAction,
+  /// The item represents a secondary action.
+  ///
+  /// A secondary action is a frequently used action for the current context
+    /// but is not a requirement for the current context to function.  
+  secondaryAction,
+  /// The item represents a primary action.
+  ///
+  /// A primary action is a more frequently used action for the current
+  /// context. For example, a button the user clicks or taps to compose a new
+    /// message in a chat app.  
+  primaryAction,
 }
 
 // ignore: public_member_api_docs

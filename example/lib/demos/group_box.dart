@@ -7,8 +7,8 @@ class GroupBoxDemoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('GroupBox Demo')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('GroupBox Demo')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

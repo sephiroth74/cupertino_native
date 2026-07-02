@@ -19,8 +19,8 @@ class _TextViewDemoPageState extends State<TextViewDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Text View')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Text View')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

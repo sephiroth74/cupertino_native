@@ -23,8 +23,8 @@ class _LevelIndicatorDemoPageState extends State<LevelIndicatorDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(
         middle: Text('Level Indicators'),
       ),
       child: SafeArea(

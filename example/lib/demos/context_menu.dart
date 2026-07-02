@@ -110,8 +110,8 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
     final menu = _buildMenu();
     final noIconsMenu = _buildMultiLevelNoIconsMenu();
 
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Context Menu')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Context Menu')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

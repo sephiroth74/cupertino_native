@@ -6,8 +6,8 @@ class TabViewDemoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Tab View Demo')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Tab View Demo')),
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),

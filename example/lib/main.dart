@@ -1,5 +1,6 @@
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart' show ThemeMode;
 import 'demos/slider.dart';
 import 'demos/toggle_demo.dart';
 import 'demos/segmented_control.dart';
@@ -31,9 +32,38 @@ import 'demos/group_box.dart';
 import 'demos/tab_view.dart';
 import 'demos/swiftui_toolbar_demo.dart';
 import 'demos/theme.dart';
+import 'package:provider/provider.dart';
+import 'package:provider/src/change_notifier_provider.dart';
+import 'package:system_theme/system_theme.dart';
 
-void main() {
+const _systemColors = <MapEntry<String, Color>>[
+  MapEntry('Red', MacOS26Colors.red),
+  MapEntry('Orange', MacOS26Colors.orange),
+  MapEntry('Yellow', MacOS26Colors.yellow),
+  MapEntry('Green', MacOS26Colors.green),
+  MapEntry('Teal', MacOS26Colors.teal),
+  MapEntry('Blue', MacOS26Colors.blue),
+  MapEntry('Indigo', MacOS26Colors.indigo),
+  MapEntry('Purple', MacOS26Colors.purple),
+  MapEntry('Pink', MacOS26Colors.pink),
+  MapEntry('Gray', MacOS26Colors.gray),
+];
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemTheme.accentColor.load();
   runApp(const MyApp());
+}
+
+class AppTheme extends ChangeNotifier {
+  ThemeMode _mode = ThemeMode.system;
+
+  ThemeMode get mode => _mode;
+
+  set mode(ThemeMode mode) {
+    _mode = mode;
+    notifyListeners();
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -44,14 +74,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Color _accentColor = CupertinoColors.systemBlue;
-  bool _isDarkMode = false;
-
-  void _toggleTheme() {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
-  }
+  Color? _accentColor = null;
 
   void _setAccentColor(Color color) {
     setState(() {
@@ -61,363 +84,454 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = _isDarkMode ? Brightness.dark : Brightness.light;
+    return SystemThemeBuilder(
+      builder: (context, color) {
+        if (_accentColor == null) {
+          _accentColor = color.accent;
+        }
+        return ChangeNotifierProvider(
+          create: (_) => AppTheme(),
+          builder: (context, child) {
+            final appTheme = context.watch<AppTheme>();
+            final brightness = appTheme.mode == ThemeMode.system
+                ? WidgetsBinding.instance.platformDispatcher.platformBrightness
+                : (appTheme.mode == ThemeMode.dark ? Brightness.dark : Brightness.light);
+            return CNDesktopApp(
+              debugShowCheckedModeBanner: false,
+              themeMode: appTheme.mode,
+              theme: CNThemeData(brightness: brightness, primaryColor: _accentColor ?? color.accent),
+              home: _DesktopDemoShell(
+                isDarkMode: brightness == Brightness.dark,
+                accentColor: _accentColor ?? color.accent,
+                onSelectAccentColor: _setAccentColor,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
 
-    return CNTheme(
-      data: CNThemeData(brightness: brightness, primaryColor: _accentColor),
-      child: CupertinoApp(
-        debugShowCheckedModeBanner: false,
-        theme: CupertinoThemeData(brightness: brightness, primaryColor: _accentColor),
-        home: HomePage(
-          isDarkMode: _isDarkMode,
-          onToggleTheme: _toggleTheme,
-          accentColor: _accentColor,
-          onSelectAccentColor: _setAccentColor,
+class _DesktopDemoShell extends StatefulWidget {
+  const _DesktopDemoShell({required this.isDarkMode, required this.accentColor, required this.onSelectAccentColor});
+
+  final Color accentColor;
+  final bool isDarkMode;
+  final ValueChanged<Color> onSelectAccentColor;
+
+  @override
+  State<_DesktopDemoShell> createState() => _DesktopDemoShellState();
+}
+
+class _DesktopDemoShellState extends State<_DesktopDemoShell> {
+  String _searchQuery = '';
+  final CNMainWindowController _windowController = CNMainWindowController();
+
+  @override
+  void dispose() {
+    _windowController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final accentColor = widget.accentColor;
+    final theme = CNTheme.of(context);
+
+    return CNMainWindow(
+      controller: _windowController,
+      toolbarTitle: 'Cupertino Native',
+      toolbarShowSearch: true,
+      toolbarGroups: [
+        CNToolbarGroup(
+          id: 'left-window',
+          placement: CNToolbarItemPlacement.navigation,
+          items: [
+            CNToolbarButtonItem(
+              id: 'toggle-left-sidebar',
+              systemSymbolName: 'sidebar.left',
+              onPressed: _windowController.toggleSidebar,
+            ),
+          ],
         ),
+        CNToolbarGroup(
+          id: 'status-window',
+          placement: CNToolbarItemPlacement.status,
+          items: [
+            CNToolbarButtonItem(
+              id: 'toggle-right-sidebar',
+              systemSymbolName: 'sidebar.right',
+              onPressed: _windowController.toggleTrailingSidebar,
+            ),
+          ],
+        ),
+        CNToolbarGroup(
+          id: 'appearance',
+          placement: CNToolbarItemPlacement.principal,
+          items: [
+            CNToolbarPickerItem(
+              id: 'accent-colors',
+              pickerStyle: CNPickerStyle.menu,
+              controlSize: CNControlSize.regular,
+              items: _systemColors.map((e) => e.key).toList(),
+              selectedValue: _systemColors.firstWhere((e) => e.value == accentColor, orElse: () => _systemColors.first).key,
+              onChanged: (value) {
+                final selected = _systemColors.firstWhere((e) => e.key == value, orElse: () => _systemColors.first);
+                widget.onSelectAccentColor(selected.value);
+              },
+            ),
+            CNToolbarToggleItem(
+              id: 'dark-mode-toggle',
+              systemSymbolName: 'moon.fill',
+              isOn: widget.isDarkMode,
+              toggleStyle: CNToggleStyle.automatic,
+              controlSize: CNControlSize.small,
+              onChanged: (_) {
+                setState(() {
+                  final theme = context.read<AppTheme>();
+                  theme.mode = theme.mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+                });
+              },
+            ),
+          ],
+        ),
+      ],
+      onToolbarSearchChanged: (value) {
+        setState(() {
+          _searchQuery = value;
+        });
+      },
+      sidebar: CNSidebar(
+        shownByDefault: true,
+        startWidth: 250,
+        child: SafeArea(
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              CNListSection.insetGrouped(
+                backgroundColor: theme.canvasColor,
+                header: Text('Components'),
+                children: [
+                  CNListTile(
+                    title: Text('Theme Tokens'),
+                    leading: CNIcon(symbol: CNSymbol('paintbrush.pointed', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ThemeDemoPage()));
+                    },
+                  ),
+
+                  CNListTile(
+                    title: Text('Slider'),
+                    leading: CNIcon(symbol: CNSymbol('slider.horizontal.3', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const SliderDemoPage()));
+                    },
+                  ),
+
+                  CNListTile(
+                    title: Text('Toggle'),
+                    leading: CNIcon(symbol: CNSymbol('switch.2', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ToggleDemo()));
+                    },
+                  ),
+
+                  CNListTile(
+                    title: Text('Segmented Control (x)'),
+                    leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const SegmentedControlDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Picker'),
+                    leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1.fill', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const PickerDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('TabView'),
+                    leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const TabViewDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Icon'),
+                    leading: CNIcon(symbol: CNSymbol('app', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const IconDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Image'),
+                    leading: CNIcon(symbol: CNSymbol('photo', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ImageDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Popup Menu Button'),
+                    leading: CNIcon(symbol: CNSymbol('ellipsis.circle', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const PopupMenuButtonDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Menu Button'),
+                    leading: CNIcon(symbol: CNSymbol('ellipsis.circle', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const MenuButtonDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Label'),
+                    leading: CNIcon(symbol: CNSymbol('textformat', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const LabelDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Button'),
+                    leading: CNIcon(symbol: CNSymbol('hand.tap', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ButtonDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Color Well'),
+                    leading: CNIcon(symbol: CNSymbol('paintpalette', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ColorWellDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Path Control'),
+                    leading: CNIcon(symbol: CNSymbol('folder', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const PathControlDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Progress Indicators'),
+                    leading: CNIcon(symbol: CNSymbol('hourglass', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ProgressIndicatorsPageDemo()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Level Indicators'),
+                    leading: CNIcon(symbol: CNSymbol('gauge', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const LevelIndicatorDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Steppers'),
+                    leading: CNIcon(symbol: CNSymbol('plusminus', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const StepperDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Date Picker'),
+                    leading: CNIcon(symbol: CNSymbol('calendar', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const DatePickerDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Search Field'),
+                    leading: CNIcon(symbol: CNSymbol('magnifyingglass', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const SearchFieldDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Text Field'),
+                    leading: CNIcon(symbol: CNSymbol('character.cursor.ibeam', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const TextFieldDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Secure Text Field'),
+                    leading: CNIcon(symbol: CNSymbol('lock.shield', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const SecureTextFieldDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Text View / Text Area'),
+                    leading: CNIcon(symbol: CNSymbol('text.justify.left', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const TextViewDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Combo Box'),
+                    leading: CNIcon(symbol: CNSymbol('list.bullet.rectangle', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ComboBoxDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Alert'),
+                    leading: CNIcon(symbol: CNSymbol('exclamationmark.bubble', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const AlertDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Popover'),
+                    leading: CNIcon(symbol: CNSymbol('rectangle.on.rectangle', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const PopoverDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Context Menu'),
+                    leading: CNIcon(symbol: CNSymbol('ellipsis.rectangle', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ContextMenuDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('GroupBox'),
+                    leading: CNIcon(symbol: CNSymbol('textformat', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const GroupBoxDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Sheet'),
+                    leading: CNIcon(symbol: CNSymbol('square.and.line.vertical.and.square', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const SheetDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('Split View'),
+                    leading: CNIcon(symbol: CNSymbol('rectangle.split.2x1', color: accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const SplitViewDemoPage()));
+                    },
+                  ),
+                  CNListTile(
+                    title: Text('SwiftUI Toolbar'),
+                    leading: CNIcon(symbol: CNSymbol('macwindow', color: widget.accentColor)),
+                    trailing: const CNListTileChevron(),
+                    onTap: () {
+                      Navigator.of(context).push(CNPageRoute(builder: (_) => const SwiftUIToolbarDemo()));
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      endSidebar: CNSidebar(
+        shownByDefault: false,
+        startWidth: 280,
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(12),
+            children: [
+              const Text('Inspector', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              Text('Sidebar sinistra: ${_windowController.isSidebarVisible ? 'aperta' : 'chiusa'}'),
+              const SizedBox(height: 4),
+              Text('Sidebar destra: ${_windowController.isTrailingSidebarVisible ? 'aperta' : 'chiusa'}'),
+              const SizedBox(height: 4),
+              Text('Search: ${_searchQuery.isEmpty ? '-' : _searchQuery}'),
+            ],
+          ),
+        ),
+      ),
+      child: HomePage(
+        isDarkMode: widget.isDarkMode,
+        accentColor: widget.accentColor,
+        onSelectAccentColor: widget.onSelectAccentColor,
       ),
     );
   }
 }
 
-class HomePage extends StatelessWidget {
-  const HomePage({
-    super.key,
-    required this.isDarkMode,
-    required this.onToggleTheme,
-    required this.accentColor,
-    required this.onSelectAccentColor,
-  });
+class HomePage extends StatefulWidget {
+  const HomePage({super.key, required this.isDarkMode, required this.accentColor, required this.onSelectAccentColor});
 
   final Color accentColor;
   final bool isDarkMode;
   final ValueChanged<Color> onSelectAccentColor;
-  final VoidCallback onToggleTheme;
 
-  static const _systemColors = <MapEntry<String, Color>>[
-    MapEntry('Red', CupertinoColors.systemRed),
-    MapEntry('Orange', CupertinoColors.systemOrange),
-    MapEntry('Yellow', CupertinoColors.systemYellow),
-    MapEntry('Green', CupertinoColors.systemGreen),
-    MapEntry('Teal', CupertinoColors.systemTeal),
-    MapEntry('Blue', CupertinoColors.systemBlue),
-    MapEntry('Indigo', CupertinoColors.systemIndigo),
-    MapEntry('Purple', CupertinoColors.systemPurple),
-    MapEntry('Pink', CupertinoColors.systemPink),
-    MapEntry('Gray', CupertinoColors.systemGrey),
-  ];
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
 
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final theme = CNTheme.of(context);
 
-    return CupertinoPageScaffold(
-      backgroundColor: theme.groupedBackgroundColor,
-      navigationBar: CupertinoNavigationBar(
-        enableBackgroundFilterBlur: true,
-        backgroundColor: theme.groupedBackgroundColor,
-        middle: const Text('Cupertino Native'),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CNMenuButton(
-              buttonLabel: 'Accent Color',
-              buttonIcon: CNSymbol('circle.fill', mode: CNSymbolRenderingMode.monochrome),
-              controlSize: CNControlSize.regular,
-              menu: CNMenu(
-                items: _systemColors.map((entry) {
-                  return CNMenuItem(
-                    title: entry.key,
-                    image: CNImage(
-                      systemSymbolName: 'circle.fill',
-                      symbolConfiguration: CNSymbolConfiguration.monochrome(entry.value),
-                    ),
-                    state: accentColor == entry.value ? CNMenuItemState.on : CNMenuItemState.off,
-                    tag: entry.value.toARGB32(),
-                    enabled: true,
-                  );
-                }).toList(),
-              ),
-              onSelected: (value) {
-                final selectedColor = Color(value.tag as int);
-                onSelectAccentColor(selectedColor);
-              },
-            ),
-            const SizedBox(width: 8),
-            CNToggle(
-              systemSymbolName: isDarkMode ? 'sun.max' : 'moon',
-              onChanged: (value) {
-                onToggleTheme();
-              },
-              value: isDarkMode,
-            ),
-          ],
+    debugPrint('HomePage build: isDarkMode=${widget.isDarkMode}, accentColor=${widget.accentColor}');
+
+    return Center(
+      child: CNMenuButton(
+        label: 'Select Accent Color',
+        systemImage: 'circle.fill',
+        tint: widget.accentColor,
+        symbolRenderingMode: CNSymbolRenderingMode.monochrome,
+        menu: CNMenu(
+          items: _systemColors
+              .map(
+                (e) => CNMenuItem(
+                  title: e.key,
+                  image: CNImage(
+                    systemSymbolName: 'circle.fill',
+                    symbolConfiguration: CNSymbolConfiguration.monochrome(e.value),
+                  ),
+                ),
+              )
+              .toList(),
         ),
-      ),
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          CupertinoListSection.insetGrouped(
-            header: Text('Components'),
-            children: [
-              CupertinoListTile(
-                title: Text('Theme Tokens'),
-                leading: CNIcon(symbol: CNSymbol('paintbrush.pointed', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ThemeDemoPage()));
-                },
-              ),
-
-              CupertinoListTile(
-                title: Text('Slider'),
-                leading: CNIcon(symbol: CNSymbol('slider.horizontal.3', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SliderDemoPage()));
-                },
-              ),
-
-              CupertinoListTile(
-                title: Text('Toggle'),
-                leading: CNIcon(symbol: CNSymbol('switch.2', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ToggleDemo()));
-                },
-              ),
-
-              CupertinoListTile(
-                title: Text('Segmented Control (deprecated)'),
-                leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SegmentedControlDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Picker'),
-                leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1.fill', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const PickerDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('TabView'),
-                leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const TabViewDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Icon'),
-                leading: CNIcon(symbol: CNSymbol('app', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const IconDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Image'),
-                leading: CNIcon(symbol: CNSymbol('photo', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ImageDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Popup Menu Button'),
-                leading: CNIcon(symbol: CNSymbol('ellipsis.circle', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const PopupMenuButtonDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Menu Button'),
-                leading: CNIcon(symbol: CNSymbol('ellipsis.circle', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const MenuButtonDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Label'),
-                leading: CNIcon(symbol: CNSymbol('textformat', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const LabelDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Button'),
-                leading: CNIcon(symbol: CNSymbol('hand.tap', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ButtonDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Color Well'),
-                leading: CNIcon(symbol: CNSymbol('paintpalette', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ColorWellDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Path Control'),
-                leading: CNIcon(symbol: CNSymbol('folder', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const PathControlDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Progress Indicators'),
-                leading: CNIcon(symbol: CNSymbol('hourglass', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ProgressIndicatorsPageDemo()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Level Indicators'),
-                leading: CNIcon(symbol: CNSymbol('gauge', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const LevelIndicatorDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Steppers'),
-                leading: CNIcon(symbol: CNSymbol('plusminus', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const StepperDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Date Picker'),
-                leading: CNIcon(symbol: CNSymbol('calendar', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const DatePickerDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Search Field'),
-                leading: CNIcon(symbol: CNSymbol('magnifyingglass', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SearchFieldDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Text Field'),
-                leading: CNIcon(symbol: CNSymbol('character.cursor.ibeam', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const TextFieldDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Secure Text Field'),
-                leading: CNIcon(symbol: CNSymbol('lock.shield', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SecureTextFieldDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Text View / Text Area'),
-                leading: CNIcon(symbol: CNSymbol('text.justify.left', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const TextViewDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Combo Box'),
-                leading: CNIcon(symbol: CNSymbol('list.bullet.rectangle', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ComboBoxDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Alert'),
-                leading: CNIcon(symbol: CNSymbol('exclamationmark.bubble', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const AlertDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Popover'),
-                leading: CNIcon(symbol: CNSymbol('rectangle.on.rectangle', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const PopoverDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Context Menu'),
-                leading: CNIcon(symbol: CNSymbol('ellipsis.rectangle', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const ContextMenuDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('GroupBox'),
-                leading: CNIcon(symbol: CNSymbol('textformat', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const GroupBoxDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Sheet'),
-                leading: CNIcon(symbol: CNSymbol('square.and.line.vertical.and.square', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SheetDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('Split View'),
-                leading: CNIcon(symbol: CNSymbol('rectangle.split.2x1', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SplitViewDemoPage()));
-                },
-              ),
-              CupertinoListTile(
-                title: Text('SwiftUI Toolbar'),
-                leading: CNIcon(symbol: CNSymbol('macwindow', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const SwiftUIToolbarDemo()));
-                },
-              ),
-            ],
-          ),
-          CupertinoListSection.insetGrouped(
-            header: Text('Navigation'),
-            children: [
-              CupertinoListTile(
-                title: Text('Tab Bar'),
-                leading: CNIcon(symbol: CNSymbol('square.grid.2x2', color: accentColor)),
-                trailing: CupertinoListTileChevron(),
-                onTap: () {
-                  Navigator.of(context).push(CupertinoPageRoute(builder: (_) => const TabBarDemoPage()));
-                },
-              ),
-            ],
-          ),
-        ],
+        onSelected: (item) {
+          final selectedColor = _systemColors.firstWhere((e) => e.key == item.title, orElse: () => _systemColors.first).value;
+          widget.onSelectAccentColor(selectedColor);
+        },
+        menuStyle: CNMenuStyle.automatic,
+        controlSize: CNControlSize.large,
       ),
     );
   }

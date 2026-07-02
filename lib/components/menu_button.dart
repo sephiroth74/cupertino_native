@@ -1,14 +1,9 @@
 import 'package:cupertino_native/channel/params.dart';
-import 'package:cupertino_native/components/menu.dart';
-import 'package:cupertino_native/model/control_size.dart';
-import 'package:cupertino_native/style/menu_style.dart';
-import 'package:cupertino_native/style/sf_symbol.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-
-import '../theme/cn_theme.dart';
 
 /// A native menu button backed by SwiftUI on macOS.
 ///
@@ -20,52 +15,24 @@ class CNMenuButton extends StatefulWidget {
     super.key,
     required this.menu,
     required this.onSelected,
-    this.buttonLabel,
-    this.buttonIcon,
-    this.tint,
+    this.label,
+    this.systemImage,
     this.menuStyle = CNMenuStyle.automatic,
     this.controlSize = CNControlSize.regular,
     this.focusable = false,
-  }) : assert(buttonLabel != null || buttonIcon != null, 'CNMenuButton requires a label, icon.'),
-       super();
-
-  /// Creates a menu button that shows only an icon.
-  const CNMenuButton.icon({
-    super.key,
-    required this.buttonIcon,
-    required this.menu,
-    required this.onSelected,
     this.tint,
-    this.menuStyle = CNMenuStyle.automatic,
-    this.controlSize = CNControlSize.regular,
-    this.focusable = false,
-  }) : buttonLabel = null,
+    this.symbolRenderingMode,
+  }) : assert(label != null || systemImage != null, 'CNMenuButton requires a label or systemImage.'),
        super();
-
-  /// Creates a menu button with a label.
-  const CNMenuButton.label({
-    super.key,
-    required this.buttonLabel,
-    required this.menu,
-    required this.onSelected,
-    this.tint,
-    this.menuStyle = CNMenuStyle.automatic,
-    this.controlSize = CNControlSize.regular,
-    this.focusable = false,
-  }) : buttonIcon = null,
-       super();
-
-  /// Optional SF Symbol icon shown on the button.
-  final CNSymbol? buttonIcon;
-
-  /// Optional text label shown on the button.
-  final String? buttonLabel;
 
   /// Control size for the native button.
   final CNControlSize controlSize;
 
   /// Whether the native button should be focusable.
   final bool focusable;
+
+  /// Optional text label shown on the button.
+  final String? label;
 
   /// The menu model to show.
   final CNMenu menu;
@@ -76,7 +43,13 @@ class CNMenuButton extends StatefulWidget {
   /// Called when a leaf menu item is selected.
   final ValueChanged<CNMenuItem> onSelected;
 
-  /// Optional tint color for the native control.
+  /// Optional symbol rendering mode applied to the button icon.
+  final CNSymbolRenderingMode? symbolRenderingMode;
+
+  /// Optional SF Symbol icon shown on the button.
+  final String? systemImage;
+
+  /// Optional tint color applied to the button and icon.
   final Color? tint;
 
   @override
@@ -88,12 +61,12 @@ class _CNMenuButtonState extends State<CNMenuButton> {
   double? _intrinsicHeight;
   double? _intrinsicWidth;
   bool? _lastFocusable;
-  int? _lastIconColor;
   String? _lastIconName;
-  double? _lastIconSize;
   bool _lastIsDark = false;
   CNMenu? _lastMenu;
   CNMenuStyle? _lastStyle;
+  CNSymbolRenderingMode? _lastSymbolRenderingMode;
+  Color? _lastTint;
   String? _lastTitle;
 
   @override
@@ -114,20 +87,16 @@ class _CNMenuButtonState extends State<CNMenuButton> {
     super.dispose();
   }
 
-  bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
-
-  Color? get _effectiveTint => widget.tint ?? CNTheme.of(context).primaryColor;
-
   void _onCreated(int id) {
     _channel = MethodChannel('CupertinoNativeMenuButton_$id')..setMethodCallHandler(_onMethodCall);
-    _lastIsDark = _isDark;
+    _lastIsDark = CNTheme.of(context).brightness == Brightness.dark;
     _lastMenu = widget.menu;
-    _lastTitle = widget.buttonLabel;
-    _lastIconName = widget.buttonIcon?.name;
-    _lastIconSize = widget.buttonIcon?.size;
-    _lastIconColor = resolveColorToArgb(widget.buttonIcon?.color, context);
+    _lastTitle = widget.label;
     _lastStyle = widget.menuStyle;
     _lastFocusable = widget.focusable;
+    _lastTint = widget.tint;
+    _lastSymbolRenderingMode = widget.symbolRenderingMode;
+    _lastIconName = widget.systemImage;
     _requestIntrinsicSize();
   }
 
@@ -146,33 +115,25 @@ class _CNMenuButtonState extends State<CNMenuButton> {
   }
 
   Future<void> _syncBrightnessIfNeeded() async {
+    debugPrint('_syncBrightnessIfNeeded()');
+
     final ch = _channel;
     if (ch == null) return;
 
-    final isDark = _isDark;
-    final tint = resolveColorToArgb(_effectiveTint, context);
+    final isDark = CNTheme.of(context).brightness == Brightness.dark;
 
     if (_lastIsDark != isDark) {
       await ch.invokeMethod('setIsDark', {'value': isDark});
       _lastIsDark = isDark;
     }
-
-    if (tint != null) {
-      await ch.invokeMethod('setStyle', {'tint': tint});
-    }
   }
 
   Future<void> _syncPropsToNativeIfNeeded(CNMenuButton oldWidget) async {
+    debugPrint('_syncPropsToNativeIfNeeded()');
     final ch = _channel;
     if (ch == null) return;
 
     final currentMenuMap = widget.menu.toMap(context);
-    final currentIconName = widget.buttonIcon?.name;
-    final currentIconSize = widget.buttonIcon?.size;
-    final currentIconColor = resolveColorToArgb(widget.buttonIcon?.color, context);
-    final currentIconPaletteColors = widget.buttonIcon?.paletteColors?.map((c) => resolveColorToArgb(c, context)).toList();
-    final currentIconRenderingMode = widget.buttonIcon?.mode?.name;
-    final currentIconGradientEnabled = widget.buttonIcon?.gradient;
 
     if (_lastMenu != widget.menu) {
       _lastMenu = widget.menu;
@@ -189,23 +150,26 @@ class _CNMenuButtonState extends State<CNMenuButton> {
       await ch.invokeMethod('setFocusable', {'focusable': widget.focusable});
     }
 
-    if (_lastTitle != widget.buttonLabel) {
-      _lastTitle = widget.buttonLabel;
-      await ch.invokeMethod('setButtonTitle', {'buttonTitle': widget.buttonLabel});
+    if (_lastTitle != widget.label) {
+      _lastTitle = widget.label;
+      await ch.invokeMethod('setLabel', {'label': widget.label});
     }
 
-    if (_lastIconName != currentIconName || _lastIconSize != currentIconSize || _lastIconColor != currentIconColor) {
-      _lastIconName = currentIconName;
-      _lastIconSize = currentIconSize;
-      _lastIconColor = currentIconColor;
-      await ch.invokeMethod('setButtonIcon', {
-        'buttonIconName': currentIconName,
-        'buttonIconSize': currentIconSize,
-        'buttonIconColor': currentIconColor,
-        'buttonIconRenderingMode': currentIconRenderingMode,
-        'buttonIconPaletteColors': currentIconPaletteColors,
-        'buttonIconGradientEnabled': currentIconGradientEnabled,
-      });
+    if (_lastIconName != oldWidget.systemImage) {
+      _lastIconName = widget.systemImage;
+      await ch.invokeMethod('setSystemImage', {'systemImage': widget.systemImage});
+    }
+
+    if (_lastTint != widget.tint) {
+      _lastTint = widget.tint;
+      if (mounted) {
+        await ch.invokeMethod('setTint', {'tint': resolveColorToArgb(_lastTint, context)});
+      }
+    }
+
+    if (_lastSymbolRenderingMode != widget.symbolRenderingMode) {
+      _lastSymbolRenderingMode = widget.symbolRenderingMode;
+      await ch.invokeMethod('setSymbolRenderingMode', {'symbolRenderingMode': widget.symbolRenderingMode?.name});
     }
 
     if (oldWidget.controlSize != widget.controlSize) {
@@ -237,16 +201,18 @@ class _CNMenuButtonState extends State<CNMenuButton> {
       return SizedBox.shrink();
     }
 
+    final isDark = CNTheme.of(context).brightness == Brightness.dark;
+
     final creationParams = <String, dynamic>{
       'menu': widget.menu.toMap(context),
-      'buttonTitle': widget.buttonLabel,
-      'buttonIconName': widget.buttonIcon?.name,
-      'buttonIconSize': widget.buttonIcon?.size,
-      'buttonIconColor': resolveColorToArgb(widget.buttonIcon?.color, context),
-      'buttonStyle': widget.menuStyle.name,
+      'label': widget.label,
+      'style': widget.menuStyle.name,
       'controlSize': widget.controlSize.name,
       'focusable': widget.focusable,
-      'style': encodeStyle(context, tint: _effectiveTint),
+      'isDark': isDark,
+      'systemImage': widget.systemImage,
+      'tint': resolveColorToArgb(widget.tint, context),
+      'symbolRenderingMode': widget.symbolRenderingMode?.name,
     };
 
     // Constrain the platform view size to avoid infinite width when this
@@ -254,24 +220,23 @@ class _CNMenuButtonState extends State<CNMenuButton> {
     final height = _intrinsicHeight ?? 28.0;
     return LayoutBuilder(
       builder: (context, constraints) {
+        debugPrint('constraints: $constraints, intrinsicWidth: $_intrinsicWidth, intrinsicHeight: $_intrinsicHeight');
+
         final width = constraints.hasBoundedWidth
             ? (_intrinsicWidth != null ? _intrinsicWidth!.clamp(0.0, constraints.maxWidth) : constraints.maxWidth)
             : (_intrinsicWidth ?? 100.0);
 
-        return Align(
-          alignment: Alignment.centerLeft,
-          child: SizedBox(
-            width: width,
-            height: height,
-            child: AppKitView(
-              viewType: 'CupertinoNativeMenuButton',
-              creationParamsCodec: const StandardMessageCodec(),
-              creationParams: creationParams,
-              onPlatformViewCreated: _onCreated,
-              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-              },
-            ),
+        return SizedBox(
+          width: width,
+          height: height,
+          child: AppKitView(
+            viewType: 'CupertinoNativeMenuButton',
+            creationParamsCodec: const StandardMessageCodec(),
+            creationParams: creationParams,
+            onPlatformViewCreated: _onCreated,
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+              Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+            },
           ),
         );
       },

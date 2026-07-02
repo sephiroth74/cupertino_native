@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-
 import '../../model/picker_style.dart';
 import 'toolbar_item.dart';
 
@@ -10,6 +8,7 @@ class CNToolbarPickerItem extends CNToolbarItem {
     required super.id,
     super.tint,
     super.disabled,
+    super.controlSize,
     this.label,
     required this.items,
     this.selectedValue,

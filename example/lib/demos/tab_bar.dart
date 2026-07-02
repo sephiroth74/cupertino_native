@@ -32,8 +32,8 @@ class _TabBarDemoPageState extends State<TabBarDemoPage>
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(
         middle: Text('Native Tab Bar'),
       ),
       child: Stack(

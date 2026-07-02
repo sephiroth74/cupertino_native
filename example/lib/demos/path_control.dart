@@ -35,8 +35,8 @@ class _PathControlDemoPageState extends State<PathControlDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('Path Control')),
+    return CNPageScaffold(
+      navigationBar: const CNNavigationBar(middle: Text('Path Control')),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
