@@ -152,7 +152,7 @@ class _SplitViewDemoPageState extends State<SplitViewDemoPage> {
                   dividerInteractiveThickness: 18,
                   dividerDoubleTapAction: CNSplitDividerDoubleTapAction.reset,
                   dividerSemanticLabel: 'Demo split view divider',
-                  macOSDividerStyle: CNSplitMacOSDividerStyle.grabber,
+                  macOSDividerStyle: CNSplitMacOSDividerStyle.plain,
                   enableMacOSDividerVisualEffects: _enableMacOSDividerEffects,
                   first: CNSplitPane(
                     minExtent: 140,

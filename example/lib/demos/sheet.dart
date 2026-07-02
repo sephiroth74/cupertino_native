@@ -16,10 +16,10 @@ class _SheetDemoPageState extends State<SheetDemoPage> {
     required CNSheetStyle style,
     required String message,
   }) {
-    return CupertinoButton.filled(
+    return CNButton(
+      label: title,
       onPressed: () =>
           _showSimpleSheet(title: title, style: style, message: message),
-      child: Text(title),
     );
   }
 
@@ -111,9 +111,9 @@ class _SheetDemoPageState extends State<SheetDemoPage> {
               message: 'Deleting this item cannot be undone.',
             ),
             const SizedBox(height: 16),
-            CupertinoButton.filled(
+            CNButton(
               onPressed: _showCustomActionsSheet,
-              child: const Text('Sheet With Multiple Actions'),
+              label: 'Sheet With Multiple Actions',
             ),
           ],
         ),

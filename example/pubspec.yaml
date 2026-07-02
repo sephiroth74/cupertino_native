@@ -32,6 +32,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   path_provider: ^2.1.6
   async: ^2.11.0
+  system_theme: ^3.0.0
 
 dev_dependencies:
   integration_test:

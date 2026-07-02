@@ -243,7 +243,7 @@ class CNSplitView extends StatefulWidget {
     required this.second,
     this.axis = CNSplitAxis.horizontal,
     this.controller,
-    this.dividerThickness = 6.0,
+    this.dividerThickness = 1.0,
     this.dividerInteractiveThickness = 14.0,
     this.dividerSemanticLabel = 'Split view divider',
     this.dividerDoubleTapAction = CNSplitDividerDoubleTapAction.none,
