@@ -23,10 +23,22 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
   Widget build(BuildContext context) {
     final simpleMenu = CNMenu(
       items: [
-        CNMenuItem(title: 'New', subtitle: 'Create a new file', systemImageName: 'doc.badge.plus'),
-        CNMenuItem(title: 'Open', subtitle: 'Open an existing file', systemImageName: 'folder'),
+        CNMenuItem(
+          title: 'New',
+          subtitle: 'Create a new file',
+          image: CNImage(systemSymbolName: 'doc.badge.plus'),
+        ),
+        CNMenuItem(
+          title: 'Open',
+          subtitle: 'Open an existing file',
+          image: CNImage(systemSymbolName: 'folder'),
+        ),
         CNMenuItem.separator(),
-        CNMenuItem(title: 'Close', subtitle: 'Close the current file', systemImageName: 'xmark'),
+        CNMenuItem(
+          title: 'Close',
+          subtitle: 'Close the current file',
+          image: CNImage(systemSymbolName: 'xmark'),
+        ),
       ],
     );
 
@@ -37,14 +49,26 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
           subtitle: 'View options',
           submenu: CNMenu(
             items: [
-              CNMenuItem(title: 'Zoom In', systemImageName: 'plus.magnifyingglass'),
-              CNMenuItem(title: 'Zoom Out', systemImageName: 'minus.magnifyingglass'),
+              CNMenuItem(
+                title: 'Zoom In',
+                image: CNImage(systemSymbolName: 'plus.magnifyingglass'),
+              ),
+              CNMenuItem(
+                title: 'Zoom Out',
+                image: CNImage(systemSymbolName: 'minus.magnifyingglass'),
+              ),
             ],
           ),
         ),
         CNMenuItem.separator(),
-        CNMenuItem(title: 'Settings', systemImageName: 'gear'),
-        CNMenuItem(title: 'About', systemImageName: 'info'),
+        CNMenuItem(
+          title: 'Settings',
+          image: CNImage(systemSymbolName: 'gear'),
+        ),
+        CNMenuItem(
+          title: 'About',
+          image: CNImage(systemSymbolName: 'info'),
+        ),
       ],
     );
 
@@ -73,8 +97,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
               alignment: Alignment.centerLeft,
               child: CNMenuButton(
                 label: 'More',
-                symbolRenderingMode: CNSymbolRenderingMode.monochrome,
-                systemImage: 'ellipsis.circle',
+                image: const CNImage(systemSymbolName: 'ellipsis.circle'),
                 menu: nestedMenu,
                 onSelected: (item) => _setLastAction('Selected: ${item.title}'),
                 menuStyle: _menuStyle,

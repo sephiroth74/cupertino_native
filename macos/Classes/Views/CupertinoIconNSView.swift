@@ -17,7 +17,7 @@ class CupertinoIconNSView: NSView {
         channel = FlutterMethodChannel(name: "CupertinoNativeIcon_\(viewId)", binaryMessenger: messenger)
         imageView = NSImageView(frame: .zero)
 
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             if let s = dict["name"] as? String { name = s }
             if let b = dict["isDark"] as? NSNumber { isDark = b.boolValue }
             if let style = dict["style"] as? [String: Any] {
@@ -57,13 +57,13 @@ class CupertinoIconNSView: NSView {
                     result(["width": 0.0, "height": 0.0])
                 }
             case "setSymbol":
-                if let args = call.arguments as? [String: Any], let n = args["name"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let n = args["name"] as? String {
                     self.name = n
                     self.rebuild()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing name", details: nil)) }
             case "setStyle":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let v = args["iconSize"] as? NSNumber { self.size = CGFloat(truncating: v) }
                     if let v = args["iconColor"] as? NSNumber { self.color = ColorUtils.colorFromARGB(v.intValue) }
                     if let arr = args["iconPaletteColors"] as? [NSNumber] { self.palette = arr.map { ColorUtils.colorFromARGB($0.intValue) } }
@@ -73,7 +73,7 @@ class CupertinoIconNSView: NSView {
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
             case "setBrightness":
-                if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
+                if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["isDark"] as? NSNumber)?.boolValue {
                     self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }

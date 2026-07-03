@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:cupertino_native/channel/channel_serialization.dart';
+import 'package:cupertino_native/components/menu.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -6,6 +8,7 @@ import '../../channel/params.dart';
 import 'toolbar_button_item.dart';
 import 'toolbar_group.dart';
 import 'toolbar_item.dart';
+import 'toolbar_menu_button_item.dart';
 import 'toolbar_picker.dart';
 import 'toolbar_toggle_item.dart';
 
@@ -32,6 +35,9 @@ class CNToolbarController {
   /// Whether toolbar is currently created
   bool _isCreated = false;
 
+  /// Map of menu-button itemId -> menu model/callback pair
+  final Map<String, _ToolbarMenuButtonRegistration> _menuButtonRegistrations = {};
+
   /// Map of itemId -> callback for picker selection changes
   final Map<String, void Function(String)> _pickerCallbacks = {};
 
@@ -57,14 +63,7 @@ class CNToolbarController {
       _registerCallbacksRecursive(items);
 
       // Send toolbar configuration to native side
-      final itemsList = items.map((item) {
-        final itemMap = item.toMap();
-        // Convert Color to ARGB int using resolveColorToArgb
-        if (item.tint != null) {
-          itemMap['tint'] = resolveColorToArgb(item.tint, context);
-        }
-        return itemMap;
-      }).toList();
+      final itemsList = items.map((item) => _serializeItem(item, context)).toList();
       await platform.invokeMethod('makeToolbar', {'title': title, 'items': itemsList, 'showSearch': showSearch});
 
       _isCreated = true;
@@ -126,6 +125,25 @@ class CNToolbarController {
     _eventSubscription = null;
   }
 
+  Map<String, dynamic> _serializeItem(CNToolbarItem item, BuildContext context) {
+    final itemMap = item.toMap();
+
+    if (item is CNToolbarMenuButtonItem) {
+      itemMap['menu'] = item.menu.toChannelMap(context);
+      itemMap['image'] = CNChannelSerialization.object(item.image, context);
+    }
+
+    if (item.tint != null) {
+      itemMap['tint'] = resolveColorToArgb(item.tint, context);
+    }
+
+    if (item is CNToolbarGroup) {
+      itemMap['items'] = item.items.map((child) => _serializeItem(child, context)).toList();
+    }
+
+    return itemMap;
+  }
+
   /// Listen to toolbar events from native side
   void _listenToToolbarEvents() {
     _eventSubscription ??= eventChannel.receiveBroadcastStream().listen(
@@ -147,6 +165,7 @@ class CNToolbarController {
     final itemId = data['id'] as String?;
     final query = data['query'] as String?;
     final value = data['value'];
+    final identifier = data['identifier'] as String?;
 
     switch (eventType) {
       case 'buttonPressed':
@@ -162,6 +181,17 @@ class CNToolbarController {
       case 'toggleChanged':
         if (itemId != null && value is bool) {
           _toggleCallbacks[itemId]?.call(value);
+        }
+        break;
+      case 'menuButtonItemSelected':
+        if (itemId != null && identifier != null) {
+          final registration = _menuButtonRegistrations[itemId];
+          if (registration != null) {
+            final selectedItem = registration.menu.findItemByIdentifier(identifier);
+            if (selectedItem != null && selectedItem.enabled) {
+              registration.onSelected(selectedItem);
+            }
+          }
         }
         break;
       case 'searchChanged':
@@ -184,6 +214,7 @@ class CNToolbarController {
     _buttonCallbacks.clear();
     _pickerCallbacks.clear();
     _toggleCallbacks.clear();
+    _menuButtonRegistrations.clear();
   }
 
   /// Recursively register callbacks from items and groups
@@ -195,9 +226,18 @@ class CNToolbarController {
         _pickerCallbacks[item.id] = item.onChanged!;
       } else if (item is CNToolbarToggleItem && item.onChanged != null) {
         _toggleCallbacks[item.id] = item.onChanged!;
+      } else if (item is CNToolbarMenuButtonItem) {
+        _menuButtonRegistrations[item.id] = _ToolbarMenuButtonRegistration(menu: item.menu, onSelected: item.onSelected);
       } else if (item is CNToolbarGroup) {
         _registerCallbacksRecursive(item.items);
       }
     }
   }
+}
+
+class _ToolbarMenuButtonRegistration {
+  _ToolbarMenuButtonRegistration({required this.menu, required this.onSelected});
+
+  final CNMenu menu;
+  final ValueChanged<CNMenuItem> onSelected;
 }

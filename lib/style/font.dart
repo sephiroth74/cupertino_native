@@ -118,93 +118,74 @@ enum CNFontKind {
 
 /// Declarative font descriptor serialized to native NSFont constructors.
 class CNFont extends Equatable {
+  const CNFont._(this.kind, this.name, this.size, this.weight)
+    : assert(kind != CNFontKind.named || name != null, 'CNFont.named requires a name.'),
+      assert(kind == CNFontKind.named || name == null, 'Only CNFont.named can have a name.'),
+      assert(
+        kind == CNFontKind.system ||
+            kind == CNFontKind.monospacedSystem ||
+            kind == CNFontKind.monospacedDigitSystem ||
+            kind == CNFontKind.boldSystem ||
+            kind == CNFontKind.user ||
+            kind == CNFontKind.userFixedPitch ||
+            kind == CNFontKind.menu ||
+            kind == CNFontKind.menuBar ||
+            kind == CNFontKind.message ||
+            kind == CNFontKind.palette ||
+            kind == CNFontKind.titleBar ||
+            kind == CNFontKind.toolTips ||
+            kind == CNFontKind.controlContent ||
+            kind == CNFontKind.label ||
+            kind == CNFontKind.named,
+        'Invalid font kind: $kind',
+      );
+
   /// Creates `NSFont.boldSystemFont(ofSize:)`.
-  const CNFont.boldSystem(this.size)
-    : kind = CNFontKind.boldSystem,
-      weight = null,
-      name = null;
+  const CNFont.boldSystem(this.size) : kind = CNFontKind.boldSystem, weight = null, name = null;
 
   /// Creates `NSFont.controlContentFont(ofSize:)`.
-  const CNFont.controlContent(this.size)
-    : kind = CNFontKind.controlContent,
-      weight = null,
-      name = null;
+  const CNFont.controlContent(this.size) : kind = CNFontKind.controlContent, weight = null, name = null;
 
   /// Creates `NSFont.labelFont(ofSize:)`.
-  const CNFont.label(this.size)
-    : kind = CNFontKind.label,
-      weight = null,
-      name = null;
+  const CNFont.label(this.size) : kind = CNFontKind.label, weight = null, name = null;
 
   /// Creates `NSFont.menuFont(ofSize:)`.
-  const CNFont.menu(this.size)
-    : kind = CNFontKind.menu,
-      weight = null,
-      name = null;
+  const CNFont.menu(this.size) : kind = CNFontKind.menu, weight = null, name = null;
 
   /// Creates `NSFont.menuBarFont(ofSize:)`.
-  const CNFont.menuBar(this.size)
-    : kind = CNFontKind.menuBar,
-      weight = null,
-      name = null;
+  const CNFont.menuBar(this.size) : kind = CNFontKind.menuBar, weight = null, name = null;
 
   /// Creates `NSFont.messageFont(ofSize:)`.
-  const CNFont.message(this.size)
-    : kind = CNFontKind.message,
-      weight = null,
-      name = null;
+  const CNFont.message(this.size) : kind = CNFontKind.message, weight = null, name = null;
 
   /// Creates `NSFont.monospacedDigitSystemFont(ofSize:weight:)`.
-  const CNFont.monospacedDigitSystem(
-    this.size, {
-    this.weight = CNFontWeight.regular,
-  }) : kind = CNFontKind.monospacedDigitSystem,
-       name = null;
+  const CNFont.monospacedDigitSystem(this.size, {this.weight = CNFontWeight.regular})
+    : kind = CNFontKind.monospacedDigitSystem,
+      name = null;
 
   /// Creates `NSFont.monospacedSystemFont(ofSize:weight:)`.
-  const CNFont.monospacedSystem(this.size, {this.weight = CNFontWeight.regular})
-    : kind = CNFontKind.monospacedSystem,
-      name = null;
+  const CNFont.monospacedSystem(this.size, {this.weight = CNFontWeight.regular}) : kind = CNFontKind.monospacedSystem, name = null;
 
   /// Creates `NSFont(name:size:)`.
-  const CNFont.named(this.name, this.size)
-    : kind = CNFontKind.named,
-      weight = null;
+  const CNFont.named(this.name, this.size) : kind = CNFontKind.named, weight = null;
 
   /// Creates `NSFont.paletteFont(ofSize:)`.
-  const CNFont.palette(this.size)
-    : kind = CNFontKind.palette,
-      weight = null,
-      name = null;
+  const CNFont.palette(this.size) : kind = CNFontKind.palette, weight = null, name = null;
 
   /// Creates `NSFont.systemFont(ofSize:weight:)`.
-  const CNFont.system(this.size, {this.weight = CNFontWeight.regular})
-    : kind = CNFontKind.system,
-      name = null;
+  const CNFont.system(this.size, {this.weight = CNFontWeight.regular}) : kind = CNFontKind.system, name = null;
 
   /// Creates `NSFont.titleBarFont(ofSize:)`.
-  const CNFont.titleBar(this.size)
-    : kind = CNFontKind.titleBar,
-      weight = null,
-      name = null;
+  const CNFont.titleBar(this.size) : kind = CNFontKind.titleBar, weight = null, name = null;
 
   /// Creates `NSFont.toolTipsFont(ofSize:)`.
-  const CNFont.toolTips(this.size)
-    : kind = CNFontKind.toolTips,
-      weight = null,
-      name = null;
+  const CNFont.toolTips(this.size) : kind = CNFontKind.toolTips, weight = null, name = null;
 
   /// Creates `NSFont.userFont(ofSize:)`.
-  const CNFont.user(this.size)
-    : kind = CNFontKind.user,
-      weight = null,
-      name = null;
+  const CNFont.user(this.size) : kind = CNFontKind.user, weight = null, name = null;
 
   /// Creates `NSFont.userFixedPitchFont(ofSize:)`.
-  const CNFont.userFixedPitch(this.size)
-    : kind = CNFontKind.userFixedPitch,
-      weight = null,
-      name = null;
+  const CNFont.userFixedPitch(this.size) : kind = CNFontKind.userFixedPitch, weight = null, name = null;
 
   /// Constructor kind mapped on the native side.
   final CNFontKind kind;
@@ -223,11 +204,11 @@ class CNFont extends Equatable {
 
   /// Serializes this value for platform channel transport.
   Map<String, dynamic> toMap() {
-    return {
-      'kind': kind.name,
-      'size': size.toMap(),
-      if (weight != null) 'weight': weight!.name,
-      if (name != null) 'name': name,
-    };
+    return {'kind': kind.name, 'size': size.toMap(), if (weight != null) 'weight': weight!.name, if (name != null) 'name': name};
+  }
+
+  /// Creates a copy of this font with optional overrides.
+  CNFont copyWith({CNFontKind? kind, String? name, CNFontSize? size, CNFontWeight? weight}) {
+    return CNFont._(kind ?? this.kind, name ?? this.name, size ?? this.size, weight ?? this.weight);
   }
 }

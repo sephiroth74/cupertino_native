@@ -30,7 +30,6 @@ import 'demos/sheet.dart';
 import 'demos/split_view.dart';
 import 'demos/group_box.dart';
 import 'demos/tab_view.dart';
-import 'demos/swiftui_toolbar_demo.dart';
 import 'demos/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/src/change_notifier_provider.dart';
@@ -155,7 +154,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('GroupBox', 'textformat', GroupBoxDemoPage()),
     _DemoEntry('Sheet', 'square.and.line.vertical.and.square', SheetDemoPage()),
     _DemoEntry('Split View', 'rectangle.split.2x1', SplitViewDemoPage()),
-    _DemoEntry('SwiftUI Toolbar', 'macwindow', SwiftUIToolbarDemo()),
   ];
 
   String _searchQuery = '';
@@ -220,6 +218,27 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
                 widget.onSelectAccentColor(selected.value);
               },
             ),
+            CNToolbarMenuButtonItem(
+              id: 'menu-button',
+              label: 'Accent Color',
+              image: const CNImage(systemSymbolName: 'circle.fill'),
+              menuStyle: CNMenuStyle.borderedButton,
+              onSelected: (value) {},
+              menu: CNMenu(
+                items: _systemColors.map((e) {
+                  return CNMenuItem(
+                    title: e.key,
+                    state: e.value == accentColor ? CNMenuItemState.on : CNMenuItemState.off,
+                    image: CNImage(
+                      systemSymbolName: 'circle.fill',
+                      symbolRenderingMode: CNSymbolRenderingMode.monochrome,
+                      foregroundStyleColors: [e.value],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+
             CNToolbarToggleItem(
               id: 'dark-mode-toggle',
               systemSymbolName: 'moon.fill',
@@ -323,7 +342,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
           GroupBoxDemoPage(),
           SheetDemoPage(),
           SplitViewDemoPage(),
-          SwiftUIToolbarDemo(),
         ],
       ),
     );

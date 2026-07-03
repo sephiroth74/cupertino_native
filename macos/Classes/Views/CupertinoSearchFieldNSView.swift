@@ -123,7 +123,7 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                 let size = self.searchField.intrinsicContentSize
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setText":
-                if let args = call.arguments as? [String: Any], let value = args["value"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let value = args["value"] as? String {
                     self.isUpdatingFromDart = true
                     self.searchField.stringValue = value
                     self.isUpdatingFromDart = false
@@ -134,7 +134,7 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                     )
                 }
             case "setPlaceholder":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.searchField.placeholderString = args["value"] as? String
                     self.applyPlaceholderColor()
                     result(nil)
@@ -146,7 +146,7 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                     )
                 }
             case "setTextColor":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     let value = args["value"] as? Int
                     self.searchField.textColor = value.map(ColorUtils.colorFromARGB)
                     result(nil)
@@ -158,7 +158,7 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                     )
                 }
             case "setPlaceholderColor":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     let value = args["value"] as? Int
                     self.placeholderColor = value.map(ColorUtils.colorFromARGB)
                     self.applyPlaceholderColor()
@@ -173,7 +173,7 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                     )
                 }
             case "setBackgroundColor":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let value = args["value"] as? Int {
                         self.searchField.drawsBackground = true
                         self.searchField.backgroundColor = ColorUtils.colorFromARGB(value)
@@ -192,7 +192,7 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                     )
                 }
             case "setFont":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let fontDict = args["value"] as? [String: Any],
                        let font = FontUtils.fontFromDictionary(fontDict)
                     {
@@ -207,7 +207,7 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                     )
                 }
             case "setEnabled":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.searchField.isEnabled = value
@@ -220,7 +220,7 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                     )
                 }
             case "setControlSize":
-                if let args = call.arguments as? [String: Any], let value = args["value"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let value = args["value"] as? String {
                     self.searchField.controlSize = Self.parseControlSize(value)
                     result(nil)
                 } else {
@@ -231,7 +231,7 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                     )
                 }
             case "setIsDark":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.appearance = NSAppearance(named: value ? .darkAqua : .aqua)
@@ -244,7 +244,7 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                     )
                 }
             case "setBezelStyle":
-                if let args = call.arguments as? [String: Any], let value = args["value"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let value = args["value"] as? String {
                     Self.applyBezelStyle(value, to: self.searchField)
                     result(nil)
                 } else {
@@ -255,7 +255,7 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
                     )
                 }
             case "setSuggestions":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = args["value"] as? [String]
                 {
                     self.suggestions = value

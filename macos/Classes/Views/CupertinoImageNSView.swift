@@ -1,35 +1,31 @@
 import Cocoa
 import FlutterMacOS
+import SwiftUI
 
-class CupertinoImageNSView: NSView {
+class CupertinoImageView: NSView {
     private let channel: FlutterMethodChannel
-    private let imageView: NSImageView
+    private let hostingView: NSHostingView<AnyView>
 
-    private var systemSymbolName: String = ""
-    private var symbolConfiguration: [String: Any]?
+    private var payload: CNImagePayload?
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(name: "CupertinoNativeImage_\(viewId)", binaryMessenger: messenger)
-        imageView = NSImageView(frame: .zero)
+        hostingView = NSHostingView(rootView: AnyView(EmptyView()))
 
-        if let dict = args as? [String: Any] {
-            if let s = dict["systemSymbolName"] as? String { systemSymbolName = s }
-            if let config = dict["symbolConfiguration"] as? [String: Any] { symbolConfiguration = config }
-        }
+        payload = CNChannelSerialization.decode(args)
 
         super.init(frame: .zero)
 
         wantsLayer = true
         layer?.backgroundColor = NSColor.clear.cgColor
 
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.imageScaling = .scaleProportionallyUpOrDown
-        addSubview(imageView)
+        hostingView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(hostingView)
         NSLayoutConstraint.activate([
-            imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            imageView.topAnchor.constraint(equalTo: topAnchor),
-            imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            hostingView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            hostingView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            hostingView.topAnchor.constraint(equalTo: topAnchor),
+            hostingView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
 
         rebuild()
@@ -38,9 +34,8 @@ class CupertinoImageNSView: NSView {
             guard let self = self else { result(nil); return }
             switch call.method {
             case "setImage":
-                if let args = call.arguments as? [String: Any] {
-                    if let n = args["systemSymbolName"] as? String { self.systemSymbolName = n }
-                    if let config = args["symbolConfiguration"] as? [String: Any] { self.symbolConfiguration = config }
+                if let args = CNChannelSerialization.asDict(call.arguments) {
+                    self.payload = CNImagePayload(channel: args)
                     self.rebuild()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing args", details: nil)) }
@@ -55,49 +50,8 @@ class CupertinoImageNSView: NSView {
     }
 
     private func rebuild() {
-        guard var image = NSImage(systemSymbolName: systemSymbolName, accessibilityDescription: nil) else {
-            imageView.image = nil
-            return
-        }
-
-        if let cfg = symbolConfiguration {
-            let type = cfg["type"] as? String
-
-            if #available(macOS 12.0, *) {
-                var nsConfig: NSImage.SymbolConfiguration?
-
-                switch type {
-                case "hierarchical":
-                    if let colorVal = cfg["color"] as? NSNumber {
-                        let c = ColorUtils.colorFromARGB(colorVal.intValue)
-                        nsConfig = NSImage.SymbolConfiguration(hierarchicalColor: c)
-                    }
-                case "palette":
-                    if let colorsArray = cfg["colors"] as? [NSNumber] {
-                        let nsColors = colorsArray.map { ColorUtils.colorFromARGB($0.intValue) }
-                        nsConfig = NSImage.SymbolConfiguration(paletteColors: nsColors)
-                    }
-                case "multicolor":
-                    nsConfig = NSImage.SymbolConfiguration.preferringMulticolor()
-                default:
-                    break
-                }
-
-                if let validConfig = nsConfig {
-                    image = image.withSymbolConfiguration(validConfig) ?? image
-                }
-            }
-
-            if type == "monochrome" {
-                if let colorVal = cfg["color"] as? NSNumber {
-                    let c = ColorUtils.colorFromARGB(colorVal.intValue)
-                    image = image.tinted(with: c)
-                } else {
-                    image = image.tinted(with: .black)
-                }
-            }
-        }
-
-        imageView.image = image
+        hostingView.rootView = payload.flatMap {
+            CNImage.deserialize($0.toChannel())
+        } ?? AnyView(EmptyView())
     }
 }

@@ -93,7 +93,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         case "getPlatformVersion":
             result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
         case "showAlert":
-            guard let args = call.arguments as? [String: Any] else {
+            guard let args = CNChannelSerialization.asDict(call.arguments) else {
                 result(
                     FlutterError(
                         code: "invalid_args",
@@ -105,7 +105,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
             }
             showAlert(args: args, result: result)
         case "showContextMenu":
-            guard let args = call.arguments as? [String: Any] else {
+            guard let args = CNChannelSerialization.asDict(call.arguments) else {
                 result(
                     FlutterError(
                         code: "invalid_args",
@@ -127,7 +127,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
             }
             handler.showContextMenu(args: args, result: result)
         case "showSheet":
-            guard let args = call.arguments as? [String: Any] else {
+            guard let args = CNChannelSerialization.asDict(call.arguments) else {
                 result(
                     FlutterError(
                         code: "invalid_args",
@@ -139,7 +139,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
             }
             showSheet(args: args, result: result)
         case "makeToolbar":
-            guard let args = call.arguments as? [String: Any] else {
+            guard let args = CNChannelSerialization.asDict(call.arguments) else {
                 result(
                     FlutterError(
                         code: "invalid_args",
@@ -223,7 +223,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         parsed.reserveCapacity(list.count)
 
         for item in list {
-            if let dict = item as? [String: Any] {
+            if let dict = CNChannelSerialization.asDict(item) {
                 parsed.append(dict)
             } else if let dict = item as? [AnyHashable: Any] {
                 var normalized = [String: Any]()

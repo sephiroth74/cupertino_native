@@ -27,7 +27,7 @@ class CupertinoSliderNSView: NSView {
         var controlSize: NSControl.ControlSize = .regular
         var allowsTickMarkValuesOnly = false
 
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             if let v = dict["value"] as? NSNumber { initialValue = v.doubleValue }
             if let v = dict["min"] as? NSNumber { minValue = v.doubleValue }
             if let v = dict["max"] as? NSNumber { maxValue = v.doubleValue }
@@ -98,7 +98,7 @@ class CupertinoSliderNSView: NSView {
                 let size = slider.intrinsicContentSize
                 result(["width": size.width, "height": size.height])
             case "setValue":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.doubleValue
                 {
                     if value >= self.myModel.minValue, value <= self.myModel.maxValue {
@@ -111,7 +111,7 @@ class CupertinoSliderNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setRange":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let min = (args["min"] as? NSNumber)?.doubleValue,
                    let max = (args["max"] as? NSNumber)?.doubleValue
                 {
@@ -121,7 +121,7 @@ class CupertinoSliderNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing min/max", details: nil))
                 }
             case "setIsEnabled":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let enabled = (args["value"] as? NSNumber)?.boolValue
                 {
                     slider.isEnabled = enabled
@@ -130,7 +130,7 @@ class CupertinoSliderNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setTint":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let tintNum = args["value"] as? NSNumber {
                         let ns = ColorUtils.colorFromARGB(tintNum.intValue)
                         slider.trackFillColor = ns
@@ -140,7 +140,7 @@ class CupertinoSliderNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setIsDark":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["value"] as? NSNumber)?.boolValue
                 {
                     slider.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
@@ -149,7 +149,7 @@ class CupertinoSliderNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setTickMarks":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let tickMarks = (args["value"] as? NSNumber)?.intValue
                 {
                     slider.numberOfTickMarks = tickMarks
@@ -158,7 +158,7 @@ class CupertinoSliderNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setTickMarkPosition":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let tickMarkPosition = args["value"] as? String
                 {
                     slider.tickMarkPosition = Self.tickMarkPositionFromString(tickMarkPosition)
@@ -167,7 +167,7 @@ class CupertinoSliderNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setAllowsTickMarkValuesOnly":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let allowsTickMarkValuesOnly = (args["value"] as? NSNumber)?.boolValue
                 {
                     slider.allowsTickMarkValuesOnly = allowsTickMarkValuesOnly
@@ -180,7 +180,7 @@ class CupertinoSliderNSView: NSView {
                     )
                 }
             case "setSliderType":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let type = args["value"] as? String
                 {
                     slider.sliderType = Self.sliderTypeFromString(type)
@@ -189,7 +189,7 @@ class CupertinoSliderNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setIsContinuous":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let isContinuous = (args["value"] as? NSNumber)?.boolValue
                 {
                     slider.isContinuous = isContinuous
@@ -198,7 +198,7 @@ class CupertinoSliderNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setIsVertical":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let isVertical = (args["value"] as? NSNumber)?.boolValue
                 {
                     slider.isVertical = isVertical
@@ -207,7 +207,7 @@ class CupertinoSliderNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setControlSize":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let size = args["value"] as? String
                 {
                     slider.controlSize = ControlSizeUtils.controlSizeFromString(size)

@@ -26,7 +26,7 @@ class CupertinoSegmentedControlNSView: NSView {
         var enabled = true
         var isDark = false
 
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             if let arr = dict["labels"] as? [String] { labels = arr }
             if let arr = dict["sfSymbols"] as? [String] { sfSymbols = arr }
             if let sizes = dict["sfSymbolSizes"] as? [NSNumber] { perSymbolSizes = sizes.map { CGFloat(truncating: $0) } }
@@ -83,17 +83,17 @@ class CupertinoSegmentedControlNSView: NSView {
                 let size = self.control.intrinsicContentSize
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setSelectedIndex":
-                if let args = call.arguments as? [String: Any], let idx = (args["index"] as? NSNumber)?.intValue {
+                if let args = CNChannelSerialization.asDict(call.arguments), let idx = (args["index"] as? NSNumber)?.intValue {
                     self.control.selectedSegment = idx
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing index", details: nil)) }
             case "setEnabled":
-                if let args = call.arguments as? [String: Any], let e = (args["enabled"] as? NSNumber)?.boolValue {
+                if let args = CNChannelSerialization.asDict(call.arguments), let e = (args["enabled"] as? NSNumber)?.boolValue {
                     self.control.isEnabled = e
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil)) }
             case "setStyle":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let s = args["iconSize"] as? NSNumber { self.defaultIconSize = CGFloat(truncating: s) }
                     if let tint = args["tint"] as? NSNumber {
                         self.tintColor = ColorUtils.colorFromARGB(tint.intValue)
@@ -102,7 +102,7 @@ class CupertinoSegmentedControlNSView: NSView {
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
             case "setBrightness":
-                if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
+                if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["isDark"] as? NSNumber)?.boolValue {
                     self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }

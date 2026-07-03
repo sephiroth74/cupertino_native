@@ -129,7 +129,7 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
         var preferredEdgeName = "bottom"
         var transparentOverlay = false
 
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             if let value = dict["transparentOverlay"] as? NSNumber {
                 transparentOverlay = value.boolValue
             }
@@ -234,7 +234,7 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
                 let size = self.button.intrinsicContentSize
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setStyle":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if #available(macOS 10.14, *), let value = args["tint"] as? NSNumber {
                         let color = ColorUtils.colorFromARGB(value.intValue)
                         if let styleName = args["buttonStyle"] as? String,
@@ -266,14 +266,14 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
                     result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
                 }
             case "setButtonTitle":
-                if let args = call.arguments as? [String: Any], let value = args["title"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let value = args["title"] as? String {
                     self.button.title = value
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing title", details: nil))
                 }
             case "setButtonIcon":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let name = args["buttonIconName"] as? String,
                        var image = NSImage(systemSymbolName: name, accessibilityDescription: nil)
                     {
@@ -303,7 +303,7 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
                     )
                 }
             case "setBrightness":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["isDark"] as? NSNumber)?.boolValue
                 {
                     self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
@@ -312,7 +312,7 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
                     result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
                 }
             case "setPopoverContent":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.popoverTitle = args["title"] as? String
                     self.popoverMessage = (args["message"] as? String) ?? ""
                     self.popoverActions = (args["actions"] as? [[String: Any]]) ?? []
@@ -329,7 +329,7 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
                     )
                 }
             case "setPopoverBehavior":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let value = args["behavior"] as? String {
                         self.popover.behavior = Self.popoverBehavior(from: value)
                     }

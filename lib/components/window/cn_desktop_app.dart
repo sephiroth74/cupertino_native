@@ -116,7 +116,13 @@ class CNDesktopApp extends StatelessWidget {
       home: home,
     );
 
-    app = CNTheme(data: resolvedTheme, child: app);
+    app = CNTheme(
+      data: resolvedTheme,
+      child: DefaultTextStyle(
+        style: resolvedTheme.typography.body.copyWith(color: resolvedTheme.labelColor),
+        child: app,
+      ),
+    );
 
     return app;
   }

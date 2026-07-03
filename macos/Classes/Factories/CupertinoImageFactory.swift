@@ -14,6 +14,6 @@ class CupertinoImageFactory: NSObject, FlutterPlatformViewFactory {
     }
 
     func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
-        return CupertinoImageNSView(viewId: viewId, args: args, messenger: messenger)
+        return CupertinoImageView(viewId: viewId, args: args, messenger: messenger)
     }
 }

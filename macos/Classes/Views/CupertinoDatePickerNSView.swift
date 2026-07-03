@@ -27,7 +27,7 @@ class CupertinoDatePickerNSView: NSView {
         var locale: Locale? = nil
         var isEnabled = true
 
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             if let styleStr = dict["datePickerStyle"] as? String {
                 datePickerStyle = Self.datePickerStyleFromString(styleStr)
             }
@@ -105,7 +105,7 @@ class CupertinoDatePickerNSView: NSView {
                 result(["width": size.width, "height": size.height])
 
             case "setIsDark":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.datePicker.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
@@ -115,7 +115,7 @@ class CupertinoDatePickerNSView: NSView {
                 }
 
             case "setIsEnabled":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let enabled = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.datePicker.isEnabled = enabled
@@ -125,7 +125,7 @@ class CupertinoDatePickerNSView: NSView {
                 }
 
             case "setDatePickerStyle":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let styleStr = args["value"] as? String
                 {
                     self.datePicker.datePickerStyle = Self.datePickerStyleFromString(styleStr)
@@ -135,7 +135,7 @@ class CupertinoDatePickerNSView: NSView {
                 }
 
             case "setDatePickerElements":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let elementsArr = args["value"] as? [String]
                 {
                     self.datePicker.datePickerElements =
@@ -148,7 +148,7 @@ class CupertinoDatePickerNSView: NSView {
                 }
 
             case "setFont":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let fontDict = args["value"] as? [String: Any],
                    let font = FontUtils.fontFromDictionary(fontDict)
                 {
@@ -159,7 +159,7 @@ class CupertinoDatePickerNSView: NSView {
                 }
 
             case "setBackgroundColor":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let colorInt = args["value"] as? Int
                 {
                     self.datePicker.backgroundColor = ColorUtils.colorFromARGB(colorInt)
@@ -169,7 +169,7 @@ class CupertinoDatePickerNSView: NSView {
                 }
 
             case "setTextColor":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let colorInt = args["value"] as? Int
                 {
                     self.datePicker.textColor = ColorUtils.colorFromARGB(colorInt)
@@ -179,7 +179,7 @@ class CupertinoDatePickerNSView: NSView {
                 }
 
             case "setMinDate":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let timestamp = args["value"] as? TimeInterval
                 {
                     self.datePicker.minDate = Date(timeIntervalSince1970: timestamp / 1000)
@@ -191,7 +191,7 @@ class CupertinoDatePickerNSView: NSView {
                 }
 
             case "setMaxDate":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let timestamp = args["value"] as? TimeInterval
                 {
                     self.datePicker.maxDate = Date(timeIntervalSince1970: timestamp / 1000)
@@ -203,7 +203,7 @@ class CupertinoDatePickerNSView: NSView {
                 }
 
             case "setLocale":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let localeStr = args["value"] as? String
                 {
                     self.datePicker.locale = Locale(identifier: localeStr)
@@ -213,7 +213,7 @@ class CupertinoDatePickerNSView: NSView {
                 }
 
             case "setIsBordered":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let bordered = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.datePicker.isBordered = bordered
@@ -225,7 +225,7 @@ class CupertinoDatePickerNSView: NSView {
                 }
 
             case "setDrawsBackground":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let draws = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.datePicker.drawsBackground = draws
@@ -239,7 +239,7 @@ class CupertinoDatePickerNSView: NSView {
                 }
 
             case "setDateValue":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let timestamp = args["value"] as? TimeInterval
                 {
                     self.datePicker.dateValue = Date(timeIntervalSince1970: timestamp / 1000)
@@ -251,7 +251,7 @@ class CupertinoDatePickerNSView: NSView {
                 }
 
             case "setDatePickerMode":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let modeStr = args["value"] as? String
                 {
                     self.datePicker.datePickerMode = Self.datePickerModeFromString(modeStr)

@@ -22,7 +22,7 @@ class CupertinoTabBarNSView: NSView {
         var tint: NSColor? = nil
         var bg: NSColor? = nil
 
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             labels = (dict["labels"] as? [String]) ?? []
             symbols = (dict["sfSymbols"] as? [String]) ?? []
             sizes = (dict["sfSymbolSizes"] as? [NSNumber]) ?? []
@@ -70,13 +70,13 @@ class CupertinoTabBarNSView: NSView {
                 let size = self.control.intrinsicContentSize
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setSelectedIndex":
-                if let args = call.arguments as? [String: Any], let idx = (args["index"] as? NSNumber)?.intValue {
+                if let args = CNChannelSerialization.asDict(call.arguments), let idx = (args["index"] as? NSNumber)?.intValue {
                     self.control.selectedSegment = idx
                     self.applySegmentTint()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing index", details: nil)) }
             case "setStyle":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let n = args["tint"] as? NSNumber { self.currentTint = Self.colorFromARGB(n.intValue) }
                     if let n = args["backgroundColor"] as? NSNumber {
                         let c = Self.colorFromARGB(n.intValue)
@@ -88,7 +88,7 @@ class CupertinoTabBarNSView: NSView {
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
             case "setBrightness":
-                if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
+                if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["isDark"] as? NSNumber)?.boolValue {
                     self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }

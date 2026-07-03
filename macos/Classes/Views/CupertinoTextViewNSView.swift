@@ -139,7 +139,7 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
 
             switch call.method {
             case "setText":
-                if let args = call.arguments as? [String: Any], let value = args["value"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let value = args["value"] as? String {
                     self.isUpdatingFromDart = true
                     self.textView.string = value
                     self.isUpdatingFromDart = false
@@ -151,7 +151,7 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
                     )
                 }
             case "setSelection":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let base = args["base"] as? Int,
                    let extent = args["extent"] as? Int
                 {
@@ -173,7 +173,7 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
                     )
                 }
             case "setPlaceholder":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.placeholderLabel.stringValue = (args["value"] as? String) ?? ""
                     self.updatePlaceholderVisibility()
                     result(nil)
@@ -185,7 +185,7 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
                     )
                 }
             case "setTextColor":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     let value = args["value"] as? Int
                     self.textView.textColor = value.map(ColorUtils.colorFromARGB)
                     result(nil)
@@ -197,7 +197,7 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
                     )
                 }
             case "setPlaceholderColor":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     let value = args["value"] as? Int
                     self.placeholderColor = value.map(ColorUtils.colorFromARGB)
                     self.applyPlaceholderStyle()
@@ -211,7 +211,7 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
                     )
                 }
             case "setBackgroundColor":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let value = args["value"] as? Int {
                         self.textView.drawsBackground = true
                         self.textView.backgroundColor = ColorUtils.colorFromARGB(value)
@@ -228,7 +228,7 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
                     )
                 }
             case "setFont":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let fontDict = args["value"] as? [String: Any],
                        let font = FontUtils.fontFromDictionary(fontDict)
                     {
@@ -244,7 +244,7 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
                     )
                 }
             case "setPlaceholderFont":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let fontDict = args["value"] as? [String: Any],
                        let font = FontUtils.fontFromDictionary(fontDict)
                     {
@@ -262,7 +262,7 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
                     )
                 }
             case "setEnabled":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.textView.isEditable = value
@@ -276,7 +276,7 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
                     )
                 }
             case "setIsDark":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.appearance = NSAppearance(named: value ? .darkAqua : .aqua)

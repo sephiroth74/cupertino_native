@@ -1,5 +1,5 @@
-import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native/channel/channel_serialization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -16,13 +16,11 @@ class CNMenuButton extends StatefulWidget {
     required this.menu,
     required this.onSelected,
     this.label,
-    this.systemImage,
+    this.image,
     this.menuStyle = CNMenuStyle.automatic,
     this.controlSize = CNControlSize.regular,
     this.focusable = false,
-    this.tint,
-    this.symbolRenderingMode,
-  }) : assert(label != null || systemImage != null, 'CNMenuButton requires a label or systemImage.'),
+  }) : assert(label != null || image != null, 'CNMenuButton requires a label or image.'),
        super();
 
   /// Control size for the native button.
@@ -30,6 +28,9 @@ class CNMenuButton extends StatefulWidget {
 
   /// Whether the native button should be focusable.
   final bool focusable;
+
+  /// Optional icon shown on the button.
+  final CNImage? image;
 
   /// Optional text label shown on the button.
   final String? label;
@@ -43,15 +44,6 @@ class CNMenuButton extends StatefulWidget {
   /// Called when a leaf menu item is selected.
   final ValueChanged<CNMenuItem> onSelected;
 
-  /// Optional symbol rendering mode applied to the button icon.
-  final CNSymbolRenderingMode? symbolRenderingMode;
-
-  /// Optional SF Symbol icon shown on the button.
-  final String? systemImage;
-
-  /// Optional tint color applied to the button and icon.
-  final Color? tint;
-
   @override
   State<CNMenuButton> createState() => _CNMenuButtonState();
 }
@@ -61,12 +53,10 @@ class _CNMenuButtonState extends State<CNMenuButton> {
   double? _intrinsicHeight;
   double? _intrinsicWidth;
   bool? _lastFocusable;
-  String? _lastIconName;
+  CNImage? _lastImage;
   bool _lastIsDark = false;
   CNMenu? _lastMenu;
   CNMenuStyle? _lastStyle;
-  CNSymbolRenderingMode? _lastSymbolRenderingMode;
-  Color? _lastTint;
   String? _lastTitle;
 
   @override
@@ -94,9 +84,7 @@ class _CNMenuButtonState extends State<CNMenuButton> {
     _lastTitle = widget.label;
     _lastStyle = widget.menuStyle;
     _lastFocusable = widget.focusable;
-    _lastTint = widget.tint;
-    _lastSymbolRenderingMode = widget.symbolRenderingMode;
-    _lastIconName = widget.systemImage;
+    _lastImage = widget.image;
     _requestIntrinsicSize();
   }
 
@@ -133,7 +121,8 @@ class _CNMenuButtonState extends State<CNMenuButton> {
     final ch = _channel;
     if (ch == null) return;
 
-    final currentMenuMap = widget.menu.toMap(context);
+    final currentMenuMap = widget.menu.toChannelMap(context);
+    final currentImageMap = CNChannelSerialization.object(widget.image, context);
 
     if (_lastMenu != widget.menu) {
       _lastMenu = widget.menu;
@@ -155,21 +144,9 @@ class _CNMenuButtonState extends State<CNMenuButton> {
       await ch.invokeMethod('setLabel', {'label': widget.label});
     }
 
-    if (_lastIconName != oldWidget.systemImage) {
-      _lastIconName = widget.systemImage;
-      await ch.invokeMethod('setSystemImage', {'systemImage': widget.systemImage});
-    }
-
-    if (_lastTint != widget.tint) {
-      _lastTint = widget.tint;
-      if (mounted) {
-        await ch.invokeMethod('setTint', {'tint': resolveColorToArgb(_lastTint, context)});
-      }
-    }
-
-    if (_lastSymbolRenderingMode != widget.symbolRenderingMode) {
-      _lastSymbolRenderingMode = widget.symbolRenderingMode;
-      await ch.invokeMethod('setSymbolRenderingMode', {'symbolRenderingMode': widget.symbolRenderingMode?.name});
+    if (_lastImage != widget.image) {
+      _lastImage = widget.image;
+      await ch.invokeMethod('setImage', {'image': currentImageMap});
     }
 
     if (oldWidget.controlSize != widget.controlSize) {
@@ -204,15 +181,13 @@ class _CNMenuButtonState extends State<CNMenuButton> {
     final isDark = CNTheme.of(context).brightness == Brightness.dark;
 
     final creationParams = <String, dynamic>{
-      'menu': widget.menu.toMap(context),
+      'menu': widget.menu.toChannelMap(context),
       'label': widget.label,
       'style': widget.menuStyle.name,
       'controlSize': widget.controlSize.name,
       'focusable': widget.focusable,
       'isDark': isDark,
-      'systemImage': widget.systemImage,
-      'tint': resolveColorToArgb(widget.tint, context),
-      'symbolRenderingMode': widget.symbolRenderingMode?.name,
+      'image': CNChannelSerialization.object(widget.image, context),
     };
 
     // Constrain the platform view size to avoid infinite width when this

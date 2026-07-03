@@ -133,7 +133,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                 let size = self.textField.intrinsicContentSize
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setText":
-                if let args = call.arguments as? [String: Any], let value = args["value"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let value = args["value"] as? String {
                     self.isUpdatingFromDart = true
                     self.textField.stringValue = value
                     self.isUpdatingFromDart = false
@@ -144,7 +144,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                     )
                 }
             case "setSelection":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let base = args["base"] as? Int,
                    let extent = args["extent"] as? Int
                 {
@@ -165,7 +165,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                     )
                 }
             case "setPlaceholder":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.textField.placeholderString = args["value"] as? String
                     self.applyPlaceholderColor()
                     result(nil)
@@ -177,7 +177,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                     )
                 }
             case "setTextColor":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     let value = args["value"] as? Int
                     self.textField.textColor = value.map(ColorUtils.colorFromARGB)
                     result(nil)
@@ -189,7 +189,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                     )
                 }
             case "setPlaceholderColor":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     let value = args["value"] as? Int
                     self.placeholderColor = value.map(ColorUtils.colorFromARGB)
                     self.applyPlaceholderColor()
@@ -203,7 +203,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                     )
                 }
             case "setBackgroundColor":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let value = args["value"] as? Int {
                         self.textField.drawsBackground = true
                         self.textField.backgroundColor = ColorUtils.colorFromARGB(value)
@@ -220,7 +220,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                     )
                 }
             case "setFont":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let fontDict = args["value"] as? [String: Any],
                        let font = FontUtils.fontFromDictionary(fontDict)
                     {
@@ -235,7 +235,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                     )
                 }
             case "setPlaceholderFont":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let fontDict = args["value"] as? [String: Any],
                        let font = FontUtils.fontFromDictionary(fontDict)
                     {
@@ -251,7 +251,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                     )
                 }
             case "setEnabled":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.textField.isEnabled = value
@@ -264,7 +264,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                     )
                 }
             case "setControlSize":
-                if let args = call.arguments as? [String: Any], let value = args["value"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let value = args["value"] as? String {
                     self.textField.controlSize = Self.parseControlSize(value)
                     result(nil)
                 } else {
@@ -275,7 +275,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                     )
                 }
             case "setIsDark":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.appearance = NSAppearance(named: value ? .darkAqua : .aqua)
@@ -288,7 +288,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                     )
                 }
             case "setBezelStyle":
-                if let args = call.arguments as? [String: Any], let value = args["value"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let value = args["value"] as? String {
                     Self.applyBezelStyle(value, to: self.textField)
                     result(nil)
                 } else {

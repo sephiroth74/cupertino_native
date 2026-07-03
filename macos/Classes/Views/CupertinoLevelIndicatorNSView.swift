@@ -27,7 +27,7 @@ class CupertinoLevelIndicatorNSView: NSView {
         var criticalColor: NSColor? = nil
         var levelIndicatorStyle: NSLevelIndicator.Style = .continuousCapacity
 
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             if let v = dict["value"] as? NSNumber { initialValue = v.doubleValue }
             if let v = dict["min"] as? NSNumber { minValue = v.doubleValue }
             if let v = dict["max"] as? NSNumber { maxValue = v.doubleValue }
@@ -104,7 +104,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                 let size = levelIndicator.intrinsicContentSize
                 result(["width": size.width, "height": size.height])
             case "updateRange":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let min = (args["min"] as? NSNumber)?.doubleValue,
                    let max = (args["max"] as? NSNumber)?.doubleValue
                 {
@@ -114,7 +114,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing min/max", details: nil))
                 }
             case "setValue":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.doubleValue
                 {
                     if value >= self.model.minValue, value <= self.model.maxValue {
@@ -131,7 +131,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setIsEnabled":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let enabled = (args["value"] as? NSNumber)?.boolValue
                 {
                     levelIndicator.isEnabled = enabled
@@ -140,7 +140,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setIsEditable":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let editable = (args["value"] as? NSNumber)?.boolValue
                 {
                     levelIndicator.isEditable = editable
@@ -149,7 +149,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setIsContinuous":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let continuous = (args["value"] as? NSNumber)?.boolValue
                 {
                     levelIndicator.isContinuous = continuous
@@ -158,7 +158,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setIsDark":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["value"] as? NSNumber)?.boolValue
                 {
                     levelIndicator.appearance =
@@ -168,7 +168,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setLevelIndicatorStyle":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let styleStr = args["value"] as? String
                 {
                     levelIndicator.levelIndicatorStyle =
@@ -178,7 +178,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setFillColor":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let fillColorNum = args["value"] as? NSNumber
                 {
                     levelIndicator.fillColor = ColorUtils.colorFromARGB(fillColorNum.intValue)
@@ -187,7 +187,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setWarningColor":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let warningColorNum = args["value"] as? NSNumber
                 {
                     levelIndicator.warningFillColor = ColorUtils.colorFromARGB(warningColorNum.intValue)
@@ -196,7 +196,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setCriticalColor":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let criticalColorNum = args["value"] as? NSNumber
                 {
                     levelIndicator.criticalFillColor = ColorUtils.colorFromARGB(
@@ -207,7 +207,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setWarningValue":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let warningValue = (args["value"] as? NSNumber)?.doubleValue
                 {
                     levelIndicator.warningValue = warningValue
@@ -216,7 +216,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setCriticalValue":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let criticalValue = (args["value"] as? NSNumber)?.doubleValue
                 {
                     levelIndicator.criticalValue = criticalValue

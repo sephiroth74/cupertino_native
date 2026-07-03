@@ -21,7 +21,7 @@ class CupertinoLabelNSView: NSView {
             name: "CupertinoNativeLabel_\(viewId)",
             binaryMessenger: messenger
         )
-        self.args = args as? [String: Any] ?? [:]
+        self.args = CNChannelSerialization.asDict(args) ?? [:]
         super.init(frame: .zero)
 
         wantsLayer = true
@@ -68,7 +68,7 @@ class CupertinoLabelNSView: NSView {
                 let size = self.hostingView?.intrinsicContentSize ?? NSSize(width: NSView.noIntrinsicMetric, height: NSView.noIntrinsicMetric)
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setText":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["text"] = args["text"]
                     self.createHostingView()
                     result(nil)
@@ -76,7 +76,7 @@ class CupertinoLabelNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing text", details: nil))
                 }
             case "setIcon":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["iconName"] = args["iconName"]
                     self.args["iconSize"] = args["iconSize"]
                     self.args["iconColor"] = args["iconColor"]
@@ -89,7 +89,7 @@ class CupertinoLabelNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing icon", details: nil))
                 }
             case "setColor":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["color"] = args["color"]
                     self.createHostingView()
                     result(nil)
@@ -97,7 +97,7 @@ class CupertinoLabelNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing color", details: nil))
                 }
             case "setFont":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["font"] = args["font"]
                     self.createHostingView()
                     result(nil)
@@ -105,7 +105,7 @@ class CupertinoLabelNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing font", details: nil))
                 }
             case "setLabelStyle":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["labelStyle"] = args["labelStyle"]
                     self.createHostingView()
                     result(nil)

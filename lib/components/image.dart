@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:cupertino_native/channel/channel_serialization.dart';
 import 'package:cupertino_native/channel/params.dart';
-import 'package:equatable/equatable.dart';
+import 'package:cupertino_native/style/font.dart';
+import 'package:cupertino_native/style/sf_symbol.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -9,30 +11,54 @@ import 'package:flutter/services.dart';
 /// Represents an image that can be used in various components, such as menu items or buttons.
 /// This class encapsulates the necessary information to render a system symbol on Apple platforms,
 /// along with optional configuration for customizing its appearance.
-class CNImage extends StatefulWidget {
-  /// Creates a CNImage with the given [systemSymbolName] and an optional [symbolConfiguration].
+class CNImage extends StatefulWidget implements CNChannelSerializable {
+  /// Creates a CNImage with the given [systemSymbolName].
   const CNImage({
     super.key,
     required this.systemSymbolName,
-    this.symbolConfiguration = const CNSymbolConfiguration(
-      type: CNSymbolConfigurationType.defaultConfiguration,
-    ),
+    this.symbolRenderingMode,
+    this.symbolColorRenderingMode,
+    this.foregroundStyleColors,
+    this.tint,
+    this.font,
   });
 
-  /// An optional symbol configuration that can be used to customize the appearance of the menu item.
-  final CNSymbolConfiguration symbolConfiguration;
+  /// Optional font used to render the symbol image.
+  final CNFont? font;
+
+  /// Optional per-image foreground style colors.
+  ///
+  /// When [symbolRenderingMode] is [CNSymbolRenderingMode.palette], up to three
+  /// colors are used as the palette.
+  final List<Color>? foregroundStyleColors;
+
+  /// Optional color rendering mode for SF Symbols.
+  final CNSymbolColorRenderingMode? symbolColorRenderingMode;
+
+  /// Optional rendering mode for SF Symbols.
+  final CNSymbolRenderingMode? symbolRenderingMode;
 
   /// The name of the system symbol to render, which corresponds to an SF Symbol on Apple platforms.
   final String systemSymbolName;
 
+  /// Optional tint color applied after symbol configuration.
+  final Color? tint;
+
   @override
   State<CNImage> createState() => _CNImageState();
+
+  @override
+  Map<String, dynamic> toChannelMap(BuildContext context) => toMap(context);
 
   /// Serializes this image to a map for platform channel communication.
   Map<String, dynamic> toMap(BuildContext context) {
     return {
       'systemSymbolName': systemSymbolName,
-      'symbolConfiguration': symbolConfiguration.toMap(context),
+      'symbolRenderingMode': symbolRenderingMode?.name,
+      'symbolColorRenderingMode': symbolColorRenderingMode?.name,
+      'foregroundStyleColors': foregroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
+      'tint': resolveColorToArgb(tint, context),
+      'font': font?.toMap(),
     };
   }
 
@@ -44,8 +70,13 @@ class CNImage extends StatefulWidget {
 
 class _CNImageState extends State<CNImage> {
   MethodChannel? _channel;
-  CNSymbolConfiguration? _lastSymbolConfiguration;
-  String? _lastSystemSymbolName;
+  String? _lastSerializedPayload;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncPropsToNativeIfNeeded();
+  }
 
   @override
   void didUpdateWidget(covariant CNImage oldWidget) {
@@ -59,9 +90,10 @@ class _CNImageState extends State<CNImage> {
     super.dispose();
   }
 
+  String _serializeCurrentPayload() => jsonEncode(widget.toMap(context));
+
   void _onPlatformViewCreated(int id) {
-    _channel = MethodChannel('CupertinoNativeImage_$id')
-      ..setMethodCallHandler(_onMethodCall);
+    _channel = MethodChannel('CupertinoNativeImage_$id')..setMethodCallHandler(_onMethodCall);
     _cacheCurrentProps();
   }
 
@@ -70,17 +102,18 @@ class _CNImageState extends State<CNImage> {
   }
 
   void _cacheCurrentProps() {
-    _lastSystemSymbolName = widget.systemSymbolName;
-    _lastSymbolConfiguration = widget.symbolConfiguration;
+    _lastSerializedPayload = _serializeCurrentPayload();
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
 
-    if (_lastSystemSymbolName != widget.systemSymbolName ||
-        _lastSymbolConfiguration != widget.symbolConfiguration) {
-      await channel.invokeMethod('setImage', widget.toMap(context));
+    final payload = widget.toMap(context);
+    final serializedPayload = jsonEncode(payload);
+
+    if (_lastSerializedPayload != serializedPayload) {
+      await channel.invokeMethod('setImage', payload);
       _cacheCurrentProps();
     }
   }
@@ -99,128 +132,5 @@ class _CNImageState extends State<CNImage> {
       creationParams: creationParams,
       onPlatformViewCreated: _onPlatformViewCreated,
     );
-  }
-}
-
-/// Symbol rendering modes for menu item icons.
-enum CNSymbolConfigurationType {
-  /// Use the platform default symbol rendering.
-  defaultConfiguration,
-
-  /// Use hierarchical rendering with a single tint.
-  hierarchical,
-
-  /// Use monochrome rendering with a single tint.
-  monochrome,
-
-  /// Use palette rendering with multiple colors.
-  palette,
-
-  /// Use SF Symbols multicolor rendering.
-  multicolor,
-}
-
-/// Configuration for symbol rendering on a [CNMenuItem].
-class CNSymbolConfiguration extends Equatable {
-  /// Creates a symbol configuration with the specified properties. The [type] determines which properties are relevant for rendering.
-  const CNSymbolConfiguration({
-    required this.type,
-    this.hierarchicalColor,
-    this.paletteColors,
-    this.monochromeColor,
-  });
-
-  /// Private constructor for internal use by factory methods.
-  const CNSymbolConfiguration._({
-    required this.type,
-    this.hierarchicalColor,
-    this.paletteColors,
-    this.monochromeColor,
-  });
-
-  /// Creates a default symbol configuration.
-  factory CNSymbolConfiguration.defaultConfiguration() =>
-      CNSymbolConfiguration._(
-        type: CNSymbolConfigurationType.defaultConfiguration,
-      );
-
-  /// Creates a hierarchical symbol configuration.
-  factory CNSymbolConfiguration.hierarchical(Color? color) {
-    return CNSymbolConfiguration._(
-      type: CNSymbolConfigurationType.hierarchical,
-      hierarchicalColor: color,
-    );
-  }
-
-  /// Creates a monochrome symbol configuration.
-  factory CNSymbolConfiguration.monochrome(Color? color) {
-    return CNSymbolConfiguration._(
-      type: CNSymbolConfigurationType.monochrome,
-      monochromeColor: color,
-    );
-  }
-
-  /// Creates a multicolor symbol configuration.
-  factory CNSymbolConfiguration.multicolor() =>
-      CNSymbolConfiguration._(type: CNSymbolConfigurationType.multicolor);
-
-  /// Creates a palette symbol configuration.
-  factory CNSymbolConfiguration.palette(List<Color>? colors) {
-    return CNSymbolConfiguration._(
-      type: CNSymbolConfigurationType.palette,
-      paletteColors: colors,
-    );
-  }
-
-  /// Optional color for hierarchical rendering.
-  final Color? hierarchicalColor;
-
-  /// Optional color for monochrome rendering.
-  final Color? monochromeColor;
-
-  /// Optional colors for palette rendering.
-  final List<Color>? paletteColors;
-
-  /// The selected symbol rendering mode.
-  final CNSymbolConfigurationType type;
-
-  @override
-  List<Object?> get props => [
-    type,
-    hierarchicalColor,
-    monochromeColor,
-    paletteColors,
-  ];
-
-  /// Serializes the symbol configuration to JSON for native consumption.
-  Map<String, dynamic> toMap(BuildContext context) {
-    switch (type) {
-      case CNSymbolConfigurationType.defaultConfiguration:
-        return {'type': 'default'};
-      case CNSymbolConfigurationType.hierarchical:
-        return {
-          'type': 'hierarchical',
-          'color': resolveColorToArgb(hierarchicalColor, context),
-        };
-      case CNSymbolConfigurationType.monochrome:
-        return {
-          'type': 'monochrome',
-          'color': resolveColorToArgb(monochromeColor, context),
-        };
-      case CNSymbolConfigurationType.palette:
-        return {
-          'type': 'palette',
-          'colors': paletteColors
-              ?.map((c) => resolveColorToArgb(c, context))
-              .toList(),
-        };
-      case CNSymbolConfigurationType.multicolor:
-        return {'type': 'multicolor'};
-    }
-  }
-
-  /// Serializes the symbol configuration to JSON for native consumption.
-  String toJson(BuildContext context) {
-    return jsonEncode(toMap(context));
   }
 }

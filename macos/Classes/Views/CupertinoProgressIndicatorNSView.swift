@@ -25,7 +25,7 @@ class CupertinoProgressIndicatorNSView: NSView {
         var progressIndeterminate = false
         var isDark = false
 
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             if let ps = dict["progressStyle"] as? String { progressStyle = ps }
             if let ps = dict["progressSize"] as? String { progressSize = ps }
             if let pv = dict["progressValue"] as? Double { progressValue = pv }
@@ -115,7 +115,7 @@ class CupertinoProgressIndicatorNSView: NSView {
                 let s = self.progressIndicator.intrinsicContentSize
                 result(["width": Double(s.width), "height": Double(s.height)])
             case "setBrightness":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["isDark"] as? NSNumber)?.boolValue
                 {
                     self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
@@ -124,7 +124,7 @@ class CupertinoProgressIndicatorNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
                 }
             case "updateProgress":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let progressStyle = args["progressStyle"] as? String {
                         self.currentProgressStyle = progressStyle
                         switch progressStyle {

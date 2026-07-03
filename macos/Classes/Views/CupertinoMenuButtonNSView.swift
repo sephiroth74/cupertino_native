@@ -2,6 +2,68 @@ import Cocoa
 import FlutterMacOS
 import SwiftUI
 
+struct CNMenuItemModel {
+    let separator: Bool
+    let title: String
+    let subtitle: String?
+    let image: [String: Any]?
+    let tag: Int?
+    let identifier: String
+    let enabled: Bool
+    let state: String
+    let submenu: [CNMenuItemModel]?
+}
+
+extension CNMenuItemModel: CNChannelSerializable {
+    init?(channel: [String: Any]) {
+        let separator = (channel["separator"] as? Bool) ?? false
+        let title = (channel["title"] as? String) ?? ""
+        let subtitle = channel["subtitle"] as? String
+        let image = channel["image"] as? [String: Any]
+        let tag = channel["tag"] as? Int
+        let identifier = (channel["identifier"] as? String) ?? UUID().uuidString
+        let enabled = (channel["enabled"] as? Bool) ?? true
+        let state = (channel["state"] as? String) ?? "off"
+        let submenu: [CNMenuItemModel]?
+        let decodedSubmenu: [CNMenuItemModel] = CNChannelSerialization.decodeArray(channel["submenu"])
+        submenu = decodedSubmenu.isEmpty ? nil : decodedSubmenu
+
+        self.init(
+            separator: separator,
+            title: title,
+            subtitle: subtitle,
+            image: image,
+            tag: tag,
+            identifier: identifier,
+            enabled: enabled,
+            state: state,
+            submenu: submenu
+        )
+    }
+
+    func toChannel() -> [String: Any] {
+        var channel: [String: Any] = [
+            "separator": separator,
+            "title": title,
+            "identifier": identifier,
+            "enabled": enabled,
+            "state": state,
+        ]
+        channel["subtitle"] = subtitle
+        channel["image"] = image
+        channel["tag"] = tag
+        channel["submenu"] = submenu.map(CNChannelSerialization.encodeArray)
+        return channel
+    }
+}
+
+func parseCNMenuItems(_ rawMenu: Any?) -> [CNMenuItemModel] {
+    guard let menuDict = CNChannelSerialization.asDict(rawMenu) else {
+        return []
+    }
+    return CNChannelSerialization.decodeArray(menuDict["items"])
+}
+
 class CupertinoMenuButtonNSView: NSView {
     override var intrinsicContentSize: NSSize {
         if let measuredSize {
@@ -21,7 +83,7 @@ class CupertinoMenuButtonNSView: NSView {
             name: "CupertinoNativeMenuButton_\(viewId)",
             binaryMessenger: messenger
         )
-        self.args = args as? [String: Any] ?? [:]
+        self.args = CNChannelSerialization.asDict(args) ?? [:]
         super.init(frame: .zero)
 
         let isDark = (self.args["isDark"] as? NSNumber)?.boolValue ?? false
@@ -32,42 +94,6 @@ class CupertinoMenuButtonNSView: NSView {
         setupMethodCallHandler()
 
         appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-    }
-
-    private func parseMenuItems(_ menuDict: [String: Any]) -> [MenuItemModel] {
-        guard let items = menuDict["items"] as? [[String: Any]] else {
-            return []
-        }
-        return items.compactMap { itemDict in
-            let separator = itemDict["separator"] as? Bool ?? false
-            let title = itemDict["title"] as? String ?? ""
-            let subtitle = itemDict["subtitle"] as? String
-            let systemImageName = itemDict["systemImageName"] as? String
-            let tag = itemDict["tag"] as? Int
-            let identifier = itemDict["identifier"] as? String ?? UUID().uuidString
-            let enabled = itemDict["enabled"] as? Bool ?? true
-            let state = itemDict["state"] as? String ?? "off"
-            let image: NSImage?
-            if let imageDict = itemDict["image"] as? [String: Any] {
-                image = CupertinoImageDeserializer.deserialize(dict: imageDict)
-            } else {
-                image = nil
-            }
-            let submenuDict = itemDict["submenu"] as? [String: Any]
-            let submenu = submenuDict != nil ? parseMenuItems(submenuDict!) : nil
-            return MenuItemModel(
-                separator: separator,
-                title: title,
-                subtitle: subtitle,
-                systemImageName: systemImageName,
-                image: image,
-                tag: tag,
-                identifier: identifier,
-                enabled: enabled,
-                state: state,
-                submenu: submenu
-            )
-        }
     }
 
     required init?(coder _: NSCoder) {
@@ -110,7 +136,7 @@ class CupertinoMenuButtonNSView: NSView {
                 let size = self.hostingView?.intrinsicContentSize ?? NSSize(width: NSView.noIntrinsicMetric, height: NSView.noIntrinsicMetric)
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setMenu":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["menu"] = args["menu"]
                     self.createHostingView()
                     result(nil)
@@ -118,7 +144,7 @@ class CupertinoMenuButtonNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing menu", details: nil))
                 }
             case "setIsDark":
-                if let args = call.arguments as? [String: Any], let isDark = (args["value"] as? NSNumber)?.boolValue {
+                if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["value"] as? NSNumber)?.boolValue {
                     self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     self.createHostingView()
                     result(nil)
@@ -126,31 +152,31 @@ class CupertinoMenuButtonNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
                 }
             case "setLabel":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["label"] = args["label"]
                     self.createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing label", details: nil))
                 }
-            case "setSystemImage":
-                if let args = call.arguments as? [String: Any] {
-                    self.args["systemImage"] = args["systemImage"]
+            case "setImage":
+                if let args = CNChannelSerialization.asDict(call.arguments) {
+                    self.args["image"] = args["image"]
                     self.createHostingView()
                     result(nil)
                 } else {
-                    result(FlutterError(code: "bad_args", message: "Missing buttonIcon", details: nil))
+                    result(FlutterError(code: "bad_args", message: "Missing image", details: nil))
                 }
             case "setStyle":
-                if let args = call.arguments as? [String: Any] {
-                    self.args["style"] = args["style"]
+                if let args = CNChannelSerialization.asDict(call.arguments) {
+                    self.args["style"] = args["style"] ?? args["menuStyle"]
                     self.createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
                 }
             case "setControlSize":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["controlSize"] = args["controlSize"]
                     self.createHostingView()
                     result(nil)
@@ -158,20 +184,12 @@ class CupertinoMenuButtonNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing controlSize", details: nil))
                 }
             case "setFocusable":
-                if let args = call.arguments as? [String: Any], let focusable = (args["focusable"] as? NSNumber)?.boolValue {
+                if let args = CNChannelSerialization.asDict(call.arguments), let focusable = (args["focusable"] as? NSNumber)?.boolValue {
                     self.args["focusable"] = focusable
                     self.createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing focusable", details: nil))
-                }
-            case "setTint":
-                if let args = call.arguments as? [String: Any], let tintValue = args["tint"] as? NSNumber {
-                    self.args["tint"] = tintValue
-                    self.createHostingView()
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing tint", details: nil))
                 }
             default:
                 result(FlutterMethodNotImplemented)
@@ -180,45 +198,26 @@ class CupertinoMenuButtonNSView: NSView {
     }
 
     private func parseArguments(_ args: [String: Any]) -> MenuButtonModel {
-        let menuDict = args["menu"] as? [String: Any] ?? [:]
-
         print("Parsing menu button arguments: \(args)")
 
         return MenuButtonModel(
-            items: parseMenuItems(menuDict),
+            items: parseCNMenuItems(args["menu"]),
             label: args["label"] as? String,
-            systemImage: args["systemImage"] as? String,
+            image: args["image"] as? [String: Any],
             menuStyle: args["style"] as? String ?? "automatic",
             controlSize: ((args["controlSize"] as? String)?.toControlSize()) ?? .regular,
-            focusable: (args["focusable"] as? NSNumber)?.boolValue ?? false,
-            tint: (args["tint"] as? NSNumber).map { $0.intValue.toARGB() },
-            symbolRenderingMode: (args["symbolRenderingMode"] as? String)?.toSymbolRenderingMode()
+            focusable: (args["focusable"] as? NSNumber)?.boolValue ?? false
         )
     }
 }
 
 private struct MenuButtonModel {
-    let items: [MenuItemModel]
+    let items: [CNMenuItemModel]
     let label: String?
-    let systemImage: String?
+    let image: [String: Any]?
     let menuStyle: String
     let controlSize: ControlSize
     let focusable: Bool
-    let tint: Color?
-    let symbolRenderingMode: SymbolRenderingMode?
-}
-
-private struct MenuItemModel {
-    let separator: Bool
-    let title: String
-    let subtitle: String?
-    let systemImageName: String?
-    let image: NSImage?
-    let tag: Int?
-    let identifier: String
-    let enabled: Bool
-    let state: String
-    let submenu: [MenuItemModel]?
 }
 
 private struct MenuButtonContent: View {
@@ -231,8 +230,6 @@ private struct MenuButtonContent: View {
         menuView
             .controlSize(model.controlSize)
             .modifier(ConditionalMenuStyle(name: model.menuStyle))
-            .modifier(TintModifier(tint: model.tint))
-            .modifier(SymbolRenderingModeModifier(mode: model.symbolRenderingMode))
             .focusable(model.focusable)
             .padding(0)
             .background(SizeReader(size: $measuredSize))
@@ -243,7 +240,7 @@ private struct MenuButtonContent: View {
 
     private var menuView: some View {
         Menu {
-            menuItems(model.items)
+            CNMenuEntriesView(items: model.items, onSelection: onSelection)
         } label: {
             buttonLabelView
         }
@@ -251,67 +248,24 @@ private struct MenuButtonContent: View {
 
     @ViewBuilder
     private var buttonLabelView: some View {
-        if let systemImage = model.systemImage, !systemImage.isEmpty,
-           let label = model.label, !label.isEmpty
+        if let image = model.image,
+           let label = model.label,
+           !label.isEmpty,
+           let swiftImage = CNImage.deserialize(image)
         {
-            Label(label, systemImage: systemImage)
-        } else if let systemImage = model.systemImage, !systemImage.isEmpty {
-            Image(systemName: systemImage)
+            Label {
+                Text(label)
+            } icon: {
+                swiftImage
+            }
+        } else if let image = model.image,
+                  let swiftImage = CNImage.deserialize(image)
+        {
+            swiftImage
         } else if let label = model.label, !label.isEmpty {
             Text(label)
         } else {
             Text("Menu")
-        }
-
-        // TODO: we must apply the optional color and/or rendering mode to the icon if it exists
-    }
-
-    @ViewBuilder
-    private func rowView(for item: MenuItemModel) -> some View {
-        if let systemImageName = item.systemImageName, !systemImageName.isEmpty {
-            Label(item.title, systemImage: systemImageName)
-        } else if let image = item.image {
-            Image(nsImage: image)
-            Text(item.title)
-        } else {
-            Text(item.title)
-        }
-
-        if let subtitle = item.subtitle, !subtitle.isEmpty {
-            Text(subtitle)
-        }
-    }
-
-    @ViewBuilder
-    private func iconView(for item: MenuItemModel) -> some View {
-        if let image = item.image {
-            Image(nsImage: image)
-        } else if let systemImage = item.systemImageName {
-            Image(systemName: systemImage)
-        }
-    }
-
-    private struct TintModifier: ViewModifier {
-        let tint: Color?
-
-        func body(content: Content) -> some View {
-            if let tint = tint {
-                content.tint(tint)
-            } else {
-                content
-            }
-        }
-    }
-
-    private struct SymbolRenderingModeModifier: ViewModifier {
-        let mode: SymbolRenderingMode?
-
-        func body(content: Content) -> some View {
-            if let mode = mode {
-                content.symbolRenderingMode(mode)
-            } else {
-                content
-            }
         }
     }
 
@@ -331,16 +285,51 @@ private struct MenuButtonContent: View {
             }
         }
     }
+}
 
-    /// Helper that returns an erased AnyView for recursive menu building
-    private func menuItems(_ items: [MenuItemModel]) -> AnyView {
+struct CNMenuEntriesView: View {
+    let items: [CNMenuItemModel]
+    let onSelection: (String) -> Void
+
+    var body: some View {
+        menuItems(items)
+    }
+
+    @ViewBuilder
+    private func rowView(for item: CNMenuItemModel) -> some View {
+        let hasTitle = !item.title.isEmpty
+        let hasImage = item.image != nil
+
+        if hasTitle && hasImage {
+            HStack(spacing: 8) {
+                if let image = item.image,
+                   let swiftImage = CNImage.deserialize(image)
+                {
+                    swiftImage
+                }
+                Text(item.title)
+            }
+        } else if hasTitle {
+            Text(item.title)
+        } else if hasImage {
+            if let image = item.image,
+               let swiftImage = CNImage.deserialize(image)
+            {
+                swiftImage
+            }
+        }
+    }
+
+    private func menuItems(_ items: [CNMenuItemModel]) -> AnyView {
         AnyView(
-            ForEach(items, id: \ .identifier) { item in
+            ForEach(items, id: \.identifier) { item in
                 if item.separator {
                     Divider()
                 } else if let submenu = item.submenu {
-                    Menu(item.title) {
+                    Menu {
                         menuItems(submenu)
+                    } label: {
+                        rowView(for: item)
                     }
                     .disabled(!item.enabled)
                 } else {

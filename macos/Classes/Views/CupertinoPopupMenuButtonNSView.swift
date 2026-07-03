@@ -41,7 +41,7 @@ class CupertinoPopupMenuButtonNSView: NSView {
         var buttonIconPalette: [NSNumber] = []
         var transparentOverlay = false
 
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             if let t = dict["transparentOverlay"] as? NSNumber { transparentOverlay = t.boolValue }
             if let t = dict["buttonTitle"] as? String { title = t }
             if let s = dict["buttonIconName"] as? String { iconName = s }
@@ -166,7 +166,7 @@ class CupertinoPopupMenuButtonNSView: NSView {
                 let s = self.button.intrinsicContentSize
                 result(["width": Double(s.width), "height": Double(s.height)])
             case "setItems":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.labels = (args["labels"] as? [String]) ?? []
                     self.symbols = (args["sfSymbols"] as? [String]) ?? []
                     self.dividers = ((args["isDivider"] as? [NSNumber]) ?? []).map { $0.boolValue }
@@ -181,7 +181,7 @@ class CupertinoPopupMenuButtonNSView: NSView {
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing items", details: nil)) }
             case "setStyle":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if #available(macOS 10.14, *), let n = args["tint"] as? NSNumber {
                         let color = Self.colorFromARGB(n.intValue)
                         if ["filled", "borderedProminent", "prominentGlass"].contains(buttonStyle) {
@@ -210,7 +210,7 @@ class CupertinoPopupMenuButtonNSView: NSView {
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
             case "setButtonIcon":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let name = args["buttonIconName"] as? String, var image = NSImage(systemSymbolName: name, accessibilityDescription: nil) {
                         if #available(macOS 12.0, *), let sz = args["buttonIconSize"] as? NSNumber {
                             let cfg = NSImage.SymbolConfiguration(pointSize: CGFloat(truncating: sz), weight: .regular)
@@ -247,17 +247,17 @@ class CupertinoPopupMenuButtonNSView: NSView {
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing icon args", details: nil)) }
             case "setBrightness":
-                if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
+                if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["isDark"] as? NSNumber)?.boolValue {
                     self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
             case "setButtonTitle":
-                if let args = call.arguments as? [String: Any], let t = args["title"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let t = args["title"] as? String {
                     self.button.title = t
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing title", details: nil)) }
             case "setPressed":
-                if let args = call.arguments as? [String: Any], let p = args["pressed"] as? NSNumber {
+                if let args = CNChannelSerialization.asDict(call.arguments), let p = args["pressed"] as? NSNumber {
                     self.alphaValue = p.boolValue ? 0.7 : 1.0
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing pressed", details: nil)) }

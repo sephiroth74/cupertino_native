@@ -38,7 +38,7 @@ class CupertinoPathControlNSView: NSView {
         var allowedTypes: [String] = []
         var editable = true
 
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             if let v = dict["isDirectory"] as? NSNumber { isDirectory = v.boolValue }
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
             if let e = dict["enabled"] as? NSNumber { enabled = e.boolValue }
@@ -116,7 +116,7 @@ class CupertinoPathControlNSView: NSView {
                 let s = self.pathControl.intrinsicContentSize
                 result(["width": Double(s.width), "height": Double(s.height)])
             case "setStyle":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let n = args["tint"] as? NSNumber {
                         let color = ColorUtils.colorFromARGB(n.intValue)
                         // self.pathControl.tint = color
@@ -138,7 +138,7 @@ class CupertinoPathControlNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
                 }
             case "setControlSize":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let cs = args["controlSize"] as? String
                 {
                     self.currentPathSize = cs
@@ -165,7 +165,7 @@ class CupertinoPathControlNSView: NSView {
                     )
                 }
             case "setPath":
-                if let args = call.arguments as? [String: Any], let path = args["path"] as? String,
+                if let args = CNChannelSerialization.asDict(call.arguments), let path = args["path"] as? String,
                    let isDirectory = args["isDirectory"] as? Bool
                 {
                     self.currentPath = path
@@ -176,7 +176,7 @@ class CupertinoPathControlNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing path", details: nil))
                 }
             case "setEnabled":
-                if let args = call.arguments as? [String: Any], let e = args["enabled"] as? NSNumber {
+                if let args = CNChannelSerialization.asDict(call.arguments), let e = args["enabled"] as? NSNumber {
                     self.isEnabled = e.boolValue
                     self.pathControl.isEnabled = self.isEnabled
                     result(nil)
@@ -184,7 +184,7 @@ class CupertinoPathControlNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
                 }
             case "setBrightness":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["isDark"] as? NSNumber)?.boolValue
                 {
                     self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
@@ -193,7 +193,7 @@ class CupertinoPathControlNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
                 }
             case "setAllowedTypes":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let at = args["allowedTypes"] as? [String]
                 {
                     self.currentAllowedTypes = at
@@ -207,7 +207,7 @@ class CupertinoPathControlNSView: NSView {
                     )
                 }
             case "setEditable":
-                if let args = call.arguments as? [String: Any], let e = args["editable"] as? NSNumber {
+                if let args = CNChannelSerialization.asDict(call.arguments), let e = args["editable"] as? NSNumber {
                     self.currentEditable = e.boolValue
                     self.pathControl.isEditable = self.currentEditable
                     result(nil)

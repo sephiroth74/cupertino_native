@@ -22,7 +22,7 @@ class CupertinoPickerNSView: NSView {
 
         var selectedIndex = 0
 
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             if let arr = dict["items"] as? [[String: Any]] { items = arr }
             if let lbl = dict["label"] as? String { label = lbl }
             if let sublbl = dict["sublabel"] as? String { sublabel = sublbl }
@@ -58,26 +58,26 @@ class CupertinoPickerNSView: NSView {
 
                 result(["width": size.width, "height": size.height])
             case "setSelectedIndex":
-                if let args = call.arguments as? [String: Any], let idx = (args["index"] as? NSNumber)?.intValue {
+                if let args = CNChannelSerialization.asDict(call.arguments), let idx = (args["index"] as? NSNumber)?.intValue {
                     self.selection = idx
                     self.createPickerContent()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing index", details: nil)) }
             case "setEnabled":
-                if let args = call.arguments as? [String: Any], let e = (args["enabled"] as? NSNumber)?.boolValue {
+                if let args = CNChannelSerialization.asDict(call.arguments), let e = (args["enabled"] as? NSNumber)?.boolValue {
                     self.enabled = e
                     self.createPickerContent()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil)) }
             case "setBrightness":
-                if let args = call.arguments as? [String: Any], let isDark = (args["isDark"] as? NSNumber)?.boolValue {
+                if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["isDark"] as? NSNumber)?.boolValue {
                     self.isDark = isDark
                     self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     self.createPickerContent()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
             case "setStyle":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let tint = args["tint"] as? NSNumber {
                         self.tintColor = ColorUtils.colorFromARGB(tint.intValue)
                     }
@@ -85,19 +85,19 @@ class CupertinoPickerNSView: NSView {
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
             case "setControlSize":
-                if let args = call.arguments as? [String: Any], let sizeName = args["controlSize"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let sizeName = args["controlSize"] as? String {
                     self.controlSize = sizeName
                     self.createPickerContent()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing controlSize", details: nil)) }
             case "setPickerStyle":
-                if let args = call.arguments as? [String: Any], let styleName = args["pickerStyle"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let styleName = args["pickerStyle"] as? String {
                     self.pickerStyleName = styleName
                     self.createPickerContent()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing pickerStyle", details: nil)) }
             case "setAsList":
-                if let args = call.arguments as? [String: Any], let displayAsList = (args["asList"] as? NSNumber)?.boolValue {
+                if let args = CNChannelSerialization.asDict(call.arguments), let displayAsList = (args["asList"] as? NSNumber)?.boolValue {
                     self.asList = displayAsList
                     self.createPickerContent()
                     result(nil)
@@ -204,26 +204,26 @@ struct PickerContent: View {
         )
 
         let pickerBase = Picker(selection: selectionBinding) {
-                ForEach(model.items.indices, id: \.self) { index in
-                    let item = model.items[index]
-                    itemView(for: item)
-                        .tag(index)
-                }
-            } label: {
-                if let label = model.label {
-                    Text(label)
-                    if let sublabel = model.sublabel {
-                        Text(sublabel)
-                    }
+            ForEach(model.items.indices, id: \.self) { index in
+                let item = model.items[index]
+                itemView(for: item)
+                    .tag(index)
+            }
+        } label: {
+            if let label = model.label {
+                Text(label)
+                if let sublabel = model.sublabel {
+                    Text(sublabel)
                 }
             }
-            .controlSize(model.controlSize)
-            .onGeometryChange(for: CGSize.self) { proxy in
-                proxy.size
-            } action: { newValue in
-                reportMeasuredSize(newValue, fromListContainer: model.label != nil)
-            }
-            .disabled(!model.enabled)
+        }
+        .controlSize(model.controlSize)
+        .onGeometryChange(for: CGSize.self) { proxy in
+            proxy.size
+        } action: { newValue in
+            reportMeasuredSize(newValue, fromListContainer: model.label != nil)
+        }
+        .disabled(!model.enabled)
 
         let picker = applyPickerStyle(to: pickerBase)
 

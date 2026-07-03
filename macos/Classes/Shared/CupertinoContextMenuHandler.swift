@@ -170,10 +170,6 @@ final class CupertinoContextMenuHandler: NSObject {
                 }
             }
 
-            if let image = item["image"] as? [String: Any] {
-                menuItem.image = CupertinoImageDeserializer.deserialize(dict: image)
-            }
-
             if let submenu = item["submenu"] as? [String: Any] {
                 menuItem.submenu = deserializeMenu(dict: submenu)
             }

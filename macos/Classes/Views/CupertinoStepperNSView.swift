@@ -23,7 +23,7 @@ class CupertinoStepperNSView: NSView {
         var isDark = false
         var controlSize: NSControl.ControlSize = .regular
 
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             if let v = dict["value"] as? NSNumber { initialValue = v.doubleValue }
             if let v = dict["min"] as? NSNumber { minValue = v.doubleValue }
             if let v = dict["max"] as? NSNumber { maxValue = v.doubleValue }
@@ -69,7 +69,7 @@ class CupertinoStepperNSView: NSView {
                 let size = stepper.intrinsicContentSize
                 result(["width": size.width, "height": size.height])
             case "setValue":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.doubleValue
                 {
                     if value >= stepper.minValue, value <= stepper.maxValue {
@@ -86,7 +86,7 @@ class CupertinoStepperNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setRange":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let min = (args["min"] as? NSNumber)?.doubleValue,
                    let max = (args["max"] as? NSNumber)?.doubleValue
                 {
@@ -99,7 +99,7 @@ class CupertinoStepperNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing min/max", details: nil))
                 }
             case "setIncrement":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let increment = (args["value"] as? NSNumber)?.doubleValue
                 {
                     stepper.increment = increment
@@ -108,7 +108,7 @@ class CupertinoStepperNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setIsEnabled":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let enabled = (args["value"] as? NSNumber)?.boolValue
                 {
                     stepper.isEnabled = enabled
@@ -117,7 +117,7 @@ class CupertinoStepperNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setIsAutorepeat":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let isAutorepeat = (args["value"] as? NSNumber)?.boolValue
                 {
                     stepper.autorepeat = isAutorepeat
@@ -126,7 +126,7 @@ class CupertinoStepperNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setValueWraps":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let valueWraps = (args["value"] as? NSNumber)?.boolValue
                 {
                     stepper.valueWraps = valueWraps
@@ -135,7 +135,7 @@ class CupertinoStepperNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setIsDark":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["value"] as? NSNumber)?.boolValue
                 {
                     stepper.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
@@ -144,7 +144,7 @@ class CupertinoStepperNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setControlSize":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let size = args["value"] as? String
                 {
                     stepper.controlSize = ControlSizeUtils.controlSizeFromString(size)

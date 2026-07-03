@@ -24,7 +24,7 @@ class CupertinoButtonNSView: NSView {
         var imageScale = "medium"
         var symbolRenderingMode: SymbolRenderingMode? = nil
 
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             if let t = dict["buttonTitle"] as? String { title = t }
             if let s = dict["buttonIconName"] as? String { iconName = s }
             if let bs = dict["buttonStyle"] as? String { buttonStyle = bs.toButtonStyle() }
@@ -88,7 +88,7 @@ class CupertinoButtonNSView: NSView {
                 let s = self.hostingController.view.fittingSize
                 result(["width": Double(s.width), "height": Double(s.height)])
             case "setStyle":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let n = args["tint"] as? NSNumber {
                         self.model.tint = n.intValue.toARGB()
                     }
@@ -103,35 +103,35 @@ class CupertinoButtonNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
                 }
             case "setControlSize":
-                if let args = call.arguments as? [String: Any], let cs = args["controlSize"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let cs = args["controlSize"] as? String {
                     self.model.controlSize = cs.toControlSize() ?? .regular
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing control size", details: nil))
                 }
             case "setImageScale":
-                if let args = call.arguments as? [String: Any], let iscale = args["imageScale"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let iscale = args["imageScale"] as? String {
                     self.model.imageScale = iscale
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing image scale", details: nil))
                 }
             case "setButtonTitle":
-                if let args = call.arguments as? [String: Any], let t = args["title"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let t = args["title"] as? String {
                     self.model.title = t
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing title", details: nil))
                 }
             case "setEnabled":
-                if let args = call.arguments as? [String: Any], let e = args["enabled"] as? NSNumber {
+                if let args = CNChannelSerialization.asDict(call.arguments), let e = args["enabled"] as? NSNumber {
                     self.model.isEnabled = e.boolValue
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
                 }
             case "setButtonIcon":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let name = args["buttonIconName"] as? String {
                         self.model.iconName = name
                     }
@@ -143,7 +143,7 @@ class CupertinoButtonNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing icon args", details: nil))
                 }
             case "setBrightness":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["isDark"] as? NSNumber)?.boolValue
                 {
                     self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
@@ -152,7 +152,7 @@ class CupertinoButtonNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
                 }
             case "setPressed":
-                if let args = call.arguments as? [String: Any], let p = args["pressed"] as? NSNumber {
+                if let args = CNChannelSerialization.asDict(call.arguments), let p = args["pressed"] as? NSNumber {
                     self.model.isPressed = p.boolValue
                     result(nil)
                 } else {

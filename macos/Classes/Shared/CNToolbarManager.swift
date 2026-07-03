@@ -6,6 +6,7 @@ import SwiftUI
 
 enum CNToolbarItemKind: String {
     case button
+    case menuButton
     case picker
     case toggle
 }
@@ -38,6 +39,9 @@ struct CNToolbarItemModel {
     let isOn: Bool? // For toggle items (current state)
     let toggleStyle: String? // For toggle items (switch, button, automatic)
     let controlSize: ControlSize // For toggle items (mini, small, regular, large)
+    let menuItems: [CNMenuItemModel]? // For menuButton items
+    let menuButtonImage: [String: Any]? // For menuButton items
+    let menuStyle: String? // For menuButton items
 }
 
 extension CNToolbarItemModel: Equatable {
@@ -131,13 +135,11 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
     // MARK: - Parsing
 
     private func parseToolbarItems(_ raw: Any?) -> [CNToolbarItemModel] {
-        guard let list = raw as? [Any] else {
-            return []
-        }
+        let list = CNChannelSerialization.asArray(raw)
 
         var parsed: [CNToolbarItemModel] = []
         for item in list {
-            guard let dict = item as? [String: Any] else { continue }
+            guard let dict = CNChannelSerialization.asDict(item) else { continue }
 
             guard let id = dict["id"] as? String, !id.isEmpty else { continue }
 
@@ -170,7 +172,36 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     pickerStyle: nil,
                     isOn: nil,
                     toggleStyle: nil,
-                    controlSize: controlSize
+                    controlSize: controlSize,
+                    menuItems: nil,
+                    menuButtonImage: nil,
+                    menuStyle: nil
+                ))
+            } else if kind == "menuButton" {
+                let label = dict["label"] as? String
+                let image = dict["image"] as? [String: Any]
+                let menuStyle = (dict["menuStyle"] as? String) ?? "automatic"
+                let menuItems = parseCNMenuItems(dict["menu"])
+
+                parsed.append(CNToolbarItemModel(
+                    id: id,
+                    kind: "menuButton",
+                    label: label,
+                    placement: placement,
+                    systemSymbolName: nil,
+                    disabled: disabled,
+                    tint: tint,
+                    buttonStyle: nil,
+                    children: nil,
+                    items: nil,
+                    selectedValue: nil,
+                    pickerStyle: nil,
+                    isOn: nil,
+                    toggleStyle: nil,
+                    controlSize: controlSize,
+                    menuItems: menuItems,
+                    menuButtonImage: image,
+                    menuStyle: menuStyle
                 ))
             } else if kind == "picker" {
                 // Parse picker item
@@ -194,7 +225,10 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     pickerStyle: pickerStyle,
                     isOn: nil,
                     toggleStyle: nil,
-                    controlSize: controlSize
+                    controlSize: controlSize,
+                    menuItems: nil,
+                    menuButtonImage: nil,
+                    menuStyle: nil
                 ))
             } else if kind == "toggle" {
                 // Parse toggle item
@@ -218,7 +252,10 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     pickerStyle: nil,
                     isOn: isOn,
                     toggleStyle: toggleStyle,
-                    controlSize: controlSize
+                    controlSize: controlSize,
+                    menuItems: nil,
+                    menuButtonImage: nil,
+                    menuStyle: nil
                 ))
             } else {
                 // Parse button item
@@ -241,7 +278,10 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     pickerStyle: nil,
                     isOn: nil,
                     toggleStyle: nil,
-                    controlSize: controlSize
+                    controlSize: controlSize,
+                    menuItems: nil,
+                    menuButtonImage: nil,
+                    menuStyle: nil
                 ))
             }
         }
@@ -360,12 +400,62 @@ struct DynamicToolbarContent: ToolbarContent {
                             buildPickerMenu(for: child, options: child.items ?? [])
                         } else if child.kind == "toggle" {
                             buildToggleControl(for: child)
+                        } else if child.kind == "menuButton" {
+                            buildMenuButton(for: child)
                         } else {
                             buildButton(for: child)
                         }
                     }
                 }
             }
+        }
+    }
+
+    private func buildMenuButton(for item: CNToolbarItemModel) -> some View {
+        let menu = Menu {
+            CNMenuEntriesView(items: item.menuItems ?? []) { identifier in
+                onEvent(["id": item.id, "type": "menuButtonItemSelected", "identifier": identifier])
+            }
+        } label: {
+            menuButtonLabel(for: item)
+        }
+        .disabled(item.disabled)
+        .foregroundColor(getTintColor(item))
+        .controlSize(item.controlSize)
+
+        let style = item.menuStyle ?? "automatic"
+        switch style {
+        case "button":
+            return AnyView(menu.menuStyle(ButtonMenuStyle()))
+        case "borderlessButton":
+            return AnyView(menu.menuStyle(BorderlessButtonMenuStyle()))
+        case "borderedButton":
+            return AnyView(menu.menuStyle(BorderedButtonMenuStyle()))
+        default:
+            return AnyView(menu.menuStyle(DefaultMenuStyle()))
+        }
+    }
+
+    @ViewBuilder
+    private func menuButtonLabel(for item: CNToolbarItemModel) -> some View {
+        if let image = item.menuButtonImage,
+           let label = item.label,
+           !label.isEmpty,
+           let swiftImage = CNImage.deserialize(image)
+        {
+            Label {
+                Text(label)
+            } icon: {
+                swiftImage
+            }
+        } else if let image = item.menuButtonImage,
+                  let swiftImage = CNImage.deserialize(image)
+        {
+            swiftImage
+        } else if let label = item.label, !label.isEmpty {
+            Text(label)
+        } else {
+            Text("Menu")
         }
     }
 

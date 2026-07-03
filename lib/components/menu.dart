@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cupertino_native/channel/channel_serialization.dart';
 import 'package:cupertino_native/components/image.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
@@ -9,7 +10,7 @@ import 'package:flutter/widgets.dart';
 /// This model is shared by other menu-based controls and supports nested
 /// submenus, separators, and optional icon/subtitle metadata.
 // ignore: must_be_immutable
-class CNMenu extends ChangeNotifier with EquatableMixin {
+class CNMenu extends ChangeNotifier with EquatableMixin implements CNChannelSerializable {
   /// Creates a menu with the provided [items].
   CNMenu({required this.items}) {
     // Listen to all items for changes
@@ -38,9 +39,12 @@ class CNMenu extends ChangeNotifier with EquatableMixin {
   @override
   List<Object?> get props => [items];
 
+  @override
+  Map<String, dynamic> toChannelMap(BuildContext context) => toMap(context);
+
   /// Serializes the menu to JSON for platform channel communication.
   Map<String, dynamic> toMap(BuildContext context) {
-    return {'items': items.map((item) => item.toMap(context)).toList()};
+    return {'items': CNChannelSerialization.objects(items, context)};
   }
 
   String toJson(BuildContext context) {
@@ -84,7 +88,7 @@ enum CNMenuItemState {
 /// an optional symbol configuration, and an optional submenu.
 /// It also has a state (on, off, mixed) and an enabled/disabled status.
 // ignore: must_be_immutable
-class CNMenuItem extends ChangeNotifier with EquatableMixin {
+class CNMenuItem extends ChangeNotifier with EquatableMixin implements CNChannelSerializable {
   /// Creates a new CNMenuItem with the given properties. The [title] is required, while other properties are optional.
   /// The [state] defaults to [CNMenuItemState.off], and [enabled] defaults to true.
   /// The [tag] can be used to store an arbitrary integer value for identification purposes.
@@ -92,7 +96,6 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
     required this.title,
     this.subtitle,
     this.tag,
-    this.systemImageName,
     this.image,
     this.submenu,
     this.state = CNMenuItemState.off,
@@ -104,7 +107,6 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
   CNMenuItem.separator()
     : title = '',
       subtitle = null,
-      systemImageName = null,
       tag = null,
       image = null,
       submenu = null,
@@ -131,9 +133,6 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
   /// An optional subtitle displayed below the primary title.
   final String? subtitle;
 
-  /// Optional system icon name, e.g. `book`.
-  final String? systemImageName;
-
   /// An optional integer tag that can be used to identify the item.
   final int? tag;
 
@@ -145,7 +144,10 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
   final int _identifier;
 
   @override
-  List<Object?> get props => [_identifier, isSeparator, state, tag, title, subtitle, systemImageName, image, submenu, enabled];
+  List<Object?> get props => [_identifier, isSeparator, state, tag, title, subtitle, image, submenu, enabled];
+
+  @override
+  Map<String, dynamic> toChannelMap(BuildContext context) => toMap(context);
 
   /// A unique identifier for this menu item, used for platform communication. It is generated automatically and should not be set manually.
   String get identifier => isSeparator ? '' : 'menuItem_$_identifier';
@@ -161,13 +163,12 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin {
       'separator': false,
       'title': title,
       'subtitle': subtitle,
-      'systemImageName': systemImageName,
       'tag': tag,
       'identifier': 'menuItem_$_identifier',
       'state': state.name,
-      'image': image?.toMap(context),
+      'image': CNChannelSerialization.object(image, context),
       'enabled': enabled,
-      'submenu': submenu?.toMap(context),
+      'submenu': CNChannelSerialization.object(submenu, context),
     };
   }
 

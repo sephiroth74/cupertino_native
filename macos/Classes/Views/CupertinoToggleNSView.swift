@@ -19,7 +19,7 @@ class CupertinoToggleNSView: NSView {
         var controlSize = "regular"
         var tint: NSColor? = nil
 
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             if let v = dict["value"] as? NSNumber { initialValue = v.boolValue }
             if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
             if let v = dict["label"] as? String { label = v }
@@ -74,7 +74,7 @@ class CupertinoToggleNSView: NSView {
                 let size = self.hostingController.view.intrinsicContentSize
                 result(["width": size.width, "height": size.height])
             case "setValue":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
                     model.setValueFromDart(value)
@@ -83,7 +83,7 @@ class CupertinoToggleNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setIsEnabled":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let enabled = (args["value"] as? NSNumber)?.boolValue
                 {
                     model.enabled = enabled
@@ -92,14 +92,14 @@ class CupertinoToggleNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
                 }
             case "setControlSize":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     model.controlSize = (args["controlSize"] as? String) ?? "regular"
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing controlSize", details: nil))
                 }
             case "setTint":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let tintValue = args["tint"] as? Int
                 {
                     let ns = ColorUtils.colorFromARGB(tintValue)
@@ -109,7 +109,7 @@ class CupertinoToggleNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing tint", details: nil))
                 }
             case "setBrightness":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["isDark"] as? NSNumber)?.boolValue
                 {
                     if isDark {

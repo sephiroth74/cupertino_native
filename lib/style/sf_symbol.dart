@@ -15,17 +15,19 @@ enum CNSymbolRenderingMode {
   multicolor,
 }
 
+/// Color treatment mode for SF Symbols.
+enum CNSymbolColorRenderingMode {
+  /// Uniform color interpolation.
+  flat,
+
+  /// Gradient-based interpolation when supported.
+  gradient,
+}
+
 /// Describes an SF Symbol to render natively.
 class CNSymbol {
   /// Creates a symbol description for native rendering.
-  const CNSymbol(
-    this.name, {
-    this.size = 24.0,
-    this.color,
-    this.paletteColors,
-    this.mode,
-    this.gradient,
-  });
+  const CNSymbol(this.name, {this.size = 24.0, this.color, this.paletteColors, this.mode, this.gradient});
 
   /// Preferred icon color (for monochrome/hierarchical modes).
   final Color? color; // preferred icon color (monochrome/hierarchical)

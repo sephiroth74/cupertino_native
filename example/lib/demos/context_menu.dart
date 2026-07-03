@@ -46,9 +46,8 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
           title: 'Delete',
           image: CNImage(
             systemSymbolName: 'trash',
-            symbolConfiguration: CNSymbolConfiguration.hierarchical(
-              CupertinoColors.systemRed,
-            ),
+            symbolRenderingMode: CNSymbolRenderingMode.hierarchical,
+            foregroundStyleColors: const [CupertinoColors.systemRed],
           ),
         ),
       ],
@@ -116,9 +115,7 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const Text(
-              'Right-click inside the card to open the native context menu.',
-            ),
+            const Text('Right-click inside the card to open the native context menu.'),
             const SizedBox(height: 12),
             CNContextMenuRegion(
               menu: menu,
@@ -138,13 +135,7 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Project Item',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    Text('Project Item', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     SizedBox(height: 8),
                     Text('Use secondary click to open actions.'),
                   ],
@@ -172,17 +163,9 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Editor Area',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    Text('Editor Area', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     SizedBox(height: 8),
-                    Text(
-                      'Right-click to test a multi-level context menu without icons.',
-                    ),
+                    Text('Right-click to test a multi-level context menu without icons.'),
                   ],
                 ),
               ),

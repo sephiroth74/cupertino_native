@@ -18,7 +18,7 @@ class CupertinoColorWellNSView: NSView {
         colorWell = NSColorWell()
         super.init(frame: .zero)
 
-        if let args = args as? [String: Any] {
+        if let args = CNChannelSerialization.asDict(args) {
             parseArgs(args)
         }
         setupColorWell()
@@ -90,7 +90,7 @@ class CupertinoColorWellNSView: NSView {
                 let s = self.colorWell!.intrinsicContentSize
                 result(["width": Double(s.width), "height": Double(s.height)])
             case "setStyle":
-                if let args = call.arguments as? [String: Any], let s = args["style"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let s = args["style"] as? String {
                     self.colorWell!.colorWellStyle = Self.parseStyle(s)
                     result(nil)
                 } else {
@@ -98,7 +98,7 @@ class CupertinoColorWellNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
                 }
             case "setBrightness":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["isDark"] as? NSNumber)?.boolValue
                 {
                     self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
@@ -108,7 +108,7 @@ class CupertinoColorWellNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
                 }
             case "setColor":
-                if let args = call.arguments as? [String: Any], let c = args["color"] as? NSNumber {
+                if let args = CNChannelSerialization.asDict(call.arguments), let c = args["color"] as? NSNumber {
                     self.color = ColorUtils.colorFromARGB(c.intValue)
                     self.colorWell!.color = self.color
                     result(nil)
@@ -117,7 +117,7 @@ class CupertinoColorWellNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing color", details: nil))
                 }
             case "setSupportsAlpha":
-                if let args = call.arguments as? [String: Any], let s = args["supportsAlpha"] as? Bool {
+                if let args = CNChannelSerialization.asDict(call.arguments), let s = args["supportsAlpha"] as? Bool {
                     self.supportsAlpha = s
                     self.colorWell!.supportsAlpha = s
                     result(nil)

@@ -276,7 +276,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                 result(["width": Double(size.width), "height": Double(size.height)])
 
             case "setText":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = args["value"] as? String
                 {
                     self.isUpdatingFromDart = true
@@ -288,7 +288,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                 }
 
             case "setItems":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let items = args["value"] as? [String]
                 {
                     let currentText = self.comboBox.stringValue
@@ -308,7 +308,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                 }
 
             case "setBehavior":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = args["value"] as? String
                 {
                     self.applyBehavior(value)
@@ -318,7 +318,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                 }
 
             case "setPlaceholder":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.comboBox.placeholderString = args["value"] as? String
                     result(nil)
                 } else {
@@ -326,7 +326,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                 }
 
             case "setTextColor":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let value = args["value"] as? Int {
                         self.comboBox.textColor = ColorUtils.colorFromARGB(value)
                     } else {
@@ -346,7 +346,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                 result(nil)
 
             case "setFont":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let fontDict = args["value"] as? [String: Any],
                        let font = FontUtils.fontFromDictionary(fontDict)
                     {
@@ -365,7 +365,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                 result(nil)
 
             case "setEnabled":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.comboBox.isEnabled = value
@@ -375,7 +375,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                 }
 
             case "setControlSize":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = args["value"] as? String
                 {
                     self.comboBox.controlSize = Self.parseControlSize(value)
@@ -386,7 +386,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                 }
 
             case "setIsDark":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.appearance = NSAppearance(named: value ? .darkAqua : .aqua)

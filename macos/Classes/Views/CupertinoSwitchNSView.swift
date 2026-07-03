@@ -16,7 +16,7 @@ class CupertinoSwitchNSView: NSView {
         var isDark = false
         var initialTint: NSColor? = nil
         var controlSize: ControlSize = .regular
-        if let dict = args as? [String: Any] {
+        if let dict = CNChannelSerialization.asDict(args) {
             if let v = dict["value"] as? NSNumber { initialValue = v.boolValue }
             if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
@@ -68,7 +68,7 @@ class CupertinoSwitchNSView: NSView {
                 let size = self.hostingController.view.intrinsicContentSize
                 result(["width": size.width, "height": size.height])
             case "setValue":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
                     model.setValueFromDart(value)
@@ -77,7 +77,7 @@ class CupertinoSwitchNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setIsEnabled":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let enabled = (args["value"] as? NSNumber)?.boolValue
                 {
                     model.enabled = enabled
@@ -86,7 +86,7 @@ class CupertinoSwitchNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
                 }
             case "setTint":
-                if let args = call.arguments as? [String: Any] {
+                if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let tintNum = args["value"] as? NSNumber {
                         let ns = ColorUtils.colorFromARGB(tintNum.intValue)
                         model.tintColor = Color(ns)
@@ -96,7 +96,7 @@ class CupertinoSwitchNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
                 }
             case "setIsDark":
-                if let args = call.arguments as? [String: Any],
+                if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["value"] as? NSNumber)?.boolValue
                 {
                     self.hostingController.view.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
@@ -105,7 +105,7 @@ class CupertinoSwitchNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
                 }
             case "setControlSize":
-                if let args = call.arguments as? [String: Any], let sizeStr = args["value"] as? String {
+                if let args = CNChannelSerialization.asDict(call.arguments), let sizeStr = args["value"] as? String {
                     switch sizeStr {
                     case "mini": controlSize = .mini
                     case "small": controlSize = .small
