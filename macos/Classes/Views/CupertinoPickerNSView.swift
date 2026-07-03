@@ -14,7 +14,7 @@ class CupertinoPickerNSView: NSView {
     private var isDark: Bool = false
     private var tintColor: NSColor?
     private var controlSize: String = "regular"
-    private var pickerStyle: any PickerStyle = DefaultPickerStyle()
+    private var pickerStyleName: String = "automatic"
     private var asList: Bool = false
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
@@ -30,7 +30,7 @@ class CupertinoPickerNSView: NSView {
             if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
             if let size = dict["controlSize"] as? String { controlSize = size }
-            if let style = dict["pickerStyle"] as? String { pickerStyle = style.toPickerStyle() }
+            if let s = dict["pickerStyle"] as? String { pickerStyleName = s }
             if let displayAsList = dict["asList"] as? NSNumber { asList = displayAsList.boolValue }
             if let style = dict["style"] as? [String: Any] {
                 if let tint = style["tint"] as? NSNumber {
@@ -92,7 +92,7 @@ class CupertinoPickerNSView: NSView {
                 } else { result(FlutterError(code: "bad_args", message: "Missing controlSize", details: nil)) }
             case "setPickerStyle":
                 if let args = call.arguments as? [String: Any], let styleName = args["pickerStyle"] as? String {
-                    self.pickerStyle = styleName.toPickerStyle()
+                    self.pickerStyleName = styleName
                     self.createPickerContent()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing pickerStyle", details: nil)) }
@@ -115,6 +115,8 @@ class CupertinoPickerNSView: NSView {
     private func createPickerContent() {
         hostingView?.removeFromSuperview()
 
+        print("pickerStyle: \(pickerStyleName)")
+
         let pickerModel = PickerModel(
             items: items,
             label: label,
@@ -122,8 +124,8 @@ class CupertinoPickerNSView: NSView {
             selectedIndex: selection,
             enabled: enabled,
             tintColor: tintColor,
-            controlSize: SwiftUtils.controlSizeFromString(controlSize),
-            pickerStyle: pickerStyle,
+            controlSize: controlSize.toControlSize() ?? .regular,
+            pickerStyleName: pickerStyleName,
             displayAsList: asList,
             onSelectionChange: { [weak self] newIndex in
                 NSLog("Picker selection changed to index: \(newIndex)")
@@ -166,7 +168,7 @@ struct PickerModel {
     let enabled: Bool
     let tintColor: NSColor?
     let controlSize: ControlSize
-    let pickerStyle: any PickerStyle
+    let pickerStyleName: String
     let displayAsList: Bool
     let onSelectionChange: (Int) -> Void
     let onSizeChange: (CGSize) -> Void
@@ -201,21 +203,20 @@ struct PickerContent: View {
             }
         )
 
-        let picker = Picker(selection: selectionBinding) {
-            ForEach(model.items.indices, id: \.self) { index in
-                let item = model.items[index]
-                itemView(for: item)
-                    .tag(index)
-            }
-        } label: {
-            if let label = model.label {
-                Text(label)
-                if let sublabel = model.sublabel {
-                    Text(sublabel)
+        let pickerBase = Picker(selection: selectionBinding) {
+                ForEach(model.items.indices, id: \.self) { index in
+                    let item = model.items[index]
+                    itemView(for: item)
+                        .tag(index)
+                }
+            } label: {
+                if let label = model.label {
+                    Text(label)
+                    if let sublabel = model.sublabel {
+                        Text(sublabel)
+                    }
                 }
             }
-        }
-        pickerStyle(model.pickerStyle)
             .controlSize(model.controlSize)
             .onGeometryChange(for: CGSize.self) { proxy in
                 proxy.size
@@ -223,6 +224,8 @@ struct PickerContent: View {
                 reportMeasuredSize(newValue, fromListContainer: model.label != nil)
             }
             .disabled(!model.enabled)
+
+        let picker = applyPickerStyle(to: pickerBase)
 
         let shouldUseListContainer = model.label != nil && model.displayAsList
 
@@ -261,29 +264,54 @@ struct PickerContent: View {
         }
 
         if let tintColor = model.tintColor {
-            let tintedPicker = picker.tint(Color(nsColor: tintColor))
+            let tintedPicker = AnyView(picker.tint(Color(nsColor: tintColor)))
             if shouldUseListContainer {
                 return AnyView(List {
                     tintedPicker
                 }.padding(0))
             } else {
-                return AnyView(tintedPicker)
+                return tintedPicker
             }
         } else {
+            let plainPicker = picker
             if shouldUseListContainer {
                 return AnyView(List {
-                    picker
+                    plainPicker
                 }.padding(0))
             }
 
-            return AnyView(picker)
+            return plainPicker
+        }
+    }
+
+    private func applyPickerStyle<V: View>(to picker: V) -> AnyView {
+        switch model.pickerStyleName {
+        case "segmented":
+            return AnyView(picker.pickerStyle(.segmented))
+        case "inline":
+            return AnyView(picker.pickerStyle(.inline))
+        case "menu":
+            return AnyView(picker.pickerStyle(.menu))
+        case "palette":
+            return AnyView(picker.pickerStyle(.palette))
+        case "radioGroup":
+            return AnyView(picker.pickerStyle(.radioGroup))
+        default:
+            return AnyView(picker.pickerStyle(.automatic))
         }
     }
 
     @ViewBuilder
     private func itemView(for item: [String: Any]) -> some View {
-        let type = item["type"] as? String ?? "text"
-        if type == "icon", let symbolName = item["symbolName"] as? String {
+        let hasText = item["text"] as? String != nil
+        let hasIcon = item["symbolName"] as? String != nil
+
+        if hasIcon && hasText {
+            HStack {
+                buildStyledImage(symbolName: item["symbolName"] as! String, from: item)
+                Text(item["text"] as? String ?? "")
+            }
+        } else if hasIcon, let symbolName = item["symbolName"] as? String {
             AnyView(buildStyledImage(symbolName: symbolName, from: item))
         } else {
             Text(item["text"] as? String ?? "")

@@ -1,5 +1,4 @@
 import 'package:cupertino_native/components/toggle.dart';
-import 'package:cupertino_native/model/control_size.dart';
 
 import 'toolbar_item.dart';
 
@@ -22,7 +21,7 @@ class CNToolbarToggleItem extends CNToolbarItem {
   /// This is NOT serialized - it's stored locally for event handling
   final void Function(bool)? onChanged;
 
-    /// Current on/off state
+  /// Current on/off state
   final bool isOn;
 
   /// Optional display label for this toggle

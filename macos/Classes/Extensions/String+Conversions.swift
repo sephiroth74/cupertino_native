@@ -2,7 +2,7 @@ import Swift
 import SwiftUI
 
 extension String {
-    func toPickerStyle() -> any PickerStyle {
+    func toPickerStyle() -> PickerStyle? {
         switch self {
         case "segmented":
             return SegmentedPickerStyle()

@@ -16,6 +16,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
   int _iconPickerIndex = 0;
   int _labelPickerIndex = 0;
   CNPickerStyle _pickerStyle = CNPickerStyle.radioGroup;
+  CNPickerStyle _pickerStyle2 = CNPickerStyle.radioGroup;
   int _shrinkWrappedPickerIndex = 0;
   final List<CNControlSize> _sizes = CNControlSize.values;
   int _sublabelPickerIndex = 0;
@@ -59,77 +60,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 48),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: CNPicker(
-                        items: CNPickerStyle.values.map((e) => CNPickerItem.text(e.name)).toList(),
-                        selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle),
-                        pickerStyle: CNPickerStyle.segmented,
-                        controlSize: _controlSize,
-                        onValueChanged: (i) => setState(() {
-                          _pickerStyle = CNPickerStyle.values[i];
-                        }),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 48),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: CNPicker(
-                        items: [
-                          CNPickerItem.icon(CNSymbol('square.split.2x1')),
-                          CNPickerItem.icon(CNSymbol('circle.inset.filled')),
-                          CNPickerItem.icon(CNSymbol('list.bullet')),
-                          CNPickerItem.icon(CNSymbol('gearshape')),
-                          CNPickerItem.icon(CNSymbol('rectangle.portrait')),
-                          CNPickerItem.icon(CNSymbol('paintpalette')),
-                        ],
-                        selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle),
-                        pickerStyle: CNPickerStyle.palette,
-                        color: CupertinoColors.systemCyan,
-                        enabled: false,
-                        controlSize: _controlSize,
-                        onValueChanged: (i) => setState(() {
-                          _pickerStyle = CNPickerStyle.values[i];
-                        }),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 48),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: CNPicker(
-                        label: 'Radio Group Picker',
-                        items: CNPickerStyle.values.map((e) => CNPickerItem.text(e.name)).toList(),
-                        selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle),
-                        pickerStyle: CNPickerStyle.radioGroup,
-                        controlSize: _controlSize,
-                        onValueChanged: (i) => setState(() {
-                          _pickerStyle = CNPickerStyle.values[i];
-                        }),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 48),
+              const SizedBox(height: 8),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -149,14 +80,87 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                         child: CNPicker(
                           label: 'Picker Style',
                           sublabel: 'Select Picker Style',
-                          items: CNPickerStyle.values.map((e) => CNPickerItem.text(e.name)).toList(),
+                          items: CNPickerStyle.values.map((e) {
+                            return CNPickerItem(e.name, icon: CNSymbol('circle.fill', color: CupertinoColors.systemBlue));
+                          }).toList(),
                           selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle),
-                          pickerStyle: CNPickerStyle.menu,
                           controlSize: _controlSize,
+                          pickerStyle: CNPickerStyle.menu,
                           onValueChanged: (i) => setState(() {
                             _pickerStyle = CNPickerStyle.values[i];
                           }),
                         ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 48),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: CNPicker(
+                        items: CNPickerStyle.values.map((e) => CNPickerItem.text(e.name)).toList(),
+                        selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle2),
+                        pickerStyle: _pickerStyle,
+                        controlSize: _controlSize,
+                        onValueChanged: (i) => setState(() {
+                          _pickerStyle2 = CNPickerStyle.values[i];
+                        }),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 48),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: CNPicker(
+                        items: [
+                          CNPickerItem.icon(CNSymbol('square.split.2x1')),
+                          CNPickerItem.icon(CNSymbol('circle.inset.filled')),
+                          CNPickerItem.icon(CNSymbol('list.bullet')),
+                          CNPickerItem.icon(CNSymbol('gearshape')),
+                          CNPickerItem.icon(
+                            CNSymbol('rectangle.portrait', mode: CNSymbolRenderingMode.hierarchical, color: MacOS26Colors.orange),
+                          ),
+                          CNPickerItem.icon(CNSymbol('paintpalette', color: MacOS26Colors.cyan)),
+                        ],
+                        selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle2),
+                        pickerStyle: _pickerStyle,
+                        color: CupertinoColors.systemCyan,
+                        controlSize: _controlSize,
+                        onValueChanged: (i) => setState(() {
+                          _pickerStyle2 = CNPickerStyle.values[i];
+                        }),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 48),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: CNPicker(
+                        label: 'Radio Group Picker',
+                        items: CNPickerStyle.values.map((e) => CNPickerItem.text(e.name)).toList(),
+                        selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle2),
+                        pickerStyle: _pickerStyle,
+                        controlSize: _controlSize,
+                        onValueChanged: (i) => setState(() {
+                          _pickerStyle2 = CNPickerStyle.values[i];
+                        }),
                       ),
                     ),
                   ),

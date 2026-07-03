@@ -125,7 +125,41 @@ class _DesktopDemoShell extends StatefulWidget {
 }
 
 class _DesktopDemoShellState extends State<_DesktopDemoShell> {
+  static const _entries = <_DemoEntry>[
+    _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
+    _DemoEntry('Slider', 'slider.horizontal.3', SliderDemoPage()),
+    _DemoEntry('Toggle', 'switch.2', ToggleDemo()),
+    _DemoEntry('Segmented Control', 'rectangle.split.3x1', SegmentedControlDemoPage()),
+    _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
+    _DemoEntry('TabView', 'rectangle.split.3x1', TabViewDemoPage()),
+    _DemoEntry('Icon', 'app', IconDemoPage()),
+    _DemoEntry('Image', 'photo', ImageDemoPage()),
+    _DemoEntry('Popup Menu Button', 'ellipsis.circle', PopupMenuButtonDemoPage()),
+    _DemoEntry('Menu Button', 'ellipsis.circle', MenuButtonDemoPage()),
+    _DemoEntry('Label', 'textformat', LabelDemoPage()),
+    _DemoEntry('Button', 'hand.tap', ButtonDemoPage()),
+    _DemoEntry('Color Well', 'paintpalette', ColorWellDemoPage()),
+    _DemoEntry('Path Control', 'folder', PathControlDemoPage()),
+    _DemoEntry('Progress Indicators', 'hourglass', ProgressIndicatorsPageDemo()),
+    _DemoEntry('Level Indicators', 'gauge', LevelIndicatorDemoPage()),
+    _DemoEntry('Steppers', 'plusminus', StepperDemoPage()),
+    _DemoEntry('Date Picker', 'calendar', DatePickerDemoPage()),
+    _DemoEntry('Search Field', 'magnifyingglass', SearchFieldDemoPage()),
+    _DemoEntry('Text Field', 'character.cursor.ibeam', TextFieldDemoPage()),
+    _DemoEntry('Secure Text Field', 'lock.shield', SecureTextFieldDemoPage()),
+    _DemoEntry('Text View / Text Area', 'text.justify.left', TextViewDemoPage()),
+    _DemoEntry('Combo Box', 'list.bullet.rectangle', ComboBoxDemoPage()),
+    _DemoEntry('Alert', 'exclamationmark.bubble', AlertDemoPage()),
+    _DemoEntry('Popover', 'rectangle.on.rectangle', PopoverDemoPage()),
+    _DemoEntry('Context Menu', 'ellipsis.rectangle', ContextMenuDemoPage()),
+    _DemoEntry('GroupBox', 'textformat', GroupBoxDemoPage()),
+    _DemoEntry('Sheet', 'square.and.line.vertical.and.square', SheetDemoPage()),
+    _DemoEntry('Split View', 'rectangle.split.2x1', SplitViewDemoPage()),
+    _DemoEntry('SwiftUI Toolbar', 'macwindow', SwiftUIToolbarDemo()),
+  ];
+
   String _searchQuery = '';
+  int _selectedIndex = 0;
   final CNMainWindowController _windowController = CNMainWindowController();
 
   @override
@@ -138,6 +172,11 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
   Widget build(BuildContext context) {
     final accentColor = widget.accentColor;
     final theme = CNTheme.of(context);
+    final search = _searchQuery.trim().toLowerCase();
+    final visibleEntries = search.isEmpty
+        ? _entries
+        : _entries.where((entry) => entry.title.toLowerCase().contains(search)).toList();
+    final selectedEntry = _entries[_selectedIndex];
 
     return CNMainWindow(
       controller: _windowController,
@@ -213,249 +252,19 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
                 backgroundColor: theme.canvasColor,
                 header: Text('Components'),
                 children: [
-                  CNListTile(
-                    title: Text('Theme Tokens'),
-                    leading: CNIcon(symbol: CNSymbol('paintbrush.pointed', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ThemeDemoPage()));
-                    },
-                  ),
-
-                  CNListTile(
-                    title: Text('Slider'),
-                    leading: CNIcon(symbol: CNSymbol('slider.horizontal.3', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const SliderDemoPage()));
-                    },
-                  ),
-
-                  CNListTile(
-                    title: Text('Toggle'),
-                    leading: CNIcon(symbol: CNSymbol('switch.2', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ToggleDemo()));
-                    },
-                  ),
-
-                  CNListTile(
-                    title: Text('Segmented Control (x)'),
-                    leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const SegmentedControlDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Picker'),
-                    leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1.fill', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const PickerDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('TabView'),
-                    leading: CNIcon(symbol: CNSymbol('rectangle.split.3x1', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const TabViewDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Icon'),
-                    leading: CNIcon(symbol: CNSymbol('app', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const IconDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Image'),
-                    leading: CNIcon(symbol: CNSymbol('photo', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ImageDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Popup Menu Button'),
-                    leading: CNIcon(symbol: CNSymbol('ellipsis.circle', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const PopupMenuButtonDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Menu Button'),
-                    leading: CNIcon(symbol: CNSymbol('ellipsis.circle', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const MenuButtonDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Label'),
-                    leading: CNIcon(symbol: CNSymbol('textformat', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const LabelDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Button'),
-                    leading: CNIcon(symbol: CNSymbol('hand.tap', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ButtonDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Color Well'),
-                    leading: CNIcon(symbol: CNSymbol('paintpalette', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ColorWellDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Path Control'),
-                    leading: CNIcon(symbol: CNSymbol('folder', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const PathControlDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Progress Indicators'),
-                    leading: CNIcon(symbol: CNSymbol('hourglass', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ProgressIndicatorsPageDemo()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Level Indicators'),
-                    leading: CNIcon(symbol: CNSymbol('gauge', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const LevelIndicatorDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Steppers'),
-                    leading: CNIcon(symbol: CNSymbol('plusminus', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const StepperDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Date Picker'),
-                    leading: CNIcon(symbol: CNSymbol('calendar', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const DatePickerDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Search Field'),
-                    leading: CNIcon(symbol: CNSymbol('magnifyingglass', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const SearchFieldDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Text Field'),
-                    leading: CNIcon(symbol: CNSymbol('character.cursor.ibeam', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const TextFieldDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Secure Text Field'),
-                    leading: CNIcon(symbol: CNSymbol('lock.shield', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const SecureTextFieldDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Text View / Text Area'),
-                    leading: CNIcon(symbol: CNSymbol('text.justify.left', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const TextViewDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Combo Box'),
-                    leading: CNIcon(symbol: CNSymbol('list.bullet.rectangle', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ComboBoxDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Alert'),
-                    leading: CNIcon(symbol: CNSymbol('exclamationmark.bubble', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const AlertDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Popover'),
-                    leading: CNIcon(symbol: CNSymbol('rectangle.on.rectangle', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const PopoverDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Context Menu'),
-                    leading: CNIcon(symbol: CNSymbol('ellipsis.rectangle', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const ContextMenuDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('GroupBox'),
-                    leading: CNIcon(symbol: CNSymbol('textformat', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const GroupBoxDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Sheet'),
-                    leading: CNIcon(symbol: CNSymbol('square.and.line.vertical.and.square', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const SheetDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('Split View'),
-                    leading: CNIcon(symbol: CNSymbol('rectangle.split.2x1', color: accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const SplitViewDemoPage()));
-                    },
-                  ),
-                  CNListTile(
-                    title: Text('SwiftUI Toolbar'),
-                    leading: CNIcon(symbol: CNSymbol('macwindow', color: widget.accentColor)),
-                    trailing: const CNListTileChevron(),
-                    onTap: () {
-                      Navigator.of(context).push(CNPageRoute(builder: (_) => const SwiftUIToolbarDemo()));
-                    },
-                  ),
+                  for (final entry in visibleEntries)
+                    CNListTile(
+                      title: Text(entry.title),
+                      leading: CNIcon(symbol: CNSymbol(entry.symbolName, color: accentColor)),
+                      trailing: _selectedIndex == _entries.indexOf(entry)
+                          ? const Text('✓', style: TextStyle(fontSize: 16))
+                          : const CNListTileChevron(),
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = _entries.indexOf(entry);
+                        });
+                      },
+                    ),
                 ],
               ),
             ],
@@ -475,64 +284,56 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
               const SizedBox(height: 4),
               Text('Sidebar destra: ${_windowController.isTrailingSidebarVisible ? 'aperta' : 'chiusa'}'),
               const SizedBox(height: 4),
+              Text('Selezione: ${selectedEntry.title}'),
+              const SizedBox(height: 4),
               Text('Search: ${_searchQuery.isEmpty ? '-' : _searchQuery}'),
             ],
           ),
         ),
       ),
-      child: HomePage(
-        isDarkMode: widget.isDarkMode,
-        accentColor: widget.accentColor,
-        onSelectAccentColor: widget.onSelectAccentColor,
+      child: IndexedStack(
+        index: _selectedIndex,
+        children: const [
+          ThemeDemoPage(),
+          SliderDemoPage(),
+          ToggleDemo(),
+          SegmentedControlDemoPage(),
+          PickerDemoPage(),
+          TabViewDemoPage(),
+          IconDemoPage(),
+          ImageDemoPage(),
+          PopupMenuButtonDemoPage(),
+          MenuButtonDemoPage(),
+          LabelDemoPage(),
+          ButtonDemoPage(),
+          ColorWellDemoPage(),
+          PathControlDemoPage(),
+          ProgressIndicatorsPageDemo(),
+          LevelIndicatorDemoPage(),
+          StepperDemoPage(),
+          DatePickerDemoPage(),
+          SearchFieldDemoPage(),
+          TextFieldDemoPage(),
+          SecureTextFieldDemoPage(),
+          TextViewDemoPage(),
+          ComboBoxDemoPage(),
+          AlertDemoPage(),
+          PopoverDemoPage(),
+          ContextMenuDemoPage(),
+          GroupBoxDemoPage(),
+          SheetDemoPage(),
+          SplitViewDemoPage(),
+          SwiftUIToolbarDemo(),
+        ],
       ),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.isDarkMode, required this.accentColor, required this.onSelectAccentColor});
+class _DemoEntry {
+  const _DemoEntry(this.title, this.symbolName, this.page);
 
-  final Color accentColor;
-  final bool isDarkMode;
-  final ValueChanged<Color> onSelectAccentColor;
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  @override
-  Widget build(BuildContext context) {
-    final theme = CNTheme.of(context);
-
-    debugPrint('HomePage build: isDarkMode=${widget.isDarkMode}, accentColor=${widget.accentColor}');
-
-    return Center(
-      child: CNMenuButton(
-        label: 'Select Accent Color',
-        systemImage: 'circle.fill',
-        tint: widget.accentColor,
-        symbolRenderingMode: CNSymbolRenderingMode.monochrome,
-        menu: CNMenu(
-          items: _systemColors
-              .map(
-                (e) => CNMenuItem(
-                  title: e.key,
-                  image: CNImage(
-                    systemSymbolName: 'circle.fill',
-                    symbolConfiguration: CNSymbolConfiguration.monochrome(e.value),
-                  ),
-                ),
-              )
-              .toList(),
-        ),
-        onSelected: (item) {
-          final selectedColor = _systemColors.firstWhere((e) => e.key == item.title, orElse: () => _systemColors.first).value;
-          widget.onSelectAccentColor(selectedColor);
-        },
-        menuStyle: CNMenuStyle.automatic,
-        controlSize: CNControlSize.large,
-      ),
-    );
-  }
+  final Widget page;
+  final String symbolName;
+  final String title;
 }

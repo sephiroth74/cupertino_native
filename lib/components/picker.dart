@@ -15,6 +15,9 @@ const double _kDefaultPickerWidth = 300.0;
 ///
 /// Embeds a native SwiftUI Picker for pixel-perfect fidelity on macOS.
 class CNPickerItem {
+  // ignore: public_member_api_docs
+  CNPickerItem(this.text, {this.icon});
+
   /// Creates an icon-based picker item.
   const CNPickerItem.icon(this.icon) : text = null;
 
@@ -29,22 +32,16 @@ class CNPickerItem {
 
   /// Converts the picker item to a platform-friendly map.
   Map<String, dynamic> toMap(BuildContext context) {
-    if (text != null) {
-      return {'type': 'text', 'text': text};
-    }
-    if (icon != null) {
-      return {
-        'type': 'icon',
-        'symbolName': icon!.name,
-        if (icon!.color != null) 'symbolColor': resolveColorToArgb(icon!.color, context),
-        if (icon!.paletteColors != null)
-          'symbolPaletteColors': icon!.paletteColors!.map((c) => resolveColorToArgb(c, context)).toList(),
-        if (icon!.mode != null) 'symbolRenderingMode': icon!.mode!.name,
-        if (icon!.gradient != null) 'symbolGradientEnabled': icon!.gradient,
-        'symbolSize': icon!.size,
-      };
-    }
-    return {'type': 'text', 'text': ''};
+    return {
+      if (text != null) 'text': text,
+      if (icon != null) 'symbolName': icon!.name,
+      if (icon?.color != null) 'symbolColor': resolveColorToArgb(icon!.color, context),
+      if (icon?.paletteColors != null)
+        'symbolPaletteColors': icon!.paletteColors!.map((c) => resolveColorToArgb(c, context)).toList(),
+      if (icon?.mode != null) 'symbolRenderingMode': icon!.mode!.name,
+      if (icon?.gradient != null) 'symbolGradientEnabled': icon!.gradient,
+      if (icon?.size != null) 'symbolSize': icon!.size,
+    };
   }
 }
 
