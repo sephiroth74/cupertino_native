@@ -476,6 +476,14 @@ const _kSystemColors = {
   'fillQuinary': MacOS26Colors.fillQuinary,
 };
 
+const _kRenderingModes = {
+  'automatic': null,
+  'monochrome': CNSymbolRenderingMode.monochrome,
+  'hierarchical': CNSymbolRenderingMode.hierarchical,
+  'palette': CNSymbolRenderingMode.palette,
+  'multicolor': CNSymbolRenderingMode.multicolor,
+};
+
 class ImageDemoPage extends StatefulWidget {
   const ImageDemoPage({super.key});
 
@@ -488,7 +496,7 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
   CNSymbolColorRenderingMode _colorMode = CNSymbolColorRenderingMode.flat;
   late List<Color> _colors = [];
   var _font = CNFont.system(CNFontSize.points(32), weight: CNFontWeight.regular);
-  CNSymbolRenderingMode _renderingMode = CNSymbolRenderingMode.monochrome;
+  CNSymbolRenderingMode? _renderingMode = null;
 
   @override
   initState() {
@@ -561,7 +569,7 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                       mode: _renderingMode,
                       colorMode: _colorMode,
                       colors:
-                          (_renderingMode == CNSymbolRenderingMode.monochrome ||
+                          (_renderingMode == null || _renderingMode == CNSymbolRenderingMode.monochrome ||
                               _renderingMode == CNSymbolRenderingMode.hierarchical)
                           ? [_color]
                           : _colors,
@@ -583,11 +591,11 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                     children: [
                       Expanded(child: const Text('Rendering Mode')),
                       CNPicker(
-                        selectedIndex: CNSymbolRenderingMode.values.indexOf(_renderingMode),
+                        selectedIndex: _kRenderingModes.values.toList().indexOf(_renderingMode),
                         onValueChanged: (index) => setState(() {
-                          _renderingMode = CNSymbolRenderingMode.values[index];
+                          _renderingMode = _kRenderingModes.values.elementAt(index);
                         }),
-                        items: CNSymbolRenderingMode.values.map((mode) => CNPickerItem(mode.name)).toList(),
+                        items: _kRenderingModes.keys.map((mode) => CNPickerItem(mode)).toList(),
                         pickerStyle: CNPickerStyle.automatic,
                       ),
                     ],
