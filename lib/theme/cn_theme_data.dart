@@ -1,9 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../style/font.dart';
 import '../style/cn_typography.dart';
 import '../style/macos26_colors.dart';
 import '../style/macos26_materials.dart';
+import '../style/sf_symbol.dart';
 
 /// Widget-specific visual overrides for [CNToggle].
 class CNToggleThemeData extends Equatable {
@@ -33,6 +35,76 @@ class CNToggleThemeData extends Equatable {
   }
 }
 
+/// Widget-specific visual overrides for [CNImage].
+class CNImageThemeData extends Equatable {
+  /// Creates image theme overrides.
+  const CNImageThemeData({
+    this.symbolRenderingMode,
+    this.symbolColorRenderingMode,
+    this.foregroundStyleColors,
+    this.tint,
+    this.font,
+  });
+
+  /// Default symbol font.
+  final CNFont? font;
+
+  /// Default per-symbol foreground colors.
+  final List<Color>? foregroundStyleColors;
+
+  /// Default color rendering mode.
+  final CNSymbolColorRenderingMode? symbolColorRenderingMode;
+
+  /// Default rendering mode.
+  final CNSymbolRenderingMode? symbolRenderingMode;
+
+  /// Default tint color.
+  final Color? tint;
+
+  @override
+  List<Object?> get props => [symbolRenderingMode, symbolColorRenderingMode, foregroundStyleColors, tint, font];
+
+  /// Returns a copy with selected values replaced.
+  CNImageThemeData copyWith({
+    CNSymbolRenderingMode? symbolRenderingMode,
+    CNSymbolColorRenderingMode? symbolColorRenderingMode,
+    List<Color>? foregroundStyleColors,
+    Color? tint,
+    CNFont? font,
+  }) {
+    return CNImageThemeData(
+      symbolRenderingMode: symbolRenderingMode ?? this.symbolRenderingMode,
+      symbolColorRenderingMode: symbolColorRenderingMode ?? this.symbolColorRenderingMode,
+      foregroundStyleColors: foregroundStyleColors ?? this.foregroundStyleColors,
+      tint: tint ?? this.tint,
+      font: font ?? this.font,
+    );
+  }
+
+  /// Returns a new object where non-null values from [other] override this one.
+  CNImageThemeData merge(CNImageThemeData? other) {
+    if (other == null) return this;
+    return copyWith(
+      symbolRenderingMode: other.symbolRenderingMode,
+      symbolColorRenderingMode: other.symbolColorRenderingMode,
+      foregroundStyleColors: other.foregroundStyleColors,
+      tint: other.tint,
+      font: other.font,
+    );
+  }
+
+  /// Linearly interpolates between two image themes.
+  static CNImageThemeData lerp(CNImageThemeData a, CNImageThemeData b, double t) {
+    return CNImageThemeData(
+      symbolRenderingMode: t < 0.5 ? a.symbolRenderingMode : b.symbolRenderingMode,
+      symbolColorRenderingMode: t < 0.5 ? a.symbolColorRenderingMode : b.symbolColorRenderingMode,
+      foregroundStyleColors: t < 0.5 ? a.foregroundStyleColors : b.foregroundStyleColors,
+      tint: Color.lerp(a.tint, b.tint, t),
+      font: t < 0.5 ? a.font : b.font,
+    );
+  }
+}
+
 /// Defines the semantic color tokens used by [CNTheme].
 class CNThemeData extends Equatable {
   /// Creates a theme configuration with semantic defaults for the given brightness.
@@ -56,6 +128,7 @@ class CNThemeData extends Equatable {
     CNGlassMaterial? materialThick,
     CNGlassMaterial? materialUltraThick,
     CNToggleThemeData? toggleTheme,
+    CNImageThemeData? imageTheme,
   }) {
     final isDark = brightness == Brightness.dark;
 
@@ -70,7 +143,7 @@ class CNThemeData extends Equatable {
       primaryColor: resolvedPrimaryColor,
       secondaryColor: secondaryColor ?? (isDark ? MacOS26Colors.indigo.darkColor : MacOS26Colors.indigo.color),
       destructiveColor: destructiveColor ?? (isDark ? MacOS26Colors.red.darkColor : MacOS26Colors.red.color),
-      canvasColor: canvasColor ?? (isDark ? CupertinoColors.systemBackground.darkColor : CupertinoColors.systemBackground.color),
+      canvasColor: canvasColor ?? (isDark ? CupertinoColors.secondarySystemBackground.darkColor : CupertinoColors.secondarySystemBackground.color),
       groupedBackgroundColor:
           groupedBackgroundColor ??
           (isDark ? CupertinoColors.systemGroupedBackground.darkColor : CupertinoColors.systemGroupedBackground.color),
@@ -90,6 +163,7 @@ class CNThemeData extends Equatable {
       materialThick: materialThick ?? CNGlassMaterial.thick,
       materialUltraThick: materialUltraThick ?? CNGlassMaterial.ultraThick,
       toggleTheme: resolvedToggleTheme,
+      imageTheme: imageTheme ?? const CNImageThemeData(),
     );
   }
 
@@ -123,6 +197,7 @@ class CNThemeData extends Equatable {
     required this.materialThick,
     required this.materialUltraThick,
     required this.toggleTheme,
+    required this.imageTheme,
   });
 
   /// Overall brightness for descendant widgets.
@@ -145,6 +220,9 @@ class CNThemeData extends Equatable {
 
   /// Grouped surface background color.
   final Color groupedBackgroundColor;
+
+  /// Widget-specific image theme overrides.
+  final CNImageThemeData imageTheme;
 
   /// Primary text color.
   final Color labelColor;
@@ -203,6 +281,7 @@ class CNThemeData extends Equatable {
     materialThick,
     materialUltraThick,
     toggleTheme,
+    imageTheme,
   ];
 
   /// Alias of [primaryColor] for accent-driven controls.
@@ -232,6 +311,7 @@ class CNThemeData extends Equatable {
     CNGlassMaterial? materialThick,
     CNGlassMaterial? materialUltraThick,
     CNToggleThemeData? toggleTheme,
+    CNImageThemeData? imageTheme,
   }) {
     return CNThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -253,6 +333,7 @@ class CNThemeData extends Equatable {
       materialThick: materialThick ?? this.materialThick,
       materialUltraThick: materialUltraThick ?? this.materialUltraThick,
       toggleTheme: this.toggleTheme.merge(toggleTheme),
+      imageTheme: this.imageTheme.merge(imageTheme),
     );
   }
 
@@ -279,6 +360,7 @@ class CNThemeData extends Equatable {
       materialThick: other.materialThick,
       materialUltraThick: other.materialUltraThick,
       toggleTheme: other.toggleTheme,
+      imageTheme: other.imageTheme,
     );
   }
 
@@ -304,6 +386,7 @@ class CNThemeData extends Equatable {
       materialThick: t < 0.5 ? a.materialThick : b.materialThick,
       materialUltraThick: t < 0.5 ? a.materialUltraThick : b.materialUltraThick,
       toggleTheme: CNToggleThemeData.lerp(a.toggleTheme, b.toggleTheme, t),
+      imageTheme: CNImageThemeData.lerp(a.imageTheme, b.imageTheme, t),
     );
   }
 }

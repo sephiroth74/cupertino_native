@@ -4,6 +4,7 @@ import 'package:cupertino_native/channel/channel_serialization.dart';
 import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/style/font.dart';
 import 'package:cupertino_native/style/sf_symbol.dart';
+import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -52,13 +53,20 @@ class CNImage extends StatefulWidget implements CNChannelSerializable {
 
   /// Serializes this image to a map for platform channel communication.
   Map<String, dynamic> toMap(BuildContext context) {
+    final imageTheme = CNTheme.of(context).imageTheme;
+    final resolvedRenderingMode = symbolRenderingMode ?? imageTheme.symbolRenderingMode;
+    final resolvedColorRenderingMode = symbolColorRenderingMode ?? imageTheme.symbolColorRenderingMode;
+    final resolvedForegroundStyleColors = foregroundStyleColors ?? imageTheme.foregroundStyleColors;
+    final resolvedTint = tint ?? imageTheme.tint;
+    final resolvedFont = font ?? imageTheme.font;
+
     return {
       'systemSymbolName': systemSymbolName,
-      'symbolRenderingMode': symbolRenderingMode?.name,
-      'symbolColorRenderingMode': symbolColorRenderingMode?.name,
-      'foregroundStyleColors': foregroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
-      'tint': resolveColorToArgb(tint, context),
-      'font': font?.toMap(),
+      'symbolRenderingMode': resolvedRenderingMode?.name,
+      'symbolColorRenderingMode': resolvedColorRenderingMode?.name,
+      'foregroundStyleColors': resolvedForegroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
+      'tint': resolveColorToArgb(resolvedTint, context),
+      'font': resolvedFont?.toMap(),
     };
   }
 

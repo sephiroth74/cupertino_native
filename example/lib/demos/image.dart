@@ -515,7 +515,7 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
   }) {
     final theme = CNTheme.of(context);
     final labelStyle = theme.typography.caption1;
-    final containerSize = (font?.size.points ?? 24) * 6;
+    final containerSize = (font?.size.points ?? 24) * 5;
     final imageSize = (font?.size.points ?? 24) * 3;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -530,7 +530,7 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
               width: imageSize,
               height: imageSize,
               decoration: BoxDecoration(
-                border: Border.all(color: CNTheme.of(context).separatorColor.withValues(alpha: 0.2), width: 1),
+                border: Border.all(color: _colors?.last ?? CNTheme.of(context).accentColor, width: 2),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: CNImage(
@@ -557,6 +557,8 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
       navigationBar: const CNNavigationBar(middle: Text('Image')),
       child: SafeArea(
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: SingleChildScrollView(
@@ -569,7 +571,8 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                       mode: _renderingMode,
                       colorMode: _colorMode,
                       colors:
-                          (_renderingMode == null || _renderingMode == CNSymbolRenderingMode.monochrome ||
+                          (_renderingMode == null ||
+                              _renderingMode == CNSymbolRenderingMode.monochrome ||
                               _renderingMode == CNSymbolRenderingMode.hierarchical)
                           ? [_color]
                           : _colors,
@@ -580,7 +583,12 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
               ),
             ),
             Container(
-              width: 300,
+              width: 350,
+              decoration: BoxDecoration(
+                color: CNTheme.of(context).fillPrimaryColor,
+                border: Border.all(color: CNTheme.of(context).separatorColor, width: 1),
+                borderRadius: BorderRadius.circular(12),
+              ),
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -608,6 +616,7 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                       CNToggle(
                         toggleStyle: CNToggleStyle.switch_,
                         value: _colorMode == CNSymbolColorRenderingMode.gradient,
+                        controlSize: CNControlSize.small,
                         onChanged: (value) {
                           setState(() {
                             _colorMode = value ? CNSymbolColorRenderingMode.gradient : CNSymbolColorRenderingMode.flat;
