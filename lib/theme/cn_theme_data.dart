@@ -1,3 +1,4 @@
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -165,6 +166,34 @@ class CNSliderThemeData extends Equatable {
   }
 }
 
+/// Widget-specific visual overrides for [CNProgressView].
+class CNProgressThemeData extends Equatable {
+  /// Creates progress view theme overrides.
+  const CNProgressThemeData({this.tintColor});
+
+  /// Default tint color for progress view.
+  final Color? tintColor;
+
+  @override
+  List<Object?> get props => [tintColor];
+
+  /// Returns a copy with selected values replaced.
+  CNProgressThemeData copyWith({Color? tintColor}) {
+    return CNProgressThemeData(tintColor: tintColor ?? this.tintColor);
+  }
+
+  /// Returns a new object where non-null values from [other] override this one.
+  CNProgressThemeData merge(CNProgressThemeData? other) {
+    if (other == null) return this;
+    return copyWith(tintColor: other.tintColor);
+  }
+
+  /// Linearly interpolates between two progress view themes.
+  static CNProgressThemeData lerp(CNProgressThemeData a, CNProgressThemeData b, double t) {
+    return CNProgressThemeData(tintColor: Color.lerp(a.tintColor, b.tintColor, t));
+  }
+}
+
 /// Defines the semantic color tokens used by [CNTheme].
 class CNThemeData extends Equatable {
   /// Creates a theme configuration with semantic defaults for the given brightness.
@@ -191,6 +220,7 @@ class CNThemeData extends Equatable {
     CNImageThemeData? imageTheme,
     CNTextThemeData? textTheme,
     CNSliderThemeData? sliderTheme,
+    CNProgressThemeData? progressTheme,
   }) {
     final isDark = brightness == Brightness.dark;
 
@@ -207,6 +237,9 @@ class CNThemeData extends Equatable {
     );
     final resolvedSliderTheme = (sliderTheme ?? const CNSliderThemeData()).copyWith(
       tintColor: sliderTheme?.tintColor ?? resolvedPrimaryColor,
+    );
+    final resolvedProgressTheme = (progressTheme ?? const CNProgressThemeData()).copyWith(
+      tintColor: progressTheme?.tintColor ?? resolvedPrimaryColor,
     );
 
     return CNThemeData.raw(
@@ -238,6 +271,7 @@ class CNThemeData extends Equatable {
       imageTheme: imageTheme ?? const CNImageThemeData(),
       textTheme: resolvedTextTheme,
       sliderTheme: resolvedSliderTheme,
+      progressTheme: resolvedProgressTheme,
     );
   }
 
@@ -274,6 +308,7 @@ class CNThemeData extends Equatable {
     required this.imageTheme,
     required this.textTheme,
     required this.sliderTheme,
+    required this.progressTheme,
   });
 
   /// Overall brightness for descendant widgets.
@@ -321,6 +356,9 @@ class CNThemeData extends Equatable {
   /// Primary interactive color.
   final Color primaryColor;
 
+  /// Widget-specific progress view theme overrides.
+  final CNProgressThemeData progressTheme;
+
   /// Secondary interactive color.
   final Color secondaryColor;
 
@@ -366,6 +404,7 @@ class CNThemeData extends Equatable {
     imageTheme,
     textTheme,
     sliderTheme,
+    progressTheme,
   ];
 
   /// Alias of [primaryColor] for accent-driven controls.
@@ -398,6 +437,7 @@ class CNThemeData extends Equatable {
     CNImageThemeData? imageTheme,
     CNTextThemeData? textTheme,
     CNSliderThemeData? sliderTheme,
+    CNProgressThemeData? progressTheme,
   }) {
     return CNThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -422,6 +462,7 @@ class CNThemeData extends Equatable {
       imageTheme: this.imageTheme.merge(imageTheme),
       textTheme: this.textTheme.merge(textTheme),
       sliderTheme: this.sliderTheme.merge(sliderTheme),
+      progressTheme: this.progressTheme.merge(progressTheme),
     );
   }
 
@@ -451,6 +492,7 @@ class CNThemeData extends Equatable {
       imageTheme: other.imageTheme,
       textTheme: other.textTheme,
       sliderTheme: other.sliderTheme,
+      progressTheme: other.progressTheme,
     );
   }
 
@@ -479,6 +521,7 @@ class CNThemeData extends Equatable {
       imageTheme: CNImageThemeData.lerp(a.imageTheme, b.imageTheme, t),
       textTheme: CNTextThemeData.lerp(a.textTheme, b.textTheme, t),
       sliderTheme: CNSliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
+      progressTheme: CNProgressThemeData.lerp(a.progressTheme, b.progressTheme, t),
     );
   }
 }

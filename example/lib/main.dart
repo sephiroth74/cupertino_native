@@ -127,10 +127,13 @@ class _DesktopDemoShell extends StatefulWidget {
 class _DesktopDemoShellState extends State<_DesktopDemoShell> {
   static const _entries = <_DemoEntry>[
     _DemoEntry('Image', 'photo', ImageDemoPage()),
-    _DemoEntry('Text', 'textformat', TextDemoPage()),
     _DemoEntry('Label', 'textformat', LabelDemoPage()),
-    _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
+    _DemoEntry('Text', 'text.viewfinder', TextDemoPage()),
+    _DemoEntry('Color Well', 'paintpalette', ColorWellDemoPage()),
     _DemoEntry('Slider', 'slider.horizontal.3', SliderDemoPage()),
+    _DemoEntry('Progress', 'progress.indicator', ProgressIndicatorsPageDemo()),
+
+    _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Toggle', 'switch.2', ToggleDemo()),
     _DemoEntry('Segmented Control', 'rectangle.split.3x1', SegmentedControlDemoPage()),
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
@@ -139,9 +142,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Popup Menu Button', 'ellipsis.circle', PopupMenuButtonDemoPage()),
     _DemoEntry('Menu Button', 'ellipsis.circle', MenuButtonDemoPage()),
     _DemoEntry('Button', 'hand.tap', ButtonDemoPage()),
-    _DemoEntry('Color Well', 'paintpalette', ColorWellDemoPage()),
     _DemoEntry('Path Control', 'folder', PathControlDemoPage()),
-    _DemoEntry('Progress Indicators', 'hourglass', ProgressIndicatorsPageDemo()),
     _DemoEntry('Level Indicators', 'gauge', LevelIndicatorDemoPage()),
     _DemoEntry('Steppers', 'plusminus', StepperDemoPage()),
     _DemoEntry('Date Picker', 'calendar', DatePickerDemoPage()),

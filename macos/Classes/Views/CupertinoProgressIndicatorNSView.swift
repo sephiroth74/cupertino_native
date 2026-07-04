@@ -4,81 +4,33 @@ import SwiftUI
 
 class CupertinoProgressIndicatorNSView: NSView {
     private let channel: FlutterMethodChannel
-    private let progressIndicator: NSProgressIndicator
-    private var currentProgressStyle: String = "spinning"
-    private var currentProgressSize: String = "regular"
-    private var currentProgressValue: Double = 0.0
-    private var currentProgressMaxValue: Double = 1.0
-    private var currentProgressIndeterminate: Bool = false
+    private let hostingView: NSHostingView<AnyView>
+
+    private var payload: CNProgressViewPayload?
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
-        progressIndicator = NSProgressIndicator()
+        hostingView = NSHostingView(rootView: AnyView(EmptyView()))
         channel = FlutterMethodChannel(
             name: "CupertinoNativeProgressIndicator_\(viewId)", binaryMessenger: messenger,
         )
+        payload = CNProgressViewDeserializer.decode(args)
+
         super.init(frame: .zero)
-
-        var progressStyle = "spinning"
-        var progressSize = "regular"
-        var progressValue = 0.0
-        var progressMaxValue = 1.0
-        var progressIndeterminate = false
-        var isDark = false
-
-        if let dict = CNChannelSerialization.asDict(args) {
-            if let ps = dict["progressStyle"] as? String { progressStyle = ps }
-            if let ps = dict["progressSize"] as? String { progressSize = ps }
-            if let pv = dict["progressValue"] as? Double { progressValue = pv }
-            if let pmv = dict["progressMaxValue"] as? Double { progressMaxValue = pmv }
-            if let pi = dict["progressIndeterminate"] as? Bool { progressIndeterminate = pi }
-            if let pd = dict["isDark"] as? Bool { isDark = pd }
-        }
 
         wantsLayer = true
         layer?.backgroundColor = NSColor.clear.cgColor
-        appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
 
-        switch progressStyle {
-        case "spinning": progressIndicator.style = .spinning
-        case "bar": progressIndicator.style = .bar
-        default: progressIndicator.style = .spinning
-        }
-
-        switch progressSize {
-        case "mini": progressIndicator.controlSize = .mini
-        case "small": progressIndicator.controlSize = .small
-        case "regular": progressIndicator.controlSize = .regular
-        case "large": progressIndicator.controlSize = .large
-        case "extraLarge":
-            progressIndicator.controlSize =
-                if #available(macOS 26.0, *) {
-                    .extraLarge
-                } else {
-                    .large
-                }
-        default: progressIndicator.controlSize = .regular
-        }
-
-        progressIndicator.isIndeterminate = progressIndeterminate
-        progressIndicator.doubleValue = progressValue
-        progressIndicator.maxValue = progressMaxValue
-
-        currentProgressStyle = progressStyle
-        currentProgressSize = progressSize
-        currentProgressValue = progressValue
-        currentProgressMaxValue = progressMaxValue
-        currentProgressIndeterminate = progressIndeterminate
-
-        addSubview(progressIndicator)
-        progressIndicator.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(hostingView)
+        hostingView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            progressIndicator.leadingAnchor.constraint(equalTo: leadingAnchor),
-            progressIndicator.trailingAnchor.constraint(equalTo: trailingAnchor),
-            progressIndicator.topAnchor.constraint(equalTo: topAnchor),
-            progressIndicator.bottomAnchor.constraint(equalTo: bottomAnchor),
+            hostingView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            hostingView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            hostingView.topAnchor.constraint(equalTo: topAnchor),
+            hostingView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
 
-        _setupChannel()
+        rebuild()
+        setupChannel()
     }
 
     @available(*, unavailable)
@@ -86,87 +38,56 @@ class CupertinoProgressIndicatorNSView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewDidMoveToSuperview() {}
-
-    override func viewWillMove(toSuperview newSuperview: NSView?) {
-        if newSuperview == nil {
-            progressIndicator.stopAnimation(nil)
-        } else {
-            if currentProgressIndeterminate {
-                progressIndicator.startAnimation(nil)
-            }
-        }
-    }
-
-    private func _setupChannel() {
+    private func setupChannel() {
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self else {
                 result(nil)
                 return
             }
+
             switch call.method {
-            case "startAnimation":
-                progressIndicator.startAnimation(nil)
-                result(nil)
-            case "stopAnimation":
-                progressIndicator.stopAnimation(nil)
-                result(nil)
             case "getIntrinsicSize":
-                let s = progressIndicator.intrinsicContentSize
-                result(["width": Double(s.width), "height": Double(s.height)])
-            case "setBrightness":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let isDark = (args["isDark"] as? NSNumber)?.boolValue
-                {
-                    appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+                let size = hostingView.fittingSize
+                result(["width": Double(size.width), "height": Double(size.height)])
+            case "setProgressView":
+                if let parsed: CNProgressViewPayload = CNChannelSerialization.decode(call.arguments) {
+                    payload = parsed
+                    rebuild()
+                    let size = hostingView.fittingSize
+                    channel.invokeMethod(
+                        "intrinsicSizeChanged",
+                        arguments: ["width": Double(size.width), "height": Double(size.height)],
+                    )
                     result(nil)
                 } else {
-                    result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
+                    result(FlutterError(code: "bad_args", message: "Invalid progress view payload", details: nil))
                 }
-            case "updateProgress":
-                if let args = CNChannelSerialization.asDict(call.arguments) {
-                    if let progressStyle = args["progressStyle"] as? String {
-                        currentProgressStyle = progressStyle
-                        switch progressStyle {
-                        case "spinning": progressIndicator.style = .spinning
-                        case "bar": progressIndicator.style = .bar
-                        default: progressIndicator.style = .spinning
-                        }
-                    }
-                    if let progressSize = args["progressSize"] as? String {
-                        currentProgressSize = progressSize
-                        switch progressSize {
-                        case "mini": progressIndicator.controlSize = .mini
-                        case "small": progressIndicator.controlSize = .small
-                        case "regular": progressIndicator.controlSize = .regular
-                        case "large": progressIndicator.controlSize = .large
-                        case "extraLarge":
-                            progressIndicator.controlSize =
-                                if #available(macOS 26.0, *) {
-                                    .extraLarge
-                                } else {
-                                    .large
-                                }
-                        default: progressIndicator.controlSize = .regular
-                        }
-                    }
-                    if let progressValue = args["progressValue"] as? Double {
-                        currentProgressValue = progressValue
-                        progressIndicator.doubleValue = progressValue
-                    }
-                    if let progressMaxValue = args["progressMaxValue"] as? Double {
-                        currentProgressMaxValue = progressMaxValue
-                        progressIndicator.maxValue = progressMaxValue
-                    }
-                    if let progressIndeterminate = args["progressIndeterminate"] as? Bool {
-                        currentProgressIndeterminate = progressIndeterminate
-                        progressIndicator.isIndeterminate = progressIndeterminate
-                    }
-                }
-                result(nil)
             default:
                 result(FlutterMethodNotImplemented)
             }
         }
+    }
+
+    private func rebuild() {
+        guard let payload else {
+            hostingView.rootView = AnyView(EmptyView())
+            return
+        }
+
+        if let isDark = payload.isDark {
+            hostingView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+        } else {
+            hostingView.appearance = nil
+        }
+
+        hostingView.rootView = CNProgressViewDeserializer.deserialize(
+            payload.toChannel(),
+            onSizeChanged: { [weak self] size in
+                self?.channel.invokeMethod(
+                    "intrinsicSizeChanged",
+                    arguments: ["width": size.width, "height": size.height],
+                )
+            },
+        ) ?? AnyView(EmptyView())
     }
 }

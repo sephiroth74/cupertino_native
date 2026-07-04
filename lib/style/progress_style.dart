@@ -1,8 +1,8 @@
-/// The style of the progress indicator.
-enum CNProgressStyle {
-  /// A spinning progress indicator.
-  spinning,
+/// The style of [CNProgressView].
+enum CNProgressViewStyle {
+  /// Uses a linear style.
+  linear,
 
-  /// A bar progress indicator.
-  bar,
+  /// Uses a circular style.
+  circular,
 }
