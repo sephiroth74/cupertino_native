@@ -132,7 +132,7 @@ class _CNSliderState extends State<CNSlider> {
 
   bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
 
-  Color? get _resolvedTint => widget.color ?? CNTheme.of(context).primaryColor;
+  Color? get _resolvedTint => widget.color ?? CNTheme.of(context).sliderTheme.tintColor ?? CNTheme.of(context).accentColor;
 
   double _defaultHeightForControlSize() {
     switch (widget.controlSize) {

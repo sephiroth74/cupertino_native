@@ -137,6 +137,34 @@ class CNTextThemeData extends Equatable {
   }
 }
 
+/// Widget-specific visual overrides for [CNSlider].
+class CNSliderThemeData extends Equatable {
+  /// Creates slider theme overrides.
+  const CNSliderThemeData({this.tintColor});
+
+  /// Default tint color for slider track and thumb.
+  final Color? tintColor;
+
+  @override
+  List<Object?> get props => [tintColor];
+
+  /// Returns a copy with selected values replaced.
+  CNSliderThemeData copyWith({Color? tintColor}) {
+    return CNSliderThemeData(tintColor: tintColor ?? this.tintColor);
+  }
+
+  /// Returns a new object where non-null values from [other] override this one.
+  CNSliderThemeData merge(CNSliderThemeData? other) {
+    if (other == null) return this;
+    return copyWith(tintColor: other.tintColor);
+  }
+
+  /// Linearly interpolates between two slider themes.
+  static CNSliderThemeData lerp(CNSliderThemeData a, CNSliderThemeData b, double t) {
+    return CNSliderThemeData(tintColor: Color.lerp(a.tintColor, b.tintColor, t));
+  }
+}
+
 /// Defines the semantic color tokens used by [CNTheme].
 class CNThemeData extends Equatable {
   /// Creates a theme configuration with semantic defaults for the given brightness.
@@ -162,6 +190,7 @@ class CNThemeData extends Equatable {
     CNToggleThemeData? toggleTheme,
     CNImageThemeData? imageTheme,
     CNTextThemeData? textTheme,
+    CNSliderThemeData? sliderTheme,
   }) {
     final isDark = brightness == Brightness.dark;
 
@@ -175,6 +204,9 @@ class CNThemeData extends Equatable {
     );
     final resolvedToggleTheme = (toggleTheme ?? const CNToggleThemeData()).copyWith(
       tint: toggleTheme?.tint ?? resolvedPrimaryColor,
+    );
+    final resolvedSliderTheme = (sliderTheme ?? const CNSliderThemeData()).copyWith(
+      tintColor: sliderTheme?.tintColor ?? resolvedPrimaryColor,
     );
 
     return CNThemeData.raw(
@@ -205,6 +237,7 @@ class CNThemeData extends Equatable {
       toggleTheme: resolvedToggleTheme,
       imageTheme: imageTheme ?? const CNImageThemeData(),
       textTheme: resolvedTextTheme,
+      sliderTheme: resolvedSliderTheme,
     );
   }
 
@@ -240,6 +273,7 @@ class CNThemeData extends Equatable {
     required this.toggleTheme,
     required this.imageTheme,
     required this.textTheme,
+    required this.sliderTheme,
   });
 
   /// Overall brightness for descendant widgets.
@@ -296,6 +330,9 @@ class CNThemeData extends Equatable {
   /// Separator and stroke color.
   final Color separatorColor;
 
+  /// Widget-specific slider theme overrides.
+  final CNSliderThemeData sliderTheme;
+
   /// Widget-specific text theme overrides.
   final CNTextThemeData textTheme;
 
@@ -328,6 +365,7 @@ class CNThemeData extends Equatable {
     toggleTheme,
     imageTheme,
     textTheme,
+    sliderTheme,
   ];
 
   /// Alias of [primaryColor] for accent-driven controls.
@@ -359,6 +397,7 @@ class CNThemeData extends Equatable {
     CNToggleThemeData? toggleTheme,
     CNImageThemeData? imageTheme,
     CNTextThemeData? textTheme,
+    CNSliderThemeData? sliderTheme,
   }) {
     return CNThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -382,6 +421,7 @@ class CNThemeData extends Equatable {
       toggleTheme: this.toggleTheme.merge(toggleTheme),
       imageTheme: this.imageTheme.merge(imageTheme),
       textTheme: this.textTheme.merge(textTheme),
+      sliderTheme: this.sliderTheme.merge(sliderTheme),
     );
   }
 
@@ -410,6 +450,7 @@ class CNThemeData extends Equatable {
       toggleTheme: other.toggleTheme,
       imageTheme: other.imageTheme,
       textTheme: other.textTheme,
+      sliderTheme: other.sliderTheme,
     );
   }
 
@@ -437,6 +478,7 @@ class CNThemeData extends Equatable {
       toggleTheme: CNToggleThemeData.lerp(a.toggleTheme, b.toggleTheme, t),
       imageTheme: CNImageThemeData.lerp(a.imageTheme, b.imageTheme, t),
       textTheme: CNTextThemeData.lerp(a.textTheme, b.textTheme, t),
+      sliderTheme: CNSliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
     );
   }
 }
