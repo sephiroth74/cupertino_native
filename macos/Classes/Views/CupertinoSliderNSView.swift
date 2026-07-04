@@ -4,216 +4,121 @@ import SwiftUI
 
 class CupertinoSliderNSView: NSView {
     private let channel: FlutterMethodChannel
-    @objc let myModel: RangeModel = .init()
+    private let hostingView: NSHostingView<AnyView>
+
+    private var payload: CNSliderPayload?
+
+    private func sameSliderConfiguration(_ lhs: CNSliderPayload, _ rhs: CNSliderPayload) -> Bool {
+        lhs.min == rhs.min &&
+            lhs.max == rhs.max &&
+            lhs.step == rhs.step &&
+            lhs.isDark == rhs.isDark &&
+            lhs.isEnabled == rhs.isEnabled &&
+            lhs.controlSize == rhs.controlSize &&
+            lhs.tint == rhs.tint &&
+            lhs.width == rhs.width &&
+            lhs.height == rhs.height
+    }
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
-        channel = FlutterMethodChannel(
-            name: "CupertinoNativeSlider_\(viewId)", binaryMessenger: messenger,
-        )
+        channel = FlutterMethodChannel(name: "CupertinoNativeSlider_\(viewId)", binaryMessenger: messenger)
+        hostingView = NSHostingView(rootView: AnyView(EmptyView()))
 
-        let slider = NSSlider()
-
-        var initialValue: Double = 0
-        var minValue: Double = 0
-        var maxValue: Double = 1
-        var enabled = true
-        var isDark = false
-        var tint: NSColor? = nil
-        var tickMarks = 0
-        var tickMarkPosition: NSSlider.TickMarkPosition? = nil
-        var type: NSSlider.SliderType = .linear
-        var isContinuous = true
-        var isVertical = false
-        var controlSize: NSControl.ControlSize = .regular
-        var allowsTickMarkValuesOnly = false
-
-        if let dict = CNChannelSerialization.asDict(args) {
-            if let v = dict["value"] as? NSNumber { initialValue = v.doubleValue }
-            if let v = dict["min"] as? NSNumber { minValue = v.doubleValue }
-            if let v = dict["max"] as? NSNumber { maxValue = v.doubleValue }
-            if let v = dict["isEnabled"] as? NSNumber { enabled = v.boolValue }
-            if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
-            if let v = dict["sliderType"] as? String { type = Self.sliderTypeFromString(v) }
-            if let v = dict["tickMarkPosition"] as? String {
-                tickMarkPosition = Self.tickMarkPositionFromString(v)
-            }
-            if let v = dict["tickMarks"] as? NSNumber { tickMarks = v.intValue }
-            if let v = dict["allowsTickMarkValuesOnly"] as? NSNumber {
-                allowsTickMarkValuesOnly = v.boolValue
-            }
-            if let v = dict["isContinuous"] as? NSNumber { isContinuous = v.boolValue }
-            if let v = dict["tint"] as? NSNumber { tint = ColorUtils.colorFromARGB(v.intValue) }
-            if let v = dict["isVertical"] as? NSNumber { isVertical = v.boolValue }
-            if let v = dict["controlSize"] as? String {
-                controlSize = ControlSizeUtils.controlSizeFromString(v)
-            }
-        }
+        payload = CNChannelSerialization.decode(args)
 
         super.init(frame: .zero)
 
-        myModel.updateValues(minValue: minValue, maxValue: maxValue, value: initialValue)
+        wantsLayer = true
+        layer?.backgroundColor = NSColor.clear.cgColor
 
-        slider.bind(.value, to: myModel, withKeyPath: "value", options: nil)
-        slider.bind(.minValue, to: myModel, withKeyPath: "minValue", options: nil)
-        slider.bind(.maxValue, to: myModel, withKeyPath: "maxValue", options: nil)
-
-        myModel.onChange = { value in
-            self.channel.invokeMethod("valueChanged", arguments: ["value": value])
-        }
-
-        slider.controlSize = controlSize
-        slider.isEnabled = enabled
-        slider.isContinuous = isContinuous
-        slider.sliderType = type
-        slider.isVertical = isVertical
-        slider.numberOfTickMarks = tickMarks
-        slider.allowsTickMarkValuesOnly = allowsTickMarkValuesOnly
-
-        if tickMarkPosition != nil {
-            slider.tickMarkPosition = tickMarkPosition!
-        }
-
-        if let tint {
-            slider.trackFillColor = tint
-        }
-
-        slider.wantsLayer = true
-        slider.layer?.backgroundColor = NSColor.clear.cgColor
-        slider.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-        slider.target = self
-        // slider.action = #selector(onSliderValueChanged(_:))
-
-        addSubview(slider)
-        slider.translatesAutoresizingMaskIntoConstraints = false
+        hostingView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(hostingView)
         NSLayoutConstraint.activate([
-            slider.leadingAnchor.constraint(equalTo: leadingAnchor),
-            slider.trailingAnchor.constraint(equalTo: trailingAnchor),
-            slider.topAnchor.constraint(equalTo: topAnchor),
-            slider.bottomAnchor.constraint(equalTo: bottomAnchor),
+            hostingView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            hostingView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            hostingView.topAnchor.constraint(equalTo: topAnchor),
+            hostingView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
 
-        channel.setMethodCallHandler { call, result in
+        rebuild()
+
+        channel.setMethodCallHandler { [weak self] call, result in
+            guard let self else {
+                result(nil)
+                return
+            }
+
             switch call.method {
             case "getIntrinsicSize":
-                let size = slider.intrinsicContentSize
-                result(["width": size.width, "height": size.height])
-            case "setValue":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let value = (args["value"] as? NSNumber)?.doubleValue
-                {
-                    if value >= self.myModel.minValue, value <= self.myModel.maxValue {
-                        self.myModel.value = value
+                let size = hostingView.fittingSize
+                result(["width": Double(size.width), "height": Double(size.height)])
+            case "setSlider":
+                if let raw = CNChannelSerialization.asDict(call.arguments) {
+                    if let parsed = CNSliderPayload(channel: raw) {
+                        if let current = payload, sameSliderConfiguration(current, parsed) {
+                            // Value-only updates should not recreate the control while dragging.
+                            payload = parsed
+                            result(nil)
+                            return
+                        }
+
+                        payload = parsed
+                        rebuild()
                         result(nil)
                     } else {
-                        result(FlutterError(code: "bad_args", message: "Value out of range", details: nil))
+                        result(FlutterError(code: "bad_args", message: "Invalid slider payload", details: nil))
                     }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing slider payload", details: nil))
+                }
+            case "setValue":
+                if let args = CNChannelSerialization.asDict(call.arguments),
+                   let value = (args["value"] as? NSNumber)?.doubleValue,
+                   var current = payload
+                {
+                    let clamped = Swift.min(Swift.max(value, current.min), current.max)
+                    current = CNSliderPayload(channel: [
+                        "value": clamped,
+                        "min": current.min,
+                        "max": current.max,
+                        "step": current.step as Any,
+                        "isDark": current.isDark as Any,
+                        "isEnabled": current.isEnabled as Any,
+                        "controlSize": current.controlSize as Any,
+                        "tint": current.tint as Any,
+                        "width": current.width as Any,
+                        "height": current.height as Any,
+                    ]) ?? current
+                    payload = current
+                    rebuild()
+                    result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             case "setRange":
                 if let args = CNChannelSerialization.asDict(call.arguments),
-                   let min = (args["min"] as? NSNumber)?.doubleValue,
-                   let max = (args["max"] as? NSNumber)?.doubleValue
+                   let minValue = (args["min"] as? NSNumber)?.doubleValue,
+                   let maxValue = (args["max"] as? NSNumber)?.doubleValue,
+                   minValue < maxValue,
+                   let current = payload
                 {
-                    self.myModel.updateRange(minValue: min, maxValue: max)
+                    let clampedValue = Swift.min(Swift.max(current.value, minValue), maxValue)
+                    payload = CNSliderPayload(channel: [
+                        "value": clampedValue,
+                        "min": minValue,
+                        "max": maxValue,
+                        "step": current.step as Any,
+                        "isDark": current.isDark as Any,
+                        "isEnabled": current.isEnabled as Any,
+                        "controlSize": current.controlSize as Any,
+                        "tint": current.tint as Any,
+                        "width": current.width as Any,
+                        "height": current.height as Any,
+                    ])
+                    rebuild()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing min/max", details: nil))
-                }
-            case "setIsEnabled":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let enabled = (args["value"] as? NSNumber)?.boolValue
-                {
-                    slider.isEnabled = enabled
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
-                }
-            case "setTint":
-                if let args = CNChannelSerialization.asDict(call.arguments) {
-                    if let tintNum = args["value"] as? NSNumber {
-                        let ns = ColorUtils.colorFromARGB(tintNum.intValue)
-                        slider.trackFillColor = ns
-                    }
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
-                }
-            case "setIsDark":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let isDark = (args["value"] as? NSNumber)?.boolValue
-                {
-                    slider.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
-                }
-            case "setTickMarks":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let tickMarks = (args["value"] as? NSNumber)?.intValue
-                {
-                    slider.numberOfTickMarks = tickMarks
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
-                }
-            case "setTickMarkPosition":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let tickMarkPosition = args["value"] as? String
-                {
-                    slider.tickMarkPosition = Self.tickMarkPositionFromString(tickMarkPosition)
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
-                }
-            case "setAllowsTickMarkValuesOnly":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let allowsTickMarkValuesOnly = (args["value"] as? NSNumber)?.boolValue
-                {
-                    slider.allowsTickMarkValuesOnly = allowsTickMarkValuesOnly
-                    result(nil)
-                } else {
-                    result(
-                        FlutterError(
-                            code: "bad_args", message: "Missing value", details: nil,
-                        ),
-                    )
-                }
-            case "setSliderType":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let type = args["value"] as? String
-                {
-                    slider.sliderType = Self.sliderTypeFromString(type)
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
-                }
-            case "setIsContinuous":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let isContinuous = (args["value"] as? NSNumber)?.boolValue
-                {
-                    slider.isContinuous = isContinuous
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
-                }
-            case "setIsVertical":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let isVertical = (args["value"] as? NSNumber)?.boolValue
-                {
-                    slider.isVertical = isVertical
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
-                }
-            case "setControlSize":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let size = args["value"] as? String
-                {
-                    slider.controlSize = ControlSizeUtils.controlSizeFromString(size)
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
                 }
             default:
                 result(FlutterMethodNotImplemented)
@@ -221,37 +126,37 @@ class CupertinoSliderNSView: NSView {
         }
     }
 
+    @available(*, unavailable)
     required init?(coder _: NSCoder) {
-        nil
+        fatalError("init(coder:) has not been implemented")
     }
 
-    @objc func onSliderValueChanged(_ sender: NSSlider) {
-        myModel.value = sender.doubleValue
-    }
-
-    private static func tickMarkPositionFromString(_ s: String) -> NSSlider.TickMarkPosition {
-        switch s {
-        case "above":
-            .above
-        case "below":
-            .below
-        case "leading":
-            .leading
-        case "trailing":
-            .trailing
-        default:
-            .above
+    private func rebuild() {
+        guard let payload else {
+            hostingView.rootView = AnyView(EmptyView())
+            return
         }
-    }
 
-    private static func sliderTypeFromString(_ s: String) -> NSSlider.SliderType {
-        switch s {
-        case "circular":
-            .circular
-        case "linear":
-            .linear
-        default:
-            .linear
+        if let isDark = payload.isDark {
+            hostingView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+        } else {
+            hostingView.appearance = nil
         }
+
+        hostingView.rootView = CNSlider.deserialize(
+            payload.toChannel(),
+            onValueChanged: { [weak self] newValue in
+                self?.channel.invokeMethod("valueChanged", arguments: ["value": newValue])
+            },
+            onEditingChanged: { [weak self] editing in
+                self?.channel.invokeMethod("editingChanged", arguments: ["editing": editing])
+            },
+            onSizeChanged: { [weak self] size in
+                self?.channel.invokeMethod(
+                    "intrinsicSizeChanged",
+                    arguments: ["width": size.width, "height": size.height],
+                )
+            },
+        ) ?? AnyView(EmptyView())
     }
 }

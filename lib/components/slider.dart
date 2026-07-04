@@ -1,24 +1,26 @@
-import 'package:cupertino_native/cupertino_native.dart';
+import 'dart:convert';
+
+import 'package:cupertino_native/channel/params.dart';
+import 'package:cupertino_native/model/control_size.dart';
+import 'package:cupertino_native/theme/cn_theme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../channel/params.dart';
+const double _kDefaultSliderWidth = 140.0;
 
-/// Controller for a [CNSlider] allowing imperative changes to the native
-/// NSSlider instance.
+/// Controller for [CNSlider], allowing imperative updates to native state.
 class CNSliderController {
   MethodChannel? _channel;
 
-  /// Sets the current slider [value]. When [animated] is true, animates to it.
-  Future<void> setValue(double value, {bool animated = false}) async {
+  /// Sets the current slider [value].
+  Future<void> setValue(double value) async {
     final channel = _channel;
     if (channel == null) return;
-    await channel.invokeMethod('setValue', {'value': value, 'animated': animated});
+    await channel.invokeMethod('setValue', {'value': value});
   }
 
-  /// Sets the valid [min] and [max] range of the slider.
+  /// Sets the slider range.
   Future<void> setRange({required double min, required double max}) async {
     final channel = _channel;
     if (channel == null) return;
@@ -34,101 +36,39 @@ class CNSliderController {
   }
 }
 
-/// A Cupertino-native slider rendered by the host platform.
+/// A native macOS SwiftUI `Slider`.
 ///
-/// On macOS this embeds NSSlider via a platform view and falls
-/// back to Flutter's [Slider] on other platforms.
+/// On non-macOS platforms, this falls back to Flutter's [Slider].
 class CNSlider extends StatefulWidget {
-  /// Creates a Cupertino-native slider.
+  /// Creates a native SwiftUI slider.
   const CNSlider({
     super.key,
     required this.value,
     this.onChanged,
-    this.sliderType = CNSliderType.linear,
-    this.controlSize = CNControlSize.regular,
-    this.isContinuous = true,
+    this.onEditingChanged,
     this.min = 0.0,
     this.max = 1.0,
-    this.controller,
+    this.step,
+    this.controlSize = CNControlSize.regular,
     this.color,
-    this.tickMarks,
-    this.tickMarkPosition,
-    this.isVertical = false,
-    this.allowsTickMarkValuesOnly = false,
+    this.width,
+    this.height,
+    this.controller,
   }) : assert(min < max),
-       assert(value >= min && value <= max);
+       assert(value >= min && value <= max),
+       assert(step == null || step > 0);
 
-  /// Creates a Cupertino-native circular slider.
-  factory CNSlider.circular({
-    required double value,
-    ValueChanged<double>? onChanged,
-    CNControlSize controlSize = CNControlSize.regular,
-    bool isContinuous = true,
-    double min = 0.0,
-    double max = 1.0,
-    CNSliderController? controller,
-    Color? color,
-    int? tickMarks,
-    bool allowsTickMarkValuesOnly = false,
-  }) => CNSlider(
-    value: value,
-    onChanged: onChanged,
-    sliderType: CNSliderType.circular,
-    isContinuous: isContinuous,
-    min: min,
-    max: max,
-    controller: controller,
-    color: color,
-    tickMarks: tickMarks,
-    controlSize: controlSize,
-    allowsTickMarkValuesOnly: allowsTickMarkValuesOnly,
-  );
-
-  /// Creates a Cupertino-native vertical slider.
-  factory CNSlider.vertical({
-    required double value,
-    ValueChanged<double>? onChanged,
-    CNControlSize controlSize = CNControlSize.regular,
-    bool isContinuous = true,
-    double min = 0.0,
-    double max = 1.0,
-    CNSliderController? controller,
-    Color? color,
-    int? tickMarks,
-    CNSliderTickmarkPosition? tickMarkPosition,
-    bool allowsTickMarkValuesOnly = false,
-  }) => CNSlider(
-    value: value,
-    onChanged: onChanged,
-    sliderType: CNSliderType.linear,
-    isContinuous: isContinuous,
-    min: min,
-    max: max,
-    controller: controller,
-    color: color,
-    tickMarks: tickMarks,
-    tickMarkPosition: tickMarkPosition,
-    allowsTickMarkValuesOnly: allowsTickMarkValuesOnly,
-    isVertical: true,
-  );
-
-  /// Wheter the slider allows only tick mark values.
-  final bool allowsTickMarkValuesOnly;
-
-  /// General accent/tint color for the control.
+  /// Optional tint color.
   final Color? color;
 
-  /// Size of the slider.
+  /// Native control size.
   final CNControlSize controlSize;
 
-  /// Optional controller to imperatively interact with the native view.
+  /// Optional imperative controller.
   final CNSliderController? controller;
 
-  /// Whether the slider is continuous.
-  final bool isContinuous;
-
-  /// Whether the slider is vertical.
-  final bool isVertical;
+  /// Optional fixed height.
+  final double? height;
 
   /// Maximum value.
   final double max;
@@ -136,25 +76,25 @@ class CNSlider extends StatefulWidget {
   /// Minimum value.
   final double min;
 
-  /// Callback when the value changes due to user interaction.
+  /// Called when slider value changes.
   final ValueChanged<double>? onChanged;
 
-  /// Type of slider.
-  final CNSliderType sliderType;
+  /// Called when editing starts/ends.
+  final ValueChanged<bool>? onEditingChanged;
 
-  /// Position of the tick marks.
-  final CNSliderTickmarkPosition? tickMarkPosition;
+  /// Optional step increment.
+  final double? step;
 
-  /// Number of tick marks.
-  final int? tickMarks;
-
-  /// Current slider value.
+  /// Current value.
   final double value;
+
+  /// Optional fixed width.
+  final double? width;
 
   @override
   State<CNSlider> createState() => _CNSliderState();
 
-  // ignore: public_member_api_docs
+  /// Whether the slider accepts interaction.
   bool get isEnabled => onChanged != null;
 }
 
@@ -163,18 +103,22 @@ class _CNSliderState extends State<CNSlider> {
   CNSliderController? _internalController;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
-  bool _lastIsDark = false;
+  bool _isEditingFromNative = false;
+  String? _lastSerializedConfigPayload;
+  double? _lastSyncedValue;
+  double? _layoutHeight;
+  double? _layoutWidth;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
+    _syncPropsToNativeIfNeeded();
   }
 
   @override
   void didUpdateWidget(covariant CNSlider oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _syncPropsToNativeIfNeeded(oldWidget);
+    _syncPropsToNativeIfNeeded();
   }
 
   @override
@@ -184,13 +128,49 @@ class _CNSliderState extends State<CNSlider> {
     super.dispose();
   }
 
-  bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
-
-  bool get _enabled => widget.onChanged != null;
-
   CNSliderController get _controller => widget.controller ?? (_internalController ??= CNSliderController());
 
-  Color? get _tint => widget.color ?? CNTheme.of(context).primaryColor;
+  bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
+
+  Color? get _resolvedTint => widget.color ?? CNTheme.of(context).primaryColor;
+
+  double _defaultHeightForControlSize() {
+    switch (widget.controlSize) {
+      case CNControlSize.mini:
+        return 16.0;
+      case CNControlSize.small:
+        return 18.0;
+      case CNControlSize.regular:
+        return 22.0;
+      case CNControlSize.large:
+        return 26.0;
+      case CNControlSize.extraLarge:
+        return 30.0;
+    }
+  }
+
+  Map<String, dynamic> _toPayload({double? frameWidth, double? frameHeight, bool includeValue = true}) {
+    return {
+      if (includeValue) 'value': widget.value,
+      'min': widget.min,
+      'max': widget.max,
+      'step': widget.step,
+      'isDark': _isDark,
+      'isEnabled': widget.isEnabled,
+      'controlSize': widget.controlSize.name,
+      'tint': resolveColorToArgb(_resolvedTint, context),
+      'width': frameWidth,
+      'height': frameHeight,
+    };
+  }
+
+  String _serializeCurrentConfigPayload() =>
+      jsonEncode(_toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight, includeValue: false));
+
+  void _cacheCurrentProps() {
+    _lastSerializedConfigPayload = _serializeCurrentConfigPayload();
+    _lastSyncedValue = widget.value;
+  }
 
   void _onPlatformViewCreated(int id) {
     final channel = MethodChannel('CupertinoNativeSlider_$id');
@@ -198,180 +178,112 @@ class _CNSliderState extends State<CNSlider> {
     _controller._attach(channel);
     channel.setMethodCallHandler(_onMethodCall);
     _cacheCurrentProps();
-    _syncBrightnessIfNeeded();
-  }
-
-  Future<dynamic> _onMethodCall(MethodCall call) async {
-    if (call.method == 'valueChanged') {
-      final args = call.arguments as Map?;
-      final value = (args?['value'] as num?)?.toDouble();
-      if (value != null) {
-        widget.onChanged?.call(value);
-      }
-    }
-    return null;
-  }
-
-  Future<void> _requestIntrinsicSize() async {
-    final ch = _channel;
-    if (ch == null) return;
-    try {
-      final size = await ch.invokeMethod<Map>('getIntrinsicSize');
-      final w = (size?['width'] as num?)?.toDouble();
-      final h = (size?['height'] as num?)?.toDouble();
-
-      if ((w != null || h != null) && mounted) {
-        setState(() {
-          _intrinsicWidth = w != null && w > -1 ? w + 20 : null;
-          _intrinsicHeight = h != null && h > -1 ? h + 20 : null;
-        });
-      }
-    } catch (_) {}
-  }
-
-  void _cacheCurrentProps() {
-    _lastIsDark = _isDark;
     _requestIntrinsicSize();
   }
 
-  Future<void> _syncPropsToNativeIfNeeded(CNSlider oldWidget) async {
+  Future<dynamic> _onMethodCall(MethodCall call) async {
+    switch (call.method) {
+      case 'valueChanged':
+        final args = call.arguments as Map?;
+        final value = (args?['value'] as num?)?.toDouble();
+        if (value != null) {
+          widget.onChanged?.call(value);
+        }
+        break;
+      case 'editingChanged':
+        final args = call.arguments as Map?;
+        final editing = (args?['editing'] as bool?) ?? (args?['editing'] as num?)?.toInt() == 1;
+        _isEditingFromNative = editing;
+        widget.onEditingChanged?.call(editing);
+        break;
+      case 'intrinsicSizeChanged':
+        final args = call.arguments as Map?;
+        _onIntrinsicSizeChanged((args?['width'] as num?)?.toDouble(), (args?['height'] as num?)?.toDouble());
+        break;
+      default:
+        break;
+    }
+
+    return null;
+  }
+
+  void _onIntrinsicSizeChanged(double? width, double? height) {
+    if (!mounted || width == null || height == null) return;
+    if (width == _intrinsicWidth && height == _intrinsicHeight) return;
+    setState(() {
+      _intrinsicWidth = width > 0 ? width : null;
+      _intrinsicHeight = height > 0 ? height : null;
+    });
+  }
+
+  Future<void> _requestIntrinsicSize() async {
     final channel = _channel;
-    if (channel == null || !mounted) return;
+    if (channel == null) return;
 
-    bool needsIntrinsicSize = false;
-
-    if (oldWidget.min != widget.min || oldWidget.max != widget.max) {
-      await channel.invokeMethod('setRange', {'min': widget.min, 'max': widget.max});
-    }
-
-    if (oldWidget.isEnabled != widget.isEnabled) {
-      await channel.invokeMethod('setIsEnabled', {'value': widget.isEnabled});
-    }
-
-    final double clamped = widget.value.clamp(widget.min, widget.max).toDouble();
-    if (oldWidget.value != clamped) {
-      await channel.invokeMethod('setValue', {'value': clamped, 'animated': false});
-    }
-
-    if (oldWidget.controlSize != widget.controlSize) {
-      await channel.invokeMethod('setControlSize', {'value': widget.controlSize.name});
-      debugPrint('called setControlSize with value: ${widget.controlSize.name} for type: ${widget.sliderType}');
-      needsIntrinsicSize = true;
-    }
-
-    if (oldWidget.tickMarks != widget.tickMarks) {
-      await channel.invokeMethod('setTickMarks', {'value': widget.tickMarks});
-      needsIntrinsicSize = true;
-    }
-
-    if (oldWidget.tickMarkPosition != widget.tickMarkPosition) {
-      await channel.invokeMethod('setTickMarkPosition', {'value': widget.tickMarkPosition?.name});
-      needsIntrinsicSize = true;
-    }
-
-    if (oldWidget.allowsTickMarkValuesOnly != widget.allowsTickMarkValuesOnly) {
-      await channel.invokeMethod('setAllowsTickMarkValuesOnly', {'value': widget.allowsTickMarkValuesOnly});
-    }
-
-    if (oldWidget.sliderType != widget.sliderType) {
-      await channel.invokeMethod('setSliderType', {'value': widget.sliderType.name});
-      needsIntrinsicSize = true;
-    }
-
-    if (oldWidget.isContinuous != widget.isContinuous) {
-      await channel.invokeMethod('setIsContinuous', {'value': widget.isContinuous});
-    }
-
-    if (oldWidget.isVertical != widget.isVertical) {
-      await channel.invokeMethod('setIsVertical', {'value': widget.isVertical});
-      needsIntrinsicSize = true;
-    }
-
-    if (!mounted) return;
-    if (oldWidget.color != widget.color) {
-      await channel.invokeMethod('setTint', {'value': resolveColorToArgb(widget.color, context)});
-    }
-
-    if (needsIntrinsicSize) {
-      _requestIntrinsicSize();
+    try {
+      final size = await channel.invokeMethod<Map>('getIntrinsicSize');
+      _onIntrinsicSizeChanged((size?['width'] as num?)?.toDouble(), (size?['height'] as num?)?.toDouble());
+    } catch (_) {
+      // Ignored.
     }
   }
 
-  Future<void> _syncBrightnessIfNeeded() async {
+  Future<void> _syncPropsToNativeIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
-    final isDark = _isDark;
 
-    if (_lastIsDark != isDark) {
-      await channel.invokeMethod('setIsDark', {'value': isDark});
-      _lastIsDark = isDark;
+    final serializedConfigPayload = _serializeCurrentConfigPayload();
+    if (_lastSerializedConfigPayload != serializedConfigPayload) {
+      await channel.invokeMethod('setSlider', _toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight));
+      _cacheCurrentProps();
+      _requestIntrinsicSize();
+      return;
+    }
+
+    if (_lastSyncedValue != widget.value) {
+      _lastSyncedValue = widget.value;
+
+      if (_isEditingFromNative) {
+        return;
+      }
+
+      await channel.invokeMethod('setValue', {'value': widget.value});
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Fallback to Flutter Slider on unsupported platforms.
-    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
-      return Placeholder();
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      return SizedBox.shrink();
     }
-
-    const viewType = 'CupertinoNativeSlider';
-    final creationParams = <String, dynamic>{
-      'min': widget.min,
-      'max': widget.max,
-      'value': widget.value,
-      'isDark': _isDark,
-      'isEnabled': _enabled,
-      'sliderType': widget.sliderType.name,
-      'isContinuous': widget.isContinuous,
-      'isVertical': widget.isVertical,
-      'tickMarks': widget.tickMarks,
-      'tickMarkPosition': widget.tickMarkPosition?.name,
-      'tint': resolveColorToArgb(_tint, context),
-      'controlSize': widget.controlSize.name,
-      'allowsTickMarkValuesOnly': widget.allowsTickMarkValuesOnly,
-    };
-
-    final platformView = AppKitView(
-      viewType: viewType,
-      creationParams: creationParams,
-      creationParamsCodec: const StandardMessageCodec(),
-      onPlatformViewCreated: _onPlatformViewCreated,
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-        Factory<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer()),
-        Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
-        Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-      },
-    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final hasBoundedWidth = constraints.hasBoundedWidth;
         final hasBoundedHeight = constraints.hasBoundedHeight;
 
-        // Use intrinsicWidth if type is circular, or linear and it's vertical
-        final useIntrinsicWidth = widget.sliderType == CNSliderType.circular || widget.isVertical;
+        final resolvedWidth = widget.width ?? (hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth ?? _kDefaultSliderWidth);
+        final resolvedHeight =
+            widget.height ?? (hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? _defaultHeightForControlSize());
 
-        // Use intrinsicHeight if type is circular, or linear and it's not vertical
-        final useIntrinsicHeight = widget.sliderType == CNSliderType.circular || !widget.isVertical;
-
-        final preferIntrinsicWidth = !hasBoundedWidth && useIntrinsicWidth;
-        final preferIntrinsicHeight = !hasBoundedHeight && useIntrinsicHeight;
-
-        double? width;
-        if (preferIntrinsicWidth) {
-          width = _intrinsicWidth ?? 44.0;
-        } else {
-          width = _intrinsicWidth;
-        }
-        double? height;
-        if (preferIntrinsicHeight) {
-          height = _intrinsicHeight ?? 44.0;
-        } else {
-          height = _intrinsicHeight;
+        if (_layoutWidth != resolvedWidth || _layoutHeight != resolvedHeight) {
+          _layoutWidth = resolvedWidth;
+          _layoutHeight = resolvedHeight;
+          _syncPropsToNativeIfNeeded();
         }
 
-        return SizedBox(width: width, height: height, child: platformView);
+        final creationParams = _toPayload(frameWidth: resolvedWidth, frameHeight: resolvedHeight);
+
+        return SizedBox(
+          width: resolvedWidth,
+          height: resolvedHeight + 10,
+          child: AppKitView(
+            viewType: 'CupertinoNativeSlider',
+            creationParams: creationParams,
+            creationParamsCodec: const StandardMessageCodec(),
+            onPlatformViewCreated: _onPlatformViewCreated,
+          ),
+        );
       },
     );
   }

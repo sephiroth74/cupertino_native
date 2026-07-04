@@ -1,6 +1,28 @@
 import 'package:flutter/cupertino.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 
+const _kSystemColors = {
+  'none': null,
+  'red': MacOS26Colors.red,
+  'orange': MacOS26Colors.orange,
+  'yellow': MacOS26Colors.yellow,
+  'green': MacOS26Colors.green,
+  'mint': MacOS26Colors.mint,
+  'teal': MacOS26Colors.teal,
+  'cyan': MacOS26Colors.cyan,
+  'blue': MacOS26Colors.blue,
+  'indigo': MacOS26Colors.indigo,
+  'pink': MacOS26Colors.pink,
+  'purple': MacOS26Colors.purple,
+  'brown': MacOS26Colors.brown,
+  'gray': MacOS26Colors.gray,
+  'fillPrimary': MacOS26Colors.fillPrimary,
+  'fillSecondary': MacOS26Colors.fillSecondary,
+  'fillTertiary': MacOS26Colors.fillTertiary,
+  'fillQuaternary': MacOS26Colors.fillQuaternary,
+  'fillQuinary': MacOS26Colors.fillQuinary,
+};
+
 class SliderDemoPage extends StatefulWidget {
   const SliderDemoPage({super.key});
 
@@ -9,176 +31,118 @@ class SliderDemoPage extends StatefulWidget {
 }
 
 class _SliderDemoPageState extends State<SliderDemoPage> {
-  double _coloredSliderValue = 50;
   double _defaultSliderValue = .5;
+  bool _isEditing = false;
+  bool _isEnabled = true;
+  bool _isStepped = false;
   CNControlSize _size = CNControlSize.regular;
-
-  void _onSliderChange(double v) {
-    setState(() {
-      _defaultSliderValue = v;
-    });
-  }
+  Color? _tintColor = null;
 
   @override
   Widget build(BuildContext context) {
     return CNPageScaffold(
       navigationBar: const CNNavigationBar(middle: Text('Slider')),
       child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          physics: const AlwaysScrollableScrollPhysics(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text('Size'),
-                const SizedBox(width: 16),
-                CNPopupMenuButton.icon(
-                  buttonIcon: CNSymbol('gearshape', size: 12),
-                  items: [
-                    CNPopupMenuItem(
-                      label: 'Mini',
-                      checked: _size == CNControlSize.mini,
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  const SizedBox(height: 16),
+                  Row(children: [const Text('Default'), Spacer(), Text('Value: ${_defaultSliderValue.toStringAsFixed(2)}')]),
+                  CNSlider(
+                    value: _defaultSliderValue,
+                    onChanged: _isEnabled ? (v) => setState(() => _defaultSliderValue = v) : null,
+                    onEditingChanged: (editing) => setState(() => _isEditing = editing),
+                    controlSize: _size,
+                    step: _isStepped ? 0.025 : null,
+                    color: _tintColor,
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Editing: ${_isEditing ? 'true' : 'false'}', style: CNTheme.of(context).typography.body),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                constraints: BoxConstraints.expand(width: 350),
+                decoration: BoxDecoration(
+                  color: CNTheme.of(context).fillPrimaryColor,
+                  border: Border.all(color: CNTheme.of(context).separatorColor, width: 1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: const Text('Control Size')),
+                        CNPicker(
+                          selectedIndex: CNControlSize.values.indexOf(_size),
+                          onValueChanged: (index) => setState(() => _size = CNControlSize.values[index]),
+                          items: CNControlSize.values.map((size) => CNPickerItem(size.name)).toList(),
+                          pickerStyle: CNPickerStyle.automatic,
+                        ),
+                      ],
                     ),
-                    CNPopupMenuItem(
-                      label: 'Small',
-                      checked: _size == CNControlSize.small,
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(child: const Text('Enabled')),
+                        CNToggle(
+                          value: _isEnabled,
+                          onChanged: (enabled) => setState(() => _isEnabled = enabled),
+                          controlSize: CNControlSize.small,
+                          toggleStyle: CNToggleStyle.switch_,
+                        ),
+                      ],
                     ),
-                    CNPopupMenuItem(
-                      label: 'Regular',
-                      checked: _size == CNControlSize.regular,
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(child: const Text('Steps')),
+                        CNToggle(
+                          value: _isStepped,
+                          onChanged: (enabled) => setState(() => _isStepped = enabled),
+                          controlSize: CNControlSize.small,
+                          toggleStyle: CNToggleStyle.switch_,
+                        ),
+                      ],
                     ),
-                    CNPopupMenuItem(
-                      label: 'Large',
-                      checked: _size == CNControlSize.large,
-                    ),
-                    CNPopupMenuItem(
-                      label: 'Extra Large',
-                      checked: _size == CNControlSize.extraLarge,
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(child: const Text('Tint Color')),
+                        CNPicker(
+                          selectedIndex: _kSystemColors.keys.toList().indexOf(
+                            _tintColor == null
+                                ? 'none'
+                                : _kSystemColors.entries.firstWhere((entry) => entry.value == _tintColor).key,
+                          ),
+                          onValueChanged: (index) => setState(() => _tintColor = _kSystemColors.values.elementAt(index)),
+                          items: _kSystemColors.keys
+                              .map(
+                                (colorName) =>
+                                    CNPickerItem(colorName, icon: CNSymbol("circle.fill", color: _kSystemColors[colorName])),
+                              )
+                              .toList(),
+                          pickerStyle: CNPickerStyle.menu,
+                        ),
+                      ],
                     ),
                   ],
-                  onSelected: (v) =>
-                      setState(() => _size = CNControlSize.values[v]),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const Text('Default'),
-                Spacer(),
-                Text('Value: ${_defaultSliderValue.toStringAsFixed(2)}'),
-              ],
-            ),
-            CNSlider(
-              value: _defaultSliderValue,
-              onChanged: (v) => setState(() => _defaultSliderValue = v),
-              controlSize: _size,
-            ),
-            const SizedBox(height: 16),
-            Text('Step Slider'),
-            CNSlider(
-              value: _defaultSliderValue,
-              onChanged: (v) => setState(() => _defaultSliderValue = v),
-              tickMarks: 20,
-              allowsTickMarkValuesOnly: true,
-              tickMarkPosition: CNSliderTickmarkPosition.below,
-              controlSize: _size,
-            ),
-            const SizedBox(height: 16),
-            Text('Non Continuous'),
-            CNSlider(
-              value: _defaultSliderValue,
-              isContinuous: false,
-              onChanged: (v) => setState(() => _defaultSliderValue = v),
-              controlSize: _size,
-            ),
-            const SizedBox(height: 16),
-            Text('Tinted'),
-
-            CNSlider(
-              value: _defaultSliderValue,
-              isContinuous: false,
-              onChanged: (v) => setState(() => _defaultSliderValue = v),
-              controlSize: _size,
-              color: CupertinoColors.activeGreen,
-            ),
-            const SizedBox(height: 16),
-            Text('Disabled'),
-
-            CNSlider(
-              value: _defaultSliderValue,
-              isContinuous: false,
-              onChanged: null,
-              controlSize: _size,
-            ),
-            const SizedBox(height: 16),
-
-            Row(
-              children: [
-                SizedBox(
-                  height: 150,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Text('Vertical'),
-                      const SizedBox(height: 16.0),
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            height: 100,
-                            child: CNSlider.vertical(
-                              value: _defaultSliderValue,
-                              isContinuous: true,
-                              onChanged: _onSliderChange,
-                              controlSize: _size,
-                            ),
-                          ),
-                          const SizedBox(width: 16.0),
-                          SizedBox(
-                            height: 100,
-                            child: CNSlider.vertical(
-                              value: _defaultSliderValue,
-                              isContinuous: true,
-                              onChanged: _onSliderChange,
-                              controlSize: _size,
-                              tickMarks: 10,
-                              allowsTickMarkValuesOnly: true,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 32),
-
-                SizedBox(
-                  height: 150,
-                  child: Column(
-                    children: [
-                      Text('Circular'),
-                      const SizedBox(height: 16.0),
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          CNSlider.circular(
-                            value: _defaultSliderValue,
-                            onChanged: _onSliderChange,
-                            controlSize: _size,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ),

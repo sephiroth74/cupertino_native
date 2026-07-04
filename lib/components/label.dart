@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 const double _kDefaultLabelWidth = 50.0;
-const double _kDefaultLabelHeight = 24.0;
 
 /// A native macOS SwiftUI label backed by `Label`.
 ///
@@ -149,8 +148,8 @@ class _CNLabelState extends State<CNLabel> {
 
   Map<String, dynamic> _textToMap(CNText textWidget) {
     final theme = CNTheme.of(context);
-    final resolvedColor = textWidget.color ?? theme.labelColor;
-    final resolvedFont = textWidget.font ?? cnFontFromTextStyle(theme.typography.body);
+    final resolvedColor = textWidget.color ?? theme.textTheme.labelColor ?? theme.labelColor;
+    final resolvedFont = textWidget.font ?? theme.textTheme.font ?? cnFontFromTextStyle(theme.typography.body);
 
     return {
       'text': textWidget.text,
@@ -165,8 +164,8 @@ class _CNLabelState extends State<CNLabel> {
 
   Widget _buildFallbackText(CNText textWidget) {
     final theme = CNTheme.of(context);
-    final resolvedColor = textWidget.color ?? theme.labelColor;
-    final resolvedFont = textWidget.font ?? cnFontFromTextStyle(theme.typography.body);
+    final resolvedColor = textWidget.color ?? theme.textTheme.labelColor ?? theme.labelColor;
+    final resolvedFont = textWidget.font ?? theme.textTheme.font ?? cnFontFromTextStyle(theme.typography.body);
 
     return Text(
       textWidget.text,
@@ -178,6 +177,19 @@ class _CNLabelState extends State<CNLabel> {
         fontWeight: fontWeightFromCNFontWeight(resolvedFont.weight),
       ),
     );
+  }
+
+  double _defaultHeightFromFonts() {
+    final theme = CNTheme.of(context);
+    final themeTextFont = theme.textTheme.font ?? cnFontFromTextStyle(theme.typography.body);
+    final iconTextFont = theme.imageTheme.font ?? cnFontFromTextStyle(theme.typography.body);
+    final primaryFont = widget.text.font ?? themeTextFont;
+    final secondaryFont = widget.secondaryText?.font ?? themeTextFont;
+    final iconFont = widget.icon?.font ?? iconTextFont;
+    final primaryPoints = primaryFont.size.points ?? 17.0;
+    final secondaryPoints = secondaryFont.size.points ?? 17.0;
+    final iconPoints = iconFont.size.points ?? 17.0;
+    return primaryPoints > secondaryPoints ? (primaryPoints > iconPoints ? primaryPoints : iconPoints) : (secondaryPoints > iconPoints ? secondaryPoints : iconPoints);
   }
 
   Map<String, dynamic> _toPayload() {
@@ -242,14 +254,11 @@ class _CNLabelState extends State<CNLabel> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final defaultHeight = _defaultHeightFromFonts();
         final hasBoundedWidth = constraints.hasBoundedWidth;
         final hasBoundedHeight = constraints.hasBoundedHeight;
         final shouldProbeWidth = widget.width == null && !hasBoundedWidth && _intrinsicWidth == null;
         final shouldProbeHeight = widget.height == null && !hasBoundedHeight && _intrinsicHeight == null;
-
-        debugPrint(
-          '[CNLabel] build() constraints: $constraints, intrinsicWidth: $_intrinsicWidth, intrinsicHeight: $_intrinsicHeight, layoutWidth: $_layoutWidth, layoutHeight: $_layoutHeight',
-        );
 
         if ((shouldProbeWidth || shouldProbeHeight) && !_intrinsicProbeInFlight && _channel != null) {
           _requestIntrinsicSize();
@@ -263,15 +272,13 @@ class _CNLabelState extends State<CNLabel> {
             (hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth ?? (canFallbackWidth ? _kDefaultLabelWidth : null));
         final resolvedHeight =
             widget.height ??
-            (hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? (canFallbackHeight ? _kDefaultLabelHeight : null));
+          (hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? (canFallbackHeight ? defaultHeight : null));
 
         if (_layoutWidth != resolvedWidth || _layoutHeight != resolvedHeight) {
           _layoutWidth = resolvedWidth;
           _layoutHeight = resolvedHeight;
           _syncPropsToNativeIfNeeded();
         }
-
-        debugPrint('[CNLabel] build() resolvedWidth: $resolvedWidth, resolvedHeight: $resolvedHeight');
 
         if (defaultTargetPlatform != TargetPlatform.macOS) {
           final showIcon = widget.icon != null && widget.labelStyle != CNLabelStyle.titleOnly;
@@ -308,14 +315,11 @@ class _CNLabelState extends State<CNLabel> {
         );
 
         if (resolvedWidth == null && resolvedHeight == null) {
-          debugPrint('[CNLabel] build() using default width: $_kDefaultLabelWidth, default height: $_kDefaultLabelHeight');
-          return SizedBox(width: _kDefaultLabelWidth, height: _kDefaultLabelHeight, child: platformView);
+          return SizedBox(width: _kDefaultLabelWidth, height: defaultHeight, child: platformView);
         } else if (resolvedWidth == null) {
-          debugPrint('[CNLabel] build() using default width: $_kDefaultLabelWidth');
           return SizedBox(width: _kDefaultLabelWidth, child: platformView);
         } else if (resolvedHeight == null) {
-          debugPrint('[CNLabel] build() using default height: $_kDefaultLabelHeight');
-          return SizedBox(height: _kDefaultLabelHeight, child: platformView);
+          return SizedBox(height: defaultHeight, child: platformView);
         }
         return SizedBox(width: resolvedWidth, height: resolvedHeight, child: platformView);
       },

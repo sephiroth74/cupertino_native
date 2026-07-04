@@ -57,8 +57,8 @@ class CNText extends StatefulWidget {
 
   Map<String, dynamic> _toMap(BuildContext context, {double? frameWidth, double? frameHeight}) {
     final theme = CNTheme.of(context);
-    final resolvedColor = color ?? theme.labelColor;
-    final resolvedFont = font ?? cnFontFromTextStyle(theme.typography.body);
+    final resolvedColor = color ?? theme.textTheme.labelColor ?? theme.labelColor;
+    final resolvedFont = font ?? theme.textTheme.font ?? cnFontFromTextStyle(theme.typography.body);
 
     return {
       'text': text,
@@ -160,8 +160,8 @@ class _CNTextState extends State<CNText> {
   @override
   Widget build(BuildContext context) {
     final theme = CNTheme.of(context);
-    final resolvedColor = widget.color ?? theme.labelColor;
-    final resolvedFont = widget.font ?? cnFontFromTextStyle(theme.typography.body);
+    final resolvedColor = widget.color ?? theme.textTheme.labelColor ?? theme.labelColor;
+    final resolvedFont = widget.font ?? theme.textTheme.font ?? cnFontFromTextStyle(theme.typography.body);
     final textStyle = theme.typography.body.copyWith(
       color: resolvedColor,
       fontSize: resolvedFont.size.points,
