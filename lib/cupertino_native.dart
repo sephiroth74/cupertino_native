@@ -10,6 +10,7 @@ export 'components/icon.dart';
 export 'components/tab_bar.dart';
 export 'components/popup_menu_button.dart';
 export 'components/menu_button.dart';
+export 'components/button_child.dart';
 export 'components/label.dart';
 export 'components/button.dart';
 export 'components/color_well.dart';

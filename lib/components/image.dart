@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:cupertino_native/channel/channel_serialization.dart';
+import 'package:cupertino_native/components/button_child.dart';
 import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/style/font.dart';
 import 'package:cupertino_native/style/sf_symbol.dart';
@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 /// Represents an image that can be used in various components, such as menu items or buttons.
 /// This class encapsulates the necessary information to render a system symbol on Apple platforms,
 /// along with optional configuration for customizing its appearance.
-class CNImage extends StatefulWidget implements CNChannelSerializable {
+class CNImage extends StatefulWidget with CNButtonChild {
   /// Creates a CNImage with the given [systemSymbolName].
   const CNImage({
     super.key,
@@ -46,19 +46,22 @@ class CNImage extends StatefulWidget implements CNChannelSerializable {
   final Color? tint;
 
   @override
+  String get buttonChildType => 'image';
+
+  @override
   State<CNImage> createState() => _CNImageState();
 
   @override
-  Map<String, dynamic> toChannelMap(BuildContext context) => toMap(context);
+  Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) => toMap(context, ignoreTheme: ignoreTheme);
 
   /// Serializes this image to a map for platform channel communication.
-  Map<String, dynamic> toMap(BuildContext context) {
-    final imageTheme = CNTheme.of(context).imageTheme;
-    final resolvedRenderingMode = symbolRenderingMode ?? imageTheme.symbolRenderingMode;
-    final resolvedColorRenderingMode = symbolColorRenderingMode ?? imageTheme.symbolColorRenderingMode;
-    final resolvedForegroundStyleColors = foregroundStyleColors ?? imageTheme.foregroundStyleColors;
-    final resolvedTint = tint ?? imageTheme.tint;
-    final resolvedFont = font ?? imageTheme.font;
+  Map<String, dynamic> toMap(BuildContext context, {bool ignoreTheme = false}) {
+    final imageTheme = ignoreTheme ? null : CNTheme.of(context).imageTheme;
+    final resolvedRenderingMode = symbolRenderingMode ?? imageTheme?.symbolRenderingMode;
+    final resolvedColorRenderingMode = symbolColorRenderingMode ?? imageTheme?.symbolColorRenderingMode;
+    final resolvedForegroundStyleColors = foregroundStyleColors ?? imageTheme?.foregroundStyleColors;
+    final resolvedTint = tint ?? imageTheme?.tint;
+    final resolvedFont = font ?? imageTheme?.font;
 
     return {
       'systemSymbolName': systemSymbolName,
@@ -71,8 +74,8 @@ class CNImage extends StatefulWidget implements CNChannelSerializable {
   }
 
   /// Serializes this image to JSON for communication with the native platform.
-  String toJson(BuildContext context) {
-    return jsonEncode(toMap(context));
+  String toJson(BuildContext context, {bool ignoreTheme = false}) {
+    return jsonEncode(toMap(context, ignoreTheme: ignoreTheme));
   }
 }
 

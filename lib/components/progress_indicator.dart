@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cupertino_native/channel/channel_serialization.dart';
+import 'package:cupertino_native/components/button_child.dart';
 import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/model/control_size.dart';
 import 'package:cupertino_native/style/progress_style.dart';
@@ -24,7 +25,7 @@ const _kDefaultCircularSizeExtraLarge = 32.0;
 /// A native macOS SwiftUI-style progress view.
 ///
 /// Backed by SwiftUI `ProgressView` on macOS.
-class CNProgressView extends StatefulWidget {
+class CNProgressView extends StatefulWidget with CNButtonChild {
   /// Creates a progress view.
   ///
   /// Pass `value` as null for indeterminate mode.
@@ -61,7 +62,28 @@ class CNProgressView extends StatefulWidget {
   final double? width;
 
   @override
+  String get buttonChildType => 'progressView';
+
+  @override
   State<CNProgressView> createState() => _CNProgressViewState();
+
+  @override
+  Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
+    final isDark = CNTheme.brightnessOf(context) == Brightness.dark;
+    final resolvedTint =
+        tint ?? (ignoreTheme ? null : CNTheme.of(context).progressTheme.tintColor ?? CNTheme.of(context).primaryColor);
+
+    return {
+      'style': progressViewStyle.name,
+      'controlSize': controlSize.name,
+      'isDark': isDark,
+      'tint': resolveColorToArgb(resolvedTint, context),
+      'value': value,
+      'total': total,
+      'width': width,
+      'height': height,
+    };
+  }
 }
 
 class _CNProgressViewState extends State<CNProgressView> {

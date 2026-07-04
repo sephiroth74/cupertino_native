@@ -54,7 +54,17 @@ class _ProgressIndicatorsPageDemoState extends State<ProgressIndicatorsPageDemo>
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerLeft,
-              child: CNProgressView(controlSize: CNControlSize.small, progressViewStyle: CNProgressViewStyle.circular),
+              child: Row(
+                children: [
+                  CNProgressView(controlSize: CNControlSize.small, progressViewStyle: CNProgressViewStyle.circular),
+                  const SizedBox(width: 12),
+                  CNProgressView(
+                    controlSize: CNControlSize.regular,
+                    progressViewStyle: CNProgressViewStyle.circular,
+                    tint: MacOS26Colors.brown,
+                  ),
+                ],
+              ),
             ),
 
             const SizedBox(height: 20),

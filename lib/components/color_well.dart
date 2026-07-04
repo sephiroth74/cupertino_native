@@ -189,7 +189,7 @@ class _CNColorWellPayload implements CNChannelSerializable {
   final bool supportsAlpha;
 
   @override
-  Map<String, dynamic> toChannelMap(BuildContext context) {
+  Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
     return {
       'color': color,
       'style': style,

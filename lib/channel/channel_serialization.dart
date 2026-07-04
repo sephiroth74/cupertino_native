@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 /// Contract for channel payload objects that need BuildContext to serialize.
 abstract class CNChannelSerializable {
   /// Converts this object to a channel-safe map payload.
-  Map<String, dynamic> toChannelMap(BuildContext context);
+  Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false});
 }
 
 /// Centralized helpers for serializing/deserializing channel payloads.
@@ -23,12 +23,12 @@ class CNChannelSerialization {
   }
 
   /// Serializes an optional object implementing [CNChannelSerializable].
-  static Map<String, dynamic>? object(CNChannelSerializable? value, BuildContext context) {
-    return value?.toChannelMap(context);
+  static Map<String, dynamic>? object(CNChannelSerializable? value, BuildContext context, {bool ignoreTheme = false}) {
+    return value?.toChannelMap(context, ignoreTheme: ignoreTheme);
   }
 
   /// Serializes a list of [CNChannelSerializable] objects.
-  static List<Map<String, dynamic>> objects(Iterable<CNChannelSerializable> values, BuildContext context) {
-    return values.map((e) => e.toChannelMap(context)).toList();
+  static List<Map<String, dynamic>> objects(Iterable<CNChannelSerializable> values, BuildContext context, {bool ignoreTheme = false}) {
+    return values.map((e) => e.toChannelMap(context, ignoreTheme: ignoreTheme)).toList();
   }
 }

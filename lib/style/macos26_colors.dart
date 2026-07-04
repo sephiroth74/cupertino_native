@@ -93,6 +93,12 @@ abstract final class MacOS26Colors {
     darkColor: Color(0xFF8E8E93),
   );
 
+  // ignore: public_member_api_docs
+  static const Color white = Color(0xFFFFFFFF);
+  
+  // ignore: public_member_api_docs
+  static const Color black = Color(0xFF000000);
+
   // -------------------------------------------------------------------------
   // Fills — Opaque System Colors
   // These are semi-transparent overlays on top of backgrounds.

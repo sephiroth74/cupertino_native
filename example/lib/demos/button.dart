@@ -1,6 +1,28 @@
 import 'package:flutter/cupertino.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 
+const _kSystemColors = {
+  'none': null,
+  'red': MacOS26Colors.red,
+  'orange': MacOS26Colors.orange,
+  'yellow': MacOS26Colors.yellow,
+  'green': MacOS26Colors.green,
+  'mint': MacOS26Colors.mint,
+  'teal': MacOS26Colors.teal,
+  'cyan': MacOS26Colors.cyan,
+  'blue': MacOS26Colors.blue,
+  'indigo': MacOS26Colors.indigo,
+  'pink': MacOS26Colors.pink,
+  'purple': MacOS26Colors.purple,
+  'brown': MacOS26Colors.brown,
+  'gray': MacOS26Colors.gray,
+  'fillPrimary': MacOS26Colors.fillPrimary,
+  'fillSecondary': MacOS26Colors.fillSecondary,
+  'fillTertiary': MacOS26Colors.fillTertiary,
+  'fillQuaternary': MacOS26Colors.fillQuaternary,
+  'fillQuinary': MacOS26Colors.fillQuinary,
+};
+
 class ButtonDemoPage extends StatefulWidget {
   const ButtonDemoPage({super.key});
 
@@ -11,12 +33,9 @@ class ButtonDemoPage extends StatefulWidget {
 class _ButtonDemoPageState extends State<ButtonDemoPage> {
   CNButtonStyle _buttonStyle = CNButtonStyle.automatic;
   CNControlSize _controlSize = CNControlSize.large;
-  CNImageScale _imageScale = CNImageScale.large;
   String _last = 'None';
   bool _shrinkWrap = true;
-  final List<CNControlSize> _sizes = CNControlSize.values;
-  CNSymbolRenderingMode _symbolRenderingMode = CNSymbolRenderingMode.hierarchical;
-  final Color? _tint = null;
+  Color? _tintColor;
 
   void _set(String what) => setState(() => _last = what);
 
@@ -25,152 +44,141 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
     return CNPageScaffold(
       navigationBar: const CNNavigationBar(middle: Text('Button')),
       child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const Text('Text buttons'),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: CNPicker(
-                      onValueChanged: (value) {
-                        setState(() {
-                          debugPrint('Selected control size: ${_sizes[value]}');
-                          _controlSize = _sizes[value];
-                        });
-                      },
-                      selectedIndex: _sizes.indexOf(_controlSize),
-                      controlSize: CNControlSize.large,
-                      pickerStyle: CNPickerStyle.automatic,
-                      shrinkWrap: true,
-                      items: CNControlSize.values.map((size) => CNPickerItem.text(size.name)).toList(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Wrap(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: CNButton(
+                        onPressed: () => _set('Default'),
+                        controlSize: _controlSize,
+                        tint: _tintColor,
+                        style: _buttonStyle,
+                        children: const [CNText('Default')],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: CNPicker(
-                      selectedIndex: _imageScale.index,
-                      controlSize: CNControlSize.large,
-                      shrinkWrap: true,
-                      pickerStyle: CNPickerStyle.menu,
-                      items: CNImageScale.values.map((scale) => CNPickerItem.text(scale.name)).toList(),
-                      onValueChanged: (value) {
-                        setState(() {
-                          debugPrint('Selected image scale: ${CNImageScale.values[value]}');
-                          _imageScale = CNImageScale.values[value];
-                        });
-                      },
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: CNButton(
+                        onPressed: () => _set('Button with Icon'),
+                        controlSize: _controlSize,
+                        tint: _tintColor,
+                        style: _buttonStyle,
+                        shrinkWrap: true,
+                        children: const [
+                          CNImage(systemSymbolName: 'square.and.arrow.up'),
+                          CNText('Button with Icon'),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: CNButton(
+                        onPressed: () => _set('Icon Only'),
+                        controlSize: _controlSize,
+                        tint: _tintColor,
+                        style: _buttonStyle,
+                        shrinkWrap: true,
+                        children: const [CNImage(systemSymbolName: 'square.and.arrow.up')],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: CNButton(
+                        onPressed: () => _set('Progress View'),
+                        controlSize: _controlSize,
+                        tint: _tintColor,
+                        style: _buttonStyle,
+                        shrinkWrap: true,
+                        children: const [
+                          CNProgressView(
+                            controlSize: CNControlSize.small,
+                            progressViewStyle: CNProgressViewStyle.linear,
+                            width: 50,
+                            tint: MacOS26Colors.white,
+                          ),
+                          CNText('Progress View'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: CNPicker(
-                      selectedIndex: _symbolRenderingMode.index,
-                      controlSize: CNControlSize.large,
-                      shrinkWrap: true,
-                      pickerStyle: CNPickerStyle.menu,
-                      items: CNSymbolRenderingMode.values.map((mode) => CNPickerItem.text(mode.name)).toList(),
-                      onValueChanged: (value) {
-                        setState(() {
-                          debugPrint('Selected symbol rendering mode: ${CNSymbolRenderingMode.values[value]}');
-                          _symbolRenderingMode = CNSymbolRenderingMode.values[value];
-                        });
-                      },
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                constraints: BoxConstraints.expand(width: 350),
+                decoration: BoxDecoration(
+                  color: CNTheme.of(context).fillPrimaryColor,
+                  border: Border.all(color: CNTheme.of(context).separatorColor, width: 1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: const Text('Control Size')),
+                        CNPicker(
+                          selectedIndex: CNControlSize.values.indexOf(_controlSize),
+                          onValueChanged: (index) => setState(() => _controlSize = CNControlSize.values[index]),
+                          items: CNControlSize.values.map((size) => CNPickerItem(size.name)).toList(),
+                          pickerStyle: CNPickerStyle.automatic,
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: CNPicker(
-                      selectedIndex: _buttonStyle.index,
-                      controlSize: CNControlSize.large,
-                      shrinkWrap: true,
-                      pickerStyle: CNPickerStyle.menu,
-                      items: CNButtonStyle.values.map((style) => CNPickerItem.text(style.name)).toList(),
-                      onValueChanged: (value) {
-                        setState(() {
-                          debugPrint('Selected button style: ${CNButtonStyle.values[value]}');
-                          _buttonStyle = CNButtonStyle.values[value];
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Table(
-                columnWidths: const {0: FlexColumnWidth(200), 1: FlexColumnWidth(200)},
-                children: [
-                  TableRow(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: CNButton(
-                          label: 'Label Only',
-                          symbolRenderingMode: _symbolRenderingMode,
-                          style: _buttonStyle,
-                          imageScale: _imageScale,
-                          onPressed: () => _set('Automatic'),
-                          shrinkWrap: _shrinkWrap,
-                          controlSize: _controlSize,
-                          tint: _tint,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: CNButton(
-                          label: 'Label and Icon',
-                          systemImage: 'square.and.arrow.up',
-                          symbolRenderingMode: _symbolRenderingMode,
-                          style: _buttonStyle,
-                          imageScale: _imageScale,
-                          onPressed: () => _set('Plain'),
-                          shrinkWrap: _shrinkWrap,
-                          controlSize: _controlSize,
-                          tint: _tint,
-                        ),
-                      ),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: CNButton(
-                          systemImage: 'square.and.arrow.up',
-                          symbolRenderingMode: _symbolRenderingMode,
-                          style: _buttonStyle,
-                          imageScale: _imageScale,
-                          onPressed: () => _set('Icon Only'),
-                          shrinkWrap: _shrinkWrap,
-                          controlSize: _controlSize,
-                          tint: _tint,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: const SizedBox.shrink(), // Empty cell
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    const SizedBox(height: 16),
 
-              const SizedBox(height: 24),
-              Text('Last pressed: $_last'),
-            ],
-          ),
+                    Row(
+                      children: [
+                        Expanded(child: const Text('Button Style')),
+                        CNPicker(
+                          selectedIndex: CNButtonStyle.values.indexOf(_buttonStyle),
+                          onValueChanged: (index) => setState(() => _buttonStyle = CNButtonStyle.values[index]),
+                          items: CNButtonStyle.values.map((size) => CNPickerItem(size.name)).toList(),
+                          pickerStyle: CNPickerStyle.automatic,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    Row(
+                      children: [
+                        Expanded(child: const Text('Tint Color')),
+                        CNPicker(
+                          selectedIndex: _kSystemColors.keys.toList().indexOf(
+                            _tintColor == null
+                                ? 'none'
+                                : _kSystemColors.entries.firstWhere((entry) => entry.value == _tintColor).key,
+                          ),
+                          onValueChanged: (index) => setState(() => _tintColor = _kSystemColors.values.elementAt(index)),
+                          items: _kSystemColors.keys
+                              .map(
+                                (colorName) =>
+                                    CNPickerItem(colorName, icon: CNSymbol("circle.fill", color: _kSystemColors[colorName])),
+                              )
+                              .toList(),
+                          pickerStyle: CNPickerStyle.menu,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

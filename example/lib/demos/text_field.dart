@@ -68,13 +68,13 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
               runSpacing: 8,
               children: [
                 CNButton(
-                  label: 'Set Text',
+                  children: const [CNText('Set Text')],
                   onPressed: () {
                     _controller.text = 'Flutter says hi!';
                   },
                 ),
                 CNButton(
-                  label: 'Clear Text',
+                  children: const [CNText('Clear Text')],
                   onPressed: () {
                     _controller.clear();
                   },

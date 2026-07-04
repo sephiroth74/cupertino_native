@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 
 import '../theme/cn_theme.dart';
@@ -27,6 +28,7 @@ class CNListTile extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.padding = const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    this.selected = false,
   });
 
   /// Optional leading widget.
@@ -37,6 +39,9 @@ class CNListTile extends StatelessWidget {
 
   /// Content padding.
   final EdgeInsets padding;
+
+  /// Whether the tile is selected.
+  final bool selected;
 
   /// Main title widget.
   final Widget title;
@@ -53,15 +58,16 @@ class CNListTile extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: Container(
         padding: padding,
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: theme.separatorColor.withValues(alpha: 0.45), width: 1)),
-        ),
+        decoration: selected ? BoxDecoration(
+          color: theme.accentColor,
+          borderRadius: BorderRadius.circular(12),
+        ) : null,
         child: Row(
           children: [
             if (leading != null) ...[leading!, const SizedBox(width: 12)],
             Expanded(
               child: DefaultTextStyle(
-                style: theme.typography.title3.copyWith(color: theme.labelColor),
+                style: theme.typography.title3.copyWith(color: selected ? CupertinoColors.label.darkColor : CupertinoColors.label.color),
                 child: title,
               ),
             ),

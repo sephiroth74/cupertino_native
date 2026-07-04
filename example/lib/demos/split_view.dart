@@ -107,19 +107,27 @@ class _SplitViewDemoPageState extends State<SplitViewDemoPage> {
                     runSpacing: 8,
                     children: [
                       CNButton(
-                        label: '30 / 70',
+                        children: const [CNText('30 / 70')],
                         onPressed: () => _controller.setFraction(0.3),
                         style: CNButtonStyle.borderedProminent,
                       ),
                       CNButton(
-                        label: '50 / 50',
+                        children: const [CNText('50 / 50')],
                         onPressed: () => _controller.setFraction(0.5),
                         style: CNButtonStyle.borderedProminent,
                       ),
-                      CNButton(label: 'Collapse First', onPressed: _controller.collapseFirst, style: CNButtonStyle.bordered),
-                      CNButton(label: 'Collapse Second', onPressed: _controller.collapseSecond, style: CNButtonStyle.bordered),
                       CNButton(
-                        label: 'Expand Both',
+                        children: const [CNText('Collapse First')],
+                        onPressed: _controller.collapseFirst,
+                        style: CNButtonStyle.bordered,
+                      ),
+                      CNButton(
+                        children: const [CNText('Collapse Second')],
+                        onPressed: _controller.collapseSecond,
+                        style: CNButtonStyle.bordered,
+                      ),
+                      CNButton(
+                        children: const [CNText('Expand Both')],
                         onPressed: () {
                           _controller.expandFirst();
                           _controller.expandSecond();

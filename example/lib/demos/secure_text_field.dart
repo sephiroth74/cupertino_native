@@ -58,13 +58,13 @@ class _SecureTextFieldDemoPageState extends State<SecureTextFieldDemoPage> {
               runSpacing: 8,
               children: [
                 CNButton(
-                  label: 'Set Sample',
+                  children: const [CNText('Set Sample')],
                   onPressed: () {
                     _controller.text = 's3cr3t-passw0rd';
                   },
                 ),
                 CNButton(
-                  label: 'Clear',
+                  children: const [CNText('Clear')],
                   onPressed: () {
                     _controller.clear();
                   },

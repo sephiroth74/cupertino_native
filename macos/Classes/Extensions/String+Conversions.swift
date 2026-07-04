@@ -35,7 +35,7 @@ extension String {
             PlainButtonStyle()
         case "glass":
             GlassButtonStyle()
-        case "glassProminent":
+        case "glassProminent", "prominentGlass":
             GlassProminentButtonStyle()
         case "link":
             LinkButtonStyle()

@@ -1,4 +1,5 @@
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'demos/slider.dart';
@@ -86,9 +87,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return SystemThemeBuilder(
       builder: (context, color) {
-        if (_accentColor == null) {
-          _accentColor = color.accent;
-        }
+        _accentColor ??= color.accent;
         return ChangeNotifierProvider(
           create: (_) => AppTheme(),
           builder: (context, child) {
@@ -132,6 +131,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Color Well', 'paintpalette', ColorWellDemoPage()),
     _DemoEntry('Slider', 'slider.horizontal.3', SliderDemoPage()),
     _DemoEntry('Progress', 'progress.indicator', ProgressIndicatorsPageDemo()),
+    _DemoEntry('Button', 'button.horizontal', ButtonDemoPage()),
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Toggle', 'switch.2', ToggleDemo()),
@@ -141,7 +141,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Icon', 'app', IconDemoPage()),
     _DemoEntry('Popup Menu Button', 'ellipsis.circle', PopupMenuButtonDemoPage()),
     _DemoEntry('Menu Button', 'ellipsis.circle', MenuButtonDemoPage()),
-    _DemoEntry('Button', 'hand.tap', ButtonDemoPage()),
     _DemoEntry('Path Control', 'folder', PathControlDemoPage()),
     _DemoEntry('Level Indicators', 'gauge', LevelIndicatorDemoPage()),
     _DemoEntry('Steppers', 'plusminus', StepperDemoPage()),
@@ -277,10 +276,15 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
                   for (final entry in visibleEntries)
                     CNListTile(
                       title: Text(entry.title),
-                      leading: CNIcon(symbol: CNSymbol(entry.symbolName, color: accentColor)),
-                      trailing: _selectedIndex == _entries.indexOf(entry)
-                          ? const Text('✓', style: TextStyle(fontSize: 16))
-                          : const CNListTileChevron(),
+                      leading: CNIcon(
+                        symbol: CNSymbol(
+                          entry.symbolName,
+                          color: _selectedIndex == _entries.indexOf(entry)
+                              ? CupertinoColors.label.darkColor
+                              : CupertinoColors.label.color,
+                        ),
+                      ),
+                      selected: _selectedIndex == _entries.indexOf(entry),
                       onTap: () {
                         setState(() {
                           _selectedIndex = _entries.indexOf(entry);

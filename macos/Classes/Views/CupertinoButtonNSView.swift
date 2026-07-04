@@ -4,78 +4,31 @@ import SwiftUI
 
 class CupertinoButtonNSView: NSView {
     private let channel: FlutterMethodChannel
-    private var hostingController: NSHostingController<CupertinoButtonView>!
-    private var model: ButtonModel!
+    private let hostingView: NSHostingView<AnyView>
+    private var payload: CNButtonPayload?
+    private var lastReportedIntrinsicSize: CGSize?
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
+        hostingView = NSHostingView(rootView: AnyView(EmptyView()))
         channel = FlutterMethodChannel(
             name: "CupertinoNativeButton_\(viewId)", binaryMessenger: messenger,
         )
+        payload = CNButton.decode(args)
         super.init(frame: .zero)
-
-        var title: String? = nil
-        var iconName: String? = nil
-        var buttonStyle: any PrimitiveButtonStyle = DefaultButtonStyle()
-        var controlSize: ControlSize = .regular
-        var isDark = false
-        var tint: Color? = nil
-        var enabled = true
-        var buttonRole = "none"
-        var imageScale = "medium"
-        var symbolRenderingMode: SymbolRenderingMode? = nil
-
-        if let dict = CNChannelSerialization.asDict(args) {
-            if let t = dict["buttonTitle"] as? String { title = t }
-            if let s = dict["buttonIconName"] as? String { iconName = s }
-            if let bs = dict["buttonStyle"] as? String { buttonStyle = bs.toButtonStyle() }
-            if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
-            if let style = dict["style"] as? [String: Any], let n = style["tint"] as? NSNumber {
-                tint = n.intValue.toARGB()
-            }
-            if let e = dict["enabled"] as? NSNumber { enabled = e.boolValue }
-            if let role = dict["buttonRole"] as? String { buttonRole = role }
-            if let cs = dict["controlSize"] as? String { controlSize = cs.toControlSize() ?? .regular }
-            if let iscale = dict["imageScale"] as? String { imageScale = iscale }
-            if let srm = dict["symbolRenderingMode"] as? String {
-                symbolRenderingMode = srm.toSymbolRenderingMode()
-            }
-        }
 
         wantsLayer = true
         layer?.backgroundColor = NSColor.clear.cgColor
-        appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
 
-        var channelRef: FlutterMethodChannel? = nil
-        model = ButtonModel(
-            title: title,
-            iconName: iconName,
-            buttonRole: buttonRole,
-            buttonStyle: buttonStyle,
-            controlSize: controlSize,
-            tint: tint,
-            isEnabled: enabled,
-            imageScale: imageScale,
-            symbolRenderingMode: symbolRenderingMode,
-            onPressed: {
-                channelRef?.invokeMethod("pressed", arguments: nil)
-            },
-            onSizeChanged: { _ in },
-        )
-
-        hostingController = NSHostingController(rootView: CupertinoButtonView(model: model))
-        hostingController.view.wantsLayer = true
-        hostingController.view.layer?.backgroundColor = NSColor.clear.cgColor
-
-        addSubview(hostingController.view)
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(hostingView)
+        hostingView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            hostingController.view.leadingAnchor.constraint(equalTo: leadingAnchor),
-            hostingController.view.trailingAnchor.constraint(equalTo: trailingAnchor),
-            hostingController.view.topAnchor.constraint(equalTo: topAnchor),
-            hostingController.view.bottomAnchor.constraint(equalTo: bottomAnchor),
+            hostingView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            hostingView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            hostingView.topAnchor.constraint(equalTo: topAnchor),
+            hostingView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
 
-        channelRef = channel
+        rebuild()
 
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self else {
@@ -85,78 +38,16 @@ class CupertinoButtonNSView: NSView {
 
             switch call.method {
             case "getIntrinsicSize":
-                let s = hostingController.view.fittingSize
+                let s = currentIntrinsicSize()
                 result(["width": Double(s.width), "height": Double(s.height)])
-            case "setStyle":
-                if let args = CNChannelSerialization.asDict(call.arguments) {
-                    if let n = args["tint"] as? NSNumber {
-                        model.tint = n.intValue.toARGB()
-                    }
-                    if let bs = args["buttonStyle"] as? String {
-                        model.buttonStyle = bs.toButtonStyle()
-                    }
-                    if let role = args["buttonRole"] as? String {
-                        model.buttonRole = role
-                    }
+            case "setButton":
+                if let parsed: CNButtonPayload = CNChannelSerialization.decode(call.arguments) {
+                    payload = parsed
+                    rebuild()
+                    notifyIntrinsicSizeChanged(force: true)
                     result(nil)
                 } else {
-                    result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
-                }
-            case "setControlSize":
-                if let args = CNChannelSerialization.asDict(call.arguments), let cs = args["controlSize"] as? String {
-                    model.controlSize = cs.toControlSize() ?? .regular
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing control size", details: nil))
-                }
-            case "setImageScale":
-                if let args = CNChannelSerialization.asDict(call.arguments), let iscale = args["imageScale"] as? String {
-                    model.imageScale = iscale
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing image scale", details: nil))
-                }
-            case "setButtonTitle":
-                if let args = CNChannelSerialization.asDict(call.arguments), let t = args["title"] as? String {
-                    model.title = t
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing title", details: nil))
-                }
-            case "setEnabled":
-                if let args = CNChannelSerialization.asDict(call.arguments), let e = args["enabled"] as? NSNumber {
-                    model.isEnabled = e.boolValue
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
-                }
-            case "setButtonIcon":
-                if let args = CNChannelSerialization.asDict(call.arguments) {
-                    if let name = args["buttonIconName"] as? String {
-                        model.iconName = name
-                    }
-                    if let srm = args["symbolRenderingMode"] as? String {
-                        model.symbolRenderingMode = srm.toSymbolRenderingMode()
-                    }
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing icon args", details: nil))
-                }
-            case "setBrightness":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let isDark = (args["isDark"] as? NSNumber)?.boolValue
-                {
-                    appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
-                }
-            case "setPressed":
-                if let args = CNChannelSerialization.asDict(call.arguments), let p = args["pressed"] as? NSNumber {
-                    model.isPressed = p.boolValue
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing pressed", details: nil))
+                    result(FlutterError(code: "bad_args", message: "Invalid button payload", details: nil))
                 }
             default:
                 result(FlutterMethodNotImplemented)
@@ -167,131 +58,99 @@ class CupertinoButtonNSView: NSView {
     required init?(coder _: NSCoder) {
         nil
     }
-}
 
-private final class ButtonModel: ObservableObject {
-    @Published var title: String?
-    @Published var iconName: String?
-    @Published var buttonRole: String
-    @Published var buttonStyle: any PrimitiveButtonStyle
-    @Published var controlSize: ControlSize
-    @Published var tint: Color?
-    @Published var isEnabled: Bool
-    @Published var isPressed: Bool = false
-    @Published var imageScale: String
-    @Published var symbolRenderingMode: SymbolRenderingMode?
-    let onPressed: () -> Void
-    let onSizeChanged: (CGSize) -> Void
-
-    init(
-        title: String?,
-        iconName: String?,
-        buttonRole: String,
-        buttonStyle: any PrimitiveButtonStyle,
-        controlSize: ControlSize,
-        tint: Color?,
-        isEnabled: Bool,
-        imageScale: String,
-        symbolRenderingMode: SymbolRenderingMode?,
-        onPressed: @escaping () -> Void,
-        onSizeChanged: @escaping (CGSize) -> Void,
-    ) {
-        self.title = title
-        self.iconName = iconName
-        self.buttonRole = buttonRole
-        self.buttonStyle = buttonStyle
-        self.controlSize = controlSize
-        self.tint = tint
-        self.isEnabled = isEnabled
-        self.imageScale = imageScale
-        self.symbolRenderingMode = symbolRenderingMode
-        self.onPressed = onPressed
-        self.onSizeChanged = onSizeChanged
-    }
-}
-
-private struct CupertinoButtonView: View {
-    @ObservedObject var model: ButtonModel
-
-    private var imageScaleValue: Image.Scale {
-        switch model.imageScale {
-        case "small":
-            .small
-        case "large":
-            .large
-        default:
-            .medium
+    private func rebuild() {
+        guard let payload else {
+            hostingView.rootView = AnyView(EmptyView())
+            return
         }
-    }
 
-    private var roleValue: ButtonRole? {
-        switch model.buttonRole {
-        case "cancel":
-            .cancel
-        case "destructive":
-            .destructive
-        case "confirm":
-            .confirm
-        case "close":
-            .close
-        default:
-            nil
-        }
-    }
-
-    var body: some View {
-        buildButton()
-            .onGeometryChange(for: CGSize.self) { proxy in
-                proxy.size
-            } action: { newSize in
-                model.onSizeChanged(newSize)
-            }
-    }
-
-    private func onButtonPressed() {
-        guard model.isEnabled else { return }
-        model.onPressed()
-    }
-
-    private func buildButton() -> some View {
-        let title = model.title?.trimmingCharacters(in: .whitespacesAndNewlines)
-        let hasTitle = (title?.isEmpty == false)
-        let hasIcon = (model.iconName?.isEmpty == false)
-
-        let baseButton = if hasTitle, hasIcon {
-            AnyView(Button {
-                onButtonPressed()
-            } label: {
-                HStack {
-                    Image(systemName: model.iconName!)
-                    Text(title!)
-                }
-            })
-        } else if hasTitle {
-            AnyView(Button(title!, role: roleValue, action: onButtonPressed))
-        } else if hasIcon {
-            AnyView(Button {
-                onButtonPressed()
-            } label: {
-                Image(systemName: model.iconName!)
-            })
+        if let isDark = payload.isDark {
+            hostingView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
         } else {
-            AnyView(Button("", role: roleValue, action: onButtonPressed))
+            hostingView.appearance = nil
         }
 
-        let button = baseButton
-            .disabled(!model.isEnabled)
-            .controlSize(model.controlSize)
-            .opacity(model.isPressed ? 0.7 : 1.0)
-            .imageScale(imageScaleValue)
-            .symbolRenderingMode(model.symbolRenderingMode)
-            .buttonStyle(model.buttonStyle)
+        hostingView.rootView = CNButton.deserialize(
+            payload.toChannel(),
+            onPressed: { [weak self] in
+                self?.channel.invokeMethod("pressed", arguments: nil)
+            },
+            onSizeChanged: { [weak self] _ in
+                self?.notifyIntrinsicSizeChanged()
+            },
+        ) ?? AnyView(EmptyView())
 
-        if model.tint != nil {
-            let tintedButton = button.tint(model.tint!)
-            return AnyView(tintedButton)
+        // A second pass on the next runloop avoids reporting a transient
+        // geometry value before SwiftUI finishes laying out the button label.
+        DispatchQueue.main.async { [weak self] in
+            self?.notifyIntrinsicSizeChanged()
+        }
+    }
+
+    private func currentIntrinsicSize() -> CGSize {
+        layoutSubtreeIfNeeded()
+        hostingView.layoutSubtreeIfNeeded()
+
+        let natural = naturalContentSize()
+
+        let intrinsic = hostingView.intrinsicContentSize
+        let intrinsicWidth = intrinsic.width
+        let intrinsicHeight = intrinsic.height
+
+        let hasValidIntrinsic =
+            intrinsicWidth > 0 &&
+            intrinsicHeight > 0 &&
+            intrinsicWidth != NSView.noIntrinsicMetric &&
+            intrinsicHeight != NSView.noIntrinsicMetric
+
+        if hasValidIntrinsic {
+            return CGSize(
+                width: max(natural.width, intrinsicWidth),
+                height: max(natural.height, intrinsicHeight),
+            )
         }
 
-        return AnyView(button)
+        let fitting = hostingView.fittingSize
+        return CGSize(
+            width: max(natural.width, fitting.width),
+            height: max(natural.height, fitting.height),
+        )
+    }
+
+    private func naturalContentSize() -> CGSize {
+        guard let payload else {
+            return .zero
+        }
+
+        let rootView = CNButton.deserialize(payload.toChannel()) ?? AnyView(EmptyView())
+        let measuringView = NSHostingView(rootView: rootView)
+        measuringView.appearance = hostingView.appearance
+        measuringView.layoutSubtreeIfNeeded()
+
+        let measuredIntrinsic = measuringView.intrinsicContentSize
+        let measuredFitting = measuringView.fittingSize
+
+        return CGSize(
+            width: max(0, measuredIntrinsic.width, measuredFitting.width),
+            height: max(0, measuredIntrinsic.height, measuredFitting.height),
+        )
+    }
+
+    private func notifyIntrinsicSizeChanged(force: Bool = false) {
+        let size = currentIntrinsicSize()
+        guard size.width > 0, size.height > 0 else {
+            return
+        }
+
+        if !force, lastReportedIntrinsicSize == size {
+            return
+        }
+
+        lastReportedIntrinsicSize = size
+        channel.invokeMethod(
+            "intrinsicSizeChanged",
+            arguments: ["width": size.width, "height": size.height],
+        )
     }
 }

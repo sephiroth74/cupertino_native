@@ -249,7 +249,7 @@ class CNThemeData extends Equatable {
       destructiveColor: destructiveColor ?? (isDark ? MacOS26Colors.red.darkColor : MacOS26Colors.red.color),
       canvasColor:
           canvasColor ??
-          (isDark ? CupertinoColors.secondarySystemBackground.darkColor : CupertinoColors.secondarySystemBackground.color),
+          (isDark ? CupertinoColors.secondarySystemBackground.darkColor : CupertinoColors.systemBackground.color),
       groupedBackgroundColor:
           groupedBackgroundColor ??
           (isDark ? CupertinoColors.systemGroupedBackground.darkColor : CupertinoColors.systemGroupedBackground.color),

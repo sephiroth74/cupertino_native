@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cupertino_native/components/button_child.dart';
 import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/style/font.dart';
 import 'package:cupertino_native/style/text.dart';
@@ -13,7 +14,7 @@ const double _kDefaultTextWidth = 120.0;
 const double _kDefaultTextHeight = 24.0;
 
 /// A SwiftUI Text-backed native macOS text widget.
-class CNText extends StatefulWidget {
+class CNText extends StatefulWidget with CNButtonChild {
   /// Creates a new text widget.
   const CNText(
     this.text, {
@@ -51,19 +52,28 @@ class CNText extends StatefulWidget {
   /// Optional fixed width frame.
   final double? width;
 
+  @override
+  String get buttonChildType => 'text';
+
   // ignore: public_member_api_docs, annotate_overrides, library_private_types_in_public_api
   @override
   State<CNText> createState() => _CNTextState();
 
-  Map<String, dynamic> _toMap(BuildContext context, {double? frameWidth, double? frameHeight}) {
+  @override
+  Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
+    return toMap(context, ignoreTheme: ignoreTheme);
+  }
+
+  // ignore: public_member_api_docs
+  Map<String, dynamic> toMap(BuildContext context, {double? frameWidth, double? frameHeight, bool ignoreTheme = false}) {
     final theme = CNTheme.of(context);
-    final resolvedColor = color ?? theme.textTheme.labelColor ?? theme.labelColor;
-    final resolvedFont = font ?? theme.textTheme.font ?? cnFontFromTextStyle(theme.typography.body);
+    final resolvedColor = color ?? (ignoreTheme ? null : theme.textTheme.labelColor ?? theme.labelColor);
+    final resolvedFont = font ?? (ignoreTheme ? null : theme.textTheme.font ?? cnFontFromTextStyle(theme.typography.body));
 
     return {
       'text': text,
       'color': resolveColorToArgb(resolvedColor, context),
-      'font': resolvedFont.toMap(),
+      'font': resolvedFont?.toMap(),
       'lineLimit': lineLimit,
       'lineLimitReservesSpace': lineLimitReservesSpace,
       'textScale': textScale?.name,
@@ -74,7 +84,7 @@ class CNText extends StatefulWidget {
   }
 
   String _toJson(BuildContext context, {double? frameWidth, double? frameHeight}) =>
-      jsonEncode(_toMap(context, frameWidth: frameWidth, frameHeight: frameHeight));
+      jsonEncode(toMap(context, frameWidth: frameWidth, frameHeight: frameHeight));
 }
 
 class _CNTextState extends State<CNText> {
@@ -147,7 +157,7 @@ class _CNTextState extends State<CNText> {
     final channel = _channel;
     if (channel == null) return;
 
-    final payload = widget._toMap(context, frameWidth: _layoutWidth, frameHeight: _layoutHeight);
+    final payload = widget.toMap(context, frameWidth: _layoutWidth, frameHeight: _layoutHeight);
     final serializedPayload = jsonEncode(payload);
 
     if (_lastSerializedPayload != serializedPayload) {
@@ -194,7 +204,7 @@ class _CNTextState extends State<CNText> {
           );
         }
 
-        final creationParams = widget._toMap(context, frameWidth: resolvedWidth, frameHeight: resolvedHeight);
+        final creationParams = widget.toMap(context, frameWidth: resolvedWidth, frameHeight: resolvedHeight);
 
         return SizedBox(
           width: resolvedWidth,

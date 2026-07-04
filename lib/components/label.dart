@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:cupertino_native/channel/params.dart';
+import 'package:cupertino_native/components/button_child.dart';
 import 'package:cupertino_native/components/image.dart';
 import 'package:cupertino_native/components/text.dart';
 import 'package:cupertino_native/style/text_utils.dart';
@@ -14,7 +14,7 @@ const double _kDefaultLabelWidth = 50.0;
 /// A native macOS SwiftUI label backed by `Label`.
 ///
 /// On platforms other than macOS, this falls back to a plain Flutter text label.
-class CNLabel extends StatefulWidget {
+class CNLabel extends StatefulWidget with CNButtonChild {
   /// Creates a native SwiftUI label.
   const CNLabel(
     this.text, {
@@ -76,7 +76,28 @@ class CNLabel extends StatefulWidget {
   final double? width;
 
   @override
+  String get buttonChildType => 'label';
+
+  @override
   State<CNLabel> createState() => _CNLabelState();
+
+  @override
+  Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
+    return toMap(context, ignoreTheme: ignoreTheme);
+  }
+
+  Map<String, dynamic> toMap(BuildContext context, {double? frameWidth, double? frameHeight, bool ignoreTheme = false}) {
+    return {
+      'primaryText': text.toMap(context, ignoreTheme: ignoreTheme),
+      if (secondaryText != null) 'secondaryText': secondaryText!.toMap(context, ignoreTheme: ignoreTheme),
+      if (icon != null) 'icon': icon!.toMap(context, ignoreTheme: ignoreTheme),
+      'labelStyle': labelStyle.name,
+      if (labelReservedIconWidth != null) 'labelReservedIconWidth': labelReservedIconWidth,
+      if (labelIconToTitleSpacing != null) 'labelIconToTitleSpacing': labelIconToTitleSpacing,
+      'width': frameWidth ?? width,
+      'height': frameHeight ?? height,
+    };
+  }
 }
 
 /// Style options for [CNLabel].
@@ -146,22 +167,6 @@ class _CNLabelState extends State<CNLabel> {
     });
   }
 
-  Map<String, dynamic> _textToMap(CNText textWidget) {
-    final theme = CNTheme.of(context);
-    final resolvedColor = textWidget.color ?? theme.textTheme.labelColor ?? theme.labelColor;
-    final resolvedFont = textWidget.font ?? theme.textTheme.font ?? cnFontFromTextStyle(theme.typography.body);
-
-    return {
-      'text': textWidget.text,
-      'color': resolveColorToArgb(resolvedColor, context),
-      'font': resolvedFont.toMap(),
-      'lineLimit': textWidget.lineLimit,
-      'lineLimitReservesSpace': textWidget.lineLimitReservesSpace,
-      'textScale': textWidget.textScale?.name,
-      'truncationMode': textWidget.truncationMode?.name,
-    };
-  }
-
   Widget _buildFallbackText(CNText textWidget) {
     final theme = CNTheme.of(context);
     final resolvedColor = textWidget.color ?? theme.textTheme.labelColor ?? theme.labelColor;
@@ -189,20 +194,13 @@ class _CNLabelState extends State<CNLabel> {
     final primaryPoints = primaryFont.size.points ?? 17.0;
     final secondaryPoints = secondaryFont.size.points ?? 17.0;
     final iconPoints = iconFont.size.points ?? 17.0;
-    return primaryPoints > secondaryPoints ? (primaryPoints > iconPoints ? primaryPoints : iconPoints) : (secondaryPoints > iconPoints ? secondaryPoints : iconPoints);
+    return primaryPoints > secondaryPoints
+        ? (primaryPoints > iconPoints ? primaryPoints : iconPoints)
+        : (secondaryPoints > iconPoints ? secondaryPoints : iconPoints);
   }
 
   Map<String, dynamic> _toPayload() {
-    return {
-      'primaryText': _textToMap(widget.text),
-      if (widget.secondaryText != null) 'secondaryText': _textToMap(widget.secondaryText!),
-      if (widget.icon != null) 'icon': widget.icon!.toMap(context),
-      'labelStyle': widget.labelStyle.name,
-      if (widget.labelReservedIconWidth != null) 'labelReservedIconWidth': widget.labelReservedIconWidth,
-      if (widget.labelIconToTitleSpacing != null) 'labelIconToTitleSpacing': widget.labelIconToTitleSpacing,
-      'width': _layoutWidth,
-      'height': _layoutHeight,
-    };
+    return widget.toMap(context, frameWidth: _layoutWidth, frameHeight: _layoutHeight);
   }
 
   String _serializeCurrentPayload() => jsonEncode(_toPayload());
@@ -272,7 +270,7 @@ class _CNLabelState extends State<CNLabel> {
             (hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth ?? (canFallbackWidth ? _kDefaultLabelWidth : null));
         final resolvedHeight =
             widget.height ??
-          (hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? (canFallbackHeight ? defaultHeight : null));
+            (hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? (canFallbackHeight ? defaultHeight : null));
 
         if (_layoutWidth != resolvedWidth || _layoutHeight != resolvedHeight) {
           _layoutWidth = resolvedWidth;

@@ -40,15 +40,16 @@ class CNMenu extends ChangeNotifier with EquatableMixin implements CNChannelSeri
   List<Object?> get props => [items];
 
   @override
-  Map<String, dynamic> toChannelMap(BuildContext context) => toMap(context);
+  Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) => toMap(context, ignoreTheme: ignoreTheme);
 
   /// Serializes the menu to JSON for platform channel communication.
-  Map<String, dynamic> toMap(BuildContext context) {
-    return {'items': CNChannelSerialization.objects(items, context)};
+  Map<String, dynamic> toMap(BuildContext context, {bool ignoreTheme = false}) {
+    return {'items': CNChannelSerialization.objects(items, context, ignoreTheme: ignoreTheme)};
   }
 
-  String toJson(BuildContext context) {
-    return jsonEncode(toMap(context));
+  // ignore: public_member_api_docs
+  String toJson(BuildContext context, {bool ignoreTheme = false}) {
+    return jsonEncode(toMap(context, ignoreTheme: ignoreTheme));
   }
 
   /// Returns the first menu item with the given platform [identifier].
@@ -147,14 +148,14 @@ class CNMenuItem extends ChangeNotifier with EquatableMixin implements CNChannel
   List<Object?> get props => [_identifier, isSeparator, state, tag, title, subtitle, image, submenu, enabled];
 
   @override
-  Map<String, dynamic> toChannelMap(BuildContext context) => toMap(context);
+  Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) => toMap(context, ignoreTheme: ignoreTheme);
 
   /// A unique identifier for this menu item, used for platform communication. It is generated automatically and should not be set manually.
   String get identifier => isSeparator ? '' : 'menuItem_$_identifier';
 
   /// Converts this menu item to a JSON string representation, which is used for communication with the native platform.
   /// The JSON includes all relevant properties of the menu item, such as title, tag, state, symbol configuration, enabled status, and submenu (if any).
-  Map<String, dynamic> toMap(BuildContext context) {
+  Map<String, dynamic> toMap(BuildContext context, {bool ignoreTheme = false}) {
     if (isSeparator) {
       return {'separator': true};
     }

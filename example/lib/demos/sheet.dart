@@ -11,23 +11,14 @@ class SheetDemoPage extends StatefulWidget {
 class _SheetDemoPageState extends State<SheetDemoPage> {
   int? _lastSelectedIndex;
 
-  Widget _buildSheetButton({
-    required String title,
-    required CNSheetStyle style,
-    required String message,
-  }) {
+  Widget _buildSheetButton({required String title, required CNSheetStyle style, required String message}) {
     return CNButton(
-      label: title,
-      onPressed: () =>
-          _showSimpleSheet(title: title, style: style, message: message),
+      children: [CNText(title)],
+      onPressed: () => _showSimpleSheet(title: title, style: style, message: message),
     );
   }
 
-  Future<void> _showSimpleSheet({
-    required String title,
-    required CNSheetStyle style,
-    required String message,
-  }) async {
+  Future<void> _showSimpleSheet({required String title, required CNSheetStyle style, required String message}) async {
     final selected = await CNSheet.show(
       context,
       title: title,
@@ -71,25 +62,14 @@ class _SheetDemoPageState extends State<SheetDemoPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text(
-              'Last Selection',
-              style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
-            ),
+            Text('Last Selection', style: CupertinoTheme.of(context).textTheme.navTitleTextStyle),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: CupertinoColors.systemGrey6,
-                borderRadius: BorderRadius.circular(8),
-              ),
+              decoration: BoxDecoration(color: CupertinoColors.systemGrey6, borderRadius: BorderRadius.circular(8)),
               child: Text(
-                _lastSelectedIndex == null
-                    ? 'No sheet opened yet'
-                    : 'Selected action index: $_lastSelectedIndex',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: CupertinoColors.systemGrey,
-                ),
+                _lastSelectedIndex == null ? 'No sheet opened yet' : 'Selected action index: $_lastSelectedIndex',
+                style: const TextStyle(fontSize: 12, color: CupertinoColors.systemGrey),
               ),
             ),
             const SizedBox(height: 32),
@@ -111,10 +91,7 @@ class _SheetDemoPageState extends State<SheetDemoPage> {
               message: 'Deleting this item cannot be undone.',
             ),
             const SizedBox(height: 16),
-            CNButton(
-              onPressed: _showCustomActionsSheet,
-              label: 'Sheet With Multiple Actions',
-            ),
+            CNButton(onPressed: _showCustomActionsSheet, children: const [CNText('Sheet With Multiple Actions')]),
           ],
         ),
       ),
