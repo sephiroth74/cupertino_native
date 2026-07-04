@@ -129,9 +129,9 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                           CNPickerItem.icon(CNSymbol('list.bullet')),
                           CNPickerItem.icon(CNSymbol('gearshape')),
                           CNPickerItem.icon(
-                            CNSymbol('rectangle.portrait', mode: CNSymbolRenderingMode.hierarchical, color: MacOS26Colors.orange),
+                            CNSymbol('rectangle.portrait', mode: CNSymbolRenderingMode.hierarchical, color: CNColors.orange),
                           ),
-                          CNPickerItem.icon(CNSymbol('paintpalette', color: MacOS26Colors.cyan)),
+                          CNPickerItem.icon(CNSymbol('paintpalette', color: CNColors.cyan)),
                         ],
                         selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle2),
                         pickerStyle: _pickerStyle,

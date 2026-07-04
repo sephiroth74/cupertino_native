@@ -38,16 +38,16 @@ import 'package:provider/src/change_notifier_provider.dart';
 import 'package:system_theme/system_theme.dart';
 
 const _systemColors = <MapEntry<String, Color>>[
-  MapEntry('Red', MacOS26Colors.red),
-  MapEntry('Orange', MacOS26Colors.orange),
-  MapEntry('Yellow', MacOS26Colors.yellow),
-  MapEntry('Green', MacOS26Colors.green),
-  MapEntry('Teal', MacOS26Colors.teal),
-  MapEntry('Blue', MacOS26Colors.blue),
-  MapEntry('Indigo', MacOS26Colors.indigo),
-  MapEntry('Purple', MacOS26Colors.purple),
-  MapEntry('Pink', MacOS26Colors.pink),
-  MapEntry('Gray', MacOS26Colors.gray),
+  MapEntry('Red', CNColors.red),
+  MapEntry('Orange', CNColors.orange),
+  MapEntry('Yellow', CNColors.yellow),
+  MapEntry('Green', CNColors.green),
+  MapEntry('Teal', CNColors.teal),
+  MapEntry('Blue', CNColors.blue),
+  MapEntry('Indigo', CNColors.indigo),
+  MapEntry('Purple', CNColors.purple),
+  MapEntry('Pink', CNColors.pink),
+  MapEntry('Gray', CNColors.gray),
 ];
 
 void main() async {

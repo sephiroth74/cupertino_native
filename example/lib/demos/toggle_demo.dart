@@ -227,7 +227,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                       value: _darkMode,
                       label: 'Switch Style',
                       systemSymbolName: 'switch.2',
-                      tint: MacOS26Colors.orange,
+                      tint: CNColors.orange,
                       toggleStyle: CNToggleStyle.switch_,
                       onChanged: (value) {
                         setState(() {
@@ -240,7 +240,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                       value: _notifications,
                       label: 'Button Style',
                       systemSymbolName: 'button.rounded.fill',
-                      tint: MacOS26Colors.pink,
+                      tint: CNColors.pink,
                       toggleStyle: CNToggleStyle.button,
                       onChanged: (value) {
                         setState(() {
@@ -253,7 +253,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                     CNToggle(
                       value: _checkboxStyle,
                       label: 'Checkbox Style',
-                      tint: MacOS26Colors.teal,
+                      tint: CNColors.teal,
                       systemSymbolName: 'checkmark.square',
                       toggleStyle: CNToggleStyle.checkbox,
                       onChanged: (value) {

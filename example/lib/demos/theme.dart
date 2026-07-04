@@ -53,7 +53,7 @@ class ThemeDemoPage extends StatelessWidget {
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: MacOS26Colors.accents.map((c) {
+                    children: CNColors.accents.map((c) {
                       final resolved = c.resolveFrom(context);
                       return _Swatch(color: resolved);
                     }).toList(),

@@ -151,6 +151,7 @@ enum CNButton {
         case "progressView":
             CNProgressViewDeserializer.deserialize(child.payload)
         default:
+            NSLog("Unknown button child type: \(child.type)")
             nil
         }
     }

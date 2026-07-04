@@ -61,7 +61,7 @@ class _ProgressIndicatorsPageDemoState extends State<ProgressIndicatorsPageDemo>
                   CNProgressView(
                     controlSize: CNControlSize.regular,
                     progressViewStyle: CNProgressViewStyle.circular,
-                    tint: MacOS26Colors.brown,
+                    tint: CNColors.brown,
                   ),
                 ],
               ),

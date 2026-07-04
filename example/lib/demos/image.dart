@@ -456,24 +456,24 @@ const _kImageNames = [
 ];
 
 const _kSystemColors = {
-  'red': MacOS26Colors.red,
-  'orange': MacOS26Colors.orange,
-  'yellow': MacOS26Colors.yellow,
-  'green': MacOS26Colors.green,
-  'mint': MacOS26Colors.mint,
-  'teal': MacOS26Colors.teal,
-  'cyan': MacOS26Colors.cyan,
-  'blue': MacOS26Colors.blue,
-  'indigo': MacOS26Colors.indigo,
-  'pink': MacOS26Colors.pink,
-  'purple': MacOS26Colors.purple,
-  'brown': MacOS26Colors.brown,
-  'gray': MacOS26Colors.gray,
-  'fillPrimary': MacOS26Colors.fillPrimary,
-  'fillSecondary': MacOS26Colors.fillSecondary,
-  'fillTertiary': MacOS26Colors.fillTertiary,
-  'fillQuaternary': MacOS26Colors.fillQuaternary,
-  'fillQuinary': MacOS26Colors.fillQuinary,
+  'red': CNColors.red,
+  'orange': CNColors.orange,
+  'yellow': CNColors.yellow,
+  'green': CNColors.green,
+  'mint': CNColors.mint,
+  'teal': CNColors.teal,
+  'cyan': CNColors.cyan,
+  'blue': CNColors.blue,
+  'indigo': CNColors.indigo,
+  'pink': CNColors.pink,
+  'purple': CNColors.purple,
+  'brown': CNColors.brown,
+  'gray': CNColors.gray,
+  'fillPrimary': CNColors.fillPrimary,
+  'fillSecondary': CNColors.fillSecondary,
+  'fillTertiary': CNColors.fillTertiary,
+  'fillQuaternary': CNColors.fillQuaternary,
+  'fillQuinary': CNColors.fillQuinary,
 };
 
 const _kRenderingModes = {
@@ -501,8 +501,8 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
   @override
   initState() {
     super.initState();
-    _color = MacOS26Colors.blue;
-    _colors = [MacOS26Colors.red, _color];
+    _color = CNColors.blue;
+    _colors = [CNColors.red, _color];
   }
 
   Widget _symbolRow({
@@ -635,7 +635,7 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                         onValueChanged: (index) {
                           setState(() {
                             _color = _kSystemColors.values.elementAt(index);
-                            _colors = [MacOS26Colors.red, _color!];
+                            _colors = [CNColors.red, _color!];
                           });
                         },
                         items: _kSystemColors.keys

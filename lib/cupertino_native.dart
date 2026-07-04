@@ -54,7 +54,7 @@ export 'style/path_control_style.dart';
 export 'style/progress_style.dart';
 export 'style/slider_type.dart';
 export 'style/level_indicator_style.dart';
-export 'style/macos26_colors.dart';
+export 'style/cn_colors.dart';
 export 'style/macos26_materials.dart';
 export 'style/cn_typography.dart';
 export 'style/text.dart';

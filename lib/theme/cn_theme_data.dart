@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../style/font.dart';
 import '../style/cn_typography.dart';
-import '../style/macos26_colors.dart';
+import '../style/cn_colors.dart';
 import '../style/macos26_materials.dart';
 import '../style/sf_symbol.dart';
 import '../style/text_utils.dart';
@@ -225,7 +225,7 @@ class CNThemeData extends Equatable {
     final isDark = brightness == Brightness.dark;
 
     final resolvedLabelColor = labelColor ?? (isDark ? CupertinoColors.label.darkColor : CupertinoColors.label.color);
-    final resolvedPrimaryColor = primaryColor ?? (isDark ? MacOS26Colors.blue.darkColor : MacOS26Colors.blue.color);
+    final resolvedPrimaryColor = primaryColor ?? (isDark ? CNColors.blue.darkColor : CNColors.blue.color);
     final resolvedTypography =
         typography ?? (isDark ? CNTypography.lightOpaque() : CNTypography.darkOpaque()).copyWith(color: resolvedLabelColor);
     final resolvedTextTheme = (textTheme ?? const CNTextThemeData()).copyWith(
@@ -245,11 +245,10 @@ class CNThemeData extends Equatable {
     return CNThemeData.raw(
       brightness: brightness,
       primaryColor: resolvedPrimaryColor,
-      secondaryColor: secondaryColor ?? (isDark ? MacOS26Colors.indigo.darkColor : MacOS26Colors.indigo.color),
-      destructiveColor: destructiveColor ?? (isDark ? MacOS26Colors.red.darkColor : MacOS26Colors.red.color),
+      secondaryColor: secondaryColor ?? (isDark ? CNColors.indigo.darkColor : CNColors.indigo.color),
+      destructiveColor: destructiveColor ?? (isDark ? CNColors.red.darkColor : CNColors.red.color),
       canvasColor:
-          canvasColor ??
-          (isDark ? CupertinoColors.secondarySystemBackground.darkColor : CupertinoColors.systemBackground.color),
+          canvasColor ?? (isDark ? CupertinoColors.secondarySystemBackground.darkColor : CupertinoColors.systemBackground.color),
       groupedBackgroundColor:
           groupedBackgroundColor ??
           (isDark ? CupertinoColors.systemGroupedBackground.darkColor : CupertinoColors.systemGroupedBackground.color),
@@ -257,10 +256,9 @@ class CNThemeData extends Equatable {
       secondaryLabelColor:
           secondaryLabelColor ?? (isDark ? CupertinoColors.secondaryLabel.darkColor : CupertinoColors.secondaryLabel.color),
       separatorColor: separatorColor ?? (isDark ? CupertinoColors.separator.darkColor : CupertinoColors.separator.color),
-      fillPrimaryColor: fillPrimaryColor ?? (isDark ? MacOS26Colors.fillPrimary.darkColor : MacOS26Colors.fillPrimary.color),
-      fillSecondaryColor:
-          fillSecondaryColor ?? (isDark ? MacOS26Colors.fillSecondary.darkColor : MacOS26Colors.fillSecondary.color),
-      fillTertiaryColor: fillTertiaryColor ?? (isDark ? MacOS26Colors.fillTertiary.darkColor : MacOS26Colors.fillTertiary.color),
+      fillPrimaryColor: fillPrimaryColor ?? (isDark ? CNColors.fillPrimary.darkColor : CNColors.fillPrimary.color),
+      fillSecondaryColor: fillSecondaryColor ?? (isDark ? CNColors.fillSecondary.darkColor : CNColors.fillSecondary.color),
+      fillTertiaryColor: fillTertiaryColor ?? (isDark ? CNColors.fillTertiary.darkColor : CNColors.fillTertiary.color),
       typography: resolvedTypography,
       materialUltraThin: materialUltraThin ?? CNGlassMaterial.ultraThin,
       materialThin: materialThin ?? CNGlassMaterial.thin,

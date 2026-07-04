@@ -8,9 +8,9 @@ import 'package:flutter/cupertino.dart';
 ///
 /// Usage:
 /// ```dart
-/// final color = MacOS26Colors.red.resolveFrom(context);
+/// final color = CupertinoNativeColors.red.resolveFrom(context);
 /// ```
-abstract final class MacOS26Colors {
+abstract final class CNColors {
   // -------------------------------------------------------------------------
   // Accent / Opaque Tint Colors
   // -------------------------------------------------------------------------
@@ -95,7 +95,7 @@ abstract final class MacOS26Colors {
 
   // ignore: public_member_api_docs
   static const Color white = Color(0xFFFFFFFF);
-  
+
   // ignore: public_member_api_docs
   static const Color black = Color(0xFF000000);
 
