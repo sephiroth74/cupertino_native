@@ -195,8 +195,6 @@ class _CNMenuButtonState extends State<CNMenuButton> {
     final height = _intrinsicHeight ?? 28.0;
     return LayoutBuilder(
       builder: (context, constraints) {
-        debugPrint('constraints: $constraints, intrinsicWidth: $_intrinsicWidth, intrinsicHeight: $_intrinsicHeight');
-
         final width = constraints.hasBoundedWidth
             ? (_intrinsicWidth != null ? _intrinsicWidth!.clamp(0.0, constraints.maxWidth) : constraints.maxWidth)
             : (_intrinsicWidth ?? 100.0);

@@ -193,7 +193,6 @@ class _CNToggleState extends State<CNToggle> {
     try {
       final result = await _channel?.invokeMethod<Map>('getIntrinsicSize');
       if (result != null) {
-        debugPrint('Picker intrinsic size: $result');
         _onIntrinsicSizeChanged((result['width'] as num?)?.toDouble(), (result['height'] as num?)?.toDouble());
       }
     } catch (e) {
@@ -205,7 +204,6 @@ class _CNToggleState extends State<CNToggle> {
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
     if (!mounted || width == null || height == null) return;
-    debugPrint('_onIntrinsicSizeChanged: width=$width, height=$height');
 
     if (width == _intrinsicWidth && height == _intrinsicHeight) {
       return; // No change

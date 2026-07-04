@@ -128,6 +128,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
   static const _entries = <_DemoEntry>[
     _DemoEntry('Image', 'photo', ImageDemoPage()),
     _DemoEntry('Text', 'textformat', TextDemoPage()),
+    _DemoEntry('Label', 'textformat', LabelDemoPage()),
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Slider', 'slider.horizontal.3', SliderDemoPage()),
     _DemoEntry('Toggle', 'switch.2', ToggleDemo()),
@@ -137,7 +138,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Icon', 'app', IconDemoPage()),
     _DemoEntry('Popup Menu Button', 'ellipsis.circle', PopupMenuButtonDemoPage()),
     _DemoEntry('Menu Button', 'ellipsis.circle', MenuButtonDemoPage()),
-    _DemoEntry('Label', 'textformat', LabelDemoPage()),
     _DemoEntry('Button', 'hand.tap', ButtonDemoPage()),
     _DemoEntry('Color Well', 'paintpalette', ColorWellDemoPage()),
     _DemoEntry('Path Control', 'folder', PathControlDemoPage()),
@@ -312,7 +312,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
           ),
         ),
       ),
-      child: IndexedStack(index: _selectedIndex, children: _entries.map((entry) => entry.page).toList(growable: false)),
+      child: KeyedSubtree(key: ValueKey(_selectedIndex), child: _entries[_selectedIndex].page),
     );
   }
 }

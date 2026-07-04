@@ -113,21 +113,13 @@ class _CNComboBoxState extends State<CNComboBox> {
 
   @override
   void dispose() {
-    _log('dispose');
     _channel?.setMethodCallHandler(null);
     super.dispose();
   }
 
   bool get _isDark => CupertinoTheme.of(context).brightness == Brightness.dark;
 
-  void _log(String message) {
-    if (kDebugMode) {
-      debugPrint('[CNComboBox ${identityHashCode(this)}] $message');
-    }
-  }
-
   void _onPlatformViewCreated(int id) {
-    _log('onPlatformViewCreated id=$id');
     final channel = MethodChannel('CupertinoNativeComboBox_$id');
     _channel = channel;
     channel.setMethodCallHandler(_onMethodCall);
@@ -137,22 +129,19 @@ class _CNComboBoxState extends State<CNComboBox> {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
-    _log('Native -> Dart method=${call.method}');
     switch (call.method) {
       case 'textChanged':
         final value = (call.arguments as String?) ?? '';
         _lastText = value;
-        _log('Native -> Dart textChanged value="$value"');
         widget.onChanged?.call(value);
         break;
       case 'submitted':
         final value = (call.arguments as String?) ?? '';
-        _log('Native -> Dart submitted value="$value"');
         widget.onSubmitted?.call(value);
         break;
       case 'debugLog':
         final value = (call.arguments as String?) ?? '';
-        _log(value);
+        debugPrint('[CNComboBox] debugLog: $value');
         break;
     }
     return null;
@@ -184,13 +173,11 @@ class _CNComboBoxState extends State<CNComboBox> {
     bool requiresIntrinsicSize = false;
 
     if (_lastText != widget.text) {
-      _log('setText value="${widget.text}"');
       await channel.invokeMethod('setText', {'value': widget.text});
       _lastText = widget.text;
     }
 
     if (_lastBehavior != widget.behavior) {
-      _log('setBehavior value=${widget.behavior.name}');
       await channel.invokeMethod('setBehavior', {
         'value': widget.behavior.name,
       });
@@ -198,14 +185,12 @@ class _CNComboBoxState extends State<CNComboBox> {
     }
 
     if (!listEquals(_lastItems, widget.items)) {
-      _log('setItems items=${widget.items.length}');
       await channel.invokeMethod('setItems', {'value': widget.items});
       _lastItems = widget.items;
       requiresIntrinsicSize = true;
     }
 
     if (_lastPlaceholder != widget.placeholder) {
-      _log('setPlaceholder value="${widget.placeholder}"');
       await channel.invokeMethod('setPlaceholder', {
         'value': widget.placeholder,
       });
@@ -215,7 +200,6 @@ class _CNComboBoxState extends State<CNComboBox> {
     if (!mounted) return;
     final textColor = resolveColorToArgb(widget.textColor, context);
     if (_lastTextColor != textColor) {
-      _log('setTextColor');
       await channel.invokeMethod('setTextColor', {'value': textColor});
       _lastTextColor = textColor;
     }
@@ -226,7 +210,6 @@ class _CNComboBoxState extends State<CNComboBox> {
       context,
     );
     if (_lastPlaceholderColor != placeholderColor) {
-      _log('setPlaceholderColor');
       await channel.invokeMethod('setPlaceholderColor', {
         'value': placeholderColor,
       });
@@ -236,7 +219,6 @@ class _CNComboBoxState extends State<CNComboBox> {
     if (!mounted) return;
     final backgroundColor = resolveColorToArgb(widget.backgroundColor, context);
     if (_lastBackgroundColor != backgroundColor) {
-      _log('setBackgroundColor');
       await channel.invokeMethod('setBackgroundColor', {
         'value': backgroundColor,
       });
@@ -244,14 +226,12 @@ class _CNComboBoxState extends State<CNComboBox> {
     }
 
     if (_lastFont != widget.font) {
-      _log('setFont');
       await channel.invokeMethod('setFont', {'value': widget.font?.toMap()});
       _lastFont = widget.font;
       requiresIntrinsicSize = true;
     }
 
     if (_lastPlaceholderFont != widget.placeholderFont) {
-      _log('setPlaceholderFont');
       await channel.invokeMethod('setPlaceholderFont', {
         'value': widget.placeholderFont?.toMap(),
       });
@@ -260,13 +240,11 @@ class _CNComboBoxState extends State<CNComboBox> {
     }
 
     if (_lastEnabled != widget.enabled) {
-      _log('setEnabled value=${widget.enabled}');
       await channel.invokeMethod('setEnabled', {'value': widget.enabled});
       _lastEnabled = widget.enabled;
     }
 
     if (_lastControlSize != widget.controlSize) {
-      _log('setControlSize value=${widget.controlSize.name}');
       await channel.invokeMethod('setControlSize', {
         'value': widget.controlSize.name,
       });
@@ -275,7 +253,6 @@ class _CNComboBoxState extends State<CNComboBox> {
     }
 
     if (_lastBezelStyle != widget.bezelStyle) {
-      _log('setBezelStyle value=${widget.bezelStyle.name}');
       await channel.invokeMethod('setBezelStyle', {
         'value': widget.bezelStyle.name,
       });
@@ -284,7 +261,6 @@ class _CNComboBoxState extends State<CNComboBox> {
     }
 
     if (requiresIntrinsicSize) {
-      _log('syncPropsToNativeIfNeeded requesting intrinsic size');
       _requestIntrinsicSize();
     }
   }
@@ -294,7 +270,6 @@ class _CNComboBoxState extends State<CNComboBox> {
     if (channel == null) return;
 
     if (_lastIsDark != _isDark) {
-      _log('setIsDark value=$_isDark');
       await channel.invokeMethod('setIsDark', {'value': _isDark});
       _lastIsDark = _isDark;
     }
@@ -305,7 +280,6 @@ class _CNComboBoxState extends State<CNComboBox> {
     if (channel == null) return;
 
     try {
-      _log('requestIntrinsicSize start');
       SchedulerBinding.instance.scheduleFrame();
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
@@ -314,7 +288,6 @@ class _CNComboBoxState extends State<CNComboBox> {
         final size = await ch.invokeMethod<Map>('getIntrinsicSize');
         final width = (size?['width'] as num?)?.toDouble();
         final height = (size?['height'] as num?)?.toDouble();
-        _log('requestIntrinsicSize result width=$width height=$height');
 
         if (width != null && height != null && mounted) {
           setState(() {
@@ -324,7 +297,7 @@ class _CNComboBoxState extends State<CNComboBox> {
         }
       });
     } catch (e) {
-      _log('requestIntrinsicSize error=$e');
+      debugPrint('[CNComboBox]requestIntrinsicSize error=$e');
     }
   }
 

@@ -147,7 +147,6 @@ class _CNPickerState extends State<CNPicker> {
     try {
       final result = await _channel?.invokeMethod<Map>('getIntrinsicSize');
       if (result != null) {
-        debugPrint('Picker intrinsic size: $result');
         _onIntrinsicSizeChanged((result['width'] as num?)?.toDouble(), (result['height'] as num?)?.toDouble());
       }
     } catch (e) {
@@ -159,7 +158,6 @@ class _CNPickerState extends State<CNPicker> {
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
     if (!mounted || width == null || height == null) return;
-    debugPrint('_onIntrinsicSizeChanged: width=$width, height=$height');
     setState(() {
       _intrinsicWidth = width > -1 ? width : null;
       _intrinsicHeight = height > -1 ? height : null;
@@ -270,10 +268,8 @@ class _CNPickerState extends State<CNPicker> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        debugPrint('Picker constraints: $constraints');
         final bool hasBoundedWidth = constraints.hasBoundedWidth;
         final bool hasBoundedHeight = constraints.hasBoundedHeight;
-        debugPrint('Picker hasBoundedWidth=$hasBoundedWidth, hasBoundedHeight=$hasBoundedHeight');
 
         double? width;
         double? height;
@@ -305,8 +301,6 @@ class _CNPickerState extends State<CNPicker> {
           width = _intrinsicWidth ?? _kDefaultPickerWidth;
           height = _intrinsicHeight ?? (hasBoundedHeight ? constraints.maxHeight : _kDefaultPickerHeight);
         }
-
-        debugPrint('Picker final size: width=$width, height=$height');
 
         if (width == double.infinity) {
           width = _intrinsicWidth ?? _kDefaultPickerWidth;

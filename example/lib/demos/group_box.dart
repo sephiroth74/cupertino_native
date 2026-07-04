@@ -31,7 +31,10 @@ class GroupBoxDemoPage extends StatelessWidget {
             const SizedBox(height: 8),
             GroupBox(
               style: GroupBoxStyle.border,
-              label: CNLabel(text: 'Optional Title', icon: CNSymbol('paperclip'), font: const CNFont.label(CNFontSize.points(20))),
+              label: const CNLabel(
+                CNText('Optional Title', font: CNFont.label(CNFontSize.points(20))),
+                icon: CNImage(systemSymbolName: 'paperclip'),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [SizedBox(height: 8), Text('This GroupBox has no title.'), Text('It only contains content.')],

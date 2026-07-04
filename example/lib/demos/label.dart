@@ -12,23 +12,36 @@ class LabelDemoPage extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const Text('Native SwiftUI Label'),
+            const Text('SwiftUI Label Examples'),
             const SizedBox(height: 12),
-            const CNLabel(text: 'Simple label'),
+            const Text('Single text + icon'),
             const SizedBox(height: 12),
-            const CNLabel(text: 'Label with icon', icon: CNSymbol('star.fill', size: 18)),
+            const CNLabel(
+              CNText('First'),
+              icon: CNImage(systemSymbolName: 'bolt.fill'),
+            ),
             const SizedBox(height: 12),
-            CNLabel(text: 'Colored label', icon: const CNSymbol('heart.fill', size: 18), color: CupertinoColors.systemPink),
+            const CNLabel(
+              CNText('Second'),
+              icon: CNImage(systemSymbolName: 'bolt.fill'),
+            ),
             const SizedBox(height: 12),
-            const CNLabel(text: 'Title only', icon: CNSymbol('moon.fill', size: 18), labelStyle: CNLabelStyle.titleOnly),
+            const Text('Two inner Text + optional Image'),
             const SizedBox(height: 12),
-            const CNLabel(text: 'Icon only', icon: CNSymbol('sun.max.fill', size: 18), labelStyle: CNLabelStyle.iconOnly),
-            const SizedBox(height: 12),
-            CNLabel(
-              text: 'Custom font',
-              icon: const CNSymbol('textformat', size: 18),
-              color: CupertinoColors.systemBlue,
-              font: const CNFont.system(CNFontSize.points(18), weight: CNFontWeight.semibold),
+            Container(
+              child: CNLabel(
+                const CNText(
+                  'Alessandro',
+                  font: CNFont.system(CNFontSize.preset(CNFontSizePreset.system), weight: CNFontWeight.regular),
+                  color: CupertinoColors.label,
+                ),
+                secondaryText: const CNText(
+                  'Crugnola',
+                  font: CNFont.system(CNFontSize.preset(CNFontSizePreset.smallSystem), weight: CNFontWeight.regular),
+                  color: CupertinoColors.secondaryLabel,
+                ),
+                icon: const CNImage(systemSymbolName: 'microphone.fill', tint: CupertinoColors.systemBrown),
+              ),
             ),
           ],
         ),

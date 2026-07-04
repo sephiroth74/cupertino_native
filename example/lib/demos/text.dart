@@ -21,12 +21,12 @@ class TextDemoPage extends StatelessWidget {
             const SizedBox(height: 24),
             const Text('Default rendering', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-            const CNText(text: 'The quick brown fox jumps over the lazy dog.'),
+            const CNText('The quick brown fox jumps over the lazy dog.'),
             const SizedBox(height: 24),
             const Text('Custom font and color', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             const CNText(
-              text: 'Monospaced title with a stronger accent color.',
+              'Monospaced title with a stronger accent color.',
               font: CNFont.monospacedSystem(CNFontSize.points(20), weight: CNFontWeight.semibold),
               color: CupertinoColors.systemBlue,
             ),
@@ -36,8 +36,7 @@ class TextDemoPage extends StatelessWidget {
             const SizedBox(
               width: 120,
               child: CNText(
-                text:
-                    'This sentence is intentionally long so the demo can show how a line limit and truncation behave when the available width is constrained.',
+                'This sentence is intentionally long so the demo can show how a line limit and truncation behave when the available width is constrained.',
                 lineLimit: 2,
                 truncationMode: CNTextTruncationMode.tail,
                 width: 120,
@@ -49,7 +48,7 @@ class TextDemoPage extends StatelessWidget {
             const SizedBox(
               width: 320,
               child: CNText(
-                text: 'The widget can reserve space for multiple lines even when the content is short.',
+                'The widget can reserve space for multiple lines even when the content is short.',
                 lineLimit: 2,
                 lineLimitReservesSpace: true,
               ),
@@ -57,9 +56,9 @@ class TextDemoPage extends StatelessWidget {
             const SizedBox(height: 24),
             const Text('Text scale variants', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-            const CNText(text: 'Default scale', textScale: CNTextScale.defaultScale),
+            const CNText('Default scale', textScale: CNTextScale.defaultScale),
             const SizedBox(height: 8),
-            const CNText(text: 'Secondary scale', textScale: CNTextScale.secondary),
+            const CNText('Secondary scale', textScale: CNTextScale.secondary),
             const SizedBox(height: 24),
             const Text('Reusable inside layout', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
@@ -72,7 +71,7 @@ class TextDemoPage extends StatelessWidget {
                 border: Border.all(color: theme.separatorColor),
               ),
               child: const CNText(
-                text: 'This same widget can be embedded in future controls without coupling the payload model to the view wrapper.',
+                'This same widget can be embedded in future controls without coupling the payload model to the view wrapper.',
                 width: 360,
               ),
             ),

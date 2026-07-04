@@ -15,9 +15,9 @@ const double _kDefaultTextHeight = 24.0;
 /// A SwiftUI Text-backed native macOS text widget.
 class CNText extends StatefulWidget {
   /// Creates a new text widget.
-  const CNText({
+  const CNText(
+    this.text, {
     super.key,
-    required this.text,
     this.color,
     this.font,
     this.lineLimit,
