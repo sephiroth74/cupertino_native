@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:cupertino_native/channel/params.dart';
-import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native/channel/channel_serialization.dart';
+import 'package:cupertino_native/style/color_well_style.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -20,13 +23,7 @@ class CNColorWell extends StatefulWidget {
   /// The [style] parameter is optional and defaults to [CNColorWellStyle.regular].
   /// The [supportsAlpha] parameter is optional and defaults to true.
   ///
-  const CNColorWell({
-    super.key,
-    this.color,
-    this.onColorChanged,
-    this.style = CNColorWellStyle.regular,
-    this.supportsAlpha = true,
-  });
+  const CNColorWell({super.key, this.color, this.onColorChanged, this.style = CNColorWellStyle.regular, this.supportsAlpha = true});
 
   /// The color of the color well.
   final Color? color;
@@ -51,15 +48,12 @@ class _CNColorWellState extends State<CNColorWell> {
   MethodChannel? _channel;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
-  Color? _lastColor;
-  bool _lastIsDark = false;
-  CNColorWellStyle _lastStyle = CNColorWellStyle.regular;
-  bool _lastSupportsAlpha = true;
+  String? _lastSerializedPayload;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
+    _syncPropsToNativeIfNeeded();
   }
 
   @override
@@ -72,14 +66,28 @@ class _CNColorWellState extends State<CNColorWell> {
 
   bool get enabled => widget.onColorChanged != null;
 
+  _CNColorWellPayload _payload() {
+    return _CNColorWellPayload(
+      color: resolveColorToArgb(widget.color, context),
+      style: widget.style.name,
+      enabled: enabled,
+      isDark: isDark,
+      continuous: true,
+      supportsAlpha: widget.supportsAlpha,
+    );
+  }
+
+  String _serializeCurrentPayload() => jsonEncode(_payload().toChannelMap(context));
+
+  void _cacheCurrentProps() {
+    _lastSerializedPayload = _serializeCurrentPayload();
+  }
+
   void _onCreated(int id) {
     final ch = MethodChannel('CupertinoNativeColorWell_$id');
     _channel = ch;
     ch.setMethodCallHandler(_onMethodCall);
-    _lastIsDark = isDark;
-    _lastColor = widget.color;
-    _lastStyle = widget.style;
-    _lastSupportsAlpha = widget.supportsAlpha;
+    _cacheCurrentProps();
     _requestIntrinsicSize();
   }
 
@@ -115,53 +123,21 @@ class _CNColorWellState extends State<CNColorWell> {
   Future<void> _syncPropsToNativeIfNeeded() async {
     final ch = _channel;
     if (ch == null) return;
-    bool needsIntrinsicSize = false;
 
-    if (_lastColor != widget.color) {
-      ch.invokeMethod('setColor', {
-        'color': resolveColorToArgb(widget.color, context),
-      });
-      _lastColor = widget.color;
-    }
+    final payload = _payload().toChannelMap(context);
+    final serializedPayload = jsonEncode(payload);
 
-    if (_lastStyle != widget.style) {
-      ch.invokeMethod('setStyle', {'style': widget.style.name});
-      _lastStyle = widget.style;
-      needsIntrinsicSize = true;
-    }
-
-    if (_lastSupportsAlpha != widget.supportsAlpha) {
-      ch.invokeMethod('setSupportsAlpha', {
-        'supportsAlpha': widget.supportsAlpha,
-      });
-      _lastSupportsAlpha = widget.supportsAlpha;
-    }
-
-    if (needsIntrinsicSize) {
+    if (_lastSerializedPayload != serializedPayload) {
+      await ch.invokeMethod('setColorWell', payload);
+      _cacheCurrentProps();
       _requestIntrinsicSize();
-    }
-  }
-
-  Future<void> _syncBrightnessIfNeeded() async {
-    final ch = _channel;
-    if (ch == null) return;
-    if (_lastIsDark != isDark) {
-      await ch.invokeMethod('setBrightness', {'isDark': isDark});
-      _lastIsDark = isDark;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     const viewType = 'CupertinoNativeColorWell';
-    final creationParams = <String, dynamic>{
-      'color': resolveColorToArgb(widget.color, context),
-      'style': widget.style.name,
-      'enabled': enabled,
-      'isDark': isDark,
-      'continuous': true,
-      'supportsAlpha': widget.supportsAlpha,
-    };
+    final creationParams = _payload().toChannelMap(context);
 
     if (defaultTargetPlatform != TargetPlatform.macOS) {
       return Placeholder();
@@ -185,15 +161,42 @@ class _CNColorWellState extends State<CNColorWell> {
         double width = hasWidth ? constraints.maxWidth : _kDefaultWidth;
         double height = hasHeight ? constraints.maxHeight : _kDefaultHeight;
 
-        if (_intrinsicWidth != null &&
-            _intrinsicHeight != null &&
-            !hasWidth &&
-            !hasHeight) {
+        if (_intrinsicWidth != null && _intrinsicHeight != null && !hasWidth && !hasHeight) {
           width = _intrinsicWidth!;
           height = _intrinsicHeight!;
         }
         return SizedBox(width: width, height: height, child: platformView);
       },
     );
+  }
+}
+
+class _CNColorWellPayload implements CNChannelSerializable {
+  const _CNColorWellPayload({
+    this.color,
+    required this.style,
+    required this.enabled,
+    required this.isDark,
+    required this.continuous,
+    required this.supportsAlpha,
+  });
+
+  final int? color;
+  final bool continuous;
+  final bool enabled;
+  final bool isDark;
+  final String style;
+  final bool supportsAlpha;
+
+  @override
+  Map<String, dynamic> toChannelMap(BuildContext context) {
+    return {
+      'color': color,
+      'style': style,
+      'enabled': enabled,
+      'isDark': isDark,
+      'continuous': continuous,
+      'supportsAlpha': supportsAlpha,
+    };
   }
 }
