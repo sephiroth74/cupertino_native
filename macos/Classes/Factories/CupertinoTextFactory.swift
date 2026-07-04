@@ -1,7 +1,7 @@
 import Cocoa
 import FlutterMacOS
 
-class CupertinoSegmentedControlViewFactory: NSObject, FlutterPlatformViewFactory {
+class CupertinoTextFactory: NSObject, FlutterPlatformViewFactory {
     private let messenger: FlutterBinaryMessenger
 
     init(messenger: FlutterBinaryMessenger) {
@@ -14,6 +14,6 @@ class CupertinoSegmentedControlViewFactory: NSObject, FlutterPlatformViewFactory
     }
 
     func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
-        CupertinoSegmentedControlNSView(viewId: viewId, args: args, messenger: messenger)
+        CupertinoTextNSView(viewId: viewId, args: args, messenger: messenger)
     }
 }

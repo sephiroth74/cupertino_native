@@ -19,7 +19,7 @@ class CupertinoLabelNSView: NSView {
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
             name: "CupertinoNativeLabel_\(viewId)",
-            binaryMessenger: messenger
+            binaryMessenger: messenger,
         )
         self.args = CNChannelSerialization.asDict(args) ?? [:]
         super.init(frame: .zero)
@@ -31,7 +31,7 @@ class CupertinoLabelNSView: NSView {
     }
 
     required init?(coder _: NSCoder) {
-        return nil
+        nil
     }
 
     private func createHostingView() {
@@ -39,14 +39,14 @@ class CupertinoLabelNSView: NSView {
         let content = LabelContent(
             model: parseArguments(args),
             onSizeChanged: { [weak self] size in
-                guard let self = self else { return }
-                self.measuredSize = NSSize(width: size.width, height: size.height)
-                self.invalidateIntrinsicContentSize()
-                self.channel.invokeMethod(
+                guard let self else { return }
+                measuredSize = NSSize(width: size.width, height: size.height)
+                invalidateIntrinsicContentSize()
+                channel.invokeMethod(
                     "intrinsicSizeChanged",
-                    arguments: ["width": size.width, "height": size.height]
+                    arguments: ["width": size.width, "height": size.height],
                 )
-            }
+            },
         )
         let hosting = NSHostingView(rootView: content)
         hosting.translatesAutoresizingMaskIntoConstraints = false
@@ -62,15 +62,15 @@ class CupertinoLabelNSView: NSView {
 
     private func setupMethodCallHandler() {
         channel.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else { result(nil); return }
+            guard let self else { result(nil); return }
             switch call.method {
             case "getIntrinsicSize":
-                let size = self.hostingView?.intrinsicContentSize ?? NSSize(width: NSView.noIntrinsicMetric, height: NSView.noIntrinsicMetric)
+                let size = hostingView?.intrinsicContentSize ?? NSSize(width: NSView.noIntrinsicMetric, height: NSView.noIntrinsicMetric)
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setText":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["text"] = args["text"]
-                    self.createHostingView()
+                    createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing text", details: nil))
@@ -83,7 +83,7 @@ class CupertinoLabelNSView: NSView {
                     self.args["iconRenderingMode"] = args["iconRenderingMode"]
                     self.args["iconPaletteColors"] = args["iconPaletteColors"]
                     self.args["iconGradientEnabled"] = args["iconGradientEnabled"]
-                    self.createHostingView()
+                    createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing icon", details: nil))
@@ -91,7 +91,7 @@ class CupertinoLabelNSView: NSView {
             case "setColor":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["color"] = args["color"]
-                    self.createHostingView()
+                    createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing color", details: nil))
@@ -99,7 +99,7 @@ class CupertinoLabelNSView: NSView {
             case "setFont":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["font"] = args["font"]
-                    self.createHostingView()
+                    createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing font", details: nil))
@@ -107,7 +107,7 @@ class CupertinoLabelNSView: NSView {
             case "setLabelStyle":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["labelStyle"] = args["labelStyle"]
-                    self.createHostingView()
+                    createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing labelStyle", details: nil))
@@ -119,7 +119,7 @@ class CupertinoLabelNSView: NSView {
     }
 
     private func parseArguments(_ args: [String: Any]) -> LabelModel {
-        return LabelModel(
+        LabelModel(
             text: args["text"] as? String ?? "",
             iconName: args["iconName"] as? String,
             iconSize: (args["iconSize"] as? NSNumber).map { CGFloat(truncating: $0) },
@@ -129,7 +129,7 @@ class CupertinoLabelNSView: NSView {
             iconGradientEnabled: (args["iconGradientEnabled"] as? NSNumber)?.boolValue,
             color: (args["color"] as? NSNumber).map { ColorUtils.colorFromARGB($0.intValue) },
             font: (args["font"] as? [String: Any]).flatMap { FontUtils.swiftUIFontFromDictionary($0) },
-            labelStyle: args["labelStyle"] as? String
+            labelStyle: args["labelStyle"] as? String,
         )
     }
 }
@@ -191,15 +191,15 @@ private struct LabelContent: View {
     private func symbolRenderingModeFromString(from raw: String?) -> SymbolRenderingMode? {
         switch raw {
         case "monochrome":
-            return .monochrome
+            .monochrome
         case "hierarchical":
-            return .hierarchical
+            .hierarchical
         case "multicolor":
-            return .multicolor
+            .multicolor
         case "palette":
-            return .palette
+            .palette
         default:
-            return nil
+            nil
         }
     }
 }

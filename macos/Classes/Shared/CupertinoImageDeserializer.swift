@@ -23,11 +23,11 @@ enum CNChannelSerialization {
         asArray(value).compactMap { decode($0) as T? }
     }
 
-    static func encode<T: CNChannelSerializable>(_ value: T?) -> [String: Any]? {
+    static func encode(_ value: (some CNChannelSerializable)?) -> [String: Any]? {
         value?.toChannel()
     }
 
-    static func encodeArray<T: CNChannelSerializable>(_ values: [T]) -> [[String: Any]] {
+    static func encodeArray(_ values: [some CNChannelSerializable]) -> [[String: Any]] {
         values.map { $0.toChannel() }
     }
 }
@@ -52,7 +52,7 @@ struct CNImagePayload: CNChannelSerializable {
         font = channel["font"] as? [String: Any]
 
         if let rawColors = channel["foregroundStyleColors"] as? [NSNumber] {
-            foregroundStyleColors = rawColors.map { $0.intValue }
+            foregroundStyleColors = rawColors.map(\.intValue)
         } else if let rawColors = channel["foregroundStyleColors"] as? [Int] {
             foregroundStyleColors = rawColors
         } else {
@@ -87,7 +87,7 @@ enum CNImage {
     static func deserialize(jsonString: String) -> AnyView? {
         do {
             if let imageDict = try JSONSerialization.jsonObject(
-                with: Data(jsonString.utf8), options: []
+                with: Data(jsonString.utf8), options: [],
             ) as? [String: Any] {
                 return deserialize(imageDict)
             }
@@ -123,7 +123,7 @@ enum CNImage {
         }
 
         if let tintColorValue = payload.tint {
-            view = AnyView(view.foregroundColor(colorFromARGB(tintColorValue)))
+            view = AnyView(view.foregroundColor(ColorUtils.swiftUIColorFromARGB(tintColorValue)))
         }
 
         return AnyView(view.id(identityKey(for: payload)))
@@ -147,11 +147,11 @@ enum CNImage {
     private static func applyColorRenderingMode(to view: AnyView, payload: CNImagePayload) -> AnyView {
         switch payload.symbolColorRenderingMode {
         case "flat":
-            return AnyView(view.symbolColorRenderingMode(.flat))
+            AnyView(view.symbolColorRenderingMode(.flat))
         case "gradient":
-            return AnyView(view.symbolColorRenderingMode(.gradient))
+            AnyView(view.symbolColorRenderingMode(.gradient))
         default:
-            return view
+            view
         }
     }
 
@@ -163,7 +163,7 @@ enum CNImage {
                 return AnyView(
                     view
                         .symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(colorFromARGB(first))
+                        .foregroundStyle(ColorUtils.swiftUIColorFromARGB(first)),
                 )
             }
             return AnyView(view.symbolRenderingMode(.hierarchical))
@@ -172,12 +172,12 @@ enum CNImage {
                 return AnyView(
                     view
                         .symbolRenderingMode(.monochrome)
-                        .foregroundStyle(colorFromARGB(first))
+                        .foregroundStyle(ColorUtils.swiftUIColorFromARGB(first)),
                 )
             }
             return AnyView(view.symbolRenderingMode(.monochrome))
         case "palette":
-            let palette = payload.foregroundStyleColors.map(colorFromARGB)
+            let palette = payload.foregroundStyleColors.map(ColorUtils.swiftUIColorFromARGB)
             guard !palette.isEmpty else {
                 return AnyView(view.symbolRenderingMode(.palette))
             }
@@ -185,34 +185,26 @@ enum CNImage {
                 return AnyView(
                     view
                         .symbolRenderingMode(.palette)
-                        .foregroundStyle(palette[0])
+                        .foregroundStyle(palette[0]),
                 )
             }
             if palette.count == 2 {
                 return AnyView(
                     view
                         .symbolRenderingMode(.palette)
-                        .foregroundStyle(palette[0], palette[1])
+                        .foregroundStyle(palette[0], palette[1]),
                 )
             }
             return AnyView(
                 view
                     .symbolRenderingMode(.palette)
-                    .foregroundStyle(palette[0], palette[1], palette[2])
+                    .foregroundStyle(palette[0], palette[1], palette[2]),
             )
         case "multicolor":
             return AnyView(view.symbolRenderingMode(.multicolor))
         default:
             return view
         }
-    }
-
-    private static func colorFromARGB(_ argb: Int) -> Color {
-        let a = CGFloat((argb >> 24) & 0xFF) / 255.0
-        let r = CGFloat((argb >> 16) & 0xFF) / 255.0
-        let g = CGFloat((argb >> 8) & 0xFF) / 255.0
-        let b = CGFloat(argb & 0xFF) / 255.0
-        return Color(.sRGB, red: r, green: g, blue: b, opacity: a)
     }
 }
 

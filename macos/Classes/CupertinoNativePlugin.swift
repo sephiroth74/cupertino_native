@@ -11,7 +11,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         CupertinoNativePlugin.contextMenuHandler = CupertinoContextMenuHandler(registrar: registrar)
         CupertinoNativePlugin.toolbarManager = CNToolbarManager(messenger: registrar.messenger)
         let channel = FlutterMethodChannel(
-            name: "cupertino_native", binaryMessenger: registrar.messenger
+            name: "cupertino_native", binaryMessenger: registrar.messenger,
         )
         let instance = CupertinoNativePlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
@@ -56,7 +56,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         registrar.register(pathControlFactory, withId: "CupertinoNativePathControl")
 
         let progressIndicatorFactory = CupertinoProgressIndicatorViewFactory(
-            messenger: registrar.messenger
+            messenger: registrar.messenger,
         )
         registrar.register(progressIndicatorFactory, withId: "CupertinoNativeProgressIndicator")
 
@@ -84,6 +84,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         let comboBoxFactory = CupertinoComboBoxFactory(messenger: registrar.messenger)
         registrar.register(comboBoxFactory, withId: "CupertinoNativeComboBox")
 
+        let textFactory = CupertinoTextFactory(messenger: registrar.messenger)
+        registrar.register(textFactory, withId: "CupertinoNativeText")
+
         let imageFactory = CupertinoImageFactory(messenger: registrar.messenger)
         registrar.register(imageFactory, withId: "CupertinoNativeImage")
     }
@@ -98,8 +101,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                     FlutterError(
                         code: "invalid_args",
                         message: "showAlert expects a map of arguments",
-                        details: nil
-                    )
+                        details: nil,
+                    ),
                 )
                 return
             }
@@ -110,8 +113,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                     FlutterError(
                         code: "invalid_args",
                         message: "showContextMenu expects a map of arguments",
-                        details: nil
-                    )
+                        details: nil,
+                    ),
                 )
                 return
             }
@@ -120,8 +123,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                     FlutterError(
                         code: "handler_unavailable",
                         message: "Context menu handler is not initialized",
-                        details: nil
-                    )
+                        details: nil,
+                    ),
                 )
                 return
             }
@@ -132,8 +135,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                     FlutterError(
                         code: "invalid_args",
                         message: "showSheet expects a map of arguments",
-                        details: nil
-                    )
+                        details: nil,
+                    ),
                 )
                 return
             }
@@ -144,8 +147,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                     FlutterError(
                         code: "invalid_args",
                         message: "makeToolbar expects a map of arguments",
-                        details: nil
-                    )
+                        details: nil,
+                    ),
                 )
                 return
             }
@@ -247,8 +250,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 FlutterError(
                     code: "window_unavailable",
                     message: "Unable to find host window for sheet presentation",
-                    details: nil
-                )
+                    details: nil,
+                ),
             )
             return
         }
@@ -301,8 +304,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 FlutterError(
                     code: "window_unavailable",
                     message: "Unable to find host window for toolbar configuration",
-                    details: nil
-                )
+                    details: nil,
+                ),
             )
             return
         }
@@ -312,8 +315,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 FlutterError(
                     code: "toolbar_manager_unavailable",
                     message: "Toolbar manager is not initialized",
-                    details: nil
-                )
+                    details: nil,
+                ),
             )
             return
         }
@@ -327,8 +330,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 FlutterError(
                     code: "window_unavailable",
                     message: "Unable to find host window for toolbar configuration",
-                    details: nil
-                )
+                    details: nil,
+                ),
             )
             return
         }
@@ -338,8 +341,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 FlutterError(
                     code: "toolbar_manager_unavailable",
                     message: "Toolbar manager is not initialized",
-                    details: nil
-                )
+                    details: nil,
+                ),
             )
             return
         }
@@ -350,6 +353,6 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
 extension FlutterPluginRegistrar {
     func getFlutterWindow() -> NSWindow? {
-        return view?.window
+        view?.window
     }
 }

@@ -81,25 +81,25 @@ class FontUtils {
     private static func weightFromString(_ value: String?) -> NSFont.Weight {
         switch value {
         case "ultraLight":
-            return .ultraLight
+            .ultraLight
         case "thin":
-            return .thin
+            .thin
         case "light":
-            return .light
+            .light
         case "medium":
-            return .medium
+            .medium
         case "semibold":
-            return .semibold
+            .semibold
         case "bold":
-            return .bold
+            .bold
         case "heavy":
-            return .heavy
+            .heavy
         case "black":
-            return .black
+            .black
         case "regular", .none:
-            return .regular
+            .regular
         default:
-            return .regular
+            .regular
         }
     }
 }

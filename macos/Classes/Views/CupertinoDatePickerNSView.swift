@@ -8,7 +8,7 @@ class CupertinoDatePickerNSView: NSView {
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
-            name: "CupertinoNativeDatePicker_\(viewId)", binaryMessenger: messenger
+            name: "CupertinoNativeDatePicker_\(viewId)", binaryMessenger: messenger,
         )
         super.init(frame: .zero)
 
@@ -97,7 +97,7 @@ class CupertinoDatePickerNSView: NSView {
 
         channel.setMethodCallHandler { call, result in
             NSLog(
-                "Received method call: \(call.method)"
+                "Received method call: \(call.method)",
             )
             switch call.method {
             case "getIntrinsicSize":
@@ -143,7 +143,7 @@ class CupertinoDatePickerNSView: NSView {
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing elements", details: nil)
+                        FlutterError(code: "bad_args", message: "Missing elements", details: nil),
                     )
                 }
 
@@ -186,7 +186,7 @@ class CupertinoDatePickerNSView: NSView {
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil)
+                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil),
                     )
                 }
 
@@ -198,7 +198,7 @@ class CupertinoDatePickerNSView: NSView {
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil)
+                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil),
                     )
                 }
 
@@ -220,7 +220,7 @@ class CupertinoDatePickerNSView: NSView {
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing bordered", details: nil)
+                        FlutterError(code: "bad_args", message: "Missing bordered", details: nil),
                     )
                 }
 
@@ -233,8 +233,8 @@ class CupertinoDatePickerNSView: NSView {
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing drawsBackground", details: nil
-                        )
+                            code: "bad_args", message: "Missing drawsBackground", details: nil,
+                        ),
                     )
                 }
 
@@ -246,7 +246,7 @@ class CupertinoDatePickerNSView: NSView {
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil)
+                        FlutterError(code: "bad_args", message: "Missing timestamp", details: nil),
                     )
                 }
 
@@ -279,29 +279,29 @@ class CupertinoDatePickerNSView: NSView {
         let intervalMs = interval * 1000
 
         channel.invokeMethod(
-            "onDateChanged", arguments: ["timestamp": timestamp, "interval": intervalMs]
+            "onDateChanged", arguments: ["timestamp": timestamp, "interval": intervalMs],
         )
     }
 
     private static func datePickerModeFromString(_ mode: String) -> NSDatePicker.Mode {
         switch mode {
         case "range":
-            return NSDatePicker.Mode.range
+            NSDatePicker.Mode.range
         default:
-            return NSDatePicker.Mode.single
+            NSDatePicker.Mode.single
         }
     }
 
     private static func datePickerStyleFromString(_ style: String) -> NSDatePicker.Style {
         switch style {
         case "clockAndCalendar":
-            return NSDatePicker.Style.clockAndCalendar
+            NSDatePicker.Style.clockAndCalendar
         case "textFieldAndStepper":
-            return NSDatePicker.Style.textFieldAndStepper
+            NSDatePicker.Style.textFieldAndStepper
         case "textField":
-            return NSDatePicker.Style.textField
+            NSDatePicker.Style.textField
         default:
-            return NSDatePicker.Style.clockAndCalendar
+            NSDatePicker.Style.clockAndCalendar
         }
     }
 
@@ -320,19 +320,19 @@ class CupertinoDatePickerNSView: NSView {
     private static func datePickerElementFromString(_ element: String) -> NSDatePicker.ElementFlags? {
         switch element {
         case "hourMinute":
-            return NSDatePicker.ElementFlags.hourMinute
+            NSDatePicker.ElementFlags.hourMinute
         case "hourMinuteSecond":
-            return NSDatePicker.ElementFlags.hourMinuteSecond
+            NSDatePicker.ElementFlags.hourMinuteSecond
         case "timeZone":
-            return NSDatePicker.ElementFlags.timeZone
+            NSDatePicker.ElementFlags.timeZone
         case "yearMonth":
-            return NSDatePicker.ElementFlags.yearMonth
+            NSDatePicker.ElementFlags.yearMonth
         case "yearMonthDay":
-            return NSDatePicker.ElementFlags.yearMonthDay
+            NSDatePicker.ElementFlags.yearMonthDay
         case "era":
-            return NSDatePicker.ElementFlags.era
+            NSDatePicker.ElementFlags.era
         default:
-            return nil
+            nil
         }
     }
 }

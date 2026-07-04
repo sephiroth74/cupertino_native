@@ -10,16 +10,16 @@ class CupertinoSecureTextFieldFactory: NSObject, FlutterPlatformViewFactory {
 
     func create(
         withViewIdentifier viewId: Int64,
-        arguments args: Any?
+        arguments args: Any?,
     ) -> NSView {
-        return CupertinoSecureTextFieldNSView(
+        CupertinoSecureTextFieldNSView(
             viewId: viewId,
             args: args,
-            messenger: messenger
+            messenger: messenger,
         )
     }
 
     func createArgsCodec() -> (FlutterMessageCodec & NSObjectProtocol)? {
-        return FlutterStandardMessageCodec.sharedInstance()
+        FlutterStandardMessageCodec.sharedInstance()
     }
 }

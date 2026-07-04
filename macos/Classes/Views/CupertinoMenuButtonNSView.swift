@@ -37,7 +37,7 @@ extension CNMenuItemModel: CNChannelSerializable {
             identifier: identifier,
             enabled: enabled,
             state: state,
-            submenu: submenu
+            submenu: submenu,
         )
     }
 
@@ -81,7 +81,7 @@ class CupertinoMenuButtonNSView: NSView {
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
             name: "CupertinoNativeMenuButton_\(viewId)",
-            binaryMessenger: messenger
+            binaryMessenger: messenger,
         )
         self.args = CNChannelSerialization.asDict(args) ?? [:]
         super.init(frame: .zero)
@@ -97,7 +97,7 @@ class CupertinoMenuButtonNSView: NSView {
     }
 
     required init?(coder _: NSCoder) {
-        return nil
+        nil
     }
 
     private func createHostingView() {
@@ -109,9 +109,9 @@ class CupertinoMenuButtonNSView: NSView {
             },
             onSizeChanged: { [weak self] size in
                 guard let self else { return }
-                self.measuredSize = NSSize(width: size.width, height: size.height)
-                self.invalidateIntrinsicContentSize()
-            }
+                measuredSize = NSSize(width: size.width, height: size.height)
+                invalidateIntrinsicContentSize()
+            },
         )
         let hosting = NSHostingView(rootView: content)
         hosting.translatesAutoresizingMaskIntoConstraints = false
@@ -133,20 +133,20 @@ class CupertinoMenuButtonNSView: NSView {
 
             switch call.method {
             case "getIntrinsicSize":
-                let size = self.hostingView?.intrinsicContentSize ?? NSSize(width: NSView.noIntrinsicMetric, height: NSView.noIntrinsicMetric)
+                let size = hostingView?.intrinsicContentSize ?? NSSize(width: NSView.noIntrinsicMetric, height: NSView.noIntrinsicMetric)
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setMenu":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["menu"] = args["menu"]
-                    self.createHostingView()
+                    createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing menu", details: nil))
                 }
             case "setIsDark":
                 if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["value"] as? NSNumber)?.boolValue {
-                    self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-                    self.createHostingView()
+                    appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+                    createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
@@ -154,7 +154,7 @@ class CupertinoMenuButtonNSView: NSView {
             case "setLabel":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["label"] = args["label"]
-                    self.createHostingView()
+                    createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing label", details: nil))
@@ -162,7 +162,7 @@ class CupertinoMenuButtonNSView: NSView {
             case "setImage":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["image"] = args["image"]
-                    self.createHostingView()
+                    createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing image", details: nil))
@@ -170,7 +170,7 @@ class CupertinoMenuButtonNSView: NSView {
             case "setStyle":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["style"] = args["style"] ?? args["menuStyle"]
-                    self.createHostingView()
+                    createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
@@ -178,7 +178,7 @@ class CupertinoMenuButtonNSView: NSView {
             case "setControlSize":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.args["controlSize"] = args["controlSize"]
-                    self.createHostingView()
+                    createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing controlSize", details: nil))
@@ -186,7 +186,7 @@ class CupertinoMenuButtonNSView: NSView {
             case "setFocusable":
                 if let args = CNChannelSerialization.asDict(call.arguments), let focusable = (args["focusable"] as? NSNumber)?.boolValue {
                     self.args["focusable"] = focusable
-                    self.createHostingView()
+                    createHostingView()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing focusable", details: nil))
@@ -206,7 +206,7 @@ class CupertinoMenuButtonNSView: NSView {
             image: args["image"] as? [String: Any],
             menuStyle: args["style"] as? String ?? "automatic",
             controlSize: ((args["controlSize"] as? String)?.toControlSize()) ?? .regular,
-            focusable: (args["focusable"] as? NSNumber)?.boolValue ?? false
+            focusable: (args["focusable"] as? NSNumber)?.boolValue ?? false,
         )
     }
 }
@@ -300,7 +300,7 @@ struct CNMenuEntriesView: View {
         let hasTitle = !item.title.isEmpty
         let hasImage = item.image != nil
 
-        if hasTitle && hasImage {
+        if hasTitle, hasImage {
             HStack(spacing: 8) {
                 if let image = item.image,
                    let swiftImage = CNImage.deserialize(image)
@@ -338,7 +338,7 @@ struct CNMenuEntriesView: View {
                     }
                     .disabled(!item.enabled)
                 }
-            }
+            },
         )
     }
 }

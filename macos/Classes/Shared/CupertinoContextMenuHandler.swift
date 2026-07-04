@@ -15,8 +15,8 @@ final class CupertinoContextMenuHandler: NSObject {
                 FlutterError(
                     code: "invalid_args",
                     message: "showContextMenu expects a menu JSON string",
-                    details: nil
-                )
+                    details: nil,
+                ),
             )
             return
         }
@@ -29,8 +29,8 @@ final class CupertinoContextMenuHandler: NSObject {
                 FlutterError(
                     code: "window_unavailable",
                     message: "Unable to resolve Flutter window/content view",
-                    details: nil
-                )
+                    details: nil,
+                ),
             )
             return
         }
@@ -40,11 +40,11 @@ final class CupertinoContextMenuHandler: NSObject {
                 result(nil)
                 return
             }
-            self.presentContextMenu(
+            presentContextMenu(
                 menuJson: menuJson,
                 args: args,
                 contentView: contentView,
-                result: result
+                result: result,
             )
         }
     }
@@ -53,7 +53,7 @@ final class CupertinoContextMenuHandler: NSObject {
         menuJson: String,
         args: [String: Any],
         contentView: NSView,
-        result: @escaping FlutterResult
+        result: @escaping FlutterResult,
     ) {
         let menu = deserializeMenu(jsonString: menuJson)
         let anchorPoint = resolveMenuPoint(args: args, contentView: contentView)
@@ -91,7 +91,7 @@ final class CupertinoContextMenuHandler: NSObject {
         {
             return NSPoint(
                 x: x,
-                y: contentView.bounds.height - y
+                y: contentView.bounds.height - y,
             )
         }
 

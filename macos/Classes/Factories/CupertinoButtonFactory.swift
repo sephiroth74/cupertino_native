@@ -10,10 +10,10 @@ class CupertinoButtonViewFactory: NSObject, FlutterPlatformViewFactory {
     }
 
     func createArgsCodec() -> (FlutterMessageCodec & NSObjectProtocol)? {
-        return FlutterStandardMessageCodec.sharedInstance()
+        FlutterStandardMessageCodec.sharedInstance()
     }
 
     func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
-        return CupertinoButtonNSView(viewId: viewId, args: args, messenger: messenger)
+        CupertinoButtonNSView(viewId: viewId, args: args, messenger: messenger)
     }
 }

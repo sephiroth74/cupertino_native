@@ -48,33 +48,33 @@ class CupertinoIconNSView: NSView {
         rebuild()
 
         channel.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else { result(nil); return }
+            guard let self else { result(nil); return }
             switch call.method {
             case "getIntrinsicSize":
-                if let img = self.imageView.image {
+                if let img = imageView.image {
                     result(["width": Double(img.size.width), "height": Double(img.size.height)])
                 } else {
                     result(["width": 0.0, "height": 0.0])
                 }
             case "setSymbol":
                 if let args = CNChannelSerialization.asDict(call.arguments), let n = args["name"] as? String {
-                    self.name = n
-                    self.rebuild()
+                    name = n
+                    rebuild()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing name", details: nil)) }
             case "setStyle":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
-                    if let v = args["iconSize"] as? NSNumber { self.size = CGFloat(truncating: v) }
-                    if let v = args["iconColor"] as? NSNumber { self.color = ColorUtils.colorFromARGB(v.intValue) }
-                    if let arr = args["iconPaletteColors"] as? [NSNumber] { self.palette = arr.map { ColorUtils.colorFromARGB($0.intValue) } }
-                    if let mode = args["iconRenderingMode"] as? String { self.renderingMode = mode }
-                    if let g = args["iconGradientEnabled"] as? NSNumber { self.gradientEnabled = g.boolValue }
-                    self.rebuild()
+                    if let v = args["iconSize"] as? NSNumber { size = CGFloat(truncating: v) }
+                    if let v = args["iconColor"] as? NSNumber { color = ColorUtils.colorFromARGB(v.intValue) }
+                    if let arr = args["iconPaletteColors"] as? [NSNumber] { palette = arr.map { ColorUtils.colorFromARGB($0.intValue) } }
+                    if let mode = args["iconRenderingMode"] as? String { renderingMode = mode }
+                    if let g = args["iconGradientEnabled"] as? NSNumber { gradientEnabled = g.boolValue }
+                    rebuild()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
             case "setBrightness":
                 if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["isDark"] as? NSNumber)?.boolValue {
-                    self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+                    appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
             default:
@@ -84,7 +84,7 @@ class CupertinoIconNSView: NSView {
     }
 
     required init?(coder _: NSCoder) {
-        return nil
+        nil
     }
 
     private func rebuild() {

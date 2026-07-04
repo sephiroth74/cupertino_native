@@ -9,7 +9,7 @@ class CupertinoButtonNSView: NSView {
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
-            name: "CupertinoNativeButton_\(viewId)", binaryMessenger: messenger
+            name: "CupertinoNativeButton_\(viewId)", binaryMessenger: messenger,
         )
         super.init(frame: .zero)
 
@@ -59,7 +59,7 @@ class CupertinoButtonNSView: NSView {
             onPressed: {
                 channelRef?.invokeMethod("pressed", arguments: nil)
             },
-            onSizeChanged: { _ in }
+            onSizeChanged: { _ in },
         )
 
         hostingController = NSHostingController(rootView: CupertinoButtonView(model: model))
@@ -78,25 +78,25 @@ class CupertinoButtonNSView: NSView {
         channelRef = channel
 
         channel.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else {
+            guard let self else {
                 result(nil)
                 return
             }
 
             switch call.method {
             case "getIntrinsicSize":
-                let s = self.hostingController.view.fittingSize
+                let s = hostingController.view.fittingSize
                 result(["width": Double(s.width), "height": Double(s.height)])
             case "setStyle":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let n = args["tint"] as? NSNumber {
-                        self.model.tint = n.intValue.toARGB()
+                        model.tint = n.intValue.toARGB()
                     }
                     if let bs = args["buttonStyle"] as? String {
-                        self.model.buttonStyle = bs.toButtonStyle()
+                        model.buttonStyle = bs.toButtonStyle()
                     }
                     if let role = args["buttonRole"] as? String {
-                        self.model.buttonRole = role
+                        model.buttonRole = role
                     }
                     result(nil)
                 } else {
@@ -104,28 +104,28 @@ class CupertinoButtonNSView: NSView {
                 }
             case "setControlSize":
                 if let args = CNChannelSerialization.asDict(call.arguments), let cs = args["controlSize"] as? String {
-                    self.model.controlSize = cs.toControlSize() ?? .regular
+                    model.controlSize = cs.toControlSize() ?? .regular
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing control size", details: nil))
                 }
             case "setImageScale":
                 if let args = CNChannelSerialization.asDict(call.arguments), let iscale = args["imageScale"] as? String {
-                    self.model.imageScale = iscale
+                    model.imageScale = iscale
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing image scale", details: nil))
                 }
             case "setButtonTitle":
                 if let args = CNChannelSerialization.asDict(call.arguments), let t = args["title"] as? String {
-                    self.model.title = t
+                    model.title = t
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing title", details: nil))
                 }
             case "setEnabled":
                 if let args = CNChannelSerialization.asDict(call.arguments), let e = args["enabled"] as? NSNumber {
-                    self.model.isEnabled = e.boolValue
+                    model.isEnabled = e.boolValue
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
@@ -133,10 +133,10 @@ class CupertinoButtonNSView: NSView {
             case "setButtonIcon":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let name = args["buttonIconName"] as? String {
-                        self.model.iconName = name
+                        model.iconName = name
                     }
                     if let srm = args["symbolRenderingMode"] as? String {
-                        self.model.symbolRenderingMode = srm.toSymbolRenderingMode()
+                        model.symbolRenderingMode = srm.toSymbolRenderingMode()
                     }
                     result(nil)
                 } else {
@@ -146,14 +146,14 @@ class CupertinoButtonNSView: NSView {
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["isDark"] as? NSNumber)?.boolValue
                 {
-                    self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+                    appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
                 }
             case "setPressed":
                 if let args = CNChannelSerialization.asDict(call.arguments), let p = args["pressed"] as? NSNumber {
-                    self.model.isPressed = p.boolValue
+                    model.isPressed = p.boolValue
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing pressed", details: nil))
@@ -165,7 +165,7 @@ class CupertinoButtonNSView: NSView {
     }
 
     required init?(coder _: NSCoder) {
-        return nil
+        nil
     }
 }
 
@@ -194,7 +194,7 @@ private final class ButtonModel: ObservableObject {
         imageScale: String,
         symbolRenderingMode: SymbolRenderingMode?,
         onPressed: @escaping () -> Void,
-        onSizeChanged: @escaping (CGSize) -> Void
+        onSizeChanged: @escaping (CGSize) -> Void,
     ) {
         self.title = title
         self.iconName = iconName
@@ -216,26 +216,26 @@ private struct CupertinoButtonView: View {
     private var imageScaleValue: Image.Scale {
         switch model.imageScale {
         case "small":
-            return .small
+            .small
         case "large":
-            return .large
+            .large
         default:
-            return .medium
+            .medium
         }
     }
 
     private var roleValue: ButtonRole? {
         switch model.buttonRole {
         case "cancel":
-            return .cancel
+            .cancel
         case "destructive":
-            return .destructive
+            .destructive
         case "confirm":
-            return .confirm
+            .confirm
         case "close":
-            return .close
+            .close
         default:
-            return nil
+            nil
         }
     }
 
@@ -258,9 +258,8 @@ private struct CupertinoButtonView: View {
         let hasTitle = (title?.isEmpty == false)
         let hasIcon = (model.iconName?.isEmpty == false)
 
-        let baseButton: AnyView
-        if hasTitle, hasIcon {
-            baseButton = AnyView(Button {
+        let baseButton = if hasTitle, hasIcon {
+            AnyView(Button {
                 onButtonPressed()
             } label: {
                 HStack {
@@ -269,15 +268,15 @@ private struct CupertinoButtonView: View {
                 }
             })
         } else if hasTitle {
-            baseButton = AnyView(Button(title!, role: roleValue, action: onButtonPressed))
+            AnyView(Button(title!, role: roleValue, action: onButtonPressed))
         } else if hasIcon {
-            baseButton = AnyView(Button {
+            AnyView(Button {
                 onButtonPressed()
             } label: {
                 Image(systemName: model.iconName!)
             })
         } else {
-            baseButton = AnyView(Button("", role: roleValue, action: onButtonPressed))
+            AnyView(Button("", role: roleValue, action: onButtonPressed))
         }
 
         let button = baseButton

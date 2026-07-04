@@ -64,32 +64,32 @@ class CupertinoTabBarNSView: NSView {
         ])
 
         channel.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else { result(nil); return }
+            guard let self else { result(nil); return }
             switch call.method {
             case "getIntrinsicSize":
-                let size = self.control.intrinsicContentSize
+                let size = control.intrinsicContentSize
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setSelectedIndex":
                 if let args = CNChannelSerialization.asDict(call.arguments), let idx = (args["index"] as? NSNumber)?.intValue {
-                    self.control.selectedSegment = idx
-                    self.applySegmentTint()
+                    control.selectedSegment = idx
+                    applySegmentTint()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing index", details: nil)) }
             case "setStyle":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
-                    if let n = args["tint"] as? NSNumber { self.currentTint = Self.colorFromARGB(n.intValue) }
+                    if let n = args["tint"] as? NSNumber { currentTint = Self.colorFromARGB(n.intValue) }
                     if let n = args["backgroundColor"] as? NSNumber {
                         let c = Self.colorFromARGB(n.intValue)
-                        self.currentBackground = c
-                        self.wantsLayer = true
-                        self.layer?.backgroundColor = c.cgColor
+                        currentBackground = c
+                        wantsLayer = true
+                        layer?.backgroundColor = c.cgColor
                     }
-                    self.applySegmentTint()
+                    applySegmentTint()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
             case "setBrightness":
                 if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["isDark"] as? NSNumber)?.boolValue {
-                    self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+                    appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
             default:
@@ -99,7 +99,7 @@ class CupertinoTabBarNSView: NSView {
     }
 
     required init?(coder _: NSCoder) {
-        return nil
+        nil
     }
 
     private func configureSegments(labels: [String], symbols: [String], sizes: [NSNumber]) {

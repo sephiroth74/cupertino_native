@@ -19,6 +19,7 @@ export 'components/level_indicator.dart';
 export 'components/stepper.dart';
 export 'components/combo_box.dart';
 export 'components/image.dart';
+export 'components/text.dart';
 export 'components/menu.dart';
 export 'components/date_picker.dart';
 export 'components/search_field.dart';
@@ -55,6 +56,7 @@ export 'style/level_indicator_style.dart';
 export 'style/macos26_colors.dart';
 export 'style/macos26_materials.dart';
 export 'style/cn_typography.dart';
+export 'style/text.dart';
 export 'theme/cn_theme.dart';
 export 'theme/cn_theme_data.dart';
 // combo button removed

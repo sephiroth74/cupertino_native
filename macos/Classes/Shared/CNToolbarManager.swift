@@ -46,7 +46,7 @@ struct CNToolbarItemModel {
 
 extension CNToolbarItemModel: Equatable {
     static func == (lhs: CNToolbarItemModel, rhs: CNToolbarItemModel) -> Bool {
-        return lhs.id == rhs.id &&
+        lhs.id == rhs.id &&
             lhs.selectedValue == rhs.selectedValue &&
             lhs.isOn == rhs.isOn
     }
@@ -62,7 +62,7 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
     init(messenger: FlutterBinaryMessenger) {
         let eventChannel = FlutterEventChannel(
             name: "cupertino_native/toolbar_events",
-            binaryMessenger: messenger
+            binaryMessenger: messenger,
         )
         eventsChannel = eventChannel
         super.init()
@@ -82,7 +82,7 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                 showSearch: showSearch,
                 onEvent: { [weak self] event in
                     self?.sendEvent(event)
-                }
+                },
             )
 
             let hostingView = NSHostingView(rootView: toolbarView)
@@ -175,7 +175,7 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     controlSize: controlSize,
                     menuItems: nil,
                     menuButtonImage: nil,
-                    menuStyle: nil
+                    menuStyle: nil,
                 ))
             } else if kind == "menuButton" {
                 let label = dict["label"] as? String
@@ -201,7 +201,7 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     controlSize: controlSize,
                     menuItems: menuItems,
                     menuButtonImage: image,
-                    menuStyle: menuStyle
+                    menuStyle: menuStyle,
                 ))
             } else if kind == "picker" {
                 // Parse picker item
@@ -228,7 +228,7 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     controlSize: controlSize,
                     menuItems: nil,
                     menuButtonImage: nil,
-                    menuStyle: nil
+                    menuStyle: nil,
                 ))
             } else if kind == "toggle" {
                 // Parse toggle item
@@ -255,7 +255,7 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     controlSize: controlSize,
                     menuItems: nil,
                     menuButtonImage: nil,
-                    menuStyle: nil
+                    menuStyle: nil,
                 ))
             } else {
                 // Parse button item
@@ -281,7 +281,7 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
                     controlSize: controlSize,
                     menuItems: nil,
                     menuButtonImage: nil,
-                    menuStyle: nil
+                    menuStyle: nil,
                 ))
             }
         }
@@ -509,7 +509,7 @@ struct DynamicToolbarContent: ToolbarContent {
             set: { newValue in
                 pickerValues[item.id] = newValue
                 onEvent(["id": item.id, "type": "pickerChanged", "value": newValue])
-            }
+            },
         )) {
             ForEach(options, id: \.self) { option in
                 Text(option).tag(option)
@@ -545,7 +545,7 @@ struct DynamicToolbarContent: ToolbarContent {
             set: { newValue in
                 toggleValues[item.id] = newValue
                 onEvent(["id": item.id, "type": "toggleChanged", "value": newValue])
-            }
+            },
         )) {
             if let symbol = item.systemSymbolName, let label = item.label, !label.isEmpty {
                 Label(label, systemImage: symbol)
@@ -593,7 +593,7 @@ struct CNToolbarView: View {
         .searchable(
             text: $searchText,
             isPresented: .constant(showSearch),
-            prompt: "Search"
+            prompt: "Search",
         )
         .onChange(of: searchText) { _, newValue in
             onEvent([
@@ -645,7 +645,7 @@ struct CNToolbarView: View {
             getTintColor: getTintColor,
             getButtonStyle: { item in item.buttonStyle ?? "automatic" },
             pickerValues: $pickerValues,
-            toggleValues: $toggleValues
+            toggleValues: $toggleValues,
         )
     }
 
@@ -699,23 +699,23 @@ struct CNToolbarView: View {
     private func mapPlacement(_ placement: CNToolbarItemPlacement) -> ToolbarItemPlacement {
         switch placement {
         case .automatic:
-            return .automatic
+            .automatic
         case .principal:
-            return .principal
+            .principal
         case .navigation:
-            return .navigation
+            .navigation
         case .status:
-            return .status
+            .status
         case .confirmationAction:
-            return .confirmationAction
+            .confirmationAction
         case .destructiveAction:
-            return .destructiveAction
+            .destructiveAction
         case .cancellationAction:
-            return .cancellationAction
+            .cancellationAction
         case .secondaryAction:
-            return .secondaryAction
+            .secondaryAction
         case .primaryAction:
-            return .primaryAction
+            .primaryAction
         }
     }
 }

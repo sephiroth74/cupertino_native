@@ -13,7 +13,7 @@ private final class CupertinoPopoverContentViewController: NSViewController {
         message: String,
         actions: [[String: Any]],
         width: CGFloat,
-        onSelect: @escaping (Int) -> Void
+        onSelect: @escaping (Int) -> Void,
     ) {
         popoverTitle = title
         self.message = message
@@ -58,7 +58,7 @@ private final class CupertinoPopoverContentViewController: NSViewController {
         for (index, action) in actions.enumerated() {
             let label = (action["label"] as? String) ?? "Action"
             let button = NSButton(
-                title: label, target: self, action: #selector(handleButtonPress(_:))
+                title: label, target: self, action: #selector(handleButtonPress(_:)),
             )
             button.tag = index
             button.isEnabled = (action["enabled"] as? Bool) ?? true
@@ -112,7 +112,7 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
-            name: "CupertinoNativePopover_\(viewId)", binaryMessenger: messenger
+            name: "CupertinoNativePopover_\(viewId)", binaryMessenger: messenger,
         )
         button = NSButton(title: "", target: nil, action: nil)
         super.init(frame: .zero)
@@ -176,7 +176,7 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
             {
                 if #available(macOS 12.0, *), let iconSize {
                     let configuration = NSImage.SymbolConfiguration(
-                        pointSize: iconSize, weight: .regular
+                        pointSize: iconSize, weight: .regular,
                     )
                     image = image.withSymbolConfiguration(configuration) ?? image
                 }
@@ -231,7 +231,7 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
             }
             switch call.method {
             case "getIntrinsicSize":
-                let size = self.button.intrinsicContentSize
+                let size = button.intrinsicContentSize
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setStyle":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
@@ -240,25 +240,25 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
                         if let styleName = args["buttonStyle"] as? String,
                            ["filled", "borderedProminent", "prominentGlass"].contains(styleName)
                         {
-                            self.button.bezelColor = color
-                            self.button.contentTintColor = .white
+                            button.bezelColor = color
+                            button.contentTintColor = .white
                         } else {
-                            self.button.contentTintColor = color
+                            button.contentTintColor = color
                         }
                     }
                     if let styleName = args["buttonStyle"] as? String {
                         switch styleName {
                         case "plain":
-                            self.button.bezelStyle = .texturedRounded
-                            self.button.isBordered = false
+                            button.bezelStyle = .texturedRounded
+                            button.isBordered = false
                         case "gray", "tinted", "glass", "prominentGlass":
-                            self.button.bezelStyle = .texturedRounded
-                            self.button.isBordered = true
+                            button.bezelStyle = .texturedRounded
+                            button.isBordered = true
                         case "bordered", "borderedProminent", "filled":
-                            self.button.bezelStyle = .rounded
-                            self.button.isBordered = true
+                            button.bezelStyle = .rounded
+                            button.isBordered = true
                         default:
-                            self.button.bezelStyle = .rounded
+                            button.bezelStyle = .rounded
                         }
                     }
                     result(nil)
@@ -267,7 +267,7 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
                 }
             case "setButtonTitle":
                 if let args = CNChannelSerialization.asDict(call.arguments), let value = args["title"] as? String {
-                    self.button.title = value
+                    button.title = value
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing title", details: nil))
@@ -281,67 +281,67 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
                            let value = args["buttonIconSize"] as? NSNumber
                         {
                             let configuration = NSImage.SymbolConfiguration(
-                                pointSize: CGFloat(truncating: value), weight: .regular
+                                pointSize: CGFloat(truncating: value), weight: .regular,
                             )
                             image = image.withSymbolConfiguration(configuration) ?? image
                         }
                         if let value = args["buttonIconColor"] as? NSNumber {
                             image = image.tinted(with: ColorUtils.colorFromARGB(value.intValue))
                         }
-                        self.button.image = image
-                        self.button.imagePosition = .imageOnly
+                        button.image = image
+                        button.imagePosition = .imageOnly
                     } else {
-                        self.button.image = nil
+                        button.image = nil
                     }
                     if let value = args["round"] as? NSNumber, value.boolValue {
-                        self.button.bezelStyle = .circular
+                        button.bezelStyle = .circular
                     }
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing icon args", details: nil)
+                        FlutterError(code: "bad_args", message: "Missing icon args", details: nil),
                     )
                 }
             case "setBrightness":
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["isDark"] as? NSNumber)?.boolValue
                 {
-                    self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+                    appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
                 }
             case "setPopoverContent":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
-                    self.popoverTitle = args["title"] as? String
-                    self.popoverMessage = (args["message"] as? String) ?? ""
-                    self.popoverActions = (args["actions"] as? [[String: Any]]) ?? []
+                    popoverTitle = args["title"] as? String
+                    popoverMessage = (args["message"] as? String) ?? ""
+                    popoverActions = (args["actions"] as? [[String: Any]]) ?? []
                     if let value = args["popoverWidth"] as? NSNumber {
-                        self.popoverWidth = CGFloat(truncating: value)
+                        popoverWidth = CGFloat(truncating: value)
                     }
-                    self.rebuildPopoverContent()
+                    rebuildPopoverContent()
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing popover content", details: nil
-                        )
+                            code: "bad_args", message: "Missing popover content", details: nil,
+                        ),
                     )
                 }
             case "setPopoverBehavior":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let value = args["behavior"] as? String {
-                        self.popover.behavior = Self.popoverBehavior(from: value)
+                        popover.behavior = Self.popoverBehavior(from: value)
                     }
                     if let value = args["preferredEdge"] as? String {
-                        self.preferredEdge = Self.preferredEdge(from: value)
+                        preferredEdge = Self.preferredEdge(from: value)
                     }
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing popover behavior", details: nil
-                        )
+                            code: "bad_args", message: "Missing popover behavior", details: nil,
+                        ),
                     )
                 }
             default:
@@ -370,11 +370,11 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
             title: popoverTitle,
             message: popoverMessage,
             actions: popoverActions,
-            width: popoverWidth
+            width: popoverWidth,
         ) { [weak self] index in
             guard let self else { return }
-            self.popover.performClose(nil)
-            self.channel.invokeMethod("actionSelected", arguments: ["index": index])
+            popover.performClose(nil)
+            channel.invokeMethod("actionSelected", arguments: ["index": index])
         }
         controller.loadViewIfNeeded()
         controller.view.layoutSubtreeIfNeeded()
@@ -386,24 +386,24 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
     private static func popoverBehavior(from value: String) -> NSPopover.Behavior {
         switch value {
         case "applicationDefined":
-            return .applicationDefined
+            .applicationDefined
         case "semitransient":
-            return .semitransient
+            .semitransient
         default:
-            return .transient
+            .transient
         }
     }
 
     private static func preferredEdge(from value: String) -> NSRectEdge {
         switch value {
         case "top":
-            return .minY
+            .minY
         case "left":
-            return .minX
+            .minX
         case "right":
-            return .maxX
+            .maxX
         default:
-            return .maxY
+            .maxY
         }
     }
 }

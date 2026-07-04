@@ -8,7 +8,7 @@ class CupertinoToggleNSView: NSView {
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
-            name: "CupertinoNativeToggle_\(viewId)", binaryMessenger: messenger
+            name: "CupertinoNativeToggle_\(viewId)", binaryMessenger: messenger,
         )
 
         var initialValue = false
@@ -46,9 +46,9 @@ class CupertinoToggleNSView: NSView {
             onSizeChanged: { newSize in
                 channelRef?.invokeMethod(
                     "intrinsicSizeChanged",
-                    arguments: ["width": newSize.width, "height": newSize.height]
+                    arguments: ["width": newSize.width, "height": newSize.height],
                 )
-            }
+            },
         )
 
         hostingController = NSHostingController(rootView: CupertinoToggleView(model: model))
@@ -128,7 +128,7 @@ class CupertinoToggleNSView: NSView {
     }
 
     required init?(coder _: NSCoder) {
-        return nil
+        nil
     }
 }
 
@@ -154,7 +154,7 @@ class ToggleModel: ObservableObject {
         controlSize: String,
         tint: NSColor?,
         onChanged: @escaping (Bool) -> Void,
-        onSizeChanged: @escaping (CGSize) -> Void
+        onSizeChanged: @escaping (CGSize) -> Void,
     ) {
         self.value = value
         self.enabled = enabled
@@ -198,7 +198,7 @@ struct CupertinoToggleView: View {
             set: { newValue in
                 model.value = newValue
                 model.onChanged(newValue)
-            }
+            },
         )) {
             if let symbol = model.systemSymbolName, let label = model.label {
                 Label(label, systemImage: symbol)

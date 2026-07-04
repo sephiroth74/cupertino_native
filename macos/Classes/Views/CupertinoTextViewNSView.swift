@@ -14,7 +14,7 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
             name: "CupertinoNativeTextView_\(viewId)",
-            binaryMessenger: messenger
+            binaryMessenger: messenger,
         )
         super.init(frame: .zero)
 
@@ -105,7 +105,7 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
         textView.textContainer?.widthTracksTextView = true
         textView.textContainer?.containerSize = NSSize(
             width: CGFloat.greatestFiniteMagnitude,
-            height: CGFloat.greatestFiniteMagnitude
+            height: CGFloat.greatestFiniteMagnitude,
         )
 
         scrollView.documentView = textView
@@ -125,14 +125,14 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
             placeholderLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
             placeholderLabel.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             placeholderLabel.trailingAnchor.constraint(
-                lessThanOrEqualTo: trailingAnchor, constant: -8
+                lessThanOrEqualTo: trailingAnchor, constant: -8,
             ),
         ])
     }
 
     private func configureChannel() {
         channel.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else {
+            guard let self else {
                 result(nil)
                 return
             }
@@ -140,14 +140,14 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
             switch call.method {
             case "setText":
                 if let args = CNChannelSerialization.asDict(call.arguments), let value = args["value"] as? String {
-                    self.isUpdatingFromDart = true
-                    self.textView.string = value
-                    self.isUpdatingFromDart = false
-                    self.updatePlaceholderVisibility()
+                    isUpdatingFromDart = true
+                    textView.string = value
+                    isUpdatingFromDart = false
+                    updatePlaceholderVisibility()
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing text value", details: nil)
+                        FlutterError(code: "bad_args", message: "Missing text value", details: nil),
                     )
                 }
             case "setSelection":
@@ -156,75 +156,75 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
                    let extent = args["extent"] as? Int
                 {
                     let length = max(0, extent - base)
-                    let textLength = (self.textView.string as NSString).length
+                    let textLength = (textView.string as NSString).length
                     let location = min(max(0, base), textLength)
                     let clampedLength = min(length, max(0, textLength - location))
-                    self.isUpdatingFromDart = true
-                    self.textView.setSelectedRange(
-                        NSRange(location: location, length: clampedLength)
+                    isUpdatingFromDart = true
+                    textView.setSelectedRange(
+                        NSRange(location: location, length: clampedLength),
                     )
-                    self.isUpdatingFromDart = false
+                    isUpdatingFromDart = false
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing selection values", details: nil
-                        )
+                            code: "bad_args", message: "Missing selection values", details: nil,
+                        ),
                     )
                 }
             case "setPlaceholder":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
-                    self.placeholderLabel.stringValue = (args["value"] as? String) ?? ""
-                    self.updatePlaceholderVisibility()
+                    placeholderLabel.stringValue = (args["value"] as? String) ?? ""
+                    updatePlaceholderVisibility()
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing placeholder value", details: nil
-                        )
+                            code: "bad_args", message: "Missing placeholder value", details: nil,
+                        ),
                     )
                 }
             case "setTextColor":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     let value = args["value"] as? Int
-                    self.textView.textColor = value.map(ColorUtils.colorFromARGB)
+                    textView.textColor = value.map(ColorUtils.colorFromARGB)
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing textColor value", details: nil
-                        )
+                            code: "bad_args", message: "Missing textColor value", details: nil,
+                        ),
                     )
                 }
             case "setPlaceholderColor":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     let value = args["value"] as? Int
-                    self.placeholderColor = value.map(ColorUtils.colorFromARGB)
-                    self.applyPlaceholderStyle()
+                    placeholderColor = value.map(ColorUtils.colorFromARGB)
+                    applyPlaceholderStyle()
                     result(nil)
                 } else {
                     result(
                         FlutterError(
                             code: "bad_args", message: "Missing placeholderColor value",
-                            details: nil
-                        )
+                            details: nil,
+                        ),
                     )
                 }
             case "setBackgroundColor":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let value = args["value"] as? Int {
-                        self.textView.drawsBackground = true
-                        self.textView.backgroundColor = ColorUtils.colorFromARGB(value)
+                        textView.drawsBackground = true
+                        textView.backgroundColor = ColorUtils.colorFromARGB(value)
                     } else {
-                        self.textView.drawsBackground = false
-                        self.textView.backgroundColor = .clear
+                        textView.drawsBackground = false
+                        textView.backgroundColor = .clear
                     }
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing backgroundColor value", details: nil
-                        )
+                            code: "bad_args", message: "Missing backgroundColor value", details: nil,
+                        ),
                     )
                 }
             case "setFont":
@@ -232,15 +232,15 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
                     if let fontDict = args["value"] as? [String: Any],
                        let font = FontUtils.fontFromDictionary(fontDict)
                     {
-                        self.textView.font = font
+                        textView.font = font
                     } else {
-                        self.textView.font = nil
+                        textView.font = nil
                     }
-                    self.applyPlaceholderStyle()
+                    applyPlaceholderStyle()
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing font value", details: nil)
+                        FlutterError(code: "bad_args", message: "Missing font value", details: nil),
                     )
                 }
             case "setPlaceholderFont":
@@ -248,44 +248,44 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
                     if let fontDict = args["value"] as? [String: Any],
                        let font = FontUtils.fontFromDictionary(fontDict)
                     {
-                        self.placeholderFont = font
+                        placeholderFont = font
                     } else {
-                        self.placeholderFont = nil
+                        placeholderFont = nil
                     }
-                    self.applyPlaceholderStyle()
+                    applyPlaceholderStyle()
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing placeholderFont value", details: nil
-                        )
+                            code: "bad_args", message: "Missing placeholderFont value", details: nil,
+                        ),
                     )
                 }
             case "setEnabled":
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
-                    self.textView.isEditable = value
-                    self.textView.isSelectable = true
+                    textView.isEditable = value
+                    textView.isSelectable = true
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing enabled value", details: nil
-                        )
+                            code: "bad_args", message: "Missing enabled value", details: nil,
+                        ),
                     )
                 }
             case "setIsDark":
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
-                    self.appearance = NSAppearance(named: value ? .darkAqua : .aqua)
+                    appearance = NSAppearance(named: value ? .darkAqua : .aqua)
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing isDark value", details: nil
-                        )
+                            code: "bad_args", message: "Missing isDark value", details: nil,
+                        ),
                     )
                 }
             default:
@@ -305,7 +305,7 @@ class CupertinoTextViewNSView: NSView, NSTextViewDelegate {
         let range = textView.selectedRange()
         channel.invokeMethod(
             "selectionChanged",
-            arguments: ["base": range.location, "extent": range.location + range.length]
+            arguments: ["base": range.location, "extent": range.location + range.length],
         )
     }
 

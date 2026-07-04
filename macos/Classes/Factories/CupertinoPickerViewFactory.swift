@@ -10,10 +10,10 @@ class CupertinoPickerViewFactory: NSObject, FlutterPlatformViewFactory {
     }
 
     func createArgsCodec() -> (FlutterMessageCodec & NSObjectProtocol)? {
-        return FlutterStandardMessageCodec.sharedInstance()
+        FlutterStandardMessageCodec.sharedInstance()
     }
 
     func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
-        return CupertinoPickerNSView(viewId: viewId, args: args, messenger: messenger)
+        CupertinoPickerNSView(viewId: viewId, args: args, messenger: messenger)
     }
 }

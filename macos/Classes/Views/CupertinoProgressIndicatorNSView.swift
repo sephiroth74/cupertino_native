@@ -14,7 +14,7 @@ class CupertinoProgressIndicatorNSView: NSView {
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         progressIndicator = NSProgressIndicator()
         channel = FlutterMethodChannel(
-            name: "CupertinoNativeProgressIndicator_\(viewId)", binaryMessenger: messenger
+            name: "CupertinoNativeProgressIndicator_\(viewId)", binaryMessenger: messenger,
         )
         super.init(frame: .zero)
 
@@ -100,25 +100,25 @@ class CupertinoProgressIndicatorNSView: NSView {
 
     private func _setupChannel() {
         channel.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else {
+            guard let self else {
                 result(nil)
                 return
             }
             switch call.method {
             case "startAnimation":
-                self.progressIndicator.startAnimation(nil)
+                progressIndicator.startAnimation(nil)
                 result(nil)
             case "stopAnimation":
-                self.progressIndicator.stopAnimation(nil)
+                progressIndicator.stopAnimation(nil)
                 result(nil)
             case "getIntrinsicSize":
-                let s = self.progressIndicator.intrinsicContentSize
+                let s = progressIndicator.intrinsicContentSize
                 result(["width": Double(s.width), "height": Double(s.height)])
             case "setBrightness":
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["isDark"] as? NSNumber)?.boolValue
                 {
-                    self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+                    appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
@@ -126,41 +126,41 @@ class CupertinoProgressIndicatorNSView: NSView {
             case "updateProgress":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let progressStyle = args["progressStyle"] as? String {
-                        self.currentProgressStyle = progressStyle
+                        currentProgressStyle = progressStyle
                         switch progressStyle {
-                        case "spinning": self.progressIndicator.style = .spinning
-                        case "bar": self.progressIndicator.style = .bar
-                        default: self.progressIndicator.style = .spinning
+                        case "spinning": progressIndicator.style = .spinning
+                        case "bar": progressIndicator.style = .bar
+                        default: progressIndicator.style = .spinning
                         }
                     }
                     if let progressSize = args["progressSize"] as? String {
-                        self.currentProgressSize = progressSize
+                        currentProgressSize = progressSize
                         switch progressSize {
-                        case "mini": self.progressIndicator.controlSize = .mini
-                        case "small": self.progressIndicator.controlSize = .small
-                        case "regular": self.progressIndicator.controlSize = .regular
-                        case "large": self.progressIndicator.controlSize = .large
+                        case "mini": progressIndicator.controlSize = .mini
+                        case "small": progressIndicator.controlSize = .small
+                        case "regular": progressIndicator.controlSize = .regular
+                        case "large": progressIndicator.controlSize = .large
                         case "extraLarge":
-                            self.progressIndicator.controlSize =
+                            progressIndicator.controlSize =
                                 if #available(macOS 26.0, *) {
                                     .extraLarge
                                 } else {
                                     .large
                                 }
-                        default: self.progressIndicator.controlSize = .regular
+                        default: progressIndicator.controlSize = .regular
                         }
                     }
                     if let progressValue = args["progressValue"] as? Double {
-                        self.currentProgressValue = progressValue
-                        self.progressIndicator.doubleValue = progressValue
+                        currentProgressValue = progressValue
+                        progressIndicator.doubleValue = progressValue
                     }
                     if let progressMaxValue = args["progressMaxValue"] as? Double {
-                        self.currentProgressMaxValue = progressMaxValue
-                        self.progressIndicator.maxValue = progressMaxValue
+                        currentProgressMaxValue = progressMaxValue
+                        progressIndicator.maxValue = progressMaxValue
                     }
                     if let progressIndeterminate = args["progressIndeterminate"] as? Bool {
-                        self.currentProgressIndeterminate = progressIndeterminate
-                        self.progressIndicator.isIndeterminate = progressIndeterminate
+                        currentProgressIndeterminate = progressIndeterminate
+                        progressIndicator.isIndeterminate = progressIndeterminate
                     }
                 }
                 result(nil)

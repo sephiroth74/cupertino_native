@@ -149,9 +149,9 @@ class CupertinoPopupMenuButtonNSView: NSView {
 
         self.labels = labels
         self.symbols = symbols
-        self.dividers = dividers.map { $0.boolValue }
-        self.enabled = enabled.map { $0.boolValue }
-        checked = checkedNums.map { $0.boolValue }
+        self.dividers = dividers.map(\.boolValue)
+        self.enabled = enabled.map(\.boolValue)
+        checked = checkedNums.map(\.boolValue)
         defaultSizes = sizes
         defaultColors = colors
         rebuildMenu(defaultSizes: sizes, defaultColors: colors)
@@ -160,24 +160,24 @@ class CupertinoPopupMenuButtonNSView: NSView {
         button.action = #selector(onButtonPressed(_:))
 
         channel.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else { result(nil); return }
+            guard let self else { result(nil); return }
             switch call.method {
             case "getIntrinsicSize":
-                let s = self.button.intrinsicContentSize
+                let s = button.intrinsicContentSize
                 result(["width": Double(s.width), "height": Double(s.height)])
             case "setItems":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     self.labels = (args["labels"] as? [String]) ?? []
                     self.symbols = (args["sfSymbols"] as? [String]) ?? []
-                    self.dividers = ((args["isDivider"] as? [NSNumber]) ?? []).map { $0.boolValue }
-                    self.enabled = ((args["enabled"] as? [NSNumber]) ?? []).map { $0.boolValue }
-                    self.checked = ((args["checked"] as? [NSNumber]) ?? []).map { $0.boolValue }
-                    self.defaultSizes = (args["sfSymbolSizes"] as? [NSNumber]) ?? []
-                    self.defaultColors = (args["sfSymbolColors"] as? [NSNumber]) ?? []
-                    self.defaultModes = (args["sfSymbolRenderingModes"] as? [String?]) ?? []
-                    self.defaultPalettes = (args["sfSymbolPaletteColors"] as? [[NSNumber]]) ?? []
-                    self.defaultGradients = (args["sfSymbolGradientEnabled"] as? [NSNumber?]) ?? []
-                    self.rebuildMenu(defaultSizes: self.defaultSizes, defaultColors: self.defaultColors)
+                    self.dividers = ((args["isDivider"] as? [NSNumber]) ?? []).map(\.boolValue)
+                    self.enabled = ((args["enabled"] as? [NSNumber]) ?? []).map(\.boolValue)
+                    checked = ((args["checked"] as? [NSNumber]) ?? []).map(\.boolValue)
+                    defaultSizes = (args["sfSymbolSizes"] as? [NSNumber]) ?? []
+                    defaultColors = (args["sfSymbolColors"] as? [NSNumber]) ?? []
+                    defaultModes = (args["sfSymbolRenderingModes"] as? [String?]) ?? []
+                    defaultPalettes = (args["sfSymbolPaletteColors"] as? [[NSNumber]]) ?? []
+                    defaultGradients = (args["sfSymbolGradientEnabled"] as? [NSNumber?]) ?? []
+                    rebuildMenu(defaultSizes: defaultSizes, defaultColors: defaultColors)
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing items", details: nil)) }
             case "setStyle":
@@ -185,27 +185,27 @@ class CupertinoPopupMenuButtonNSView: NSView {
                     if #available(macOS 10.14, *), let n = args["tint"] as? NSNumber {
                         let color = Self.colorFromARGB(n.intValue)
                         if ["filled", "borderedProminent", "prominentGlass"].contains(buttonStyle) {
-                            self.button.bezelColor = color
-                            self.button.contentTintColor = .white
+                            button.bezelColor = color
+                            button.contentTintColor = .white
                         } else {
-                            self.button.contentTintColor = color
+                            button.contentTintColor = color
                         }
                     }
                     if let bs = args["buttonStyle"] as? String {
                         switch bs {
                         case "plain":
-                            self.button.bezelStyle = .texturedRounded
-                            self.button.isBordered = false
-                        case "gray": self.button.bezelStyle = .texturedRounded
-                        case "tinted": self.button.bezelStyle = .texturedRounded
-                        case "bordered": self.button.bezelStyle = .rounded
-                        case "borderedProminent": self.button.bezelStyle = .rounded
-                        case "filled": self.button.bezelStyle = .rounded
-                        case "glass": self.button.bezelStyle = .texturedRounded
-                        case "prominentGlass": self.button.bezelStyle = .texturedRounded
-                        default: self.button.bezelStyle = .rounded
+                            button.bezelStyle = .texturedRounded
+                            button.isBordered = false
+                        case "gray": button.bezelStyle = .texturedRounded
+                        case "tinted": button.bezelStyle = .texturedRounded
+                        case "bordered": button.bezelStyle = .rounded
+                        case "borderedProminent": button.bezelStyle = .rounded
+                        case "filled": button.bezelStyle = .rounded
+                        case "glass": button.bezelStyle = .texturedRounded
+                        case "prominentGlass": button.bezelStyle = .texturedRounded
+                        default: button.bezelStyle = .rounded
                         }
-                        if bs != "plain" { self.button.isBordered = true }
+                        if bs != "plain" { button.isBordered = true }
                     }
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
@@ -240,25 +240,25 @@ class CupertinoPopupMenuButtonNSView: NSView {
                         } else if let c = args["buttonIconColor"] as? NSNumber {
                             image = image.tinted(with: Self.colorFromARGB(c.intValue))
                         }
-                        self.button.image = image
-                        self.button.imagePosition = .imageOnly
+                        button.image = image
+                        button.imagePosition = .imageOnly
                     }
-                    if let r = args["round"] as? NSNumber, r.boolValue { self.button.bezelStyle = .circular }
+                    if let r = args["round"] as? NSNumber, r.boolValue { button.bezelStyle = .circular }
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing icon args", details: nil)) }
             case "setBrightness":
                 if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["isDark"] as? NSNumber)?.boolValue {
-                    self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+                    appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
             case "setButtonTitle":
                 if let args = CNChannelSerialization.asDict(call.arguments), let t = args["title"] as? String {
-                    self.button.title = t
+                    button.title = t
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing title", details: nil)) }
             case "setPressed":
                 if let args = CNChannelSerialization.asDict(call.arguments), let p = args["pressed"] as? NSNumber {
-                    self.alphaValue = p.boolValue ? 0.7 : 1.0
+                    alphaValue = p.boolValue ? 0.7 : 1.0
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing pressed", details: nil)) }
             default:
@@ -268,7 +268,7 @@ class CupertinoPopupMenuButtonNSView: NSView {
     }
 
     required init?(coder _: NSCoder) {
-        return nil
+        nil
     }
 
     @objc private func onButtonPressed(_ sender: NSButton) {

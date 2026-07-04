@@ -22,7 +22,7 @@ class CupertinoPathControlNSView: NSView {
         self.registrar = registrar
         pathControl = NSPathControl()
         channel = FlutterMethodChannel(
-            name: "CupertinoNativePathControl_\(viewId)", binaryMessenger: registrar.messenger
+            name: "CupertinoNativePathControl_\(viewId)", binaryMessenger: registrar.messenger,
         )
         super.init(frame: .zero)
 
@@ -107,30 +107,30 @@ class CupertinoPathControlNSView: NSView {
         pathControl.action = #selector(onPressed(_:))
 
         channel.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else {
+            guard let self else {
                 result(nil)
                 return
             }
             switch call.method {
             case "getIntrinsicSize":
-                let s = self.pathControl.intrinsicContentSize
+                let s = pathControl.intrinsicContentSize
                 result(["width": Double(s.width), "height": Double(s.height)])
             case "setStyle":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let n = args["tint"] as? NSNumber {
                         let color = ColorUtils.colorFromARGB(n.intValue)
                         // self.pathControl.tint = color
-                        self.currentTint = color
+                        currentTint = color
                     }
                     if let bs = args["style"] as? String {
-                        self.currentPathStyle = bs
+                        currentPathStyle = bs
                         switch bs {
                         case "standard":
-                            self.pathControl.pathStyle = .standard
+                            pathControl.pathStyle = .standard
                         case "popup":
-                            self.pathControl.pathStyle = .popUp
+                            pathControl.pathStyle = .popUp
                         default:
-                            self.pathControl.pathStyle = .standard
+                            pathControl.pathStyle = .standard
                         }
                     }
                     result(nil)
@@ -141,44 +141,44 @@ class CupertinoPathControlNSView: NSView {
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let cs = args["controlSize"] as? String
                 {
-                    self.currentPathSize = cs
+                    currentPathSize = cs
                     switch cs {
-                    case "mini": self.pathControl.controlSize = .mini
-                    case "small": self.pathControl.controlSize = .small
-                    case "regular": self.pathControl.controlSize = .regular
-                    case "large": self.pathControl.controlSize = .large
+                    case "mini": pathControl.controlSize = .mini
+                    case "small": pathControl.controlSize = .small
+                    case "regular": pathControl.controlSize = .regular
+                    case "large": pathControl.controlSize = .large
                     case "extraLarge":
-                        self.pathControl.controlSize =
+                        pathControl.controlSize =
                             if #available(macOS 26.0, *) {
                                 .extraLarge
                             } else {
                                 .large
                             }
-                    default: self.pathControl.controlSize = .regular
+                    default: pathControl.controlSize = .regular
                     }
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing control size", details: nil
-                        )
+                            code: "bad_args", message: "Missing control size", details: nil,
+                        ),
                     )
                 }
             case "setPath":
                 if let args = CNChannelSerialization.asDict(call.arguments), let path = args["path"] as? String,
                    let isDirectory = args["isDirectory"] as? Bool
                 {
-                    self.currentPath = path
-                    self.currentIsDirectory = isDirectory
-                    self.pathControl.url = URL(fileURLWithPath: path, isDirectory: isDirectory)
+                    currentPath = path
+                    currentIsDirectory = isDirectory
+                    pathControl.url = URL(fileURLWithPath: path, isDirectory: isDirectory)
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing path", details: nil))
                 }
             case "setEnabled":
                 if let args = CNChannelSerialization.asDict(call.arguments), let e = args["enabled"] as? NSNumber {
-                    self.isEnabled = e.boolValue
-                    self.pathControl.isEnabled = self.isEnabled
+                    isEnabled = e.boolValue
+                    pathControl.isEnabled = isEnabled
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
@@ -187,7 +187,7 @@ class CupertinoPathControlNSView: NSView {
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["isDark"] as? NSNumber)?.boolValue
                 {
-                    self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+                    appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
@@ -196,20 +196,20 @@ class CupertinoPathControlNSView: NSView {
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let at = args["allowedTypes"] as? [String]
                 {
-                    self.currentAllowedTypes = at
-                    self.pathControl.allowedTypes = at
+                    currentAllowedTypes = at
+                    pathControl.allowedTypes = at
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing allowedTypes", details: nil
-                        )
+                            code: "bad_args", message: "Missing allowedTypes", details: nil,
+                        ),
                     )
                 }
             case "setEditable":
                 if let args = CNChannelSerialization.asDict(call.arguments), let e = args["editable"] as? NSNumber {
-                    self.currentEditable = e.boolValue
-                    self.pathControl.isEditable = self.currentEditable
+                    currentEditable = e.boolValue
+                    pathControl.isEditable = currentEditable
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing editable", details: nil))
@@ -248,7 +248,7 @@ class CupertinoPathControlNSView: NSView {
         }
 
         @objc func otherItemClick(_: NSMenuItem) {
-            guard let parent = parent else { return }
+            guard let parent else { return }
             guard parent.currentEditable else { return }
             guard let appWindow = parent.registrar.getFlutterWindow() else { return }
 

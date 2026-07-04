@@ -77,33 +77,33 @@ class CupertinoSegmentedControlNSView: NSView {
         ])
 
         channel.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else { result(nil); return }
+            guard let self else { result(nil); return }
             switch call.method {
             case "getIntrinsicSize":
-                let size = self.control.intrinsicContentSize
+                let size = control.intrinsicContentSize
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setSelectedIndex":
                 if let args = CNChannelSerialization.asDict(call.arguments), let idx = (args["index"] as? NSNumber)?.intValue {
-                    self.control.selectedSegment = idx
+                    control.selectedSegment = idx
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing index", details: nil)) }
             case "setEnabled":
                 if let args = CNChannelSerialization.asDict(call.arguments), let e = (args["enabled"] as? NSNumber)?.boolValue {
-                    self.control.isEnabled = e
+                    control.isEnabled = e
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil)) }
             case "setStyle":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
-                    if let s = args["iconSize"] as? NSNumber { self.defaultIconSize = CGFloat(truncating: s) }
+                    if let s = args["iconSize"] as? NSNumber { defaultIconSize = CGFloat(truncating: s) }
                     if let tint = args["tint"] as? NSNumber {
-                        self.tintColor = ColorUtils.colorFromARGB(tint.intValue)
+                        tintColor = ColorUtils.colorFromARGB(tint.intValue)
                     }
-                    self.configureSegments()
+                    configureSegments()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
             case "setBrightness":
                 if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["isDark"] as? NSNumber)?.boolValue {
-                    self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+                    appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
             default:
@@ -113,7 +113,7 @@ class CupertinoSegmentedControlNSView: NSView {
     }
 
     required init?(coder _: NSCoder) {
-        return nil
+        nil
     }
 
     override func observeValue(forKeyPath keyPath: String?, of _: Any?, change _: [NSKeyValueChangeKey: Any]?, context _: UnsafeMutableRawPointer?) {
@@ -146,7 +146,7 @@ class CupertinoSegmentedControlNSView: NSView {
 
                 // Apply rendering mode
                 let mode = (i < perSymbolModes.count ? perSymbolModes[i] : nil) ?? defaultIconRenderingMode
-                if let mode = mode, #available(macOS 12.0, *) {
+                if let mode, #available(macOS 12.0, *) {
                     switch mode {
                     case "hierarchical":
                         if let color = iconColor {

@@ -10,10 +10,10 @@ class CupertinoPopupMenuButtonViewFactory: NSObject, FlutterPlatformViewFactory 
     }
 
     func createArgsCodec() -> (FlutterMessageCodec & NSObjectProtocol)? {
-        return FlutterStandardMessageCodec.sharedInstance()
+        FlutterStandardMessageCodec.sharedInstance()
     }
 
     func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
-        return CupertinoPopupMenuButtonNSView(viewId: viewId, args: args, messenger: messenger)
+        CupertinoPopupMenuButtonNSView(viewId: viewId, args: args, messenger: messenger)
     }
 }

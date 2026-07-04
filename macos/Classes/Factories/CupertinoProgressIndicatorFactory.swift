@@ -10,10 +10,10 @@ class CupertinoProgressIndicatorViewFactory: NSObject, FlutterPlatformViewFactor
     }
 
     func createArgsCodec() -> (FlutterMessageCodec & NSObjectProtocol)? {
-        return FlutterStandardMessageCodec.sharedInstance()
+        FlutterStandardMessageCodec.sharedInstance()
     }
 
     func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
-        return CupertinoProgressIndicatorNSView(viewId: viewId, args: args, messenger: messenger)
+        CupertinoProgressIndicatorNSView(viewId: viewId, args: args, messenger: messenger)
     }
 }

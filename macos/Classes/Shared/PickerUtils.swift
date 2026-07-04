@@ -4,19 +4,19 @@ class PickerUtils {
     static func pickerStyleFromString(_ style: String) -> any PickerStyle {
         switch style {
         case "segmented":
-            return .segmented
+            .segmented
         case "automatic":
-            return .automatic
+            .automatic
         case "inline":
-            return .inline
+            .inline
         case "menu":
-            return .menu
+            .menu
         case "palette":
-            return .palette
+            .palette
         case "radioGroup":
-            return .radioGroup
+            .radioGroup
         default:
-            return SegmentedPickerStyle()
+            SegmentedPickerStyle()
         }
     }
 }

@@ -8,10 +8,10 @@ class CupertinoStepperNSView: NSView {
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
             name: "CupertinoNativeStepper_\(viewId)",
-            binaryMessenger: messenger
+            binaryMessenger: messenger,
         )
 
-        let stepper = self.stepper
+        let stepper = stepper
 
         var initialValue: Double = 0
         var minValue: Double = 0
@@ -78,8 +78,8 @@ class CupertinoStepperNSView: NSView {
                     } else {
                         result(
                             FlutterError(
-                                code: "bad_args", message: "Value out of range", details: nil
-                            )
+                                code: "bad_args", message: "Value out of range", details: nil,
+                            ),
                         )
                     }
                 } else {
@@ -162,7 +162,7 @@ class CupertinoStepperNSView: NSView {
             self,
             selector: #selector(viewSizeChanged),
             name: NSView.frameDidChangeNotification,
-            object: self
+            object: self,
         )
     }
 
@@ -172,7 +172,7 @@ class CupertinoStepperNSView: NSView {
         if newWindow == nil {
             postsFrameChangedNotifications = false
             NotificationCenter.default.removeObserver(
-                self, name: NSView.frameDidChangeNotification, object: self
+                self, name: NSView.frameDidChangeNotification, object: self,
             )
         }
     }
@@ -181,12 +181,12 @@ class CupertinoStepperNSView: NSView {
         let size = stepper.intrinsicContentSize
 
         channel.invokeMethod(
-            "intrinsicSizeChanged", arguments: ["width": size.width, "height": size.height]
+            "intrinsicSizeChanged", arguments: ["width": size.width, "height": size.height],
         )
     }
 
     required init?(coder _: NSCoder) {
-        return nil
+        nil
     }
 
     @objc func onStepperValueChanged(_ sender: NSStepper) {

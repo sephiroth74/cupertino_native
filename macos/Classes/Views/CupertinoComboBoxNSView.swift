@@ -46,14 +46,12 @@ class MyComboBox: NSComboBox {
         let pointInSelf = convert(event.locationInWindow, from: nil)
         let isInsideBounds = bounds.contains(pointInSelf)
         let hitView = superview?.hitTest(convert(event.locationInWindow, to: superview))
-        let hitViewDescription: String
-
-        if hitView === self {
-            hitViewDescription = "self"
+        let hitViewDescription = if hitView === self {
+            "self"
         } else if let hitView {
-            hitViewDescription = String(describing: type(of: hitView))
+            String(describing: type(of: hitView))
         } else {
-            hitViewDescription = "nil"
+            "nil"
         }
 
         let hitResult = cell?.hitTest(for: event, in: bounds, of: self).rawValue ?? 0
@@ -64,7 +62,7 @@ class MyComboBox: NSComboBox {
     override func mouseDown(with event: NSEvent) {
         let hadFocus = hasEffectiveFocus()
         debugLog(
-            "mouseDown hadFocus=\(hadFocus) firstResponder=\(firstResponderDescription()) \(eventOriginDescription(event))"
+            "mouseDown hadFocus=\(hadFocus) firstResponder=\(firstResponderDescription()) \(eventOriginDescription(event))",
         )
         mouseWasDown = true
     }
@@ -77,7 +75,7 @@ class MyComboBox: NSComboBox {
 
         let hasFocus = hasEffectiveFocus()
         debugLog(
-            "mouseUp hasFocus=\(hasFocus) firstResponder=\(firstResponderDescription()) \(eventOriginDescription(event))"
+            "mouseUp hasFocus=\(hasFocus) firstResponder=\(firstResponderDescription()) \(eventOriginDescription(event))",
         )
         let hitResult = cell?.hitTest(for: event, in: bounds, of: self).rawValue ?? 0
 
@@ -87,12 +85,12 @@ class MyComboBox: NSComboBox {
             debugLog("mouseUp scheduling popup open on next run loop")
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
-                if self.isPopupOpen {
-                    self.debugLog("scheduled popup open skipped because popup is already open")
+                if isPopupOpen {
+                    debugLog("scheduled popup open skipped because popup is already open")
                     return
                 }
-                self.debugLog("scheduled popup open executing")
-                self.cell?.perform(Selector("popUp:"))
+                debugLog("scheduled popup open executing")
+                cell?.perform(Selector("popUp:"))
             }
         }
 
@@ -103,7 +101,7 @@ class MyComboBox: NSComboBox {
         let hadFocus = hasEffectiveFocus()
         let result = super.becomeFirstResponder()
         debugLog(
-            "becomeFirstResponder hadFocus=\(hadFocus) result=\(result) firstResponder=\(firstResponderDescription())"
+            "becomeFirstResponder hadFocus=\(hadFocus) result=\(result) firstResponder=\(firstResponderDescription())",
         )
         return result
     }
@@ -111,13 +109,13 @@ class MyComboBox: NSComboBox {
     override func resignFirstResponder() -> Bool {
         let hadFocus = hasEffectiveFocus()
         debugLog(
-            "resignFirstResponder hadFocus=\(hadFocus) firstResponder=\(firstResponderDescription())"
+            "resignFirstResponder hadFocus=\(hadFocus) firstResponder=\(firstResponderDescription())",
         )
         return super.resignFirstResponder()
     }
 
     func hasFocus() -> Bool {
-        return hasEffectiveFocus()
+        hasEffectiveFocus()
     }
 }
 
@@ -155,7 +153,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
             name: "CupertinoNativeComboBox_\(viewId)",
-            binaryMessenger: messenger
+            binaryMessenger: messenger,
         )
         super.init(frame: .zero)
 
@@ -263,25 +261,25 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
 
     private func configureChannel() {
         channel.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else {
+            guard let self else {
                 result(nil)
                 return
             }
 
-            self.debugLog("Received method call: \(call.method)")
+            debugLog("Received method call: \(call.method)")
 
             switch call.method {
             case "getIntrinsicSize":
-                let size = self.comboBox.intrinsicContentSize
+                let size = comboBox.intrinsicContentSize
                 result(["width": Double(size.width), "height": Double(size.height)])
 
             case "setText":
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = args["value"] as? String
                 {
-                    self.isUpdatingFromDart = true
+                    isUpdatingFromDart = true
                     defer { self.isUpdatingFromDart = false }
-                    self.comboBox.stringValue = value
+                    comboBox.stringValue = value
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing text value", details: nil))
@@ -291,16 +289,16 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let items = args["value"] as? [String]
                 {
-                    let currentText = self.comboBox.stringValue
-                    self.comboBox.removeAllItems()
+                    let currentText = comboBox.stringValue
+                    comboBox.removeAllItems()
                     if !items.isEmpty {
-                        self.comboBox.addItems(withObjectValues: items)
+                        comboBox.addItems(withObjectValues: items)
                     }
                     // Preserve stringValue only if it's still in the new list
                     if items.contains(currentText) {
-                        self.comboBox.stringValue = currentText
+                        comboBox.stringValue = currentText
                     } else {
-                        self.comboBox.stringValue = ""
+                        comboBox.stringValue = ""
                     }
                     result(nil)
                 } else {
@@ -311,7 +309,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = args["value"] as? String
                 {
-                    self.applyBehavior(value)
+                    applyBehavior(value)
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing behavior value", details: nil))
@@ -319,7 +317,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
 
             case "setPlaceholder":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
-                    self.comboBox.placeholderString = args["value"] as? String
+                    comboBox.placeholderString = args["value"] as? String
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing placeholder value", details: nil))
@@ -328,9 +326,9 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
             case "setTextColor":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let value = args["value"] as? Int {
-                        self.comboBox.textColor = ColorUtils.colorFromARGB(value)
+                        comboBox.textColor = ColorUtils.colorFromARGB(value)
                     } else {
-                        self.comboBox.textColor = nil
+                        comboBox.textColor = nil
                     }
                     result(nil)
                 } else {
@@ -350,11 +348,11 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                     if let fontDict = args["value"] as? [String: Any],
                        let font = FontUtils.fontFromDictionary(fontDict)
                     {
-                        self.comboBox.font = font
+                        comboBox.font = font
                     } else {
-                        self.comboBox.font = nil
+                        comboBox.font = nil
                     }
-                    self.notifySizeChange()
+                    notifySizeChange()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing font value", details: nil))
@@ -368,7 +366,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
-                    self.comboBox.isEnabled = value
+                    comboBox.isEnabled = value
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing enabled value", details: nil))
@@ -378,8 +376,8 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = args["value"] as? String
                 {
-                    self.comboBox.controlSize = Self.parseControlSize(value)
-                    self.notifySizeChange()
+                    comboBox.controlSize = Self.parseControlSize(value)
+                    notifySizeChange()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing controlSize value", details: nil))
@@ -389,7 +387,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
-                    self.appearance = NSAppearance(named: value ? .darkAqua : .aqua)
+                    appearance = NSAppearance(named: value ? .darkAqua : .aqua)
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing isDark value", details: nil))
@@ -411,7 +409,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
         let size = comboBox.intrinsicContentSize
         channel.invokeMethod(
             "intrinsicSizeChanged",
-            arguments: ["width": Double(size.width), "height": Double(size.height)]
+            arguments: ["width": Double(size.width), "height": Double(size.height)],
         )
     }
 
@@ -422,7 +420,7 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
 
     func controlTextDidChange(_: Notification) {
         debugLog(
-            "controlTextDidChange value=\(comboBox.stringValue), isUpdatingFromDart=\(isUpdatingFromDart)"
+            "controlTextDidChange value=\(comboBox.stringValue), isUpdatingFromDart=\(isUpdatingFromDart)",
         )
         guard !isUpdatingFromDart else { return }
         // Only fire textChanged when the combo box is actually editable (behavior == editable).
@@ -437,18 +435,18 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate {
     func comboBoxWillPopUp(_: Notification) {
         comboBox.isPopupOpen = true
         debugLog(
-            "comboBoxWillPopUp responder=\(firstResponderDescription()) currentEvent=\(window?.currentEvent.map(describeEvent) ?? "nil")"
+            "comboBoxWillPopUp responder=\(firstResponderDescription()) currentEvent=\(window?.currentEvent.map(describeEvent) ?? "nil")",
         )
     }
 
     func comboBoxWillDismiss(_: Notification) {
         comboBox.isPopupOpen = false
         debugLog(
-            "comboBoxWillDismiss responder=\(firstResponderDescription()) currentEvent=\(window?.currentEvent.map(describeEvent) ?? "nil")"
+            "comboBoxWillDismiss responder=\(firstResponderDescription()) currentEvent=\(window?.currentEvent.map(describeEvent) ?? "nil")",
         )
     }
 
     private static func parseControlSize(_ rawValue: String) -> NSControl.ControlSize {
-        return ControlSizeUtils.controlSizeFromString(rawValue)
+        ControlSizeUtils.controlSizeFromString(rawValue)
     }
 }

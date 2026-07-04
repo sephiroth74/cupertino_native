@@ -8,7 +8,7 @@ class CupertinoSwitchNSView: NSView {
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
-            name: "CupertinoNativeSwitch_\(viewId)", binaryMessenger: messenger
+            name: "CupertinoNativeSwitch_\(viewId)", binaryMessenger: messenger,
         )
 
         var initialValue = false
@@ -126,6 +126,6 @@ class CupertinoSwitchNSView: NSView {
     }
 
     required init?(coder _: NSCoder) {
-        return nil
+        nil
     }
 }

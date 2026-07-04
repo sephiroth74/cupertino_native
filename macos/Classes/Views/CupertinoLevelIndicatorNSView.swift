@@ -8,7 +8,7 @@ class CupertinoLevelIndicatorNSView: NSView {
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
-            name: "CupertinoNativeLevelIndicator_\(viewId)", binaryMessenger: messenger
+            name: "CupertinoNativeLevelIndicator_\(viewId)", binaryMessenger: messenger,
         )
 
         let levelIndicator = NSLevelIndicator()
@@ -68,19 +68,19 @@ class CupertinoLevelIndicatorNSView: NSView {
         levelIndicator.isContinuous = isContinuous
         levelIndicator.levelIndicatorStyle = levelIndicatorStyle
 
-        if let fillColor = fillColor {
+        if let fillColor {
             levelIndicator.fillColor = fillColor
         }
-        if let warningColor = warningColor {
+        if let warningColor {
             levelIndicator.warningFillColor = warningColor
         }
-        if let criticalColor = criticalColor {
+        if let criticalColor {
             levelIndicator.criticalFillColor = criticalColor
         }
-        if let warningValue = warningValue {
+        if let warningValue {
             levelIndicator.warningValue = warningValue
         }
-        if let criticalValue = criticalValue {
+        if let criticalValue {
             levelIndicator.criticalValue = criticalValue
         }
 
@@ -123,8 +123,8 @@ class CupertinoLevelIndicatorNSView: NSView {
                     } else {
                         result(
                             FlutterError(
-                                code: "bad_args", message: "Value out of range", details: nil
-                            )
+                                code: "bad_args", message: "Value out of range", details: nil,
+                            ),
                         )
                     }
                 } else {
@@ -200,7 +200,7 @@ class CupertinoLevelIndicatorNSView: NSView {
                    let criticalColorNum = args["value"] as? NSNumber
                 {
                     levelIndicator.criticalFillColor = ColorUtils.colorFromARGB(
-                        criticalColorNum.intValue
+                        criticalColorNum.intValue,
                     )
                     result(nil)
                 } else {
@@ -237,11 +237,11 @@ class CupertinoLevelIndicatorNSView: NSView {
 
     private static func levelIndicatorStyleFromString(_ str: String) -> NSLevelIndicator.Style {
         switch str {
-        case "continuousCapacity": return .continuousCapacity
-        case "discreteCapacity": return .discreteCapacity
-        case "rating": return .rating
-        case "relevancy": return .relevancy
-        default: return .continuousCapacity
+        case "continuousCapacity": .continuousCapacity
+        case "discreteCapacity": .discreteCapacity
+        case "rating": .rating
+        case "relevancy": .relevancy
+        default: .continuousCapacity
         }
     }
 }

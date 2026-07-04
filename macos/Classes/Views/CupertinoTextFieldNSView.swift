@@ -11,7 +11,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
             name: "CupertinoNativeTextField_\(viewId)",
-            binaryMessenger: messenger
+            binaryMessenger: messenger,
         )
         super.init(frame: .zero)
 
@@ -123,24 +123,24 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
 
     private func configureChannel() {
         channel.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else {
+            guard let self else {
                 result(nil)
                 return
             }
 
             switch call.method {
             case "getIntrinsicSize":
-                let size = self.textField.intrinsicContentSize
+                let size = textField.intrinsicContentSize
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setText":
                 if let args = CNChannelSerialization.asDict(call.arguments), let value = args["value"] as? String {
-                    self.isUpdatingFromDart = true
-                    self.textField.stringValue = value
-                    self.isUpdatingFromDart = false
+                    isUpdatingFromDart = true
+                    textField.stringValue = value
+                    isUpdatingFromDart = false
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing text value", details: nil)
+                        FlutterError(code: "bad_args", message: "Missing text value", details: nil),
                     )
                 }
             case "setSelection":
@@ -148,75 +148,75 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                    let base = args["base"] as? Int,
                    let extent = args["extent"] as? Int
                 {
-                    if let editor = self.textField.currentEditor() as? NSTextView {
+                    if let editor = textField.currentEditor() as? NSTextView {
                         let length = max(0, extent - base)
-                        let location = min(max(0, base), self.textField.stringValue.count)
+                        let location = min(max(0, base), textField.stringValue.count)
                         let range = NSRange(location: location, length: length)
-                        self.isUpdatingFromDart = true
+                        isUpdatingFromDart = true
                         editor.setSelectedRange(range)
-                        self.isUpdatingFromDart = false
+                        isUpdatingFromDart = false
                     }
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing selection values", details: nil
-                        )
+                            code: "bad_args", message: "Missing selection values", details: nil,
+                        ),
                     )
                 }
             case "setPlaceholder":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
-                    self.textField.placeholderString = args["value"] as? String
-                    self.applyPlaceholderColor()
+                    textField.placeholderString = args["value"] as? String
+                    applyPlaceholderColor()
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing placeholder value", details: nil
-                        )
+                            code: "bad_args", message: "Missing placeholder value", details: nil,
+                        ),
                     )
                 }
             case "setTextColor":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     let value = args["value"] as? Int
-                    self.textField.textColor = value.map(ColorUtils.colorFromARGB)
+                    textField.textColor = value.map(ColorUtils.colorFromARGB)
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing textColor value", details: nil
-                        )
+                            code: "bad_args", message: "Missing textColor value", details: nil,
+                        ),
                     )
                 }
             case "setPlaceholderColor":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     let value = args["value"] as? Int
-                    self.placeholderColor = value.map(ColorUtils.colorFromARGB)
-                    self.applyPlaceholderColor()
+                    placeholderColor = value.map(ColorUtils.colorFromARGB)
+                    applyPlaceholderColor()
                     result(nil)
                 } else {
                     result(
                         FlutterError(
                             code: "bad_args", message: "Missing placeholderColor value",
-                            details: nil
-                        )
+                            details: nil,
+                        ),
                     )
                 }
             case "setBackgroundColor":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let value = args["value"] as? Int {
-                        self.textField.drawsBackground = true
-                        self.textField.backgroundColor = ColorUtils.colorFromARGB(value)
+                        textField.drawsBackground = true
+                        textField.backgroundColor = ColorUtils.colorFromARGB(value)
                     } else {
-                        self.textField.drawsBackground = false
-                        self.textField.backgroundColor = .clear
+                        textField.drawsBackground = false
+                        textField.backgroundColor = .clear
                     }
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing backgroundColor value", details: nil
-                        )
+                            code: "bad_args", message: "Missing backgroundColor value", details: nil,
+                        ),
                     )
                 }
             case "setFont":
@@ -224,14 +224,14 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                     if let fontDict = args["value"] as? [String: Any],
                        let font = FontUtils.fontFromDictionary(fontDict)
                     {
-                        self.textField.font = font
+                        textField.font = font
                     } else {
-                        self.textField.font = nil
+                        textField.font = nil
                     }
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing font value", details: nil)
+                        FlutterError(code: "bad_args", message: "Missing font value", details: nil),
                     )
                 }
             case "setPlaceholderFont":
@@ -239,63 +239,63 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                     if let fontDict = args["value"] as? [String: Any],
                        let font = FontUtils.fontFromDictionary(fontDict)
                     {
-                        self.placeholderFont = font
+                        placeholderFont = font
                     } else {
-                        self.placeholderFont = nil
+                        placeholderFont = nil
                     }
-                    self.applyPlaceholderColor()
+                    applyPlaceholderColor()
                     result(nil)
                 } else {
                     result(
-                        FlutterError(code: "bad_args", message: "Missing placeholderFont value", details: nil)
+                        FlutterError(code: "bad_args", message: "Missing placeholderFont value", details: nil),
                     )
                 }
             case "setEnabled":
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
-                    self.textField.isEnabled = value
+                    textField.isEnabled = value
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing enabled value", details: nil
-                        )
+                            code: "bad_args", message: "Missing enabled value", details: nil,
+                        ),
                     )
                 }
             case "setControlSize":
                 if let args = CNChannelSerialization.asDict(call.arguments), let value = args["value"] as? String {
-                    self.textField.controlSize = Self.parseControlSize(value)
+                    textField.controlSize = Self.parseControlSize(value)
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing controlSize value", details: nil
-                        )
+                            code: "bad_args", message: "Missing controlSize value", details: nil,
+                        ),
                     )
                 }
             case "setIsDark":
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
-                    self.appearance = NSAppearance(named: value ? .darkAqua : .aqua)
+                    appearance = NSAppearance(named: value ? .darkAqua : .aqua)
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing isDark value", details: nil
-                        )
+                            code: "bad_args", message: "Missing isDark value", details: nil,
+                        ),
                     )
                 }
             case "setBezelStyle":
                 if let args = CNChannelSerialization.asDict(call.arguments), let value = args["value"] as? String {
-                    Self.applyBezelStyle(value, to: self.textField)
+                    Self.applyBezelStyle(value, to: textField)
                     result(nil)
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing bezelStyle value", details: nil
-                        )
+                            code: "bad_args", message: "Missing bezelStyle value", details: nil,
+                        ),
                     )
                 }
             default:
@@ -318,7 +318,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
         guard !isUpdatingFromDart else { return }
         channel.invokeMethod(
             "selectionChanged",
-            arguments: ["base": range.location, "extent": range.location + range.length]
+            arguments: ["base": range.location, "extent": range.location + range.length],
         )
     }
 
@@ -337,7 +337,7 @@ class CupertinoTextFieldNSView: NSView, NSTextFieldDelegate, MyTextFieldDelegate
                 attributes: [
                     .foregroundColor: placeholderColor ?? NSColor.placeholderTextColor,
                     .font: fontToUse,
-                ]
+                ],
             )
         } else {
             textField.placeholderAttributedString = nil
@@ -381,7 +381,7 @@ class MyTextField: NSTextField, NSTextViewDelegate {
     open weak var callback: (any MyTextFieldDelegate)?
 
     override func becomeFirstResponder() -> Bool {
-        return super.becomeFirstResponder()
+        super.becomeFirstResponder()
     }
 
     func textViewDidChangeSelection(_ notification: Notification) {

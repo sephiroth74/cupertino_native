@@ -5,7 +5,7 @@ struct CupertinoCheckboxView: View {
 
     var body: some View {
         let base = Toggle(
-            isOn: $model.value
+            isOn: $model.value,
         ) {
             if let label = model.label, let systemImage = model.systemImage {
                 Label(label, systemImage: systemImage).labelStyle(.titleAndIcon)
@@ -23,7 +23,7 @@ struct CupertinoCheckboxView: View {
                 if oldValue != newValue {
                     model.handleChange(newValue)
                 }
-            }
+            },
         )
         .toggleStyle(.checkbox)
 

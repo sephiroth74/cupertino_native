@@ -4,21 +4,21 @@ class ControlSizeUtils {
     static func controlSizeFromString(_ size: String) -> NSControl.ControlSize {
         switch size {
         case "small":
-            return .small
+            .small
         case "regular":
-            return .regular
+            .regular
         case "large":
-            return .large
+            .large
         case "mini":
-            return .mini
+            .mini
         case "extraLarge":
             if #available(macOS 26.0, *) {
-                return .extraLarge
+                .extraLarge
             } else {
-                return .large
+                .large
             }
         default:
-            return .regular
+            .regular
         }
     }
 }

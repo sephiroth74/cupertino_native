@@ -72,7 +72,7 @@ class CustomComboBoxView: NSView, NSTextFieldDelegate, NSTableViewDelegate, NSTa
             textField.topAnchor.constraint(equalTo: topAnchor),
             textField.bottomAnchor.constraint(equalTo: bottomAnchor),
             textField.trailingAnchor.constraint(
-                equalTo: dropdownButton.leadingAnchor, constant: -4
+                equalTo: dropdownButton.leadingAnchor, constant: -4,
             ),
 
             dropdownButton.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -113,14 +113,14 @@ class CustomComboBoxView: NSView, NSTextFieldDelegate, NSTableViewDelegate, NSTa
         // Schedule popover open on next run loop to avoid timing issues
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-            if !self.isPopoverOpen {
-                self.debugLog("openPopover cancelled because popover already closed")
+            if !isPopoverOpen {
+                debugLog("openPopover cancelled because popover already closed")
                 return
             }
-            self.debugLog("openPopover executing")
-            self.popover.show(
-                relativeTo: rectInWindow, of: self.dropdownButton.window!.contentView!,
-                preferredEdge: .minY
+            debugLog("openPopover executing")
+            popover.show(
+                relativeTo: rectInWindow, of: dropdownButton.window!.contentView!,
+                preferredEdge: .minY,
             )
         }
     }
@@ -134,13 +134,13 @@ class CustomComboBoxView: NSView, NSTextFieldDelegate, NSTableViewDelegate, NSTa
     // MARK: - NSTableViewDataSource
 
     func numberOfRows(in _: NSTableView) -> Int {
-        return items.count
+        items.count
     }
 
     func tableView(_: NSTableView, objectValueFor _: NSTableColumn?, row: Int)
         -> Any?
     {
-        return items[row]
+        items[row]
     }
 
     // MARK: - NSTableViewDelegate

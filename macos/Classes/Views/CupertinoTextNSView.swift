@@ -2,14 +2,14 @@ import Cocoa
 import FlutterMacOS
 import SwiftUI
 
-class CupertinoImageView: NSView {
+class CupertinoTextNSView: NSView {
     private let channel: FlutterMethodChannel
     private let hostingView: NSHostingView<AnyView>
 
-    private var payload: CNImagePayload?
+    private var payload: CNTextPayload?
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
-        channel = FlutterMethodChannel(name: "CupertinoNativeImage_\(viewId)", binaryMessenger: messenger)
+        channel = FlutterMethodChannel(name: "CupertinoNativeText_\(viewId)", binaryMessenger: messenger)
         hostingView = NSHostingView(rootView: AnyView(EmptyView()))
 
         payload = CNChannelSerialization.decode(args)
@@ -31,27 +31,42 @@ class CupertinoImageView: NSView {
         rebuild()
 
         channel.setMethodCallHandler { [weak self] call, result in
-            guard let self else { result(nil); return }
+            guard let self else {
+                result(nil)
+                return
+            }
+
             switch call.method {
-            case "setImage":
-                if let args = CNChannelSerialization.asDict(call.arguments) {
-                    payload = CNImagePayload(channel: args)
+            case "getIntrinsicSize":
+                let size = hostingView.fittingSize
+                result(["width": Double(size.width), "height": Double(size.height)])
+            case "setText":
+                if let raw = CNChannelSerialization.asDict(call.arguments) {
+                    payload = CNTextPayload(channel: raw)
                     rebuild()
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing args", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing text payload", details: nil))
+                }
             default:
                 result(FlutterMethodNotImplemented)
             }
         }
     }
 
+    @available(*, unavailable)
     required init?(coder _: NSCoder) {
-        nil
+        fatalError("init(coder:) has not been implemented")
     }
 
     private func rebuild() {
-        hostingView.rootView = payload.flatMap {
-            CNImage.deserialize($0.toChannel())
+        hostingView.rootView = payload.flatMap { payload in
+            CNText.deserialize(payload.toChannel()) { [weak self] size in
+                self?.channel.invokeMethod(
+                    "intrinsicSizeChanged",
+                    arguments: ["width": size.width, "height": size.height],
+                )
+            }
         } ?? AnyView(EmptyView())
     }
 }

@@ -10,10 +10,10 @@ class CupertinoLabelViewFactory: NSObject, FlutterPlatformViewFactory {
     }
 
     func createArgsCodec() -> (FlutterMessageCodec & NSObjectProtocol)? {
-        return FlutterStandardMessageCodec.sharedInstance()
+        FlutterStandardMessageCodec.sharedInstance()
     }
 
     func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
-        return CupertinoLabelNSView(viewId: viewId, args: args, messenger: messenger)
+        CupertinoLabelNSView(viewId: viewId, args: args, messenger: messenger)
     }
 }

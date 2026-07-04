@@ -10,10 +10,10 @@ class CupertinoDatePickerViewFactory: NSObject, FlutterPlatformViewFactory {
     }
 
     func createArgsCodec() -> (FlutterMessageCodec & NSObjectProtocol)? {
-        return FlutterStandardMessageCodec.sharedInstance()
+        FlutterStandardMessageCodec.sharedInstance()
     }
 
     func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
-        return CupertinoDatePickerNSView(viewId: viewId, args: args, messenger: messenger)
+        CupertinoDatePickerNSView(viewId: viewId, args: args, messenger: messenger)
     }
 }

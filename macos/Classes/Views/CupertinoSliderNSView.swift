@@ -8,7 +8,7 @@ class CupertinoSliderNSView: NSView {
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
-            name: "CupertinoNativeSlider_\(viewId)", binaryMessenger: messenger
+            name: "CupertinoNativeSlider_\(viewId)", binaryMessenger: messenger,
         )
 
         let slider = NSSlider()
@@ -73,7 +73,7 @@ class CupertinoSliderNSView: NSView {
             slider.tickMarkPosition = tickMarkPosition!
         }
 
-        if let tint = tint {
+        if let tint {
             slider.trackFillColor = tint
         }
 
@@ -175,8 +175,8 @@ class CupertinoSliderNSView: NSView {
                 } else {
                     result(
                         FlutterError(
-                            code: "bad_args", message: "Missing value", details: nil
-                        )
+                            code: "bad_args", message: "Missing value", details: nil,
+                        ),
                     )
                 }
             case "setSliderType":
@@ -222,7 +222,7 @@ class CupertinoSliderNSView: NSView {
     }
 
     required init?(coder _: NSCoder) {
-        return nil
+        nil
     }
 
     @objc func onSliderValueChanged(_ sender: NSSlider) {
@@ -232,26 +232,26 @@ class CupertinoSliderNSView: NSView {
     private static func tickMarkPositionFromString(_ s: String) -> NSSlider.TickMarkPosition {
         switch s {
         case "above":
-            return .above
+            .above
         case "below":
-            return .below
+            .below
         case "leading":
-            return .leading
+            .leading
         case "trailing":
-            return .trailing
+            .trailing
         default:
-            return .above
+            .above
         }
     }
 
     private static func sliderTypeFromString(_ s: String) -> NSSlider.SliderType {
         switch s {
         case "circular":
-            return .circular
+            .circular
         case "linear":
-            return .linear
+            .linear
         default:
-            return .linear
+            .linear
         }
     }
 }

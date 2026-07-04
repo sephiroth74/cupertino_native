@@ -19,6 +19,7 @@ import 'demos/stepper.dart';
 import 'demos/date_picker.dart';
 import 'demos/search_field.dart';
 import 'demos/text_field.dart';
+import 'demos/text.dart';
 import 'demos/secure_text_field.dart';
 import 'demos/text_view.dart';
 import 'demos/combo_box.dart';
@@ -125,6 +126,8 @@ class _DesktopDemoShell extends StatefulWidget {
 
 class _DesktopDemoShellState extends State<_DesktopDemoShell> {
   static const _entries = <_DemoEntry>[
+    _DemoEntry('Image', 'photo', ImageDemoPage()),
+    _DemoEntry('Text', 'textformat', TextDemoPage()),
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Slider', 'slider.horizontal.3', SliderDemoPage()),
     _DemoEntry('Toggle', 'switch.2', ToggleDemo()),
@@ -132,7 +135,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
     _DemoEntry('TabView', 'rectangle.split.3x1', TabViewDemoPage()),
     _DemoEntry('Icon', 'app', IconDemoPage()),
-    _DemoEntry('Image', 'photo', ImageDemoPage()),
     _DemoEntry('Popup Menu Button', 'ellipsis.circle', PopupMenuButtonDemoPage()),
     _DemoEntry('Menu Button', 'ellipsis.circle', MenuButtonDemoPage()),
     _DemoEntry('Label', 'textformat', LabelDemoPage()),
@@ -310,40 +312,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
           ),
         ),
       ),
-      child: IndexedStack(
-        index: _selectedIndex,
-        children: const [
-          ThemeDemoPage(),
-          SliderDemoPage(),
-          ToggleDemo(),
-          SegmentedControlDemoPage(),
-          PickerDemoPage(),
-          TabViewDemoPage(),
-          IconDemoPage(),
-          ImageDemoPage(),
-          PopupMenuButtonDemoPage(),
-          MenuButtonDemoPage(),
-          LabelDemoPage(),
-          ButtonDemoPage(),
-          ColorWellDemoPage(),
-          PathControlDemoPage(),
-          ProgressIndicatorsPageDemo(),
-          LevelIndicatorDemoPage(),
-          StepperDemoPage(),
-          DatePickerDemoPage(),
-          SearchFieldDemoPage(),
-          TextFieldDemoPage(),
-          SecureTextFieldDemoPage(),
-          TextViewDemoPage(),
-          ComboBoxDemoPage(),
-          AlertDemoPage(),
-          PopoverDemoPage(),
-          ContextMenuDemoPage(),
-          GroupBoxDemoPage(),
-          SheetDemoPage(),
-          SplitViewDemoPage(),
-        ],
-      ),
+      child: IndexedStack(index: _selectedIndex, children: _entries.map((entry) => entry.page).toList(growable: false)),
     );
   }
 }

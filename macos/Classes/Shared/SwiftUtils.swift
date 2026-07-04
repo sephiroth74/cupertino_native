@@ -4,17 +4,17 @@ class SwiftUtils {
     static func controlSizeFromString(_ size: String?) -> ControlSize {
         switch size {
         case "small":
-            return ControlSize.small
+            ControlSize.small
         case "regular":
-            return ControlSize.regular
+            ControlSize.regular
         case "large":
-            return ControlSize.large
+            ControlSize.large
         case "mini":
-            return ControlSize.mini
+            ControlSize.mini
         case "extraLarge":
-            return ControlSize.extraLarge
+            ControlSize.extraLarge
         default:
-            return ControlSize.regular
+            ControlSize.regular
         }
     }
 }

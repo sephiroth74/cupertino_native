@@ -10,10 +10,10 @@ class CupertinoIconViewFactory: NSObject, FlutterPlatformViewFactory {
     }
 
     func createArgsCodec() -> (FlutterMessageCodec & NSObjectProtocol)? {
-        return FlutterStandardMessageCodec.sharedInstance()
+        FlutterStandardMessageCodec.sharedInstance()
     }
 
     func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
-        return CupertinoIconNSView(viewId: viewId, args: args, messenger: messenger)
+        CupertinoIconNSView(viewId: viewId, args: args, messenger: messenger)
     }
 }

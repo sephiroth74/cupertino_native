@@ -5,76 +5,76 @@ extension String {
     func toPickerStyle() -> PickerStyle? {
         switch self {
         case "segmented":
-            return SegmentedPickerStyle()
+            SegmentedPickerStyle()
         case "automatic":
-            return DefaultPickerStyle()
+            DefaultPickerStyle()
         case "inline":
-            return InlinePickerStyle()
+            InlinePickerStyle()
         case "menu":
-            return MenuPickerStyle()
+            MenuPickerStyle()
         case "palette":
-            return PalettePickerStyle()
+            PalettePickerStyle()
         case "radioGroup":
-            return RadioGroupPickerStyle()
+            RadioGroupPickerStyle()
         default:
-            return DefaultPickerStyle()
+            DefaultPickerStyle()
         }
     }
 
     func toButtonStyle() -> any PrimitiveButtonStyle {
         switch self {
         case "automatic":
-            return DefaultButtonStyle()
+            DefaultButtonStyle()
         case "bordered":
-            return BorderedButtonStyle()
+            BorderedButtonStyle()
         case "borderedProminent":
-            return BorderedProminentButtonStyle()
+            BorderedProminentButtonStyle()
         case "borderless":
-            return BorderlessButtonStyle()
+            BorderlessButtonStyle()
         case "plain":
-            return PlainButtonStyle()
+            PlainButtonStyle()
         case "glass":
-            return GlassButtonStyle()
+            GlassButtonStyle()
         case "glassProminent":
-            return GlassProminentButtonStyle()
+            GlassProminentButtonStyle()
         case "link":
-            return LinkButtonStyle()
+            LinkButtonStyle()
         case "accessoryBar":
-            return AccessoryBarButtonStyle()
+            AccessoryBarButtonStyle()
         case "accessoryBarAction":
-            return AccessoryBarActionButtonStyle()
+            AccessoryBarActionButtonStyle()
         default:
-            return DefaultButtonStyle()
+            DefaultButtonStyle()
         }
     }
 
     func toSymbolRenderingMode() -> SymbolRenderingMode? {
         switch self {
         case "hierarchical":
-            return .hierarchical
+            .hierarchical
         case "palette":
-            return .palette
+            .palette
         case "monochrome":
-            return .monochrome
+            .monochrome
         default:
-            return nil
+            nil
         }
     }
 
     func toControlSize() -> ControlSize? {
         switch self {
         case "small":
-            return .small
+            .small
         case "regular":
-            return .regular
+            .regular
         case "large":
-            return .large
+            .large
         case "mini":
-            return .mini
+            .mini
         case "extraLarge":
-            return .extraLarge
+            .extraLarge
         default:
-            return nil
+            nil
         }
     }
 }

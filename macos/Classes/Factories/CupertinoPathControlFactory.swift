@@ -10,10 +10,10 @@ class CupertinoPathControlViewFactory: NSObject, FlutterPlatformViewFactory {
     }
 
     func createArgsCodec() -> (FlutterMessageCodec & NSObjectProtocol)? {
-        return FlutterStandardMessageCodec.sharedInstance()
+        FlutterStandardMessageCodec.sharedInstance()
     }
 
     func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
-        return CupertinoPathControlNSView(viewId: viewId, args: args, registrar: registrar)
+        CupertinoPathControlNSView(viewId: viewId, args: args, registrar: registrar)
     }
 }

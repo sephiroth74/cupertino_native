@@ -13,7 +13,7 @@ class CupertinoColorWellNSView: NSView {
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
-            name: "CupertinoNativeColorWell_\(viewId)", binaryMessenger: messenger
+            name: "CupertinoNativeColorWell_\(viewId)", binaryMessenger: messenger,
         )
         colorWell = NSColorWell()
         super.init(frame: .zero)
@@ -81,17 +81,17 @@ class CupertinoColorWellNSView: NSView {
         }
 
         channel.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else {
+            guard let self else {
                 result(nil)
                 return
             }
             switch call.method {
             case "getIntrinsicSize":
-                let s = self.colorWell!.intrinsicContentSize
+                let s = colorWell!.intrinsicContentSize
                 result(["width": Double(s.width), "height": Double(s.height)])
             case "setStyle":
                 if let args = CNChannelSerialization.asDict(call.arguments), let s = args["style"] as? String {
-                    self.colorWell!.colorWellStyle = Self.parseStyle(s)
+                    colorWell!.colorWellStyle = Self.parseStyle(s)
                     result(nil)
                 } else {
                     NSLog("setStyle called with invalid arguments: \(call.arguments as Optional)")
@@ -101,7 +101,7 @@ class CupertinoColorWellNSView: NSView {
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let isDark = (args["isDark"] as? NSNumber)?.boolValue
                 {
-                    self.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+                    appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
                 } else {
                     NSLog("setBrightness called with invalid arguments: \(call.arguments as Optional)")
@@ -109,8 +109,8 @@ class CupertinoColorWellNSView: NSView {
                 }
             case "setColor":
                 if let args = CNChannelSerialization.asDict(call.arguments), let c = args["color"] as? NSNumber {
-                    self.color = ColorUtils.colorFromARGB(c.intValue)
-                    self.colorWell!.color = self.color
+                    color = ColorUtils.colorFromARGB(c.intValue)
+                    colorWell!.color = color
                     result(nil)
                 } else {
                     NSLog("setColor called with invalid arguments: \(call.arguments as Optional)")
@@ -118,8 +118,8 @@ class CupertinoColorWellNSView: NSView {
                 }
             case "setSupportsAlpha":
                 if let args = CNChannelSerialization.asDict(call.arguments), let s = args["supportsAlpha"] as? Bool {
-                    self.supportsAlpha = s
-                    self.colorWell!.supportsAlpha = s
+                    supportsAlpha = s
+                    colorWell!.supportsAlpha = s
                     result(nil)
                 } else {
                     NSLog("setSupportsAlpha called with invalid arguments: \(call.arguments as Optional)")
@@ -140,11 +140,11 @@ class CupertinoColorWellNSView: NSView {
     private static func parseStyle(_ style: String) -> NSColorWell.Style {
         switch style {
         case "minimal":
-            return .minimal
+            .minimal
         case "expanded":
-            return .expanded
+            .expanded
         default:
-            return .default
+            .default
         }
     }
 
