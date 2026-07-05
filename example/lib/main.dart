@@ -76,6 +76,17 @@ class _MyAppState extends State<MyApp> {
   Color? _accentColor;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     var dispatcher = SchedulerBinding.instance.platformDispatcher;
@@ -86,17 +97,6 @@ class _MyAppState extends State<MyApp> {
       debugPrint('Platform brightness changed: $brightness');
       setState(() {});
     };
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    setState(() {});
   }
 
   void _setAccentColor(Color color) {
@@ -159,9 +159,9 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Progress', 'progress.indicator', ProgressIndicatorsPageDemo()),
     _DemoEntry('Button', 'button.horizontal', ButtonDemoPage()),
     _DemoEntry('Menu', 'ellipsis.circle', MenuButtonDemoPage()),
+    _DemoEntry('Toggle', 'switch.2', ToggleDemo()),
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
-    _DemoEntry('Toggle', 'switch.2', ToggleDemo()),
     _DemoEntry('Segmented Control', 'rectangle.split.3x1', SegmentedControlDemoPage()),
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
     _DemoEntry('TabView', 'rectangle.split.3x1', TabViewDemoPage()),

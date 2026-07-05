@@ -2,82 +2,169 @@ import Cocoa
 import FlutterMacOS
 import SwiftUI
 
+struct CNToggleChildPayload: CNChannelSerializable {
+    let payload: [String: Any]
+    let type: String
+
+    init?(channel: [String: Any]) {
+        guard let type = channel["type"] as? String,
+              let payload = channel["payload"] as? [String: Any]
+        else {
+            return nil
+        }
+
+        self.type = type
+        self.payload = payload
+    }
+
+    func toChannel() -> [String: Any] {
+        [
+            "type": type,
+            "payload": payload,
+        ]
+    }
+}
+
+struct CNTogglePayload: CNChannelSerializable {
+    var controlSize: String?
+    var enabled: Bool?
+    var foregroundColor: Int?
+    var height: Double?
+    var isDark: Bool?
+    var labelChildren: [CNToggleChildPayload]
+    var tint: Int?
+    var toggleStyle: String?
+    var value: Bool?
+    var width: Double?
+
+    init?(channel: [String: Any]) {
+        value = (channel["value"] as? NSNumber)?.boolValue ?? channel["value"] as? Bool
+        enabled = (channel["enabled"] as? NSNumber)?.boolValue ?? channel["enabled"] as? Bool
+        labelChildren = CNChannelSerialization.decodeArray(channel["labelChildren"])
+        toggleStyle = channel["toggleStyle"] as? String
+        isDark = (channel["isDark"] as? NSNumber)?.boolValue ?? channel["isDark"] as? Bool
+        controlSize = channel["controlSize"] as? String
+        tint = (channel["tint"] as? NSNumber)?.intValue ?? channel["tint"] as? Int
+        foregroundColor = (channel["foregroundColor"] as? NSNumber)?.intValue ?? channel["foregroundColor"] as? Int
+        width = (channel["width"] as? NSNumber)?.doubleValue ?? channel["width"] as? Double
+        height = (channel["height"] as? NSNumber)?.doubleValue ?? channel["height"] as? Double
+    }
+
+    func toChannel() -> [String: Any] {
+        [
+            "value": value as Any,
+            "enabled": enabled as Any,
+            "labelChildren": CNChannelSerialization.encodeArray(labelChildren),
+            "toggleStyle": toggleStyle as Any,
+            "isDark": isDark as Any,
+            "controlSize": controlSize as Any,
+            "tint": tint as Any,
+            "foregroundColor": foregroundColor as Any,
+            "width": width as Any,
+            "height": height as Any,
+        ]
+    }
+}
+
+final class CNToggleModel: ObservableObject {
+    @Published var payload: CNTogglePayload
+    let onChanged: (Bool) -> Void
+    let onSizeChanged: (CGSize) -> Void
+
+    init(payload: CNTogglePayload, onChanged: @escaping (Bool) -> Void, onSizeChanged: @escaping (CGSize) -> Void) {
+        self.payload = payload
+        self.onChanged = onChanged
+        self.onSizeChanged = onSizeChanged
+    }
+
+    func setPayload(_ newPayload: CNTogglePayload) {
+        payload = newPayload
+    }
+
+    func setValueFromDart(_ value: Bool) {
+        var next = payload
+        next.value = value
+        payload = next
+    }
+
+    func setEnabledFromDart(_ enabled: Bool) {
+        var next = payload
+        next.enabled = enabled
+        payload = next
+    }
+
+    func setValueFromUser(_ value: Bool) {
+        var next = payload
+        next.value = value
+        payload = next
+        onChanged(value)
+    }
+}
+
 class CupertinoToggleNSView: NSView {
     private let channel: FlutterMethodChannel
-    private let hostingController: NSHostingController<CupertinoToggleView>
+    private let hostingView: NSHostingView<AnyView>
+    private let model: CNToggleModel
+    private var payload: CNTogglePayload
+    private var lastReportedIntrinsicSize: CGSize?
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
+        hostingView = NSHostingView(rootView: AnyView(EmptyView()))
         channel = FlutterMethodChannel(
             name: "CupertinoNativeToggle_\(viewId)", binaryMessenger: messenger,
         )
 
-        var initialValue = false
-        var enabled = true
-        var label: String? = nil
-        var systemSymbolName: String? = nil
-        var toggleStyle = "switch"
-        var controlSize = "regular"
-        var tint: NSColor? = nil
+        payload = CNChannelSerialization.decode(args) ?? Self.defaultPayload()
 
-        if let dict = CNChannelSerialization.asDict(args) {
-            if let v = dict["value"] as? NSNumber { initialValue = v.boolValue }
-            if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
-            if let v = dict["label"] as? String { label = v }
-            if let v = dict["systemSymbolName"] as? String { systemSymbolName = v }
-            if let v = dict["toggleStyle"] as? String { toggleStyle = v }
-            if let v = dict["controlSize"] as? String { controlSize = v }
-            if let v = dict["tint"] as? Int {
-                tint = ColorUtils.colorFromARGB(v)
-            }
-        }
-
-        var channelRef: FlutterMethodChannel? = nil
-        let model = ToggleModel(
-            value: initialValue,
-            enabled: enabled,
-            label: label,
-            systemSymbolName: systemSymbolName,
-            toggleStyle: toggleStyle,
-            controlSize: controlSize,
-            tint: tint,
+        let channelRef = channel
+        model = CNToggleModel(
+            payload: payload,
             onChanged: { newValue in
-                channelRef?.invokeMethod("onChanged", arguments: ["value": newValue])
+                channelRef.invokeMethod("onChanged", arguments: ["value": newValue])
             },
             onSizeChanged: { newSize in
-                channelRef?.invokeMethod(
+                channelRef.invokeMethod(
                     "intrinsicSizeChanged",
                     arguments: ["width": newSize.width, "height": newSize.height],
                 )
             },
         )
-
-        hostingController = NSHostingController(rootView: CupertinoToggleView(model: model))
         super.init(frame: .zero)
 
-        channelRef = channel
+        hostingView.wantsLayer = true
+        hostingView.layer?.backgroundColor = NSColor.clear.cgColor
 
-        hostingController.view.wantsLayer = true
-        hostingController.view.layer?.backgroundColor = NSColor.clear.cgColor
-
-        addSubview(hostingController.view)
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(hostingView)
+        hostingView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            hostingController.view.leadingAnchor.constraint(equalTo: leadingAnchor),
-            hostingController.view.trailingAnchor.constraint(equalTo: trailingAnchor),
-            hostingController.view.topAnchor.constraint(equalTo: topAnchor),
-            hostingController.view.bottomAnchor.constraint(equalTo: bottomAnchor),
+            hostingView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            hostingView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            hostingView.topAnchor.constraint(equalTo: topAnchor),
+            hostingView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
+
+        rebuild()
 
         channel.setMethodCallHandler { call, result in
             switch call.method {
             case "getIntrinsicSize":
-                let size = self.hostingController.view.intrinsicContentSize
+                let size = self.currentIntrinsicSize()
                 result(["width": size.width, "height": size.height])
+            case "setToggle":
+                if let parsed: CNTogglePayload = CNChannelSerialization.decode(call.arguments) {
+                    self.payload = parsed
+                    self.model.setPayload(parsed)
+                    self.rebuild()
+                    self.notifyIntrinsicSizeChanged(force: true)
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Invalid toggle payload", details: nil))
+                }
             case "setValue":
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.boolValue
                 {
-                    model.setValueFromDart(value)
+                    self.model.setValueFromDart(value)
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
@@ -86,40 +173,10 @@ class CupertinoToggleNSView: NSView {
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let enabled = (args["value"] as? NSNumber)?.boolValue
                 {
-                    model.enabled = enabled
+                    self.model.setEnabledFromDart(enabled)
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
-                }
-            case "setControlSize":
-                if let args = CNChannelSerialization.asDict(call.arguments) {
-                    model.controlSize = (args["controlSize"] as? String) ?? "regular"
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing controlSize", details: nil))
-                }
-            case "setTint":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let tintValue = args["tint"] as? Int
-                {
-                    let ns = ColorUtils.colorFromARGB(tintValue)
-                    model.tint = ns
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing tint", details: nil))
-                }
-            case "setBrightness":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let isDark = (args["isDark"] as? NSNumber)?.boolValue
-                {
-                    if isDark {
-                        NSApp.appearance = NSAppearance(named: .darkAqua)
-                    } else {
-                        NSApp.appearance = NSAppearance(named: .aqua)
-                    }
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing brightness", details: nil))
                 }
             default:
                 result(FlutterMethodNotImplemented)
@@ -130,58 +187,75 @@ class CupertinoToggleNSView: NSView {
     required init?(coder _: NSCoder) {
         nil
     }
-}
 
-// MARK: - Toggle Model
-
-class ToggleModel: ObservableObject {
-    @Published var value: Bool
-    @Published var enabled: Bool
-    @Published var controlSize: String
-    @Published var tint: NSColor?
-    let label: String?
-    let systemSymbolName: String?
-    let toggleStyle: String
-    var onChanged: (Bool) -> Void
-    let onSizeChanged: (CGSize) -> Void
-
-    init(
-        value: Bool,
-        enabled: Bool,
-        label: String?,
-        systemSymbolName: String?,
-        toggleStyle: String,
-        controlSize: String,
-        tint: NSColor?,
-        onChanged: @escaping (Bool) -> Void,
-        onSizeChanged: @escaping (CGSize) -> Void,
-    ) {
-        self.value = value
-        self.enabled = enabled
-        self.label = label
-        self.systemSymbolName = systemSymbolName
-        self.toggleStyle = toggleStyle
-        self.controlSize = controlSize
-        self.tint = tint
-        self.onChanged = onChanged
-        self.onSizeChanged = onSizeChanged
+    private static func defaultPayload() -> CNTogglePayload {
+        CNTogglePayload(channel: [
+            "value": false,
+            "enabled": true,
+            "labelChildren": [],
+            "toggleStyle": "switch",
+            "controlSize": "regular",
+        ])!
     }
 
-    func toggle() {
-        value.toggle()
-        onChanged(value)
+    private func rebuild() {
+        if let isDark = payload.isDark {
+            hostingView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+        } else {
+            hostingView.appearance = nil
+        }
+
+        hostingView.rootView = AnyView(CupertinoToggleView(model: model))
+
+        DispatchQueue.main.async { [weak self] in
+            self?.notifyIntrinsicSizeChanged()
+        }
     }
 
-    func setValueFromDart(_ newValue: Bool) {
-        value = newValue
+    private func currentIntrinsicSize() -> CGSize {
+        layoutSubtreeIfNeeded()
+        hostingView.layoutSubtreeIfNeeded()
+
+        let intrinsic = hostingView.intrinsicContentSize
+        let intrinsicWidth = intrinsic.width
+        let intrinsicHeight = intrinsic.height
+
+        let hasValidIntrinsic =
+            intrinsicWidth > 0 &&
+            intrinsicHeight > 0 &&
+            intrinsicWidth != NSView.noIntrinsicMetric &&
+            intrinsicHeight != NSView.noIntrinsicMetric
+
+        if hasValidIntrinsic {
+            return intrinsic
+        }
+
+        let fitting = hostingView.fittingSize
+        return CGSize(width: max(0, fitting.width), height: max(0, fitting.height))
+    }
+
+    private func notifyIntrinsicSizeChanged(force: Bool = false) {
+        let size = currentIntrinsicSize()
+        guard size.width > 0, size.height > 0 else {
+            return
+        }
+
+        if !force, lastReportedIntrinsicSize == size {
+            return
+        }
+
+        lastReportedIntrinsicSize = size
+        channel.invokeMethod(
+            "intrinsicSizeChanged",
+            arguments: ["width": size.width, "height": size.height],
+        )
     }
 }
 
 // MARK: - Toggle View
 
 struct CupertinoToggleView: View {
-    @ObservedObject var model: ToggleModel
-    @State private var measuredSize: CGSize = .zero
+    @ObservedObject var model: CNToggleModel
 
     var body: some View {
         buildToggle()
@@ -192,38 +266,71 @@ struct CupertinoToggleView: View {
             }
     }
 
-    private func buildToggle() -> some View {
+    private func buildToggle() -> AnyView {
+        let payload = model.payload
         let toggle = Toggle(isOn: Binding(
-            get: { model.value },
+            get: { payload.value ?? false },
             set: { newValue in
-                model.value = newValue
-                model.onChanged(newValue)
+                model.setValueFromUser(newValue)
             },
         )) {
-            if let symbol = model.systemSymbolName, let label = model.label {
-                Label(label, systemImage: symbol)
-            } else if let symbol = model.systemSymbolName {
-                Image(systemName: symbol)
-            } else if let label = model.label {
-                Text(label)
+            if payload.labelChildren.isEmpty {
+                EmptyView()
+            } else if payload.labelChildren.count == 1 {
+                deserializeLabelChild(payload.labelChildren[0])
+            } else {
+                ForEach(Array(payload.labelChildren.enumerated()), id: \.offset) { _, child in
+                    deserializeLabelChild(child)
+                }
             }
         }
-        .disabled(!model.enabled)
-        .controlSize(SwiftUtils.controlSizeFromString(model.controlSize))
-        .tint(model.tint != nil ? Color(model.tint!) : nil)
 
-        // Apply style based on configuration
-        switch model.toggleStyle {
+        var view = AnyView(toggle.disabled(!(payload.enabled ?? true)))
+        view = AnyView(view.controlSize(SwiftUtils.controlSizeFromString(payload.controlSize)))
+
+        if let tint = payload.tint {
+            view = AnyView(view.tint(ColorUtils.swiftUIColorFromARGB(tint)))
+        }
+
+        if let foregroundColor = payload.foregroundColor {
+            view = AnyView(view.foregroundStyle(ColorUtils.swiftUIColorFromARGB(foregroundColor)))
+        }
+
+        if let width = payload.width, let height = payload.height {
+            view = AnyView(view.frame(width: CGFloat(width), height: CGFloat(height)))
+        } else if let width = payload.width {
+            view = AnyView(view.frame(width: CGFloat(width)))
+        } else if let height = payload.height {
+            view = AnyView(view.frame(height: CGFloat(height)))
+        }
+
+        switch payload.toggleStyle {
         case "automatic":
-            return AnyView(toggle.toggleStyle(.automatic))
+            return AnyView(view.toggleStyle(.automatic))
         case "checkbox":
-            return AnyView(toggle.toggleStyle(.checkbox))
+            return AnyView(view.toggleStyle(.checkbox))
         case "button":
-            return AnyView(toggle.toggleStyle(.button))
+            return AnyView(view.toggleStyle(.button))
         case "switch":
-            return AnyView(toggle.toggleStyle(.switch))
+            return AnyView(view.toggleStyle(.switch))
         default:
-            return AnyView(toggle.toggleStyle(.automatic))
+            return AnyView(view.toggleStyle(.automatic))
+        }
+    }
+
+    @ViewBuilder
+    private func deserializeLabelChild(_ child: CNToggleChildPayload) -> some View {
+        switch child.type {
+        case "image":
+            CNImage.deserialize(child.payload) ?? AnyView(EmptyView())
+        case "label":
+            CNLabel.deserialize(child.payload) ?? AnyView(EmptyView())
+        case "text":
+            CNText.deserialize(child.payload) ?? AnyView(EmptyView())
+        case "progressView":
+            CNProgressViewDeserializer.deserialize(child.payload) ?? AnyView(EmptyView())
+        default:
+            AnyView(EmptyView())
         }
     }
 }

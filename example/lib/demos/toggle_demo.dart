@@ -1,6 +1,7 @@
+import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:cupertino_native/cupertino_native.dart';
 
 class ToggleDemo extends StatefulWidget {
   const ToggleDemo({super.key});
@@ -10,13 +11,10 @@ class ToggleDemo extends StatefulWidget {
 }
 
 class _ToggleDemoState extends State<ToggleDemo> {
-  bool _autoSave = true;
-  bool _automaticStyle = false;
-  bool _checkboxStyle = true;
-  final CNControlSize _controlSize = CNControlSize.regular;
   bool _darkMode = false;
-  bool _notifications = true;
-  bool _soundEnabled = false;
+  CNToggleStyle _toggleStyle = CNToggleStyle.switch_;
+  Color? _tintColor;
+  CNControlSize _controlSize = CNControlSize.regular;
 
   void _showNotification(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), duration: const Duration(milliseconds: 800)));
@@ -27,260 +25,116 @@ class _ToggleDemoState extends State<ToggleDemo> {
     return CNPageScaffold(
       navigationBar: const CNNavigationBar(middle: Text('Toggle Demo')),
       child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Switch Style Toggle', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: CNToggle(
-                  value: _darkMode,
-                  label: 'Dark Mode',
-                  systemSymbolName: 'moon.fill',
-                  toggleStyle: CNToggleStyle.switch_,
-                  controlSize: _controlSize,
-                  onChanged: (value) {
-                    setState(() {
-                      _darkMode = value;
-                    });
-                    _showNotification('Dark Mode ${value ? "enabled" : "disabled"}');
-                  },
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text('Button Style Toggle', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: CNToggle(
-                  value: _notifications,
-                  label: 'Notifications',
-                  systemSymbolName: 'bell.fill',
-                  toggleStyle: CNToggleStyle.button,
-                  controlSize: _controlSize,
-                  onChanged: (value) {
-                    setState(() {
-                      _notifications = value;
-                    });
-                    _showNotification('Notifications ${value ? "enabled" : "disabled"}');
-                  },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text('Switch Style Toggle', style: CNTheme.of(context).typography.title2),
+                    const SizedBox(height: 16),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: CNToggle(
+                        value: _darkMode,
+                        toggleStyle: _toggleStyle,
+                        controlSize: _controlSize,
+                        tint: _tintColor,
+                        onChanged: (value) {
+                          setState(() {
+                            _darkMode = value;
+                          });
+                          _showNotification('Dark Mode ${value ? "enabled" : "disabled"}');
+                        },
+                        children: const [
+                          CNText('Dark Mode'),
+                          CNText('Enable dark mode for the app'),
+                          CNImage(systemSymbolName: 'moon.fill'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 24),
-              const Text('Multiple Toggles', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              Container(
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                constraints: BoxConstraints.expand(width: 350),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
-                  borderRadius: BorderRadius.circular(8),
+                  color: CNTheme.of(context).fillPrimaryColor,
+                  border: Border.all(color: CNTheme.of(context).separatorColor, width: 1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    CNToggle(
-                      value: _soundEnabled,
-                      label: 'Sound',
-                      systemSymbolName: 'speaker.wave.2.fill',
-                      toggleStyle: CNToggleStyle.switch_,
-                      controlSize: _controlSize,
-                      tint: CupertinoColors.activeOrange,
-                      onChanged: (value) {
-                        setState(() {
-                          _soundEnabled = value;
-                        });
-                        _showNotification('Sound ${value ? "enabled" : "disabled"}');
-                      },
+                    Row(
+                      children: [
+                        Expanded(child: const Text('Control Size')),
+                        CNPicker(
+                          selectedIndex: CNControlSize.values.indexOf(_controlSize),
+                          onValueChanged: (index) => setState(() => _controlSize = CNControlSize.values[index]),
+                          items: CNControlSize.values.map((size) => CNPickerItem(size.name)).toList(),
+                          pickerStyle: CNPickerStyle.automatic,
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
-                    CNToggle(
-                      value: _autoSave,
-                      label: 'Auto-Save',
-                      systemSymbolName: 'checkmark.circle.fill',
-                      toggleStyle: CNToggleStyle.switch_,
-                      controlSize: _controlSize,
-                      onChanged: (value) {
-                        setState(() {
-                          _autoSave = value;
-                        });
-                        _showNotification('Auto-Save ${value ? "enabled" : "disabled"}');
-                      },
+
+                    Row(
+                      children: [
+                        Expanded(child: const Text('Button Style')),
+                        CNPicker(
+                          selectedIndex: CNToggleStyle.values.indexOf(_toggleStyle),
+                          onValueChanged: (index) => setState(() => _toggleStyle = CNToggleStyle.values[index]),
+                          items: CNToggleStyle.values.map((style) => CNPickerItem(style.name)).toList(),
+                          pickerStyle: CNPickerStyle.automatic,
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 16),
+
+                    Row(
+                      children: [
+                        Expanded(child: const Text('Tint Color')),
+                        CNPicker(
+                          selectedIndex: kSystemColors.keys.toList().indexOf(
+                            _tintColor == null
+                                ? 'none'
+                                : kSystemColors.entries.firstWhere((entry) => entry.value == _tintColor).key,
+                          ),
+                          onValueChanged: (index) => setState(() => _tintColor = kSystemColors.values.elementAt(index)),
+                          items: kSystemColors.keys
+                              .map(
+                                (colorName) =>
+                                    CNPickerItem(colorName, icon: CNSymbol("circle.fill", color: kSystemColors[colorName])),
+                              )
+                              .toList(),
+                          pickerStyle: CNPickerStyle.menu,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-              const Text('Icon Only Toggles', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    CNToggle(
-                      value: _darkMode,
-                      systemSymbolName: 'moon.fill',
-                      toggleStyle: CNToggleStyle.button,
-                      controlSize: _controlSize,
-                      onChanged: (value) {
-                        setState(() {
-                          _darkMode = value;
-                        });
-                      },
-                    ),
-                    CNToggle(
-                      value: _notifications,
-                      systemSymbolName: 'bell.fill',
-                      toggleStyle: CNToggleStyle.button,
-                      controlSize: _controlSize,
-                      onChanged: (value) {
-                        setState(() {
-                          _notifications = value;
-                        });
-                      },
-                    ),
-                    CNToggle(
-                      value: _soundEnabled,
-                      systemSymbolName: 'speaker.wave.2.fill',
-                      toggleStyle: CNToggleStyle.button,
-                      controlSize: _controlSize,
-                      onChanged: (value) {
-                        setState(() {
-                          _soundEnabled = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text('Checkbox Style Toggle', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: CNToggle(
-                  value: _checkboxStyle,
-                  label: 'Enable Feature',
-                  toggleStyle: CNToggleStyle.checkbox,
-                  onChanged: (value) {
-                    setState(() {
-                      _checkboxStyle = value;
-                    });
-                    _showNotification('Checkbox toggle: ${value ? "enabled" : "disabled"}');
-                  },
-                  controlSize: _controlSize,
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text('Automatic Style Toggle', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: CNToggle(
-                  value: _automaticStyle,
-                  label: 'Automatic Style',
-                  systemSymbolName: 'gear',
-                  toggleStyle: CNToggleStyle.automatic,
-                  onChanged: (value) {
-                    setState(() {
-                      _automaticStyle = value;
-                    });
-                    _showNotification('Automatic toggle: ${value ? "enabled" : "disabled"}');
-                  },
-                  controlSize: _controlSize,
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text('All Styles Comparison', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    CNToggle(
-                      value: _darkMode,
-                      label: 'Switch Style',
-                      systemSymbolName: 'switch.2',
-                      tint: CNColors.orange,
-                      toggleStyle: CNToggleStyle.switch_,
-                      onChanged: (value) {
-                        setState(() {
-                          _darkMode = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    CNToggle(
-                      value: _notifications,
-                      label: 'Button Style',
-                      systemSymbolName: 'button.rounded.fill',
-                      tint: CNColors.pink,
-                      toggleStyle: CNToggleStyle.button,
-                      onChanged: (value) {
-                        setState(() {
-                          _notifications = value;
-                        });
-                      },
-                      controlSize: CNControlSize.large,
-                    ),
-                    const SizedBox(height: 12),
-                    CNToggle(
-                      value: _checkboxStyle,
-                      label: 'Checkbox Style',
-                      tint: CNColors.teal,
-                      systemSymbolName: 'checkmark.square',
-                      toggleStyle: CNToggleStyle.checkbox,
-                      onChanged: (value) {
-                        setState(() {
-                          _checkboxStyle = value;
-                        });
-                      },
-                      controlSize: _controlSize,
-                    ),
-                    const SizedBox(height: 12),
-                    CNToggle(
-                      value: _automaticStyle,
-                      label: 'Automatic Style',
-                      systemSymbolName: 'dial.high.fill',
-                      toggleStyle: CNToggleStyle.automatic,
-                      onChanged: (value) {
-                        setState(() {
-                          _automaticStyle = value;
-                        });
-                      },
-                      controlSize: _controlSize,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

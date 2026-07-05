@@ -15,6 +15,12 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
   CNMenuStyle _menuStyle = CNMenuStyle.automatic;
   Color? _tintColor;
 
+  void _setLastAction(String value) {
+    setState(() {
+      _lastAction = value;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return CNPageScaffold(
@@ -198,11 +204,5 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
         ),
       ),
     );
-  }
-
-  void _setLastAction(String value) {
-    setState(() {
-      _lastAction = value;
-    });
   }
 }

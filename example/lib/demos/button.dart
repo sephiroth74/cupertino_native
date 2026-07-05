@@ -35,6 +35,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
   CNControlSize _controlSize = CNControlSize.large;
   // ignore: unused_field
   String _last = 'None';
+
   Color? _tintColor;
 
   void _set(String what) => setState(() => _last = what);

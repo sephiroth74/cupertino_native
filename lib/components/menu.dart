@@ -46,6 +46,22 @@ class CNDivider with CNMenuChild, EquatableMixin {
 /// Supported menu children are [CNButton], [CNText], [CNImage],
 /// [CNLabel], and [CNDivider] (all objects implementing [CNMenuChild]).
 class CNMenu extends StatefulWidget {
+  /// Creates a native menu view.
+  const CNMenu({
+    super.key,
+    this.children = const [],
+    this.labels = const [],
+    this.onPrimaryAction,
+    this.enabled = true,
+    this.tint,
+    this.foregroundColor,
+    this.width,
+    this.height,
+    this.shrinkWrap = false,
+    this.style = CNMenuStyle.automatic,
+    this.controlSize = CNControlSize.regular,
+  });
+
   /// Menu content children.
   final List<CNMenuChild> children;
 
@@ -79,22 +95,6 @@ class CNMenu extends StatefulWidget {
   /// Optional fixed width.
   final double? width;
 
-  /// Creates a native menu view.
-  const CNMenu({
-    super.key,
-    this.children = const [],
-    this.labels = const [],
-    this.onPrimaryAction,
-    this.enabled = true,
-    this.tint,
-    this.foregroundColor,
-    this.width,
-    this.height,
-    this.shrinkWrap = false,
-    this.style = CNMenuStyle.automatic,
-    this.controlSize = CNControlSize.regular,
-  });
-
   @override
   State<CNMenu> createState() => _CNMenuState();
 }
@@ -106,51 +106,6 @@ class _CNMenuState extends State<CNMenu> {
   String? _lastSerializedPayload;
   double? _layoutHeight;
   double? _layoutWidth;
-
-  bool get _isDark => CNTheme.of(context).brightness == Brightness.dark;
-
-  @override
-  Widget build(BuildContext context) {
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
-      return const SizedBox.shrink();
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final hasFixedWidth = constraints.hasTightWidth;
-        final hasFixedHeight = constraints.hasTightHeight;
-        final hasExplicitWidth = widget.width != null;
-        final hasExplicitHeight = widget.height != null;
-        final shouldSendWidth = hasExplicitWidth || hasFixedWidth;
-        final shouldSendHeight = hasExplicitHeight || hasFixedHeight;
-
-        final resolvedWidth = widget.width ?? (hasFixedWidth ? constraints.maxWidth : (_intrinsicWidth ?? _kDefaultWidth));
-        final resolvedHeight = widget.height ?? (hasFixedHeight ? constraints.maxHeight : (_intrinsicHeight ?? _kDefaultHeight));
-
-        final nextLayoutWidth = shouldSendWidth ? resolvedWidth : null;
-        final nextLayoutHeight = shouldSendHeight ? resolvedHeight : null;
-
-        if (_layoutWidth != nextLayoutWidth || _layoutHeight != nextLayoutHeight) {
-          _layoutWidth = nextLayoutWidth;
-          _layoutHeight = nextLayoutHeight;
-          _syncPropsToNativeIfNeeded();
-        }
-
-        final creationParams = _toPayload(frameWidth: nextLayoutWidth, frameHeight: nextLayoutHeight);
-
-        return SizedBox(
-          width: resolvedWidth,
-          height: resolvedHeight,
-          child: AppKitView(
-            viewType: 'CupertinoNativeMenu',
-            creationParams: creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            onPlatformViewCreated: _onCreated,
-          ),
-        );
-      },
-    );
-  }
 
   @override
   void didChangeDependencies() {
@@ -185,6 +140,8 @@ class _CNMenuState extends State<CNMenu> {
     _channel?.setMethodCallHandler(null);
     super.dispose();
   }
+
+  bool get _isDark => CNTheme.of(context).brightness == Brightness.dark;
 
   void _cacheCurrentProps() {
     _lastSerializedPayload = _serializeCurrentPayload();
@@ -311,5 +268,48 @@ class _CNMenuState extends State<CNMenu> {
     }
 
     return payload;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      return const SizedBox.shrink();
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasFixedWidth = constraints.hasTightWidth;
+        final hasFixedHeight = constraints.hasTightHeight;
+        final hasExplicitWidth = widget.width != null;
+        final hasExplicitHeight = widget.height != null;
+        final shouldSendWidth = hasExplicitWidth || hasFixedWidth;
+        final shouldSendHeight = hasExplicitHeight || hasFixedHeight;
+
+        final resolvedWidth = widget.width ?? (hasFixedWidth ? constraints.maxWidth : (_intrinsicWidth ?? _kDefaultWidth));
+        final resolvedHeight = widget.height ?? (hasFixedHeight ? constraints.maxHeight : (_intrinsicHeight ?? _kDefaultHeight));
+
+        final nextLayoutWidth = shouldSendWidth ? resolvedWidth : null;
+        final nextLayoutHeight = shouldSendHeight ? resolvedHeight : null;
+
+        if (_layoutWidth != nextLayoutWidth || _layoutHeight != nextLayoutHeight) {
+          _layoutWidth = nextLayoutWidth;
+          _layoutHeight = nextLayoutHeight;
+          _syncPropsToNativeIfNeeded();
+        }
+
+        final creationParams = _toPayload(frameWidth: nextLayoutWidth, frameHeight: nextLayoutHeight);
+
+        return SizedBox(
+          width: resolvedWidth,
+          height: resolvedHeight,
+          child: AppKitView(
+            viewType: 'CupertinoNativeMenu',
+            creationParams: creationParams,
+            creationParamsCodec: const StandardMessageCodec(),
+            onPlatformViewCreated: _onCreated,
+          ),
+        );
+      },
+    );
   }
 }
