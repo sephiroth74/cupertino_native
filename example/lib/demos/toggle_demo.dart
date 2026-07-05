@@ -1,6 +1,6 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_native_example/demos/pixel_perfect_probe.dart';
 import 'package:flutter/material.dart';
 
 class ToggleDemo extends StatefulWidget {
@@ -11,14 +11,11 @@ class ToggleDemo extends StatefulWidget {
 }
 
 class _ToggleDemoState extends State<ToggleDemo> {
-  bool _darkMode = false;
-  CNToggleStyle _toggleStyle = CNToggleStyle.switch_;
-  Color? _tintColor;
   CNControlSize _controlSize = CNControlSize.regular;
-
-  void _showNotification(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), duration: const Duration(milliseconds: 800)));
-  }
+  bool _darkMode = false;
+  FlutterPixelGeometry? _flutterGeometry;
+  Color? _tintColor;
+  CNToggleStyle _toggleStyle = CNToggleStyle.switch_;
 
   @override
   Widget build(BuildContext context) {
@@ -46,24 +43,50 @@ class _ToggleDemoState extends State<ToggleDemo> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       padding: const EdgeInsets.all(16),
-                      child: CNToggle(
-                        value: _darkMode,
-                        toggleStyle: _toggleStyle,
-                        controlSize: _controlSize,
-                        tint: _tintColor,
-                        onChanged: (value) {
+                      child: PixelPerfectProbe(
+                        enforcePixelPerfectPosition: true,
+                        onGeometryChanged: (geometry) {
                           setState(() {
-                            _darkMode = value;
+                            _flutterGeometry = geometry;
                           });
-                          _showNotification('Dark Mode ${value ? "enabled" : "disabled"}');
                         },
-                        children: const [
-                          CNText('Dark Mode'),
-                          CNText('Enable dark mode for the app'),
-                          CNImage(systemSymbolName: 'moon.fill'),
-                        ],
+                        child: CNToggle(
+                          value: _darkMode,
+                          toggleStyle: _toggleStyle,
+                          controlSize: _controlSize,
+                          tint: _tintColor,
+                          onChanged: (value) {
+                            setState(() {
+                              _darkMode = value;
+                            });
+                            _showNotification('Dark Mode ${value ? "enabled" : "disabled"}');
+                          },
+                          children: const [
+                            CNText('Dark Mode'),
+                            CNText('Enable dark mode for the app'),
+                            CNImage(systemSymbolName: 'moon.fill'),
+                          ],
+                        ),
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    if (_flutterGeometry != null)
+                      SelectableText(
+                        'Flutter geometry (snapped): '
+                        'x=${_flutterGeometry!.x.toStringAsFixed(2)}, '
+                        'y=${_flutterGeometry!.y.toStringAsFixed(2)}, '
+                        'w=${_flutterGeometry!.width.toStringAsFixed(2)}, '
+                        'h=${_flutterGeometry!.height.toStringAsFixed(2)}\n'
+                        'physical=(${_flutterGeometry!.physicalX.toStringAsFixed(2)}, ${_flutterGeometry!.physicalY.toStringAsFixed(2)}, '
+                        '${_flutterGeometry!.physicalWidth.toStringAsFixed(2)}, ${_flutterGeometry!.physicalHeight.toStringAsFixed(2)}), '
+                        'dpr=${_flutterGeometry!.devicePixelRatio.toStringAsFixed(2)}\n'
+                        'pixelAligned: '
+                        'x=${_flutterGeometry!.pixelAlignedX}, '
+                        'y=${_flutterGeometry!.pixelAlignedY}, '
+                        'w=${_flutterGeometry!.pixelAlignedWidth}, '
+                        'h=${_flutterGeometry!.pixelAlignedHeight}',
+                        style: CNTheme.of(context).typography.body.copyWith(color: CNTheme.of(context).secondaryLabelColor),
+                      ),
                   ],
                 ),
               ),
@@ -71,7 +94,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
-                constraints: BoxConstraints.expand(width: 350),
+                constraints: const BoxConstraints.expand(width: 350),
                 decoration: BoxDecoration(
                   color: CNTheme.of(context).fillPrimaryColor,
                   border: Border.all(color: CNTheme.of(context).separatorColor, width: 1),
@@ -138,5 +161,9 @@ class _ToggleDemoState extends State<ToggleDemo> {
         ),
       ),
     );
+  }
+
+  void _showNotification(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), duration: const Duration(milliseconds: 800)));
   }
 }
