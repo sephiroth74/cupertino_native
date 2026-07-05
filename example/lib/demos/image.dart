@@ -1,5 +1,6 @@
 import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
 const _kImageNames = [
@@ -464,46 +465,25 @@ const _kRenderingModes = {
   'multicolor': CNSymbolRenderingMode.multicolor,
 };
 
-const _kSystemColors = {
-  'red': CNColors.red,
-  'orange': CNColors.orange,
-  'yellow': CNColors.yellow,
-  'green': CNColors.green,
-  'mint': CNColors.mint,
-  'teal': CNColors.teal,
-  'cyan': CNColors.cyan,
-  'blue': CNColors.blue,
-  'indigo': CNColors.indigo,
-  'pink': CNColors.pink,
-  'purple': CNColors.purple,
-  'brown': CNColors.brown,
-  'gray': CNColors.gray,
-  'fillPrimary': CNColors.fillPrimary,
-  'fillSecondary': CNColors.fillSecondary,
-  'fillTertiary': CNColors.fillTertiary,
-  'fillQuaternary': CNColors.fillQuaternary,
-  'fillQuinary': CNColors.fillQuinary,
-};
-
 class ImageDemoPage extends StatefulWidget {
   const ImageDemoPage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _ImageDemoPageState createState() => _ImageDemoPageState();
 }
 
 class _ImageDemoPageState extends State<ImageDemoPage> {
-  late CupertinoDynamicColor _color;
-  CNSymbolColorRenderingMode _colorMode = CNSymbolColorRenderingMode.flat;
-  late List<Color> _colors = [];
-  var _font = CNFont.system(CNFontSize.points(32), weight: CNFontWeight.regular);
-  CNSymbolRenderingMode? _renderingMode;
+  CupertinoDynamicColor? color;
+  CNSymbolColorRenderingMode colorMode = CNSymbolColorRenderingMode.flat;
+  late List<Color> colors = [];
+  var font = CNFont.system(CNFontSize.points(32), weight: CNFontWeight.regular);
+  CNSymbolRenderingMode? renderingMode;
 
   @override
   initState() {
     super.initState();
-    _color = CNColors.blue;
-    _colors = [CNColors.red, _color];
+    colors = [CNColors.red, CNColors.blue];
   }
 
   Widget _symbolRow({
@@ -531,7 +511,7 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
               width: imageSize,
               height: imageSize,
               decoration: BoxDecoration(
-                border: Border.all(color: _colors.last, width: 2),
+                border: Border.all(color: colors?.last ?? CNColors.gray, width: 2),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: CNImage(
@@ -569,15 +549,17 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                     return _symbolRow(
                       label: name,
                       symbolName: name,
-                      mode: _renderingMode,
-                      colorMode: _colorMode,
+                      mode: renderingMode,
+                      colorMode: colorMode,
                       colors:
-                          (_renderingMode == null ||
-                              _renderingMode == CNSymbolRenderingMode.monochrome ||
-                              _renderingMode == CNSymbolRenderingMode.hierarchical)
-                          ? [_color]
-                          : _colors,
-                      font: _font,
+                          (renderingMode == null ||
+                              renderingMode == CNSymbolRenderingMode.monochrome ||
+                              renderingMode == CNSymbolRenderingMode.hierarchical)
+                          ? color != null
+                                ? [color!]
+                                : null
+                          : colors,
+                      font: font,
                     );
                   }).toList(),
                 ),
@@ -600,9 +582,9 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                     children: [
                       Expanded(child: const Text('Rendering Mode')),
                       CNPicker(
-                        selectedIndex: _kRenderingModes.values.toList().indexOf(_renderingMode),
+                        selectedIndex: _kRenderingModes.values.toList().indexOf(renderingMode),
                         onValueChanged: (index) => setState(() {
-                          _renderingMode = _kRenderingModes.values.elementAt(index);
+                          renderingMode = _kRenderingModes.values.elementAt(index);
                         }),
                         items: _kRenderingModes.keys.map((mode) => CNText(mode)).toList(),
                         pickerStyle: CNPickerStyle.automatic,
@@ -616,11 +598,11 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                       Expanded(child: const Text('Gradient')),
                       CNToggle(
                         toggleStyle: CNToggleStyle.switch_,
-                        value: _colorMode == CNSymbolColorRenderingMode.gradient,
+                        value: colorMode == CNSymbolColorRenderingMode.gradient,
                         modifiers: CNViewModifiers(controlSize: CNControlSize.small),
                         onChanged: (value) {
                           setState(() {
-                            _colorMode = value ? CNSymbolColorRenderingMode.gradient : CNSymbolColorRenderingMode.flat;
+                            colorMode = value ? CNSymbolColorRenderingMode.gradient : CNSymbolColorRenderingMode.flat;
                           });
                         },
                       ),
@@ -632,20 +614,24 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                     children: [
                       Expanded(child: const Text('Color')),
                       CNPicker(
-                        selectedIndex: _kSystemColors.values.toList().indexOf(_color),
+                        selectedIndex: kSystemColors.values.toList().indexOf(color),
                         onValueChanged: (index) {
                           setState(() {
-                            _color = _kSystemColors.values.elementAt(index);
-                            _colors = [CNColors.red, _color];
+                            color = kSystemColors.values.elementAt(index);
+                            if(color != null) {
+                              colors = [CNColors.red, color!];
+                            } else {
+                              colors = [CNColors.red, CNColors.blue];
+                            }
                           });
                         },
-                        items: _kSystemColors.keys
+                        items: kSystemColors.keys
                             .map(
                               (color) => CNLabel(
                                 CNText(color),
                                 icon: CNImage(
                                   systemSymbolName: 'circle.fill',
-                                  modifiers: CNViewModifiers(tint: _kSystemColors[color]),
+                                  modifiers: CNViewModifiers(tint: kSystemColors[color]),
                                 ),
                               ),
                             )
@@ -660,8 +646,9 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                     children: [
                       Expanded(child: const Text('Font Weight')),
                       CNPicker(
-                        selectedIndex: CNFontWeight.values.indexOf(_font.weight ?? CNFontWeight.regular),
-                        onValueChanged: (index) => setState(() => _font = _font.copyWith(weight: CNFontWeight.values[index])),
+                        selectedIndex: CNFontWeight.values.indexOf(this.font.weight ?? CNFontWeight.regular),
+                        onValueChanged: (index) =>
+                            setState(() => this.font = this.font.copyWith(weight: CNFontWeight.values[index])),
                         items: CNFontWeight.values.map((weight) => CNText(weight.name)).toList(),
                         pickerStyle: CNPickerStyle.automatic,
                       ),

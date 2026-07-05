@@ -1,49 +1,107 @@
 import SwiftUI
 
 struct CNTextPayload: CNChannelSerializable {
-    let color: Int?
-    let font: [String: Any]?
-    let lineLimit: Int?
-    let lineLimitReservesSpace: Bool?
-    let height: Double?
-    let padding: [String: Any]?
-    let tag: AnyHashable?
-    let string: String
-    let textScale: String?
-    let truncationMode: String?
-    let width: Double?
-    let viewModifiers: CNViewModifiersPayload
+    var font: [String: Any]?
+    var lineLimit: Int?
+    var lineLimitReservesSpace: Bool?
+    var string: String
+    var textScale: String?
+    var truncationMode: String?
+    var viewModifiers: CNViewModifiersPayload
+
+    init() {
+        font = nil
+        lineLimit = nil
+        lineLimitReservesSpace = nil
+        string = ""
+        textScale = nil
+        truncationMode = nil
+        viewModifiers = CNViewModifiersPayload()
+    }
 
     init?(channel: [String: Any]) {
-        guard let string = channel["text"] as? String else {
+        guard channel["text"] != nil else {
             return nil
         }
 
-        let modifiers = CNViewModifiersPayload(channel: channel)
-        self.string = string
-        color = (channel["color"] as? NSNumber)?.intValue ?? channel["color"] as? Int
-        font = channel["font"] as? [String: Any]
-        padding = modifiers.padding
-        tag = modifiers.tag
-        lineLimit = (channel["lineLimit"] as? NSNumber)?.intValue ?? channel["lineLimit"] as? Int
-        lineLimitReservesSpace = (channel["lineLimitReservesSpace"] as? NSNumber)?.boolValue ?? channel["lineLimitReservesSpace"] as? Bool
-        height = modifiers.height
-        textScale = channel["textScale"] as? String
-        truncationMode = channel["truncationMode"] as? String
-        width = modifiers.width
-        viewModifiers = modifiers
+        self.init()
+        applyPatch(channel)
+    }
+
+    mutating func applyPatch(_ channel: [String: Any]) {
+        viewModifiers.applyPatch(channel)
+
+        if channel.keys.contains("text") {
+            string = Self.decodeString(channel["text"]) ?? ""
+        }
+
+        if channel.keys.contains("font") {
+            if channel["font"] is NSNull {
+                font = nil
+            } else {
+                font = channel["font"] as? [String: Any]
+            }
+        }
+
+        if channel.keys.contains("lineLimit") {
+            lineLimit = Self.decodeInt(channel["lineLimit"])
+        }
+
+        if channel.keys.contains("lineLimitReservesSpace") {
+            lineLimitReservesSpace = Self.decodeBool(channel["lineLimitReservesSpace"])
+        }
+
+        if channel.keys.contains("textScale") {
+            textScale = Self.decodeString(channel["textScale"])
+        }
+
+        if channel.keys.contains("truncationMode") {
+            truncationMode = Self.decodeString(channel["truncationMode"])
+        }
     }
 
     func toChannel() -> [String: Any] {
         var result = viewModifiers.toChannel()
         result["text"] = string
-        result["color"] = color
         result["font"] = font
         result["lineLimit"] = lineLimit
         result["lineLimitReservesSpace"] = lineLimitReservesSpace
         result["textScale"] = textScale
         result["truncationMode"] = truncationMode
         return result
+    }
+
+    private static func decodeBool(_ value: Any?) -> Bool? {
+        if value is NSNull { return nil }
+        return (value as? NSNumber)?.boolValue ?? value as? Bool
+    }
+
+    private static func decodeInt(_ value: Any?) -> Int? {
+        if value is NSNull { return nil }
+        return (value as? NSNumber)?.intValue ?? value as? Int
+    }
+
+    private static func decodeString(_ value: Any?) -> String? {
+        if value is NSNull { return nil }
+        return value as? String
+    }
+}
+
+final class CNTextViewModel: ObservableObject {
+    @Published private(set) var payload: CNTextPayload
+
+    init(payload: CNTextPayload) {
+        self.payload = payload
+    }
+
+    func replace(with payload: CNTextPayload) {
+        self.payload = payload
+    }
+
+    func applyPatch(_ patch: [String: Any]) {
+        var next = payload
+        next.applyPatch(patch)
+        payload = next
     }
 }
 
@@ -79,6 +137,10 @@ enum CNText {
         return view(from: payload, onSizeChanged: onSizeChanged)
     }
 
+    static func deserialize(model: CNTextViewModel, onSizeChanged: ((CGSize) -> Void)? = nil) -> AnyView {
+        AnyView(_CNBoundTextView(model: model, onSizeChanged: onSizeChanged))
+    }
+
     private static func view(from payload: CNTextPayload, onSizeChanged: ((CGSize) -> Void)? = nil) -> AnyView {
         var view = AnyView(Text(payload.string))
 
@@ -88,31 +150,16 @@ enum CNText {
             view = AnyView(view.font(symbolFont))
         }
 
-        if let color = payload.color {
-            view = AnyView(view.foregroundColor(ColorUtils.swiftUIColorFromARGB(color)))
-        }
-
         if let lineLimit = payload.lineLimit {
             view = AnyView(view.lineLimit(lineLimit, reservesSpace: payload.lineLimitReservesSpace ?? false))
         }
-
-        view = CNViewPadding.apply(payload.padding, to: view)
 
         if #available(macOS 14.0, *) {
             view = applyTextScale(to: view, payload: payload)
         }
 
         view = applyTruncationMode(to: view, payload: payload)
-
-        view = CNViewTag.apply(payload.tag, to: view)
-
-        if let width = payload.width, let height = payload.height {
-            view = AnyView(view.frame(width: CGFloat(width), height: CGFloat(height)))
-        } else if let width = payload.width {
-            view = AnyView(view.frame(width: CGFloat(width)))
-        } else if let height = payload.height {
-            view = AnyView(view.frame(height: CGFloat(height)))
-        }
+        view = CNViewModifiers.apply(payload.viewModifiers, to: view)
 
         if let onSizeChanged {
             view = AnyView(
@@ -127,6 +174,46 @@ enum CNText {
         let identifier = identityKey(for: payload)
         let identifiedView = view.id(identifier)
         return AnyView(identifiedView)
+    }
+
+    private struct _CNBoundTextView: View {
+        @ObservedObject var model: CNTextViewModel
+        let onSizeChanged: ((CGSize) -> Void)?
+
+        var body: some View {
+            let payload = model.payload
+
+            var view = AnyView(Text(payload.string))
+
+            if let fontDict = payload.font,
+               let symbolFont = FontUtils.swiftUIFontFromDictionary(fontDict)
+            {
+                view = AnyView(view.font(symbolFont))
+            }
+
+            if let lineLimit = payload.lineLimit {
+                view = AnyView(view.lineLimit(lineLimit, reservesSpace: payload.lineLimitReservesSpace ?? false))
+            }
+
+            if #available(macOS 14.0, *) {
+                view = applyTextScale(to: view, payload: payload)
+            }
+
+            view = applyTruncationMode(to: view, payload: payload)
+            view = CNViewModifiers.apply(payload.viewModifiers, to: view)
+
+            if let onSizeChanged {
+                view = AnyView(
+                    view.onGeometryChange(for: CGSize.self) { proxy in
+                        proxy.size
+                    } action: { newSize in
+                        onSizeChanged(newSize)
+                    },
+                )
+            }
+
+            return view
+        }
     }
 
     @available(macOS 14.0, *)
@@ -161,12 +248,6 @@ enum CNText {
             "nil"
         }
 
-        let colorKey = if let color = payload.color {
-            "\(color)"
-        } else {
-            "nil"
-        }
-
         let lineLimitKey = if let lineLimit = payload.lineLimit {
             "\(lineLimit)"
         } else {
@@ -181,41 +262,16 @@ enum CNText {
 
         let textScaleKey = payload.textScale ?? "nil"
         let truncationModeKey = payload.truncationMode ?? "nil"
-        let paddingKey = if let padding = payload.padding {
-            String(describing: padding)
-        } else {
-            "nil"
-        }
-        let tagKey = if let tag = payload.tag {
-            "\(tag)"
-        } else {
-            "nil"
-        }
-
-        let widthKey = if let width = payload.width {
-            "\(width)"
-        } else {
-            "nil"
-        }
-
-        let heightKey = if let height = payload.height {
-            "\(height)"
-        } else {
-            "nil"
-        }
+        let modifiersKey = payload.viewModifiers.identityKey()
 
         var components: [String] = []
         components.append(payload.string)
-        components.append(colorKey)
         components.append(fontKey)
         components.append(lineLimitKey)
         components.append(reservesSpaceKey)
         components.append(textScaleKey)
         components.append(truncationModeKey)
-        components.append(paddingKey)
-        components.append(tagKey)
-        components.append(widthKey)
-        components.append(heightKey)
+        components.append(modifiersKey)
 
         return components.joined(separator: "|")
     }

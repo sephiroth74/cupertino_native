@@ -29,19 +29,19 @@ class CNDivider with CNMenuChild {
   final CNViewModifiers _modifiers = const CNViewModifiers();
 
   @override
-  CNViewModifiers get modifiers => _modifiers;
-
-  @override
   bool get enabled => _modifiers.enabled ?? true;
 
   @override
-  EdgeInsets? get padding => _modifiers.padding;
-
-  @override
-  Object? get tag => _modifiers.tag;
-
-  @override
   String get menuChildType => 'divider';
+
+  @override
+  CNViewModifiers get modifiers => _modifiers;
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
+  EdgeInsets? get padding => _modifiers.padding;
 
   @override
   List<Object?> get props => [];
@@ -50,20 +50,20 @@ class CNDivider with CNMenuChild {
   bool get stringify => false;
 
   @override
+  Object? get tag => _modifiers.tag;
+
+  @override
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
     return {};
   }
 
   @override
-  void writeModifiers(Map<String, dynamic> payload, BuildContext context) {}
-
-  @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'CNDivider()';
   }
-  
+
   @override
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  void writeModifiers(Map<String, dynamic> payload, BuildContext context) {}
 }
 
 /// A native SwiftUI Menu wrapper.

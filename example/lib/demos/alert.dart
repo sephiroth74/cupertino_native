@@ -62,18 +62,18 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            CNButton(onPressed: _showInfoAlert, children: const [CNText('Show Informational Alert')]),
+            CNButton(onPressed: _showInfoAlert, children: [CNText('Show Informational Alert')]),
             const SizedBox(height: 12),
             CNButton(
               onPressed: _showConfirmAlert,
               style: CNButtonStyle.borderedProminent,
-              children: const [CNText('Show Confirm Alert')],
+              children: [CNText('Show Confirm Alert')],
             ),
             const SizedBox(height: 12),
             CNButton(
               onPressed: _showCriticalAlert,
               style: CNButtonStyle.borderedProminent,
-              children: const [CNText('Show Critical Alert')],
+              children: [CNText('Show Critical Alert')],
             ),
             const SizedBox(height: 16),
             Text('Last selected button index: ${_lastSelectedIndex ?? '-'}'),

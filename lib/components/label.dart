@@ -202,7 +202,7 @@ class _CNLabelState extends State<CNLabel> {
 
   Widget _buildFallbackText(CNText textWidget) {
     final theme = CNTheme.of(context);
-    final resolvedColor = textWidget.color ?? theme.textTheme.labelColor ?? theme.labelColor;
+    final resolvedColor = textWidget.modifiers.foregroundColor ?? theme.textTheme.labelColor ?? theme.labelColor;
     final resolvedFont = textWidget.font ?? theme.textTheme.font ?? cnFontFromTextStyle(theme.typography.body);
 
     return Text(

@@ -17,31 +17,26 @@ class LabelDemoPage extends StatelessWidget {
             const SizedBox(height: 12),
             const Text('Single text + icon'),
             const SizedBox(height: 12),
-            const CNLabel(
-              CNText('First'),
-              icon: CNImage(systemSymbolName: 'bolt.fill'),
-            ),
+            const CNLabel(CNText('First'), icon: CNImage(systemSymbolName: 'bolt.fill')),
             const SizedBox(height: 12),
-            const CNLabel(
-              CNText('Second'),
-              icon: CNImage(systemSymbolName: 'bolt.fill'),
-            ),
+            const CNLabel(CNText('Second'), icon: CNImage(systemSymbolName: 'bolt.fill')),
             const SizedBox(height: 12),
             const Text('Two inner Text + optional Image'),
             const SizedBox(height: 12),
-            Container(
-              child: CNLabel(
-                const CNText(
-                  'Alessandro',
-                  font: CNFont.system(CNFontSize.preset(CNFontSizePreset.system), weight: CNFontWeight.regular),
-                  color: CupertinoColors.label,
-                ),
-                secondaryText: const CNText(
-                  'Crugnola',
-                  font: CNFont.system(CNFontSize.preset(CNFontSizePreset.smallSystem), weight: CNFontWeight.regular),
-                  color: CupertinoColors.secondaryLabel,
-                ),
-                icon: const CNImage(systemSymbolName: 'microphone.fill', modifiers: CNViewModifiers(tint: CupertinoColors.systemBrown)),
+            CNLabel(
+              const CNText(
+                'Alessandro',
+                font: CNFont.system(CNFontSize.preset(CNFontSizePreset.system), weight: CNFontWeight.regular),
+                modifiers: CNViewModifiers(foregroundColor: CupertinoColors.label),
+              ),
+              secondaryText: const CNText(
+                'Crugnola',
+                font: CNFont.system(CNFontSize.preset(CNFontSizePreset.smallSystem), weight: CNFontWeight.regular),
+                modifiers: CNViewModifiers(foregroundColor: CupertinoColors.secondaryLabel),
+              ),
+              icon: const CNImage(
+                systemSymbolName: 'microphone.fill',
+                modifiers: CNViewModifiers(tint: CupertinoColors.systemBrown),
               ),
             ),
           ],

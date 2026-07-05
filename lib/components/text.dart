@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/components/button_child.dart';
 import 'package:cupertino_native/components/menu_badge_support.dart';
 import 'package:cupertino_native/components/menu_child.dart';
@@ -25,24 +24,17 @@ class CNText extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModif
   const CNText(
     this.text, {
     super.key,
-    this.color,
-    this.badge,
-    this.padding,
-    this.tag,
     this.font,
     this.lineLimit,
     this.lineLimitReservesSpace,
     this.textScale,
     this.truncationMode,
-    this.width,
-  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.'),
-       assert(tag == null || tag is int || tag is String, 'Tag must be an int or String.');
+    this.badge,
+    this.modifiers = const CNViewModifiers(),
+  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
 
   /// Optional badge shown next to the menu item when used inside [CNMenu].
   final Object? badge;
-
-  /// Optional foreground color.
-  final Color? color;
 
   /// Optional font descriptor.
   final CNFont? font;
@@ -62,16 +54,8 @@ class CNText extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModif
   /// Optional SwiftUI truncation mode.
   final CNTextTruncationMode? truncationMode;
 
-  /// Optional fixed width frame.
-  final double? width;
-
-  /// Optional padding applied around the text.
   @override
-  final EdgeInsets? padding;
-
-  /// Optional SwiftUI tag value.
-  @override
-  final CNTagValue? tag;
+  final CNViewModifiers modifiers;
 
   @override
   String get buttonChildType => 'text';
@@ -84,12 +68,8 @@ class CNText extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModif
   String get menuChildType => 'text';
 
   @override
-  CNViewModifiers get modifiers => CNViewModifiers(tag: tag, padding: padding);
-
-  @override
   List<Object?> get props => [
     text,
-    color,
     badge,
     padding,
     tag,
@@ -98,7 +78,7 @@ class CNText extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModif
     lineLimitReservesSpace,
     textScale,
     truncationMode,
-    width,
+    modifiers,
   ];
 
   @override
@@ -112,38 +92,31 @@ class CNText extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModif
   // ignore: public_member_api_docs
   Map<String, dynamic> toMap(BuildContext context, {double? frameWidth, double? frameHeight, bool ignoreTheme = false}) {
     final theme = CNTheme.of(context);
-    final resolvedColor = color ?? (ignoreTheme ? null : theme.textTheme.labelColor ?? theme.labelColor);
+    // final resolvedColor = modifiers.foregroundColor ?? (ignoreTheme ? null : theme.textTheme.labelColor ?? theme.labelColor);
     final resolvedFont = font ?? (ignoreTheme ? null : theme.textTheme.font ?? cnFontFromTextStyle(theme.typography.body));
 
     final payload = <String, dynamic>{
       'text': text,
-      'color': resolveColorToArgb(resolvedColor, context),
       'font': resolvedFont?.toMap(),
       if (badge != null) 'badge': serializeMenuBadge(badge),
       'lineLimit': lineLimit,
       'lineLimitReservesSpace': lineLimitReservesSpace,
       'textScale': textScale?.name,
       'truncationMode': truncationMode?.name,
-      'width': frameWidth ?? width,
       'height': frameHeight,
     };
 
-    writePadding(payload);
-    writeTag(payload);
+    writeModifiers(payload, context);
     return payload;
   }
-
-  String _toJson(BuildContext context, {double? frameWidth, double? frameHeight}) =>
-      jsonEncode(toMap(context, frameWidth: frameWidth, frameHeight: frameHeight));
 }
 
 class _CNTextState extends State<CNText> {
   MethodChannel? _channel;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
+  Map<String, dynamic>? _lastPayload;
   String? _lastSerializedPayload;
-  double? _layoutHeight;
-  double? _layoutWidth;
 
   @override
   void didChangeDependencies() {
@@ -164,10 +137,13 @@ class _CNTextState extends State<CNText> {
   }
 
   void _cacheCurrentProps() {
-    _lastSerializedPayload = _serializeCurrentPayload();
+    final payload = widget.toMap(context, frameWidth: widget.modifiers.width, frameHeight: widget.modifiers.height);
+    _lastSerializedPayload = jsonEncode(payload);
+    _lastPayload = Map<String, dynamic>.from(payload);
   }
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
+    debugPrint('[CNText] Intrinsic size changed: width=$width, height=$height');
     if (!mounted || width == null || height == null) return;
     setState(() {
       _intrinsicWidth = width > 0 ? width : null;
@@ -192,6 +168,7 @@ class _CNTextState extends State<CNText> {
   }
 
   Future<void> _requestIntrinsicSize() async {
+    debugPrint('[CNText] Requesting intrinsic size...');
     final channel = _channel;
     if (channel == null) return;
 
@@ -201,26 +178,57 @@ class _CNTextState extends State<CNText> {
     } catch (_) {}
   }
 
-  String _serializeCurrentPayload() => widget._toJson(context, frameWidth: _layoutWidth, frameHeight: _layoutHeight);
+  Map<String, dynamic> _computePayloadPatch(Map<String, dynamic> previous, Map<String, dynamic> next) {
+    final patch = <String, dynamic>{};
+    final keys = <String>{...previous.keys, ...next.keys};
+
+    for (final key in keys) {
+      final hadPrevious = previous.containsKey(key);
+      final hasNext = next.containsKey(key);
+      final oldValue = hadPrevious ? previous[key] : null;
+      final newValue = hasNext ? next[key] : null;
+
+      final changed = jsonEncode(oldValue) != jsonEncode(newValue);
+      if (!changed) continue;
+
+      patch[key] = hasNext ? newValue : null;
+    }
+
+    return patch;
+  }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
 
-    final payload = widget.toMap(context, frameWidth: _layoutWidth, frameHeight: _layoutHeight);
+    final payload = widget.toMap(context, frameWidth: widget.modifiers.width, frameHeight: widget.modifiers.height);
     final serializedPayload = jsonEncode(payload);
 
-    if (_lastSerializedPayload != serializedPayload) {
-      await channel.invokeMethod('setText', payload);
-      _cacheCurrentProps();
-      _requestIntrinsicSize();
+    if (_lastPayload == null) {
+      if (_lastSerializedPayload != serializedPayload) {
+        await channel.invokeMethod('setText', payload);
+      }
+
+      _lastSerializedPayload = serializedPayload;
+      _lastPayload = Map<String, dynamic>.from(payload);
+      return;
     }
+
+    final patch = _computePayloadPatch(_lastPayload!, payload);
+    if (patch.isEmpty) {
+      _lastSerializedPayload = serializedPayload;
+      return;
+    }
+
+    await channel.invokeMethod('applyPatch', patch);
+    _lastSerializedPayload = serializedPayload;
+    _lastPayload = Map<String, dynamic>.from(payload);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = CNTheme.of(context);
-    final resolvedColor = widget.color ?? theme.textTheme.labelColor ?? theme.labelColor;
+    final resolvedColor = widget.modifiers.foregroundColor ?? theme.textTheme.labelColor ?? theme.labelColor;
     final resolvedFont = widget.font ?? theme.textTheme.font ?? cnFontFromTextStyle(theme.typography.body);
     final textStyle = theme.typography.body.copyWith(
       color: resolvedColor,
@@ -232,14 +240,10 @@ class _CNTextState extends State<CNText> {
       builder: (context, constraints) {
         final hasBoundedWidth = constraints.hasBoundedWidth;
         final hasBoundedHeight = constraints.hasBoundedHeight;
-        final resolvedWidth = widget.width ?? (hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth ?? _kDefaultTextWidth);
-        final resolvedHeight = hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? _kDefaultTextHeight;
-
-        if (_layoutWidth != resolvedWidth || _layoutHeight != resolvedHeight) {
-          _layoutWidth = resolvedWidth;
-          _layoutHeight = resolvedHeight;
-          _syncPropsToNativeIfNeeded();
-        }
+        final resolvedWidth =
+            widget.modifiers.width ?? (hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth ?? _kDefaultTextWidth);
+        final resolvedHeight =
+            widget.modifiers.height ?? (hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? _kDefaultTextHeight);
 
         if (defaultTargetPlatform != TargetPlatform.macOS) {
           Widget fallbackText = Text(

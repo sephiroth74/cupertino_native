@@ -14,6 +14,22 @@ enum CNViewModifiers {
         modifiedView = CNViewEnabled.apply(modifiers.enabled, to: modifiedView)
         modifiedView = CNViewTint.apply(modifiers.tint, to: modifiedView)
         modifiedView = CNViewForegroundColor.apply(modifiers.foregroundColor, to: modifiedView)
+        modifiedView = CNViewFrame.apply(width: modifiers.width, height: modifiers.height, to: modifiedView)
+        return modifiedView
+    }
+}
+
+enum CNViewFrame {
+    static func apply(width: Double?, height: Double?, to view: AnyView) -> AnyView {
+        var modifiedView = view
+
+        if let width, let height {
+            modifiedView = AnyView(modifiedView.frame(width: CGFloat(width), height: CGFloat(height)))
+        } else if let width {
+            modifiedView = AnyView(modifiedView.frame(width: CGFloat(width)))
+        } else if let height {
+            modifiedView = AnyView(modifiedView.frame(height: CGFloat(height)))
+        }
 
         return modifiedView
     }

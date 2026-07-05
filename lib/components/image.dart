@@ -110,6 +110,7 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
 
 class _CNImageState extends State<CNImage> {
   MethodChannel? _channel;
+  Map<String, dynamic>? _lastPayload;
   String? _lastSerializedPayload;
 
   @override
@@ -131,7 +132,28 @@ class _CNImageState extends State<CNImage> {
   }
 
   void _cacheCurrentProps() {
-    _lastSerializedPayload = _serializeCurrentPayload();
+    final payload = widget.toMap(context);
+    _lastSerializedPayload = jsonEncode(payload);
+    _lastPayload = Map<String, dynamic>.from(payload);
+  }
+
+  Map<String, dynamic> _computePayloadPatch(Map<String, dynamic> previous, Map<String, dynamic> next) {
+    final patch = <String, dynamic>{};
+    final keys = <String>{...previous.keys, ...next.keys};
+
+    for (final key in keys) {
+      final hadPrevious = previous.containsKey(key);
+      final hasNext = next.containsKey(key);
+      final oldValue = hadPrevious ? previous[key] : null;
+      final newValue = hasNext ? next[key] : null;
+
+      final changed = jsonEncode(oldValue) != jsonEncode(newValue);
+      if (!changed) continue;
+
+      patch[key] = hasNext ? newValue : null;
+    }
+
+    return patch;
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
@@ -143,8 +165,6 @@ class _CNImageState extends State<CNImage> {
     _cacheCurrentProps();
   }
 
-  String _serializeCurrentPayload() => jsonEncode(widget.toMap(context));
-
   Future<void> _syncPropsToNativeIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
@@ -152,10 +172,25 @@ class _CNImageState extends State<CNImage> {
     final payload = widget.toMap(context);
     final serializedPayload = jsonEncode(payload);
 
-    if (_lastSerializedPayload != serializedPayload) {
-      await channel.invokeMethod('setImage', payload);
-      _cacheCurrentProps();
+    if (_lastPayload == null) {
+      if (_lastSerializedPayload != serializedPayload) {
+        await channel.invokeMethod('setImage', payload);
+      }
+
+      _lastSerializedPayload = serializedPayload;
+      _lastPayload = Map<String, dynamic>.from(payload);
+      return;
     }
+
+    final patch = _computePayloadPatch(_lastPayload!, payload);
+    if (patch.isEmpty) {
+      _lastSerializedPayload = serializedPayload;
+      return;
+    }
+
+    await channel.invokeMethod('applyPatch', patch);
+    _lastSerializedPayload = serializedPayload;
+    _lastPayload = Map<String, dynamic>.from(payload);
   }
 
   @override

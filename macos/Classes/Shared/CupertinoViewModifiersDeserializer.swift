@@ -1,5 +1,4 @@
 import Foundation
-import SwiftUI
 
 struct CNViewModifiersPayload {
     var tag: AnyHashable?
@@ -19,43 +18,49 @@ struct CNViewModifiersPayload {
     }
 
     mutating func applyPatch(_ channel: [String: Any]) {
-        tag = CNViewTag.parse(from: channel) ?? tag
-
-        if let paddingValue = channel["padding"] as? [String: Any] {
-            padding = paddingValue
+        if channel.keys.contains("tag") {
+            tag = CNViewTag.parse(from: channel)
         }
 
-        if let controlSizeValue = channel["controlSize"] as? String {
-            controlSize = controlSizeValue
+        if channel.keys.contains("padding") {
+            if channel["padding"] is NSNull {
+                padding = nil
+            } else {
+                padding = channel["padding"] as? [String: Any]
+            }
         }
 
-        if let enabledValue = (channel["enabled"] as? NSNumber)?.boolValue ?? channel["enabled"] as? Bool {
-            enabled = enabledValue
+        if channel.keys.contains("controlSize") {
+            controlSize = Self.decodeString(channel["controlSize"])
         }
 
-        if let widthValue = (channel["width"] as? NSNumber)?.doubleValue ?? channel["width"] as? Double {
-            width = widthValue
+        if channel.keys.contains("enabled") {
+            enabled = Self.decodeBool(channel["enabled"])
         }
 
-        if let heightValue = (channel["height"] as? NSNumber)?.doubleValue ?? channel["height"] as? Double {
-            height = heightValue
+        if channel.keys.contains("width") {
+            width = Self.decodeDouble(channel["width"])
         }
 
-        if let tintValue = (channel["tint"] as? NSNumber)?.intValue ?? channel["tint"] as? Int {
-            tint = tintValue
+        if channel.keys.contains("height") {
+            height = Self.decodeDouble(channel["height"])
         }
 
-        if let foregroundValue = (channel["foregroundColor"] as? NSNumber)?.intValue ?? channel["foregroundColor"] as? Int {
-            foregroundColor = foregroundValue
+        if channel.keys.contains("tint") {
+            tint = Self.decodeInt(channel["tint"])
+        }
+
+        if channel.keys.contains("foregroundColor") {
+            foregroundColor = Self.decodeInt(channel["foregroundColor"])
         }
 
         if let style = channel["style"] as? [String: Any] {
-            if let styleTint = (style["tint"] as? NSNumber)?.intValue ?? style["tint"] as? Int {
-                tint = styleTint
+            if style.keys.contains("tint") {
+                tint = Self.decodeInt(style["tint"])
             }
 
-            if let styleForeground = (style["foregroundColor"] as? NSNumber)?.intValue ?? style["foregroundColor"] as? Int {
-                foregroundColor = styleForeground
+            if style.keys.contains("foregroundColor") {
+                foregroundColor = Self.decodeInt(style["foregroundColor"])
             }
         }
     }
@@ -87,18 +92,66 @@ struct CNViewModifiersPayload {
             result["height"] = height
         }
 
-        var style: [String: Any] = [:]
         if let tint {
-            style["tint"] = tint
-        }
-        if let foregroundColor {
-            style["foregroundColor"] = foregroundColor
+            result["tint"] = tint
         }
 
-        if !style.isEmpty {
-            result["style"] = style
+        if let foregroundColor {
+            result["foregroundColor"] = foregroundColor
         }
 
         return result
+    }
+
+    func identityKey() -> String {
+        let tagKey = if let tag {
+            "\(tag.base)"
+        } else {
+            "nil"
+        }
+
+        let paddingKey = if let padding {
+            "\(padding)"
+        } else {
+            "nil"
+        }
+
+        let controlSizeKey = controlSize ?? "nil"
+        let enabledKey = enabled.map { "\($0)" } ?? "nil"
+        let widthKey = width.map { "\($0)" } ?? "nil"
+        let heightKey = height.map { "\($0)" } ?? "nil"
+        let tintKey = tint.map { "\($0)" } ?? "nil"
+        let foregroundColorKey = foregroundColor.map { "\($0)" } ?? "nil"
+
+        return [
+            tagKey,
+            paddingKey,
+            controlSizeKey,
+            enabledKey,
+            widthKey,
+            heightKey,
+            tintKey,
+            foregroundColorKey,
+        ].joined(separator: "|")
+    }
+
+    private static func decodeBool(_ value: Any?) -> Bool? {
+        if value is NSNull { return nil }
+        return (value as? NSNumber)?.boolValue ?? value as? Bool
+    }
+
+    private static func decodeInt(_ value: Any?) -> Int? {
+        if value is NSNull { return nil }
+        return (value as? NSNumber)?.intValue ?? value as? Int
+    }
+
+    private static func decodeDouble(_ value: Any?) -> Double? {
+        if value is NSNull { return nil }
+        return (value as? NSNumber)?.doubleValue ?? value as? Double
+    }
+
+    private static func decodeString(_ value: Any?) -> String? {
+        if value is NSNull { return nil }
+        return value as? String
     }
 }

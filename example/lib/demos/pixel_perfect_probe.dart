@@ -75,7 +75,7 @@ class PixelPerfectProbe extends StatefulWidget {
   const PixelPerfectProbe({
     super.key,
     required this.child,
-    required this.onGeometryChanged,
+    this.onGeometryChanged,
     this.enabled = true,
     this.enforcePixelPerfectPosition = false,
   });
@@ -90,7 +90,7 @@ class PixelPerfectProbe extends StatefulWidget {
   final bool enforcePixelPerfectPosition;
 
   /// Called whenever geometry changes.
-  final ValueChanged<FlutterPixelGeometry> onGeometryChanged;
+  final ValueChanged<FlutterPixelGeometry>? onGeometryChanged;
 
   @override
   State<PixelPerfectProbe> createState() => _PixelPerfectProbeState();
@@ -170,6 +170,8 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
       return;
     }
 
+    if (widget.onGeometryChanged == null) return;
+
     final snappedX = origin.dx + _snapDx;
     final snappedY = origin.dy + _snapDy;
     final physicalX = snappedX * dpr;
@@ -198,7 +200,7 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
     if (signature == _lastSignature) return;
 
     _lastSignature = signature;
-    widget.onGeometryChanged(geometry);
+    widget.onGeometryChanged?.call(geometry);
   }
 
   void _queueProbe() {

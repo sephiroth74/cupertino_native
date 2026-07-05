@@ -30,6 +30,20 @@ const double _kDefaultToggleWidth = 200.0;
 /// )
 /// ```
 class CNToggle extends StatefulWidget with CNViewModifiable {
+  /// Creates a [CNToggle].
+  const CNToggle({
+    super.key,
+    required this.value,
+    this.onChanged,
+    this.controller,
+    this.children = const [],
+    this.label,
+    this.systemSymbolName,
+    this.toggleStyle = CNToggleStyle.switch_,
+    this.shrinkWrap = false,
+    this.modifiers,
+  });
+
   /// Label content children rendered in the native `Toggle` label closure.
   ///
   /// When empty, [label] and [systemSymbolName] are used as a legacy fallback.
@@ -59,28 +73,14 @@ class CNToggle extends StatefulWidget with CNViewModifiable {
   @override
   final CNViewModifiers? modifiers;
 
-  /// Creates a [CNToggle].
-  const CNToggle({
-    super.key,
-    required this.value,
-    this.onChanged,
-    this.controller,
-    this.children = const [],
-    this.label,
-    this.systemSymbolName,
-    this.toggleStyle = CNToggleStyle.switch_,
-    this.shrinkWrap = false,
-    this.modifiers,
-  });
+  @override
+  State<CNToggle> createState() => _CNToggleState();
 
   @override
   EdgeInsets? get padding => modifiers?.padding;
 
   @override
   Object? get tag => modifiers?.tag;
-
-  @override
-  State<CNToggle> createState() => _CNToggleState();
 }
 
 /// Controller for a [CNToggle] that allows imperative updates from Dart
@@ -132,64 +132,9 @@ class _CNToggleState extends State<CNToggle> {
   late CNToggleController _controller;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
+  Map<String, dynamic>? _lastPayload;
   String? _lastSerializedPayload;
   bool? _pendingNativeValue;
-  double? _layoutHeight;
-  double? _layoutWidth;
-
-  bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
-
-  @override
-  Widget build(BuildContext context) {
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
-      return const SizedBox.shrink();
-    }
-
-    const viewType = 'cupertino_native/toggle';
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final hasFixedWidth = constraints.hasTightWidth;
-        final hasFixedHeight = constraints.hasTightHeight;
-        final hasExplicitWidth = widget.modifiers?.width != null;
-        final hasExplicitHeight = widget.modifiers?.height != null;
-        final shouldSendWidth = hasExplicitWidth || hasFixedWidth;
-        final shouldSendHeight = hasExplicitHeight || hasFixedHeight;
-
-        final resolvedWidth =
-            widget.modifiers?.width ?? (hasFixedWidth ? constraints.maxWidth : (_intrinsicWidth ?? _kDefaultToggleWidth));
-        final resolvedHeight =
-            widget.modifiers?.height ?? (hasFixedHeight ? constraints.maxHeight : (_intrinsicHeight ?? _kDefaultToggleHeight));
-
-        final nextLayoutWidth = shouldSendWidth ? resolvedWidth : null;
-        final nextLayoutHeight = shouldSendHeight ? resolvedHeight : null;
-
-        if (_layoutWidth != nextLayoutWidth || _layoutHeight != nextLayoutHeight) {
-          _layoutWidth = nextLayoutWidth;
-          _layoutHeight = nextLayoutHeight;
-          _syncPropsToNativeIfNeeded();
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              _requestIntrinsicSize();
-            }
-          });
-        }
-
-        final creationParams = _toPayload(frameWidth: nextLayoutWidth, frameHeight: nextLayoutHeight);
-
-        return SizedBox(
-          height: resolvedHeight,
-          width: resolvedWidth,
-          child: AppKitView(
-            viewType: viewType,
-            creationParamsCodec: const StandardMessageCodec(),
-            creationParams: creationParams,
-            onPlatformViewCreated: _onPlatformViewCreated,
-          ),
-        );
-      },
-    );
-  }
 
   @override
   void didChangeDependencies() {
@@ -221,6 +166,7 @@ class _CNToggleState extends State<CNToggle> {
 
     if (shouldResetPayload) {
       _lastSerializedPayload = null;
+      _lastPayload = null;
     }
 
     if (valueChanged) {
@@ -232,6 +178,7 @@ class _CNToggleState extends State<CNToggle> {
         _cacheCurrentProps();
       } else {
         _lastSerializedPayload = null;
+        _lastPayload = null;
       }
     } else {
       _pendingNativeValue = null;
@@ -253,8 +200,31 @@ class _CNToggleState extends State<CNToggle> {
     _controller = widget.controller ?? CNToggleController();
   }
 
+  bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
+
   void _cacheCurrentProps() {
-    _lastSerializedPayload = _serializeCurrentPayload();
+    final payload = _toPayload();
+    _lastSerializedPayload = jsonEncode(payload);
+    _lastPayload = Map<String, dynamic>.from(payload);
+  }
+
+  Map<String, dynamic> _computePayloadPatch(Map<String, dynamic> previous, Map<String, dynamic> next) {
+    final patch = <String, dynamic>{};
+    final keys = <String>{...previous.keys, ...next.keys};
+
+    for (final key in keys) {
+      final hadPrevious = previous.containsKey(key);
+      final hasNext = next.containsKey(key);
+      final oldValue = hadPrevious ? previous[key] : null;
+      final newValue = hasNext ? next[key] : null;
+
+      final changed = jsonEncode(oldValue) != jsonEncode(newValue);
+      if (!changed) continue;
+
+      patch[key] = hasNext ? newValue : null;
+    }
+
+    return patch;
   }
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
@@ -338,43 +308,79 @@ class _CNToggleState extends State<CNToggle> {
         .toList();
   }
 
-  String _serializeCurrentPayload() => jsonEncode(_toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight));
-
   Future<void> _syncPropsToNativeIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
 
-    final payload = _toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight);
+    final payload = _toPayload();
     final serializedPayload = jsonEncode(payload);
 
-    if (_lastSerializedPayload != serializedPayload) {
-      await channel.invokeMethod('setToggle', payload);
-      _cacheCurrentProps();
-      _requestIntrinsicSize();
+    if (_lastPayload == null) {
+      if (_lastSerializedPayload != serializedPayload) {
+        debugPrint('CNToggle payload: $serializedPayload');
+        await channel.invokeMethod('setToggle', payload);
+      }
+
+      _lastSerializedPayload = serializedPayload;
+      _lastPayload = Map<String, dynamic>.from(payload);
+      return;
     }
+
+    final patch = _computePayloadPatch(_lastPayload!, payload);
+    if (patch.isEmpty) {
+      _lastSerializedPayload = serializedPayload;
+      return;
+    }
+
+    final serializedPatch = jsonEncode(patch);
+    debugPrint('CNToggle patch payload: $serializedPatch');
+    await channel.invokeMethod('setTogglePatch', patch);
+    _lastSerializedPayload = serializedPayload;
+    _lastPayload = Map<String, dynamic>.from(payload);
   }
 
-  Map<String, dynamic> _toPayload({double? frameWidth, double? frameHeight}) {
+  Map<String, dynamic> _toPayload() {
     final payload = <String, dynamic>{
       'value': widget.value,
       'labelChildren': _serializeChildren(_resolvedLabelChildren()),
       'toggleStyle': widget.toggleStyle.toShortString(),
       'isDark': _isDark,
     };
-
-    // if (frameWidth != null) {
-    //   payload['width'] = frameWidth;
-    // }
-
-    // if (frameHeight != null) {
-    //   payload['height'] = frameHeight;
-    // }
-
     widget.writeModifiers(payload, context);
-
-    debugPrint('CNToggle payload: ${jsonEncode(payload)}');
-
     return payload;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      return const SizedBox.shrink();
+    }
+
+    const viewType = 'cupertino_native/toggle';
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasFixedWidth = constraints.hasTightWidth;
+        final hasFixedHeight = constraints.hasTightHeight;
+        final resolvedWidth =
+            widget.modifiers?.width ?? (hasFixedWidth ? constraints.maxWidth : (_intrinsicWidth ?? _kDefaultToggleWidth));
+        final resolvedHeight =
+            widget.modifiers?.height ?? (hasFixedHeight ? constraints.maxHeight : (_intrinsicHeight ?? _kDefaultToggleHeight));
+
+        final creationParams = _toPayload();
+
+        return SizedBox(
+          height: resolvedHeight,
+          width: resolvedWidth,
+          child: AppKitView(
+            viewType: viewType,
+            creationParamsCodec: const StandardMessageCodec(),
+            creationParams: creationParams,
+            onPlatformViewCreated: _onPlatformViewCreated,
+          ),
+        );
+      },
+    );
   }
 }
 

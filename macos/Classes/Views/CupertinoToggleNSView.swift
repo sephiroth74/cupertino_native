@@ -5,6 +5,7 @@ import SwiftUI
 class CupertinoToggleNSView: NSView {
     private let channel: FlutterMethodChannel
     private let hostingView: NSHostingView<AnyView>
+    private let model: CNToggleViewModel
     private var payload: CNTogglePayload
     private var lastReportedIntrinsicSize: CGSize?
 
@@ -15,6 +16,7 @@ class CupertinoToggleNSView: NSView {
         )
 
         payload = CNToggleDeserializer.decode(args) ?? Self.defaultPayload()
+        model = CNToggleViewModel(payload: payload)
 
         super.init(frame: .zero)
 
@@ -33,7 +35,8 @@ class CupertinoToggleNSView: NSView {
             hostingView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
 
-        rebuild()
+        installRootView()
+        updateAppearance()
 
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self else {
@@ -48,11 +51,20 @@ class CupertinoToggleNSView: NSView {
             case "setToggle":
                 if let parsed: CNTogglePayload = CNChannelSerialization.decode(call.arguments) {
                     payload = parsed
-                    rebuild()
-                    notifyIntrinsicSizeChanged(force: true)
+                    model.replace(with: payload)
+                    updateAppearance()
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Invalid toggle payload", details: nil))
+                }
+            case "setTogglePatch":
+                if let patch = CNChannelSerialization.asDict(call.arguments) {
+                    payload.applyPatch(patch)
+                    model.replace(with: payload)
+                    updateAppearance()
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Invalid toggle patch payload", details: nil))
                 }
             default:
                 result(FlutterMethodNotImplemented)
@@ -74,26 +86,25 @@ class CupertinoToggleNSView: NSView {
         ])!
     }
 
-    private func rebuild() {
-        if let isDark = payload.isDark {
-            hostingView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-        } else {
-            hostingView.appearance = nil
-        }
-
+    private func installRootView() {
         hostingView.rootView = CNToggleDeserializer.deserialize(
-            payload.toChannel(),
+            model: model,
             onChanged: { [weak self] newValue in
                 self?.payload.value = newValue
                 self?.channel.invokeMethod("onChanged", arguments: ["value": newValue])
             },
-            onSizeChanged: { [weak self] _ in
+            onSizeChanged: { [weak self] newSize in
+                NSLog("CupertinoToggleNSView: onSizeChanged: \(newSize)")
                 self?.notifyIntrinsicSizeChanged()
             },
-        ) ?? AnyView(EmptyView())
+        )
+    }
 
-        DispatchQueue.main.async { [weak self] in
-            self?.notifyIntrinsicSizeChanged()
+    private func updateAppearance() {
+        if let isDark = payload.isDark {
+            hostingView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+        } else {
+            hostingView.appearance = nil
         }
     }
 

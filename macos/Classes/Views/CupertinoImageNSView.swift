@@ -5,14 +5,16 @@ import SwiftUI
 class CupertinoImageView: NSView {
     private let channel: FlutterMethodChannel
     private let hostingView: NSHostingView<AnyView>
+    private let model: CNImageViewModel
 
-    private var payload: CNImagePayload?
+    private var payload: CNImagePayload
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(name: "CupertinoNativeImage_\(viewId)", binaryMessenger: messenger)
         hostingView = NSHostingView(rootView: AnyView(EmptyView()))
 
-        payload = CNChannelSerialization.decode(args)
+        payload = CNChannelSerialization.decode(args) ?? Self.defaultPayload()
+        model = CNImageViewModel(payload: payload)
 
         super.init(frame: .zero)
 
@@ -28,17 +30,27 @@ class CupertinoImageView: NSView {
             hostingView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
 
-        rebuild()
+        installRootView()
 
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self else { result(nil); return }
             switch call.method {
             case "setImage":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
-                    payload = CNImagePayload(channel: args)
-                    rebuild()
+                    guard let decoded = CNImagePayload(channel: args) else {
+                        result(FlutterError(code: "bad_args", message: "Missing args", details: nil))
+                        return
+                    }
+                    payload = decoded
+                    model.replace(with: payload)
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing args", details: nil)) }
+            case "applyPatch":
+                if let patch = CNChannelSerialization.asDict(call.arguments) {
+                    payload.applyPatch(patch)
+                    model.replace(with: payload)
+                    result(nil)
+                } else { result(FlutterError(code: "bad_args", message: "Missing patch args", details: nil)) }
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -49,9 +61,11 @@ class CupertinoImageView: NSView {
         nil
     }
 
-    private func rebuild() {
-        hostingView.rootView = payload.flatMap {
-            CNImage.deserialize($0.toChannel())
-        } ?? AnyView(EmptyView())
+    private static func defaultPayload() -> CNImagePayload {
+        CNImagePayload(channel: ["systemSymbolName": "questionmark.circle"])!
+    }
+
+    private func installRootView() {
+        hostingView.rootView = CNImage.deserialize(model: model)
     }
 }

@@ -33,32 +33,73 @@ enum CNChannelSerialization {
 }
 
 struct CNImagePayload: CNChannelSerializable {
-    let systemSymbolName: String
-    let symbolRenderingMode: String?
-    let symbolColorRenderingMode: String?
-    let foregroundStyleColors: [Int]
-    let font: [String: Any]?
-    let viewModifiers: CNViewModifiersPayload
+    var systemSymbolName: String
+    var symbolRenderingMode: String?
+    var symbolColorRenderingMode: String?
+    var foregroundStyleColors: [Int]
+    var font: [String: Any]?
+    var viewModifiers: CNViewModifiersPayload
+
+    init() {
+        systemSymbolName = "questionmark.circle"
+        symbolRenderingMode = nil
+        symbolColorRenderingMode = nil
+        foregroundStyleColors = []
+        font = nil
+        viewModifiers = CNViewModifiersPayload()
+    }
 
     init?(channel: [String: Any]) {
-        guard let systemSymbolName = channel["systemSymbolName"] as? String, !systemSymbolName.isEmpty else {
+        guard channel["systemSymbolName"] != nil else {
             return nil
         }
 
-        let modifiers = CNViewModifiersPayload(channel: channel)
-        self.systemSymbolName = systemSymbolName
-        symbolRenderingMode = channel["symbolRenderingMode"] as? String
-        symbolColorRenderingMode = channel["symbolColorRenderingMode"] as? String
-        font = channel["font"] as? [String: Any]
-        viewModifiers = modifiers
+        self.init()
+        applyPatch(channel)
+    }
 
-        if let rawColors = channel["foregroundStyleColors"] as? [NSNumber] {
-            foregroundStyleColors = rawColors.map(\.intValue)
-        } else if let rawColors = channel["foregroundStyleColors"] as? [Int] {
-            foregroundStyleColors = rawColors
-        } else {
-            foregroundStyleColors = []
+    mutating func applyPatch(_ channel: [String: Any]) {
+        viewModifiers.applyPatch(channel)
+
+        if channel.keys.contains("systemSymbolName"),
+           let symbol = channel["systemSymbolName"] as? String,
+           !symbol.isEmpty
+        {
+            systemSymbolName = symbol
         }
+
+        if channel.keys.contains("symbolRenderingMode") {
+            symbolRenderingMode = Self.decodeString(channel["symbolRenderingMode"])
+        }
+
+        if channel.keys.contains("symbolColorRenderingMode") {
+            symbolColorRenderingMode = Self.decodeString(channel["symbolColorRenderingMode"])
+        }
+
+        if channel.keys.contains("font") {
+            if channel["font"] is NSNull {
+                font = nil
+            } else {
+                font = channel["font"] as? [String: Any]
+            }
+        }
+
+        if channel.keys.contains("foregroundStyleColors") {
+            if channel["foregroundStyleColors"] is NSNull {
+                foregroundStyleColors = []
+            } else if let rawColors = channel["foregroundStyleColors"] as? [NSNumber] {
+                foregroundStyleColors = rawColors.map(\.intValue)
+            } else if let rawColors = channel["foregroundStyleColors"] as? [Int] {
+                foregroundStyleColors = rawColors
+            } else {
+                foregroundStyleColors = []
+            }
+        }
+    }
+
+    private static func decodeString(_ value: Any?) -> String? {
+        if value is NSNull { return nil }
+        return value as? String
     }
 
     func toChannel() -> [String: Any] {
@@ -69,6 +110,24 @@ struct CNImagePayload: CNChannelSerializable {
         result["foregroundStyleColors"] = foregroundStyleColors
         result["font"] = font
         return result
+    }
+}
+
+final class CNImageViewModel: ObservableObject {
+    @Published private(set) var payload: CNImagePayload
+
+    init(payload: CNImagePayload) {
+        self.payload = payload
+    }
+
+    func replace(with payload: CNImagePayload) {
+        self.payload = payload
+    }
+
+    func applyPatch(_ patch: [String: Any]) {
+        var next = payload
+        next.applyPatch(patch)
+        payload = next
     }
 }
 
@@ -106,6 +165,10 @@ enum CNImage {
         return view(from: payload)
     }
 
+    static func deserialize(model: CNImageViewModel) -> AnyView {
+        AnyView(_CNBoundImageView(model: model))
+    }
+
     private static func view(from payload: CNImagePayload) -> AnyView {
         var view = AnyView(Image(systemName: payload.systemSymbolName))
 
@@ -125,6 +188,31 @@ enum CNImage {
 
         view = CNViewModifiers.apply(payload.viewModifiers, to: view)
         return AnyView(view.id(identityKey(for: payload)))
+    }
+
+    private struct _CNBoundImageView: View {
+        @ObservedObject var model: CNImageViewModel
+
+        var body: some View {
+            let payload = model.payload
+            var view = AnyView(Image(systemName: payload.systemSymbolName))
+
+            if let fontDict = payload.font,
+               let symbolFont = FontUtils.swiftUIFontFromDictionary(fontDict)
+            {
+                view = AnyView(view.font(symbolFont))
+            }
+
+            if #available(macOS 12.0, *) {
+                view = applyRenderingMode(to: view, payload: payload)
+            }
+
+            if #available(macOS 15.0, *) {
+                view = applyColorRenderingMode(to: view, payload: payload)
+            }
+
+            return CNViewModifiers.apply(payload.viewModifiers, to: view)
+        }
     }
 
     private static func identityKey(for payload: CNImagePayload) -> String {

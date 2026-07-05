@@ -1,3 +1,4 @@
+// ignore: public_member_api_docs
 Map<String, dynamic>? serializeMenuBadge(Object? badge) {
   if (badge == null) {
     return null;

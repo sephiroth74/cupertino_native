@@ -19,7 +19,7 @@ import 'demos/stepper.dart';
 import 'demos/date_picker.dart';
 import 'demos/search_field.dart';
 import 'demos/text_field.dart';
-import 'demos/text.dart';
+import 'demos/text_demo.dart';
 import 'demos/secure_text_field.dart';
 import 'demos/text_view.dart';
 import 'demos/combo_box.dart';
