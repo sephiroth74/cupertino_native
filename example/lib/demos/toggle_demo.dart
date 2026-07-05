@@ -1,3 +1,4 @@
+import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:cupertino_native_example/demos/pixel_perfect_probe.dart';
@@ -16,6 +17,10 @@ class _ToggleDemoState extends State<ToggleDemo> {
   FlutterPixelGeometry? _flutterGeometry;
   Color? _tintColor;
   CNToggleStyle _toggleStyle = CNToggleStyle.switch_;
+
+  void _showNotification(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), duration: const Duration(milliseconds: 800)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +117,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                         CNPicker(
                           selectedIndex: CNControlSize.values.indexOf(_controlSize),
                           onValueChanged: (index) => setState(() => _controlSize = CNControlSize.values[index]),
-                          items: CNControlSize.values.map((size) => CNPickerItem(size.name)).toList(),
+                          items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
                           pickerStyle: CNPickerStyle.automatic,
                         ),
                       ],
@@ -125,7 +130,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                         CNPicker(
                           selectedIndex: CNToggleStyle.values.indexOf(_toggleStyle),
                           onValueChanged: (index) => setState(() => _toggleStyle = CNToggleStyle.values[index]),
-                          items: CNToggleStyle.values.map((style) => CNPickerItem(style.name)).toList(),
+                          items: CNToggleStyle.values.map((style) => CNText(style.name)).toList(),
                           pickerStyle: CNPickerStyle.automatic,
                         ),
                       ],
@@ -144,8 +149,10 @@ class _ToggleDemoState extends State<ToggleDemo> {
                           onValueChanged: (index) => setState(() => _tintColor = kSystemColors.values.elementAt(index)),
                           items: kSystemColors.keys
                               .map(
-                                (colorName) =>
-                                    CNPickerItem(colorName, icon: CNSymbol("circle.fill", color: kSystemColors[colorName])),
+                                (colorName) => CNLabel(
+                                  CNText(colorName),
+                                  icon: CNImage(systemSymbolName: 'circle.fill', viewModifiers: CNViewModifiers(tint: kSystemColors[colorName])),
+                                ),
                               )
                               .toList(),
                           pickerStyle: CNPickerStyle.menu,
@@ -161,9 +168,5 @@ class _ToggleDemoState extends State<ToggleDemo> {
         ),
       ),
     );
-  }
-
-  void _showNotification(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), duration: const Duration(milliseconds: 800)));
   }
 }

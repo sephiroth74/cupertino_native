@@ -1,5 +1,20 @@
+import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
+
+/// Represents a single tab in a [CNTabView].
+class CNTab {
+  /// Creates a [CNTab] with a required [item] and [child].
+  const CNTab(this.item, {required this.child});
+
+  /// The widget displayed when this tab is selected.
+  final Widget child;
+
+  /// The picker item used as the tab label.
+  ///
+  /// Supported widgets are [CNText], [CNLabel], and [CNImage].
+  final CNButtonChild item;
+}
 
 /// Controls the selected tab index of a [CNTabView].
 class CNTabController extends ChangeNotifier {
@@ -16,18 +31,6 @@ class CNTabController extends ChangeNotifier {
     _selectedIndex = value;
     notifyListeners();
   }
-}
-
-/// Represents a single tab in a [CNTabView].
-class CNTab {
-  /// Creates a [CNTab] with a required [item] and [child].
-  const CNTab(this.item, {required this.child});
-
-  /// The widget displayed when this tab is selected.
-  final Widget child;
-
-  /// The picker item used as the tab label (text or icon).
-  final CNPickerItem item;
 }
 
 /// A macOS-native-style tab view using [CNPicker] as a segmented control header.
@@ -89,10 +92,6 @@ class _CNTabViewState extends State<CNTabView> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _measurePicker());
   }
 
-  void _onTabChanged() {
-    setState(() {});
-  }
-
   void _measurePicker() {
     final box = _pickerKey.currentContext?.findRenderObject() as RenderBox?;
     if (box != null && mounted) {
@@ -105,6 +104,10 @@ class _CNTabViewState extends State<CNTabView> {
         });
       }
     }
+  }
+
+  void _onTabChanged() {
+    setState(() {});
   }
 
   @override
@@ -182,9 +185,8 @@ class _CNTabViewState extends State<CNTabView> {
                   items: pickerItems,
                   selectedIndex: _controller.selectedIndex,
                   pickerStyle: CNPickerStyle.segmented,
-                  controlSize: widget.controlSize,
+                  viewModifiers: CNViewModifiers(controlSize: widget.controlSize, enabled: widget.enabled),
                   shrinkWrap: true,
-                  enabled: widget.enabled,
                   onValueChanged: (index) {
                     _controller.selectedIndex = index;
                     _measurePicker();

@@ -6,37 +6,43 @@ struct CNTextPayload: CNChannelSerializable {
     let lineLimit: Int?
     let lineLimitReservesSpace: Bool?
     let height: Double?
+    let padding: [String: Any]?
+    let tag: AnyHashable?
     let string: String
     let textScale: String?
     let truncationMode: String?
     let width: Double?
+    let viewModifiers: CNViewModifiersPayload
 
     init?(channel: [String: Any]) {
         guard let string = channel["text"] as? String else {
             return nil
         }
 
+        let modifiers = CNViewModifiersPayload(channel: channel)
         self.string = string
         color = (channel["color"] as? NSNumber)?.intValue ?? channel["color"] as? Int
         font = channel["font"] as? [String: Any]
+        padding = modifiers.padding
+        tag = modifiers.tag
         lineLimit = (channel["lineLimit"] as? NSNumber)?.intValue ?? channel["lineLimit"] as? Int
         lineLimitReservesSpace = (channel["lineLimitReservesSpace"] as? NSNumber)?.boolValue ?? channel["lineLimitReservesSpace"] as? Bool
-        height = (channel["height"] as? NSNumber)?.doubleValue ?? channel["height"] as? Double
+        height = modifiers.height
         textScale = channel["textScale"] as? String
         truncationMode = channel["truncationMode"] as? String
-        width = (channel["width"] as? NSNumber)?.doubleValue ?? channel["width"] as? Double
+        width = modifiers.width
+        viewModifiers = modifiers
     }
 
     func toChannel() -> [String: Any] {
-        var result: [String: Any] = ["text": string]
+        var result = viewModifiers.toChannel()
+        result["text"] = string
         result["color"] = color
         result["font"] = font
         result["lineLimit"] = lineLimit
         result["lineLimitReservesSpace"] = lineLimitReservesSpace
-        result["height"] = height
         result["textScale"] = textScale
         result["truncationMode"] = truncationMode
-        result["width"] = width
         return result
     }
 }
@@ -90,11 +96,15 @@ enum CNText {
             view = AnyView(view.lineLimit(lineLimit, reservesSpace: payload.lineLimitReservesSpace ?? false))
         }
 
+        view = CNViewPadding.apply(payload.padding, to: view)
+
         if #available(macOS 14.0, *) {
             view = applyTextScale(to: view, payload: payload)
         }
 
         view = applyTruncationMode(to: view, payload: payload)
+
+        view = CNViewTag.apply(payload.tag, to: view)
 
         if let width = payload.width, let height = payload.height {
             view = AnyView(view.frame(width: CGFloat(width), height: CGFloat(height)))
@@ -171,6 +181,16 @@ enum CNText {
 
         let textScaleKey = payload.textScale ?? "nil"
         let truncationModeKey = payload.truncationMode ?? "nil"
+        let paddingKey = if let padding = payload.padding {
+            String(describing: padding)
+        } else {
+            "nil"
+        }
+        let tagKey = if let tag = payload.tag {
+            "\(tag)"
+        } else {
+            "nil"
+        }
 
         let widthKey = if let width = payload.width {
             "\(width)"
@@ -192,6 +212,8 @@ enum CNText {
         components.append(reservesSpaceKey)
         components.append(textScaleKey)
         components.append(truncationModeKey)
+        components.append(paddingKey)
+        components.append(tagKey)
         components.append(widthKey)
         components.append(heightKey)
 

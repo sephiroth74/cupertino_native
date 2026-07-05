@@ -1,5 +1,6 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter/cupertino.dart';
 
 const _kImageNames = [
   "eraser.badge.xmark",
@@ -455,6 +456,14 @@ const _kImageNames = [
   "arrowtriangle.down.2.fill",
 ];
 
+const _kRenderingModes = {
+  'automatic': null,
+  'monochrome': CNSymbolRenderingMode.monochrome,
+  'hierarchical': CNSymbolRenderingMode.hierarchical,
+  'palette': CNSymbolRenderingMode.palette,
+  'multicolor': CNSymbolRenderingMode.multicolor,
+};
+
 const _kSystemColors = {
   'red': CNColors.red,
   'orange': CNColors.orange,
@@ -474,14 +483,6 @@ const _kSystemColors = {
   'fillTertiary': CNColors.fillTertiary,
   'fillQuaternary': CNColors.fillQuaternary,
   'fillQuinary': CNColors.fillQuinary,
-};
-
-const _kRenderingModes = {
-  'automatic': null,
-  'monochrome': CNSymbolRenderingMode.monochrome,
-  'hierarchical': CNSymbolRenderingMode.hierarchical,
-  'palette': CNSymbolRenderingMode.palette,
-  'multicolor': CNSymbolRenderingMode.multicolor,
 };
 
 class ImageDemoPage extends StatefulWidget {
@@ -603,7 +604,7 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                         onValueChanged: (index) => setState(() {
                           _renderingMode = _kRenderingModes.values.elementAt(index);
                         }),
-                        items: _kRenderingModes.keys.map((mode) => CNPickerItem(mode)).toList(),
+                        items: _kRenderingModes.keys.map((mode) => CNText(mode)).toList(),
                         pickerStyle: CNPickerStyle.automatic,
                       ),
                     ],
@@ -639,7 +640,12 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                           });
                         },
                         items: _kSystemColors.keys
-                            .map((color) => CNPickerItem(color, icon: CNSymbol('circle.fill', color: _kSystemColors[color])))
+                            .map(
+                              (color) => CNLabel(
+                                CNText(color),
+                                icon: CNImage(systemSymbolName: 'circle.fill', viewModifiers: CNViewModifiers(tint: _kSystemColors[color])),
+                              ),
+                            )
                             .toList(),
                         pickerStyle: CNPickerStyle.automatic,
                       ),
@@ -653,7 +659,7 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                       CNPicker(
                         selectedIndex: CNFontWeight.values.indexOf(_font.weight ?? CNFontWeight.regular),
                         onValueChanged: (index) => setState(() => _font = _font.copyWith(weight: CNFontWeight.values[index])),
-                        items: CNFontWeight.values.map((weight) => CNPickerItem(weight.name)).toList(),
+                        items: CNFontWeight.values.map((weight) => CNText(weight.name)).toList(),
                         pickerStyle: CNPickerStyle.automatic,
                       ),
                     ],

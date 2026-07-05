@@ -4,6 +4,8 @@ import 'package:cupertino_native/channel/channel_serialization.dart';
 import 'package:cupertino_native/components/button_child.dart';
 import 'package:cupertino_native/components/menu_badge_support.dart';
 import 'package:cupertino_native/components/menu_child.dart';
+import 'package:cupertino_native/components/view_modifiable.dart';
+import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/model/control_size.dart';
 import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/cupertino.dart';
@@ -16,26 +18,11 @@ import '../style/button_style.dart';
 const double _kDefaultHeight = 64.0;
 const double _kDefaultWidth = 80.0;
 
-/// Semantic role for button actions.
-enum CNButtonRole {
-  /// Default role.
-  none,
-
-  /// Cancel role.
-  cancel,
-
-  /// Destructive role.
-  destructive,
-
-  /// Close role.
-  close,
-}
-
 /// A Cupertino-native push button.
 ///
 /// Embeds a native SwiftUI Button for authentic visuals and behavior on
 /// macOS. Falls back to [CupertinoButton] on other platforms.
-class CNButton extends StatefulWidget with CNMenuChild {
+class CNButton extends StatefulWidget with CNViewModifiable, CNMenuChild {
   /// Creates a native SwiftUI button.
   ///
   /// Supported child types are [CNImage], [CNLabel], and [CNText].
@@ -52,6 +39,7 @@ class CNButton extends StatefulWidget with CNMenuChild {
     this.shrinkWrap = false,
     this.style = CNButtonStyle.automatic,
     this.controlSize = CNControlSize.regular,
+    this.viewModifiers,
   }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
 
   /// Optional badge shown next to the menu item when used inside [CNMenu].
@@ -88,10 +76,16 @@ class CNButton extends StatefulWidget with CNMenuChild {
   final double? width;
 
   @override
+  final CNViewModifiers? viewModifiers;
+
+  @override
   State<CNButton> createState() => _CNButtonState();
 
   @override
   String get menuChildType => 'button';
+
+  @override
+  EdgeInsets? get padding => viewModifiers?.padding;
 
   @override
   List<Object?> get props => [children, badge, controlSize, enabled, height, onPressed, role, shrinkWrap, style, tint, width];
@@ -100,10 +94,13 @@ class CNButton extends StatefulWidget with CNMenuChild {
   bool get stringify => true;
 
   @override
+  Object? get tag => viewModifiers?.tag;
+
+  @override
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) => _toPayloadForMenu(context);
 
   Map<String, dynamic> _toPayloadForMenu(BuildContext context) {
-    return {
+    final payload = <String, dynamic>{
       'buttonChildren': children
           .map((child) => {'type': child.buttonChildType, 'payload': child.toChannelMap(context, ignoreTheme: true)})
           .toList(),
@@ -117,7 +114,25 @@ class CNButton extends StatefulWidget with CNMenuChild {
       'width': width,
       'height': height,
     };
+
+    writeViewModifiers(payload, context);
+    return payload;
   }
+}
+
+/// Semantic role for button actions.
+enum CNButtonRole {
+  /// Default role.
+  none,
+
+  /// Cancel role.
+  cancel,
+
+  /// Destructive role.
+  destructive,
+
+  /// Close role.
+  close,
 }
 
 class _CNButtonState extends State<CNButton> {
@@ -158,33 +173,11 @@ class _CNButtonState extends State<CNButton> {
     super.dispose();
   }
 
-  bool get _isDark => CNTheme.of(context).brightness == Brightness.dark;
-
   Color? get _effectiveTint => widget.tint;
 
+  bool get _isDark => CNTheme.of(context).brightness == Brightness.dark;
+
   String get _role => widget.role.name;
-
-  List<Map<String, dynamic>> _serializeChildren() {
-    return widget.children
-        .map((child) => {'type': child.buttonChildType, 'payload': child.toChannelMap(context, ignoreTheme: true)})
-        .toList();
-  }
-
-  Map<String, dynamic> _toPayload({double? frameWidth, double? frameHeight}) {
-    return {
-      'buttonChildren': _serializeChildren(),
-      'buttonRole': _role,
-      'buttonStyle': widget.style.name,
-      'enabled': widget.enabled && widget.onPressed != null,
-      'isDark': _isDark,
-      'controlSize': widget.controlSize.name,
-      'tint': resolveColorToArgb(_effectiveTint, context),
-      'width': frameWidth,
-      'height': frameHeight,
-    };
-  }
-
-  String _serializeCurrentPayload() => jsonEncode(_toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight));
 
   void _cacheCurrentProps() {
     _lastSerializedPayload = _serializeCurrentPayload();
@@ -240,6 +233,14 @@ class _CNButtonState extends State<CNButton> {
     } catch (_) {}
   }
 
+  List<Map<String, dynamic>> _serializeChildren() {
+    return widget.children
+        .map((child) => {'type': child.buttonChildType, 'payload': child.toChannelMap(context, ignoreTheme: true)})
+        .toList();
+  }
+
+  String _serializeCurrentPayload() => jsonEncode(_toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight));
+
   Future<void> _syncPropsToNativeIfNeeded() async {
     final ch = _channel;
     if (ch == null) return;
@@ -252,6 +253,23 @@ class _CNButtonState extends State<CNButton> {
       _cacheCurrentProps();
       _requestIntrinsicSize();
     }
+  }
+
+  Map<String, dynamic> _toPayload({double? frameWidth, double? frameHeight}) {
+    final payload = <String, dynamic>{
+      'buttonChildren': _serializeChildren(),
+      'buttonRole': _role,
+      'buttonStyle': widget.style.name,
+      'enabled': widget.enabled && widget.onPressed != null,
+      'isDark': _isDark,
+      'controlSize': widget.controlSize.name,
+      'tint': resolveColorToArgb(_effectiveTint, context),
+      'width': frameWidth,
+      'height': frameHeight,
+    };
+
+    widget.writeViewModifiers(payload, context);
+    return payload;
   }
 
   @override

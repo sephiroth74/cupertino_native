@@ -2,25 +2,6 @@ import Swift
 import SwiftUI
 
 extension String {
-    func toPickerStyle() -> PickerStyle? {
-        switch self {
-        case "segmented":
-            SegmentedPickerStyle()
-        case "automatic":
-            DefaultPickerStyle()
-        case "inline":
-            InlinePickerStyle()
-        case "menu":
-            MenuPickerStyle()
-        case "palette":
-            PalettePickerStyle()
-        case "radioGroup":
-            RadioGroupPickerStyle()
-        default:
-            DefaultPickerStyle()
-        }
-    }
-
     func toButtonStyle() -> any PrimitiveButtonStyle {
         switch self {
         case "automatic":

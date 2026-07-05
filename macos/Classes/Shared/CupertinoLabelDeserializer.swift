@@ -4,36 +4,42 @@ struct CNLabelPayload: CNChannelSerializable {
     let primaryText: [String: Any]
     let secondaryText: [String: Any]?
     let icon: [String: Any]?
+    let padding: [String: Any]?
+    let tag: AnyHashable?
     let labelStyle: String?
     let labelReservedIconWidth: Double?
     let labelIconToTitleSpacing: Double?
     let width: Double?
     let height: Double?
+    let viewModifiers: CNViewModifiersPayload
 
     init?(channel: [String: Any]) {
         guard let primaryText = channel["primaryText"] as? [String: Any] else {
             return nil
         }
 
+        let modifiers = CNViewModifiersPayload(channel: channel)
         self.primaryText = primaryText
         secondaryText = channel["secondaryText"] as? [String: Any]
         icon = channel["icon"] as? [String: Any]
+        padding = modifiers.padding
+        tag = modifiers.tag
         labelStyle = channel["labelStyle"] as? String
         labelReservedIconWidth = (channel["labelReservedIconWidth"] as? NSNumber)?.doubleValue ?? channel["labelReservedIconWidth"] as? Double
         labelIconToTitleSpacing = (channel["labelIconToTitleSpacing"] as? NSNumber)?.doubleValue ?? channel["labelIconToTitleSpacing"] as? Double
-        width = (channel["width"] as? NSNumber)?.doubleValue ?? channel["width"] as? Double
-        height = (channel["height"] as? NSNumber)?.doubleValue ?? channel["height"] as? Double
+        width = modifiers.width
+        height = modifiers.height
+        viewModifiers = modifiers
     }
 
     func toChannel() -> [String: Any] {
-        var result: [String: Any] = ["primaryText": primaryText]
+        var result = viewModifiers.toChannel()
+        result["primaryText"] = primaryText
         result["secondaryText"] = secondaryText
         result["icon"] = icon
         result["labelStyle"] = labelStyle
         result["labelReservedIconWidth"] = labelReservedIconWidth
         result["labelIconToTitleSpacing"] = labelIconToTitleSpacing
-        result["width"] = width
-        result["height"] = height
         return result
     }
 }
@@ -81,6 +87,10 @@ enum CNLabel {
         } else if let height = payload.height {
             view = AnyView(view.frame(height: CGFloat(height)))
         }
+
+        view = CNViewTag.apply(payload.tag, to: view)
+
+        view = CNViewPadding.apply(payload.padding, to: view)
 
         if let onSizeChanged {
             view = AnyView(
@@ -203,6 +213,8 @@ enum CNLabel {
         let labelStyleKey = payload.labelStyle ?? "nil"
         let reservedWidthKey = payload.labelReservedIconWidth.map { "\($0)" } ?? "nil"
         let spacingKey = payload.labelIconToTitleSpacing.map { "\($0)" } ?? "nil"
+        let paddingKey = payload.padding.map { String(describing: $0) } ?? "nil"
+        let tagKey = payload.tag.map { "\($0)" } ?? "nil"
         let widthKey = payload.width.map { "\($0)" } ?? "nil"
         let heightKey = payload.height.map { "\($0)" } ?? "nil"
 
@@ -213,6 +225,8 @@ enum CNLabel {
             labelStyleKey,
             reservedWidthKey,
             spacingKey,
+            paddingKey,
+            tagKey,
             widthKey,
             heightKey,
         ].joined(separator: "|")

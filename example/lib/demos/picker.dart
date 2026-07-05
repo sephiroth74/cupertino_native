@@ -1,5 +1,7 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_example/demos/consts.dart';
+import 'package:flutter/cupertino.dart';
 
 class PickerDemoPage extends StatefulWidget {
   const PickerDemoPage({super.key});
@@ -9,165 +11,183 @@ class PickerDemoPage extends StatefulWidget {
 }
 
 class _PickerDemoPageState extends State<PickerDemoPage> {
-  final int _basicPickerIndex = 0;
-  final int _coloredPickerIndex = 1;
   CNControlSize _controlSize = CNControlSize.large;
   int _controlSizeIndex = CNControlSize.values.indexOf(CNControlSize.large);
-  final int _iconPickerIndex = 0;
-  final int _labelPickerIndex = 0;
+  Color? _foregroundColor;
   CNPickerStyle _pickerStyle = CNPickerStyle.radioGroup;
-  CNPickerStyle _pickerStyle2 = CNPickerStyle.radioGroup;
-  final int _shrinkWrappedPickerIndex = 0;
-  final List<CNControlSize> _sizes = CNControlSize.values;
-  final int _sublabelPickerIndex = 0;
+  Color? _tintColor;
 
   @override
   Widget build(BuildContext context) {
     return CNPageScaffold(
       navigationBar: const CNNavigationBar(middle: Text('Picker (SwiftUI)')),
       child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: CupertinoColors.systemGrey.withValues(alpha: 0.2),
-                          style: BorderStyle.solid,
-                          width: 1.0,
-                        ),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      padding: const EdgeInsets.all(8.0),
-                      child: CNPicker(
-                        label: 'Control Size',
-                        sublabel: 'Select Control Size',
-                        items: CNControlSize.values.map((e) => CNPickerItem.text(e.name)).toList(),
-                        selectedIndex: _controlSizeIndex,
-                        pickerStyle: CNPickerStyle.menu,
-                        controlSize: CNControlSize.large,
-                        onValueChanged: (i) => setState(() {
-                          _controlSizeIndex = i;
-                          _controlSize = CNControlSize.values[i];
-                        }),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: CupertinoColors.systemGrey.withValues(alpha: 0.2),
-                            style: BorderStyle.solid,
-                            width: 1.0,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: CupertinoColors.systemGrey.withValues(alpha: 0.2),
+                                style: BorderStyle.solid,
+                                width: 1.0,
+                              ),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            padding: const EdgeInsets.all(8.0),
+                            child: CNPicker(
+                              labelChildren: [CNText('Basic Picker'), CNText('Select an option from the list')],
+                              items: CNControlSize.values
+                                  .map(
+                                    (e) => CNLabel(
+                                      CNText(e.name),
+                                      icon: CNImage(systemSymbolName: 'textformat.size'),
+                                      tag: e.index,
+                                    ),
+                                  )
+                                  .toList(),
+                              selectedIndex: _controlSizeIndex,
+                              pickerStyle: _pickerStyle,
+                              viewModifiers: CNViewModifiers(
+                                controlSize: _controlSize,
+                                tint: _tintColor,
+                                foregroundColor: _foregroundColor,
+                              ),
+                              onValueChanged: (i) => setState(() {
+                                _controlSizeIndex = i;
+                              }),
+                            ),
                           ),
-                          borderRadius: BorderRadius.circular(8.0),
                         ),
-                        padding: const EdgeInsets.all(8.0),
-                        child: CNPicker(
-                          label: 'Picker Style',
-                          sublabel: 'Select Picker Style',
-                          items: CNPickerStyle.values.map((e) {
-                            return CNPickerItem(e.name, icon: CNSymbol('circle.fill', color: CupertinoColors.systemBlue));
-                          }).toList(),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                constraints: const BoxConstraints.expand(width: 350),
+                decoration: BoxDecoration(
+                  color: CNTheme.of(context).fillPrimaryColor,
+                  border: Border.all(color: CNTheme.of(context).separatorColor, width: 1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: const Text('Control Size')),
+                        CNPicker(
+                          selectedIndex: CNControlSize.values.indexOf(_controlSize),
+                          onValueChanged: (index) => setState(() => _controlSize = CNControlSize.values[index]),
+                          items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
+                          pickerStyle: CNPickerStyle.automatic,
+                          viewModifiers: CNViewModifiers(
+                            controlSize: CNControlSize.large,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    Row(
+                      children: [
+                        Expanded(child: const Text('Picker Style')),
+                        CNPicker(
                           selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle),
-                          controlSize: _controlSize,
-                          pickerStyle: CNPickerStyle.menu,
-                          onValueChanged: (i) => setState(() {
-                            _pickerStyle = CNPickerStyle.values[i];
-                          }),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 48),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: CNPicker(
-                        items: CNPickerStyle.values.map((e) => CNPickerItem.text(e.name)).toList(),
-                        selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle2),
-                        pickerStyle: _pickerStyle,
-                        controlSize: _controlSize,
-                        onValueChanged: (i) => setState(() {
-                          _pickerStyle2 = CNPickerStyle.values[i];
-                        }),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 48),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: CNPicker(
-                        items: [
-                          CNPickerItem.icon(CNSymbol('square.split.2x1')),
-                          CNPickerItem.icon(CNSymbol('circle.inset.filled')),
-                          CNPickerItem.icon(CNSymbol('list.bullet')),
-                          CNPickerItem.icon(CNSymbol('gearshape')),
-                          CNPickerItem.icon(
-                            CNSymbol('rectangle.portrait', mode: CNSymbolRenderingMode.hierarchical, color: CNColors.orange),
+                          onValueChanged: (index) => setState(() => _pickerStyle = CNPickerStyle.values[index]),
+                          items: CNPickerStyle.values.map((style) {
+                            return CNText(style.name);
+                          }).toList(),
+                          pickerStyle: CNPickerStyle.automatic,
+                          viewModifiers: CNViewModifiers(
+                            controlSize: CNControlSize.large,
                           ),
-                          CNPickerItem.icon(CNSymbol('paintpalette', color: CNColors.cyan)),
-                        ],
-                        selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle2),
-                        pickerStyle: _pickerStyle,
-                        color: CupertinoColors.systemCyan,
-                        controlSize: _controlSize,
-                        onValueChanged: (i) => setState(() {
-                          _pickerStyle2 = CNPickerStyle.values[i];
-                        }),
-                      ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 48),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: CNPicker(
-                        label: 'Radio Group Picker',
-                        items: CNPickerStyle.values.map((e) => CNPickerItem.text(e.name)).toList(),
-                        selectedIndex: CNPickerStyle.values.indexOf(_pickerStyle2),
-                        pickerStyle: _pickerStyle,
-                        controlSize: _controlSize,
-                        onValueChanged: (i) => setState(() {
-                          _pickerStyle2 = CNPickerStyle.values[i];
-                        }),
-                      ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(child: const Text('Tint Color')),
+                        CNPicker(
+                          selectedIndex: kSystemColors.keys.toList().indexOf(
+                            _tintColor == null
+                                ? 'none'
+                                : kSystemColors.entries.firstWhere((entry) => entry.value == _tintColor).key,
+                          ),
+                          onValueChanged: (index) => setState(() => _tintColor = kSystemColors.values.elementAt(index)),
+                          items: kSystemColors.keys
+                              .map(
+                                (colorName) => CNLabel(
+                                  CNText(colorName),
+                                  icon: CNImage(
+                                    systemSymbolName: kSystemColors[colorName] != null ? 'circle.fill' : 'circle',
+                                    viewModifiers: CNViewModifiers(tint: kSystemColors[colorName]),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          pickerStyle: CNPickerStyle.menu,
+                          viewModifiers: CNViewModifiers(
+                            controlSize: CNControlSize.large,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(child: const Text('Foreground Color')),
+                        CNPicker(
+                          selectedIndex: kSystemColors.keys.toList().indexOf(
+                            _foregroundColor == null
+                                ? 'none'
+                                : kSystemColors.entries.firstWhere((entry) => entry.value == _foregroundColor).key,
+                          ),
+                          onValueChanged: (index) => setState(() => _foregroundColor = kSystemColors.values.elementAt(index)),
+                          items: kSystemColors.keys
+                              .map(
+                                (colorName) => CNLabel(
+                                  CNText(colorName),
+                                  icon: CNImage(
+                                    systemSymbolName: kSystemColors[colorName] != null ? 'circle.fill' : 'circle',
+                                    viewModifiers: CNViewModifiers(tint: kSystemColors[colorName]),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          pickerStyle: CNPickerStyle.menu,
+                          viewModifiers: CNViewModifiers(
+                            controlSize: CNControlSize.large,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
@@ -51,7 +52,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                       children: [
                         CNButton(
                           children: [
-                            const CNImage(systemSymbolName: 'star.fill', tint: CupertinoColors.systemRed, badge: 'uno'),
+                            const CNImage(systemSymbolName: 'star.fill', viewModifiers: CNViewModifiers(tint: CupertinoColors.systemRed), badge: 'uno'),
                             const CNText('Button 0'),
                           ],
                           onPressed: () => _setLastAction('Button 0'),
@@ -61,7 +62,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                         CNButton(
                           badge: '3',
                           children: const [
-                            CNImage(systemSymbolName: 'star.fill', tint: CupertinoColors.systemYellow),
+                            CNImage(systemSymbolName: 'star.fill', viewModifiers: CNViewModifiers(tint: CupertinoColors.systemYellow)),
                             CNText('Button 1'),
                           ],
                           onPressed: () => _setLastAction('Button 1'),
@@ -70,7 +71,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                           badge: 5,
                           onPressed: () => _setLastAction('Button 2'),
                           children: const [
-                            CNImage(systemSymbolName: 'star.fill', tint: CupertinoColors.systemRed),
+                            CNImage(systemSymbolName: 'star.fill', viewModifiers: CNViewModifiers(tint: CupertinoColors.systemRed)),
                             CNText('Button 2'),
                           ],
                         ),
@@ -155,7 +156,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                         CNPicker(
                           selectedIndex: CNControlSize.values.indexOf(_controlSize),
                           onValueChanged: (index) => setState(() => _controlSize = CNControlSize.values[index]),
-                          items: CNControlSize.values.map((size) => CNPickerItem(size.name)).toList(),
+                          items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
                           pickerStyle: CNPickerStyle.automatic,
                         ),
                       ],
@@ -168,7 +169,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                         CNPicker(
                           selectedIndex: CNMenuStyle.values.indexOf(_menuStyle),
                           onValueChanged: (index) => setState(() => _menuStyle = CNMenuStyle.values[index]),
-                          items: CNMenuStyle.values.map((style) => CNPickerItem(style.name)).toList(),
+                          items: CNMenuStyle.values.map((style) => CNText(style.name)).toList(),
                           pickerStyle: CNPickerStyle.automatic,
                         ),
                       ],
@@ -187,8 +188,10 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                           onValueChanged: (index) => setState(() => _tintColor = kSystemColors.values.elementAt(index)),
                           items: kSystemColors.keys
                               .map(
-                                (colorName) =>
-                                    CNPickerItem(colorName, icon: CNSymbol("circle.fill", color: kSystemColors[colorName])),
+                                (colorName) => CNLabel(
+                                  CNText(colorName),
+                                  icon: CNImage(systemSymbolName: 'circle.fill', viewModifiers: CNViewModifiers(tint: kSystemColors[colorName])),
+                                ),
                               )
                               .toList(),
                           pickerStyle: CNPickerStyle.menu,

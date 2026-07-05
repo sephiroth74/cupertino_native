@@ -1,5 +1,6 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter/cupertino.dart';
 
 const _kSystemColors = {
   'none': null,
@@ -134,7 +135,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                         CNPicker(
                           selectedIndex: CNControlSize.values.indexOf(_controlSize),
                           onValueChanged: (index) => setState(() => _controlSize = CNControlSize.values[index]),
-                          items: CNControlSize.values.map((size) => CNPickerItem(size.name)).toList(),
+                          items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
                           pickerStyle: CNPickerStyle.automatic,
                         ),
                       ],
@@ -147,7 +148,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                         CNPicker(
                           selectedIndex: CNButtonStyle.values.indexOf(_buttonStyle),
                           onValueChanged: (index) => setState(() => _buttonStyle = CNButtonStyle.values[index]),
-                          items: CNButtonStyle.values.map((size) => CNPickerItem(size.name)).toList(),
+                          items: CNButtonStyle.values.map((size) => CNText(size.name)).toList(),
                           pickerStyle: CNPickerStyle.automatic,
                         ),
                       ],
@@ -166,8 +167,10 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                           onValueChanged: (index) => setState(() => _tintColor = _kSystemColors.values.elementAt(index)),
                           items: _kSystemColors.keys
                               .map(
-                                (colorName) =>
-                                    CNPickerItem(colorName, icon: CNSymbol("circle.fill", color: _kSystemColors[colorName])),
+                                (colorName) => CNLabel(
+                                  CNText(colorName),
+                                  icon: CNImage(systemSymbolName: 'circle.fill', viewModifiers: CNViewModifiers(tint: _kSystemColors[colorName])),
+                                ),
                               )
                               .toList(),
                           pickerStyle: CNPickerStyle.menu,

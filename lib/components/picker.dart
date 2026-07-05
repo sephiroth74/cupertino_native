@@ -1,85 +1,51 @@
+import 'package:cupertino_native/channel/params.dart';
+import 'package:cupertino_native/components/button_child.dart';
+import 'package:cupertino_native/components/image.dart';
+import 'package:cupertino_native/components/label.dart';
+import 'package:cupertino_native/components/text.dart';
+import 'package:cupertino_native/components/view_modifiable.dart';
+import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/model/picker_style.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '../channel/params.dart';
-import '../model/control_size.dart';
-import '../style/sf_symbol.dart';
 import '../theme/cn_theme.dart';
 
 const double _kDefaultPickerHeight = 38.0;
 const double _kDefaultPickerWidth = 300.0;
 
 /// A Cupertino-native picker with segmented control style.
-///
-/// Embeds a native SwiftUI Picker for pixel-perfect fidelity on macOS.
-class CNPickerItem {
-  // ignore: public_member_api_docs
-  CNPickerItem(this.text, {this.icon});
-
-  /// Creates an icon-based picker item.
-  const CNPickerItem.icon(this.icon) : text = null;
-
-  /// Creates a text-based picker item.
-  const CNPickerItem.text(this.text) : icon = null;
-
-  /// The symbol for an icon item.
-  final CNSymbol? icon;
-
-  /// The display text for a text item.
-  final String? text;
-
-  /// Converts the picker item to a platform-friendly map.
-  Map<String, dynamic> toMap(BuildContext context) {
-    return {
-      if (text != null) 'text': text,
-      if (icon != null) 'symbolName': icon!.name,
-      if (icon?.color != null) 'symbolColor': resolveColorToArgb(icon!.color, context),
-      if (icon?.paletteColors != null)
-        'symbolPaletteColors': icon!.paletteColors!.map((c) => resolveColorToArgb(c, context)).toList(),
-      if (icon?.mode != null) 'symbolRenderingMode': icon!.mode!.name,
-      if (icon?.gradient != null) 'symbolGradientEnabled': icon!.gradient,
-      if (icon?.size != null) 'symbolSize': icon!.size,
-    };
-  }
-}
-
-/// A Cupertino-native picker with segmented control style.
-class CNPicker extends StatefulWidget {
+class CNPicker extends StatefulWidget with CNViewModifiable {
   /// Creates a Cupertino-native picker.
-  const CNPicker({
+  CNPicker({
     super.key,
     required this.selectedIndex,
     required this.onValueChanged,
-    this.label,
-    this.sublabel,
-    this.enabled = true,
-    this.color,
-    this.controlSize = CNControlSize.regular,
+    this.labelChildren = const [],
     this.pickerStyle = CNPickerStyle.segmented,
     this.shrinkWrap = false,
     this.asList = false,
     required this.items,
-  }) : assert(items.length > 0, 'Items list cannot be empty.');
+    this.viewModifiers,
+  }) : assert(items.isNotEmpty, 'Items list cannot be empty.'),
+       assert(
+         items.every((item) => item is CNText || item is CNLabel || item is CNImage),
+         'CNPicker items must be CNText, CNLabel, or CNImage.',
+       );
 
   /// Whether the picker should be displayed as a list (true) or segmented control (false).
   final bool asList;
 
-  /// Accent/tint color used for the picker.
-  final Color? color;
-
-  /// Control size for the picker.
-  final CNControlSize controlSize;
-
-  /// Whether the picker is interactive.
-  final bool enabled;
-
   /// Picker items to display, in order.
-  final List<CNPickerItem> items;
+  ///
+  /// Only Swift-backed content widgets are supported: [CNText], [CNLabel], [CNImage].
+  final List<CNButtonChild> items;
 
-  /// Optional primary label.
-  final String? label;
+  /// Optional rich picker label content.
+  ///
+  /// When provided, this takes precedence over [label]/[sublabel].
+  final List<CNButtonChild> labelChildren;
 
   /// Called when the user selects an option.
   final ValueChanged<int> onValueChanged;
@@ -93,29 +59,29 @@ class CNPicker extends StatefulWidget {
   /// Whether the picker should shrink-wrap its content.
   final bool shrinkWrap;
 
-  /// Optional secondary label/subtitle.
-  final String? sublabel;
+  @override
+  final CNViewModifiers? viewModifiers;
 
   @override
   State<CNPicker> createState() => _CNPickerState();
+
+  @override
+  EdgeInsets? get padding => viewModifiers?.padding;
+
+  @override
+  Object? get tag => viewModifiers?.tag;
 }
 
 class _CNPickerState extends State<CNPicker> {
   MethodChannel? _channel;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
-  bool? _lastAsList;
-  CNControlSize? _lastControlSize;
-  bool? _lastEnabled;
-  bool? _lastIsDark;
-  CNPickerStyle? _lastPickerStyle;
-  int? _lastSelected;
-  int? _lastTint;
+  String? _lastSerializedPayload;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
+    _syncPropsToNativeIfNeeded();
   }
 
   @override
@@ -130,30 +96,14 @@ class _CNPickerState extends State<CNPicker> {
     super.dispose();
   }
 
+  bool get _effectiveEnabled => widget.viewModifiers?.enabled ?? true;
+
+  Color? get _effectiveTint => widget.viewModifiers?.tint ?? CNTheme.of(context).primaryColor;
+
   bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
 
-  Color? get _effectiveTint => widget.color ?? CNTheme.of(context).primaryColor;
-
-  void _onPlatformViewCreated(int id) {
-    final channel = MethodChannel('CupertinoNativePicker_$id');
-    _channel = channel;
-    channel.setMethodCallHandler(_onMethodCall);
-    _cacheCurrentProps();
-    _syncBrightnessIfNeeded();
-    _queryIntrinsicSize();
-  }
-
-  Future<void> _queryIntrinsicSize() async {
-    try {
-      final result = await _channel?.invokeMethod<Map>('getIntrinsicSize');
-      if (result != null) {
-        _onIntrinsicSizeChanged((result['width'] as num?)?.toDouble(), (result['height'] as num?)?.toDouble());
-      }
-    } catch (e) {
-      // Fallback to default height
-      _intrinsicWidth = null;
-      _intrinsicHeight = null;
-    }
+  void _cacheCurrentProps() {
+    _lastSerializedPayload = _serializeCurrentPayload();
   }
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
@@ -170,7 +120,6 @@ class _CNPickerState extends State<CNPicker> {
       final idx = (args?['index'] as num?)?.toInt();
       if (idx != null) {
         widget.onValueChanged(idx);
-        _lastSelected = idx;
       }
     } else if (call.method == 'intrinsicSizeChanged') {
       final args = call.arguments as Map?;
@@ -179,64 +128,72 @@ class _CNPickerState extends State<CNPicker> {
     return null;
   }
 
-  void _cacheCurrentProps() {
-    _lastSelected = widget.selectedIndex;
-    _lastEnabled = widget.enabled;
-    _lastIsDark = _isDark;
-    _lastTint = resolveColorToArgb(_effectiveTint, context);
-    _lastControlSize = widget.controlSize;
-    _lastPickerStyle = widget.pickerStyle;
-    _lastAsList = widget.asList;
+  void _onPlatformViewCreated(int id) {
+    final channel = MethodChannel('CupertinoNativePicker_$id');
+    _channel = channel;
+    channel.setMethodCallHandler(_onMethodCall);
+    _cacheCurrentProps();
+    _queryIntrinsicSize();
   }
+
+  Future<void> _queryIntrinsicSize() async {
+    try {
+      final result = await _channel?.invokeMethod<Map>('getIntrinsicSize');
+      if (result != null) {
+        _onIntrinsicSizeChanged((result['width'] as num?)?.toDouble(), (result['height'] as num?)?.toDouble());
+      }
+    } catch (e) {
+      // Fallback to default height
+      _intrinsicWidth = null;
+      _intrinsicHeight = null;
+    }
+  }
+
+  List<Map<String, dynamic>> _serializeChildren(List<CNButtonChild> children) {
+    return children
+        .map((child) => {'type': child.buttonChildType, 'payload': child.toChannelMap(context, ignoreTheme: true)})
+        .toList();
+  }
+
+  String _serializeCurrentPayload() => _toPayload().toString();
 
   Future<void> _syncPropsToNativeIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
 
-    final tint = resolveColorToArgb(_effectiveTint, context);
+    final payload = _toPayload();
+    final serializedPayload = payload.toString();
 
-    if (_lastEnabled != widget.enabled) {
-      await channel.invokeMethod('setEnabled', {'enabled': widget.enabled});
-      _lastEnabled = widget.enabled;
-    }
-    if (_lastSelected != widget.selectedIndex) {
-      await channel.invokeMethod('setSelectedIndex', {'index': widget.selectedIndex});
-      _lastSelected = widget.selectedIndex;
-    }
-    if (_lastTint != tint && tint != null) {
-      await channel.invokeMethod('setStyle', {'tint': tint});
-      _lastTint = tint;
-    }
-    if (_lastControlSize != widget.controlSize) {
-      await channel.invokeMethod('setControlSize', {'controlSize': widget.controlSize.name});
-      _lastControlSize = widget.controlSize;
-      _queryIntrinsicSize();
-    }
-    if (_lastPickerStyle != widget.pickerStyle) {
-      await channel.invokeMethod('setPickerStyle', {'pickerStyle': widget.pickerStyle.name});
-      _lastPickerStyle = widget.pickerStyle;
-      _queryIntrinsicSize();
-    }
-    if (_lastAsList != widget.asList) {
-      await channel.invokeMethod('setAsList', {'asList': widget.asList});
-      _lastAsList = widget.asList;
+    if (_lastSerializedPayload != serializedPayload) {
+      await channel.invokeMethod('setPicker', payload);
+      _cacheCurrentProps();
       _queryIntrinsicSize();
     }
   }
 
-  Future<void> _syncBrightnessIfNeeded() async {
-    final channel = _channel;
-    if (channel == null) return;
-    final isDark = _isDark;
-    final tint = resolveColorToArgb(_effectiveTint, context);
-    if (_lastIsDark != isDark) {
-      await channel.invokeMethod('setBrightness', {'isDark': isDark});
-      _lastIsDark = isDark;
-    }
-    if (_lastTint != tint && tint != null) {
-      await channel.invokeMethod('setStyle', {'tint': tint});
-      _lastTint = tint;
-    }
+  Map<String, dynamic> _toPayload() {
+    final itemsPayload = widget.items.map((item) {
+      final childPayload = item.toChannelMap(context, ignoreTheme: true);
+      final tag = childPayload['tag'];
+      return <String, dynamic>{
+        if (tag != null) 'tag': tag,
+        'children': [
+          {'type': item.buttonChildType, 'payload': childPayload},
+        ],
+      };
+    }).toList();
+
+    final payload = <String, dynamic>{
+      'items': itemsPayload,
+      'selectedIndex': widget.selectedIndex,
+      'isDark': _isDark,
+      'pickerStyle': widget.pickerStyle.name,
+      'asList': widget.asList,
+      if (widget.labelChildren.isNotEmpty) 'labelChildren': _serializeChildren(widget.labelChildren),
+    };
+
+    widget.writeViewModifiers(payload, context);
+    return payload;
   }
 
   @override
@@ -246,18 +203,7 @@ class _CNPickerState extends State<CNPicker> {
     }
 
     const viewType = 'CupertinoNativePicker';
-    final creationParams = <String, dynamic>{
-      'items': widget.items.map((item) => item.toMap(context)).toList(),
-      'selectedIndex': widget.selectedIndex,
-      'enabled': widget.enabled,
-      'isDark': _isDark,
-      'controlSize': widget.controlSize.name,
-      'pickerStyle': widget.pickerStyle.name,
-      'asList': widget.asList,
-      if (widget.label != null) 'label': widget.label,
-      if (widget.sublabel != null) 'sublabel': widget.sublabel,
-      'style': encodeStyle(context, tint: _effectiveTint),
-    };
+    final creationParams = _toPayload();
 
     final child = AppKitView(
       viewType: viewType,

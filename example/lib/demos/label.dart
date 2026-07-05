@@ -1,3 +1,4 @@
+import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 
@@ -40,7 +41,7 @@ class LabelDemoPage extends StatelessWidget {
                   font: CNFont.system(CNFontSize.preset(CNFontSizePreset.smallSystem), weight: CNFontWeight.regular),
                   color: CupertinoColors.secondaryLabel,
                 ),
-                icon: const CNImage(systemSymbolName: 'microphone.fill', tint: CupertinoColors.systemBrown),
+                icon: const CNImage(systemSymbolName: 'microphone.fill', viewModifiers: CNViewModifiers(tint: CupertinoColors.systemBrown)),
               ),
             ),
           ],

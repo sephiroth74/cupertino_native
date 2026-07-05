@@ -37,19 +37,20 @@ struct CNImagePayload: CNChannelSerializable {
     let symbolRenderingMode: String?
     let symbolColorRenderingMode: String?
     let foregroundStyleColors: [Int]
-    let tint: Int?
     let font: [String: Any]?
+    let viewModifiers: CNViewModifiersPayload
 
     init?(channel: [String: Any]) {
         guard let systemSymbolName = channel["systemSymbolName"] as? String, !systemSymbolName.isEmpty else {
             return nil
         }
 
+        let modifiers = CNViewModifiersPayload(channel: channel)
         self.systemSymbolName = systemSymbolName
         symbolRenderingMode = channel["symbolRenderingMode"] as? String
         symbolColorRenderingMode = channel["symbolColorRenderingMode"] as? String
-        tint = (channel["tint"] as? NSNumber)?.intValue ?? channel["tint"] as? Int
         font = channel["font"] as? [String: Any]
+        viewModifiers = modifiers
 
         if let rawColors = channel["foregroundStyleColors"] as? [NSNumber] {
             foregroundStyleColors = rawColors.map(\.intValue)
@@ -61,11 +62,11 @@ struct CNImagePayload: CNChannelSerializable {
     }
 
     func toChannel() -> [String: Any] {
-        var result: [String: Any] = ["systemSymbolName": systemSymbolName]
+        var result = viewModifiers.toChannel()
+        result["systemSymbolName"] = systemSymbolName
         result["symbolRenderingMode"] = symbolRenderingMode
         result["symbolColorRenderingMode"] = symbolColorRenderingMode
         result["foregroundStyleColors"] = foregroundStyleColors
-        result["tint"] = tint
         result["font"] = font
         return result
     }
@@ -122,24 +123,27 @@ enum CNImage {
             view = applyColorRenderingMode(to: view, payload: payload)
         }
 
-        if let tintColorValue = payload.tint {
-            view = AnyView(view.foregroundColor(ColorUtils.swiftUIColorFromARGB(tintColorValue)))
-        }
-
+        view = CNViewModifiers.apply(payload.viewModifiers, to: view)
         return AnyView(view.id(identityKey(for: payload)))
     }
 
     private static func identityKey(for payload: CNImagePayload) -> String {
         let colors = payload.foregroundStyleColors.map(String.init).joined(separator: ",")
         let fontKey = payload.font.map { String(describing: $0) } ?? "nil"
-        let tintKey = payload.tint.map(String.init) ?? "nil"
+        let tintKey = payload.viewModifiers.tint.map(String.init) ?? "nil"
+        let paddingKey = payload.viewModifiers.padding.map { String(describing: $0) } ?? "nil"
+        let foregroundColorKey = payload.viewModifiers.foregroundColor.map { String(describing: $0) } ?? "nil"
+        let tagKey = payload.viewModifiers.tag.map { "\($0)" } ?? "nil"
         return [
             payload.systemSymbolName,
             payload.symbolRenderingMode ?? "nil",
             payload.symbolColorRenderingMode ?? "nil",
             colors,
             tintKey,
+            foregroundColorKey,
             fontKey,
+            paddingKey,
+            tagKey,
         ].joined(separator: "|")
     }
 

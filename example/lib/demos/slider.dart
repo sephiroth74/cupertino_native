@@ -1,5 +1,6 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter/cupertino.dart';
 
 const _kSystemColors = {
   'none': null,
@@ -90,7 +91,7 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                         CNPicker(
                           selectedIndex: CNControlSize.values.indexOf(_size),
                           onValueChanged: (index) => setState(() => _size = CNControlSize.values[index]),
-                          items: CNControlSize.values.map((size) => CNPickerItem(size.name)).toList(),
+                          items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
                           pickerStyle: CNPickerStyle.automatic,
                         ),
                       ],
@@ -132,8 +133,10 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                           onValueChanged: (index) => setState(() => _tintColor = _kSystemColors.values.elementAt(index)),
                           items: _kSystemColors.keys
                               .map(
-                                (colorName) =>
-                                    CNPickerItem(colorName, icon: CNSymbol("circle.fill", color: _kSystemColors[colorName])),
+                                (colorName) => CNLabel(
+                                  CNText(colorName),
+                                  icon: CNImage(systemSymbolName: 'circle.fill', viewModifiers: CNViewModifiers(tint: _kSystemColors[colorName])),
+                                ),
                               )
                               .toList(),
                           pickerStyle: CNPickerStyle.menu,

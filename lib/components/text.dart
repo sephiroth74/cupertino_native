@@ -1,9 +1,13 @@
 import 'dart:convert';
 
+import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/components/button_child.dart';
 import 'package:cupertino_native/components/menu_badge_support.dart';
 import 'package:cupertino_native/components/menu_child.dart';
-import 'package:cupertino_native/channel/params.dart';
+import 'package:cupertino_native/components/paddable.dart';
+import 'package:cupertino_native/components/taggable.dart';
+import 'package:cupertino_native/components/view_modifiable.dart';
+import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/style/font.dart';
 import 'package:cupertino_native/style/text.dart';
 import 'package:cupertino_native/style/text_utils.dart';
@@ -12,24 +16,27 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-const double _kDefaultTextWidth = 120.0;
 const double _kDefaultTextHeight = 24.0;
+const double _kDefaultTextWidth = 120.0;
 
 /// A SwiftUI Text-backed native macOS text widget.
-class CNText extends StatefulWidget with CNButtonChild, CNMenuChild {
+class CNText extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModifiable, CNPaddable, CNTaggable {
   /// Creates a new text widget.
   const CNText(
     this.text, {
     super.key,
     this.color,
     this.badge,
+    this.padding,
+    this.tag,
     this.font,
     this.lineLimit,
     this.lineLimitReservesSpace,
     this.textScale,
     this.truncationMode,
     this.width,
-  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
+  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.'),
+       assert(tag == null || tag is int || tag is String, 'Tag must be an int or String.');
 
   /// Optional badge shown next to the menu item when used inside [CNMenu].
   final Object? badge;
@@ -58,6 +65,14 @@ class CNText extends StatefulWidget with CNButtonChild, CNMenuChild {
   /// Optional fixed width frame.
   final double? width;
 
+  /// Optional padding applied around the text.
+  @override
+  final EdgeInsets? padding;
+
+  /// Optional SwiftUI tag value.
+  @override
+  final CNTagValue? tag;
+
   @override
   String get buttonChildType => 'text';
 
@@ -69,7 +84,19 @@ class CNText extends StatefulWidget with CNButtonChild, CNMenuChild {
   String get menuChildType => 'text';
 
   @override
-  List<Object?> get props => [text, color, badge, font, lineLimit, lineLimitReservesSpace, textScale, truncationMode, width];
+  List<Object?> get props => [
+    text,
+    color,
+    badge,
+    padding,
+    tag,
+    font,
+    lineLimit,
+    lineLimitReservesSpace,
+    textScale,
+    truncationMode,
+    width,
+  ];
 
   @override
   bool get stringify => true;
@@ -79,13 +106,16 @@ class CNText extends StatefulWidget with CNButtonChild, CNMenuChild {
     return toMap(context, ignoreTheme: ignoreTheme);
   }
 
+  @override
+  CNViewModifiers get viewModifiers => CNViewModifiers(tag: tag, padding: padding);
+
   // ignore: public_member_api_docs
   Map<String, dynamic> toMap(BuildContext context, {double? frameWidth, double? frameHeight, bool ignoreTheme = false}) {
     final theme = CNTheme.of(context);
     final resolvedColor = color ?? (ignoreTheme ? null : theme.textTheme.labelColor ?? theme.labelColor);
     final resolvedFont = font ?? (ignoreTheme ? null : theme.textTheme.font ?? cnFontFromTextStyle(theme.typography.body));
 
-    return {
+    final payload = <String, dynamic>{
       'text': text,
       'color': resolveColorToArgb(resolvedColor, context),
       'font': resolvedFont?.toMap(),
@@ -97,6 +127,10 @@ class CNText extends StatefulWidget with CNButtonChild, CNMenuChild {
       'width': frameWidth ?? width,
       'height': frameHeight,
     };
+
+    writePadding(payload);
+    writeTag(payload);
+    return payload;
   }
 
   String _toJson(BuildContext context, {double? frameWidth, double? frameHeight}) =>
@@ -129,16 +163,16 @@ class _CNTextState extends State<CNText> {
     super.dispose();
   }
 
-  String _serializeCurrentPayload() => widget._toJson(context, frameWidth: _layoutWidth, frameHeight: _layoutHeight);
-
   void _cacheCurrentProps() {
     _lastSerializedPayload = _serializeCurrentPayload();
   }
 
-  void _onPlatformViewCreated(int id) {
-    _channel = MethodChannel('CupertinoNativeText_$id')..setMethodCallHandler(_onMethodCall);
-    _cacheCurrentProps();
-    _requestIntrinsicSize();
+  void _onIntrinsicSizeChanged(double? width, double? height) {
+    if (!mounted || width == null || height == null) return;
+    setState(() {
+      _intrinsicWidth = width > 0 ? width : null;
+      _intrinsicHeight = height > 0 ? height : null;
+    });
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
@@ -151,12 +185,10 @@ class _CNTextState extends State<CNText> {
     return null;
   }
 
-  void _onIntrinsicSizeChanged(double? width, double? height) {
-    if (!mounted || width == null || height == null) return;
-    setState(() {
-      _intrinsicWidth = width > 0 ? width : null;
-      _intrinsicHeight = height > 0 ? height : null;
-    });
+  void _onPlatformViewCreated(int id) {
+    _channel = MethodChannel('CupertinoNativeText_$id')..setMethodCallHandler(_onMethodCall);
+    _cacheCurrentProps();
+    _requestIntrinsicSize();
   }
 
   Future<void> _requestIntrinsicSize() async {
@@ -168,6 +200,8 @@ class _CNTextState extends State<CNText> {
       _onIntrinsicSizeChanged((size?['width'] as num?)?.toDouble(), (size?['height'] as num?)?.toDouble());
     } catch (_) {}
   }
+
+  String _serializeCurrentPayload() => widget._toJson(context, frameWidth: _layoutWidth, frameHeight: _layoutHeight);
 
   Future<void> _syncPropsToNativeIfNeeded() async {
     final channel = _channel;
@@ -208,16 +242,18 @@ class _CNTextState extends State<CNText> {
         }
 
         if (defaultTargetPlatform != TargetPlatform.macOS) {
-          return SizedBox(
-            width: resolvedWidth,
-            height: resolvedHeight,
-            child: Text(
-              widget.text,
-              maxLines: widget.lineLimit,
-              overflow: overflowFromTruncationMode(widget.truncationMode),
-              style: textStyle,
-            ),
+          Widget fallbackText = Text(
+            widget.text,
+            maxLines: widget.lineLimit,
+            overflow: overflowFromTruncationMode(widget.truncationMode),
+            style: textStyle,
           );
+
+          if (widget.padding != null) {
+            fallbackText = Padding(padding: widget.padding!, child: fallbackText);
+          }
+
+          return SizedBox(width: resolvedWidth, height: resolvedHeight, child: fallbackText);
         }
 
         final creationParams = widget.toMap(context, frameWidth: resolvedWidth, frameHeight: resolvedHeight);

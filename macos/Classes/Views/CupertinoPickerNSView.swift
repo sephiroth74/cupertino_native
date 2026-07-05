@@ -6,45 +6,17 @@ class CupertinoPickerNSView: NSView {
     private let channel: FlutterMethodChannel
     private var hostingView: NSHostingView<PickerContent>?
     private var measuredSize: NSSize?
-    private var selection: Int = 0
-    private var items: [[String: Any]] = []
-    private var label: String?
-    private var sublabel: String?
-    private var enabled: Bool = true
-    private var isDark: Bool = false
-    private var tintColor: NSColor?
-    private var controlSize: String = "regular"
-    private var pickerStyleName: String = "automatic"
-    private var asList: Bool = false
+    private var payload = CNPickerPayload()
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(name: "CupertinoNativePicker_\(viewId)", binaryMessenger: messenger)
-
-        var selectedIndex = 0
-
-        if let dict = CNChannelSerialization.asDict(args) {
-            if let arr = dict["items"] as? [[String: Any]] { items = arr }
-            if let lbl = dict["label"] as? String { label = lbl }
-            if let sublbl = dict["sublabel"] as? String { sublabel = sublbl }
-            if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
-            if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
-            if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
-            if let size = dict["controlSize"] as? String { controlSize = size }
-            if let s = dict["pickerStyle"] as? String { pickerStyleName = s }
-            if let displayAsList = dict["asList"] as? NSNumber { asList = displayAsList.boolValue }
-            if let style = dict["style"] as? [String: Any] {
-                if let tint = style["tint"] as? NSNumber {
-                    tintColor = ColorUtils.colorFromARGB(tint.intValue)
-                }
-            }
-        }
-
-        selection = selectedIndex
         super.init(frame: .zero)
+
+        _ = CNPickerDeserializer.applyPatch(args, to: &payload)
 
         wantsLayer = true
         layer?.backgroundColor = NSColor.clear.cgColor
-        appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+        appearance = NSAppearance(named: payload.isDark ? .darkAqua : .aqua)
 
         createPickerContent()
 
@@ -57,51 +29,11 @@ class CupertinoPickerNSView: NSView {
                     ?? NSSize(width: NSView.noIntrinsicMetric, height: 32)
 
                 result(["width": size.width, "height": size.height])
-            case "setSelectedIndex":
-                if let args = CNChannelSerialization.asDict(call.arguments), let idx = (args["index"] as? NSNumber)?.intValue {
-                    selection = idx
+            case "setPicker":
+                if CNPickerDeserializer.applyPatch(call.arguments, to: &payload) {
                     createPickerContent()
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing index", details: nil)) }
-            case "setEnabled":
-                if let args = CNChannelSerialization.asDict(call.arguments), let e = (args["enabled"] as? NSNumber)?.boolValue {
-                    enabled = e
-                    createPickerContent()
-                    result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil)) }
-            case "setBrightness":
-                if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["isDark"] as? NSNumber)?.boolValue {
-                    self.isDark = isDark
-                    appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-                    createPickerContent()
-                    result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
-            case "setStyle":
-                if let args = CNChannelSerialization.asDict(call.arguments) {
-                    if let tint = args["tint"] as? NSNumber {
-                        tintColor = ColorUtils.colorFromARGB(tint.intValue)
-                    }
-                    createPickerContent()
-                    result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
-            case "setControlSize":
-                if let args = CNChannelSerialization.asDict(call.arguments), let sizeName = args["controlSize"] as? String {
-                    controlSize = sizeName
-                    createPickerContent()
-                    result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing controlSize", details: nil)) }
-            case "setPickerStyle":
-                if let args = CNChannelSerialization.asDict(call.arguments), let styleName = args["pickerStyle"] as? String {
-                    pickerStyleName = styleName
-                    createPickerContent()
-                    result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing pickerStyle", details: nil)) }
-            case "setAsList":
-                if let args = CNChannelSerialization.asDict(call.arguments), let displayAsList = (args["asList"] as? NSNumber)?.boolValue {
-                    asList = displayAsList
-                    createPickerContent()
-                    result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing asList", details: nil)) }
+                } else { result(FlutterError(code: "bad_args", message: "Missing picker payload", details: nil)) }
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -115,21 +47,15 @@ class CupertinoPickerNSView: NSView {
     private func createPickerContent() {
         hostingView?.removeFromSuperview()
 
-        print("pickerStyle: \(pickerStyleName)")
-
         let pickerModel = PickerModel(
-            items: items,
-            label: label,
-            sublabel: sublabel,
-            selectedIndex: selection,
-            enabled: enabled,
-            tintColor: tintColor,
-            controlSize: controlSize.toControlSize() ?? .regular,
-            pickerStyleName: pickerStyleName,
-            displayAsList: asList,
+            items: payload.items,
+            labelChildren: payload.labelChildren,
+            selectedIndex: payload.selectedIndex,
+            pickerStyleName: payload.pickerStyleName,
+            displayAsList: payload.asList,
+            viewModifiers: payload.viewModifiers,
             onSelectionChange: { [weak self] newIndex in
-                NSLog("Picker selection changed to index: \(newIndex)")
-                self?.selection = newIndex
+                self?.payload.applyPatch(["selectedIndex": newIndex])
                 self?.channel.invokeMethod("valueChanged", arguments: ["index": newIndex])
             },
             onSizeChange: { [weak self] newSize in
@@ -162,14 +88,11 @@ class CupertinoPickerNSView: NSView {
 
 struct PickerModel {
     let items: [[String: Any]]
-    let label: String?
-    let sublabel: String?
+    let labelChildren: [[String: Any]]
     let selectedIndex: Int
-    let enabled: Bool
-    let tintColor: NSColor?
-    let controlSize: ControlSize
     let pickerStyleName: String
     let displayAsList: Bool
+    let viewModifiers: CNViewModifiersPayload?
     let onSelectionChange: (Int) -> Void
     let onSizeChange: (CGSize) -> Void
 }
@@ -203,31 +126,31 @@ struct PickerContent: View {
             },
         )
 
+        let hasLabelContent = !model.labelChildren.isEmpty
+
         let pickerBase = Picker(selection: selectionBinding) {
             ForEach(model.items.indices, id: \.self) { index in
                 let item = model.items[index]
+                let tag = CNPickerDeserializer.itemTag(for: item, fallback: index)
                 itemView(for: item)
-                    .tag(index)
+                    .tag(tag)
             }
         } label: {
-            if let label = model.label {
-                Text(label)
-                if let sublabel = model.sublabel {
-                    Text(sublabel)
-                }
+            if !model.labelChildren.isEmpty {
+                pickerLabelChildren(model.labelChildren)
             }
         }
-        .controlSize(model.controlSize)
         .onGeometryChange(for: CGSize.self) { proxy in
             proxy.size
         } action: { newValue in
-            reportMeasuredSize(newValue, fromListContainer: model.label != nil)
+            reportMeasuredSize(newValue, fromListContainer: hasLabelContent)
         }
-        .disabled(!model.enabled)
 
-        let picker = applyPickerStyle(to: pickerBase)
+        var picker = applyPickerStyle(to: pickerBase)
 
-        let shouldUseListContainer = model.label != nil && model.displayAsList
+        picker = CNViewModifiers.apply(model.viewModifiers, to: picker)
+
+        let shouldUseListContainer = hasLabelContent && model.displayAsList
 
         func reportMeasuredSize(_ newValue: CGSize, fromListContainer: Bool) {
             let adjusted: CGSize
@@ -263,25 +186,14 @@ struct PickerContent: View {
             model.onSizeChange(adjusted)
         }
 
-        if let tintColor = model.tintColor {
-            let tintedPicker = AnyView(picker.tint(Color(nsColor: tintColor)))
-            if shouldUseListContainer {
-                return AnyView(List {
-                    tintedPicker
-                }.padding(0))
-            } else {
-                return tintedPicker
-            }
-        } else {
-            let plainPicker = picker
-            if shouldUseListContainer {
-                return AnyView(List {
-                    plainPicker
-                }.padding(0))
-            }
-
-            return plainPicker
+        let plainPicker = picker
+        if shouldUseListContainer {
+            return AnyView(List {
+                plainPicker
+            })
         }
+
+        return plainPicker
     }
 
     private func applyPickerStyle(to picker: some View) -> AnyView {
@@ -303,18 +215,69 @@ struct PickerContent: View {
 
     @ViewBuilder
     private func itemView(for item: [String: Any]) -> some View {
-        let hasText = item["text"] as? String != nil
-        let hasIcon = item["symbolName"] as? String != nil
+        if let children = item["children"] as? [[String: Any]], !children.isEmpty {
+            pickerOptionChildren(children)
+        } else {
+            let hasText = item["text"] as? String != nil
+            let hasIcon = item["symbolName"] as? String != nil
 
-        if hasIcon, hasText {
-            HStack {
-                buildStyledImage(symbolName: item["symbolName"] as! String, from: item)
+            if hasIcon, hasText {
+                HStack {
+                    buildStyledImage(symbolName: item["symbolName"] as! String, from: item)
+                    Text(item["text"] as? String ?? "")
+                }
+            } else if hasIcon, let symbolName = item["symbolName"] as? String {
+                buildStyledImage(symbolName: symbolName, from: item)
+            } else {
                 Text(item["text"] as? String ?? "")
             }
-        } else if hasIcon, let symbolName = item["symbolName"] as? String {
-            AnyView(buildStyledImage(symbolName: symbolName, from: item))
+        }
+    }
+
+    @ViewBuilder
+    private func pickerLabelChildren(_ children: [[String: Any]]) -> some View {
+        if children.count == 1 {
+            deserializeButtonChild(children[0])
         } else {
-            Text(item["text"] as? String ?? "")
+            Group {
+                ForEach(Array(children.enumerated()), id: \.offset) { _, child in
+                    deserializeButtonChild(child)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func pickerOptionChildren(_ children: [[String: Any]]) -> some View {
+        if children.count == 1 {
+            deserializeButtonChild(children[0])
+        } else {
+            Group {
+                ForEach(Array(children.enumerated()), id: \.offset) { _, child in
+                    deserializeButtonChild(child)
+                }
+            }
+        }
+    }
+
+    private func deserializeButtonChild(_ child: [String: Any]) -> AnyView {
+        guard let type = child["type"] as? String,
+              let payload = child["payload"] as? [String: Any]
+        else {
+            return AnyView(EmptyView())
+        }
+
+        switch type {
+        case "image":
+            return CNImage.deserialize(payload) ?? AnyView(EmptyView())
+        case "label":
+            return CNLabel.deserialize(payload) ?? AnyView(EmptyView())
+        case "text":
+            return CNText.deserialize(payload) ?? AnyView(EmptyView())
+        case "progressView":
+            return CNProgressViewDeserializer.deserialize(payload) ?? AnyView(EmptyView())
+        default:
+            return AnyView(EmptyView())
         }
     }
 

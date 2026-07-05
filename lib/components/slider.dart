@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:cupertino_native/channel/params.dart';
+import 'package:cupertino_native/components/view_modifiable.dart';
+import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/model/control_size.dart';
 import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,37 +11,10 @@ import 'package:flutter/services.dart';
 
 const double _kDefaultSliderWidth = 140.0;
 
-/// Controller for [CNSlider], allowing imperative updates to native state.
-class CNSliderController {
-  MethodChannel? _channel;
-
-  /// Sets the current slider [value].
-  Future<void> setValue(double value) async {
-    final channel = _channel;
-    if (channel == null) return;
-    await channel.invokeMethod('setValue', {'value': value});
-  }
-
-  /// Sets the slider range.
-  Future<void> setRange({required double min, required double max}) async {
-    final channel = _channel;
-    if (channel == null) return;
-    await channel.invokeMethod('setRange', {'min': min, 'max': max});
-  }
-
-  void _attach(MethodChannel channel) {
-    _channel = channel;
-  }
-
-  void _detach() {
-    _channel = null;
-  }
-}
-
 /// A native macOS SwiftUI `Slider`.
 ///
 /// On non-macOS platforms, this falls back to Flutter's [Slider].
-class CNSlider extends StatefulWidget {
+class CNSlider extends StatefulWidget with CNViewModifiable {
   /// Creates a native SwiftUI slider.
   const CNSlider({
     super.key,
@@ -54,6 +29,7 @@ class CNSlider extends StatefulWidget {
     this.width,
     this.height,
     this.controller,
+    this.viewModifiers,
   }) : assert(min < max),
        assert(value >= min && value <= max),
        assert(step == null || step > 0);
@@ -92,10 +68,46 @@ class CNSlider extends StatefulWidget {
   final double? width;
 
   @override
+  final CNViewModifiers? viewModifiers;
+
+  @override
   State<CNSlider> createState() => _CNSliderState();
+
+  @override
+  EdgeInsets? get padding => viewModifiers?.padding;
+
+  @override
+  Object? get tag => viewModifiers?.tag;
 
   /// Whether the slider accepts interaction.
   bool get isEnabled => onChanged != null;
+}
+
+/// Controller for [CNSlider], allowing imperative updates to native state.
+class CNSliderController {
+  MethodChannel? _channel;
+
+  /// Sets the slider range.
+  Future<void> setRange({required double min, required double max}) async {
+    final channel = _channel;
+    if (channel == null) return;
+    await channel.invokeMethod('setRange', {'min': min, 'max': max});
+  }
+
+  /// Sets the current slider [value].
+  Future<void> setValue(double value) async {
+    final channel = _channel;
+    if (channel == null) return;
+    await channel.invokeMethod('setValue', {'value': value});
+  }
+
+  void _attach(MethodChannel channel) {
+    _channel = channel;
+  }
+
+  void _detach() {
+    _channel = null;
+  }
 }
 
 class _CNSliderState extends State<CNSlider> {
@@ -134,6 +146,11 @@ class _CNSliderState extends State<CNSlider> {
 
   Color? get _resolvedTint => widget.color ?? CNTheme.of(context).sliderTheme.tintColor ?? CNTheme.of(context).accentColor;
 
+  void _cacheCurrentProps() {
+    _lastSerializedConfigPayload = _serializeCurrentConfigPayload();
+    _lastSyncedValue = widget.value;
+  }
+
   double _defaultHeightForControlSize() {
     switch (widget.controlSize) {
       case CNControlSize.mini:
@@ -149,36 +166,13 @@ class _CNSliderState extends State<CNSlider> {
     }
   }
 
-  Map<String, dynamic> _toPayload({double? frameWidth, double? frameHeight, bool includeValue = true}) {
-    return {
-      if (includeValue) 'value': widget.value,
-      'min': widget.min,
-      'max': widget.max,
-      'step': widget.step,
-      'isDark': _isDark,
-      'isEnabled': widget.isEnabled,
-      'controlSize': widget.controlSize.name,
-      'tint': resolveColorToArgb(_resolvedTint, context),
-      'width': frameWidth,
-      'height': frameHeight,
-    };
-  }
-
-  String _serializeCurrentConfigPayload() =>
-      jsonEncode(_toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight, includeValue: false));
-
-  void _cacheCurrentProps() {
-    _lastSerializedConfigPayload = _serializeCurrentConfigPayload();
-    _lastSyncedValue = widget.value;
-  }
-
-  void _onPlatformViewCreated(int id) {
-    final channel = MethodChannel('CupertinoNativeSlider_$id');
-    _channel = channel;
-    _controller._attach(channel);
-    channel.setMethodCallHandler(_onMethodCall);
-    _cacheCurrentProps();
-    _requestIntrinsicSize();
+  void _onIntrinsicSizeChanged(double? width, double? height) {
+    if (!mounted || width == null || height == null) return;
+    if (width == _intrinsicWidth && height == _intrinsicHeight) return;
+    setState(() {
+      _intrinsicWidth = width > 0 ? width : null;
+      _intrinsicHeight = height > 0 ? height : null;
+    });
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
@@ -207,13 +201,13 @@ class _CNSliderState extends State<CNSlider> {
     return null;
   }
 
-  void _onIntrinsicSizeChanged(double? width, double? height) {
-    if (!mounted || width == null || height == null) return;
-    if (width == _intrinsicWidth && height == _intrinsicHeight) return;
-    setState(() {
-      _intrinsicWidth = width > 0 ? width : null;
-      _intrinsicHeight = height > 0 ? height : null;
-    });
+  void _onPlatformViewCreated(int id) {
+    final channel = MethodChannel('CupertinoNativeSlider_$id');
+    _channel = channel;
+    _controller._attach(channel);
+    channel.setMethodCallHandler(_onMethodCall);
+    _cacheCurrentProps();
+    _requestIntrinsicSize();
   }
 
   Future<void> _requestIntrinsicSize() async {
@@ -227,6 +221,9 @@ class _CNSliderState extends State<CNSlider> {
       // Ignored.
     }
   }
+
+  String _serializeCurrentConfigPayload() =>
+      jsonEncode(_toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight, includeValue: false));
 
   Future<void> _syncPropsToNativeIfNeeded() async {
     final channel = _channel;
@@ -249,6 +246,24 @@ class _CNSliderState extends State<CNSlider> {
 
       await channel.invokeMethod('setValue', {'value': widget.value});
     }
+  }
+
+  Map<String, dynamic> _toPayload({double? frameWidth, double? frameHeight, bool includeValue = true}) {
+    final payload = <String, dynamic>{
+      if (includeValue) 'value': widget.value,
+      'min': widget.min,
+      'max': widget.max,
+      'step': widget.step,
+      'isDark': _isDark,
+      'isEnabled': widget.isEnabled,
+      'controlSize': widget.controlSize.name,
+      'tint': resolveColorToArgb(_resolvedTint, context),
+      'width': frameWidth,
+      'height': frameHeight,
+    };
+
+    widget.writeViewModifiers(payload, context);
+    return payload;
   }
 
   @override

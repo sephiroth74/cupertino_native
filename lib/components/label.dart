@@ -1,10 +1,14 @@
 import 'dart:convert';
 
 import 'package:cupertino_native/components/button_child.dart';
+import 'package:cupertino_native/components/image.dart';
 import 'package:cupertino_native/components/menu_badge_support.dart';
 import 'package:cupertino_native/components/menu_child.dart';
-import 'package:cupertino_native/components/image.dart';
+import 'package:cupertino_native/components/paddable.dart';
+import 'package:cupertino_native/components/taggable.dart';
 import 'package:cupertino_native/components/text.dart';
+import 'package:cupertino_native/components/view_modifiable.dart';
+import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/style/text_utils.dart';
 import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/cupertino.dart';
@@ -16,7 +20,7 @@ const double _kDefaultLabelWidth = 50.0;
 /// A native macOS SwiftUI label backed by `Label`.
 ///
 /// On platforms other than macOS, this falls back to a plain Flutter text label.
-class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild {
+class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModifiable, CNPaddable, CNTaggable {
   /// Creates a native SwiftUI label.
   const CNLabel(
     this.text, {
@@ -24,12 +28,15 @@ class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild {
     this.secondaryText,
     this.icon,
     this.badge,
+    this.padding,
+    this.tag,
     this.labelStyle = CNLabelStyle.automatic,
     this.labelReservedIconWidth,
     this.labelIconToTitleSpacing,
     this.width,
     this.height,
-  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
+  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.'),
+       assert(tag == null || tag is int || tag is String, 'Tag must be an int or String.');
 
   /// Creates a native SwiftUI label with a single text string.
   factory CNLabel.text(
@@ -37,6 +44,8 @@ class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild {
     CNText? secondaryText,
     CNImage? icon,
     Object? badge,
+    EdgeInsets? padding,
+    CNTagValue? tag,
     CNLabelStyle labelStyle = CNLabelStyle.automatic,
     double? labelReservedIconWidth,
     double? labelIconToTitleSpacing,
@@ -48,6 +57,8 @@ class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild {
       secondaryText: secondaryText,
       icon: icon,
       badge: badge,
+      padding: padding,
+      tag: tag,
       labelStyle: labelStyle,
       labelReservedIconWidth: labelReservedIconWidth,
       labelIconToTitleSpacing: labelIconToTitleSpacing,
@@ -83,6 +94,14 @@ class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild {
   /// Optional fixed width.
   final double? width;
 
+  /// Optional padding applied around the label.
+  @override
+  final EdgeInsets? padding;
+
+  /// Optional SwiftUI tag value.
+  @override
+  final CNTagValue? tag;
+
   @override
   String get buttonChildType => 'label';
 
@@ -98,6 +117,8 @@ class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild {
     secondaryText,
     icon,
     badge,
+    padding,
+    tag,
     labelStyle,
     labelReservedIconWidth,
     labelIconToTitleSpacing,
@@ -113,9 +134,12 @@ class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild {
     return toMap(context, ignoreTheme: ignoreTheme);
   }
 
+  @override
+  CNViewModifiers get viewModifiers => CNViewModifiers(tag: tag, padding: padding);
+
   // ignore: public_member_api_docs
   Map<String, dynamic> toMap(BuildContext context, {double? frameWidth, double? frameHeight, bool ignoreTheme = false}) {
-    return {
+    final payload = <String, dynamic>{
       'primaryText': text.toMap(context, ignoreTheme: ignoreTheme),
       if (secondaryText != null) 'secondaryText': secondaryText!.toMap(context, ignoreTheme: ignoreTheme),
       if (icon != null) 'icon': icon!.toMap(context, ignoreTheme: ignoreTheme),
@@ -126,6 +150,10 @@ class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild {
       'width': frameWidth ?? width,
       'height': frameHeight ?? height,
     };
+
+    writePadding(payload);
+    writeTag(payload);
+    return payload;
   }
 }
 
@@ -172,30 +200,6 @@ class _CNLabelState extends State<CNLabel> {
     super.dispose();
   }
 
-  Future<void> _onPlatformViewCreated(int id) async {
-    final channel = MethodChannel('CupertinoNativeLabel_$id');
-    _channel = channel;
-    channel.setMethodCallHandler(_onMethodCall);
-    _cacheCurrentProps();
-    await _requestIntrinsicSize();
-  }
-
-  Future<dynamic> _onMethodCall(MethodCall call) async {
-    if (call.method == 'intrinsicSizeChanged') {
-      final args = call.arguments as Map?;
-      _onIntrinsicSizeChanged((args?['width'] as num?)?.toDouble(), (args?['height'] as num?)?.toDouble());
-    }
-    return null;
-  }
-
-  void _onIntrinsicSizeChanged(double? width, double? height) {
-    if (!mounted || width == null || height == null) return;
-    setState(() {
-      _intrinsicWidth = width > 0 ? width : null;
-      _intrinsicHeight = height > 0 ? height : null;
-    });
-  }
-
   Widget _buildFallbackText(CNText textWidget) {
     final theme = CNTheme.of(context);
     final resolvedColor = textWidget.color ?? theme.textTheme.labelColor ?? theme.labelColor;
@@ -213,6 +217,10 @@ class _CNLabelState extends State<CNLabel> {
     );
   }
 
+  void _cacheCurrentProps() {
+    _lastSerializedPayload = _serializeCurrentPayload();
+  }
+
   double _defaultHeightFromFonts() {
     final theme = CNTheme.of(context);
     final themeTextFont = theme.textTheme.font ?? cnFontFromTextStyle(theme.typography.body);
@@ -228,28 +236,28 @@ class _CNLabelState extends State<CNLabel> {
         : (secondaryPoints > iconPoints ? secondaryPoints : iconPoints);
   }
 
-  Map<String, dynamic> _toPayload() {
-    return widget.toMap(context, frameWidth: _layoutWidth, frameHeight: _layoutHeight);
+  void _onIntrinsicSizeChanged(double? width, double? height) {
+    if (!mounted || width == null || height == null) return;
+    setState(() {
+      _intrinsicWidth = width > 0 ? width : null;
+      _intrinsicHeight = height > 0 ? height : null;
+    });
   }
 
-  String _serializeCurrentPayload() => jsonEncode(_toPayload());
-
-  void _cacheCurrentProps() {
-    _lastSerializedPayload = _serializeCurrentPayload();
-  }
-
-  Future<void> _syncPropsToNativeIfNeeded() async {
-    final channel = _channel;
-    if (channel == null) return;
-
-    final payload = _toPayload();
-    final serializedPayload = jsonEncode(payload);
-
-    if (_lastSerializedPayload != serializedPayload) {
-      await channel.invokeMethod('setLabel', payload);
-      _cacheCurrentProps();
-      await _requestIntrinsicSize();
+  Future<dynamic> _onMethodCall(MethodCall call) async {
+    if (call.method == 'intrinsicSizeChanged') {
+      final args = call.arguments as Map?;
+      _onIntrinsicSizeChanged((args?['width'] as num?)?.toDouble(), (args?['height'] as num?)?.toDouble());
     }
+    return null;
+  }
+
+  Future<void> _onPlatformViewCreated(int id) async {
+    final channel = MethodChannel('CupertinoNativeLabel_$id');
+    _channel = channel;
+    channel.setMethodCallHandler(_onMethodCall);
+    _cacheCurrentProps();
+    await _requestIntrinsicSize();
   }
 
   Future<void> _requestIntrinsicSize() async {
@@ -275,6 +283,26 @@ class _CNLabelState extends State<CNLabel> {
     } finally {
       _intrinsicProbeInFlight = false;
     }
+  }
+
+  String _serializeCurrentPayload() => jsonEncode(_toPayload());
+
+  Future<void> _syncPropsToNativeIfNeeded() async {
+    final channel = _channel;
+    if (channel == null) return;
+
+    final payload = _toPayload();
+    final serializedPayload = jsonEncode(payload);
+
+    if (_lastSerializedPayload != serializedPayload) {
+      await channel.invokeMethod('setLabel', payload);
+      _cacheCurrentProps();
+      await _requestIntrinsicSize();
+    }
+  }
+
+  Map<String, dynamic> _toPayload() {
+    return widget.toMap(context, frameWidth: _layoutWidth, frameHeight: _layoutHeight);
   }
 
   @override
@@ -314,22 +342,25 @@ class _CNLabelState extends State<CNLabel> {
           return SizedBox(
             width: resolvedWidth,
             height: resolvedHeight,
-            child: Row(
-              children: [
-                if (showIcon) SizedBox(width: widget.labelReservedIconWidth, child: widget.icon!),
-                if (showIcon && showTitle) SizedBox(width: widget.labelIconToTitleSpacing ?? 8),
-                if (showTitle)
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildFallbackText(widget.text),
-                        if (widget.secondaryText != null) _buildFallbackText(widget.secondaryText!),
-                      ],
+            child: Padding(
+              padding: widget.padding ?? EdgeInsets.zero,
+              child: Row(
+                children: [
+                  if (showIcon) SizedBox(width: widget.labelReservedIconWidth, child: widget.icon!),
+                  if (showIcon && showTitle) SizedBox(width: widget.labelIconToTitleSpacing ?? 8),
+                  if (showTitle)
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildFallbackText(widget.text),
+                          if (widget.secondaryText != null) _buildFallbackText(widget.secondaryText!),
+                        ],
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           );
         }
