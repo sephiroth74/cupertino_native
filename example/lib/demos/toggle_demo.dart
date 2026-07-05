@@ -151,7 +151,10 @@ class _ToggleDemoState extends State<ToggleDemo> {
                               .map(
                                 (colorName) => CNLabel(
                                   CNText(colorName),
-                                  icon: CNImage(systemSymbolName: 'circle.fill', viewModifiers: CNViewModifiers(tint: kSystemColors[colorName])),
+                                  icon: CNImage(
+                                    systemSymbolName: 'circle.fill',
+                                    modifiers: CNViewModifiers(tint: kSystemColors[colorName]),
+                                  ),
                                 ),
                               )
                               .toList(),

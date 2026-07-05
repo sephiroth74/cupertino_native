@@ -643,7 +643,10 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                             .map(
                               (color) => CNLabel(
                                 CNText(color),
-                                icon: CNImage(systemSymbolName: 'circle.fill', viewModifiers: CNViewModifiers(tint: _kSystemColors[color])),
+                                icon: CNImage(
+                                  systemSymbolName: 'circle.fill',
+                                  modifiers: CNViewModifiers(tint: _kSystemColors[color]),
+                                ),
                               ),
                             )
                             .toList(),

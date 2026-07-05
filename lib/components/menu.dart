@@ -6,10 +6,10 @@ import 'package:cupertino_native/components/button.dart';
 import 'package:cupertino_native/components/button_child.dart';
 import 'package:cupertino_native/components/menu_child.dart';
 import 'package:cupertino_native/components/text.dart';
+import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/model/control_size.dart';
 import 'package:cupertino_native/style/menu_style.dart';
 import 'package:cupertino_native/theme/cn_theme.dart';
-import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -22,9 +22,23 @@ const double _kDefaultWidth = 120.0;
 typedef CNMenuDivider = CNDivider;
 
 /// A visual divider entry used inside [CNMenu.children].
-class CNDivider with CNMenuChild, EquatableMixin {
+class CNDivider with CNMenuChild {
   /// Creates a divider menu entry.
   const CNDivider();
+
+  final CNViewModifiers _modifiers = const CNViewModifiers();
+
+  @override
+  CNViewModifiers get modifiers => _modifiers;
+
+  @override
+  bool get enabled => _modifiers.enabled ?? true;
+
+  @override
+  EdgeInsets? get padding => _modifiers.padding;
+
+  @override
+  Object? get tag => _modifiers.tag;
 
   @override
   String get menuChildType => 'divider';
@@ -33,12 +47,23 @@ class CNDivider with CNMenuChild, EquatableMixin {
   List<Object?> get props => [];
 
   @override
-  bool get stringify => true;
+  bool get stringify => false;
 
   @override
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
     return {};
   }
+
+  @override
+  void writeModifiers(Map<String, dynamic> payload, BuildContext context) {}
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'CNDivider()';
+  }
+  
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// A native SwiftUI Menu wrapper.
@@ -166,7 +191,7 @@ class _CNMenuState extends State<CNMenu> {
         final args = CNChannelSerialization.asMap(call.arguments);
         final childIndex = (args?['childIndex'] as num?)?.toInt();
         if (childIndex != null && childIndex >= 0 && childIndex < widget.children.length) {
-          final child = widget.children[childIndex];
+          final CNMenuChild child = widget.children[childIndex];
           if (child is CNButton && child.enabled && child.onPressed != null) {
             child.onPressed!.call();
           }

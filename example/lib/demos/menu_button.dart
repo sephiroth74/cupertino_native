@@ -52,7 +52,11 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                       children: [
                         CNButton(
                           children: [
-                            const CNImage(systemSymbolName: 'star.fill', viewModifiers: CNViewModifiers(tint: CupertinoColors.systemRed), badge: 'uno'),
+                            const CNImage(
+                              systemSymbolName: 'star.fill',
+                              modifiers: CNViewModifiers(tint: CupertinoColors.systemRed),
+                              badge: 'uno',
+                            ),
                             const CNText('Button 0'),
                           ],
                           onPressed: () => _setLastAction('Button 0'),
@@ -62,7 +66,10 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                         CNButton(
                           badge: '3',
                           children: const [
-                            CNImage(systemSymbolName: 'star.fill', viewModifiers: CNViewModifiers(tint: CupertinoColors.systemYellow)),
+                            CNImage(
+                              systemSymbolName: 'star.fill',
+                              modifiers: CNViewModifiers(tint: CupertinoColors.systemYellow),
+                            ),
                             CNText('Button 1'),
                           ],
                           onPressed: () => _setLastAction('Button 1'),
@@ -71,7 +78,10 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                           badge: 5,
                           onPressed: () => _setLastAction('Button 2'),
                           children: const [
-                            CNImage(systemSymbolName: 'star.fill', viewModifiers: CNViewModifiers(tint: CupertinoColors.systemRed)),
+                            CNImage(
+                              systemSymbolName: 'star.fill',
+                              modifiers: CNViewModifiers(tint: CupertinoColors.systemRed),
+                            ),
                             CNText('Button 2'),
                           ],
                         ),
@@ -190,7 +200,10 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                               .map(
                                 (colorName) => CNLabel(
                                   CNText(colorName),
-                                  icon: CNImage(systemSymbolName: 'circle.fill', viewModifiers: CNViewModifiers(tint: kSystemColors[colorName])),
+                                  icon: CNImage(
+                                    systemSymbolName: 'circle.fill',
+                                    modifiers: CNViewModifiers(tint: kSystemColors[colorName]),
+                                  ),
                                 ),
                               )
                               .toList(),

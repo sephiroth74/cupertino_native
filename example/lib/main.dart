@@ -160,10 +160,10 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Button', 'button.horizontal', ButtonDemoPage()),
     _DemoEntry('Menu', 'ellipsis.circle', MenuButtonDemoPage()),
     _DemoEntry('Toggle', 'switch.2', ToggleDemo()),
+    _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Segmented Control', 'rectangle.split.3x1', SegmentedControlDemoPage()),
-    _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
     _DemoEntry('TabView', 'rectangle.split.3x1', TabViewDemoPage()),
     _DemoEntry('Icon', 'app', IconDemoPage()),
     _DemoEntry('Popup Menu Button', 'ellipsis.circle', PopupMenuButtonDemoPage()),

@@ -1,4 +1,3 @@
-import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/components/button_child.dart';
 import 'package:cupertino_native/components/image.dart';
 import 'package:cupertino_native/components/label.dart';
@@ -27,7 +26,7 @@ class CNPicker extends StatefulWidget with CNViewModifiable {
     this.shrinkWrap = false,
     this.asList = false,
     required this.items,
-    this.viewModifiers,
+    this.modifiers,
   }) : assert(items.isNotEmpty, 'Items list cannot be empty.'),
        assert(
          items.every((item) => item is CNText || item is CNLabel || item is CNImage),
@@ -60,16 +59,16 @@ class CNPicker extends StatefulWidget with CNViewModifiable {
   final bool shrinkWrap;
 
   @override
-  final CNViewModifiers? viewModifiers;
+  final CNViewModifiers? modifiers;
 
   @override
   State<CNPicker> createState() => _CNPickerState();
 
   @override
-  EdgeInsets? get padding => viewModifiers?.padding;
+  EdgeInsets? get padding => modifiers?.padding;
 
   @override
-  Object? get tag => viewModifiers?.tag;
+  Object? get tag => modifiers?.tag;
 }
 
 class _CNPickerState extends State<CNPicker> {
@@ -96,9 +95,9 @@ class _CNPickerState extends State<CNPicker> {
     super.dispose();
   }
 
-  bool get _effectiveEnabled => widget.viewModifiers?.enabled ?? true;
+  bool get _effectiveEnabled => widget.modifiers?.enabled ?? true;
 
-  Color? get _effectiveTint => widget.viewModifiers?.tint ?? CNTheme.of(context).primaryColor;
+  Color? get _effectiveTint => widget.modifiers?.tint ?? CNTheme.of(context).primaryColor;
 
   bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
 
@@ -192,7 +191,7 @@ class _CNPickerState extends State<CNPicker> {
       if (widget.labelChildren.isNotEmpty) 'labelChildren': _serializeChildren(widget.labelChildren),
     };
 
-    widget.writeViewModifiers(payload, context);
+    widget.writeModifiers(payload, context);
     return payload;
   }
 

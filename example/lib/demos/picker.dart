@@ -14,7 +14,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
   CNControlSize _controlSize = CNControlSize.large;
   int _controlSizeIndex = CNControlSize.values.indexOf(CNControlSize.large);
   Color? _foregroundColor;
-  CNPickerStyle _pickerStyle = CNPickerStyle.radioGroup;
+  CNPickerStyle _pickerStyle = CNPickerStyle.menu;
   Color? _tintColor;
 
   @override
@@ -59,7 +59,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                                   .toList(),
                               selectedIndex: _controlSizeIndex,
                               pickerStyle: _pickerStyle,
-                              viewModifiers: CNViewModifiers(
+                              modifiers: CNViewModifiers(
                                 controlSize: _controlSize,
                                 tint: _tintColor,
                                 foregroundColor: _foregroundColor,
@@ -100,7 +100,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                           onValueChanged: (index) => setState(() => _controlSize = CNControlSize.values[index]),
                           items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
                           pickerStyle: CNPickerStyle.automatic,
-                          viewModifiers: CNViewModifiers(
+                          modifiers: CNViewModifiers(
                             controlSize: CNControlSize.large,
                           ),
                         ),
@@ -118,7 +118,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                             return CNText(style.name);
                           }).toList(),
                           pickerStyle: CNPickerStyle.automatic,
-                          viewModifiers: CNViewModifiers(
+                          modifiers: CNViewModifiers(
                             controlSize: CNControlSize.large,
                           ),
                         ),
@@ -141,13 +141,13 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                                   CNText(colorName),
                                   icon: CNImage(
                                     systemSymbolName: kSystemColors[colorName] != null ? 'circle.fill' : 'circle',
-                                    viewModifiers: CNViewModifiers(tint: kSystemColors[colorName]),
+                                    modifiers: CNViewModifiers(tint: kSystemColors[colorName]),
                                   ),
                                 ),
                               )
                               .toList(),
                           pickerStyle: CNPickerStyle.menu,
-                          viewModifiers: CNViewModifiers(
+                          modifiers: CNViewModifiers(
                             controlSize: CNControlSize.large,
                           ),
                         ),
@@ -170,13 +170,13 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                                   CNText(colorName),
                                   icon: CNImage(
                                     systemSymbolName: kSystemColors[colorName] != null ? 'circle.fill' : 'circle',
-                                    viewModifiers: CNViewModifiers(tint: kSystemColors[colorName]),
+                                    modifiers: CNViewModifiers(tint: kSystemColors[colorName]),
                                   ),
                                 ),
                               )
                               .toList(),
                           pickerStyle: CNPickerStyle.menu,
-                          viewModifiers: CNViewModifiers(
+                          modifiers: CNViewModifiers(
                             controlSize: CNControlSize.large,
                           ),
                         ),

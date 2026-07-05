@@ -29,7 +29,7 @@ class CNSlider extends StatefulWidget with CNViewModifiable {
     this.width,
     this.height,
     this.controller,
-    this.viewModifiers,
+    this.modifiers,
   }) : assert(min < max),
        assert(value >= min && value <= max),
        assert(step == null || step > 0);
@@ -68,16 +68,16 @@ class CNSlider extends StatefulWidget with CNViewModifiable {
   final double? width;
 
   @override
-  final CNViewModifiers? viewModifiers;
+  final CNViewModifiers? modifiers;
 
   @override
   State<CNSlider> createState() => _CNSliderState();
 
   @override
-  EdgeInsets? get padding => viewModifiers?.padding;
+  EdgeInsets? get padding => modifiers?.padding;
 
   @override
-  Object? get tag => viewModifiers?.tag;
+  Object? get tag => modifiers?.tag;
 
   /// Whether the slider accepts interaction.
   bool get isEnabled => onChanged != null;
@@ -262,7 +262,7 @@ class _CNSliderState extends State<CNSlider> {
       'height': frameHeight,
     };
 
-    widget.writeViewModifiers(payload, context);
+    widget.writeModifiers(payload, context);
     return payload;
   }
 

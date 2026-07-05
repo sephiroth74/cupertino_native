@@ -135,7 +135,10 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                               .map(
                                 (colorName) => CNLabel(
                                   CNText(colorName),
-                                  icon: CNImage(systemSymbolName: 'circle.fill', viewModifiers: CNViewModifiers(tint: _kSystemColors[colorName])),
+                                  icon: CNImage(
+                                    systemSymbolName: 'circle.fill',
+                                    modifiers: CNViewModifiers(tint: _kSystemColors[colorName]),
+                                  ),
                                 ),
                               )
                               .toList(),

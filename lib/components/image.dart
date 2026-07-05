@@ -28,7 +28,7 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
     this.symbolColorRenderingMode,
     this.foregroundStyleColors,
     this.font,
-    this.viewModifiers,
+    this.modifiers,
   }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
 
   /// Optional badge shown next to the menu item when used inside [CNMenu].
@@ -53,7 +53,7 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
   final String systemSymbolName;
 
   @override
-  final CNViewModifiers? viewModifiers;
+  final CNViewModifiers? modifiers;
 
   @override
   String get buttonChildType => 'image';
@@ -71,7 +71,7 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
     symbolRenderingMode,
     symbolColorRenderingMode,
     foregroundStyleColors,
-    viewModifiers,
+    modifiers,
     font,
   ];
 
@@ -103,7 +103,7 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
       'font': resolvedFont?.toMap(),
     };
 
-    writeViewModifiers(payload, context);
+    writeModifiers(payload, context);
     return payload;
   }
 }

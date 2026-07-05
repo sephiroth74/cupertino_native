@@ -238,7 +238,7 @@ enum CNMenuDeserializer {
         }
 
         let childIndex = (payloadMap["menuChildIndex"] as? NSNumber)?.intValue ?? payloadMap["menuChildIndex"] as? Int
-        let enabled = payload.enabled ?? true
+        let enabled = payload.viewModifiers.enabled ?? true
         let children = payload.buttonChildren.compactMap(deserializeButtonLabelChild)
 
         var button = AnyView(
@@ -254,19 +254,8 @@ enum CNMenuDeserializer {
 
         button = AnyView(button.disabled(!enabled))
         button = applyButtonStyle(to: button, buttonStyle: payload.buttonStyle)
-        button = applyControlSize(to: button, controlSize: payload.controlSize)
 
-        if let tint = payload.tint {
-            button = AnyView(button.tint(ColorUtils.swiftUIColorFromARGB(tint)))
-        }
-
-        if let width = payload.width, let height = payload.height {
-            button = AnyView(button.frame(width: CGFloat(width), height: CGFloat(height)))
-        } else if let width = payload.width {
-            button = AnyView(button.frame(width: CGFloat(width)))
-        } else if let height = payload.height {
-            button = AnyView(button.frame(height: CGFloat(height)))
-        }
+        button = CNViewModifiers.apply(payload.viewModifiers, to: button)
 
         button = applyMenuBadge(to: button, badge: badgePayload(from: payloadMap))
 

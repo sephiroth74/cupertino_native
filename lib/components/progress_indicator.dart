@@ -40,7 +40,7 @@ class CNProgressView extends StatefulWidget with CNButtonChild, CNViewModifiable
     this.tint,
     this.width,
     this.height,
-    this.viewModifiers,
+    this.modifiers,
   }) : assert(total > 0);
 
   /// Native control size.
@@ -65,7 +65,7 @@ class CNProgressView extends StatefulWidget with CNButtonChild, CNViewModifiable
   final double? width;
 
   @override
-  final CNViewModifiers? viewModifiers;
+  final CNViewModifiers? modifiers;
 
   @override
   String get buttonChildType => 'progressView';
@@ -74,7 +74,7 @@ class CNProgressView extends StatefulWidget with CNButtonChild, CNViewModifiable
   State<CNProgressView> createState() => _CNProgressViewState();
 
   @override
-  EdgeInsets? get padding => viewModifiers?.padding;
+  EdgeInsets? get padding => modifiers?.padding;
 
   @override
   List<Object?> get props => [value, total, progressViewStyle, controlSize, tint, width, height];
@@ -83,7 +83,7 @@ class CNProgressView extends StatefulWidget with CNButtonChild, CNViewModifiable
   bool get stringify => true;
 
   @override
-  Object? get tag => viewModifiers?.tag;
+  Object? get tag => modifiers?.tag;
 
   @override
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
@@ -102,7 +102,7 @@ class CNProgressView extends StatefulWidget with CNButtonChild, CNViewModifiable
       'height': height,
     };
 
-    writeViewModifiers(payload, context);
+    writeModifiers(payload, context);
     return payload;
   }
 }
@@ -251,7 +251,7 @@ class _CNProgressViewState extends State<CNProgressView> {
       'height': frameHeight,
     };
 
-    widget.writeViewModifiers(payload, context);
+    widget.writeModifiers(payload, context);
     return payload;
   }
 

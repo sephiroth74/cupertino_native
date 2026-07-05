@@ -10,7 +10,7 @@ mixin CNPaddable on CNViewModifiable {
 
   /// Adds serialized `padding` values to the channel payload when present.
   void writePadding(Map<String, dynamic> payload) {
-    final value = padding ?? viewModifiers?.padding;
+    final value = padding ?? modifiers?.padding;
     if (value == null) return;
 
     payload['padding'] = {'top': value.top, 'leading': value.left, 'bottom': value.bottom, 'trailing': value.right};

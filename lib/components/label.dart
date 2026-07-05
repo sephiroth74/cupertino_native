@@ -112,6 +112,9 @@ class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
   String get menuChildType => 'label';
 
   @override
+  CNViewModifiers get modifiers => CNViewModifiers(tag: tag, padding: padding);
+
+  @override
   List<Object?> get props => [
     text,
     secondaryText,
@@ -133,9 +136,6 @@ class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
     return toMap(context, ignoreTheme: ignoreTheme);
   }
-
-  @override
-  CNViewModifiers get viewModifiers => CNViewModifiers(tag: tag, padding: padding);
 
   // ignore: public_member_api_docs
   Map<String, dynamic> toMap(BuildContext context, {double? frameWidth, double? frameHeight, bool ignoreTheme = false}) {

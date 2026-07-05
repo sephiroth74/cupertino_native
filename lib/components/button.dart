@@ -32,14 +32,9 @@ class CNButton extends StatefulWidget with CNViewModifiable, CNMenuChild {
     this.badge,
     this.role = CNButtonRole.none,
     this.onPressed,
-    this.enabled = true,
-    this.tint,
-    this.width,
-    this.height,
     this.shrinkWrap = false,
     this.style = CNButtonStyle.automatic,
-    this.controlSize = CNControlSize.regular,
-    this.viewModifiers,
+    this.modifiers,
   }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
 
   /// Optional badge shown next to the menu item when used inside [CNMenu].
@@ -47,15 +42,6 @@ class CNButton extends StatefulWidget with CNViewModifiable, CNMenuChild {
 
   /// Content views shown inside the native SwiftUI button label closure.
   final List<CNButtonChild> children;
-
-  /// Control size.
-  final CNControlSize controlSize;
-
-  /// Whether the control is interactive and tappable.
-  final bool enabled;
-
-  /// Control height.
-  final double? height;
 
   /// Callback when pressed.
   final VoidCallback? onPressed;
@@ -69,14 +55,8 @@ class CNButton extends StatefulWidget with CNViewModifiable, CNMenuChild {
   /// Visual style to apply.
   final CNButtonStyle style;
 
-  /// Accent/tint color.
-  final Color? tint;
-
-  /// Fixed width used in icon mode.
-  final double? width;
-
   @override
-  final CNViewModifiers? viewModifiers;
+  final CNViewModifiers? modifiers;
 
   @override
   State<CNButton> createState() => _CNButtonState();
@@ -85,16 +65,10 @@ class CNButton extends StatefulWidget with CNViewModifiable, CNMenuChild {
   String get menuChildType => 'button';
 
   @override
-  EdgeInsets? get padding => viewModifiers?.padding;
-
-  @override
-  List<Object?> get props => [children, badge, controlSize, enabled, height, onPressed, role, shrinkWrap, style, tint, width];
+  List<Object?> get props => [children, badge, onPressed, role, shrinkWrap, style, modifiers];
 
   @override
   bool get stringify => true;
-
-  @override
-  Object? get tag => viewModifiers?.tag;
 
   @override
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) => _toPayloadForMenu(context);
@@ -107,15 +81,10 @@ class CNButton extends StatefulWidget with CNViewModifiable, CNMenuChild {
       if (badge != null) 'badge': serializeMenuBadge(badge),
       'buttonRole': role.name,
       'buttonStyle': style.name,
-      'enabled': enabled && onPressed != null,
       'isDark': CNTheme.of(context).brightness == Brightness.dark,
-      'controlSize': controlSize.name,
-      'tint': resolveColorToArgb(tint, context),
-      'width': width,
-      'height': height,
     };
 
-    writeViewModifiers(payload, context);
+    writeModifiers(payload, context);
     return payload;
   }
 }
@@ -153,7 +122,7 @@ class _CNButtonState extends State<CNButton> {
   void didUpdateWidget(covariant CNButton oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final controlSizeChanged = oldWidget.controlSize != widget.controlSize;
+    final controlSizeChanged = oldWidget.modifiers?.controlSize != widget.modifiers?.controlSize;
     final childrenChanged = !listEquals(oldWidget.children, widget.children);
 
     if (controlSizeChanged || childrenChanged) {
@@ -172,8 +141,6 @@ class _CNButtonState extends State<CNButton> {
     _channel?.setMethodCallHandler(null);
     super.dispose();
   }
-
-  Color? get _effectiveTint => widget.tint;
 
   bool get _isDark => CNTheme.of(context).brightness == Brightness.dark;
 
@@ -194,7 +161,7 @@ class _CNButtonState extends State<CNButton> {
   Future<dynamic> _onMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'pressed':
-        if (widget.enabled && widget.onPressed != null) {
+        if (widget.modifiers?.enabled == true && widget.onPressed != null) {
           widget.onPressed!();
         }
         break;
@@ -260,15 +227,12 @@ class _CNButtonState extends State<CNButton> {
       'buttonChildren': _serializeChildren(),
       'buttonRole': _role,
       'buttonStyle': widget.style.name,
-      'enabled': widget.enabled && widget.onPressed != null,
       'isDark': _isDark,
-      'controlSize': widget.controlSize.name,
-      'tint': resolveColorToArgb(_effectiveTint, context),
       'width': frameWidth,
       'height': frameHeight,
     };
 
-    widget.writeViewModifiers(payload, context);
+    widget.writeModifiers(payload, context);
     return payload;
   }
 
@@ -287,10 +251,10 @@ class _CNButtonState extends State<CNButton> {
         final hasFixedHeight = constraints.hasTightHeight;
         final useIntrinsicWidth = widget.shrinkWrap || !hasFixedWidth;
         final useIntrinsicHeight = widget.shrinkWrap || !hasFixedHeight;
-        final resolvedWidth = widget.width ?? (useIntrinsicWidth ? (_intrinsicWidth ?? _kDefaultWidth) : constraints.maxWidth);
+        final resolvedWidth = widget.modifiers?.width ?? (useIntrinsicWidth ? (_intrinsicWidth ?? _kDefaultWidth) : constraints.maxWidth);
 
         final resolvedHeight =
-            widget.height ?? (useIntrinsicHeight ? (_intrinsicHeight ?? _kDefaultHeight) : constraints.maxHeight);
+            widget.modifiers?.height ?? (useIntrinsicHeight ? (_intrinsicHeight ?? _kDefaultHeight) : constraints.maxHeight);
 
         if (_layoutWidth != resolvedWidth || _layoutHeight != resolvedHeight) {
           _layoutWidth = useIntrinsicWidth ? _layoutWidth : resolvedWidth;

@@ -84,6 +84,9 @@ class CNText extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModif
   String get menuChildType => 'text';
 
   @override
+  CNViewModifiers get modifiers => CNViewModifiers(tag: tag, padding: padding);
+
+  @override
   List<Object?> get props => [
     text,
     color,
@@ -105,9 +108,6 @@ class CNText extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModif
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
     return toMap(context, ignoreTheme: ignoreTheme);
   }
-
-  @override
-  CNViewModifiers get viewModifiers => CNViewModifiers(tag: tag, padding: padding);
 
   // ignore: public_member_api_docs
   Map<String, dynamic> toMap(BuildContext context, {double? frameWidth, double? frameHeight, bool ignoreTheme = false}) {

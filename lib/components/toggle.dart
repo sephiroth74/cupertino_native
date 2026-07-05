@@ -48,7 +48,7 @@ class CNToggle extends StatefulWidget with CNViewModifiable {
     this.width,
     this.height,
     this.shrinkWrap = false,
-    this.viewModifiers,
+    this.modifiers,
   }) : enabled = onChanged != null;
 
   /// Label content children rendered in the native `Toggle` label closure.
@@ -96,16 +96,16 @@ class CNToggle extends StatefulWidget with CNViewModifiable {
   final double? width;
 
   @override
-  final CNViewModifiers? viewModifiers;
+  final CNViewModifiers? modifiers;
 
   @override
   State<CNToggle> createState() => _CNToggleState();
 
   @override
-  EdgeInsets? get padding => viewModifiers?.padding;
+  EdgeInsets? get padding => modifiers?.padding;
 
   @override
-  Object? get tag => viewModifiers?.tag;
+  Object? get tag => modifiers?.tag;
 }
 
 /// Controller for a [CNToggle] that allows imperative updates from Dart
@@ -339,7 +339,7 @@ class _CNToggleState extends State<CNToggle> {
       payload['height'] = frameHeight;
     }
 
-    widget.writeViewModifiers(payload, context);
+    widget.writeModifiers(payload, context);
 
     return payload;
   }

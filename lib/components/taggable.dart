@@ -14,7 +14,7 @@ mixin CNTaggable on CNViewModifiable {
 
   /// Adds `tag` to a channel payload map when present.
   void writeTag(Map<String, dynamic> payload) {
-    final value = tag ?? viewModifiers?.tag;
+    final value = tag ?? modifiers?.tag;
     if (value != null) {
       payload['tag'] = value;
     }
