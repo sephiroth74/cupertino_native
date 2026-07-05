@@ -159,16 +159,16 @@ abstract final class CNColors {
   /// All fill levels in order from most opaque to least opaque.
   static const List<CupertinoDynamicColor> fills = [fillPrimary, fillSecondary, fillTertiary, fillQuaternary, fillQuinary];
 
-  /// Canvas color — light: white · dark: black
+  /// Canvas color
   static const CupertinoDynamicColor canvasColor = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFFFFFFF),
-    darkColor: Color(0xFF000000), // TODO
+    darkColor: Color(0xFF1C1C1E),
   );
   
-  /// Background color — light: #F4F4F4 · dark: black
+  /// Secondary background color
   static const CupertinoDynamicColor secondaryBackgroundColor = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFF4F4F4),
-    darkColor: Color(0xFF000000), // TODO
+    darkColor: Color(0xFF1C1C1E),
   );
 
   

@@ -126,7 +126,7 @@ class _TextDemoPageState extends State<TextDemoPage> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
-                constraints: const BoxConstraints.expand(width: 350),
+                width: 350,
                 decoration: BoxDecoration(
                   color: CNTheme.of(context).fillPrimaryColor,
                   border: Border.all(color: CNTheme.of(context).separatorColor, width: 1),

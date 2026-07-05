@@ -469,8 +469,7 @@ class ImageDemoPage extends StatefulWidget {
   const ImageDemoPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _ImageDemoPageState createState() => _ImageDemoPageState();
+  State<ImageDemoPage> createState() => _ImageDemoPageState();
 }
 
 class _ImageDemoPageState extends State<ImageDemoPage> {

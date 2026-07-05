@@ -7,7 +7,7 @@ import 'demos/toggle_demo.dart';
 import 'demos/segmented_control.dart';
 import 'demos/picker.dart';
 import 'demos/icon.dart';
-import 'demos/image.dart';
+import 'demos/image_demo.dart';
 import 'demos/popup_menu_button.dart';
 import 'demos/menu_button.dart';
 import 'demos/button.dart';
@@ -152,8 +152,8 @@ class _DesktopDemoShell extends StatefulWidget {
 class _DesktopDemoShellState extends State<_DesktopDemoShell> {
   static const _entries = <_DemoEntry>[
     _DemoEntry('Image', 'photo', ImageDemoPage()),
-    _DemoEntry('Label', 'textformat', LabelDemoPage()),
     _DemoEntry('Text', 'text.viewfinder', TextDemoPage()),
+    _DemoEntry('Label', 'textformat', LabelDemoPage()),
     _DemoEntry('Color Well', 'paintpalette', ColorWellDemoPage()),
     _DemoEntry('Slider', 'slider.horizontal.3', SliderDemoPage()),
     _DemoEntry('Progress', 'progress.indicator', ProgressIndicatorsPageDemo()),
@@ -293,34 +293,36 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
         shownByDefault: true,
         startWidth: 250,
         child: SafeArea(
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: [
-              CNListSection.insetGrouped(
-                backgroundColor: theme.canvasColor,
-                header: Text('Components'),
-                children: [
-                  for (final entry in visibleEntries)
-                    CNListTile(
-                      title: Text(entry.title),
-                      leading: CNIcon(
-                        symbol: CNSymbol(
-                          entry.symbolName,
-                          color: _selectedIndex == _entries.indexOf(entry)
-                              ? CupertinoColors.label.darkColor
-                              : isDark ? CupertinoColors.label.darkColor : CupertinoColors.label.color,
+          child: Container(
+            color: theme.groupedBackgroundColor,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                CNListSection.insetGrouped(
+                  backgroundColor: theme.groupedBackgroundColor,
+                  children: [
+                    for (final entry in visibleEntries)
+                      CNListTile(
+                        title: Text(entry.title),
+                        leading: CNIcon(
+                          symbol: CNSymbol(
+                            entry.symbolName,
+                            color: _selectedIndex == _entries.indexOf(entry)
+                                ? CupertinoColors.label.darkColor
+                                : isDark ? CupertinoColors.label.darkColor : CupertinoColors.label.color,
+                          ),
                         ),
+                        selected: _selectedIndex == _entries.indexOf(entry),
+                        onTap: () {
+                          setState(() {
+                            _selectedIndex = _entries.indexOf(entry);
+                          });
+                        },
                       ),
-                      selected: _selectedIndex == _entries.indexOf(entry),
-                      onTap: () {
-                        setState(() {
-                          _selectedIndex = _entries.indexOf(entry);
-                        });
-                      },
-                    ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
