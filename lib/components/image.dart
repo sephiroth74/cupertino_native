@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:cupertino_native/components/button_child.dart';
+import 'package:cupertino_native/components/menu_badge_support.dart';
+import 'package:cupertino_native/components/menu_child.dart';
 import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/style/font.dart';
 import 'package:cupertino_native/style/sf_symbol.dart';
@@ -12,17 +14,21 @@ import 'package:flutter/services.dart';
 /// Represents an image that can be used in various components, such as menu items or buttons.
 /// This class encapsulates the necessary information to render a system symbol on Apple platforms,
 /// along with optional configuration for customizing its appearance.
-class CNImage extends StatefulWidget with CNButtonChild {
+class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild {
   /// Creates a CNImage with the given [systemSymbolName].
   const CNImage({
     super.key,
     required this.systemSymbolName,
+    this.badge,
     this.symbolRenderingMode,
     this.symbolColorRenderingMode,
     this.foregroundStyleColors,
     this.tint,
     this.font,
-  });
+  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
+
+  /// Optional badge shown next to the menu item when used inside [CNMenu].
+  final Object? badge;
 
   /// Optional font used to render the symbol image.
   final CNFont? font;
@@ -52,6 +58,23 @@ class CNImage extends StatefulWidget with CNButtonChild {
   State<CNImage> createState() => _CNImageState();
 
   @override
+  String get menuChildType => 'image';
+
+  @override
+  List<Object?> get props => [
+    systemSymbolName,
+    badge,
+    symbolRenderingMode,
+    symbolColorRenderingMode,
+    foregroundStyleColors,
+    tint,
+    font,
+  ];
+
+  @override
+  bool get stringify => true;
+
+  @override
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) => toMap(context, ignoreTheme: ignoreTheme);
 
   /// Serializes this image to a map for platform channel communication.
@@ -65,6 +88,7 @@ class CNImage extends StatefulWidget with CNButtonChild {
 
     return {
       'systemSymbolName': systemSymbolName,
+      if (badge != null) 'badge': serializeMenuBadge(badge),
       'symbolRenderingMode': resolvedRenderingMode?.name,
       'symbolColorRenderingMode': resolvedColorRenderingMode?.name,
       'foregroundStyleColors': resolvedForegroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),

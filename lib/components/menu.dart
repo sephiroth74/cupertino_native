@@ -1,179 +1,315 @@
 import 'dart:convert';
 
 import 'package:cupertino_native/channel/channel_serialization.dart';
-import 'package:cupertino_native/components/image.dart';
+import 'package:cupertino_native/channel/params.dart';
+import 'package:cupertino_native/components/button.dart';
+import 'package:cupertino_native/components/button_child.dart';
+import 'package:cupertino_native/components/menu_child.dart';
+import 'package:cupertino_native/components/text.dart';
+import 'package:cupertino_native/model/control_size.dart';
+import 'package:cupertino_native/style/menu_style.dart';
+import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-/// A menu model used by [CNMenuButton].
+const double _kDefaultHeight = 44.0;
+const double _kDefaultWidth = 120.0;
+
+/// Backward-compatible alias for [CNDivider].
+@Deprecated('Use CNDivider instead.')
+typedef CNMenuDivider = CNDivider;
+
+/// A visual divider entry used inside [CNMenu.children].
+class CNDivider with CNMenuChild, EquatableMixin {
+  /// Creates a divider menu entry.
+  const CNDivider();
+
+  @override
+  String get menuChildType => 'divider';
+
+  @override
+  List<Object?> get props => [];
+
+  @override
+  bool get stringify => true;
+
+  @override
+  Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
+    return {};
+  }
+}
+
+/// A native SwiftUI Menu wrapper.
 ///
-/// This model is shared by other menu-based controls and supports nested
-/// submenus, separators, and optional icon/subtitle metadata.
-// ignore: must_be_immutable
-class CNMenu extends ChangeNotifier with EquatableMixin implements CNChannelSerializable {
-  /// Creates a menu with the provided [items].
-  CNMenu({required this.items}) {
-    // Listen to all items for changes
-    for (final item in items) {
-      item.addListener(notifyListeners);
+/// Supported menu children are [CNButton], [CNText], [CNImage],
+/// [CNLabel], and [CNDivider] (all objects implementing [CNMenuChild]).
+class CNMenu extends StatefulWidget {
+  /// Menu content children.
+  final List<CNMenuChild> children;
+
+  /// Control size.
+  final CNControlSize controlSize;
+
+  /// Whether the control is interactive.
+  final bool enabled;
+
+  /// Foreground color.
+  final Color? foregroundColor;
+
+  /// Optional fixed height.
+  final double? height;
+
+  /// Label content children for the tappable menu trigger.
+  final List<CNButtonChild> labels;
+
+  /// Callback fired when the menu trigger primary action is invoked.
+  final VoidCallback? onPrimaryAction;
+
+  /// If true, sizes to intrinsic width/height.
+  final bool shrinkWrap;
+
+  /// SwiftUI menu style.
+  final CNMenuStyle style;
+
+  /// Tint color.
+  final Color? tint;
+
+  /// Optional fixed width.
+  final double? width;
+
+  /// Creates a native menu view.
+  const CNMenu({
+    super.key,
+    this.children = const [],
+    this.labels = const [],
+    this.onPrimaryAction,
+    this.enabled = true,
+    this.tint,
+    this.foregroundColor,
+    this.width,
+    this.height,
+    this.shrinkWrap = false,
+    this.style = CNMenuStyle.automatic,
+    this.controlSize = CNControlSize.regular,
+  });
+
+  @override
+  State<CNMenu> createState() => _CNMenuState();
+}
+
+class _CNMenuState extends State<CNMenu> {
+  MethodChannel? _channel;
+  double? _intrinsicHeight;
+  double? _intrinsicWidth;
+  String? _lastSerializedPayload;
+  double? _layoutHeight;
+  double? _layoutWidth;
+
+  bool get _isDark => CNTheme.of(context).brightness == Brightness.dark;
+
+  @override
+  Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      return const SizedBox.shrink();
     }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasFixedWidth = constraints.hasTightWidth;
+        final hasFixedHeight = constraints.hasTightHeight;
+        final hasExplicitWidth = widget.width != null;
+        final hasExplicitHeight = widget.height != null;
+        final shouldSendWidth = hasExplicitWidth || hasFixedWidth;
+        final shouldSendHeight = hasExplicitHeight || hasFixedHeight;
+
+        final resolvedWidth = widget.width ?? (hasFixedWidth ? constraints.maxWidth : (_intrinsicWidth ?? _kDefaultWidth));
+        final resolvedHeight = widget.height ?? (hasFixedHeight ? constraints.maxHeight : (_intrinsicHeight ?? _kDefaultHeight));
+
+        final nextLayoutWidth = shouldSendWidth ? resolvedWidth : null;
+        final nextLayoutHeight = shouldSendHeight ? resolvedHeight : null;
+
+        if (_layoutWidth != nextLayoutWidth || _layoutHeight != nextLayoutHeight) {
+          _layoutWidth = nextLayoutWidth;
+          _layoutHeight = nextLayoutHeight;
+          _syncPropsToNativeIfNeeded();
+        }
+
+        final creationParams = _toPayload(frameWidth: nextLayoutWidth, frameHeight: nextLayoutHeight);
+
+        return SizedBox(
+          width: resolvedWidth,
+          height: resolvedHeight,
+          child: AppKitView(
+            viewType: 'CupertinoNativeMenu',
+            creationParams: creationParams,
+            creationParamsCodec: const StandardMessageCodec(),
+            onPlatformViewCreated: _onCreated,
+          ),
+        );
+      },
+    );
   }
 
-  /// Creates an empty menu.
-  factory CNMenu.empty() {
-    return CNMenu(items: []);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncPropsToNativeIfNeeded();
   }
 
-  /// The top-level menu items.
-  final List<CNMenuItem> items;
+  @override
+  void didUpdateWidget(covariant CNMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final shouldResetPayload =
+        oldWidget.enabled != widget.enabled ||
+        oldWidget.style != widget.style ||
+        oldWidget.tint != widget.tint ||
+        oldWidget.foregroundColor != widget.foregroundColor ||
+        oldWidget.width != widget.width ||
+        oldWidget.height != widget.height ||
+        oldWidget.shrinkWrap != widget.shrinkWrap ||
+        !listEquals(oldWidget.children, widget.children) ||
+        !listEquals(oldWidget.labels, widget.labels);
+
+    if (shouldResetPayload) {
+      _lastSerializedPayload = null;
+    }
+
+    _syncPropsToNativeIfNeeded();
+  }
 
   @override
   void dispose() {
-    for (final item in items) {
-      item.removeListener(notifyListeners);
-      item.dispose();
-    }
+    _channel?.setMethodCallHandler(null);
     super.dispose();
   }
 
-  @override
-  List<Object?> get props => [items];
-
-  @override
-  Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) => toMap(context, ignoreTheme: ignoreTheme);
-
-  /// Serializes the menu to JSON for platform channel communication.
-  Map<String, dynamic> toMap(BuildContext context, {bool ignoreTheme = false}) {
-    return {'items': CNChannelSerialization.objects(items, context, ignoreTheme: ignoreTheme)};
+  void _cacheCurrentProps() {
+    _lastSerializedPayload = _serializeCurrentPayload();
   }
 
-  // ignore: public_member_api_docs
-  String toJson(BuildContext context, {bool ignoreTheme = false}) {
-    return jsonEncode(toMap(context, ignoreTheme: ignoreTheme));
+  void _onCreated(int id) {
+    final ch = MethodChannel('CupertinoNativeMenu_$id');
+    _channel = ch;
+    ch.setMethodCallHandler(_onMethodCall);
+    _cacheCurrentProps();
+    _requestIntrinsicSize();
   }
 
-  /// Returns the first menu item with the given platform [identifier].
-  CNMenuItem? findItemByIdentifier(String identifier) {
-    if (identifier.isEmpty) return null;
-    return _findIn(items, identifier);
-  }
-
-  CNMenuItem? _findIn(List<CNMenuItem> nodes, String identifier) {
-    for (final item in nodes) {
-      if (!item.isSeparator && item.identifier == identifier) {
-        return item;
-      }
-      final submenuItems = item.submenu?.items;
-      if (submenuItems != null) {
-        final nested = _findIn(submenuItems, identifier);
-        if (nested != null) return nested;
-      }
+  Future<dynamic> _onMethodCall(MethodCall call) async {
+    switch (call.method) {
+      case 'primaryActionPressed':
+        if (widget.enabled) {
+          widget.onPrimaryAction?.call();
+        }
+        break;
+      case 'menuButtonPressed':
+        final args = CNChannelSerialization.asMap(call.arguments);
+        final childIndex = (args?['childIndex'] as num?)?.toInt();
+        if (childIndex != null && childIndex >= 0 && childIndex < widget.children.length) {
+          final child = widget.children[childIndex];
+          if (child is CNButton && child.enabled && child.onPressed != null) {
+            child.onPressed!.call();
+          }
+        }
+        break;
+      case 'intrinsicSizeChanged':
+        final args = CNChannelSerialization.asMap(call.arguments);
+        final w = (args?['width'] as num?)?.toDouble();
+        final h = (args?['height'] as num?)?.toDouble();
+        if (w != null && h != null && mounted) {
+          if (w == _intrinsicWidth && h == _intrinsicHeight) {
+            break;
+          }
+          setState(() {
+            _intrinsicWidth = w > 0 ? w : null;
+            _intrinsicHeight = h > 0 ? h : null;
+          });
+        }
+        break;
     }
+
     return null;
   }
-}
 
-/// Represents the state of a CNMenuItem
-enum CNMenuItemState {
-  /// The menu item is not selected.
-  off,
+  Future<void> _requestIntrinsicSize() async {
+    final ch = _channel;
+    if (ch == null) return;
 
-  /// The menu item is selected.
-  on,
+    try {
+      final size = await ch.invokeMethod<Map>('getIntrinsicSize');
+      final w = (size?['width'] as num?)?.toDouble();
+      final h = (size?['height'] as num?)?.toDouble();
 
-  /// The menu item is in an indeterminate state.
-  mixed,
-}
-
-/// Represents a single item in a CNMenu, which can have a title, an optional tag,
-/// an optional symbol configuration, and an optional submenu.
-/// It also has a state (on, off, mixed) and an enabled/disabled status.
-// ignore: must_be_immutable
-class CNMenuItem extends ChangeNotifier with EquatableMixin implements CNChannelSerializable {
-  /// Creates a new CNMenuItem with the given properties. The [title] is required, while other properties are optional.
-  /// The [state] defaults to [CNMenuItemState.off], and [enabled] defaults to true.
-  /// The [tag] can be used to store an arbitrary integer value for identification purposes.
-  CNMenuItem({
-    required this.title,
-    this.subtitle,
-    this.tag,
-    this.image,
-    this.submenu,
-    this.state = CNMenuItemState.off,
-    this.enabled = true,
-  }) : isSeparator = false,
-       _identifier = _identifierCounter++;
-
-  /// Creates a separator entry for [CNMenu].
-  CNMenuItem.separator()
-    : title = '',
-      subtitle = null,
-      tag = null,
-      image = null,
-      submenu = null,
-      state = CNMenuItemState.off,
-      enabled = false,
-      isSeparator = true,
-      _identifier = _identifierCounter++;
-
-  /// Whether the menu item is enabled or disabled. Disabled items are typically shown in a dimmed state and cannot be interacted with.
-  final bool enabled;
-
-  /// An optional symbol image associated with the menu item, which can be rendered according to the provided symbol configuration.
-  final CNImage? image;
-
-  /// Whether this entry is a visual separator.
-  final bool isSeparator;
-
-  /// The state of the menu item, which can be on, off, or mixed (indeterminate).
-  final CNMenuItemState state;
-
-  /// An optional submenu that can be displayed when the user interacts with this menu item.
-  final CNMenu? submenu;
-
-  /// An optional subtitle displayed below the primary title.
-  final String? subtitle;
-
-  /// An optional integer tag that can be used to identify the item.
-  final int? tag;
-
-  /// The title of the menu item, which is displayed to the user.
-  final String title;
-
-  static int _identifierCounter = 0;
-
-  final int _identifier;
-
-  @override
-  List<Object?> get props => [_identifier, isSeparator, state, tag, title, subtitle, image, submenu, enabled];
-
-  @override
-  Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) => toMap(context, ignoreTheme: ignoreTheme);
-
-  /// A unique identifier for this menu item, used for platform communication. It is generated automatically and should not be set manually.
-  String get identifier => isSeparator ? '' : 'menuItem_$_identifier';
-
-  /// Converts this menu item to a JSON string representation, which is used for communication with the native platform.
-  /// The JSON includes all relevant properties of the menu item, such as title, tag, state, symbol configuration, enabled status, and submenu (if any).
-  Map<String, dynamic> toMap(BuildContext context, {bool ignoreTheme = false}) {
-    if (isSeparator) {
-      return {'separator': true};
-    }
-
-    return {
-      'separator': false,
-      'title': title,
-      'subtitle': subtitle,
-      'tag': tag,
-      'identifier': 'menuItem_$_identifier',
-      'state': state.name,
-      'image': CNChannelSerialization.object(image, context),
-      'enabled': enabled,
-      'submenu': CNChannelSerialization.object(submenu, context),
-    };
+      if (w != null && h != null && mounted) {
+        setState(() {
+          _intrinsicWidth = w;
+          _intrinsicHeight = h;
+        });
+      }
+    } catch (_) {}
   }
 
-  String toJson(BuildContext context) {
-    return jsonEncode(toMap(context));
+  List<Map<String, dynamic>> _serializeChildren(List<CNMenuChild> children, BuildContext context) {
+    final serialized = <Map<String, dynamic>>[];
+
+    for (var i = 0; i < children.length; i++) {
+      final child = children[i];
+      final payload = Map<String, dynamic>.from(child.toChannelMap(context, ignoreTheme: true));
+      if (child.menuChildType == 'button') {
+        payload['menuChildIndex'] = i;
+      }
+
+      serialized.add({'type': child.menuChildType, 'payload': payload});
+    }
+
+    return serialized;
+  }
+
+  String _serializeCurrentPayload() => jsonEncode(_toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight));
+
+  List<Map<String, dynamic>> _serializeLabelChildren(List<CNButtonChild> labelChildren, BuildContext context) {
+    return labelChildren
+        .map((child) => {'type': child.buttonChildType, 'payload': child.toChannelMap(context, ignoreTheme: true)})
+        .toList();
+  }
+
+  Future<void> _syncPropsToNativeIfNeeded() async {
+    final ch = _channel;
+    if (ch == null) return;
+
+    final payload = _toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight);
+    final serializedPayload = jsonEncode(payload);
+
+    if (_lastSerializedPayload != serializedPayload) {
+      await ch.invokeMethod('setMenu', payload);
+      _cacheCurrentProps();
+      _requestIntrinsicSize();
+    }
+  }
+
+  Map<String, dynamic> _toPayload({double? frameWidth, double? frameHeight}) {
+    final payload = {
+      'children': _serializeChildren(widget.children, context),
+      'labelChildren': _serializeLabelChildren(widget.labels, context),
+      'menuStyle': widget.style.name,
+      'enabled': widget.enabled,
+      'isDark': _isDark,
+      'controlSize': widget.controlSize.name,
+      'tint': resolveColorToArgb(widget.tint, context),
+      'foregroundColor': resolveColorToArgb(widget.foregroundColor, context),
+    };
+
+    if (frameWidth != null) {
+      payload['width'] = frameWidth;
+    }
+
+    if (frameHeight != null) {
+      payload['height'] = frameHeight;
+    }
+
+    return payload;
   }
 }

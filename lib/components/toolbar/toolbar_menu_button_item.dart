@@ -1,4 +1,4 @@
-import 'package:cupertino_native/components/menu.dart';
+import 'package:cupertino_native/components/menu_model.dart';
 import 'package:cupertino_native/components/image.dart';
 import 'package:cupertino_native/style/menu_style.dart';
 import 'package:flutter/widgets.dart';
@@ -27,13 +27,13 @@ class CNToolbarMenuButtonItem extends CNToolbarItem {
   final String? label;
 
   /// The menu model to show.
-  final CNMenu menu;
+  final CNMenuModel menu;
 
   /// Native menu style.
   final CNMenuStyle menuStyle;
 
   /// Called when a leaf menu item is selected.
-  final ValueChanged<CNMenuItem> onSelected;
+  final ValueChanged<CNMenuModelItem> onSelected;
 
   @override
   Map<String, dynamic> customProperties() {

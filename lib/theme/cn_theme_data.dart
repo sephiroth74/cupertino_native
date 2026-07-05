@@ -2,11 +2,6 @@ import 'package:cupertino_native/cupertino_native.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../style/font.dart';
-import '../style/cn_typography.dart';
-import '../style/cn_colors.dart';
-import '../style/macos26_materials.dart';
-import '../style/sf_symbol.dart';
 import '../style/text_utils.dart';
 
 /// Widget-specific visual overrides for [CNToggle].

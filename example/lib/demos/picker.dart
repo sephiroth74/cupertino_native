@@ -9,17 +9,17 @@ class PickerDemoPage extends StatefulWidget {
 }
 
 class _PickerDemoPageState extends State<PickerDemoPage> {
-  int _basicPickerIndex = 0;
-  int _coloredPickerIndex = 1;
+  final int _basicPickerIndex = 0;
+  final int _coloredPickerIndex = 1;
   CNControlSize _controlSize = CNControlSize.large;
   int _controlSizeIndex = CNControlSize.values.indexOf(CNControlSize.large);
-  int _iconPickerIndex = 0;
-  int _labelPickerIndex = 0;
+  final int _iconPickerIndex = 0;
+  final int _labelPickerIndex = 0;
   CNPickerStyle _pickerStyle = CNPickerStyle.radioGroup;
   CNPickerStyle _pickerStyle2 = CNPickerStyle.radioGroup;
-  int _shrinkWrappedPickerIndex = 0;
+  final int _shrinkWrappedPickerIndex = 0;
   final List<CNControlSize> _sizes = CNControlSize.values;
-  int _sublabelPickerIndex = 0;
+  final int _sublabelPickerIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: CupertinoColors.systemGrey.withOpacity(0.2),
+                          color: CupertinoColors.systemGrey.withValues(alpha: 0.2),
                           style: BorderStyle.solid,
                           width: 1.0,
                         ),
@@ -70,7 +70,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: CupertinoColors.systemGrey.withOpacity(0.2),
+                            color: CupertinoColors.systemGrey.withValues(alpha: 0.2),
                             style: BorderStyle.solid,
                             width: 1.0,
                           ),

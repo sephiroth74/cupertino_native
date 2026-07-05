@@ -79,6 +79,10 @@ class _PopupMenuButtonDemoPageState extends State<PopupMenuButtonDemoPage> {
                 Text('Custom child'),
                 Spacer(),
                 CNPopupMenuButton(
+                  items: items,
+                  onSelected: (index) {
+                    setState(() => _lastSelected = index);
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -100,10 +104,6 @@ class _PopupMenuButtonDemoPageState extends State<PopupMenuButtonDemoPage> {
                       ],
                     ),
                   ),
-                  items: items,
-                  onSelected: (index) {
-                    setState(() => _lastSelected = index);
-                  },
                 ),
               ],
             ),

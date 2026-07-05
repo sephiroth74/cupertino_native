@@ -36,7 +36,7 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
   bool _isEnabled = true;
   bool _isStepped = false;
   CNControlSize _size = CNControlSize.regular;
-  Color? _tintColor = null;
+  Color? _tintColor;
 
   @override
   Widget build(BuildContext context) {

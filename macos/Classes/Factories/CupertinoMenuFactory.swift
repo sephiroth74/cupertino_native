@@ -1,7 +1,7 @@
 import Cocoa
 import FlutterMacOS
 
-class CupertinoMenuButtonViewFactory: NSObject, FlutterPlatformViewFactory {
+class CupertinoMenuViewFactory: NSObject, FlutterPlatformViewFactory {
     private let messenger: FlutterBinaryMessenger
 
     init(messenger: FlutterBinaryMessenger) {
@@ -14,6 +14,6 @@ class CupertinoMenuButtonViewFactory: NSObject, FlutterPlatformViewFactory {
     }
 
     func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
-        CupertinoMenuButtonNSView(viewId: viewId, args: args, messenger: messenger)
+        CupertinoMenuNSView(viewId: viewId, args: args, messenger: messenger)
     }
 }

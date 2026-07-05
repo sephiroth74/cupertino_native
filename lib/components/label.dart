@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:cupertino_native/components/button_child.dart';
+import 'package:cupertino_native/components/menu_badge_support.dart';
+import 'package:cupertino_native/components/menu_child.dart';
 import 'package:cupertino_native/components/image.dart';
 import 'package:cupertino_native/components/text.dart';
 import 'package:cupertino_native/style/text_utils.dart';
@@ -14,25 +16,27 @@ const double _kDefaultLabelWidth = 50.0;
 /// A native macOS SwiftUI label backed by `Label`.
 ///
 /// On platforms other than macOS, this falls back to a plain Flutter text label.
-class CNLabel extends StatefulWidget with CNButtonChild {
+class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild {
   /// Creates a native SwiftUI label.
   const CNLabel(
     this.text, {
     super.key,
     this.secondaryText,
     this.icon,
+    this.badge,
     this.labelStyle = CNLabelStyle.automatic,
     this.labelReservedIconWidth,
     this.labelIconToTitleSpacing,
     this.width,
     this.height,
-  });
+  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
 
   /// Creates a native SwiftUI label with a single text string.
   factory CNLabel.text(
     String text, {
     CNText? secondaryText,
     CNImage? icon,
+    Object? badge,
     CNLabelStyle labelStyle = CNLabelStyle.automatic,
     double? labelReservedIconWidth,
     double? labelIconToTitleSpacing,
@@ -43,6 +47,7 @@ class CNLabel extends StatefulWidget with CNButtonChild {
       CNText(text),
       secondaryText: secondaryText,
       icon: icon,
+      badge: badge,
       labelStyle: labelStyle,
       labelReservedIconWidth: labelReservedIconWidth,
       labelIconToTitleSpacing: labelIconToTitleSpacing,
@@ -50,6 +55,9 @@ class CNLabel extends StatefulWidget with CNButtonChild {
       height: height,
     );
   }
+
+  /// Optional badge shown next to the menu item when used inside [CNMenu].
+  final Object? badge;
 
   /// Optional fixed height.
   final double? height;
@@ -82,15 +90,36 @@ class CNLabel extends StatefulWidget with CNButtonChild {
   State<CNLabel> createState() => _CNLabelState();
 
   @override
+  String get menuChildType => 'label';
+
+  @override
+  List<Object?> get props => [
+    text,
+    secondaryText,
+    icon,
+    badge,
+    labelStyle,
+    labelReservedIconWidth,
+    labelIconToTitleSpacing,
+    width,
+    height,
+  ];
+
+  @override
+  bool get stringify => true;
+
+  @override
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
     return toMap(context, ignoreTheme: ignoreTheme);
   }
 
+  // ignore: public_member_api_docs
   Map<String, dynamic> toMap(BuildContext context, {double? frameWidth, double? frameHeight, bool ignoreTheme = false}) {
     return {
       'primaryText': text.toMap(context, ignoreTheme: ignoreTheme),
       if (secondaryText != null) 'secondaryText': secondaryText!.toMap(context, ignoreTheme: ignoreTheme),
       if (icon != null) 'icon': icon!.toMap(context, ignoreTheme: ignoreTheme),
+      if (badge != null) 'badge': serializeMenuBadge(badge),
       'labelStyle': labelStyle.name,
       if (labelReservedIconWidth != null) 'labelReservedIconWidth': labelReservedIconWidth,
       if (labelIconToTitleSpacing != null) 'labelIconToTitleSpacing': labelIconToTitleSpacing,

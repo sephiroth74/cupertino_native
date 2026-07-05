@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:cupertino_native/channel/channel_serialization.dart';
 import 'package:cupertino_native/components/button_child.dart';
+import 'package:cupertino_native/components/menu_badge_support.dart';
+import 'package:cupertino_native/components/menu_child.dart';
 import 'package:cupertino_native/model/control_size.dart';
 import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/cupertino.dart';
@@ -33,13 +35,14 @@ enum CNButtonRole {
 ///
 /// Embeds a native SwiftUI Button for authentic visuals and behavior on
 /// macOS. Falls back to [CupertinoButton] on other platforms.
-class CNButton extends StatefulWidget {
+class CNButton extends StatefulWidget with CNMenuChild {
   /// Creates a native SwiftUI button.
   ///
   /// Supported child types are [CNImage], [CNLabel], and [CNText].
   const CNButton({
     super.key,
     this.children = const [],
+    this.badge,
     this.role = CNButtonRole.none,
     this.onPressed,
     this.enabled = true,
@@ -49,7 +52,10 @@ class CNButton extends StatefulWidget {
     this.shrinkWrap = false,
     this.style = CNButtonStyle.automatic,
     this.controlSize = CNControlSize.regular,
-  });
+  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
+
+  /// Optional badge shown next to the menu item when used inside [CNMenu].
+  final Object? badge;
 
   /// Content views shown inside the native SwiftUI button label closure.
   final List<CNButtonChild> children;
@@ -83,6 +89,35 @@ class CNButton extends StatefulWidget {
 
   @override
   State<CNButton> createState() => _CNButtonState();
+
+  @override
+  String get menuChildType => 'button';
+
+  @override
+  List<Object?> get props => [children, badge, controlSize, enabled, height, onPressed, role, shrinkWrap, style, tint, width];
+
+  @override
+  bool get stringify => true;
+
+  @override
+  Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) => _toPayloadForMenu(context);
+
+  Map<String, dynamic> _toPayloadForMenu(BuildContext context) {
+    return {
+      'buttonChildren': children
+          .map((child) => {'type': child.buttonChildType, 'payload': child.toChannelMap(context, ignoreTheme: true)})
+          .toList(),
+      if (badge != null) 'badge': serializeMenuBadge(badge),
+      'buttonRole': role.name,
+      'buttonStyle': style.name,
+      'enabled': enabled && onPressed != null,
+      'isDark': CNTheme.of(context).brightness == Brightness.dark,
+      'controlSize': controlSize.name,
+      'tint': resolveColorToArgb(tint, context),
+      'width': width,
+      'height': height,
+    };
+  }
 }
 
 class _CNButtonState extends State<CNButton> {

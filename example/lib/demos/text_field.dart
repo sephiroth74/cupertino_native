@@ -1,6 +1,5 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Theme, ThemeMode;
 
 class TextFieldDemoPage extends StatefulWidget {
   const TextFieldDemoPage({super.key});
@@ -86,7 +85,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
             const SizedBox(height: 12),
             CNTextField(
               controller: TextEditingController(text: 'Styled field'),
-              backgroundColor: CupertinoColors.systemYellow.withOpacity(0.3),
+              backgroundColor: CupertinoColors.systemYellow.withValues(alpha: 0.3),
               font: const CNFont.system(CNFontSize.points(16), weight: CNFontWeight.bold),
               width: 320,
               bezelStyle: CNTextFieldBezelStyle.round,
@@ -96,7 +95,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
             CNTextField(
               controller: TextEditingController(text: ''),
               placeholder: 'Styled placeholder...',
-              placeholderColor: CupertinoColors.systemRed.withOpacity(0.8),
+              placeholderColor: CupertinoColors.systemRed.withValues(alpha: 0.8),
               placeholderFont: const CNFont.monospacedSystem(CNFontSize.points(16), weight: CNFontWeight.bold),
               backgroundColor: CupertinoColors.systemFill,
               width: 320,

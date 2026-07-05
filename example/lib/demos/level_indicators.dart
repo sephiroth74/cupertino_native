@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:flutter/cupertino.dart';
 
 class LevelIndicatorDemoPage extends StatefulWidget {
   const LevelIndicatorDemoPage({super.key});
@@ -10,8 +9,8 @@ class LevelIndicatorDemoPage extends StatefulWidget {
 }
 
 class _LevelIndicatorDemoPageState extends State<LevelIndicatorDemoPage> {
-  double _maxValue = 10.0;
-  double _minValue = 0.0;
+  final double _maxValue = 10.0;
+  final double _minValue = 0.0;
   // CNLevelIndicatorController controller = CNLevelIndicatorController(value: 3, minValue: 0, maxValue: 5);
   double _value = 5.0;
 

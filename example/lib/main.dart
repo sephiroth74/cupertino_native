@@ -1,12 +1,11 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart' show ThemeMode;
+import 'package:flutter/scheduler.dart';
 import 'demos/slider.dart';
 import 'demos/toggle_demo.dart';
 import 'demos/segmented_control.dart';
 import 'demos/picker.dart';
-import 'demos/tab_bar.dart';
 import 'demos/icon.dart';
 import 'demos/image.dart';
 import 'demos/popup_menu_button.dart';
@@ -34,7 +33,6 @@ import 'demos/group_box.dart';
 import 'demos/tab_view.dart';
 import 'demos/theme.dart';
 import 'package:provider/provider.dart';
-import 'package:provider/src/change_notifier_provider.dart';
 import 'package:system_theme/system_theme.dart';
 
 const _systemColors = <MapEntry<String, Color>>[
@@ -75,7 +73,31 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Color? _accentColor = null;
+  Color? _accentColor;
+
+  @override
+  void initState() {
+    super.initState();
+    var dispatcher = SchedulerBinding.instance.platformDispatcher;
+
+    // This callback is called every time the brightness changes.
+    dispatcher.onPlatformBrightnessChanged = () {
+      var brightness = dispatcher.platformBrightness;
+      debugPrint('Platform brightness changed: $brightness');
+      setState(() {});
+    };
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    setState(() {});
+  }
 
   void _setAccentColor(Color color) {
     setState(() {
@@ -87,6 +109,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return SystemThemeBuilder(
       builder: (context, color) {
+        debugPrint('System accent color: ${color.accent}');
         _accentColor ??= color.accent;
         return ChangeNotifierProvider(
           create: (_) => AppTheme(),
@@ -95,6 +118,9 @@ class _MyAppState extends State<MyApp> {
             final brightness = appTheme.mode == ThemeMode.system
                 ? WidgetsBinding.instance.platformDispatcher.platformBrightness
                 : (appTheme.mode == ThemeMode.dark ? Brightness.dark : Brightness.light);
+
+            debugPrint('App brightness: $brightness, accent color: $_accentColor');
+
             return CNDesktopApp(
               debugShowCheckedModeBanner: false,
               themeMode: appTheme.mode,
@@ -132,6 +158,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Slider', 'slider.horizontal.3', SliderDemoPage()),
     _DemoEntry('Progress', 'progress.indicator', ProgressIndicatorsPageDemo()),
     _DemoEntry('Button', 'button.horizontal', ButtonDemoPage()),
+    _DemoEntry('Menu', 'ellipsis.circle', MenuButtonDemoPage()),
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Toggle', 'switch.2', ToggleDemo()),
@@ -140,7 +167,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('TabView', 'rectangle.split.3x1', TabViewDemoPage()),
     _DemoEntry('Icon', 'app', IconDemoPage()),
     _DemoEntry('Popup Menu Button', 'ellipsis.circle', PopupMenuButtonDemoPage()),
-    _DemoEntry('Menu Button', 'ellipsis.circle', MenuButtonDemoPage()),
     _DemoEntry('Path Control', 'folder', PathControlDemoPage()),
     _DemoEntry('Level Indicators', 'gauge', LevelIndicatorDemoPage()),
     _DemoEntry('Steppers', 'plusminus', StepperDemoPage()),
@@ -177,6 +203,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
         ? _entries
         : _entries.where((entry) => entry.title.toLowerCase().contains(search)).toList();
     final selectedEntry = _entries[_selectedIndex];
+    final isDark = theme.brightness == Brightness.dark;
 
     return CNMainWindow(
       controller: _windowController,
@@ -226,11 +253,11 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
               image: const CNImage(systemSymbolName: 'circle.fill'),
               menuStyle: CNMenuStyle.borderedButton,
               onSelected: (value) {},
-              menu: CNMenu(
+              menu: CNMenuModel(
                 items: _systemColors.map((e) {
-                  return CNMenuItem(
+                  return CNMenuModelItem(
                     title: e.key,
-                    state: e.value == accentColor ? CNMenuItemState.on : CNMenuItemState.off,
+                    state: e.value == accentColor ? CNMenuModelItemState.on : CNMenuModelItemState.off,
                     image: CNImage(
                       systemSymbolName: 'circle.fill',
                       symbolRenderingMode: CNSymbolRenderingMode.monochrome,
@@ -281,7 +308,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
                           entry.symbolName,
                           color: _selectedIndex == _entries.indexOf(entry)
                               ? CupertinoColors.label.darkColor
-                              : CupertinoColors.label.color,
+                              : isDark ? CupertinoColors.label.darkColor : CupertinoColors.label.color,
                         ),
                       ),
                       selected: _selectedIndex == _entries.indexOf(entry),

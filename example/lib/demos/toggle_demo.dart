@@ -13,7 +13,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
   bool _autoSave = true;
   bool _automaticStyle = false;
   bool _checkboxStyle = true;
-  CNControlSize _controlSize = CNControlSize.regular;
+  final CNControlSize _controlSize = CNControlSize.regular;
   bool _darkMode = false;
   bool _notifications = true;
   bool _soundEnabled = false;
@@ -36,7 +36,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
               const SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.all(16),
@@ -59,7 +59,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
               const SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.all(16),
@@ -82,7 +82,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
               const SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.all(16),
@@ -124,7 +124,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
               const SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.all(16),
@@ -172,7 +172,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
               const SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.all(16),
@@ -194,7 +194,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
               const SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.all(16),
@@ -217,7 +217,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
               const SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.all(16),

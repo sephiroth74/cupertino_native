@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:cupertino_native/components/button_child.dart';
+import 'package:cupertino_native/components/menu_badge_support.dart';
+import 'package:cupertino_native/components/menu_child.dart';
 import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/style/font.dart';
 import 'package:cupertino_native/style/text.dart';
@@ -14,19 +16,23 @@ const double _kDefaultTextWidth = 120.0;
 const double _kDefaultTextHeight = 24.0;
 
 /// A SwiftUI Text-backed native macOS text widget.
-class CNText extends StatefulWidget with CNButtonChild {
+class CNText extends StatefulWidget with CNButtonChild, CNMenuChild {
   /// Creates a new text widget.
   const CNText(
     this.text, {
     super.key,
     this.color,
+    this.badge,
     this.font,
     this.lineLimit,
     this.lineLimitReservesSpace,
     this.textScale,
     this.truncationMode,
     this.width,
-  });
+  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
+
+  /// Optional badge shown next to the menu item when used inside [CNMenu].
+  final Object? badge;
 
   /// Optional foreground color.
   final Color? color;
@@ -60,6 +66,15 @@ class CNText extends StatefulWidget with CNButtonChild {
   State<CNText> createState() => _CNTextState();
 
   @override
+  String get menuChildType => 'text';
+
+  @override
+  List<Object?> get props => [text, color, badge, font, lineLimit, lineLimitReservesSpace, textScale, truncationMode, width];
+
+  @override
+  bool get stringify => true;
+
+  @override
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
     return toMap(context, ignoreTheme: ignoreTheme);
   }
@@ -74,6 +89,7 @@ class CNText extends StatefulWidget with CNButtonChild {
       'text': text,
       'color': resolveColorToArgb(resolvedColor, context),
       'font': resolvedFont?.toMap(),
+      if (badge != null) 'badge': serializeMenuBadge(badge),
       'lineLimit': lineLimit,
       'lineLimitReservesSpace': lineLimitReservesSpace,
       'textScale': textScale?.name,

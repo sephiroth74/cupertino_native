@@ -22,7 +22,7 @@ class _ComboBoxDemoPageState extends State<ComboBoxDemoPage> {
     'Grape',
   ];
 
-  String _noneText = 'Cherry';
+  final String _noneText = 'Cherry';
   String _selectableText = 'Banana';
 
   @override

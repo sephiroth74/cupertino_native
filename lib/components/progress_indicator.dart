@@ -68,6 +68,12 @@ class CNProgressView extends StatefulWidget with CNButtonChild {
   State<CNProgressView> createState() => _CNProgressViewState();
 
   @override
+  List<Object?> get props => [value, total, progressViewStyle, controlSize, tint, width, height];
+
+  @override
+  bool get stringify => true;
+
+  @override
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
     final isDark = CNTheme.brightnessOf(context) == Brightness.dark;
     final resolvedTint =

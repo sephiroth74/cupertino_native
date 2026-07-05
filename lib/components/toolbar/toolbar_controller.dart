@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:cupertino_native/channel/channel_serialization.dart';
-import 'package:cupertino_native/components/menu.dart';
+import 'package:cupertino_native/components/menu_model.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -238,6 +238,6 @@ class CNToolbarController {
 class _ToolbarMenuButtonRegistration {
   _ToolbarMenuButtonRegistration({required this.menu, required this.onSelected});
 
-  final CNMenu menu;
-  final ValueChanged<CNMenuItem> onSelected;
+  final CNMenuModel menu;
+  final ValueChanged<CNMenuModelItem> onSelected;
 }

@@ -11,38 +11,38 @@ class ContextMenuDemoPage extends StatefulWidget {
 class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
   String _lastSelection = 'None';
 
-  CNMenu _buildMenu() {
-    return CNMenu(
+  CNMenuModel _buildMenu() {
+    return CNMenuModel(
       items: [
-        CNMenuItem(
+        CNMenuModelItem(
           title: 'Open',
           image: const CNImage(systemSymbolName: 'folder'),
         ),
-        CNMenuItem(
+        CNMenuModelItem(
           title: 'Rename',
           image: const CNImage(systemSymbolName: 'pencil'),
         ),
-        CNMenuItem.separator(),
-        CNMenuItem(
+        CNMenuModelItem.separator(),
+        CNMenuModelItem(
           title: 'Share',
           image: const CNImage(systemSymbolName: 'square.and.arrow.up'),
-          submenu: CNMenu(
+          submenu: CNMenuModel(
             items: [
-              CNMenuItem(
+              CNMenuModelItem(
                 title: 'Copy Link',
                 image: const CNImage(systemSymbolName: 'link'),
               ),
-              CNMenuItem(
+              CNMenuModelItem(
                 title: 'Send via Mail',
                 image: const CNImage(systemSymbolName: 'envelope'),
               ),
-              CNMenuItem.separator(),
-              CNMenuItem(title: 'Export…'),
+              CNMenuModelItem.separator(),
+              CNMenuModelItem(title: 'Export…'),
             ],
           ),
         ),
-        CNMenuItem.separator(),
-        CNMenuItem(
+        CNMenuModelItem.separator(),
+        CNMenuModelItem(
           title: 'Delete',
           image: CNImage(
             systemSymbolName: 'trash',
@@ -54,28 +54,28 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
     );
   }
 
-  CNMenu _buildMultiLevelNoIconsMenu() {
-    return CNMenu(
+  CNMenuModel _buildMultiLevelNoIconsMenu() {
+    return CNMenuModel(
       items: [
-        CNMenuItem(
+        CNMenuModelItem(
           title: 'File',
-          submenu: CNMenu(
+          submenu: CNMenuModel(
             items: [
-              CNMenuItem(title: 'New'),
-              CNMenuItem(title: 'Open…'),
-              CNMenuItem.separator(),
-              CNMenuItem(
+              CNMenuModelItem(title: 'New'),
+              CNMenuModelItem(title: 'Open…'),
+              CNMenuModelItem.separator(),
+              CNMenuModelItem(
                 title: 'Recent',
-                submenu: CNMenu(
+                submenu: CNMenuModel(
                   items: [
-                    CNMenuItem(title: 'Project Alpha'),
-                    CNMenuItem(title: 'Project Beta'),
-                    CNMenuItem(
+                    CNMenuModelItem(title: 'Project Alpha'),
+                    CNMenuModelItem(title: 'Project Beta'),
+                    CNMenuModelItem(
                       title: 'Archived',
-                      submenu: CNMenu(
+                      submenu: CNMenuModel(
                         items: [
-                          CNMenuItem(title: '2023'),
-                          CNMenuItem(title: '2024'),
+                          CNMenuModelItem(title: '2023'),
+                          CNMenuModelItem(title: '2024'),
                         ],
                       ),
                     ),
@@ -85,21 +85,21 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
             ],
           ),
         ),
-        CNMenuItem(
+        CNMenuModelItem(
           title: 'Edit',
-          submenu: CNMenu(
+          submenu: CNMenuModel(
             items: [
-              CNMenuItem(title: 'Undo'),
-              CNMenuItem(title: 'Redo'),
-              CNMenuItem.separator(),
-              CNMenuItem(title: 'Cut'),
-              CNMenuItem(title: 'Copy'),
-              CNMenuItem(title: 'Paste'),
+              CNMenuModelItem(title: 'Undo'),
+              CNMenuModelItem(title: 'Redo'),
+              CNMenuModelItem.separator(),
+              CNMenuModelItem(title: 'Cut'),
+              CNMenuModelItem(title: 'Copy'),
+              CNMenuModelItem(title: 'Paste'),
             ],
           ),
         ),
-        CNMenuItem.separator(),
-        CNMenuItem(title: 'Close'),
+        CNMenuModelItem.separator(),
+        CNMenuModelItem(title: 'Close'),
       ],
     );
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 
 import '../theme/cn_theme.dart';
 
@@ -52,6 +51,7 @@ class CNListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = CNTheme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
@@ -67,7 +67,7 @@ class CNListTile extends StatelessWidget {
             if (leading != null) ...[leading!, const SizedBox(width: 12)],
             Expanded(
               child: DefaultTextStyle(
-                style: theme.typography.title3.copyWith(color: selected ? CupertinoColors.label.darkColor : CupertinoColors.label.color),
+                style: theme.typography.title3.copyWith(color: selected ? CupertinoColors.label.darkColor : isDark ? CupertinoColors.label.darkColor : CupertinoColors.label.color),
                 child: title,
               ),
             ),

@@ -79,7 +79,7 @@ class _SecureTextFieldDemoPageState extends State<SecureTextFieldDemoPage> {
               placeholder: 'Styled secure input',
               placeholderColor: CupertinoColors.systemGrey,
               placeholderFont: const CNFont.monospacedSystem(CNFontSize.points(14), weight: CNFontWeight.medium),
-              backgroundColor: CupertinoColors.systemYellow.withOpacity(0.25),
+              backgroundColor: CupertinoColors.systemYellow.withValues(alpha: 0.25),
               font: const CNFont.system(CNFontSize.points(15), weight: CNFontWeight.semibold),
               controlSize: CNControlSize.regular,
               bezelStyle: CNTextFieldBezelStyle.round,

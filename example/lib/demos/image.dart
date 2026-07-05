@@ -496,7 +496,7 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
   CNSymbolColorRenderingMode _colorMode = CNSymbolColorRenderingMode.flat;
   late List<Color> _colors = [];
   var _font = CNFont.system(CNFontSize.points(32), weight: CNFontWeight.regular);
-  CNSymbolRenderingMode? _renderingMode = null;
+  CNSymbolRenderingMode? _renderingMode;
 
   @override
   initState() {
@@ -530,7 +530,7 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
               width: imageSize,
               height: imageSize,
               decoration: BoxDecoration(
-                border: Border.all(color: _colors?.last ?? CNTheme.of(context).accentColor, width: 2),
+                border: Border.all(color: _colors.last ?? CNTheme.of(context).accentColor, width: 2),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: CNImage(
@@ -631,11 +631,11 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                     children: [
                       Expanded(child: const Text('Color')),
                       CNPicker(
-                        selectedIndex: _color != null ? _kSystemColors.values.toList().indexOf(_color) : 0,
+                        selectedIndex: _kSystemColors.values.toList().indexOf(_color),
                         onValueChanged: (index) {
                           setState(() {
                             _color = _kSystemColors.values.elementAt(index);
-                            _colors = [CNColors.red, _color!];
+                            _colors = [CNColors.red, _color];
                           });
                         },
                         items: _kSystemColors.keys

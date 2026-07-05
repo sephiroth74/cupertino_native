@@ -143,16 +143,16 @@ enum CNButton {
     private static func deserializeChild(_ child: CNButtonChildPayload) -> AnyView? {
         switch child.type {
         case "image":
-            CNImage.deserialize(child.payload)
+            return CNImage.deserialize(child.payload)
         case "label":
-            CNLabel.deserialize(child.payload)
+            return CNLabel.deserialize(child.payload)
         case "text":
-            CNText.deserialize(child.payload)
+            return CNText.deserialize(child.payload)
         case "progressView":
-            CNProgressViewDeserializer.deserialize(child.payload)
+            return CNProgressViewDeserializer.deserialize(child.payload)
         default:
             NSLog("Unknown button child type: \(child.type)")
-            nil
+            return nil
         }
     }
 

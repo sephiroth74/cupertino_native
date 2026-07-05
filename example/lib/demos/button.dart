@@ -33,8 +33,8 @@ class ButtonDemoPage extends StatefulWidget {
 class _ButtonDemoPageState extends State<ButtonDemoPage> {
   CNButtonStyle _buttonStyle = CNButtonStyle.automatic;
   CNControlSize _controlSize = CNControlSize.large;
+  // ignore: unused_field
   String _last = 'None';
-  bool _shrinkWrap = true;
   Color? _tintColor;
 
   void _set(String what) => setState(() => _last = what);
