@@ -30,20 +30,6 @@ const double _kDefaultToggleWidth = 200.0;
 /// )
 /// ```
 class CNToggle extends StatefulWidget with CNViewModifiable {
-  /// Creates a [CNToggle].
-  const CNToggle({
-    super.key,
-    required this.value,
-    this.onChanged,
-    this.controller,
-    this.children = const [],
-    this.label,
-    this.systemSymbolName,
-    this.toggleStyle = CNToggleStyle.switch_,
-    this.shrinkWrap = false,
-    this.modifiers,
-  });
-
   /// Label content children rendered in the native `Toggle` label closure.
   ///
   /// When empty, [label] and [systemSymbolName] are used as a legacy fallback.
@@ -73,14 +59,28 @@ class CNToggle extends StatefulWidget with CNViewModifiable {
   @override
   final CNViewModifiers? modifiers;
 
-  @override
-  State<CNToggle> createState() => _CNToggleState();
+  /// Creates a [CNToggle].
+  const CNToggle({
+    super.key,
+    required this.value,
+    this.onChanged,
+    this.controller,
+    this.children = const [],
+    this.label,
+    this.systemSymbolName,
+    this.toggleStyle = CNToggleStyle.switch_,
+    this.shrinkWrap = false,
+    this.modifiers,
+  });
 
   @override
   EdgeInsets? get padding => modifiers?.padding;
 
   @override
   Object? get tag => modifiers?.tag;
+
+  @override
+  State<CNToggle> createState() => _CNToggleState();
 }
 
 /// Controller for a [CNToggle] that allows imperative updates from Dart
@@ -133,8 +133,63 @@ class _CNToggleState extends State<CNToggle> {
   double? _intrinsicHeight;
   double? _intrinsicWidth;
   String? _lastSerializedPayload;
+  bool? _pendingNativeValue;
   double? _layoutHeight;
   double? _layoutWidth;
+
+  bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
+
+  @override
+  Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      return const SizedBox.shrink();
+    }
+
+    const viewType = 'cupertino_native/toggle';
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasFixedWidth = constraints.hasTightWidth;
+        final hasFixedHeight = constraints.hasTightHeight;
+        final hasExplicitWidth = widget.modifiers?.width != null;
+        final hasExplicitHeight = widget.modifiers?.height != null;
+        final shouldSendWidth = hasExplicitWidth || hasFixedWidth;
+        final shouldSendHeight = hasExplicitHeight || hasFixedHeight;
+
+        final resolvedWidth =
+            widget.modifiers?.width ?? (hasFixedWidth ? constraints.maxWidth : (_intrinsicWidth ?? _kDefaultToggleWidth));
+        final resolvedHeight =
+            widget.modifiers?.height ?? (hasFixedHeight ? constraints.maxHeight : (_intrinsicHeight ?? _kDefaultToggleHeight));
+
+        final nextLayoutWidth = shouldSendWidth ? resolvedWidth : null;
+        final nextLayoutHeight = shouldSendHeight ? resolvedHeight : null;
+
+        if (_layoutWidth != nextLayoutWidth || _layoutHeight != nextLayoutHeight) {
+          _layoutWidth = nextLayoutWidth;
+          _layoutHeight = nextLayoutHeight;
+          _syncPropsToNativeIfNeeded();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _requestIntrinsicSize();
+            }
+          });
+        }
+
+        final creationParams = _toPayload(frameWidth: nextLayoutWidth, frameHeight: nextLayoutHeight);
+
+        return SizedBox(
+          height: resolvedHeight,
+          width: resolvedWidth,
+          child: AppKitView(
+            viewType: viewType,
+            creationParamsCodec: const StandardMessageCodec(),
+            creationParams: creationParams,
+            onPlatformViewCreated: _onPlatformViewCreated,
+          ),
+        );
+      },
+    );
+  }
 
   @override
   void didChangeDependencies() {
@@ -155,8 +210,8 @@ class _CNToggleState extends State<CNToggle> {
       }
     }
 
+    final valueChanged = oldWidget.value != widget.value;
     final shouldResetPayload =
-        oldWidget.value != widget.value ||
         oldWidget.label != widget.label ||
         oldWidget.systemSymbolName != widget.systemSymbolName ||
         oldWidget.toggleStyle != widget.toggleStyle ||
@@ -166,6 +221,20 @@ class _CNToggleState extends State<CNToggle> {
 
     if (shouldResetPayload) {
       _lastSerializedPayload = null;
+    }
+
+    if (valueChanged) {
+      final isEchoFromNative = _pendingNativeValue != null && widget.value == _pendingNativeValue;
+      _pendingNativeValue = null;
+
+      if (isEchoFromNative) {
+        // Native toggle already updated itself; avoid setToggle/rebuild ping-pong.
+        _cacheCurrentProps();
+      } else {
+        _lastSerializedPayload = null;
+      }
+    } else {
+      _pendingNativeValue = null;
     }
 
     _syncPropsToNativeIfNeeded();
@@ -183,8 +252,6 @@ class _CNToggleState extends State<CNToggle> {
     super.initState();
     _controller = widget.controller ?? CNToggleController();
   }
-
-  bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
 
   void _cacheCurrentProps() {
     _lastSerializedPayload = _serializeCurrentPayload();
@@ -219,6 +286,7 @@ class _CNToggleState extends State<CNToggle> {
       }
 
       if (newValue != null) {
+        _pendingNativeValue = newValue;
         widget.onChanged?.call(newValue);
       }
     } else if (call.method == 'intrinsicSizeChanged') {
@@ -307,58 +375,6 @@ class _CNToggleState extends State<CNToggle> {
     debugPrint('CNToggle payload: ${jsonEncode(payload)}');
 
     return payload;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
-      return const SizedBox.shrink();
-    }
-
-    const viewType = 'cupertino_native/toggle';
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final hasFixedWidth = constraints.hasTightWidth;
-        final hasFixedHeight = constraints.hasTightHeight;
-        final hasExplicitWidth = widget.modifiers?.width != null;
-        final hasExplicitHeight = widget.modifiers?.height != null;
-        final shouldSendWidth = hasExplicitWidth || hasFixedWidth;
-        final shouldSendHeight = hasExplicitHeight || hasFixedHeight;
-
-        final resolvedWidth =
-            widget.modifiers?.width ?? (hasFixedWidth ? constraints.maxWidth : (_intrinsicWidth ?? _kDefaultToggleWidth));
-        final resolvedHeight =
-            widget.modifiers?.height ?? (hasFixedHeight ? constraints.maxHeight : (_intrinsicHeight ?? _kDefaultToggleHeight));
-
-        final nextLayoutWidth = shouldSendWidth ? resolvedWidth : null;
-        final nextLayoutHeight = shouldSendHeight ? resolvedHeight : null;
-
-        if (_layoutWidth != nextLayoutWidth || _layoutHeight != nextLayoutHeight) {
-          _layoutWidth = nextLayoutWidth;
-          _layoutHeight = nextLayoutHeight;
-          _syncPropsToNativeIfNeeded();
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              _requestIntrinsicSize();
-            }
-          });
-        }
-
-        final creationParams = _toPayload(frameWidth: nextLayoutWidth, frameHeight: nextLayoutHeight);
-
-        return SizedBox(
-          height: resolvedHeight,
-          width: resolvedWidth,
-          child: AppKitView(
-            viewType: viewType,
-            creationParamsCodec: const StandardMessageCodec(),
-            creationParams: creationParams,
-            onPlatformViewCreated: _onPlatformViewCreated,
-          ),
-        );
-      },
-    );
   }
 }
 
