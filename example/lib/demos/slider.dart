@@ -103,7 +103,7 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                         CNToggle(
                           value: _isEnabled,
                           onChanged: (enabled) => setState(() => _isEnabled = enabled),
-                          controlSize: CNControlSize.small,
+                          modifiers: CNViewModifiers(controlSize: CNControlSize.small),
                           toggleStyle: CNToggleStyle.switch_,
                         ),
                       ],
@@ -115,7 +115,7 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                         CNToggle(
                           value: _isStepped,
                           onChanged: (enabled) => setState(() => _isStepped = enabled),
-                          controlSize: CNControlSize.small,
+                          modifiers: CNViewModifiers(controlSize: CNControlSize.small),
                           toggleStyle: CNToggleStyle.switch_,
                         ),
                       ],

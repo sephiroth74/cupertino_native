@@ -18,6 +18,9 @@ class CupertinoToggleNSView: NSView {
 
         super.init(frame: .zero)
 
+        wantsLayer = true
+        layer?.backgroundColor = NSColor.clear.cgColor
+
         hostingView.wantsLayer = true
         hostingView.layer?.backgroundColor = NSColor.clear.cgColor
 
@@ -40,8 +43,8 @@ class CupertinoToggleNSView: NSView {
 
             switch call.method {
             case "getIntrinsicSize":
-                let size = currentIntrinsicSize()
-                result(["width": size.width, "height": size.height])
+                let s = currentIntrinsicSize()
+                result(["width": Double(s.width), "height": Double(s.height)])
             case "setToggle":
                 if let parsed: CNTogglePayload = CNChannelSerialization.decode(call.arguments) {
                     payload = parsed
@@ -50,28 +53,6 @@ class CupertinoToggleNSView: NSView {
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Invalid toggle payload", details: nil))
-                }
-            case "setValue":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let value = (args["value"] as? NSNumber)?.boolValue
-                {
-                    payload.value = value
-                    rebuild()
-                    notifyIntrinsicSizeChanged(force: true)
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
-                }
-            case "setIsEnabled":
-                if let args = CNChannelSerialization.asDict(call.arguments),
-                   let enabled = (args["value"] as? NSNumber)?.boolValue
-                {
-                    payload.enabled = enabled
-                    rebuild()
-                    notifyIntrinsicSizeChanged(force: true)
-                    result(nil)
-                } else {
-                    result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
                 }
             default:
                 result(FlutterMethodNotImplemented)
@@ -120,6 +101,8 @@ class CupertinoToggleNSView: NSView {
         layoutSubtreeIfNeeded()
         hostingView.layoutSubtreeIfNeeded()
 
+        let natural = naturalContentSize()
+
         let intrinsic = hostingView.intrinsicContentSize
         let intrinsicWidth = intrinsic.width
         let intrinsicHeight = intrinsic.height
@@ -131,11 +114,32 @@ class CupertinoToggleNSView: NSView {
             intrinsicHeight != NSView.noIntrinsicMetric
 
         if hasValidIntrinsic {
-            return intrinsic
+            return CGSize(
+                width: max(natural.width, intrinsicWidth),
+                height: max(natural.height, intrinsicHeight),
+            )
         }
 
         let fitting = hostingView.fittingSize
-        return CGSize(width: max(0, fitting.width), height: max(0, fitting.height))
+        return CGSize(
+            width: max(natural.width, fitting.width),
+            height: max(natural.height, fitting.height),
+        )
+    }
+
+    private func naturalContentSize() -> CGSize {
+        let rootView = CNToggleDeserializer.deserialize(payload.toChannel()) ?? AnyView(EmptyView())
+        let measuringView = NSHostingView(rootView: rootView)
+        measuringView.appearance = hostingView.appearance
+        measuringView.layoutSubtreeIfNeeded()
+
+        let measuredIntrinsic = measuringView.intrinsicContentSize
+        let measuredFitting = measuringView.fittingSize
+
+        return CGSize(
+            width: max(0, measuredIntrinsic.width, measuredFitting.width),
+            height: max(0, measuredIntrinsic.height, measuredFitting.height),
+        )
     }
 
     private func notifyIntrinsicSizeChanged(force: Bool = false) {

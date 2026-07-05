@@ -58,8 +58,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                         child: CNToggle(
                           value: _darkMode,
                           toggleStyle: _toggleStyle,
-                          controlSize: _controlSize,
-                          tint: _tintColor,
+                          modifiers: CNViewModifiers(controlSize: _controlSize, tint: _tintColor),
                           onChanged: (value) {
                             setState(() {
                               _darkMode = value;

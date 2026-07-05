@@ -1,13 +1,11 @@
 import 'dart:convert';
 
 import 'package:cupertino_native/channel/channel_serialization.dart';
-import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/components/button_child.dart';
 import 'package:cupertino_native/components/image.dart';
 import 'package:cupertino_native/components/text.dart';
 import 'package:cupertino_native/components/view_modifiable.dart';
 import 'package:cupertino_native/components/view_modifiers.dart';
-import 'package:cupertino_native/model/control_size.dart';
 import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -42,34 +40,17 @@ class CNToggle extends StatefulWidget with CNViewModifiable {
     this.label,
     this.systemSymbolName,
     this.toggleStyle = CNToggleStyle.switch_,
-    this.controlSize = CNControlSize.regular,
-    this.tint,
-    this.foregroundColor,
-    this.width,
-    this.height,
     this.shrinkWrap = false,
     this.modifiers,
-  }) : enabled = onChanged != null;
+  });
 
   /// Label content children rendered in the native `Toggle` label closure.
   ///
   /// When empty, [label] and [systemSymbolName] are used as a legacy fallback.
   final List<CNButtonChild> children;
 
-  /// The size of the control, which affects its appearance.
-  final CNControlSize controlSize;
-
   /// Optional external controller for imperative native operations.
   final CNToggleController? controller;
-
-  /// Whether the toggle is enabled for interaction.
-  final bool enabled;
-
-  /// Optional foreground color for the label content.
-  final Color? foregroundColor;
-
-  /// Optional fixed height.
-  final double? height;
 
   /// Optional label text for the toggle.
   final String? label;
@@ -83,17 +64,11 @@ class CNToggle extends StatefulWidget with CNViewModifiable {
   /// Optional system symbol name (SF Symbol) to display with the label.
   final String? systemSymbolName;
 
-  /// Optional tint color for the toggle control.
-  final Color? tint;
-
   /// The style of the toggle control.
   final CNToggleStyle toggleStyle;
 
   /// Whether the toggle is on or off.
   final bool value;
-
-  /// Optional fixed width.
-  final double? width;
 
   @override
   final CNViewModifiers? modifiers;
@@ -182,16 +157,11 @@ class _CNToggleState extends State<CNToggle> {
 
     final shouldResetPayload =
         oldWidget.value != widget.value ||
-        oldWidget.enabled != widget.enabled ||
         oldWidget.label != widget.label ||
         oldWidget.systemSymbolName != widget.systemSymbolName ||
         oldWidget.toggleStyle != widget.toggleStyle ||
-        oldWidget.controlSize != widget.controlSize ||
-        oldWidget.tint != widget.tint ||
-        oldWidget.foregroundColor != widget.foregroundColor ||
-        oldWidget.width != widget.width ||
-        oldWidget.height != widget.height ||
         oldWidget.shrinkWrap != widget.shrinkWrap ||
+        oldWidget.modifiers != widget.modifiers ||
         !listEquals(oldWidget.children, widget.children);
 
     if (shouldResetPayload) {
@@ -214,11 +184,6 @@ class _CNToggleState extends State<CNToggle> {
     _controller = widget.controller ?? CNToggleController();
   }
 
-  Color? get _effectiveTint {
-    final theme = CNTheme.of(context);
-    return widget.tint ?? theme.toggleTheme.tint ?? theme.accentColor;
-  }
-
   bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
 
   void _cacheCurrentProps() {
@@ -227,6 +192,8 @@ class _CNToggleState extends State<CNToggle> {
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
     if (!mounted || width == null || height == null) return;
+
+    debugPrint('CNToggle intrinsic size changed: width=$width, height=$height');
 
     if (width == _intrinsicWidth && height == _intrinsicHeight) {
       return; // No change
@@ -322,24 +289,22 @@ class _CNToggleState extends State<CNToggle> {
   Map<String, dynamic> _toPayload({double? frameWidth, double? frameHeight}) {
     final payload = <String, dynamic>{
       'value': widget.value,
-      'enabled': widget.enabled,
       'labelChildren': _serializeChildren(_resolvedLabelChildren()),
       'toggleStyle': widget.toggleStyle.toShortString(),
       'isDark': _isDark,
-      'controlSize': widget.controlSize.name,
-      'tint': resolveColorToArgb(_effectiveTint, context),
-      'foregroundColor': resolveColorToArgb(widget.foregroundColor, context),
     };
 
-    if (frameWidth != null) {
-      payload['width'] = frameWidth;
-    }
+    // if (frameWidth != null) {
+    //   payload['width'] = frameWidth;
+    // }
 
-    if (frameHeight != null) {
-      payload['height'] = frameHeight;
-    }
+    // if (frameHeight != null) {
+    //   payload['height'] = frameHeight;
+    // }
 
     widget.writeModifiers(payload, context);
+
+    debugPrint('CNToggle payload: ${jsonEncode(payload)}');
 
     return payload;
   }
@@ -356,14 +321,15 @@ class _CNToggleState extends State<CNToggle> {
       builder: (context, constraints) {
         final hasFixedWidth = constraints.hasTightWidth;
         final hasFixedHeight = constraints.hasTightHeight;
-        final hasExplicitWidth = widget.width != null;
-        final hasExplicitHeight = widget.height != null;
+        final hasExplicitWidth = widget.modifiers?.width != null;
+        final hasExplicitHeight = widget.modifiers?.height != null;
         final shouldSendWidth = hasExplicitWidth || hasFixedWidth;
         final shouldSendHeight = hasExplicitHeight || hasFixedHeight;
 
-        final resolvedWidth = widget.width ?? (hasFixedWidth ? constraints.maxWidth : (_intrinsicWidth ?? _kDefaultToggleWidth));
+        final resolvedWidth =
+            widget.modifiers?.width ?? (hasFixedWidth ? constraints.maxWidth : (_intrinsicWidth ?? _kDefaultToggleWidth));
         final resolvedHeight =
-            widget.height ?? (hasFixedHeight ? constraints.maxHeight : (_intrinsicHeight ?? _kDefaultToggleHeight));
+            widget.modifiers?.height ?? (hasFixedHeight ? constraints.maxHeight : (_intrinsicHeight ?? _kDefaultToggleHeight));
 
         final nextLayoutWidth = shouldSendWidth ? resolvedWidth : null;
         final nextLayoutHeight = shouldSendHeight ? resolvedHeight : null;

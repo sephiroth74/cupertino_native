@@ -95,10 +95,6 @@ class _CNPickerState extends State<CNPicker> {
     super.dispose();
   }
 
-  bool get _effectiveEnabled => widget.modifiers?.enabled ?? true;
-
-  Color? get _effectiveTint => widget.modifiers?.tint ?? CNTheme.of(context).primaryColor;
-
   bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
 
   void _cacheCurrentProps() {

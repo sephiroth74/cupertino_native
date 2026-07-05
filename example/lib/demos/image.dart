@@ -531,7 +531,7 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
               width: imageSize,
               height: imageSize,
               decoration: BoxDecoration(
-                border: Border.all(color: _colors.last ?? CNTheme.of(context).accentColor, width: 2),
+                border: Border.all(color: _colors.last, width: 2),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: CNImage(
@@ -617,7 +617,7 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                       CNToggle(
                         toggleStyle: CNToggleStyle.switch_,
                         value: _colorMode == CNSymbolColorRenderingMode.gradient,
-                        controlSize: CNControlSize.small,
+                        modifiers: CNViewModifiers(controlSize: CNControlSize.small),
                         onChanged: (value) {
                           setState(() {
                             _colorMode = value ? CNSymbolColorRenderingMode.gradient : CNSymbolColorRenderingMode.flat;
