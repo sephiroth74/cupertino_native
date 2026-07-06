@@ -60,9 +60,8 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                     value: _defaultSliderValue,
                     onChanged: _isEnabled ? (v) => setState(() => _defaultSliderValue = v) : null,
                     onEditingChanged: (editing) => setState(() => _isEditing = editing),
-                    controlSize: _size,
                     step: _isStepped ? 0.025 : null,
-                    color: _tintColor,
+                    modifiers: CNViewModifiers(controlSize: _size, tint: _tintColor),
                   ),
                   const SizedBox(height: 16),
                   Text('Editing: ${_isEditing ? 'true' : 'false'}', style: CNTheme.of(context).typography.body),
@@ -131,17 +130,16 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                                 : _kSystemColors.entries.firstWhere((entry) => entry.value == _tintColor).key,
                           ),
                           onValueChanged: (index) => setState(() => _tintColor = _kSystemColors.values.elementAt(index)),
-                          items: _kSystemColors.keys
-                              .map(
-                                (colorName) => CNLabel(
-                                  CNText(colorName),
-                                  icon: CNImage(
-                                    systemSymbolName: 'circle.fill',
-                                    modifiers: CNViewModifiers(tint: _kSystemColors[colorName]),
-                                  ),
-                                ),
-                              )
-                              .toList(),
+                          items: _kSystemColors.keys.map((colorName) {
+                            // return CNLabel(
+                            //   CNText(colorName),
+                            //   icon: CNImage(
+                            //     systemSymbolName: 'circle.fill',
+                            //     modifiers: CNViewModifiers(tint: _kSystemColors[colorName]),
+                            //   ),
+                            // );
+                            return CNText(colorName);
+                          }).toList(),
                           pickerStyle: CNPickerStyle.menu,
                         ),
                       ],

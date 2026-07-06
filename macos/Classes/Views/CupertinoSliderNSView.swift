@@ -5,26 +5,16 @@ import SwiftUI
 class CupertinoSliderNSView: NSView {
     private let channel: FlutterMethodChannel
     private let hostingView: NSHostingView<AnyView>
+    private let model: CNSliderViewModel
 
-    private var payload: CNSliderPayload?
-
-    private func sameSliderConfiguration(_ lhs: CNSliderPayload, _ rhs: CNSliderPayload) -> Bool {
-        lhs.min == rhs.min &&
-            lhs.max == rhs.max &&
-            lhs.step == rhs.step &&
-            lhs.isDark == rhs.isDark &&
-            lhs.isEnabled == rhs.isEnabled &&
-            lhs.controlSize == rhs.controlSize &&
-            lhs.tint == rhs.tint &&
-            lhs.width == rhs.width &&
-            lhs.height == rhs.height
-    }
+    private var payload: CNSliderPayload
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(name: "CupertinoNativeSlider_\(viewId)", binaryMessenger: messenger)
         hostingView = NSHostingView(rootView: AnyView(EmptyView()))
 
-        payload = CNChannelSerialization.decode(args)
+        payload = CNChannelSerialization.decode(args) ?? Self.defaultPayload()
+        model = CNSliderViewModel(payload: payload)
 
         super.init(frame: .zero)
 
@@ -40,7 +30,8 @@ class CupertinoSliderNSView: NSView {
             hostingView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
 
-        rebuild()
+        installRootView()
+        updateAppearance()
 
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self else {
@@ -52,18 +43,13 @@ class CupertinoSliderNSView: NSView {
             case "getIntrinsicSize":
                 let size = hostingView.fittingSize
                 result(["width": Double(size.width), "height": Double(size.height)])
-            case "setSlider":
+            case "setData":
                 if let raw = CNChannelSerialization.asDict(call.arguments) {
+                    print("[CNSliderNSView] setData <- \(raw)")
                     if let parsed = CNSliderPayload(channel: raw) {
-                        if let current = payload, sameSliderConfiguration(current, parsed) {
-                            // Value-only updates should not recreate the control while dragging.
-                            payload = parsed
-                            result(nil)
-                            return
-                        }
-
                         payload = parsed
-                        rebuild()
+                        model.replace(with: payload)
+                        updateAppearance()
                         result(nil)
                     } else {
                         result(FlutterError(code: "bad_args", message: "Invalid slider payload", details: nil))
@@ -71,26 +57,24 @@ class CupertinoSliderNSView: NSView {
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing slider payload", details: nil))
                 }
+            case "applyPatch":
+                if let patch = CNChannelSerialization.asDict(call.arguments) {
+                    print("[CNSliderNSView] applyPatch <- \(patch)")
+                    payload.applyPatch(patch)
+                    model.replace(with: payload)
+                    updateAppearance()
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing slider patch payload", details: nil))
+                }
             case "setValue":
                 if let args = CNChannelSerialization.asDict(call.arguments),
                    let value = (args["value"] as? NSNumber)?.doubleValue,
-                   var current = payload
+                   payload.min < payload.max
                 {
-                    let clamped = Swift.min(Swift.max(value, current.min), current.max)
-                    current = CNSliderPayload(channel: [
-                        "value": clamped,
-                        "min": current.min,
-                        "max": current.max,
-                        "step": current.step as Any,
-                        "isDark": current.isDark as Any,
-                        "isEnabled": current.isEnabled as Any,
-                        "controlSize": current.controlSize as Any,
-                        "tint": current.tint as Any,
-                        "width": current.width as Any,
-                        "height": current.height as Any,
-                    ]) ?? current
-                    payload = current
-                    rebuild()
+                    print("[CNSliderNSView] setValue <- \(value)")
+                    payload.applyPatch(["value": value])
+                    model.replace(with: payload)
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing value", details: nil))
@@ -100,22 +84,11 @@ class CupertinoSliderNSView: NSView {
                    let minValue = (args["min"] as? NSNumber)?.doubleValue,
                    let maxValue = (args["max"] as? NSNumber)?.doubleValue,
                    minValue < maxValue,
-                   let current = payload
+                   payload.min < payload.max
                 {
-                    let clampedValue = Swift.min(Swift.max(current.value, minValue), maxValue)
-                    payload = CNSliderPayload(channel: [
-                        "value": clampedValue,
-                        "min": minValue,
-                        "max": maxValue,
-                        "step": current.step as Any,
-                        "isDark": current.isDark as Any,
-                        "isEnabled": current.isEnabled as Any,
-                        "controlSize": current.controlSize as Any,
-                        "tint": current.tint as Any,
-                        "width": current.width as Any,
-                        "height": current.height as Any,
-                    ])
-                    rebuild()
+                    print("[CNSliderNSView] setRange <- min=\(minValue), max=\(maxValue)")
+                    payload.applyPatch(["min": minValue, "max": maxValue])
+                    model.replace(with: payload)
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing min/max", details: nil))
@@ -131,20 +104,17 @@ class CupertinoSliderNSView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private func rebuild() {
-        guard let payload else {
-            hostingView.rootView = AnyView(EmptyView())
-            return
-        }
+    private static func defaultPayload() -> CNSliderPayload {
+        CNSliderPayload(channel: [
+            "value": 0.0,
+            "min": 0.0,
+            "max": 1.0,
+        ])!
+    }
 
-        if let isDark = payload.isDark {
-            hostingView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-        } else {
-            hostingView.appearance = nil
-        }
-
+    private func installRootView() {
         hostingView.rootView = CNSlider.deserialize(
-            payload.toChannel(),
+            model: model,
             onValueChanged: { [weak self] newValue in
                 self?.channel.invokeMethod("valueChanged", arguments: ["value": newValue])
             },
@@ -157,6 +127,14 @@ class CupertinoSliderNSView: NSView {
                     arguments: ["width": size.width, "height": size.height],
                 )
             },
-        ) ?? AnyView(EmptyView())
+        )
+    }
+
+    private func updateAppearance() {
+        if let isDark = payload.isDark {
+            hostingView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+        } else {
+            hostingView.appearance = nil
+        }
     }
 }
