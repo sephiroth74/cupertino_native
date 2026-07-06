@@ -47,6 +47,7 @@ class CNProgressView extends StatefulWidget with CNButtonChild, CNViewModifiable
   final CNControlSize controlSize;
 
   /// Optional fixed height.
+  @override
   final double? height;
 
   /// Progress view style.
@@ -62,6 +63,7 @@ class CNProgressView extends StatefulWidget with CNButtonChild, CNViewModifiable
   final double? value;
 
   /// Optional fixed width.
+  @override
   final double? width;
 
   @override

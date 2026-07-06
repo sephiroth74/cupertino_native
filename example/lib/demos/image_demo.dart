@@ -645,9 +645,9 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                     children: [
                       Expanded(child: const Text('Font Weight')),
                       CNPicker(
-                        selectedIndex: CNFontWeight.values.indexOf(this.font.weight ?? CNFontWeight.regular),
+                        selectedIndex: CNFontWeight.values.indexOf(font.weight ?? CNFontWeight.regular),
                         onValueChanged: (index) =>
-                            setState(() => this.font = this.font.copyWith(weight: CNFontWeight.values[index])),
+                            setState(() => font = font.copyWith(weight: CNFontWeight.values[index])),
                         items: CNFontWeight.values.map((weight) => CNText(weight.name)).toList(),
                         pickerStyle: CNPickerStyle.automatic,
                       ),

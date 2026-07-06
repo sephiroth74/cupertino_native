@@ -142,6 +142,25 @@ class _CNTextState extends State<CNText> {
     _lastPayload = Map<String, dynamic>.from(payload);
   }
 
+  Map<String, dynamic> _computePayloadPatch(Map<String, dynamic> previous, Map<String, dynamic> next) {
+    final patch = <String, dynamic>{};
+    final keys = <String>{...previous.keys, ...next.keys};
+
+    for (final key in keys) {
+      final hadPrevious = previous.containsKey(key);
+      final hasNext = next.containsKey(key);
+      final oldValue = hadPrevious ? previous[key] : null;
+      final newValue = hasNext ? next[key] : null;
+
+      final changed = jsonEncode(oldValue) != jsonEncode(newValue);
+      if (!changed) continue;
+
+      patch[key] = hasNext ? newValue : null;
+    }
+
+    return patch;
+  }
+
   void _onIntrinsicSizeChanged(double? width, double? height) {
     debugPrint('[CNText] Intrinsic size changed: width=$width, height=$height');
     if (!mounted || width == null || height == null) return;
@@ -178,25 +197,6 @@ class _CNTextState extends State<CNText> {
     } catch (_) {}
   }
 
-  Map<String, dynamic> _computePayloadPatch(Map<String, dynamic> previous, Map<String, dynamic> next) {
-    final patch = <String, dynamic>{};
-    final keys = <String>{...previous.keys, ...next.keys};
-
-    for (final key in keys) {
-      final hadPrevious = previous.containsKey(key);
-      final hasNext = next.containsKey(key);
-      final oldValue = hadPrevious ? previous[key] : null;
-      final newValue = hasNext ? next[key] : null;
-
-      final changed = jsonEncode(oldValue) != jsonEncode(newValue);
-      if (!changed) continue;
-
-      patch[key] = hasNext ? newValue : null;
-    }
-
-    return patch;
-  }
-
   Future<void> _syncPropsToNativeIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
@@ -206,6 +206,7 @@ class _CNTextState extends State<CNText> {
 
     if (_lastPayload == null) {
       if (_lastSerializedPayload != serializedPayload) {
+        debugPrint('[CNText][Dart] Sending full update via setText');
         await channel.invokeMethod('setText', payload);
       }
 
@@ -216,10 +217,12 @@ class _CNTextState extends State<CNText> {
 
     final patch = _computePayloadPatch(_lastPayload!, payload);
     if (patch.isEmpty) {
+      debugPrint('[CNText][Dart] No patch to send (payload unchanged)');
       _lastSerializedPayload = serializedPayload;
       return;
     }
 
+    debugPrint('[CNText][Dart] Sending patch via applyPatch: ${jsonEncode(patch)}');
     await channel.invokeMethod('applyPatch', patch);
     _lastSerializedPayload = serializedPayload;
     _lastPayload = Map<String, dynamic>.from(payload);

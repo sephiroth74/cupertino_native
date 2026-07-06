@@ -21,3 +21,23 @@ const kSystemColors = {
   'fillQuaternary': CNColors.fillQuaternary,
   'fillQuinary': CNColors.fillQuinary,
 };
+
+CNFontSize defaultFontSize = CNFontSize.points(17);
+
+List<CNFont> get availableFonts => [
+  CNFont.system(defaultFontSize),
+  CNFont.monospacedSystem(defaultFontSize),
+  CNFont.boldSystem(defaultFontSize),
+  CNFont.monospacedDigitSystem(defaultFontSize),
+  CNFont.user(defaultFontSize),
+  CNFont.userFixedPitch(defaultFontSize),
+  CNFont.menu(defaultFontSize),
+  CNFont.menuBar(defaultFontSize),
+  CNFont.message(defaultFontSize),
+  CNFont.palette(defaultFontSize),
+  CNFont.titleBar(defaultFontSize),
+  CNFont.toolTips(defaultFontSize),
+  CNFont.controlContent(defaultFontSize),
+  CNFont.label(defaultFontSize),
+  CNFont.named('Helvetica Neue', defaultFontSize),
+];

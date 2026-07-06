@@ -26,7 +26,7 @@ import 'demos/combo_box.dart';
 import 'demos/alert.dart';
 import 'demos/popover.dart';
 import 'demos/context_menu.dart';
-import 'demos/label.dart';
+import 'demos/label_demo.dart';
 import 'demos/sheet.dart';
 import 'demos/split_view.dart';
 import 'demos/group_box.dart';

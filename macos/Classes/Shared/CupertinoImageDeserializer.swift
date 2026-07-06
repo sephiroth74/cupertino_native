@@ -79,8 +79,14 @@ struct CNImagePayload: CNChannelSerializable {
         if channel.keys.contains("font") {
             if channel["font"] is NSNull {
                 font = nil
+            } else if let fontPatch = channel["font"] as? [String: Any] {
+                if let current = font {
+                    font = Self.deepMerge(current, with: fontPatch)
+                } else {
+                    font = fontPatch
+                }
             } else {
-                font = channel["font"] as? [String: Any]
+                font = nil
             }
         }
 
@@ -100,6 +106,27 @@ struct CNImagePayload: CNChannelSerializable {
     private static func decodeString(_ value: Any?) -> String? {
         if value is NSNull { return nil }
         return value as? String
+    }
+
+    private static func deepMerge(_ base: [String: Any], with patch: [String: Any]) -> [String: Any] {
+        var result = base
+
+        for (key, patchValue) in patch {
+            if patchValue is NSNull {
+                result.removeValue(forKey: key)
+                continue
+            }
+
+            if let patchMap = patchValue as? [String: Any],
+               let baseMap = result[key] as? [String: Any]
+            {
+                result[key] = deepMerge(baseMap, with: patchMap)
+            } else {
+                result[key] = patchValue
+            }
+        }
+
+        return result
     }
 
     func toChannel() -> [String: Any] {

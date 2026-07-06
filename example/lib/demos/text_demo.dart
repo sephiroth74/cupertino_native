@@ -13,26 +13,7 @@ class TextDemoPage extends StatefulWidget {
 
 class _TextDemoPageState extends State<TextDemoPage> {
   CNFont? font;
-  CNFontSize fontSize = CNFontSize.points(17);
   Color? foregroundColor;
-
-  List<CNFont> get availableFonts => [
-    CNFont.system(fontSize),
-    CNFont.monospacedSystem(fontSize),
-    CNFont.boldSystem(fontSize),
-    CNFont.monospacedDigitSystem(fontSize),
-    CNFont.user(fontSize),
-    CNFont.userFixedPitch(fontSize),
-    CNFont.menu(fontSize),
-    CNFont.menuBar(fontSize),
-    CNFont.message(fontSize),
-    CNFont.palette(fontSize),
-    CNFont.titleBar(fontSize),
-    CNFont.toolTips(fontSize),
-    CNFont.controlContent(fontSize),
-    CNFont.label(fontSize),
-    CNFont.named('Helvetica Neue', fontSize),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +123,7 @@ class _TextDemoPageState extends State<TextDemoPage> {
                       children: [
                         Expanded(child: const Text('Font')),
                         CNPicker(
-                          selectedIndex: availableFonts.indexOf(font ?? CNFont.system(fontSize)),
+                          selectedIndex: availableFonts.indexOf(font ?? CNFont.system(defaultFontSize)),
                           onValueChanged: (index) => setState(() => font = availableFonts[index]),
                           items: availableFonts.map((font) => CNText(font.name ?? font.kind.name)).toList(),
                           pickerStyle: CNPickerStyle.automatic,

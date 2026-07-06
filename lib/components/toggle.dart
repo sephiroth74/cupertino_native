@@ -317,7 +317,7 @@ class _CNToggleState extends State<CNToggle> {
 
     if (_lastPayload == null) {
       if (_lastSerializedPayload != serializedPayload) {
-        debugPrint('CNToggle payload: $serializedPayload');
+        debugPrint('[CNToggle][Dart] Sending full update via setToggle: $serializedPayload');
         await channel.invokeMethod('setToggle', payload);
       }
 
@@ -328,12 +328,13 @@ class _CNToggleState extends State<CNToggle> {
 
     final patch = _computePayloadPatch(_lastPayload!, payload);
     if (patch.isEmpty) {
+      debugPrint('[CNToggle][Dart] No patch to send (payload unchanged)');
       _lastSerializedPayload = serializedPayload;
       return;
     }
 
     final serializedPatch = jsonEncode(patch);
-    debugPrint('CNToggle patch payload: $serializedPatch');
+    debugPrint('[CNToggle][Dart] Sending patch via setTogglePatch: $serializedPatch');
     await channel.invokeMethod('setTogglePatch', patch);
     _lastSerializedPayload = serializedPayload;
     _lastPayload = Map<String, dynamic>.from(payload);

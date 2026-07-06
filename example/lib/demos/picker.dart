@@ -53,7 +53,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                                     (e) => CNLabel(
                                       CNText(e.name),
                                       icon: CNImage(systemSymbolName: 'textformat.size'),
-                                      tag: e.index,
+                                      modifiers: CNViewModifiers(tag: e.index),
                                     ),
                                   )
                                   .toList(),

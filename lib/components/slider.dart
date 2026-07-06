@@ -44,6 +44,7 @@ class CNSlider extends StatefulWidget with CNViewModifiable {
   final CNSliderController? controller;
 
   /// Optional fixed height.
+  @override
   final double? height;
 
   /// Maximum value.
@@ -65,6 +66,7 @@ class CNSlider extends StatefulWidget with CNViewModifiable {
   final double value;
 
   /// Optional fixed width.
+  @override
   final double? width;
 
   @override

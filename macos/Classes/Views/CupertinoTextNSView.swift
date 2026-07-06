@@ -31,6 +31,7 @@ class CupertinoTextNSView: NSView {
         ])
 
         installRootView()
+        NSLog("[CNText][Swift] Root view installed for viewId=\(viewId)")
 
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self else {
@@ -41,23 +42,28 @@ class CupertinoTextNSView: NSView {
             switch call.method {
             case "getIntrinsicSize":
                 let size = hostingView.fittingSize
+                NSLog("[CNText][Swift] getIntrinsicSize -> width=\(size.width), height=\(size.height)")
                 result(["width": Double(size.width), "height": Double(size.height)])
             case "setText":
                 if let raw = CNChannelSerialization.asDict(call.arguments) {
+                    NSLog("[CNText][Swift] setText received full payload keys=\(Array(raw.keys))")
                     guard let decoded = CNTextPayload(channel: raw) else {
                         result(FlutterError(code: "bad_args", message: "Missing text payload", details: nil))
                         return
                     }
                     payload = decoded
                     model.replace(with: payload)
+                    NSLog("[CNText][Swift] setText applied (full model replace)")
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing text payload", details: nil))
                 }
             case "applyPatch":
                 if let patch = CNChannelSerialization.asDict(call.arguments) {
+                    NSLog("[CNText][Swift] applyPatch received keys=\(Array(patch.keys))")
                     payload.applyPatch(patch)
                     model.replace(with: payload)
+                    NSLog("[CNText][Swift] applyPatch applied")
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing text patch payload", details: nil))

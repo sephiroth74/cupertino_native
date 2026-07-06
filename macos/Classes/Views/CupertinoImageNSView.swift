@@ -31,24 +31,29 @@ class CupertinoImageView: NSView {
         ])
 
         installRootView()
+        NSLog("[CNImage][Swift] Root view installed for viewId=\(viewId)")
 
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self else { result(nil); return }
             switch call.method {
             case "setImage":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
+                    NSLog("[CNImage][Swift] setImage received full payload keys=\(Array(args.keys))")
                     guard let decoded = CNImagePayload(channel: args) else {
                         result(FlutterError(code: "bad_args", message: "Missing args", details: nil))
                         return
                     }
                     payload = decoded
                     model.replace(with: payload)
+                    NSLog("[CNImage][Swift] setImage applied (full model replace)")
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing args", details: nil)) }
             case "applyPatch":
                 if let patch = CNChannelSerialization.asDict(call.arguments) {
+                    NSLog("[CNImage][Swift] applyPatch received keys=\(Array(patch.keys))")
                     payload.applyPatch(patch)
                     model.replace(with: payload)
+                    NSLog("[CNImage][Swift] applyPatch applied")
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing patch args", details: nil)) }
             default:

@@ -16,6 +16,12 @@ mixin CNViewModifiable on Widget {
   /// Backward-compatible `enabled` accessor.
   bool get enabled => modifiers?.enabled ?? true;
 
+  /// Backward-compatible `frame` accessors.
+  double? get width => modifiers?.width;
+
+  /// Backward-compatible `frame` accessors.
+  double? get height => modifiers?.height;
+
   /// Writes all available shared modifiers into a method-channel payload.
   void writeModifiers(Map<String, dynamic> payload, BuildContext context) {
     modifiers?.writeToPayload(payload, context);

@@ -174,6 +174,7 @@ class _CNImageState extends State<CNImage> {
 
     if (_lastPayload == null) {
       if (_lastSerializedPayload != serializedPayload) {
+        debugPrint('[CNImage][Dart] Sending full update via setImage');
         await channel.invokeMethod('setImage', payload);
       }
 
@@ -184,10 +185,12 @@ class _CNImageState extends State<CNImage> {
 
     final patch = _computePayloadPatch(_lastPayload!, payload);
     if (patch.isEmpty) {
+      debugPrint('[CNImage][Dart] No patch to send (payload unchanged)');
       _lastSerializedPayload = serializedPayload;
       return;
     }
 
+    debugPrint('[CNImage][Dart] Sending patch via applyPatch: ${jsonEncode(patch)}');
     await channel.invokeMethod('applyPatch', patch);
     _lastSerializedPayload = serializedPayload;
     _lastPayload = Map<String, dynamic>.from(payload);

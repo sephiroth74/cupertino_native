@@ -38,8 +38,14 @@ struct CNTextPayload: CNChannelSerializable {
         if channel.keys.contains("font") {
             if channel["font"] is NSNull {
                 font = nil
+            } else if let fontPatch = channel["font"] as? [String: Any] {
+                if let current = font {
+                    font = Self.deepMerge(current, with: fontPatch)
+                } else {
+                    font = fontPatch
+                }
             } else {
-                font = channel["font"] as? [String: Any]
+                font = nil
             }
         }
 
@@ -84,6 +90,27 @@ struct CNTextPayload: CNChannelSerializable {
     private static func decodeString(_ value: Any?) -> String? {
         if value is NSNull { return nil }
         return value as? String
+    }
+
+    private static func deepMerge(_ base: [String: Any], with patch: [String: Any]) -> [String: Any] {
+        var result = base
+
+        for (key, patchValue) in patch {
+            if patchValue is NSNull {
+                result.removeValue(forKey: key)
+                continue
+            }
+
+            if let patchMap = patchValue as? [String: Any],
+               let baseMap = result[key] as? [String: Any]
+            {
+                result[key] = deepMerge(baseMap, with: patchMap)
+            } else {
+                result[key] = patchValue
+            }
+        }
+
+        return result
     }
 }
 
@@ -148,6 +175,8 @@ enum CNText {
            let symbolFont = FontUtils.swiftUIFontFromDictionary(fontDict)
         {
             view = AnyView(view.font(symbolFont))
+        } else if let fontDict = payload.font {
+            NSLog("[CNText][Swift] Font map not resolvable in static view: \(fontDict)")
         }
 
         if let lineLimit = payload.lineLimit {
@@ -189,6 +218,8 @@ enum CNText {
                let symbolFont = FontUtils.swiftUIFontFromDictionary(fontDict)
             {
                 view = AnyView(view.font(symbolFont))
+            } else if let fontDict = payload.font {
+                NSLog("[CNText][Swift] Font map not resolvable in bound view: \(fontDict)")
             }
 
             if let lineLimit = payload.lineLimit {
