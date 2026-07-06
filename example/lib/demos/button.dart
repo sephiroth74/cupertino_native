@@ -39,8 +39,6 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
 
   Color? _tintColor;
 
-  void _set(String what) => setState(() => _last = what);
-
   @override
   Widget build(BuildContext context) {
     return CNPageScaffold(
@@ -60,10 +58,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                       padding: const EdgeInsets.all(8),
                       child: CNButton(
                         onPressed: () => _set('Default'),
-                        modifiers: CNViewModifiers(
-                          controlSize: _controlSize,
-                          tint: _tintColor,
-                        ),
+                        modifiers: CNViewModifiers(controlSize: _controlSize, tint: _tintColor),
                         style: _buttonStyle,
                         children: const [CNText('Default')],
                       ),
@@ -72,10 +67,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                       padding: const EdgeInsets.all(8),
                       child: CNButton(
                         onPressed: () => _set('Button with Icon'),
-                        modifiers: CNViewModifiers(
-                          controlSize: _controlSize,
-                          tint: _tintColor,
-                        ),
+                        modifiers: CNViewModifiers(controlSize: _controlSize, tint: _tintColor),
                         style: _buttonStyle,
                         shrinkWrap: true,
                         children: const [
@@ -88,10 +80,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                       padding: const EdgeInsets.all(8),
                       child: CNButton(
                         onPressed: () => _set('Icon Only'),
-                        modifiers: CNViewModifiers(
-                          controlSize: _controlSize,
-                          tint: _tintColor,
-                        ),
+                        modifiers: CNViewModifiers(controlSize: _controlSize, tint: _tintColor),
                         style: _buttonStyle,
                         shrinkWrap: true,
                         children: const [CNImage(systemSymbolName: 'square.and.arrow.up')],
@@ -101,18 +90,13 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                       padding: const EdgeInsets.all(8),
                       child: CNButton(
                         onPressed: () => _set('Progress View'),
-                        modifiers: CNViewModifiers(
-                          controlSize: _controlSize,
-                          tint: _tintColor,
-                        ),
+                        modifiers: CNViewModifiers(controlSize: _controlSize, tint: _tintColor),
                         style: _buttonStyle,
                         shrinkWrap: true,
                         children: const [
                           CNProgressView(
-                            controlSize: CNControlSize.small,
                             progressViewStyle: CNProgressViewStyle.linear,
-                            width: 50,
-                            tint: CNColors.white,
+                            modifiers: CNViewModifiers(controlSize: CNControlSize.small, width: 50, tint: CNColors.white),
                           ),
                           CNText('Progress View'),
                         ],
@@ -198,4 +182,6 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
       ),
     );
   }
+
+  void _set(String what) => setState(() => _last = what);
 }

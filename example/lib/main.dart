@@ -13,7 +13,7 @@ import 'demos/menu_button.dart';
 import 'demos/button.dart';
 import 'demos/color_well.dart';
 import 'demos/path_control.dart';
-import 'demos/progress_indicators.dart';
+import 'demos/progress_demo.dart';
 import 'demos/level_indicators.dart';
 import 'demos/stepper.dart';
 import 'demos/date_picker.dart';

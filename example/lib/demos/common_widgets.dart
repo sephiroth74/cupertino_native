@@ -2,7 +2,7 @@ import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/cupertino.dart';
 
 class RightSideOptionContainer extends StatelessWidget {
-  const RightSideOptionContainer({super.key, this.title, required this.options});
+  const RightSideOptionContainer({super.key, this.title = 'Options', required this.options});
 
   final Map<String, Widget> options;
   final String? title;

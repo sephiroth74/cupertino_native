@@ -5,15 +5,17 @@ import SwiftUI
 class CupertinoProgressIndicatorNSView: NSView {
     private let channel: FlutterMethodChannel
     private let hostingView: NSHostingView<AnyView>
+    private let model: CNProgressViewModel
 
-    private var payload: CNProgressViewPayload?
+    private var payload: CNProgressViewPayload
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         hostingView = NSHostingView(rootView: AnyView(EmptyView()))
         channel = FlutterMethodChannel(
             name: "CupertinoNativeProgressIndicator_\(viewId)", binaryMessenger: messenger,
         )
-        payload = CNProgressViewDeserializer.decode(args)
+        payload = CNProgressViewDeserializer.decode(args) ?? Self.defaultPayload()
+        model = CNProgressViewModel(payload: payload)
 
         super.init(frame: .zero)
 
@@ -29,7 +31,8 @@ class CupertinoProgressIndicatorNSView: NSView {
             hostingView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
 
-        rebuild()
+        installRootView()
+        updateAppearance()
         setupChannel()
     }
 
@@ -49,10 +52,11 @@ class CupertinoProgressIndicatorNSView: NSView {
             case "getIntrinsicSize":
                 let size = hostingView.fittingSize
                 result(["width": Double(size.width), "height": Double(size.height)])
-            case "setProgressView":
+            case "setData", "setProgressView":
                 if let parsed: CNProgressViewPayload = CNChannelSerialization.decode(call.arguments) {
                     payload = parsed
-                    rebuild()
+                    model.replace(with: payload)
+                    updateAppearance()
                     let size = hostingView.fittingSize
                     channel.invokeMethod(
                         "intrinsicSizeChanged",
@@ -62,32 +66,52 @@ class CupertinoProgressIndicatorNSView: NSView {
                 } else {
                     result(FlutterError(code: "bad_args", message: "Invalid progress view payload", details: nil))
                 }
+            case "applyPatch":
+                if let patch = CNChannelSerialization.asDict(call.arguments) {
+                    payload.applyPatch(patch)
+                    model.replace(with: payload)
+                    updateAppearance()
+                    let size = hostingView.fittingSize
+                    channel.invokeMethod(
+                        "intrinsicSizeChanged",
+                        arguments: ["width": Double(size.width), "height": Double(size.height)],
+                    )
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Invalid progress patch payload", details: nil))
+                }
             default:
                 result(FlutterMethodNotImplemented)
             }
         }
     }
 
-    private func rebuild() {
-        guard let payload else {
-            hostingView.rootView = AnyView(EmptyView())
-            return
-        }
+    private static func defaultPayload() -> CNProgressViewPayload {
+        CNProgressViewPayload(channel: [
+            "style": "linear",
+            "total": 1.0,
+            "value": NSNull(),
+        ])!
+    }
 
-        if let isDark = payload.isDark {
-            hostingView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-        } else {
-            hostingView.appearance = nil
-        }
-
+    private func installRootView() {
         hostingView.rootView = CNProgressViewDeserializer.deserialize(
-            payload.toChannel(),
+            model: model,
             onSizeChanged: { [weak self] size in
+                NSLog("[CNProgressIndicator][Swift] intrinsicSizeChanged -> width=\(size.width), height=\(size.height)")
                 self?.channel.invokeMethod(
                     "intrinsicSizeChanged",
                     arguments: ["width": size.width, "height": size.height],
                 )
             },
-        ) ?? AnyView(EmptyView())
+        )
+    }
+
+    private func updateAppearance() {
+        if let isDark = payload.isDark {
+            hostingView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+        } else {
+            hostingView.appearance = nil
+        }
     }
 }

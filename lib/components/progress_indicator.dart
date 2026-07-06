@@ -28,6 +28,18 @@ const _kDefaultLinearSizeSmall = 20.0;
 ///
 /// Backed by SwiftUI `ProgressView` on macOS.
 class CNProgressView extends StatefulWidget with CNButtonChild, CNViewModifiable {
+  /// Progress view style.
+  final CNProgressViewStyle progressViewStyle;
+
+  /// Total value used for determinate progress.
+  final double total;
+
+  /// Determinate progress value. Null means indeterminate.
+  final double? value;
+
+  @override
+  final CNViewModifiers? modifiers;
+
   /// Creates a progress view.
   ///
   /// Pass `value` as null for indeterminate mode.
@@ -36,50 +48,17 @@ class CNProgressView extends StatefulWidget with CNButtonChild, CNViewModifiable
     this.value,
     this.total = 1.0,
     this.progressViewStyle = CNProgressViewStyle.linear,
-    this.controlSize = CNControlSize.regular,
-    this.tint,
-    this.width,
-    this.height,
     this.modifiers,
   }) : assert(total > 0);
-
-  /// Native control size.
-  final CNControlSize controlSize;
-
-  /// Progress view style.
-  final CNProgressViewStyle progressViewStyle;
-
-  /// Optional tint color.
-  final Color? tint;
-
-  /// Total value used for determinate progress.
-  final double total;
-
-  /// Determinate progress value. Null means indeterminate.
-  final double? value;
-
-  /// Optional fixed height.
-  @override
-  final double? height;
-
-  @override
-  final CNViewModifiers? modifiers;
-
-  /// Optional fixed width.
-  @override
-  final double? width;
 
   @override
   String get buttonChildType => 'progressView';
 
   @override
-  State<CNProgressView> createState() => _CNProgressViewState();
-
-  @override
   EdgeInsets? get padding => modifiers?.padding;
 
   @override
-  List<Object?> get props => [value, total, progressViewStyle, controlSize, tint, width, height];
+  List<Object?> get props => [value, total, progressViewStyle, modifiers];
 
   @override
   bool get stringify => true;
@@ -88,20 +67,19 @@ class CNProgressView extends StatefulWidget with CNButtonChild, CNViewModifiable
   Object? get tag => modifiers?.tag;
 
   @override
+  State<CNProgressView> createState() => _CNProgressViewState();
+
+  @override
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
     final isDark = CNTheme.brightnessOf(context) == Brightness.dark;
-    final resolvedTint =
-        tint ?? (ignoreTheme ? null : CNTheme.of(context).progressTheme.tintColor ?? CNTheme.of(context).primaryColor);
+    final resolvedTint = ignoreTheme ? null : CNTheme.of(context).progressTheme.tintColor ?? CNTheme.of(context).primaryColor;
 
     final payload = <String, dynamic>{
       'style': progressViewStyle.name,
-      'controlSize': controlSize.name,
       'isDark': isDark,
-      'tint': resolveColorToArgb(resolvedTint, context),
+      if (modifiers?.tint == null) 'tint': resolveColorToArgb(resolvedTint, context),
       'value': value,
       'total': total,
-      'width': width,
-      'height': height,
     };
 
     writeModifiers(payload, context);
@@ -113,9 +91,57 @@ class _CNProgressViewState extends State<CNProgressView> {
   MethodChannel? _channel;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
+  Map<String, dynamic>? _lastPayload;
   String? _lastSerializedPayload;
   double? _layoutHeight;
   double? _layoutWidth;
+
+  bool get _isCircular => widget.progressViewStyle == CNProgressViewStyle.circular;
+
+  bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
+
+  Color? get _resolvedTint => widget.modifiers?.tint ?? CNTheme.of(context).progressTheme.tintColor;
+
+  @override
+  Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      return SizedBox.shrink();
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedWidth = constraints.hasBoundedWidth;
+        final hasBoundedHeight = constraints.hasBoundedHeight;
+
+        final resolvedWidth =
+            widget.width ?? _intrinsicWidth ?? (hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth ?? _defaultWidth());
+        final resolvedHeight =
+            widget.height ?? _intrinsicHeight ?? (hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? _defaultHeight());
+
+        // if (_layoutWidth != resolvedWidth || _layoutHeight != resolvedHeight) {
+        //   _layoutWidth = resolvedWidth;
+        //   _layoutHeight = resolvedHeight;
+        //   _syncPropsToNativeIfNeeded();
+        // }
+
+        final creationParams = _toPayload(
+          frameWidth: _isCircular ? null : widget.width ?? (hasBoundedWidth ? constraints.maxWidth : null),
+          frameHeight: _isCircular ? null : widget.height ?? (hasBoundedHeight ? constraints.maxHeight : null),
+        );
+
+        return SizedBox(
+          width: resolvedWidth,
+          height: resolvedHeight,
+          child: AppKitView(
+            viewType: 'CupertinoNativeProgressIndicator',
+            creationParams: creationParams,
+            creationParamsCodec: const StandardMessageCodec(),
+            onPlatformViewCreated: _onCreated,
+          ),
+        );
+      },
+    );
+  }
 
   @override
   void didChangeDependencies() {
@@ -135,19 +161,34 @@ class _CNProgressViewState extends State<CNProgressView> {
     super.dispose();
   }
 
-  bool get _isCircular => widget.progressViewStyle == CNProgressViewStyle.circular;
-
-  bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
-
-  Color? get _resolvedTint => widget.tint ?? CNTheme.of(context).progressTheme.tintColor ?? CNTheme.of(context).primaryColor;
-
   void _cacheCurrentProps() {
-    _lastSerializedPayload = _serializeCurrentPayload();
+    final payload = _toPayload(frameWidth: _isCircular ? null : _layoutWidth, frameHeight: _isCircular ? null : _layoutHeight);
+    _lastSerializedPayload = jsonEncode(payload);
+    _lastPayload = Map<String, dynamic>.from(payload);
+  }
+
+  Map<String, dynamic> _computePayloadPatch(Map<String, dynamic> previous, Map<String, dynamic> next) {
+    final patch = <String, dynamic>{};
+    final keys = <String>{...previous.keys, ...next.keys};
+
+    for (final key in keys) {
+      final hadPrevious = previous.containsKey(key);
+      final hasNext = next.containsKey(key);
+      final oldValue = hadPrevious ? previous[key] : null;
+      final newValue = hasNext ? next[key] : null;
+
+      final changed = jsonEncode(oldValue) != jsonEncode(newValue);
+      if (!changed) continue;
+
+      patch[key] = hasNext ? newValue : null;
+    }
+
+    return patch;
   }
 
   double _defaultHeight() {
     if (widget.progressViewStyle == CNProgressViewStyle.circular) {
-      switch (widget.controlSize) {
+      switch (widget.modifiers?.controlSize ?? CNControlSize.regular) {
         case CNControlSize.mini:
           return _kDefaultCircularSizeMini;
         case CNControlSize.small:
@@ -160,7 +201,7 @@ class _CNProgressViewState extends State<CNProgressView> {
           return _kDefaultCircularSizeExtraLarge;
       }
     } else {
-      switch (widget.controlSize) {
+      switch (widget.modifiers?.controlSize ?? CNControlSize.regular) {
         case CNControlSize.mini:
           return _kDefaultLinearSizeMini;
         case CNControlSize.small:
@@ -191,6 +232,8 @@ class _CNProgressViewState extends State<CNProgressView> {
   }
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
+    debugPrint('[CNProgressView] intrinsicSizeChanged -> width=$width, height=$height');
+
     if (!mounted || width == null || height == null) return;
     if (width == _intrinsicWidth && height == _intrinsicHeight) return;
 
@@ -213,6 +256,7 @@ class _CNProgressViewState extends State<CNProgressView> {
   }
 
   Future<void> _requestIntrinsicSize() async {
+    debugPrint('[CNProgressView] requestIntrinsicSize');
     final ch = _channel;
     if (ch == null) return;
 
@@ -224,19 +268,52 @@ class _CNProgressViewState extends State<CNProgressView> {
     }
   }
 
-  String _serializeCurrentPayload() =>
-      jsonEncode(_toPayload(frameWidth: _isCircular ? null : _layoutWidth, frameHeight: _isCircular ? null : _layoutHeight));
+  bool _shouldRequestIntrinsicSize(Map<String, dynamic> previous, Map<String, dynamic> next, Map<String, dynamic> patch) {
+    final previousValue = previous['value'];
+    final nextValue = next['value'];
+    final valueNullabilityChanged = (previousValue == null) != (nextValue == null);
+
+    if (valueNullabilityChanged) {
+      return true;
+    }
+
+    const sizeAffectingKeys = {'style', 'controlSize', 'width', 'height'};
+    return patch.keys.any(sizeAffectingKeys.contains);
+  }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
+    debugPrint('[CNProgressView] syncPropsToNativeIfNeeded');
     final ch = _channel;
     if (ch == null) return;
 
     final payload = _toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight);
     final serializedPayload = jsonEncode(payload);
 
-    if (_lastSerializedPayload != serializedPayload) {
-      await ch.invokeMethod('setProgressView', payload);
-      _cacheCurrentProps();
+    if (_lastPayload == null) {
+      if (_lastSerializedPayload != serializedPayload) {
+        debugPrint('[CNProgressView] setData -> $payload');
+        await ch.invokeMethod('setData', payload);
+      }
+
+      _lastSerializedPayload = serializedPayload;
+      _lastPayload = Map<String, dynamic>.from(payload);
+      _requestIntrinsicSize();
+      return;
+    }
+
+    final patch = _computePayloadPatch(_lastPayload!, payload);
+    if (patch.isEmpty) {
+      _lastSerializedPayload = serializedPayload;
+      return;
+    }
+
+    debugPrint('[CNProgressView] applyPatch -> $patch');
+    final previousPayload = _lastPayload!;
+    await ch.invokeMethod('applyPatch', patch);
+    _lastSerializedPayload = serializedPayload;
+    _lastPayload = Map<String, dynamic>.from(payload);
+
+    if (_shouldRequestIntrinsicSize(previousPayload, payload, patch)) {
       _requestIntrinsicSize();
     }
   }
@@ -244,9 +321,9 @@ class _CNProgressViewState extends State<CNProgressView> {
   Map<String, dynamic> _toPayload({double? frameWidth, double? frameHeight}) {
     final payload = <String, dynamic>{
       'style': widget.progressViewStyle.name,
-      'controlSize': widget.controlSize.name,
+      'controlSize': (widget.modifiers?.controlSize ?? CNControlSize.regular).name,
       'isDark': _isDark,
-      'tint': resolveColorToArgb(_resolvedTint, context),
+      if (widget.modifiers?.tint == null) 'tint': resolveColorToArgb(_resolvedTint, context),
       'value': widget.value,
       'total': widget.total,
       'width': frameWidth,
@@ -255,46 +332,5 @@ class _CNProgressViewState extends State<CNProgressView> {
 
     widget.writeModifiers(payload, context);
     return payload;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
-      return SizedBox.shrink();
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final hasBoundedWidth = constraints.hasBoundedWidth;
-        final hasBoundedHeight = constraints.hasBoundedHeight;
-
-        final resolvedWidth =
-            widget.width ?? _intrinsicWidth ?? (hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth ?? _defaultWidth());
-        final resolvedHeight =
-            widget.height ?? _intrinsicHeight ?? (hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? _defaultHeight());
-
-        if (_layoutWidth != resolvedWidth || _layoutHeight != resolvedHeight) {
-          _layoutWidth = resolvedWidth;
-          _layoutHeight = resolvedHeight;
-          _syncPropsToNativeIfNeeded();
-        }
-
-        final creationParams = _toPayload(
-          frameWidth: _isCircular ? null : widget.width ?? (hasBoundedWidth ? constraints.maxWidth : null),
-          frameHeight: _isCircular ? null : widget.height ?? (hasBoundedHeight ? constraints.maxHeight : null),
-        );
-
-        return SizedBox(
-          width: resolvedWidth,
-          height: resolvedHeight,
-          child: AppKitView(
-            viewType: 'CupertinoNativeProgressIndicator',
-            creationParams: creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            onPlatformViewCreated: _onCreated,
-          ),
-        );
-      },
-    );
   }
 }

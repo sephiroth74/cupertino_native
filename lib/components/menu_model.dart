@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 /// Data model used by context-menu and toolbar menu integrations.
 // ignore: must_be_immutable
-class CNMenuModel extends ChangeNotifier with EquatableMixin implements CNChannelSerializable {
+class CNMenuModel extends ChangeNotifier with Equatable implements CNChannelSerializable {
   /// Creates a menu model with the provided [items].
   CNMenuModel({required this.items}) {
     for (final item in items) {
@@ -83,7 +83,7 @@ enum CNMenuModelItemState {
 
 /// A single item in [CNMenuModel].
 // ignore: must_be_immutable
-class CNMenuModelItem extends ChangeNotifier with EquatableMixin implements CNChannelSerializable {
+class CNMenuModelItem extends ChangeNotifier with Equatable implements CNChannelSerializable {
   /// Creates a menu item.
   CNMenuModelItem({
     required this.title,
