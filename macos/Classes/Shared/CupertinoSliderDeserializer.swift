@@ -76,7 +76,6 @@ struct CNSliderPayload: CNChannelSerializable {
         if channel.keys.contains("isDark") {
             isDark = Self.decodeBool(channel["isDark"])
         }
-
     }
 
     private static func decodeBool(_ value: Any?) -> Bool? {

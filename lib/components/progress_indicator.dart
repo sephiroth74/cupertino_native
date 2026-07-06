@@ -46,10 +46,6 @@ class CNProgressView extends StatefulWidget with CNButtonChild, CNViewModifiable
   /// Native control size.
   final CNControlSize controlSize;
 
-  /// Optional fixed height.
-  @override
-  final double? height;
-
   /// Progress view style.
   final CNProgressViewStyle progressViewStyle;
 
@@ -62,12 +58,16 @@ class CNProgressView extends StatefulWidget with CNButtonChild, CNViewModifiable
   /// Determinate progress value. Null means indeterminate.
   final double? value;
 
-  /// Optional fixed width.
+  /// Optional fixed height.
   @override
-  final double? width;
+  final double? height;
 
   @override
   final CNViewModifiers? modifiers;
+
+  /// Optional fixed width.
+  @override
+  final double? width;
 
   @override
   String get buttonChildType => 'progressView';

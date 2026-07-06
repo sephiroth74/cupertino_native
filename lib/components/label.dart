@@ -21,30 +21,6 @@ const double _kDefaultLabelWidth = 50.0;
 ///
 /// On platforms other than macOS, this falls back to a plain Flutter text label.
 class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModifiable, CNPaddable, CNTaggable {
-  /// Optional badge shown next to the menu item when used inside [CNMenu].
-  final Object? badge;
-
-  /// Optional icon shown on the leading side.
-  final CNImage? icon;
-
-  /// Optional spacing between icon and title.
-  final double? labelIconToTitleSpacing;
-
-  /// Optional reserved width for icon area.
-  final double? labelReservedIconWidth;
-
-  /// Visual style applied to the SwiftUI label.
-  final CNLabelStyle labelStyle;
-
-  /// Secondary text shown below primary text.
-  final CNText? secondaryText;
-
-  /// Primary text, required.
-  final CNText text;
-
-  @override
-  final CNViewModifiers modifiers;
-
   /// Creates a native SwiftUI label.
   const CNLabel(
     this.text, {
@@ -81,8 +57,35 @@ class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
     );
   }
 
+  /// Optional badge shown next to the menu item when used inside [CNMenu].
+  final Object? badge;
+
+  /// Optional icon shown on the leading side.
+  final CNImage? icon;
+
+  /// Optional spacing between icon and title.
+  final double? labelIconToTitleSpacing;
+
+  /// Optional reserved width for icon area.
+  final double? labelReservedIconWidth;
+
+  /// Visual style applied to the SwiftUI label.
+  final CNLabelStyle labelStyle;
+
+  /// Secondary text shown below primary text.
+  final CNText? secondaryText;
+
+  /// Primary text, required.
+  final CNText text;
+
+  @override
+  final CNViewModifiers modifiers;
+
   @override
   String get buttonChildType => 'label';
+
+  @override
+  State<CNLabel> createState() => _CNLabelState();
 
   @override
   String get menuChildType => 'label';
@@ -101,9 +104,6 @@ class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
 
   @override
   bool get stringify => true;
-
-  @override
-  State<CNLabel> createState() => _CNLabelState();
 
   @override
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
@@ -152,85 +152,6 @@ class _CNLabelState extends State<CNLabel> {
   String? _lastSerializedPayload;
   double? _layoutHeight;
   double? _layoutWidth;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final defaultHeight = _defaultHeightFromFonts();
-        final hasBoundedWidth = constraints.hasBoundedWidth;
-        final hasBoundedHeight = constraints.hasBoundedHeight;
-        final shouldProbeWidth = widget.width == null && !hasBoundedWidth && _intrinsicWidth == null;
-        final shouldProbeHeight = widget.height == null && !hasBoundedHeight && _intrinsicHeight == null;
-
-        if ((shouldProbeWidth || shouldProbeHeight) && !_intrinsicProbeInFlight && _channel != null) {
-          _requestIntrinsicSize();
-        }
-
-        final canFallbackWidth = _intrinsicProbeAttempts > 0;
-        final canFallbackHeight = _intrinsicProbeAttempts > 0;
-
-        final resolvedWidth =
-            widget.width ??
-            (hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth ?? (canFallbackWidth ? _kDefaultLabelWidth : null));
-        final resolvedHeight =
-            widget.height ??
-            (hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? (canFallbackHeight ? defaultHeight : null));
-
-        // if (_layoutWidth != resolvedWidth || _layoutHeight != resolvedHeight) {
-        //   _layoutWidth = resolvedWidth;
-        //   _layoutHeight = resolvedHeight;
-        //   _syncPropsToNativeIfNeeded();
-        // }
-
-        if (defaultTargetPlatform != TargetPlatform.macOS) {
-          final showIcon = widget.icon != null && widget.labelStyle != CNLabelStyle.titleOnly;
-          final showTitle = widget.labelStyle != CNLabelStyle.iconOnly;
-
-          return SizedBox(
-            width: resolvedWidth,
-            height: resolvedHeight,
-            child: Padding(
-              padding: widget.padding ?? EdgeInsets.zero,
-              child: Row(
-                children: [
-                  if (showIcon) SizedBox(width: widget.labelReservedIconWidth, child: widget.icon!),
-                  if (showIcon && showTitle) SizedBox(width: widget.labelIconToTitleSpacing ?? 8),
-                  if (showTitle)
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildFallbackText(widget.text),
-                          if (widget.secondaryText != null) _buildFallbackText(widget.secondaryText!),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        final platformView = AppKitView(
-          viewType: 'CupertinoNativeLabel',
-          creationParams: _toPayload(),
-          creationParamsCodec: const StandardMessageCodec(),
-          onPlatformViewCreated: _onPlatformViewCreated,
-        );
-
-        if (resolvedWidth == null && resolvedHeight == null) {
-          return SizedBox(width: _kDefaultLabelWidth, height: defaultHeight, child: platformView);
-        } else if (resolvedWidth == null) {
-          return SizedBox(width: _kDefaultLabelWidth, child: platformView);
-        } else if (resolvedHeight == null) {
-          return SizedBox(height: defaultHeight, child: platformView);
-        }
-        return SizedBox(width: resolvedWidth, height: resolvedHeight, child: platformView);
-      },
-    );
-  }
 
   @override
   void didChangeDependencies() {
@@ -426,5 +347,84 @@ class _CNLabelState extends State<CNLabel> {
     map['nodes'] = {'primaryText': primaryText, 'secondaryText': secondaryText, 'icon': icon};
 
     return map;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final defaultHeight = _defaultHeightFromFonts();
+        final hasBoundedWidth = constraints.hasBoundedWidth;
+        final hasBoundedHeight = constraints.hasBoundedHeight;
+        final shouldProbeWidth = widget.width == null && !hasBoundedWidth && _intrinsicWidth == null;
+        final shouldProbeHeight = widget.height == null && !hasBoundedHeight && _intrinsicHeight == null;
+
+        if ((shouldProbeWidth || shouldProbeHeight) && !_intrinsicProbeInFlight && _channel != null) {
+          _requestIntrinsicSize();
+        }
+
+        final canFallbackWidth = _intrinsicProbeAttempts > 0;
+        final canFallbackHeight = _intrinsicProbeAttempts > 0;
+
+        final resolvedWidth =
+            widget.width ??
+            (hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth ?? (canFallbackWidth ? _kDefaultLabelWidth : null));
+        final resolvedHeight =
+            widget.height ??
+            (hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? (canFallbackHeight ? defaultHeight : null));
+
+        // if (_layoutWidth != resolvedWidth || _layoutHeight != resolvedHeight) {
+        //   _layoutWidth = resolvedWidth;
+        //   _layoutHeight = resolvedHeight;
+        //   _syncPropsToNativeIfNeeded();
+        // }
+
+        if (defaultTargetPlatform != TargetPlatform.macOS) {
+          final showIcon = widget.icon != null && widget.labelStyle != CNLabelStyle.titleOnly;
+          final showTitle = widget.labelStyle != CNLabelStyle.iconOnly;
+
+          return SizedBox(
+            width: resolvedWidth,
+            height: resolvedHeight,
+            child: Padding(
+              padding: widget.padding ?? EdgeInsets.zero,
+              child: Row(
+                children: [
+                  if (showIcon) SizedBox(width: widget.labelReservedIconWidth, child: widget.icon!),
+                  if (showIcon && showTitle) SizedBox(width: widget.labelIconToTitleSpacing ?? 8),
+                  if (showTitle)
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildFallbackText(widget.text),
+                          if (widget.secondaryText != null) _buildFallbackText(widget.secondaryText!),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final platformView = AppKitView(
+          viewType: 'CupertinoNativeLabel',
+          creationParams: _toPayload(),
+          creationParamsCodec: const StandardMessageCodec(),
+          onPlatformViewCreated: _onPlatformViewCreated,
+        );
+
+        if (resolvedWidth == null && resolvedHeight == null) {
+          return SizedBox(width: _kDefaultLabelWidth, height: defaultHeight, child: platformView);
+        } else if (resolvedWidth == null) {
+          return SizedBox(width: _kDefaultLabelWidth, child: platformView);
+        } else if (resolvedHeight == null) {
+          return SizedBox(height: defaultHeight, child: platformView);
+        }
+        return SizedBox(width: resolvedWidth, height: resolvedHeight, child: platformView);
+      },
+    );
   }
 }
