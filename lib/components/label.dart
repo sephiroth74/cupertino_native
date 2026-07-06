@@ -9,6 +9,7 @@ import 'package:cupertino_native/components/taggable.dart';
 import 'package:cupertino_native/components/text.dart';
 import 'package:cupertino_native/components/view_modifiable.dart';
 import 'package:cupertino_native/components/view_modifiers.dart';
+import 'package:cupertino_native/extensions/box_constraints.dart';
 import 'package:cupertino_native/style/text_utils.dart';
 import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/cupertino.dart';
@@ -111,7 +112,7 @@ class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
   }
 
   // ignore: public_member_api_docs
-  Map<String, dynamic> toMap(BuildContext context, {double? frameWidth, double? frameHeight, bool ignoreTheme = false}) {
+  Map<String, dynamic> toMap(BuildContext context, {bool ignoreTheme = false, Map<String, dynamic>? layoutConstraintsPayload}) {
     final payload = <String, dynamic>{
       'primaryText': text.toMap(context, ignoreTheme: ignoreTheme),
       if (secondaryText != null) 'secondaryText': secondaryText!.toMap(context, ignoreTheme: ignoreTheme),
@@ -120,6 +121,7 @@ class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
       'labelStyle': labelStyle.name,
       if (labelReservedIconWidth != null) 'labelReservedIconWidth': labelReservedIconWidth,
       if (labelIconToTitleSpacing != null) 'labelIconToTitleSpacing': labelIconToTitleSpacing,
+      if (layoutConstraintsPayload != null && modifiers.constraints == null) 'constraints': layoutConstraintsPayload,
     };
 
     writeModifiers(payload, context);
@@ -144,14 +146,12 @@ enum CNLabelStyle {
 
 class _CNLabelState extends State<CNLabel> {
   MethodChannel? _channel;
+  Map<String, dynamic>? _currentConstraintsPayload;
+  String? _currentConstraintsSerialized;
   double? _intrinsicHeight;
-  int _intrinsicProbeAttempts = 0;
-  bool _intrinsicProbeInFlight = false;
   double? _intrinsicWidth;
   Map<String, dynamic>? _lastPayload;
   String? _lastSerializedPayload;
-  double? _layoutHeight;
-  double? _layoutWidth;
 
   @override
   void didChangeDependencies() {
@@ -256,9 +256,16 @@ class _CNLabelState extends State<CNLabel> {
   void _onIntrinsicSizeChanged(double? width, double? height) {
     debugPrint('[CNLabel][Dart] Received intrinsic size change: width=$width, height=$height');
     if (!mounted || width == null || height == null) return;
+
+    final normalizedWidth = width > 0 ? width : null;
+    final normalizedHeight = height > 0 ? height : null;
+    if (normalizedWidth == _intrinsicWidth && normalizedHeight == _intrinsicHeight) {
+      return;
+    }
+
     setState(() {
-      _intrinsicWidth = width > 0 ? width : null;
-      _intrinsicHeight = height > 0 ? height : null;
+      _intrinsicWidth = normalizedWidth;
+      _intrinsicHeight = normalizedHeight;
     });
   }
 
@@ -275,33 +282,6 @@ class _CNLabelState extends State<CNLabel> {
     _channel = channel;
     channel.setMethodCallHandler(_onMethodCall);
     _cacheCurrentProps();
-    await _requestIntrinsicSize();
-  }
-
-  Future<void> _requestIntrinsicSize() async {
-    debugPrint('[CNLabel][Dart] Requesting intrinsic size...');
-    if (_intrinsicProbeInFlight) return;
-
-    final channel = _channel;
-    if (channel == null) return;
-
-    _intrinsicProbeInFlight = true;
-    _intrinsicProbeAttempts += 1;
-    try {
-      final size = await channel.invokeMethod<Map>('getIntrinsicSize');
-      final w = (size?['width'] as num?)?.toDouble();
-      final h = (size?['height'] as num?)?.toDouble();
-      if (mounted && w != null && h != null) {
-        setState(() {
-          _intrinsicWidth = w;
-          _intrinsicHeight = h;
-        });
-      }
-    } catch (_) {
-      // Ignored.
-    } finally {
-      _intrinsicProbeInFlight = false;
-    }
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
@@ -319,7 +299,7 @@ class _CNLabelState extends State<CNLabel> {
 
       _lastSerializedPayload = serializedPayload;
       _lastPayload = Map<String, dynamic>.from(payload);
-      await _requestIntrinsicSize();
+
       return;
     }
 
@@ -334,11 +314,10 @@ class _CNLabelState extends State<CNLabel> {
     await channel.invokeMethod('applyPatch', patch);
     _lastSerializedPayload = serializedPayload;
     _lastPayload = Map<String, dynamic>.from(payload);
-    await _requestIntrinsicSize();
   }
 
   Map<String, dynamic> _toPayload() {
-    final map = widget.toMap(context, frameWidth: _layoutWidth, frameHeight: _layoutHeight);
+    final map = widget.toMap(context, layoutConstraintsPayload: _currentConstraintsPayload);
 
     final primaryText = map.remove('primaryText') as Map<String, dynamic>?;
     final secondaryText = map.remove('secondaryText');
@@ -353,76 +332,69 @@ class _CNLabelState extends State<CNLabel> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final hasExplicitConstraints = widget.modifiers.constraints != null;
+        final shrinkWrap = widget.modifiers.shrinkWrap;
+        final resolvedConstraints = hasExplicitConstraints ? widget.modifiers.constraints! : constraints;
+        _currentConstraintsPayload = resolvedConstraints.toMap();
+
+        final serializedConstraints = jsonEncode(_currentConstraintsPayload);
+        if (_currentConstraintsSerialized != serializedConstraints) {
+          _currentConstraintsSerialized = serializedConstraints;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _syncPropsToNativeIfNeeded();
+          });
+        }
+
         final defaultHeight = _defaultHeightFromFonts();
         final hasBoundedWidth = constraints.hasBoundedWidth;
         final hasBoundedHeight = constraints.hasBoundedHeight;
-        final shouldProbeWidth = widget.width == null && !hasBoundedWidth && _intrinsicWidth == null;
-        final shouldProbeHeight = widget.height == null && !hasBoundedHeight && _intrinsicHeight == null;
-
-        if ((shouldProbeWidth || shouldProbeHeight) && !_intrinsicProbeInFlight && _channel != null) {
-          _requestIntrinsicSize();
-        }
-
-        final canFallbackWidth = _intrinsicProbeAttempts > 0;
-        final canFallbackHeight = _intrinsicProbeAttempts > 0;
-
-        final resolvedWidth =
-            widget.width ??
-            (hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth ?? (canFallbackWidth ? _kDefaultLabelWidth : null));
-        final resolvedHeight =
-            widget.height ??
-            (hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? (canFallbackHeight ? defaultHeight : null));
-
-        // if (_layoutWidth != resolvedWidth || _layoutHeight != resolvedHeight) {
-        //   _layoutWidth = resolvedWidth;
-        //   _layoutHeight = resolvedHeight;
-        //   _syncPropsToNativeIfNeeded();
-        // }
+        final resolvedWidth = hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth ?? _kDefaultLabelWidth;
+        final resolvedHeight = hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? defaultHeight;
 
         if (defaultTargetPlatform != TargetPlatform.macOS) {
           final showIcon = widget.icon != null && widget.labelStyle != CNLabelStyle.titleOnly;
           final showTitle = widget.labelStyle != CNLabelStyle.iconOnly;
 
-          return SizedBox(
-            width: resolvedWidth,
-            height: resolvedHeight,
-            child: Padding(
-              padding: widget.padding ?? EdgeInsets.zero,
-              child: Row(
-                children: [
-                  if (showIcon) SizedBox(width: widget.labelReservedIconWidth, child: widget.icon!),
-                  if (showIcon && showTitle) SizedBox(width: widget.labelIconToTitleSpacing ?? 8),
-                  if (showTitle)
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildFallbackText(widget.text),
-                          if (widget.secondaryText != null) _buildFallbackText(widget.secondaryText!),
-                        ],
-                      ),
+          Widget fallback = Padding(
+            padding: widget.padding ?? EdgeInsets.zero,
+            child: Row(
+              children: [
+                if (showIcon) SizedBox(width: widget.labelReservedIconWidth, child: widget.icon!),
+                if (showIcon && showTitle) SizedBox(width: widget.labelIconToTitleSpacing ?? 8),
+                if (showTitle)
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFallbackText(widget.text),
+                        if (widget.secondaryText != null) _buildFallbackText(widget.secondaryText!),
+                      ],
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
           );
+
+          if (!shrinkWrap) {
+            return ConstrainedBox(constraints: resolvedConstraints, child: fallback);
+          }
+
+          return SizedBox(width: resolvedWidth, height: resolvedHeight, child: fallback);
         }
 
-        final platformView = AppKitView(
+        Widget platformView = AppKitView(
           viewType: 'CupertinoNativeLabel',
           creationParams: _toPayload(),
           creationParamsCodec: const StandardMessageCodec(),
           onPlatformViewCreated: _onPlatformViewCreated,
         );
 
-        if (resolvedWidth == null && resolvedHeight == null) {
-          return SizedBox(width: _kDefaultLabelWidth, height: defaultHeight, child: platformView);
-        } else if (resolvedWidth == null) {
-          return SizedBox(width: _kDefaultLabelWidth, child: platformView);
-        } else if (resolvedHeight == null) {
-          return SizedBox(height: defaultHeight, child: platformView);
+        if (!shrinkWrap) {
+          platformView = ConstrainedBox(constraints: resolvedConstraints, child: platformView);
+          return platformView;
         }
+
         return SizedBox(width: resolvedWidth, height: resolvedHeight, child: platformView);
       },
     );

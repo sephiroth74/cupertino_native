@@ -219,16 +219,7 @@ enum CNLabel {
     private static func view(from payload: CNLabelPayload, onSizeChanged: ((CGSize) -> Void)? = nil) -> AnyView {
         var view = buildBaseLabel(from: payload)
 
-        if let width = payload.viewModifiers.width, let height = payload.viewModifiers.height {
-            view = AnyView(view.frame(width: CGFloat(width), height: CGFloat(height)))
-        } else if let width = payload.viewModifiers.width {
-            view = AnyView(view.frame(width: CGFloat(width)))
-        } else if let height = payload.viewModifiers.height {
-            view = AnyView(view.frame(height: CGFloat(height)))
-        }
-
-        view = CNViewTag.apply(payload.viewModifiers.tag, to: view)
-        view = CNViewPadding.apply(payload.viewModifiers.padding, to: view)
+        view = CNViewModifiers.apply(payload.viewModifiers, to: view)
 
         if let onSizeChanged {
             view = AnyView(
@@ -257,16 +248,7 @@ enum CNLabel {
                 iconToTitleSpacing: model.labelIconToTitleSpacing,
             )
 
-            if let width = model.viewModifiers.width, let height = model.viewModifiers.height {
-                view = AnyView(view.frame(width: CGFloat(width), height: CGFloat(height)))
-            } else if let width = model.viewModifiers.width {
-                view = AnyView(view.frame(width: CGFloat(width)))
-            } else if let height = model.viewModifiers.height {
-                view = AnyView(view.frame(height: CGFloat(height)))
-            }
-
-            view = CNViewTag.apply(model.viewModifiers.tag, to: view)
-            view = CNViewPadding.apply(model.viewModifiers.padding, to: view)
+            view = CNViewModifiers.apply(model.viewModifiers, to: view)
 
             if let onSizeChanged {
                 view = AnyView(
@@ -408,10 +390,7 @@ enum CNLabel {
         let labelStyleKey = payload.labelStyle ?? "nil"
         let reservedWidthKey = payload.labelReservedIconWidth.map { "\($0)" } ?? "nil"
         let spacingKey = payload.labelIconToTitleSpacing.map { "\($0)" } ?? "nil"
-        let paddingKey = payload.viewModifiers.padding.map { String(describing: $0) } ?? "nil"
-        let tagKey = payload.viewModifiers.tag.map { "\($0)" } ?? "nil"
-        let widthKey = payload.viewModifiers.width.map { "\($0)" } ?? "nil"
-        let heightKey = payload.viewModifiers.height.map { "\($0)" } ?? "nil"
+        let modifiersKey = payload.viewModifiers.identityKey()
 
         return [
             String(describing: payload.primaryText),
@@ -420,10 +399,7 @@ enum CNLabel {
             labelStyleKey,
             reservedWidthKey,
             spacingKey,
-            paddingKey,
-            tagKey,
-            widthKey,
-            heightKey,
+            modifiersKey,
         ].joined(separator: "|")
     }
 }
