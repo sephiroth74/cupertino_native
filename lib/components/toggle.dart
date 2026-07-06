@@ -58,9 +58,6 @@ class CNToggle extends StatefulWidget with CNViewModifiable {
   /// Called when the user toggles the control.
   final ValueChanged<bool>? onChanged;
 
-  /// If true, allows intrinsic sizing on unconstrained axes.
-  final bool shrinkWrap;
-
   /// Optional system symbol name (SF Symbol) to display with the label.
   final String? systemSymbolName;
 
@@ -72,6 +69,10 @@ class CNToggle extends StatefulWidget with CNViewModifiable {
 
   @override
   final CNViewModifiers? modifiers;
+
+  /// If true, allows intrinsic sizing on unconstrained axes.
+  @override
+  final bool shrinkWrap;
 
   @override
   State<CNToggle> createState() => _CNToggleState();

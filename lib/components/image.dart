@@ -1,16 +1,12 @@
 import 'dart:convert';
 
 import 'package:cupertino_native/channel/params.dart';
-import 'package:cupertino_native/components/button_child.dart';
 import 'package:cupertino_native/components/menu_badge_support.dart';
-import 'package:cupertino_native/components/menu_child.dart';
 import 'package:cupertino_native/components/paddable.dart';
 import 'package:cupertino_native/components/taggable.dart';
 import 'package:cupertino_native/components/view_modifiable.dart';
 import 'package:cupertino_native/components/view_modifiers.dart';
-import 'package:cupertino_native/style/font.dart';
-import 'package:cupertino_native/style/sf_symbol.dart';
-import 'package:cupertino_native/theme/cn_theme.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -19,18 +15,6 @@ import 'package:flutter/services.dart';
 /// This class encapsulates the necessary information to render a system symbol on Apple platforms,
 /// along with optional configuration for customizing its appearance.
 class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModifiable, CNPaddable, CNTaggable {
-  /// Creates a CNImage with the given [systemSymbolName].
-  const CNImage({
-    super.key,
-    required this.systemSymbolName,
-    this.badge,
-    this.symbolRenderingMode,
-    this.symbolColorRenderingMode,
-    this.foregroundStyleColors,
-    this.font,
-    this.modifiers,
-  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
-
   /// Optional badge shown next to the menu item when used inside [CNMenu].
   final Object? badge;
 
@@ -55,11 +39,20 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
   @override
   final CNViewModifiers? modifiers;
 
-  @override
-  String get buttonChildType => 'image';
+  /// Creates a CNImage with the given [systemSymbolName].
+  const CNImage({
+    super.key,
+    required this.systemSymbolName,
+    this.badge,
+    this.symbolRenderingMode,
+    this.symbolColorRenderingMode,
+    this.foregroundStyleColors,
+    this.font,
+    this.modifiers,
+  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
 
   @override
-  State<CNImage> createState() => _CNImageState();
+  String get buttonChildType => 'image';
 
   @override
   String get menuChildType => 'image';
@@ -79,6 +72,9 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
   bool get stringify => true;
 
   @override
+  State<CNImage> createState() => _CNImageState();
+
+  @override
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) => toMap(context, ignoreTheme: ignoreTheme);
 
   /// Serializes this image to JSON for communication with the native platform.
@@ -87,7 +83,7 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
   }
 
   /// Serializes this image to a map for platform channel communication.
-  Map<String, dynamic> toMap(BuildContext context, {bool ignoreTheme = false}) {
+  Map<String, dynamic> toMap(BuildContext context, {bool ignoreTheme = false, Map<String, dynamic>? layoutConstraintsPayload}) {
     final imageTheme = ignoreTheme ? null : CNTheme.of(context).imageTheme;
     final resolvedRenderingMode = symbolRenderingMode ?? imageTheme?.symbolRenderingMode;
     final resolvedColorRenderingMode = symbolColorRenderingMode ?? imageTheme?.symbolColorRenderingMode;
@@ -101,6 +97,7 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
       'symbolColorRenderingMode': resolvedColorRenderingMode?.name,
       'foregroundStyleColors': resolvedForegroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
       'font': resolvedFont?.toMap(),
+      if (layoutConstraintsPayload != null && modifiers?.constraints == null) 'constraints': layoutConstraintsPayload,
     };
 
     writeModifiers(payload, context);
@@ -110,8 +107,58 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
 
 class _CNImageState extends State<CNImage> {
   MethodChannel? _channel;
+  double? _intrinsicHeight;
+  double? _intrinsicWidth;
+  Map<String, dynamic>? _currentConstraintsPayload;
+  String? _currentConstraintsSerialized;
   Map<String, dynamic>? _lastPayload;
   String? _lastSerializedPayload;
+
+  @override
+  Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      Widget fallback = const Icon(CupertinoIcons.question_circle);
+      if (widget.padding != null) {
+        fallback = Padding(padding: widget.padding!, child: fallback);
+      }
+      return fallback;
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasExplicitConstraints = widget.modifiers?.constraints != null;
+        final shrinkWrap = widget.modifiers?.shrinkWrap ?? true;
+
+        final resolvedConstraints = hasExplicitConstraints ? widget.modifiers!.constraints! : constraints;
+
+        _currentConstraintsPayload = resolvedConstraints.toMap();
+        final serializedConstraints = jsonEncode(_currentConstraintsPayload);
+        if (_currentConstraintsSerialized != serializedConstraints) {
+          _currentConstraintsSerialized = serializedConstraints;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _syncPropsToNativeIfNeeded();
+          });
+        }
+
+        final creationParams = widget.toMap(context, layoutConstraintsPayload: _currentConstraintsPayload);
+
+        // Constraints are always serialized; native side decides whether to use them based on shrinkWrap.
+
+        Widget nativeView = AppKitView(
+          viewType: 'CupertinoNativeImage',
+          creationParamsCodec: const StandardMessageCodec(),
+          creationParams: creationParams,
+          onPlatformViewCreated: _onPlatformViewCreated,
+        );
+
+        if (shrinkWrap && (_intrinsicWidth != null || _intrinsicHeight != null)) {
+          nativeView = SizedBox(width: _intrinsicWidth, height: _intrinsicHeight, child: nativeView);
+        }
+
+        return nativeView;
+      },
+    );
+  }
 
   @override
   void didChangeDependencies() {
@@ -132,7 +179,7 @@ class _CNImageState extends State<CNImage> {
   }
 
   void _cacheCurrentProps() {
-    final payload = widget.toMap(context);
+    final payload = widget.toMap(context, layoutConstraintsPayload: _currentConstraintsPayload);
     _lastSerializedPayload = jsonEncode(payload);
     _lastPayload = Map<String, dynamic>.from(payload);
   }
@@ -157,6 +204,31 @@ class _CNImageState extends State<CNImage> {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
+    switch (call.method) {
+      case 'intrinsicSizeChanged':
+        final args = call.arguments as Map?;
+        final width = (args?['width'] as num?)?.toDouble();
+        final height = (args?['height'] as num?)?.toDouble();
+
+        if (!mounted || width == null || height == null) {
+          break;
+        }
+
+        final normalizedWidth = width > 0 ? width : null;
+        final normalizedHeight = height > 0 ? height : null;
+        if (normalizedWidth == _intrinsicWidth && normalizedHeight == _intrinsicHeight) {
+          break;
+        }
+
+        setState(() {
+          _intrinsicWidth = normalizedWidth;
+          _intrinsicHeight = normalizedHeight;
+        });
+        break;
+      default:
+        break;
+    }
+
     return null;
   }
 
@@ -169,13 +241,12 @@ class _CNImageState extends State<CNImage> {
     final channel = _channel;
     if (channel == null) return;
 
-    final payload = widget.toMap(context);
+    final payload = widget.toMap(context, layoutConstraintsPayload: _currentConstraintsPayload);
     final serializedPayload = jsonEncode(payload);
 
     if (_lastPayload == null) {
       if (_lastSerializedPayload != serializedPayload) {
-        debugPrint('[CNImage][Dart] Sending full update via setImage');
-        await channel.invokeMethod('setImage', payload);
+        await channel.invokeMethod('setData', payload);
       }
 
       _lastSerializedPayload = serializedPayload;
@@ -185,34 +256,12 @@ class _CNImageState extends State<CNImage> {
 
     final patch = _computePayloadPatch(_lastPayload!, payload);
     if (patch.isEmpty) {
-      debugPrint('[CNImage][Dart] No patch to send (payload unchanged)');
       _lastSerializedPayload = serializedPayload;
       return;
     }
 
-    debugPrint('[CNImage][Dart] Sending patch via applyPatch: ${jsonEncode(patch)}');
     await channel.invokeMethod('applyPatch', patch);
     _lastSerializedPayload = serializedPayload;
     _lastPayload = Map<String, dynamic>.from(payload);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
-      Widget fallback = const Icon(CupertinoIcons.question_circle);
-      if (widget.padding != null) {
-        fallback = Padding(padding: widget.padding!, child: fallback);
-      }
-      return fallback;
-    }
-
-    final creationParams = widget.toMap(context);
-
-    return AppKitView(
-      viewType: 'CupertinoNativeImage',
-      creationParamsCodec: const StandardMessageCodec(),
-      creationParams: creationParams,
-      onPlatformViewCreated: _onPlatformViewCreated,
-    );
   }
 }

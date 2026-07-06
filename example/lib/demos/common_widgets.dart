@@ -1,4 +1,5 @@
-import 'package:cupertino_native/theme/cn_theme.dart';
+import 'package:cupertino_native/components/view_modifiers.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 
 class RightSideOptionContainer extends StatelessWidget {
@@ -46,6 +47,41 @@ class RightSideOptionContainer extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ColorPicker extends StatelessWidget {
+  const ColorPicker({
+    super.key,
+    required this.colors,
+    required this.currentValue,
+    required this.onValueChanged,
+    this.enabled = true,
+  });
+
+  final Map<String, Color?> colors;
+  final Color? currentValue;
+  final bool enabled;
+  final ValueChanged<int> onValueChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return CNPicker(
+      modifiers: CNViewModifiers(enabled: enabled),
+      selectedIndex: currentValue == null ? 0 : colors.values.toList().indexOf(currentValue!),
+      onValueChanged: enabled ? (index) => onValueChanged(index) : null,
+      items: colors.keys.map((colorName) {
+        // return CNLabel(
+        //   CNText(colorName),
+        //   icon: CNImage(
+        //     systemSymbolName: 'circle.fill',
+        //     modifiers: CNViewModifiers(tint: _kSystemColors[colorName]),
+        //   ),
+        // );
+        return CNText(colorName);
+      }).toList(),
+      pickerStyle: CNPickerStyle.menu,
     );
   }
 }

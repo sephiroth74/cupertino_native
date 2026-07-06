@@ -15,7 +15,7 @@ export 'components/label.dart';
 export 'components/button.dart';
 export 'components/color_well.dart';
 export 'components/path_control.dart';
-export 'components/progress_indicator.dart';
+export 'components/progress_view.dart';
 export 'components/level_indicator.dart';
 export 'components/stepper.dart';
 export 'components/combo_box.dart';
@@ -65,6 +65,8 @@ export 'theme/cn_theme_data.dart';
 export 'style/text_field_bezel_style.dart';
 export 'style/font.dart';
 export 'style/combo_box_behavior.dart';
+
+export 'extensions/box_constraints.dart';
 
 import 'cupertino_native_platform_interface.dart';
 

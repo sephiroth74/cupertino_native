@@ -159,24 +159,24 @@ final class CNImageViewModel: ObservableObject {
 }
 
 enum CNImage {
-    static func deserialize(_ raw: Any?) -> AnyView? {
+    static func deserialize(_ raw: Any?, onSizeChanged: ((CGSize) -> Void)? = nil) -> AnyView? {
         if let payload: CNImagePayload = CNChannelSerialization.decode(raw) {
-            return view(from: payload)
+            return view(from: payload, onSizeChanged: onSizeChanged)
         }
 
         if let jsonString = raw as? String {
-            return deserialize(jsonString: jsonString)
+            return deserialize(jsonString: jsonString, onSizeChanged: onSizeChanged)
         }
 
         return nil
     }
 
-    static func deserialize(jsonString: String) -> AnyView? {
+    static func deserialize(jsonString: String, onSizeChanged: ((CGSize) -> Void)? = nil) -> AnyView? {
         do {
             if let imageDict = try JSONSerialization.jsonObject(
                 with: Data(jsonString.utf8), options: [],
             ) as? [String: Any] {
-                return deserialize(imageDict)
+                return deserialize(imageDict, onSizeChanged: onSizeChanged)
             }
         } catch {
             NSLog("Error deserializing image JSON string: \(error)")
@@ -184,19 +184,19 @@ enum CNImage {
         return nil
     }
 
-    static func deserialize(_ dict: [String: Any]) -> AnyView? {
+    static func deserialize(_ dict: [String: Any], onSizeChanged: ((CGSize) -> Void)? = nil) -> AnyView? {
         guard let payload = CNImagePayload(channel: dict) else {
             return nil
         }
 
-        return view(from: payload)
+        return view(from: payload, onSizeChanged: onSizeChanged)
     }
 
-    static func deserialize(model: CNImageViewModel) -> AnyView {
-        AnyView(_CNBoundImageView(model: model))
+    static func deserialize(model: CNImageViewModel, onSizeChanged: ((CGSize) -> Void)? = nil) -> AnyView {
+        AnyView(_CNBoundImageView(model: model, onSizeChanged: onSizeChanged))
     }
 
-    private static func view(from payload: CNImagePayload) -> AnyView {
+    private static func view(from payload: CNImagePayload, onSizeChanged: ((CGSize) -> Void)? = nil) -> AnyView {
         var view = AnyView(Image(systemName: payload.systemSymbolName))
 
         if let fontDict = payload.font,
@@ -214,11 +214,23 @@ enum CNImage {
         }
 
         view = CNViewModifiers.apply(payload.viewModifiers, to: view)
+
+        if let onSizeChanged {
+            view = AnyView(
+                view.onGeometryChange(for: CGSize.self) { proxy in
+                    proxy.size
+                } action: { newSize in
+                    onSizeChanged(newSize)
+                },
+            )
+        }
+
         return AnyView(view.id(identityKey(for: payload)))
     }
 
     private struct _CNBoundImageView: View {
         @ObservedObject var model: CNImageViewModel
+        let onSizeChanged: ((CGSize) -> Void)?
 
         var body: some View {
             let payload = model.payload
@@ -238,7 +250,19 @@ enum CNImage {
                 view = applyColorRenderingMode(to: view, payload: payload)
             }
 
-            return CNViewModifiers.apply(payload.viewModifiers, to: view)
+            view = CNViewModifiers.apply(payload.viewModifiers, to: view)
+
+            if let onSizeChanged {
+                view = AnyView(
+                    view.onGeometryChange(for: CGSize.self) { proxy in
+                        proxy.size
+                    } action: { newSize in
+                        onSizeChanged(newSize)
+                    },
+                )
+            }
+
+            return view
         }
     }
 

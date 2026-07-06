@@ -596,29 +596,17 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                 ),
                 'Color': Column(
                   children: [
-                    CNPicker(
-                      selectedIndex: kSystemColors.values.toList().indexOf(color),
-                      onValueChanged: (index) {
-                        setState(() {
-                          color = kSystemColors.values.elementAt(index);
-                          if (color != null) {
-                            colors = [CNColors.red, color!];
-                          } else {
-                            colors = [CNColors.red, CNColors.blue];
-                          }
-                        });
-                      },
-                      items: kSystemColors.keys.map((color) {
-                        // return CNLabel(
-                        //   CNText(color),
-                        //   icon: CNImage(
-                        //     systemSymbolName: 'circle.fill',
-                        //     modifiers: CNViewModifiers(tint: kSystemColors[color]),
-                        //   ),
-                        // );
-                        return CNText(color);
-                      }).toList(),
-                      pickerStyle: CNPickerStyle.automatic,
+                    ColorPicker(
+                      colors: kSystemColors,
+                      currentValue: color,
+                      onValueChanged: (index) => setState(() {
+                        color = kSystemColors.values.elementAt(index);
+                        if (color != null) {
+                          colors = [CNColors.red, color!];
+                        } else {
+                          colors = [CNColors.red, CNColors.blue];
+                        }
+                      }),
                     ),
                   ],
                 ),

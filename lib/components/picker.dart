@@ -20,7 +20,7 @@ class CNPicker extends StatefulWidget with CNViewModifiable {
   CNPicker({
     super.key,
     required this.selectedIndex,
-    required this.onValueChanged,
+    this.onValueChanged,
     this.labelChildren = const [],
     this.pickerStyle = CNPickerStyle.segmented,
     this.shrinkWrap = false,
@@ -47,7 +47,7 @@ class CNPicker extends StatefulWidget with CNViewModifiable {
   final List<CNButtonChild> labelChildren;
 
   /// Called when the user selects an option.
-  final ValueChanged<int> onValueChanged;
+  final ValueChanged<int>? onValueChanged;
 
   /// Picker style for the picker.
   final CNPickerStyle pickerStyle;
@@ -55,11 +55,12 @@ class CNPicker extends StatefulWidget with CNViewModifiable {
   /// The index of the selected option.
   final int selectedIndex;
 
-  /// Whether the picker should shrink-wrap its content.
-  final bool shrinkWrap;
-
   @override
   final CNViewModifiers? modifiers;
+
+  /// Whether the picker should shrink-wrap its content.
+  @override
+  final bool shrinkWrap;
 
   @override
   State<CNPicker> createState() => _CNPickerState();
@@ -114,7 +115,7 @@ class _CNPickerState extends State<CNPicker> {
       final args = call.arguments as Map?;
       final idx = (args?['index'] as num?)?.toInt();
       if (idx != null) {
-        widget.onValueChanged(idx);
+        widget.onValueChanged?.call(idx);
       }
     } else if (call.method == 'intrinsicSizeChanged') {
       final args = call.arguments as Map?;

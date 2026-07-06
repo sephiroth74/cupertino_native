@@ -47,14 +47,15 @@ class CNButton extends StatefulWidget with CNViewModifiable, CNMenuChild {
   /// Semantic role for the button action.
   final CNButtonRole role;
 
-  /// If true, sizes the control to its intrinsic width.
-  final bool shrinkWrap;
-
   /// Visual style to apply.
   final CNButtonStyle style;
 
   @override
   final CNViewModifiers? modifiers;
+
+  /// If true, sizes the control to its intrinsic width.
+  @override
+  final bool shrinkWrap;
 
   @override
   State<CNButton> createState() => _CNButtonState();
@@ -106,9 +107,8 @@ class _CNButtonState extends State<CNButton> {
   MethodChannel? _channel;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
+  Map<String, dynamic>? _lastPayload;
   String? _lastSerializedPayload;
-  double? _layoutHeight;
-  double? _layoutWidth;
 
   @override
   void didChangeDependencies() {
@@ -120,14 +120,12 @@ class _CNButtonState extends State<CNButton> {
   void didUpdateWidget(covariant CNButton oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final controlSizeChanged = oldWidget.modifiers?.controlSize != widget.modifiers?.controlSize;
-    final childrenChanged = !listEquals(oldWidget.children, widget.children);
+    final childrenStructureChanged = _isChildrenStructureChanged(oldWidget.children, widget.children);
 
-    if (controlSizeChanged || childrenChanged) {
-      _layoutWidth = null;
-      _layoutHeight = null;
+    if (childrenStructureChanged) {
       _intrinsicWidth = null;
       _intrinsicHeight = null;
+      _lastPayload = null;
       _lastSerializedPayload = null;
     }
 
@@ -140,12 +138,50 @@ class _CNButtonState extends State<CNButton> {
     super.dispose();
   }
 
+  // double? _layoutHeight;
+  // double? _layoutWidth;
+
   bool get _isDark => CNTheme.of(context).brightness == Brightness.dark;
 
   String get _role => widget.role.name;
 
   void _cacheCurrentProps() {
-    _lastSerializedPayload = _serializeCurrentPayload();
+    final payload = _toPayload();
+    _lastSerializedPayload = jsonEncode(payload);
+    _lastPayload = Map<String, dynamic>.from(payload);
+  }
+
+  Map<String, dynamic> _computePayloadPatch(Map<String, dynamic> previous, Map<String, dynamic> next) {
+    final patch = <String, dynamic>{};
+    final keys = <String>{...previous.keys, ...next.keys};
+
+    for (final key in keys) {
+      final hadPrevious = previous.containsKey(key);
+      final hasNext = next.containsKey(key);
+      final oldValue = hadPrevious ? previous[key] : null;
+      final newValue = hasNext ? next[key] : null;
+
+      final changed = jsonEncode(oldValue) != jsonEncode(newValue);
+      if (!changed) continue;
+
+      patch[key] = hasNext ? newValue : null;
+    }
+
+    return patch;
+  }
+
+  bool _isChildrenStructureChanged(List<CNButtonChild> previous, List<CNButtonChild> next) {
+    if (previous.length != next.length) {
+      return true;
+    }
+
+    for (var i = 0; i < previous.length; i++) {
+      if (previous[i].buttonChildType != next[i].buttonChildType) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   void _onCreated(int id) {
@@ -153,12 +189,14 @@ class _CNButtonState extends State<CNButton> {
     _channel = ch;
     ch.setMethodCallHandler(_onMethodCall);
     _cacheCurrentProps();
-    _requestIntrinsicSize();
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
+    debugPrint('[CNButton][Dart] _onMethodCall -> ${call.method}(${call.arguments})');
+
     switch (call.method) {
       case 'pressed':
+        debugPrint('[CNButton][Dart] pressed event');
         if (widget.modifiers?.enabled == true && widget.onPressed != null) {
           widget.onPressed!();
         }
@@ -167,6 +205,7 @@ class _CNButtonState extends State<CNButton> {
         final args = CNChannelSerialization.asMap(call.arguments);
         final w = (args?['width'] as num?)?.toDouble();
         final h = (args?['height'] as num?)?.toDouble();
+        debugPrint('[CNButton][Dart] intrinsicSizeChanged -> width=$w, height=$h');
         if (w != null && h != null && mounted) {
           if (w == _intrinsicWidth && h == _intrinsicHeight) {
             break;
@@ -181,53 +220,49 @@ class _CNButtonState extends State<CNButton> {
     return null;
   }
 
-  Future<void> _requestIntrinsicSize() async {
-    final ch = _channel;
-    if (ch == null) return;
-    try {
-      final size = await ch.invokeMethod<Map>('getIntrinsicSize');
-      final w = (size?['width'] as num?)?.toDouble();
-      final h = (size?['height'] as num?)?.toDouble();
-
-      if (w != null && h != null && mounted) {
-        setState(() {
-          _intrinsicWidth = w;
-          _intrinsicHeight = h;
-        });
-      }
-    } catch (_) {}
-  }
-
   List<Map<String, dynamic>> _serializeChildren() {
     return widget.children
         .map((child) => {'type': child.buttonChildType, 'payload': child.toChannelMap(context, ignoreTheme: true)})
         .toList();
   }
 
-  String _serializeCurrentPayload() => jsonEncode(_toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight));
-
   Future<void> _syncPropsToNativeIfNeeded() async {
+    debugPrint('[CNButton][Dart] syncPropsToNativeIfNeeded');
     final ch = _channel;
     if (ch == null) return;
 
-    final payload = _toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight);
+    final payload = _toPayload();
     final serializedPayload = jsonEncode(payload);
 
-    if (_lastSerializedPayload != serializedPayload) {
-      await ch.invokeMethod('setButton', payload);
-      _cacheCurrentProps();
-      _requestIntrinsicSize();
+    if (_lastPayload == null) {
+      if (_lastSerializedPayload != serializedPayload) {
+        debugPrint('[CNButton][Dart] setData -> $payload');
+        await ch.invokeMethod('setData', payload);
+      }
+
+      _lastSerializedPayload = serializedPayload;
+      _lastPayload = Map<String, dynamic>.from(payload);
+      return;
     }
+
+    final patch = _computePayloadPatch(_lastPayload!, payload);
+    if (patch.isEmpty) {
+      _lastSerializedPayload = serializedPayload;
+      return;
+    }
+
+    debugPrint('[CNButton][Dart] applyPatch -> $patch');
+    await ch.invokeMethod('applyPatch', patch);
+    _lastSerializedPayload = serializedPayload;
+    _lastPayload = Map<String, dynamic>.from(payload);
   }
 
-  Map<String, dynamic> _toPayload({double? frameWidth, double? frameHeight}) {
+  Map<String, dynamic> _toPayload() {
     final payload = <String, dynamic>{
       'buttonChildren': _serializeChildren(),
       'buttonRole': _role,
       'buttonStyle': widget.style.name,
       'isDark': _isDark,
-      'width': frameWidth,
-      'height': frameHeight,
     };
 
     widget.writeModifiers(payload, context);
@@ -247,24 +282,34 @@ class _CNButtonState extends State<CNButton> {
       builder: (context, constraints) {
         final hasFixedWidth = constraints.hasTightWidth;
         final hasFixedHeight = constraints.hasTightHeight;
+
+        // When to use intrinsic size:
+        // 1. If shrinkWrap is true, use intrinsic size.
+        // 2. If the parent constraints are unbounded, use intrinsic size.
+
+        // How to resolve the final width and height:
+        // 1. If the user has specified a width/height via modifiers, use that.
+        // 2. constraints are tight, use the constraint value.
+        // 3. Otherwise, use the intrinsic size (if available), or fallback to default
+
         final useIntrinsicWidth = widget.shrinkWrap || !hasFixedWidth;
         final useIntrinsicHeight = widget.shrinkWrap || !hasFixedHeight;
-        final resolvedWidth = widget.modifiers?.width ?? (useIntrinsicWidth ? (_intrinsicWidth ?? _kDefaultWidth) : constraints.maxWidth);
 
+        final resolvedWidth =
+            widget.modifiers?.width ?? (hasFixedWidth ? constraints.maxWidth : (_intrinsicWidth ?? _kDefaultWidth));
         final resolvedHeight =
-            widget.modifiers?.height ?? (useIntrinsicHeight ? (_intrinsicHeight ?? _kDefaultHeight) : constraints.maxHeight);
+            widget.modifiers?.height ?? (hasFixedHeight ? constraints.maxHeight : (_intrinsicHeight ?? _kDefaultHeight));
 
-        if (_layoutWidth != resolvedWidth || _layoutHeight != resolvedHeight) {
-          _layoutWidth = useIntrinsicWidth ? _layoutWidth : resolvedWidth;
-          _layoutHeight = useIntrinsicHeight ? _layoutHeight : resolvedHeight;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _syncPropsToNativeIfNeeded();
-          });
-        }
+        debugPrint(
+          '[CNButton][Dart] build -> constrains: $constraints, hasFixedWidth=$hasFixedWidth, hasFixedHeight=$hasFixedHeight',
+        );
+        debugPrint(
+          '[CNButton][Dart] build -> resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight, useIntrinsicWidth=$useIntrinsicWidth, useIntrinsicHeight=$useIntrinsicHeight',
+        );
 
         final creationParams = _toPayload(
-          frameWidth: useIntrinsicWidth ? null : resolvedWidth,
-          frameHeight: useIntrinsicHeight ? null : resolvedHeight,
+          // frameWidth: useIntrinsicWidth ? null : resolvedWidth,
+          // frameHeight: useIntrinsicHeight ? null : resolvedHeight,
         );
 
         return SizedBox(

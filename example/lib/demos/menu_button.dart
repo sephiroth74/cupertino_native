@@ -44,7 +44,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                       style: _menuStyle,
                       controlSize: _controlSize,
                       tint: _tintColor,
-                      labels: const [
+                      labels: [
                         CNImage(systemSymbolName: 'star.fill'),
                         CNText('File'),
                       ],
@@ -52,7 +52,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                       children: [
                         CNButton(
                           children: [
-                            const CNImage(
+                            CNImage(
                               systemSymbolName: 'star.fill',
                               modifiers: CNViewModifiers(tint: CupertinoColors.systemRed),
                               badge: 'uno',
@@ -65,7 +65,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                         const CNDivider(),
                         CNButton(
                           badge: '3',
-                          children: const [
+                          children: [
                             CNImage(
                               systemSymbolName: 'star.fill',
                               modifiers: CNViewModifiers(tint: CupertinoColors.systemYellow),
@@ -77,7 +77,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                         CNButton(
                           badge: 5,
                           onPressed: () => _setLastAction('Button 2'),
-                          children: const [
+                          children: [
                             CNImage(
                               systemSymbolName: 'star.fill',
                               modifiers: CNViewModifiers(tint: CupertinoColors.systemRed),
@@ -88,7 +88,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                         CNButton(
                           badge: '1',
                           onPressed: () => _setLastAction('Button 3'),
-                          children: const [
+                          children: [
                             CNImage(systemSymbolName: 'star.fill'),
                             CNText('Button 3'),
                             CNText('Subtitle'),
@@ -109,14 +109,14 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                       labels: const [CNImage(systemSymbolName: 'ellipsis.circle')],
                       children: [
                         CNButton(
-                          children: const [
+                          children: [
                             CNImage(systemSymbolName: 'gear'),
                             CNText('Settings'),
                           ],
                           onPressed: () => _setLastAction('Settings'),
                         ),
                         CNButton(
-                          children: const [
+                          children: [
                             CNImage(systemSymbolName: 'info.circle'),
                             CNText('About'),
                           ],
@@ -134,7 +134,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                       style: _menuStyle,
                       controlSize: _controlSize,
                       tint: _tintColor,
-                      labels: [CNLabel.text(_lastAction, icon: const CNImage(systemSymbolName: 'wand.and.stars'))],
+                      labels: [CNLabel.text(_lastAction, icon: CNImage(systemSymbolName: 'wand.and.stars'))],
                       children: [
                         CNButton(children: const [CNText('Action A')], onPressed: () => _setLastAction('Action A')),
                       ],

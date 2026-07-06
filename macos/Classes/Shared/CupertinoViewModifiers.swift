@@ -14,24 +14,38 @@ enum CNViewModifiers {
         modifiedView = CNViewEnabled.apply(modifiers.enabled, to: modifiedView)
         modifiedView = CNViewTint.apply(modifiers.tint, to: modifiedView)
         modifiedView = CNViewForegroundColor.apply(modifiers.foregroundColor, to: modifiedView)
-        modifiedView = CNViewFrame.apply(width: modifiers.width, height: modifiers.height, to: modifiedView)
+        modifiedView = CNViewFrame.apply(
+            constraints: modifiers.constraints,
+            shrinkWrap: modifiers.shrinkWrap,
+            to: modifiedView,
+        )
         return modifiedView
     }
 }
 
 enum CNViewFrame {
-    static func apply(width: Double?, height: Double?, to view: AnyView) -> AnyView {
-        var modifiedView = view
-
-        if let width, let height {
-            modifiedView = AnyView(modifiedView.frame(width: CGFloat(width), height: CGFloat(height)))
-        } else if let width {
-            modifiedView = AnyView(modifiedView.frame(width: CGFloat(width)))
-        } else if let height {
-            modifiedView = AnyView(modifiedView.frame(height: CGFloat(height)))
+    static func apply(constraints: CNViewConstraintsPayload?, shrinkWrap: Bool, to view: AnyView) -> AnyView {
+        guard !shrinkWrap, let constraints else {
+            return view
         }
 
-        return modifiedView
+        let minWidth = constraints.minWidth.map { CGFloat($0) }
+        let idealWidth = constraints.tightWidth.map { CGFloat($0) }
+        let maxWidth = constraints.maxWidth.map { CGFloat($0) }
+        let minHeight = constraints.minHeight.map { CGFloat($0) }
+        let idealHeight = constraints.tightHeight.map { CGFloat($0) }
+        let maxHeight = constraints.maxHeight.map { CGFloat($0) }
+
+        let framed = view.frame(
+            minWidth: minWidth,
+            idealWidth: idealWidth,
+            maxWidth: maxWidth,
+            minHeight: minHeight,
+            idealHeight: idealHeight,
+            maxHeight: maxHeight,
+        )
+
+        return AnyView(framed)
     }
 }
 

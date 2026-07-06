@@ -5,7 +5,8 @@ import SwiftUI
 class CupertinoButtonNSView: NSView {
     private let channel: FlutterMethodChannel
     private let hostingView: NSHostingView<AnyView>
-    private var payload: CNButtonPayload?
+    private let model: CNButtonViewModel
+    private var payload: CNButtonPayload
     private var lastReportedIntrinsicSize: CGSize?
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
@@ -13,7 +14,8 @@ class CupertinoButtonNSView: NSView {
         channel = FlutterMethodChannel(
             name: "CupertinoNativeButton_\(viewId)", binaryMessenger: messenger,
         )
-        payload = CNButton.decode(args)
+        payload = CNButton.decode(args) ?? Self.defaultPayload()
+        model = CNButtonViewModel(payload: payload)
         super.init(frame: .zero)
 
         wantsLayer = true
@@ -28,7 +30,8 @@ class CupertinoButtonNSView: NSView {
             hostingView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
 
-        rebuild()
+        installRootView()
+        updateAppearance()
 
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self else {
@@ -39,15 +42,29 @@ class CupertinoButtonNSView: NSView {
             switch call.method {
             case "getIntrinsicSize":
                 let s = currentIntrinsicSize()
+                NSLog("[CNButton][Swift] getIntrinsicSize -> width=\(s.width), height=\(s.height)")
                 result(["width": Double(s.width), "height": Double(s.height)])
-            case "setButton":
+            case "setData", "setButton":
                 if let parsed: CNButtonPayload = CNChannelSerialization.decode(call.arguments) {
+                    NSLog("[CNButton][Swift] setData <- \(parsed.toChannel())")
                     payload = parsed
-                    rebuild()
+                    model.replace(with: payload)
+                    updateAppearance()
                     notifyIntrinsicSizeChanged(force: true)
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Invalid button payload", details: nil))
+                }
+            case "applyPatch":
+                if let patch = CNChannelSerialization.asDict(call.arguments) {
+                    NSLog("[CNButton][Swift] applyPatch <- \(patch)")
+                    payload.applyPatch(patch)
+                    model.replace(with: payload)
+                    updateAppearance()
+                    notifyIntrinsicSizeChanged(force: true)
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Invalid button patch payload", details: nil))
                 }
             default:
                 result(FlutterMethodNotImplemented)
@@ -59,32 +76,28 @@ class CupertinoButtonNSView: NSView {
         nil
     }
 
-    private func rebuild() {
-        guard let payload else {
-            hostingView.rootView = AnyView(EmptyView())
-            return
-        }
+    private static func defaultPayload() -> CNButtonPayload {
+        CNButtonPayload(channel: [:])!
+    }
 
+    private func installRootView() {
+        hostingView.rootView = CNButton.deserialize(
+            model: model,
+            onPressed: { [weak self] in
+                self?.channel.invokeMethod("pressed", arguments: nil)
+            },
+            onSizeChanged: { [weak self] newSize in
+                NSLog("[CNButton][Swift] onSizeChanged -> width=\(newSize.width), height=\(newSize.height)")
+                self?.notifyIntrinsicSizeChanged()
+            },
+        )
+    }
+
+    private func updateAppearance() {
         if let isDark = payload.isDark {
             hostingView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
         } else {
             hostingView.appearance = nil
-        }
-
-        hostingView.rootView = CNButton.deserialize(
-            payload.toChannel(),
-            onPressed: { [weak self] in
-                self?.channel.invokeMethod("pressed", arguments: nil)
-            },
-            onSizeChanged: { [weak self] _ in
-                self?.notifyIntrinsicSizeChanged()
-            },
-        ) ?? AnyView(EmptyView())
-
-        // A second pass on the next runloop avoids reporting a transient
-        // geometry value before SwiftUI finishes laying out the button label.
-        DispatchQueue.main.async { [weak self] in
-            self?.notifyIntrinsicSizeChanged()
         }
     }
 
@@ -119,10 +132,6 @@ class CupertinoButtonNSView: NSView {
     }
 
     private func naturalContentSize() -> CGSize {
-        guard let payload else {
-            return .zero
-        }
-
         let rootView = CNButton.deserialize(payload.toChannel()) ?? AnyView(EmptyView())
         let measuringView = NSHostingView(rootView: rootView)
         measuringView.appearance = hostingView.appearance
@@ -148,6 +157,7 @@ class CupertinoButtonNSView: NSView {
         }
 
         lastReportedIntrinsicSize = size
+        NSLog("[CNButton][Swift] intrinsicSizeChanged -> width=\(size.width), height=\(size.height)")
         channel.invokeMethod(
             "intrinsicSizeChanged",
             arguments: ["width": size.width, "height": size.height],
