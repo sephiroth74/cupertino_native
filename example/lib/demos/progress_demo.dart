@@ -12,11 +12,11 @@ class ProgressIndicatorsPageDemo extends StatefulWidget {
 }
 
 class _ProgressIndicatorsPageDemoState extends State<ProgressIndicatorsPageDemo> {
-  double progressValue = 0.75;
   CNControlSize controlSize = CNControlSize.regular;
-  CupertinoDynamicColor? tintColor;
-  CNProgressViewStyle progressViewStyle = CNProgressViewStyle.linear;
   bool isDetermininate = true;
+  double progressValue = 0.75;
+  CNProgressViewStyle progressViewStyle = CNProgressViewStyle.linear;
+  CupertinoDynamicColor? tintColor;
 
   @override
   Widget build(BuildContext context) {

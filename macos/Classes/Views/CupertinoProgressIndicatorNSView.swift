@@ -71,11 +71,11 @@ class CupertinoProgressIndicatorNSView: NSView {
                     payload.applyPatch(patch)
                     model.replace(with: payload)
                     updateAppearance()
-                    let size = hostingView.fittingSize
-                    channel.invokeMethod(
-                        "intrinsicSizeChanged",
-                        arguments: ["width": Double(size.width), "height": Double(size.height)],
-                    )
+                    // let size = hostingView.fittingSize
+                    // channel.invokeMethod(
+                    //     "intrinsicSizeChanged",
+                    //     arguments: ["width": Double(size.width), "height": Double(size.height)],
+                    // )
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Invalid progress patch payload", details: nil))
@@ -98,7 +98,7 @@ class CupertinoProgressIndicatorNSView: NSView {
         hostingView.rootView = CNProgressViewDeserializer.deserialize(
             model: model,
             onSizeChanged: { [weak self] size in
-                NSLog("[CNProgressIndicator][Swift] intrinsicSizeChanged -> width=\(size.width), height=\(size.height)")
+                NSLog("[CNProgressIndicator][Swift] onSizeChanged -> width=\(size.width), height=\(size.height)")
                 self?.channel.invokeMethod(
                     "intrinsicSizeChanged",
                     arguments: ["width": size.width, "height": size.height],

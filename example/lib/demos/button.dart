@@ -39,6 +39,8 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
 
   Color? _tintColor;
 
+  void _set(String what) => setState(() => _last = what);
+
   @override
   Widget build(BuildContext context) {
     return CNPageScaffold(
@@ -182,6 +184,4 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
       ),
     );
   }
-
-  void _set(String what) => setState(() => _last = what);
 }
