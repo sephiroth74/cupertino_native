@@ -15,6 +15,18 @@ import 'package:flutter/services.dart';
 /// This class encapsulates the necessary information to render a system symbol on Apple platforms,
 /// along with optional configuration for customizing its appearance.
 class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModifiable, CNPaddable, CNTaggable {
+  /// Creates a CNImage with the given [systemSymbolName].
+  const CNImage({
+    super.key,
+    required this.systemSymbolName,
+    this.badge,
+    this.symbolRenderingMode,
+    this.symbolColorRenderingMode,
+    this.foregroundStyleColors,
+    this.font,
+    this.modifiers,
+  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
+
   /// Optional badge shown next to the menu item when used inside [CNMenu].
   final Object? badge;
 
@@ -39,20 +51,11 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
   @override
   final CNViewModifiers? modifiers;
 
-  /// Creates a CNImage with the given [systemSymbolName].
-  const CNImage({
-    super.key,
-    required this.systemSymbolName,
-    this.badge,
-    this.symbolRenderingMode,
-    this.symbolColorRenderingMode,
-    this.foregroundStyleColors,
-    this.font,
-    this.modifiers,
-  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
-
   @override
   String get buttonChildType => 'image';
+
+  @override
+  State<CNImage> createState() => _CNImageState();
 
   @override
   String get menuChildType => 'image';
@@ -70,9 +73,6 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
 
   @override
   bool get stringify => true;
-
-  @override
-  State<CNImage> createState() => _CNImageState();
 
   @override
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) => toMap(context, ignoreTheme: ignoreTheme);
@@ -107,58 +107,12 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
 
 class _CNImageState extends State<CNImage> {
   MethodChannel? _channel;
-  double? _intrinsicHeight;
-  double? _intrinsicWidth;
   Map<String, dynamic>? _currentConstraintsPayload;
   String? _currentConstraintsSerialized;
+  double? _intrinsicHeight;
+  double? _intrinsicWidth;
   Map<String, dynamic>? _lastPayload;
   String? _lastSerializedPayload;
-
-  @override
-  Widget build(BuildContext context) {
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
-      Widget fallback = const Icon(CupertinoIcons.question_circle);
-      if (widget.padding != null) {
-        fallback = Padding(padding: widget.padding!, child: fallback);
-      }
-      return fallback;
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final hasExplicitConstraints = widget.modifiers?.constraints != null;
-        final shrinkWrap = widget.modifiers?.shrinkWrap ?? true;
-
-        final resolvedConstraints = hasExplicitConstraints ? widget.modifiers!.constraints! : constraints;
-
-        _currentConstraintsPayload = resolvedConstraints.toMap();
-        final serializedConstraints = jsonEncode(_currentConstraintsPayload);
-        if (_currentConstraintsSerialized != serializedConstraints) {
-          _currentConstraintsSerialized = serializedConstraints;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _syncPropsToNativeIfNeeded();
-          });
-        }
-
-        final creationParams = widget.toMap(context, layoutConstraintsPayload: _currentConstraintsPayload);
-
-        // Constraints are always serialized; native side decides whether to use them based on shrinkWrap.
-
-        Widget nativeView = AppKitView(
-          viewType: 'CupertinoNativeImage',
-          creationParamsCodec: const StandardMessageCodec(),
-          creationParams: creationParams,
-          onPlatformViewCreated: _onPlatformViewCreated,
-        );
-
-        if (shrinkWrap && (_intrinsicWidth != null || _intrinsicHeight != null)) {
-          nativeView = SizedBox(width: _intrinsicWidth, height: _intrinsicHeight, child: nativeView);
-        }
-
-        return nativeView;
-      },
-    );
-  }
 
   @override
   void didChangeDependencies() {
@@ -263,5 +217,51 @@ class _CNImageState extends State<CNImage> {
     await channel.invokeMethod('applyPatch', patch);
     _lastSerializedPayload = serializedPayload;
     _lastPayload = Map<String, dynamic>.from(payload);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      Widget fallback = const Icon(CupertinoIcons.question_circle);
+      if (widget.padding != null) {
+        fallback = Padding(padding: widget.padding!, child: fallback);
+      }
+      return fallback;
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasExplicitConstraints = widget.modifiers?.constraints != null;
+        final shrinkWrap = widget.modifiers?.shrinkWrap ?? true;
+
+        final resolvedConstraints = hasExplicitConstraints ? widget.modifiers!.constraints! : constraints;
+
+        _currentConstraintsPayload = resolvedConstraints.toMap();
+        final serializedConstraints = jsonEncode(_currentConstraintsPayload);
+        if (_currentConstraintsSerialized != serializedConstraints) {
+          _currentConstraintsSerialized = serializedConstraints;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _syncPropsToNativeIfNeeded();
+          });
+        }
+
+        final creationParams = widget.toMap(context, layoutConstraintsPayload: _currentConstraintsPayload);
+
+        // Constraints are always serialized; native side decides whether to use them based on shrinkWrap.
+
+        Widget nativeView = AppKitView(
+          viewType: 'CupertinoNativeImage',
+          creationParamsCodec: const StandardMessageCodec(),
+          creationParams: creationParams,
+          onPlatformViewCreated: _onPlatformViewCreated,
+        );
+
+        if (shrinkWrap && (_intrinsicWidth != null || _intrinsicHeight != null)) {
+          nativeView = SizedBox(width: _intrinsicWidth, height: _intrinsicHeight, child: nativeView);
+        }
+
+        return nativeView;
+      },
+    );
   }
 }

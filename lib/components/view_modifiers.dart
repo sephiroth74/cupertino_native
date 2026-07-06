@@ -5,6 +5,18 @@ import '../channel/params.dart';
 
 /// Shared modifier payload for SwiftUI-backed widgets.
 class CNViewModifiers {
+  /// Creates a shared modifier object that can be serialized for native SwiftUI views.
+  const CNViewModifiers({
+    this.tag,
+    this.padding,
+    this.controlSize,
+    this.constraints,
+    this.shrinkWrap = true,
+    this.tint,
+    this.foregroundColor,
+    this.enabled,
+  }) : assert(tag == null || tag is int || tag is String, 'Tag must be an int or String.');
+
   /// SwiftUI frame constraints applied when [shrinkWrap] is false.
   final BoxConstraints? constraints;
 
@@ -28,18 +40,6 @@ class CNViewModifiers {
 
   /// Tint color for native control rendering.
   final Color? tint;
-
-  /// Creates a shared modifier object that can be serialized for native SwiftUI views.
-  const CNViewModifiers({
-    this.tag,
-    this.padding,
-    this.controlSize,
-    this.constraints,
-    this.shrinkWrap = true,
-    this.tint,
-    this.foregroundColor,
-    this.enabled,
-  }) : assert(tag == null || tag is int || tag is String, 'Tag must be an int or String.');
 
   /// Backward-compatible height accessor derived from tight constraints.
   @Deprecated('Use constraints or wrap widget with SizedBox.')
