@@ -315,15 +315,6 @@ class _CNButtonState extends State<CNButton> {
         final hasBoundedWidth = constraints.hasBoundedWidth;
         final hasBoundedHeight = constraints.hasBoundedHeight;
 
-        // When to use intrinsic size:
-        // 1. If shrinkWrap is true, use intrinsic size.
-        // 2. If the parent constraints are unbounded, use intrinsic size.
-
-        // How to resolve the final width and height:
-        // 1. If the user has specified a width/height via modifiers, use that.
-        // 2. constraints are tight, use the constraint value.
-        // 3. Otherwise, use the intrinsic size (if available), or fallback to default
-
         final intrinsicOrDefaultWidth = _intrinsicWidth ?? _kDefaultWidth;
         final intrinsicOrDefaultHeight = _intrinsicHeight ?? _kDefaultHeight;
 

@@ -27,19 +27,43 @@ class CupertinoSegmentedControlNSView: NSView {
         var isDark = false
 
         if let dict = CNChannelSerialization.asDict(args) {
-            if let arr = dict["labels"] as? [String] { labels = arr }
-            if let arr = dict["sfSymbols"] as? [String] { sfSymbols = arr }
-            if let sizes = dict["sfSymbolSizes"] as? [NSNumber] { perSymbolSizes = sizes.map { CGFloat(truncating: $0) } }
-            if let modes = dict["sfSymbolRenderingModes"] as? [String?] { perSymbolModes = modes }
-            if let gradients = dict["sfSymbolGradientEnabled"] as? [NSNumber?] { perSymbolGradientEnabled = gradients }
-            if let colors = dict["sfSymbolColors"] as? [NSNumber] { perSymbolColors = colors.map { NSColor(srgbRed: CGFloat(($0.intValue >> 16) & 0xFF) / 255.0, green: CGFloat(($0.intValue >> 8) & 0xFF) / 255.0, blue: CGFloat($0.intValue & 0xFF) / 255.0, alpha: CGFloat(($0.intValue >> 24) & 0xFF) / 255.0) } }
-            if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
-            if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
-            if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
+            if let arr = dict["labels"] as? [String] {
+                labels = arr
+            }
+            if let arr = dict["sfSymbols"] as? [String] {
+                sfSymbols = arr
+            }
+            if let sizes = dict["sfSymbolSizes"] as? [NSNumber] {
+                perSymbolSizes = sizes.map { CGFloat(truncating: $0) }
+            }
+            if let modes = dict["sfSymbolRenderingModes"] as? [String?] {
+                perSymbolModes = modes
+            }
+            if let gradients = dict["sfSymbolGradientEnabled"] as? [NSNumber?] {
+                perSymbolGradientEnabled = gradients
+            }
+            if let colors = dict["sfSymbolColors"] as? [NSNumber] {
+                perSymbolColors = colors.map { NSColor(srgbRed: CGFloat(($0.intValue >> 16) & 0xFF) / 255.0, green: CGFloat(($0.intValue >> 8) & 0xFF) / 255.0, blue: CGFloat($0.intValue & 0xFF) / 255.0, alpha: CGFloat(($0.intValue >> 24) & 0xFF) / 255.0) }
+            }
+            if let v = dict["selectedIndex"] as? NSNumber {
+                selectedIndex = v.intValue
+            }
+            if let v = dict["enabled"] as? NSNumber {
+                enabled = v.boolValue
+            }
+            if let v = dict["isDark"] as? NSNumber {
+                isDark = v.boolValue
+            }
             if let style = dict["style"] as? [String: Any] {
-                if let s = style["iconSize"] as? NSNumber { defaultIconSize = CGFloat(truncating: s) }
-                if let mode = style["iconRenderingMode"] as? String { defaultIconRenderingMode = mode }
-                if let g = style["iconGradientEnabled"] as? NSNumber { defaultIconGradientEnabled = g.boolValue }
+                if let s = style["iconSize"] as? NSNumber {
+                    defaultIconSize = CGFloat(truncating: s)
+                }
+                if let mode = style["iconRenderingMode"] as? String {
+                    defaultIconRenderingMode = mode
+                }
+                if let g = style["iconGradientEnabled"] as? NSNumber {
+                    defaultIconGradientEnabled = g.boolValue
+                }
                 if let color = style["iconColor"] as? NSNumber {
                     defaultIconColor = ColorUtils.colorFromARGB(color.intValue)
                 }
@@ -58,7 +82,9 @@ class CupertinoSegmentedControlNSView: NSView {
         self.labels = labels
         symbols = sfSymbols
         configureSegments()
-        if selectedIndex >= 0 { control.selectedSegment = selectedIndex }
+        if selectedIndex >= 0 {
+            control.selectedSegment = selectedIndex
+        }
         control.isEnabled = enabled
 
         control.target = self
@@ -86,26 +112,36 @@ class CupertinoSegmentedControlNSView: NSView {
                 if let args = CNChannelSerialization.asDict(call.arguments), let idx = (args["index"] as? NSNumber)?.intValue {
                     control.selectedSegment = idx
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing index", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing index", details: nil))
+                }
             case "setEnabled":
                 if let args = CNChannelSerialization.asDict(call.arguments), let e = (args["enabled"] as? NSNumber)?.boolValue {
                     control.isEnabled = e
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing enabled", details: nil))
+                }
             case "setStyle":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
-                    if let s = args["iconSize"] as? NSNumber { defaultIconSize = CGFloat(truncating: s) }
+                    if let s = args["iconSize"] as? NSNumber {
+                        defaultIconSize = CGFloat(truncating: s)
+                    }
                     if let tint = args["tint"] as? NSNumber {
                         tintColor = ColorUtils.colorFromARGB(tint.intValue)
                     }
                     configureSegments()
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
+                }
             case "setBrightness":
                 if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["isDark"] as? NSNumber)?.boolValue {
                     appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
+                }
             default:
                 result(FlutterMethodNotImplemented)
             }

@@ -42,12 +42,24 @@ struct CNViewConstraintsPayload {
     func toChannel() -> [String: Any] {
         var result: [String: Any] = [:]
 
-        if let minWidth { result["minWidth"] = minWidth }
-        if let tightWidth { result["tightWidth"] = tightWidth }
-        if let maxWidth { result["maxWidth"] = maxWidth }
-        if let minHeight { result["minHeight"] = minHeight }
-        if let tightHeight { result["tightHeight"] = tightHeight }
-        if let maxHeight { result["maxHeight"] = maxHeight }
+        if let minWidth {
+            result["minWidth"] = minWidth
+        }
+        if let tightWidth {
+            result["tightWidth"] = tightWidth
+        }
+        if let maxWidth {
+            result["maxWidth"] = maxWidth
+        }
+        if let minHeight {
+            result["minHeight"] = minHeight
+        }
+        if let tightHeight {
+            result["tightHeight"] = tightHeight
+        }
+        if let maxHeight {
+            result["maxHeight"] = maxHeight
+        }
 
         return result
     }
@@ -232,17 +244,23 @@ struct CNViewModifiersPayload {
     }
 
     static func decodeBool(_ value: Any?) -> Bool? {
-        if value is NSNull { return nil }
+        if value is NSNull {
+            return nil
+        }
         return (value as? NSNumber)?.boolValue ?? value as? Bool
     }
 
     private static func decodeInt(_ value: Any?) -> Int? {
-        if value is NSNull { return nil }
+        if value is NSNull {
+            return nil
+        }
         return (value as? NSNumber)?.intValue ?? value as? Int
     }
 
     static func decodeDouble(_ value: Any?) -> Double? {
-        if value is NSNull { return nil }
+        if value is NSNull {
+            return nil
+        }
         if value is String {
             let stringValue = value as! String
             if stringValue == "infinity" {
@@ -259,7 +277,9 @@ struct CNViewModifiersPayload {
     }
 
     private static func decodeString(_ value: Any?) -> String? {
-        if value is NSNull { return nil }
+        if value is NSNull {
+            return nil
+        }
         return value as? String
     }
 }

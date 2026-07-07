@@ -10,6 +10,7 @@ import 'package:cupertino_native/components/taggable.dart';
 import 'package:cupertino_native/components/text.dart';
 import 'package:cupertino_native/components/view_modifiable.dart';
 import 'package:cupertino_native/components/view_modifiers.dart';
+import 'package:cupertino_native/components/widget_debug_id_mixin.dart';
 import 'package:cupertino_native/style/text_utils.dart';
 import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/cupertino.dart';
@@ -151,7 +152,7 @@ enum CNLabelStyle {
   iconOnly,
 }
 
-class _CNLabelState extends State<CNLabel> {
+class _CNLabelState extends State<CNLabel> with CNWidgetDebugIdMixin<CNLabel> {
   MethodChannel? _channel;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
@@ -243,7 +244,7 @@ class _CNLabelState extends State<CNLabel> {
   }
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
-    debugPrint('[CNLabel][Dart] Received intrinsic size change: width=$width, height=$height');
+    debugPrint('$debugLogPrefix received intrinsic size change: width=$width, height=$height');
     if (!mounted || width == null || height == null) return;
 
     final normalizedWidth = width > 0 ? width : null;
@@ -282,7 +283,7 @@ class _CNLabelState extends State<CNLabel> {
 
     if (_lastPayload == null) {
       if (_lastSerializedPayload != serializedPayload) {
-        debugPrint('[CNLabel][Dart] Sending full update via setData');
+        debugPrint('$debugLogPrefix sending full update via setData');
         await channel.invokeMethod('setData', payload);
       }
 
@@ -294,19 +295,21 @@ class _CNLabelState extends State<CNLabel> {
 
     final patch = _computeMapPatch(_lastPayload!, payload);
     if (patch.isEmpty) {
-      debugPrint('[CNLabel][Dart] No patch to send (payload unchanged)');
+      debugPrint('$debugLogPrefix no patch to send (payload unchanged)');
       _lastSerializedPayload = serializedPayload;
       return;
     }
 
-    debugPrint('[CNLabel][Dart] Sending patch via applyPatch: ${jsonEncode(patch)}');
+    debugPrint('$debugLogPrefix sending patch via applyPatch: ${jsonEncode(patch)}');
     await channel.invokeMethod('applyPatch', patch);
     _lastSerializedPayload = serializedPayload;
     _lastPayload = Map<String, dynamic>.from(payload);
   }
 
   Map<String, dynamic> _toPayload() {
-    return widget.toMap(context, layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload);
+    final payload = widget.toMap(context, layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload);
+    writeDebugWidgetId(payload);
+    return payload;
   }
 
   @override

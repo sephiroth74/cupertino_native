@@ -39,17 +39,33 @@ class CupertinoPathControlNSView: NSView {
         var editable = true
 
         if let dict = CNChannelSerialization.asDict(args) {
-            if let v = dict["isDirectory"] as? NSNumber { isDirectory = v.boolValue }
-            if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
-            if let e = dict["enabled"] as? NSNumber { enabled = e.boolValue }
-            if let cs = dict["controlSize"] as? String { controlSize = cs }
-            if let cs = dict["style"] as? String { controlStyle = cs }
-            if let p = dict["path"] as? String { path = p }
+            if let v = dict["isDirectory"] as? NSNumber {
+                isDirectory = v.boolValue
+            }
+            if let v = dict["isDark"] as? NSNumber {
+                isDark = v.boolValue
+            }
+            if let e = dict["enabled"] as? NSNumber {
+                enabled = e.boolValue
+            }
+            if let cs = dict["controlSize"] as? String {
+                controlSize = cs
+            }
+            if let cs = dict["style"] as? String {
+                controlStyle = cs
+            }
+            if let p = dict["path"] as? String {
+                path = p
+            }
             if let style = dict["tint"] as? [String: Any], let n = style["tint"] as? NSNumber {
                 tint = ColorUtils.colorFromARGB(n.intValue)
             }
-            if let at = dict["allowedTypes"] as? [String] { allowedTypes = at }
-            if let e = dict["editable"] as? NSNumber { editable = e.boolValue }
+            if let at = dict["allowedTypes"] as? [String] {
+                allowedTypes = at
+            }
+            if let e = dict["editable"] as? NSNumber {
+                editable = e.boolValue
+            }
         }
 
         wantsLayer = true

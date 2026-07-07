@@ -6,6 +6,7 @@ import 'package:cupertino_native/channel/payload_patch.dart';
 import 'package:cupertino_native/components/button_child.dart';
 import 'package:cupertino_native/components/view_modifiable.dart';
 import 'package:cupertino_native/components/view_modifiers.dart';
+import 'package:cupertino_native/components/widget_debug_id_mixin.dart';
 import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -107,7 +108,7 @@ enum CNToggleStyle {
   checkbox,
 }
 
-class _CNToggleState extends State<CNToggle> {
+class _CNToggleState extends State<CNToggle> with CNWidgetDebugIdMixin<CNToggle> {
   MethodChannel? _channel;
   late CNToggleController _controller;
   double? _intrinsicHeight;
@@ -261,7 +262,7 @@ class _CNToggleState extends State<CNToggle> {
 
     if (_lastPayload == null) {
       if (_lastSerializedPayload != serializedPayload) {
-        debugPrint('[CNToggle][Dart] Sending full update via setData: $serializedPayload');
+        debugPrint('$debugLogPrefix sending full update via setData: $serializedPayload');
         await channel.invokeMethod('setData', payload);
       }
 
@@ -272,13 +273,13 @@ class _CNToggleState extends State<CNToggle> {
 
     final patch = computeJsonSafePatch(_lastPayload!, payload);
     if (patch.isEmpty) {
-      debugPrint('[CNToggle][Dart] No patch to send (payload unchanged)');
+      debugPrint('$debugLogPrefix no patch to send (payload unchanged)');
       _lastSerializedPayload = serializedPayload;
       return;
     }
 
     final serializedPatch = jsonEncode(patch);
-    debugPrint('[CNToggle][Dart] Sending patch via applyPatch: $serializedPatch');
+    debugPrint('$debugLogPrefix sending patch via applyPatch: $serializedPatch');
     await channel.invokeMethod('applyPatch', patch);
     _lastSerializedPayload = serializedPayload;
     _lastPayload = Map<String, dynamic>.from(payload);
@@ -299,6 +300,7 @@ class _CNToggleState extends State<CNToggle> {
     );
 
     widget.writeModifiers(payload, context);
+    writeDebugWidgetId(payload);
     return payload;
   }
 

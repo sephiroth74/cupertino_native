@@ -28,13 +28,27 @@ class CupertinoLevelIndicatorNSView: NSView {
         var levelIndicatorStyle: NSLevelIndicator.Style = .continuousCapacity
 
         if let dict = CNChannelSerialization.asDict(args) {
-            if let v = dict["value"] as? NSNumber { initialValue = v.doubleValue }
-            if let v = dict["min"] as? NSNumber { minValue = v.doubleValue }
-            if let v = dict["max"] as? NSNumber { maxValue = v.doubleValue }
-            if let v = dict["isEnabled"] as? NSNumber { isEnabled = v.boolValue }
-            if let v = dict["isEditable"] as? NSNumber { isEditable = v.boolValue }
-            if let v = dict["isContinuous"] as? NSNumber { isContinuous = v.boolValue }
-            if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
+            if let v = dict["value"] as? NSNumber {
+                initialValue = v.doubleValue
+            }
+            if let v = dict["min"] as? NSNumber {
+                minValue = v.doubleValue
+            }
+            if let v = dict["max"] as? NSNumber {
+                maxValue = v.doubleValue
+            }
+            if let v = dict["isEnabled"] as? NSNumber {
+                isEnabled = v.boolValue
+            }
+            if let v = dict["isEditable"] as? NSNumber {
+                isEditable = v.boolValue
+            }
+            if let v = dict["isContinuous"] as? NSNumber {
+                isContinuous = v.boolValue
+            }
+            if let v = dict["isDark"] as? NSNumber {
+                isDark = v.boolValue
+            }
             if let v = dict["levelIndicatorStyle"] as? String {
                 levelIndicatorStyle = Self.levelIndicatorStyleFromString(v)
             }
@@ -47,8 +61,12 @@ class CupertinoLevelIndicatorNSView: NSView {
             if let v = dict["criticalColor"] as? NSNumber {
                 criticalColor = ColorUtils.colorFromARGB(v.intValue)
             }
-            if let v = dict["warningValue"] as? NSNumber { warningValue = v.doubleValue }
-            if let v = dict["criticalValue"] as? NSNumber { criticalValue = v.doubleValue }
+            if let v = dict["warningValue"] as? NSNumber {
+                warningValue = v.doubleValue
+            }
+            if let v = dict["criticalValue"] as? NSNumber {
+                criticalValue = v.doubleValue
+            }
         }
 
         super.init(frame: .zero)

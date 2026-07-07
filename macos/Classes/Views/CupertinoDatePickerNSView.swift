@@ -37,12 +37,18 @@ class CupertinoDatePickerNSView: NSView {
             if let elementsArr = dict["datePickerElements"] as? [String] {
                 datePickerElements = Self.datePickerElementsFromStrings(elementsArr)
             }
-            if let v = dict["isBordered"] as? Bool { isBordered = v }
+            if let v = dict["isBordered"] as? Bool {
+                isBordered = v
+            }
             if let v = dict["dateValue"] as? TimeInterval {
                 dateValue = Date(timeIntervalSince1970: v / 1000)
             }
-            if let v = dict["drawsBackground"] as? Bool { drawsBackground = v }
-            if let v = dict["isDark"] as? Bool { isDark = v }
+            if let v = dict["drawsBackground"] as? Bool {
+                drawsBackground = v
+            }
+            if let v = dict["isDark"] as? Bool {
+                isDark = v
+            }
             if let v = dict["backgroundColor"] as? Int {
                 backgroundColor = ColorUtils.colorFromARGB(v)
             }
@@ -61,7 +67,9 @@ class CupertinoDatePickerNSView: NSView {
             if let localeStr = dict["locale"] as? String {
                 locale = Locale(identifier: localeStr)
             }
-            if let v = dict["isEnabled"] as? Bool { isEnabled = v }
+            if let v = dict["isEnabled"] as? Bool {
+                isEnabled = v
+            }
         }
 
         datePicker.datePickerStyle = datePickerStyle

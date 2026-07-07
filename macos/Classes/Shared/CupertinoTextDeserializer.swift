@@ -78,17 +78,23 @@ struct CNTextPayload: CNChannelSerializable {
     }
 
     private static func decodeBool(_ value: Any?) -> Bool? {
-        if value is NSNull { return nil }
+        if value is NSNull {
+            return nil
+        }
         return (value as? NSNumber)?.boolValue ?? value as? Bool
     }
 
     private static func decodeInt(_ value: Any?) -> Int? {
-        if value is NSNull { return nil }
+        if value is NSNull {
+            return nil
+        }
         return (value as? NSNumber)?.intValue ?? value as? Int
     }
 
     private static func decodeString(_ value: Any?) -> String? {
-        if value is NSNull { return nil }
+        if value is NSNull {
+            return nil
+        }
         return value as? String
     }
 

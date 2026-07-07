@@ -42,25 +42,53 @@ class CupertinoPopupMenuButtonNSView: NSView {
         var transparentOverlay = false
 
         if let dict = CNChannelSerialization.asDict(args) {
-            if let t = dict["transparentOverlay"] as? NSNumber { transparentOverlay = t.boolValue }
-            if let t = dict["buttonTitle"] as? String { title = t }
-            if let s = dict["buttonIconName"] as? String { iconName = s }
-            if let s = dict["buttonIconSize"] as? NSNumber { iconSize = CGFloat(truncating: s) }
-            if let c = dict["buttonIconColor"] as? NSNumber { iconColor = Self.colorFromARGB(c.intValue) }
-            if let r = dict["round"] as? NSNumber { makeRound = r.boolValue }
-            if let bs = dict["buttonStyle"] as? String { buttonStyle = bs }
-            if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
-            if let style = dict["style"] as? [String: Any], let n = style["tint"] as? NSNumber { tint = Self.colorFromARGB(n.intValue) }
+            if let t = dict["transparentOverlay"] as? NSNumber {
+                transparentOverlay = t.boolValue
+            }
+            if let t = dict["buttonTitle"] as? String {
+                title = t
+            }
+            if let s = dict["buttonIconName"] as? String {
+                iconName = s
+            }
+            if let s = dict["buttonIconSize"] as? NSNumber {
+                iconSize = CGFloat(truncating: s)
+            }
+            if let c = dict["buttonIconColor"] as? NSNumber {
+                iconColor = Self.colorFromARGB(c.intValue)
+            }
+            if let r = dict["round"] as? NSNumber {
+                makeRound = r.boolValue
+            }
+            if let bs = dict["buttonStyle"] as? String {
+                buttonStyle = bs
+            }
+            if let v = dict["isDark"] as? NSNumber {
+                isDark = v.boolValue
+            }
+            if let style = dict["style"] as? [String: Any], let n = style["tint"] as? NSNumber {
+                tint = Self.colorFromARGB(n.intValue)
+            }
             labels = (dict["labels"] as? [String]) ?? []
             symbols = (dict["sfSymbols"] as? [String]) ?? []
             dividers = (dict["isDivider"] as? [NSNumber]) ?? []
             enabled = (dict["enabled"] as? [NSNumber]) ?? []
             checkedNums = (dict["checked"] as? [NSNumber]) ?? []
-            if let modes = dict["sfSymbolRenderingModes"] as? [String?] { defaultModes = modes }
-            if let palettes = dict["sfSymbolPaletteColors"] as? [[NSNumber]] { defaultPalettes = palettes }
-            if let gradients = dict["sfSymbolGradientEnabled"] as? [NSNumber?] { defaultGradients = gradients }
-            if let m = dict["buttonIconRenderingMode"] as? String { buttonIconMode = m }
-            if let pal = dict["buttonIconPaletteColors"] as? [NSNumber] { buttonIconPalette = pal }
+            if let modes = dict["sfSymbolRenderingModes"] as? [String?] {
+                defaultModes = modes
+            }
+            if let palettes = dict["sfSymbolPaletteColors"] as? [[NSNumber]] {
+                defaultPalettes = palettes
+            }
+            if let gradients = dict["sfSymbolGradientEnabled"] as? [NSNumber?] {
+                defaultGradients = gradients
+            }
+            if let m = dict["buttonIconRenderingMode"] as? String {
+                buttonIconMode = m
+            }
+            if let pal = dict["buttonIconPaletteColors"] as? [NSNumber] {
+                buttonIconPalette = pal
+            }
             sizes = (dict["sfSymbolSizes"] as? [NSNumber]) ?? []
             colors = (dict["sfSymbolColors"] as? [NSNumber]) ?? []
         }
@@ -79,7 +107,9 @@ class CupertinoPopupMenuButtonNSView: NSView {
             button.bezelStyle = .texturedRounded
             // NSButton doesn't have backgroundColor, but isBordered = false makes it transparent
         } else {
-            if let t = title { button.title = t }
+            if let t = title {
+                button.title = t
+            }
             if let name = iconName, var image = NSImage(systemSymbolName: name, accessibilityDescription: nil) {
                 if #available(macOS 12.0, *), let sz = iconSize {
                     let cfg = NSImage.SymbolConfiguration(pointSize: sz, weight: .regular)
@@ -127,7 +157,9 @@ class CupertinoPopupMenuButtonNSView: NSView {
         case "prominentGlass": button.bezelStyle = .texturedRounded
         default: button.bezelStyle = .rounded
         }
-        if makeRound { button.bezelStyle = .circular }
+        if makeRound {
+            button.bezelStyle = .circular
+        }
         button.setButtonType(.momentaryPushIn)
         if #available(macOS 10.14, *), let c = tint {
             if ["filled", "borderedProminent", "prominentGlass"].contains(buttonStyle) {
@@ -179,7 +211,9 @@ class CupertinoPopupMenuButtonNSView: NSView {
                     defaultGradients = (args["sfSymbolGradientEnabled"] as? [NSNumber?]) ?? []
                     rebuildMenu(defaultSizes: defaultSizes, defaultColors: defaultColors)
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing items", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing items", details: nil))
+                }
             case "setStyle":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     if #available(macOS 10.14, *), let n = args["tint"] as? NSNumber {
@@ -205,10 +239,14 @@ class CupertinoPopupMenuButtonNSView: NSView {
                         case "prominentGlass": button.bezelStyle = .texturedRounded
                         default: button.bezelStyle = .rounded
                         }
-                        if bs != "plain" { button.isBordered = true }
+                        if bs != "plain" {
+                            button.isBordered = true
+                        }
                     }
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
+                }
             case "setButtonIcon":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
                     if let name = args["buttonIconName"] as? String, var image = NSImage(systemSymbolName: name, accessibilityDescription: nil) {
@@ -243,24 +281,34 @@ class CupertinoPopupMenuButtonNSView: NSView {
                         button.image = image
                         button.imagePosition = .imageOnly
                     }
-                    if let r = args["round"] as? NSNumber, r.boolValue { button.bezelStyle = .circular }
+                    if let r = args["round"] as? NSNumber, r.boolValue {
+                        button.bezelStyle = .circular
+                    }
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing icon args", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing icon args", details: nil))
+                }
             case "setBrightness":
                 if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["isDark"] as? NSNumber)?.boolValue {
                     appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
+                }
             case "setButtonTitle":
                 if let args = CNChannelSerialization.asDict(call.arguments), let t = args["title"] as? String {
                     button.title = t
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing title", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing title", details: nil))
+                }
             case "setPressed":
                 if let args = CNChannelSerialization.asDict(call.arguments), let p = args["pressed"] as? NSNumber {
                     alphaValue = p.boolValue ? 0.7 : 1.0
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing pressed", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing pressed", details: nil))
+                }
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -291,7 +339,9 @@ class CupertinoPopupMenuButtonNSView: NSView {
             mi.tag = i
             let isEnabled = i < enabled.count ? enabled[i] : true
             mi.isEnabled = isEnabled
-            if i < checked.count { mi.state = checked[i] ? .on : .off }
+            if i < checked.count {
+                mi.state = checked[i] ? .on : .off
+            }
             if i < symbols.count, !symbols[i].isEmpty {
                 if var img = NSImage(systemSymbolName: symbols[i], accessibilityDescription: nil) {
                     if #available(macOS 12.0, *), let sizes = defaultSizes, i < sizes.count {

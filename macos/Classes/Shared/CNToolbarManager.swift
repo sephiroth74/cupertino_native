@@ -323,7 +323,7 @@ struct DynamicToolbarContent: ToolbarContent {
         let placements = Array(grouped.keys).sorted { $0.rawValue < $1.rawValue }
 
         // Unroll placements (max 8 - covers all macOS toolbar placement types)
-        if placements.count > 0 {
+        if !placements.isEmpty {
             renderPlacementAt(0, grouped: grouped, placements: placements)
         }
         if placements.count > 1 {
@@ -356,7 +356,7 @@ struct DynamicToolbarContent: ToolbarContent {
             let groupsForPlacement = grouped[placement] ?? []
 
             // Unroll groups for this placement (max 10 groups per placement)
-            if groupsForPlacement.count > 0 {
+            if !groupsForPlacement.isEmpty {
                 renderGroupAt(0, placement: placement, groups: groupsForPlacement)
             }
             if groupsForPlacement.count > 1 {

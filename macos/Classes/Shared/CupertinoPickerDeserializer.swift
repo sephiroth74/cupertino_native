@@ -8,6 +8,7 @@ struct CNPickerPayload: CNChannelSerializable {
     var isDark: Bool
     var pickerStyleName: String
     var asList: Bool
+    var debugWidgetId: String?
     var viewModifiers: CNViewModifiersPayload
 
     init() {
@@ -17,6 +18,7 @@ struct CNPickerPayload: CNChannelSerializable {
         isDark = false
         pickerStyleName = "automatic"
         asList = false
+        debugWidgetId = nil
         viewModifiers = CNViewModifiersPayload()
     }
 
@@ -28,12 +30,20 @@ struct CNPickerPayload: CNChannelSerializable {
     mutating func applyPatch(_ channel: [String: Any]) {
         viewModifiers.applyPatch(channel)
 
-        if let arr = channel["items"] as? [[String: Any]] {
-            items = arr
+        if channel.keys.contains("items") {
+            if channel["items"] is NSNull {
+                items = []
+            } else if let arr = channel["items"] as? [[String: Any]] {
+                items = arr
+            }
         }
 
-        if let arr = channel["labelChildren"] as? [[String: Any]] {
-            labelChildren = arr
+        if channel.keys.contains("labelChildren") {
+            if channel["labelChildren"] is NSNull {
+                labelChildren = []
+            } else if let arr = channel["labelChildren"] as? [[String: Any]] {
+                labelChildren = arr
+            }
         }
 
         if let v = (channel["selectedIndex"] as? NSNumber)?.intValue ?? channel["selectedIndex"] as? Int {
@@ -51,6 +61,14 @@ struct CNPickerPayload: CNChannelSerializable {
         if let displayAsList = (channel["asList"] as? NSNumber)?.boolValue ?? channel["asList"] as? Bool {
             asList = displayAsList
         }
+
+        if channel.keys.contains("debugWidgetId") {
+            if channel["debugWidgetId"] is NSNull {
+                debugWidgetId = nil
+            } else if let id = channel["debugWidgetId"] as? String {
+                debugWidgetId = id
+            }
+        }
     }
 
     func toChannel() -> [String: Any] {
@@ -62,6 +80,7 @@ struct CNPickerPayload: CNChannelSerializable {
             "isDark": isDark,
             "pickerStyle": pickerStyleName,
             "asList": asList,
+            "debugWidgetId": debugWidgetId as Any,
         ]) { _, new in new }
 
         return result

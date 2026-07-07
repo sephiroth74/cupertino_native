@@ -8,10 +8,14 @@ import 'package:cupertino_native/components/paddable.dart';
 import 'package:cupertino_native/components/taggable.dart';
 import 'package:cupertino_native/components/view_modifiable.dart';
 import 'package:cupertino_native/components/view_modifiers.dart';
+import 'package:cupertino_native/components/widget_debug_id_mixin.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+
+const double _kDefaultWidth = 24.0;
+const double _kDefaultHeight = 24.0;
 
 /// Represents an image that can be used in various components, such as menu items or buttons.
 /// This class encapsulates the necessary information to render a system symbol on Apple platforms,
@@ -112,7 +116,7 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
   }
 }
 
-class _CNImageState extends State<CNImage> {
+class _CNImageState extends State<CNImage> with CNWidgetDebugIdMixin<CNImage> {
   MethodChannel? _channel;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
@@ -203,7 +207,13 @@ class _CNImageState extends State<CNImage> {
 
     await channel.invokeMethod('applyPatch', patch);
     _lastSerializedPayload = serializedPayload;
+    _lastSerializedPayload = serializedPayload;
     _lastPayload = Map<String, dynamic>.from(payload);
+  }
+
+    Map<String, dynamic> _toPayload() {
+    final payload = widget.toMap(context, layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload);
+    return payload;
   }
 
   @override
@@ -214,20 +224,39 @@ class _CNImageState extends State<CNImage> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final shrinkWrap = widget.modifiers?.shrinkWrap ?? true;
+        final effectiveShrinkWrap = widget.modifiers?.shrinkWrap ?? false;
+        final explicitConstraints = widget.modifiers?.constraints;
+        final hasBoundedParentSize = constraints.hasBoundedWidth || constraints.hasBoundedHeight;
+        final hasBoundedModifierSize =
+            (explicitConstraints?.hasBoundedWidth ?? false) || (explicitConstraints?.hasBoundedHeight ?? false);
+
+        assert(
+          effectiveShrinkWrap || hasBoundedModifierSize || hasBoundedParentSize,
+          'CNButton requires at least one bounded axis when shrinkWrap is false. '
+          'Provide bounded constraints in CNViewModifiers.constraints or place CNButton in a parent with bounded size.',
+        );
 
         final resolvedLayoutConstraints = resolveLayoutConstraintsPayload(
           parentConstraints: constraints,
-          explicitConstraints: widget.modifiers?.constraints,
+          explicitConstraints: explicitConstraints,
         );
+        final resolvedConstraints = resolvedLayoutConstraints.resolvedConstraints;
         _layoutConstraintsSyncState.apply(resolvedLayoutConstraints, sync: _syncPropsToNativeIfNeeded);
 
-        final creationParams = widget.toMap(
-          context,
-          layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload,
-        );
+        final hasBoundedWidth = constraints.hasBoundedWidth;
+        final hasBoundedHeight = constraints.hasBoundedHeight;
 
-        // Constraints are always serialized; native side decides whether to use them based on shrinkWrap.
+        final intrinsicOrDefaultWidth = _intrinsicWidth ?? _kDefaultWidth;
+        final intrinsicOrDefaultHeight = _intrinsicHeight ?? _kDefaultHeight;
+
+        final resolvedWidth = effectiveShrinkWrap
+            ? (hasBoundedWidth ? intrinsicOrDefaultWidth.clamp(0.0, constraints.maxWidth).toDouble() : intrinsicOrDefaultWidth)
+            : (resolvedConstraints.hasBoundedWidth ? resolvedConstraints.maxWidth : intrinsicOrDefaultWidth);
+        final resolvedHeight = effectiveShrinkWrap
+            ? (hasBoundedHeight ? intrinsicOrDefaultHeight.clamp(0.0, constraints.maxHeight).toDouble() : intrinsicOrDefaultHeight)
+            : (resolvedConstraints.hasBoundedHeight ? resolvedConstraints.maxHeight : intrinsicOrDefaultHeight);
+
+        final creationParams = _toPayload();
 
         Widget nativeView = AppKitView(
           viewType: 'CupertinoNativeImage',
@@ -236,11 +265,19 @@ class _CNImageState extends State<CNImage> {
           onPlatformViewCreated: _onPlatformViewCreated,
         );
 
-        if (shrinkWrap && (_intrinsicWidth != null || _intrinsicHeight != null)) {
-          nativeView = SizedBox(width: _intrinsicWidth, height: _intrinsicHeight, child: nativeView);
+        if (!effectiveShrinkWrap) {
+          // Platform views expand to biggest constraints; force finite fallback
+          // sizes on unbounded axes to avoid Infinity during Wrap/Column layout.
+          nativeView = SizedBox(
+            width: resolvedConstraints.hasBoundedWidth ? null : resolvedWidth,
+            height: resolvedConstraints.hasBoundedHeight ? null : resolvedHeight,
+            child: nativeView,
+          );
+          nativeView = ConstrainedBox(constraints: resolvedConstraints, child: nativeView);
+          return nativeView;
         }
 
-        return nativeView;
+        return SizedBox(width: resolvedWidth, height: resolvedHeight, child: nativeView);
       },
     );
   }

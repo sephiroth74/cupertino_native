@@ -41,7 +41,9 @@ class RightSideOptionContainer extends StatelessWidget {
                       Expanded(child: Text(entry.key)),
                       SizedBox(
                         width: 175,
-                        child: entry.value),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: entry.value)),
                     ],
                   ),
                 ),

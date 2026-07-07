@@ -133,22 +133,42 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
             if let value = dict["transparentOverlay"] as? NSNumber {
                 transparentOverlay = value.boolValue
             }
-            if let value = dict["buttonTitle"] as? String { title = value }
-            if let value = dict["buttonIconName"] as? String { iconName = value }
+            if let value = dict["buttonTitle"] as? String {
+                title = value
+            }
+            if let value = dict["buttonIconName"] as? String {
+                iconName = value
+            }
             if let value = dict["buttonIconSize"] as? NSNumber {
                 iconSize = CGFloat(truncating: value)
             }
             if let value = dict["buttonIconColor"] as? NSNumber {
                 iconColor = ColorUtils.colorFromARGB(value.intValue)
             }
-            if let value = dict["round"] as? NSNumber { makeRound = value.boolValue }
-            if let value = dict["buttonStyle"] as? String { buttonStyle = value }
-            if let value = dict["isDark"] as? NSNumber { isDark = value.boolValue }
-            if let value = dict["behavior"] as? String { behavior = value }
-            if let value = dict["preferredEdge"] as? String { preferredEdgeName = value }
-            if let value = dict["popoverTitle"] as? String { popoverTitle = value }
-            if let value = dict["popoverMessage"] as? String { popoverMessage = value }
-            if let value = dict["actions"] as? [[String: Any]] { popoverActions = value }
+            if let value = dict["round"] as? NSNumber {
+                makeRound = value.boolValue
+            }
+            if let value = dict["buttonStyle"] as? String {
+                buttonStyle = value
+            }
+            if let value = dict["isDark"] as? NSNumber {
+                isDark = value.boolValue
+            }
+            if let value = dict["behavior"] as? String {
+                behavior = value
+            }
+            if let value = dict["preferredEdge"] as? String {
+                preferredEdgeName = value
+            }
+            if let value = dict["popoverTitle"] as? String {
+                popoverTitle = value
+            }
+            if let value = dict["popoverMessage"] as? String {
+                popoverMessage = value
+            }
+            if let value = dict["actions"] as? [[String: Any]] {
+                popoverActions = value
+            }
             if let value = dict["popoverWidth"] as? NSNumber {
                 popoverWidth = CGFloat(truncating: value)
             }
@@ -170,7 +190,9 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
             button.isBordered = false
             button.bezelStyle = .texturedRounded
         } else {
-            if let title { button.title = title }
+            if let title {
+                button.title = title
+            }
             if let iconName,
                var image = NSImage(systemSymbolName: iconName, accessibilityDescription: nil)
             {
@@ -180,7 +202,9 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
                     )
                     image = image.withSymbolConfiguration(configuration) ?? image
                 }
-                if let iconColor { image = image.tinted(with: iconColor) }
+                if let iconColor {
+                    image = image.tinted(with: iconColor)
+                }
                 button.image = image
                 button.imagePosition = .imageOnly
             }
@@ -197,7 +221,9 @@ class CupertinoPopoverNSView: NSView, NSPopoverDelegate {
         default:
             button.bezelStyle = .rounded
         }
-        if makeRound { button.bezelStyle = .circular }
+        if makeRound {
+            button.bezelStyle = .circular
+        }
         if #available(macOS 10.14, *), let tint {
             if ["filled", "borderedProminent", "prominentGlass"].contains(buttonStyle) {
                 button.bezelColor = tint

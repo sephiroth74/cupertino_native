@@ -26,11 +26,19 @@ class CupertinoTabBarNSView: NSView {
             labels = (dict["labels"] as? [String]) ?? []
             symbols = (dict["sfSymbols"] as? [String]) ?? []
             sizes = (dict["sfSymbolSizes"] as? [NSNumber]) ?? []
-            if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
-            if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
+            if let v = dict["selectedIndex"] as? NSNumber {
+                selectedIndex = v.intValue
+            }
+            if let v = dict["isDark"] as? NSNumber {
+                isDark = v.boolValue
+            }
             if let style = dict["style"] as? [String: Any] {
-                if let n = style["tint"] as? NSNumber { tint = Self.colorFromARGB(n.intValue) }
-                if let n = style["backgroundColor"] as? NSNumber { bg = Self.colorFromARGB(n.intValue) }
+                if let n = style["tint"] as? NSNumber {
+                    tint = Self.colorFromARGB(n.intValue)
+                }
+                if let n = style["backgroundColor"] as? NSNumber {
+                    bg = Self.colorFromARGB(n.intValue)
+                }
             }
         }
 
@@ -41,14 +49,18 @@ class CupertinoTabBarNSView: NSView {
         appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
 
         configureSegments(labels: labels, symbols: symbols, sizes: sizes)
-        if selectedIndex >= 0 { control.selectedSegment = selectedIndex }
+        if selectedIndex >= 0 {
+            control.selectedSegment = selectedIndex
+        }
         // Save current style and content for retinting
         currentLabels = labels
         currentSymbols = symbols
         currentSizes = sizes
         currentTint = tint
         currentBackground = bg
-        if let b = bg { wantsLayer = true; layer?.backgroundColor = b.cgColor }
+        if let b = bg {
+            wantsLayer = true; layer?.backgroundColor = b.cgColor
+        }
         applySegmentTint()
 
         control.target = self
@@ -74,10 +86,14 @@ class CupertinoTabBarNSView: NSView {
                     control.selectedSegment = idx
                     applySegmentTint()
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing index", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing index", details: nil))
+                }
             case "setStyle":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
-                    if let n = args["tint"] as? NSNumber { currentTint = Self.colorFromARGB(n.intValue) }
+                    if let n = args["tint"] as? NSNumber {
+                        currentTint = Self.colorFromARGB(n.intValue)
+                    }
                     if let n = args["backgroundColor"] as? NSNumber {
                         let c = Self.colorFromARGB(n.intValue)
                         currentBackground = c
@@ -86,12 +102,16 @@ class CupertinoTabBarNSView: NSView {
                     }
                     applySegmentTint()
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
+                }
             case "setBrightness":
                 if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["isDark"] as? NSNumber)?.boolValue {
                     appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
+                }
             default:
                 result(FlutterMethodNotImplemented)
             }

@@ -9,6 +9,7 @@ import 'package:cupertino_native/components/divider.dart';
 import 'package:cupertino_native/components/menu_child.dart';
 import 'package:cupertino_native/components/text.dart';
 import 'package:cupertino_native/components/view_modifiers.dart';
+import 'package:cupertino_native/components/widget_debug_id_mixin.dart';
 import 'package:cupertino_native/style/menu_style.dart';
 import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/foundation.dart';
@@ -21,7 +22,6 @@ const double _kDefaultWidth = 120.0;
 /// Backward-compatible alias for [CNDivider].
 @Deprecated('Use CNDivider instead.')
 typedef CNMenuDivider = CNDivider;
-
 
 /// A native SwiftUI Menu wrapper.
 ///
@@ -57,7 +57,7 @@ class CNMenu extends StatefulWidget {
   State<CNMenu> createState() => _CNMenuState();
 }
 
-class _CNMenuState extends State<CNMenu> {
+class _CNMenuState extends State<CNMenu> with CNWidgetDebugIdMixin<CNMenu> {
   MethodChannel? _channel;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
@@ -232,6 +232,7 @@ class _CNMenuState extends State<CNMenu> {
     );
 
     widget.modifiers?.writeToPayload(payload, context);
+    writeDebugWidgetId(payload);
 
     return payload;
   }

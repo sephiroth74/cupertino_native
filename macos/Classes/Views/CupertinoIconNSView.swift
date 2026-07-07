@@ -18,14 +18,28 @@ class CupertinoIconNSView: NSView {
         imageView = NSImageView(frame: .zero)
 
         if let dict = CNChannelSerialization.asDict(args) {
-            if let s = dict["name"] as? String { name = s }
-            if let b = dict["isDark"] as? NSNumber { isDark = b.boolValue }
+            if let s = dict["name"] as? String {
+                name = s
+            }
+            if let b = dict["isDark"] as? NSNumber {
+                isDark = b.boolValue
+            }
             if let style = dict["style"] as? [String: Any] {
-                if let v = style["iconSize"] as? NSNumber { size = CGFloat(truncating: v) }
-                if let v = style["iconColor"] as? NSNumber { color = ColorUtils.colorFromARGB(v.intValue) }
-                if let arr = style["iconPaletteColors"] as? [NSNumber] { palette = arr.map { ColorUtils.colorFromARGB($0.intValue) } }
-                if let mode = style["iconRenderingMode"] as? String { renderingMode = mode }
-                if let g = style["iconGradientEnabled"] as? NSNumber { gradientEnabled = g.boolValue }
+                if let v = style["iconSize"] as? NSNumber {
+                    size = CGFloat(truncating: v)
+                }
+                if let v = style["iconColor"] as? NSNumber {
+                    color = ColorUtils.colorFromARGB(v.intValue)
+                }
+                if let arr = style["iconPaletteColors"] as? [NSNumber] {
+                    palette = arr.map { ColorUtils.colorFromARGB($0.intValue) }
+                }
+                if let mode = style["iconRenderingMode"] as? String {
+                    renderingMode = mode
+                }
+                if let g = style["iconGradientEnabled"] as? NSNumber {
+                    gradientEnabled = g.boolValue
+                }
             }
         }
 
@@ -61,22 +75,38 @@ class CupertinoIconNSView: NSView {
                     name = n
                     rebuild()
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing name", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing name", details: nil))
+                }
             case "setStyle":
                 if let args = CNChannelSerialization.asDict(call.arguments) {
-                    if let v = args["iconSize"] as? NSNumber { size = CGFloat(truncating: v) }
-                    if let v = args["iconColor"] as? NSNumber { color = ColorUtils.colorFromARGB(v.intValue) }
-                    if let arr = args["iconPaletteColors"] as? [NSNumber] { palette = arr.map { ColorUtils.colorFromARGB($0.intValue) } }
-                    if let mode = args["iconRenderingMode"] as? String { renderingMode = mode }
-                    if let g = args["iconGradientEnabled"] as? NSNumber { gradientEnabled = g.boolValue }
+                    if let v = args["iconSize"] as? NSNumber {
+                        size = CGFloat(truncating: v)
+                    }
+                    if let v = args["iconColor"] as? NSNumber {
+                        color = ColorUtils.colorFromARGB(v.intValue)
+                    }
+                    if let arr = args["iconPaletteColors"] as? [NSNumber] {
+                        palette = arr.map { ColorUtils.colorFromARGB($0.intValue) }
+                    }
+                    if let mode = args["iconRenderingMode"] as? String {
+                        renderingMode = mode
+                    }
+                    if let g = args["iconGradientEnabled"] as? NSNumber {
+                        gradientEnabled = g.boolValue
+                    }
                     rebuild()
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing style", details: nil))
+                }
             case "setBrightness":
                 if let args = CNChannelSerialization.asDict(call.arguments), let isDark = (args["isDark"] as? NSNumber)?.boolValue {
                     appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing isDark", details: nil))
+                }
             default:
                 result(FlutterMethodNotImplemented)
             }

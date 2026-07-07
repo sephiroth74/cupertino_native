@@ -17,9 +17,15 @@ class CupertinoSwitchNSView: NSView {
         var initialTint: NSColor? = nil
         var controlSize: ControlSize = .regular
         if let dict = CNChannelSerialization.asDict(args) {
-            if let v = dict["value"] as? NSNumber { initialValue = v.boolValue }
-            if let v = dict["enabled"] as? NSNumber { enabled = v.boolValue }
-            if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
+            if let v = dict["value"] as? NSNumber {
+                initialValue = v.boolValue
+            }
+            if let v = dict["enabled"] as? NSNumber {
+                enabled = v.boolValue
+            }
+            if let v = dict["isDark"] as? NSNumber {
+                isDark = v.boolValue
+            }
             if let v = dict["controlSize"] as? String {
                 switch v {
                 case "mini": controlSize = .mini

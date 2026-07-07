@@ -2,6 +2,23 @@ import 'package:flutter/widgets.dart';
 
 /// Flutter-only geometry snapshot used for pixel-perfect diagnostics.
 class FlutterPixelGeometry {
+  /// Creates an immutable Flutter geometry snapshot.
+  const FlutterPixelGeometry({
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+    required this.physicalX,
+    required this.physicalY,
+    required this.physicalWidth,
+    required this.physicalHeight,
+    required this.devicePixelRatio,
+    required this.pixelAlignedX,
+    required this.pixelAlignedY,
+    required this.pixelAlignedWidth,
+    required this.pixelAlignedHeight,
+  });
+
   /// Device pixel ratio used for the conversion.
   final double devicePixelRatio;
 
@@ -41,23 +58,6 @@ class FlutterPixelGeometry {
   /// Logical y in the global Flutter coordinate space.
   final double y;
 
-  /// Creates an immutable Flutter geometry snapshot.
-  const FlutterPixelGeometry({
-    required this.x,
-    required this.y,
-    required this.width,
-    required this.height,
-    required this.physicalX,
-    required this.physicalY,
-    required this.physicalWidth,
-    required this.physicalHeight,
-    required this.devicePixelRatio,
-    required this.pixelAlignedX,
-    required this.pixelAlignedY,
-    required this.pixelAlignedWidth,
-    required this.pixelAlignedHeight,
-  });
-
   @override
   String toString() {
     return 'FlutterPixelGeometry('
@@ -73,6 +73,9 @@ class FlutterPixelGeometry {
 
 /// Wrap any widget to measure its global geometry using only Flutter APIs.
 class PixelPerfectProbe extends StatefulWidget {
+  /// Creates a pixel-geometry probe around [child].
+  const PixelPerfectProbe({super.key, required this.child, this.onGeometryChanged, this.adjustPosition = false});
+
   /// If true, applies a local translation to keep x/y aligned to physical pixels.
   final bool adjustPosition;
 
@@ -82,14 +85,11 @@ class PixelPerfectProbe extends StatefulWidget {
   /// Called whenever geometry changes.
   final ValueChanged<FlutterPixelGeometry>? onGeometryChanged;
 
-  /// Creates a pixel-geometry probe around [child].
-  const PixelPerfectProbe({super.key, required this.child, this.onGeometryChanged, this.adjustPosition = false});
+  @override
+  State<PixelPerfectProbe> createState() => _PixelPerfectProbeState();
 
   /// Whether the probe is enabled. If false, no geometry will be reported.
   bool get enabled => onGeometryChanged != null;
-
-  @override
-  State<PixelPerfectProbe> createState() => _PixelPerfectProbeState();
 }
 
 class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindingObserver {
@@ -98,15 +98,6 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
   bool _probeQueued = false;
   double _snapDx = 0;
   double _snapDy = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    _queueProbe();
-    return Transform.translate(
-      offset: Offset(_snapDx, _snapDy),
-      child: KeyedSubtree(key: _probeKey, child: widget.child),
-    );
-  }
 
   @override
   void didChangeMetrics() {
@@ -236,5 +227,14 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
   double _snapDelta(double physicalValue, double dpr) {
     if (dpr <= 0) return 0;
     return (physicalValue.roundToDouble() - physicalValue) / dpr;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _queueProbe();
+    return Transform.translate(
+      offset: Offset(_snapDx, _snapDy),
+      child: KeyedSubtree(key: _probeKey, child: widget.child),
+    );
   }
 }

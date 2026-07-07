@@ -1,9 +1,15 @@
+import 'dart:convert';
+
+import 'package:cupertino_native/channel/channel_serialization.dart';
+import 'package:cupertino_native/channel/layout_constraints_payload.dart';
+import 'package:cupertino_native/channel/payload_patch.dart';
 import 'package:cupertino_native/components/button_child.dart';
 import 'package:cupertino_native/components/image.dart';
 import 'package:cupertino_native/components/label.dart';
 import 'package:cupertino_native/components/text.dart';
 import 'package:cupertino_native/components/view_modifiable.dart';
 import 'package:cupertino_native/components/view_modifiers.dart';
+import 'package:cupertino_native/components/widget_debug_id_mixin.dart';
 import 'package:cupertino_native/model/picker_style.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -23,10 +29,9 @@ class CNPicker extends StatefulWidget with CNViewModifiable {
     this.onValueChanged,
     this.labelChildren = const [],
     this.pickerStyle = CNPickerStyle.segmented,
-    this.shrinkWrap = false,
     this.asList = false,
     required this.items,
-    this.modifiers,
+    this.modifiers = const CNViewModifiers(),
   }) : assert(items.isNotEmpty, 'Items list cannot be empty.'),
        assert(
          items.every((item) => item is CNText || item is CNLabel || item is CNImage),
@@ -56,36 +61,30 @@ class CNPicker extends StatefulWidget with CNViewModifiable {
   final int selectedIndex;
 
   @override
-  final CNViewModifiers? modifiers;
-
-  /// Whether the picker should shrink-wrap its content.
-  @override
-  final bool shrinkWrap;
+  final CNViewModifiers modifiers;
 
   @override
   State<CNPicker> createState() => _CNPickerState();
-
-  @override
-  EdgeInsets? get padding => modifiers?.padding;
-
-  @override
-  Object? get tag => modifiers?.tag;
 }
 
-class _CNPickerState extends State<CNPicker> {
+class _CNPickerState extends State<CNPicker> with CNWidgetDebugIdMixin<CNPicker> {
   MethodChannel? _channel;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
+  Map<String, dynamic>? _lastPayload;
   String? _lastSerializedPayload;
+  final CNLayoutConstraintsSyncState _layoutConstraintsSyncState = CNLayoutConstraintsSyncState();
 
   @override
   void didChangeDependencies() {
+    debugPrint('$debugLogPrefix didChangeDependencies');
     super.didChangeDependencies();
     _syncPropsToNativeIfNeeded();
   }
 
   @override
   void didUpdateWidget(covariant CNPicker oldWidget) {
+    debugPrint('$debugLogPrefix didUpdateWidget');
     super.didUpdateWidget(oldWidget);
     _syncPropsToNativeIfNeeded();
   }
@@ -99,26 +98,43 @@ class _CNPickerState extends State<CNPicker> {
   bool get _isDark => CNTheme.brightnessOf(context) == Brightness.dark;
 
   void _cacheCurrentProps() {
-    _lastSerializedPayload = _serializeCurrentPayload();
+    final payload = _toPayload();
+    _lastSerializedPayload = jsonEncode(payload);
+    _lastPayload = Map<String, dynamic>.from(payload);
   }
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
+    debugPrint('$debugLogPrefix intrinsic size changed: width=$width, height=$height');
     if (!mounted || width == null || height == null) return;
+
+    final hasExplicitTightWidth = widget.modifiers.constraints?.hasTightWidth ?? false;
+    if (!hasExplicitTightWidth && width > 0 && width <= 12.0) {
+      debugPrint('$debugLogPrefix ignoring transient intrinsic width=$width before stable layout');
+      return;
+    }
+
+    final normalizedWidth = width > 0 ? width : null;
+    final normalizedHeight = height > 0 ? height : null;
+
+    if (normalizedWidth == _intrinsicWidth && normalizedHeight == _intrinsicHeight) {
+      return;
+    }
+
     setState(() {
-      _intrinsicWidth = width > -1 ? width : null;
-      _intrinsicHeight = height > -1 ? height : null;
+      _intrinsicWidth = normalizedWidth;
+      _intrinsicHeight = normalizedHeight;
     });
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
     if (call.method == 'valueChanged') {
-      final args = call.arguments as Map?;
+      final args = CNChannelSerialization.asMap(call.arguments);
       final idx = (args?['index'] as num?)?.toInt();
       if (idx != null) {
         widget.onValueChanged?.call(idx);
       }
     } else if (call.method == 'intrinsicSizeChanged') {
-      final args = call.arguments as Map?;
+      final args = CNChannelSerialization.asMap(call.arguments);
       _onIntrinsicSizeChanged((args?['width'] as num?)?.toDouble(), (args?['height'] as num?)?.toDouble());
     }
     return null;
@@ -139,6 +155,7 @@ class _CNPickerState extends State<CNPicker> {
         _onIntrinsicSizeChanged((result['width'] as num?)?.toDouble(), (result['height'] as num?)?.toDouble());
       }
     } catch (e) {
+      debugPrint('$debugLogPrefix failed to get intrinsic size: $e');
       // Fallback to default height
       _intrinsicWidth = null;
       _intrinsicHeight = null;
@@ -151,20 +168,46 @@ class _CNPickerState extends State<CNPicker> {
         .toList();
   }
 
-  String _serializeCurrentPayload() => _toPayload().toString();
-
   Future<void> _syncPropsToNativeIfNeeded() async {
     final channel = _channel;
     if (channel == null) return;
 
     final payload = _toPayload();
-    final serializedPayload = payload.toString();
+    final serializedPayload = jsonEncode(payload);
 
-    if (_lastSerializedPayload != serializedPayload) {
-      await channel.invokeMethod('setPicker', payload);
-      _cacheCurrentProps();
-      _queryIntrinsicSize();
+    if (_lastPayload == null) {
+      if (_lastSerializedPayload != serializedPayload) {
+        await channel.invokeMethod('setData', payload);
+      }
+
+      _lastSerializedPayload = serializedPayload;
+      _lastPayload = Map<String, dynamic>.from(payload);
+      // _queryIntrinsicSize();
+      return;
     }
+
+    final patch = computeJsonSafePatch(_lastPayload!, payload);
+    if (patch.isEmpty) {
+      _lastSerializedPayload = serializedPayload;
+      return;
+    }
+
+    final shouldForceSetData =
+        patch.keys.contains('pickerStyle') ||
+        patch.keys.contains('labelChildren') ||
+        _lastPayload!.containsKey('labelChildren') != payload.containsKey('labelChildren');
+
+    if (shouldForceSetData) {
+      await channel.invokeMethod('setData', payload);
+      _lastSerializedPayload = serializedPayload;
+      _lastPayload = Map<String, dynamic>.from(payload);
+      return;
+    }
+
+    await channel.invokeMethod('applyPatch', patch);
+    _lastSerializedPayload = serializedPayload;
+    _lastPayload = Map<String, dynamic>.from(payload);
+    // _queryIntrinsicSize();
   }
 
   Map<String, dynamic> _toPayload() {
@@ -188,7 +231,14 @@ class _CNPickerState extends State<CNPicker> {
       if (widget.labelChildren.isNotEmpty) 'labelChildren': _serializeChildren(widget.labelChildren),
     };
 
+    writeLayoutConstraintsPayload(
+      payload,
+      layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload,
+      explicitConstraints: widget.modifiers.constraints,
+    );
+
     widget.writeModifiers(payload, context);
+    writeDebugWidgetId(payload);
     return payload;
   }
 
@@ -198,60 +248,58 @@ class _CNPickerState extends State<CNPicker> {
       return SizedBox.shrink();
     }
 
-    const viewType = 'CupertinoNativePicker';
-    final creationParams = _toPayload();
-
-    final child = AppKitView(
-      viewType: viewType,
-      creationParamsCodec: const StandardMessageCodec(),
-      creationParams: creationParams,
-      onPlatformViewCreated: _onPlatformViewCreated,
-    );
-
     return LayoutBuilder(
       builder: (context, constraints) {
-        final bool hasBoundedWidth = constraints.hasBoundedWidth;
-        final bool hasBoundedHeight = constraints.hasBoundedHeight;
+        final effectiveShrinkWrap = widget.modifiers.shrinkWrap;
+        final explicitConstraints = widget.modifiers.constraints;
+        final hasBoundedParentSize = constraints.hasBoundedWidth || constraints.hasBoundedHeight;
+        final hasBoundedModifierSize =
+            (explicitConstraints?.hasBoundedWidth ?? false) || (explicitConstraints?.hasBoundedHeight ?? false);
 
-        double? width;
-        double? height;
+        assert(
+          effectiveShrinkWrap || hasBoundedModifierSize || hasBoundedParentSize,
+          'CNPicker requires at least one bounded axis when shrinkWrap is false. '
+          'Provide bounded constraints in CNViewModifiers.constraints or place CNPicker in a parent with bounded size.',
+        );
 
-        if (widget.shrinkWrap) {
-          if (hasBoundedWidth) {
-            final targetWidth = _intrinsicWidth ?? _kDefaultPickerWidth;
-            width = targetWidth.clamp(0.0, constraints.maxWidth);
-          } else {
-            width = _intrinsicWidth ?? _kDefaultPickerWidth;
-          }
+        final resolvedLayoutConstraints = resolveLayoutConstraintsPayload(
+          parentConstraints: constraints,
+          explicitConstraints: explicitConstraints,
+        );
+        final resolvedConstraints = resolvedLayoutConstraints.resolvedConstraints;
+        _layoutConstraintsSyncState.apply(resolvedLayoutConstraints, sync: _syncPropsToNativeIfNeeded);
 
-          if (hasBoundedHeight) {
-            final targetHeight = _intrinsicHeight ?? _kDefaultPickerHeight;
-            height = targetHeight.clamp(0.0, constraints.maxHeight);
-          } else {
-            height = _intrinsicHeight ?? _kDefaultPickerHeight;
-          }
-        } else if (hasBoundedWidth) {
-          width = constraints.maxWidth;
-          if (_intrinsicHeight != null) {
-            height = _intrinsicHeight;
-          } else if (hasBoundedHeight) {
-            height = constraints.maxHeight;
-          } else {
-            height = _kDefaultPickerHeight;
-          }
-        } else {
-          width = _intrinsicWidth ?? _kDefaultPickerWidth;
-          height = _intrinsicHeight ?? (hasBoundedHeight ? constraints.maxHeight : _kDefaultPickerHeight);
+        final hasBoundedWidth = constraints.hasBoundedWidth;
+        final hasBoundedHeight = constraints.hasBoundedHeight;
+        final intrinsicOrDefaultWidth = _intrinsicWidth ?? _kDefaultPickerWidth;
+        final intrinsicOrDefaultHeight = _intrinsicHeight ?? _kDefaultPickerHeight;
+
+        final resolvedWidth = effectiveShrinkWrap
+            ? (hasBoundedWidth ? intrinsicOrDefaultWidth.clamp(0.0, constraints.maxWidth).toDouble() : intrinsicOrDefaultWidth)
+            : (resolvedConstraints.hasBoundedWidth ? resolvedConstraints.maxWidth : intrinsicOrDefaultWidth);
+        final resolvedHeight = effectiveShrinkWrap
+            ? (hasBoundedHeight ? intrinsicOrDefaultHeight.clamp(0.0, constraints.maxHeight).toDouble() : intrinsicOrDefaultHeight)
+            : (resolvedConstraints.hasBoundedHeight ? resolvedConstraints.maxHeight : intrinsicOrDefaultHeight);
+
+        final nativeView = AppKitView(
+          viewType: 'CupertinoNativePicker',
+          creationParamsCodec: const StandardMessageCodec(),
+          creationParams: _toPayload(),
+          onPlatformViewCreated: _onPlatformViewCreated,
+        );
+
+        if (!effectiveShrinkWrap) {
+          return ConstrainedBox(
+            constraints: resolvedConstraints,
+            child: SizedBox(
+              width: resolvedConstraints.hasBoundedWidth ? null : resolvedWidth,
+              height: resolvedConstraints.hasBoundedHeight ? null : resolvedHeight,
+              child: nativeView,
+            ),
+          );
         }
 
-        if (width == double.infinity) {
-          width = _intrinsicWidth ?? _kDefaultPickerWidth;
-        }
-        if (height == double.infinity) {
-          height = _intrinsicHeight ?? _kDefaultPickerHeight;
-        }
-
-        return SizedBox(height: height, width: width, child: child);
+        return SizedBox(height: resolvedHeight, width: resolvedWidth, child: nativeView);
       },
     );
   }

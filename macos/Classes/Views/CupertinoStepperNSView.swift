@@ -24,14 +24,30 @@ class CupertinoStepperNSView: NSView {
         var controlSize: NSControl.ControlSize = .regular
 
         if let dict = CNChannelSerialization.asDict(args) {
-            if let v = dict["value"] as? NSNumber { initialValue = v.doubleValue }
-            if let v = dict["min"] as? NSNumber { minValue = v.doubleValue }
-            if let v = dict["max"] as? NSNumber { maxValue = v.doubleValue }
-            if let v = dict["step"] as? NSNumber { increment = v.doubleValue }
-            if let v = dict["isEnabled"] as? NSNumber { isEnabled = v.boolValue }
-            if let v = dict["isAutorepeat"] as? NSNumber { isAutorepeat = v.boolValue }
-            if let v = dict["valueWraps"] as? NSNumber { valueWraps = v.boolValue }
-            if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
+            if let v = dict["value"] as? NSNumber {
+                initialValue = v.doubleValue
+            }
+            if let v = dict["min"] as? NSNumber {
+                minValue = v.doubleValue
+            }
+            if let v = dict["max"] as? NSNumber {
+                maxValue = v.doubleValue
+            }
+            if let v = dict["step"] as? NSNumber {
+                increment = v.doubleValue
+            }
+            if let v = dict["isEnabled"] as? NSNumber {
+                isEnabled = v.boolValue
+            }
+            if let v = dict["isAutorepeat"] as? NSNumber {
+                isAutorepeat = v.boolValue
+            }
+            if let v = dict["valueWraps"] as? NSNumber {
+                valueWraps = v.boolValue
+            }
+            if let v = dict["isDark"] as? NSNumber {
+                isDark = v.boolValue
+            }
             if let v = dict["controlSize"] as? String {
                 controlSize = ControlSizeUtils.controlSizeFromString(v)
             }
@@ -92,8 +108,12 @@ class CupertinoStepperNSView: NSView {
                 {
                     stepper.minValue = min
                     stepper.maxValue = max
-                    if stepper.doubleValue < min { stepper.doubleValue = min }
-                    if stepper.doubleValue > max { stepper.doubleValue = max }
+                    if stepper.doubleValue < min {
+                        stepper.doubleValue = min
+                    }
+                    if stepper.doubleValue > max {
+                        stepper.doubleValue = max
+                    }
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing min/max", details: nil))

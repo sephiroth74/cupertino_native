@@ -1,37 +1,5 @@
 import SwiftUI
 
-protocol CNChannelSerializable {
-    init?(channel: [String: Any])
-    func toChannel() -> [String: Any]
-}
-
-enum CNChannelSerialization {
-    static func asDict(_ value: Any?) -> [String: Any]? {
-        value as? [String: Any]
-    }
-
-    static func asArray(_ value: Any?) -> [Any] {
-        value as? [Any] ?? []
-    }
-
-    static func decode<T: CNChannelSerializable>(_ value: Any?) -> T? {
-        guard let dict = asDict(value) else { return nil }
-        return T(channel: dict)
-    }
-
-    static func decodeArray<T: CNChannelSerializable>(_ value: Any?) -> [T] {
-        asArray(value).compactMap { decode($0) as T? }
-    }
-
-    static func encode(_ value: (some CNChannelSerializable)?) -> [String: Any]? {
-        value?.toChannel()
-    }
-
-    static func encodeArray(_ values: [some CNChannelSerializable]) -> [[String: Any]] {
-        values.map { $0.toChannel() }
-    }
-}
-
 struct CNImagePayload: CNChannelSerializable {
     var systemSymbolName: String
     var symbolRenderingMode: String?
@@ -104,7 +72,9 @@ struct CNImagePayload: CNChannelSerializable {
     }
 
     private static func decodeString(_ value: Any?) -> String? {
-        if value is NSNull { return nil }
+        if value is NSNull {
+            return nil
+        }
         return value as? String
     }
 

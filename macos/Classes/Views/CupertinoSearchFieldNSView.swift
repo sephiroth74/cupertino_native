@@ -354,7 +354,9 @@ class CupertinoSearchFieldNSView: NSView, NSSearchFieldDelegate, NSTextSuggestio
         case "small": return .small
         case "large": return .large
         case "extraLarge":
-            if #available(macOS 26.0, *) { return .extraLarge }
+            if #available(macOS 26.0, *) {
+                return .extraLarge
+            }
             return .large
         default: return .regular
         }

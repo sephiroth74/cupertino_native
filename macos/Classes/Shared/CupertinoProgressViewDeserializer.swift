@@ -42,17 +42,23 @@ struct CNProgressViewPayload: CNChannelSerializable {
     }
 
     private static func decodeBool(_ value: Any?) -> Bool? {
-        if value is NSNull { return nil }
+        if value is NSNull {
+            return nil
+        }
         return (value as? NSNumber)?.boolValue ?? value as? Bool
     }
 
     private static func decodeDouble(_ value: Any?) -> Double? {
-        if value is NSNull { return nil }
+        if value is NSNull {
+            return nil
+        }
         return (value as? NSNumber)?.doubleValue ?? value as? Double
     }
 
     private static func decodeString(_ value: Any?) -> String? {
-        if value is NSNull { return nil }
+        if value is NSNull {
+            return nil
+        }
         return value as? String
     }
 

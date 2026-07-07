@@ -47,7 +47,9 @@ class CupertinoImageView: NSView {
                     model.replace(with: payload)
                     // NSLog("[CNImage][Swift] setImage applied (full model replace)")
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing args", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing args", details: nil))
+                }
             case "applyPatch":
                 if let patch = CNChannelSerialization.asDict(call.arguments) {
                     // NSLog("[CNImage][Swift] applyPatch received keys=\(Array(patch.keys))")
@@ -55,7 +57,9 @@ class CupertinoImageView: NSView {
                     model.replace(with: payload)
                     // NSLog("[CNImage][Swift] applyPatch applied")
                     result(nil)
-                } else { result(FlutterError(code: "bad_args", message: "Missing patch args", details: nil)) }
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing patch args", details: nil))
+                }
             default:
                 result(FlutterMethodNotImplemented)
             }

@@ -169,12 +169,16 @@ final class CNLabelViewModel: ObservableObject {
     }
 
     private func decodeDouble(_ value: Any?) -> Double? {
-        if value is NSNull { return nil }
+        if value is NSNull {
+            return nil
+        }
         return (value as? NSNumber)?.doubleValue ?? value as? Double
     }
 
     private func decodeString(_ value: Any?) -> String? {
-        if value is NSNull { return nil }
+        if value is NSNull {
+            return nil
+        }
         return value as? String
     }
 }
