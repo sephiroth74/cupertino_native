@@ -24,28 +24,18 @@ struct CNToggleChildPayload: CNChannelSerializable {
 }
 
 struct CNTogglePayload: CNChannelSerializable {
-    var controlSize: String?
-    var enabled: Bool?
-    var foregroundColor: Int?
-    var height: Double?
     var isDark: Bool?
     var labelChildren: [CNToggleChildPayload]
-    var tint: Int?
     var toggleStyle: String?
     var value: Bool?
-    var width: Double?
+    var viewModifiers: CNViewModifiersPayload
 
     init() {
         value = false
-        enabled = true
         labelChildren = []
         toggleStyle = "switch"
         isDark = nil
-        controlSize = "regular"
-        tint = nil
-        foregroundColor = nil
-        width = nil
-        height = nil
+        viewModifiers = CNViewModifiersPayload()
     }
 
     init?(channel: [String: Any]) {
@@ -54,12 +44,10 @@ struct CNTogglePayload: CNChannelSerializable {
     }
 
     mutating func applyPatch(_ channel: [String: Any]) {
+        viewModifiers.applyPatch(channel)
+
         if channel.keys.contains("value") {
             value = Self.decodeBool(channel["value"])
-        }
-
-        if channel.keys.contains("enabled") {
-            enabled = Self.decodeBool(channel["enabled"])
         }
 
         if channel.keys.contains("labelChildren") {
@@ -73,41 +61,11 @@ struct CNTogglePayload: CNChannelSerializable {
         if channel.keys.contains("isDark") {
             isDark = Self.decodeBool(channel["isDark"])
         }
-
-        if channel.keys.contains("controlSize") {
-            controlSize = Self.decodeString(channel["controlSize"])
-        }
-
-        if channel.keys.contains("tint") {
-            tint = Self.decodeInt(channel["tint"])
-        }
-
-        if channel.keys.contains("foregroundColor") {
-            foregroundColor = Self.decodeInt(channel["foregroundColor"])
-        }
-
-        if channel.keys.contains("width") {
-            width = Self.decodeDouble(channel["width"])
-        }
-
-        if channel.keys.contains("height") {
-            height = Self.decodeDouble(channel["height"])
-        }
     }
 
     private static func decodeBool(_ value: Any?) -> Bool? {
         if value is NSNull { return nil }
         return (value as? NSNumber)?.boolValue ?? value as? Bool
-    }
-
-    private static func decodeInt(_ value: Any?) -> Int? {
-        if value is NSNull { return nil }
-        return (value as? NSNumber)?.intValue ?? value as? Int
-    }
-
-    private static func decodeDouble(_ value: Any?) -> Double? {
-        if value is NSNull { return nil }
-        return (value as? NSNumber)?.doubleValue ?? value as? Double
     }
 
     private static func decodeString(_ value: Any?) -> String? {
@@ -116,18 +74,14 @@ struct CNTogglePayload: CNChannelSerializable {
     }
 
     func toChannel() -> [String: Any] {
-        [
+        var result = viewModifiers.toChannel()
+        result.merge([
             "value": value as Any,
-            "enabled": enabled as Any,
             "labelChildren": CNChannelSerialization.encodeArray(labelChildren),
             "toggleStyle": toggleStyle as Any,
             "isDark": isDark as Any,
-            "controlSize": controlSize as Any,
-            "tint": tint as Any,
-            "foregroundColor": foregroundColor as Any,
-            "width": width as Any,
-            "height": height as Any,
-        ]
+        ]) { _, new in new }
+        return result
     }
 }
 
@@ -255,24 +209,7 @@ enum CNToggleDeserializer {
                 },
             )
 
-            view = AnyView(view.disabled(!(payload.enabled ?? true)))
-            view = AnyView(view.controlSize(SwiftUtils.controlSizeFromString(payload.controlSize)))
-
-            if let tint = payload.tint {
-                view = AnyView(view.tint(ColorUtils.swiftUIColorFromARGB(tint)))
-            }
-
-            if let foregroundColor = payload.foregroundColor {
-                view = AnyView(view.foregroundStyle(ColorUtils.swiftUIColorFromARGB(foregroundColor)))
-            }
-
-            if let width = payload.width, let height = payload.height {
-                view = AnyView(view.frame(width: CGFloat(width), height: CGFloat(height)))
-            } else if let width = payload.width {
-                view = AnyView(view.frame(width: CGFloat(width)))
-            } else if let height = payload.height {
-                view = AnyView(view.frame(height: CGFloat(height)))
-            }
+            view = CNViewModifiers.apply(payload.viewModifiers, to: view)
 
             switch payload.toggleStyle {
             case "automatic":
@@ -337,24 +274,7 @@ enum CNToggleDeserializer {
                 },
             )
 
-            view = AnyView(view.disabled(!(payload.enabled ?? true)))
-            view = AnyView(view.controlSize(SwiftUtils.controlSizeFromString(payload.controlSize)))
-
-            if let tint = payload.tint {
-                view = AnyView(view.tint(ColorUtils.swiftUIColorFromARGB(tint)))
-            }
-
-            if let foregroundColor = payload.foregroundColor {
-                view = AnyView(view.foregroundStyle(ColorUtils.swiftUIColorFromARGB(foregroundColor)))
-            }
-
-            if let width = payload.width, let height = payload.height {
-                view = AnyView(view.frame(width: CGFloat(width), height: CGFloat(height)))
-            } else if let width = payload.width {
-                view = AnyView(view.frame(width: CGFloat(width)))
-            } else if let height = payload.height {
-                view = AnyView(view.frame(height: CGFloat(height)))
-            }
+            view = CNViewModifiers.apply(payload.viewModifiers, to: view)
 
             switch payload.toggleStyle {
             case "automatic":
@@ -386,26 +306,16 @@ enum CNToggleDeserializer {
     private static func identityKey(for payload: CNTogglePayload) -> String {
         let childrenKey = payload.labelChildren.map { String(describing: $0.toChannel()) }.joined(separator: ";")
         let styleKey = payload.toggleStyle ?? "nil"
-        let controlSizeKey = payload.controlSize ?? "nil"
-        let enabledKey = payload.enabled.map { String($0) } ?? "nil"
         let valueKey = payload.value.map { String($0) } ?? "nil"
-        let tintKey = payload.tint.map { String($0) } ?? "nil"
-        let foregroundKey = payload.foregroundColor.map { String($0) } ?? "nil"
-        let widthKey = payload.width.map { String($0) } ?? "nil"
-        let heightKey = payload.height.map { String($0) } ?? "nil"
         let darkKey = payload.isDark.map { String($0) } ?? "nil"
+        let modifiersKey = payload.viewModifiers.identityKey()
 
         return [
             childrenKey,
             styleKey,
-            controlSizeKey,
-            enabledKey,
             valueKey,
-            tintKey,
-            foregroundKey,
-            widthKey,
-            heightKey,
             darkKey,
+            modifiersKey,
         ].joined(separator: "|")
     }
 }

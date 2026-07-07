@@ -50,27 +50,47 @@ class CupertinoToggleNSView: NSView {
                 let s = currentIntrinsicSize()
                 NSLog("[CNToggle][Swift] getIntrinsicSize -> width=\(s.width), height=\(s.height)")
                 result(["width": Double(s.width), "height": Double(s.height)])
-            case "setToggle":
+            case "setData":
                 if let parsed: CNTogglePayload = CNChannelSerialization.decode(call.arguments) {
-                    NSLog("[CNToggle][Swift] setToggle received full payload")
+                    NSLog("[CNToggle][Swift] setData received full payload")
                     payload = parsed
                     model.replace(with: payload)
                     updateAppearance()
-                    NSLog("[CNToggle][Swift] setToggle applied (full model replace)")
+                    NSLog("[CNToggle][Swift] setData applied (full model replace)")
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Invalid toggle payload", details: nil))
                 }
-            case "setTogglePatch":
+            case "applyPatch":
                 if let patch = CNChannelSerialization.asDict(call.arguments) {
-                    NSLog("[CNToggle][Swift] setTogglePatch received keys=\(Array(patch.keys))")
+                    NSLog("[CNToggle][Swift] applyPatch received keys=\(Array(patch.keys))")
                     payload.applyPatch(patch)
                     model.replace(with: payload)
                     updateAppearance()
-                    NSLog("[CNToggle][Swift] setTogglePatch applied")
+                    NSLog("[CNToggle][Swift] applyPatch applied")
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Invalid toggle patch payload", details: nil))
+                }
+            case "setEnabled":
+                if let args = CNChannelSerialization.asDict(call.arguments),
+                   let enabled = (args["value"] as? NSNumber)?.boolValue ?? args["value"] as? Bool
+                {
+                    payload.viewModifiers.enabled = enabled
+                    model.replace(with: payload)
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing enabled value", details: nil))
+                }
+            case "setValue":
+                if let args = CNChannelSerialization.asDict(call.arguments),
+                   let value = (args["value"] as? NSNumber)?.boolValue ?? args["value"] as? Bool
+                {
+                    payload.value = value
+                    model.replace(with: payload)
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Missing toggle value", details: nil))
                 }
             default:
                 result(FlutterMethodNotImplemented)
@@ -85,10 +105,8 @@ class CupertinoToggleNSView: NSView {
     private static func defaultPayload() -> CNTogglePayload {
         CNTogglePayload(channel: [
             "value": false,
-            "enabled": true,
             "labelChildren": [],
             "toggleStyle": "switch",
-            "controlSize": "regular",
         ])!
     }
 

@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:cupertino_native/channel/channel_serialization.dart';
+import 'package:cupertino_native/channel/layout_constraints_payload.dart';
+import 'package:cupertino_native/channel/payload_patch.dart';
 import 'package:cupertino_native/components/button_child.dart';
-import 'package:cupertino_native/components/image.dart';
-import 'package:cupertino_native/components/text.dart';
 import 'package:cupertino_native/components/view_modifiable.dart';
 import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/theme/cn_theme.dart';
@@ -37,29 +37,18 @@ class CNToggle extends StatefulWidget with CNViewModifiable {
     this.onChanged,
     this.controller,
     this.children = const [],
-    this.label,
-    this.systemSymbolName,
     this.toggleStyle = CNToggleStyle.switch_,
-    this.shrinkWrap = false,
-    this.modifiers,
+    this.modifiers = const CNViewModifiers(),
   });
 
   /// Label content children rendered in the native `Toggle` label closure.
-  ///
-  /// When empty, [label] and [systemSymbolName] are used as a legacy fallback.
   final List<CNButtonChild> children;
 
   /// Optional external controller for imperative native operations.
   final CNToggleController? controller;
 
-  /// Optional label text for the toggle.
-  final String? label;
-
   /// Called when the user toggles the control.
   final ValueChanged<bool>? onChanged;
-
-  /// Optional system symbol name (SF Symbol) to display with the label.
-  final String? systemSymbolName;
 
   /// The style of the toggle control.
   final CNToggleStyle toggleStyle;
@@ -68,20 +57,10 @@ class CNToggle extends StatefulWidget with CNViewModifiable {
   final bool value;
 
   @override
-  final CNViewModifiers? modifiers;
-
-  /// If true, allows intrinsic sizing on unconstrained axes.
-  @override
-  final bool shrinkWrap;
+  final CNViewModifiers modifiers;
 
   @override
   State<CNToggle> createState() => _CNToggleState();
-
-  @override
-  EdgeInsets? get padding => modifiers?.padding;
-
-  @override
-  Object? get tag => modifiers?.tag;
 }
 
 /// Controller for a [CNToggle] that allows imperative updates from Dart
@@ -93,7 +72,7 @@ class CNToggleController {
   Future<void> setEnabled(bool enabled) async {
     final channel = _channel;
     if (channel == null) return;
-    await channel.invokeMethod('setIsEnabled', {'value': enabled});
+    await channel.invokeMethod('setEnabled', {'value': enabled});
   }
 
   /// Sets the toggle [value]. When [animated] is true the change is animated
@@ -135,6 +114,7 @@ class _CNToggleState extends State<CNToggle> {
   double? _intrinsicWidth;
   Map<String, dynamic>? _lastPayload;
   String? _lastSerializedPayload;
+  final CNLayoutConstraintsSyncState _layoutConstraintsSyncState = CNLayoutConstraintsSyncState();
   bool? _pendingNativeValue;
 
   @override
@@ -158,10 +138,7 @@ class _CNToggleState extends State<CNToggle> {
 
     final valueChanged = oldWidget.value != widget.value;
     final shouldResetPayload =
-        oldWidget.label != widget.label ||
-        oldWidget.systemSymbolName != widget.systemSymbolName ||
         oldWidget.toggleStyle != widget.toggleStyle ||
-        oldWidget.shrinkWrap != widget.shrinkWrap ||
         oldWidget.modifiers != widget.modifiers ||
         !listEquals(oldWidget.children, widget.children);
 
@@ -175,7 +152,7 @@ class _CNToggleState extends State<CNToggle> {
       _pendingNativeValue = null;
 
       if (isEchoFromNative) {
-        // Native toggle already updated itself; avoid setToggle/rebuild ping-pong.
+        // Native toggle already updated itself; avoid redundant full-sync ping-pong.
         _cacheCurrentProps();
       } else {
         _lastSerializedPayload = null;
@@ -207,25 +184,6 @@ class _CNToggleState extends State<CNToggle> {
     final payload = _toPayload();
     _lastSerializedPayload = jsonEncode(payload);
     _lastPayload = Map<String, dynamic>.from(payload);
-  }
-
-  Map<String, dynamic> _computePayloadPatch(Map<String, dynamic> previous, Map<String, dynamic> next) {
-    final patch = <String, dynamic>{};
-    final keys = <String>{...previous.keys, ...next.keys};
-
-    for (final key in keys) {
-      final hadPrevious = previous.containsKey(key);
-      final hasNext = next.containsKey(key);
-      final oldValue = hadPrevious ? previous[key] : null;
-      final newValue = hasNext ? next[key] : null;
-
-      final changed = jsonEncode(oldValue) != jsonEncode(newValue);
-      if (!changed) continue;
-
-      patch[key] = hasNext ? newValue : null;
-    }
-
-    return patch;
   }
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
@@ -288,21 +246,6 @@ class _CNToggleState extends State<CNToggle> {
     } catch (_) {}
   }
 
-  List<CNButtonChild> _resolvedLabelChildren() {
-    if (widget.children.isNotEmpty) {
-      return widget.children;
-    }
-
-    final legacyChildren = <CNButtonChild>[];
-    if (widget.systemSymbolName != null) {
-      legacyChildren.add(CNImage(systemSymbolName: widget.systemSymbolName!));
-    }
-    if (widget.label != null) {
-      legacyChildren.add(CNText(widget.label!));
-    }
-    return legacyChildren;
-  }
-
   List<Map<String, dynamic>> _serializeChildren(List<CNButtonChild> children) {
     return children
         .map((child) => {'type': child.buttonChildType, 'payload': child.toChannelMap(context, ignoreTheme: true)})
@@ -318,8 +261,8 @@ class _CNToggleState extends State<CNToggle> {
 
     if (_lastPayload == null) {
       if (_lastSerializedPayload != serializedPayload) {
-        debugPrint('[CNToggle][Dart] Sending full update via setToggle: $serializedPayload');
-        await channel.invokeMethod('setToggle', payload);
+        debugPrint('[CNToggle][Dart] Sending full update via setData: $serializedPayload');
+        await channel.invokeMethod('setData', payload);
       }
 
       _lastSerializedPayload = serializedPayload;
@@ -327,7 +270,7 @@ class _CNToggleState extends State<CNToggle> {
       return;
     }
 
-    final patch = _computePayloadPatch(_lastPayload!, payload);
+    final patch = computeJsonSafePatch(_lastPayload!, payload);
     if (patch.isEmpty) {
       debugPrint('[CNToggle][Dart] No patch to send (payload unchanged)');
       _lastSerializedPayload = serializedPayload;
@@ -335,8 +278,8 @@ class _CNToggleState extends State<CNToggle> {
     }
 
     final serializedPatch = jsonEncode(patch);
-    debugPrint('[CNToggle][Dart] Sending patch via setTogglePatch: $serializedPatch');
-    await channel.invokeMethod('setTogglePatch', patch);
+    debugPrint('[CNToggle][Dart] Sending patch via applyPatch: $serializedPatch');
+    await channel.invokeMethod('applyPatch', patch);
     _lastSerializedPayload = serializedPayload;
     _lastPayload = Map<String, dynamic>.from(payload);
   }
@@ -344,10 +287,17 @@ class _CNToggleState extends State<CNToggle> {
   Map<String, dynamic> _toPayload() {
     final payload = <String, dynamic>{
       'value': widget.value,
-      'labelChildren': _serializeChildren(_resolvedLabelChildren()),
+      'labelChildren': _serializeChildren(widget.children),
       'toggleStyle': widget.toggleStyle.toShortString(),
       'isDark': _isDark,
     };
+
+    writeLayoutConstraintsPayload(
+      payload,
+      layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload,
+      explicitConstraints: widget.modifiers.constraints,
+    );
+
     widget.writeModifiers(payload, context);
     return payload;
   }
@@ -362,25 +312,58 @@ class _CNToggleState extends State<CNToggle> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final hasFixedWidth = constraints.hasTightWidth;
-        final hasFixedHeight = constraints.hasTightHeight;
-        final resolvedWidth =
-            widget.modifiers?.width ?? (hasFixedWidth ? constraints.maxWidth : (_intrinsicWidth ?? _kDefaultToggleWidth));
-        final resolvedHeight =
-            widget.modifiers?.height ?? (hasFixedHeight ? constraints.maxHeight : (_intrinsicHeight ?? _kDefaultToggleHeight));
+        final effectiveShrinkWrap = widget.modifiers.shrinkWrap;
+        final explicitConstraints = widget.modifiers.constraints;
+        final hasBoundedParentSize = constraints.hasBoundedWidth || constraints.hasBoundedHeight;
+        final hasBoundedModifierSize =
+            (explicitConstraints?.hasBoundedWidth ?? false) || (explicitConstraints?.hasBoundedHeight ?? false);
+
+        assert(
+          effectiveShrinkWrap || hasBoundedModifierSize || hasBoundedParentSize,
+          'CNToggle requires at least one bounded axis when shrinkWrap is false. '
+          'Provide bounded constraints in CNViewModifiers.constraints or place CNToggle in a parent with bounded size.',
+        );
+
+        final resolvedLayoutConstraints = resolveLayoutConstraintsPayload(
+          parentConstraints: constraints,
+          explicitConstraints: explicitConstraints,
+        );
+        final resolvedConstraints = resolvedLayoutConstraints.resolvedConstraints;
+        _layoutConstraintsSyncState.apply(resolvedLayoutConstraints, sync: _syncPropsToNativeIfNeeded);
+
+        final hasBoundedWidth = constraints.hasBoundedWidth;
+        final hasBoundedHeight = constraints.hasBoundedHeight;
+
+        final intrinsicOrDefaultWidth = _intrinsicWidth ?? _kDefaultToggleWidth;
+        final intrinsicOrDefaultHeight = _intrinsicHeight ?? _kDefaultToggleHeight;
+
+        final resolvedWidth = effectiveShrinkWrap
+            ? (hasBoundedWidth ? intrinsicOrDefaultWidth.clamp(0.0, constraints.maxWidth).toDouble() : intrinsicOrDefaultWidth)
+            : (resolvedConstraints.hasBoundedWidth ? resolvedConstraints.maxWidth : intrinsicOrDefaultWidth);
+        final resolvedHeight = effectiveShrinkWrap
+            ? (hasBoundedHeight ? intrinsicOrDefaultHeight.clamp(0.0, constraints.maxHeight).toDouble() : intrinsicOrDefaultHeight)
+            : (resolvedConstraints.hasBoundedHeight ? resolvedConstraints.maxHeight : intrinsicOrDefaultHeight);
 
         final creationParams = _toPayload();
 
-        return SizedBox(
-          height: resolvedHeight,
-          width: resolvedWidth,
-          child: AppKitView(
-            viewType: viewType,
-            creationParamsCodec: const StandardMessageCodec(),
-            creationParams: creationParams,
-            onPlatformViewCreated: _onPlatformViewCreated,
-          ),
+        Widget nativeView = AppKitView(
+          viewType: viewType,
+          creationParamsCodec: const StandardMessageCodec(),
+          creationParams: creationParams,
+          onPlatformViewCreated: _onPlatformViewCreated,
         );
+
+        if (!effectiveShrinkWrap) {
+          nativeView = SizedBox(
+            width: resolvedConstraints.hasBoundedWidth ? null : resolvedWidth,
+            height: resolvedConstraints.hasBoundedHeight ? null : resolvedHeight,
+            child: nativeView,
+          );
+          nativeView = ConstrainedBox(constraints: resolvedConstraints, child: nativeView);
+          return nativeView;
+        }
+
+        return SizedBox(height: resolvedHeight, width: resolvedWidth, child: nativeView);
       },
     );
   }

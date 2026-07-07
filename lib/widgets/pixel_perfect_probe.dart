@@ -2,22 +2,6 @@ import 'package:flutter/widgets.dart';
 
 /// Flutter-only geometry snapshot used for pixel-perfect diagnostics.
 class FlutterPixelGeometry {
-  const FlutterPixelGeometry({
-    required this.x,
-    required this.y,
-    required this.width,
-    required this.height,
-    required this.physicalX,
-    required this.physicalY,
-    required this.physicalWidth,
-    required this.physicalHeight,
-    required this.devicePixelRatio,
-    required this.pixelAlignedX,
-    required this.pixelAlignedY,
-    required this.pixelAlignedWidth,
-    required this.pixelAlignedHeight,
-  });
-
   /// Device pixel ratio used for the conversion.
   final double devicePixelRatio;
 
@@ -57,6 +41,23 @@ class FlutterPixelGeometry {
   /// Logical y in the global Flutter coordinate space.
   final double y;
 
+  /// Creates an immutable Flutter geometry snapshot.
+  const FlutterPixelGeometry({
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+    required this.physicalX,
+    required this.physicalY,
+    required this.physicalWidth,
+    required this.physicalHeight,
+    required this.devicePixelRatio,
+    required this.pixelAlignedX,
+    required this.pixelAlignedY,
+    required this.pixelAlignedWidth,
+    required this.pixelAlignedHeight,
+  });
+
   @override
   String toString() {
     return 'FlutterPixelGeometry('
@@ -72,25 +73,20 @@ class FlutterPixelGeometry {
 
 /// Wrap any widget to measure its global geometry using only Flutter APIs.
 class PixelPerfectProbe extends StatefulWidget {
-  const PixelPerfectProbe({
-    super.key,
-    required this.child,
-    this.onGeometryChanged,
-    this.enabled = true,
-    this.enforcePixelPerfectPosition = false,
-  });
+  /// If true, applies a local translation to keep x/y aligned to physical pixels.
+  final bool adjustPosition;
 
   /// Child being measured.
   final Widget child;
 
-  /// Enable/disable probing.
-  final bool enabled;
-
-  /// If true, applies a local translation to keep x/y aligned to physical pixels.
-  final bool enforcePixelPerfectPosition;
-
   /// Called whenever geometry changes.
   final ValueChanged<FlutterPixelGeometry>? onGeometryChanged;
+
+  /// Creates a pixel-geometry probe around [child].
+  const PixelPerfectProbe({super.key, required this.child, this.onGeometryChanged, this.adjustPosition = false});
+
+  /// Whether the probe is enabled. If false, no geometry will be reported.
+  bool get enabled => onGeometryChanged != null;
 
   @override
   State<PixelPerfectProbe> createState() => _PixelPerfectProbeState();
@@ -102,6 +98,15 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
   bool _probeQueued = false;
   double _snapDx = 0;
   double _snapDy = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    _queueProbe();
+    return Transform.translate(
+      offset: Offset(_snapDx, _snapDy),
+      child: KeyedSubtree(key: _probeKey, child: widget.child),
+    );
+  }
 
   @override
   void didChangeMetrics() {
@@ -133,13 +138,22 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
   }
 
   void _probeNow() {
-    if (!mounted || !widget.enabled) return;
+    if (!mounted || !widget.enabled) {
+      // debugPrint('[PixelPerfectProbe]: skipping probe because not mounted or disabled');
+      return;
+    }
 
     final ctx = _probeKey.currentContext;
-    if (ctx == null) return;
+    if (ctx == null) {
+      // debugPrint('[PixelPerfectProbe]: skipping probe because context is null');
+      return;
+    }
 
     final renderObject = ctx.findRenderObject();
-    if (renderObject is! RenderBox || !renderObject.hasSize) return;
+    if (renderObject is! RenderBox || !renderObject.hasSize) {
+      // debugPrint('[PixelPerfectProbe]: skipping probe because renderObject is not a RenderBox or has no size');
+      return;
+    }
 
     final origin = renderObject.localToGlobal(Offset.zero);
     final size = renderObject.size;
@@ -148,12 +162,13 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
     final rawPhysicalX = origin.dx * dpr;
     final rawPhysicalY = origin.dy * dpr;
 
-    if (widget.enforcePixelPerfectPosition) {
-      final desiredDx = _snapDelta(rawPhysicalX, dpr);
-      final desiredDy = _snapDelta(rawPhysicalY, dpr);
+    if (widget.adjustPosition) {
+      final desiredDx = _snapDx + _snapDelta(rawPhysicalX, dpr);
+      final desiredDy = _snapDy + _snapDelta(rawPhysicalY, dpr);
 
       // Avoid setState churn for tiny floating point noise.
       if ((desiredDx - _snapDx).abs() > 0.0001 || (desiredDy - _snapDy).abs() > 0.0001) {
+        // debugPrint('[PixelPerfectProbe]: updating snap delta');
         setState(() {
           _snapDx = desiredDx;
           _snapDy = desiredDy;
@@ -162,6 +177,7 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
         return;
       }
     } else if (_snapDx != 0 || _snapDy != 0) {
+      // debugPrint('[PixelPerfectProbe]: resetting snap delta');
       setState(() {
         _snapDx = 0;
         _snapDy = 0;
@@ -170,10 +186,8 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
       return;
     }
 
-    if (widget.onGeometryChanged == null) return;
-
-    final snappedX = origin.dx + _snapDx;
-    final snappedY = origin.dy + _snapDy;
+    final snappedX = origin.dx;
+    final snappedY = origin.dy;
     final physicalX = snappedX * dpr;
     final physicalY = snappedY * dpr;
     final physicalWidth = size.width * dpr;
@@ -197,14 +211,21 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
 
     final signature = [geometry.x, geometry.y, geometry.width, geometry.height, geometry.devicePixelRatio].join('|');
 
-    if (signature == _lastSignature) return;
+    if (signature == _lastSignature) {
+      // debugPrint('[PixelPerfectProbe]: skipping probe because geometry has not changed');
+      return;
+    }
 
     _lastSignature = signature;
     widget.onGeometryChanged?.call(geometry);
   }
 
   void _queueProbe() {
-    if (!mounted || !widget.enabled || _probeQueued) return;
+    // debugPrint('[PixelPerfectProbe]: queueing probe');
+    if (!mounted || !widget.enabled || _probeQueued) {
+      // debugPrint('[PixelPerfectProbe]: skipping probe because conditions not met');
+      return;
+    }
     _probeQueued = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _probeQueued = false;
@@ -215,14 +236,5 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
   double _snapDelta(double physicalValue, double dpr) {
     if (dpr <= 0) return 0;
     return (physicalValue.roundToDouble() - physicalValue) / dpr;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _queueProbe();
-    return Transform.translate(
-      offset: Offset(_snapDx, _snapDy),
-      child: KeyedSubtree(key: _probeKey, child: widget.child),
-    );
   }
 }

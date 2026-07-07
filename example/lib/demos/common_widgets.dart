@@ -1,5 +1,6 @@
 import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
 class RightSideOptionContainer extends StatelessWidget {
@@ -38,7 +39,9 @@ class RightSideOptionContainer extends StatelessWidget {
                   child: Row(
                     children: [
                       Expanded(child: Text(entry.key)),
-                      entry.value,
+                      SizedBox(
+                        width: 175,
+                        child: entry.value),
                     ],
                   ),
                 ),
@@ -72,14 +75,14 @@ class ColorPicker extends StatelessWidget {
       selectedIndex: currentValue == null ? 0 : colors.values.toList().indexOf(currentValue!),
       onValueChanged: enabled ? (index) => onValueChanged(index) : null,
       items: colors.keys.map((colorName) {
-        // return CNLabel(
-        //   CNText(colorName),
-        //   icon: CNImage(
-        //     systemSymbolName: 'circle.fill',
-        //     modifiers: CNViewModifiers(tint: _kSystemColors[colorName]),
-        //   ),
-        // );
-        return CNText(colorName);
+        return CNLabel(
+          CNText(colorName),
+          icon: CNImage(
+            systemSymbolName: 'circle.fill',
+            modifiers: CNViewModifiers(tint: kSystemColors[colorName]),
+          ),
+        );
+        // return CNText(colorName);
       }).toList(),
       pickerStyle: CNPickerStyle.menu,
     );

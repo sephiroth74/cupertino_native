@@ -2,7 +2,7 @@ import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
-import 'package:cupertino_native_example/demos/pixel_perfect_probe.dart';
+import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:flutter/cupertino.dart';
 
 class ButtonDemoPage extends StatefulWidget {
@@ -47,7 +47,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                     Padding(
                       padding: const EdgeInsets.all(8),
                       child: PixelPerfectProbe(
-                        enforcePixelPerfectPosition: true,
+                        adjustPosition: true,
                         child: CNButton(
                           onPressed: () => _set('Default'),
                           modifiers: CNViewModifiers(

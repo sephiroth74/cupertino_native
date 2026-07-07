@@ -2,7 +2,7 @@ import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
-import 'package:cupertino_native_example/demos/pixel_perfect_probe.dart';
+import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:flutter/cupertino.dart';
 
 class LabelDemoPage extends StatefulWidget {
@@ -36,7 +36,7 @@ class _LabelDemoPageState extends State<LabelDemoPage> {
                 children: [
                   const SizedBox(height: 12),
                   PixelPerfectProbe(
-                    enforcePixelPerfectPosition: true,
+                    adjustPosition: true,
                     child: CNLabel(
                       labelIconToTitleSpacing: labelIconToTitleSpacing,
                       CNText(
@@ -64,7 +64,8 @@ class _LabelDemoPageState extends State<LabelDemoPage> {
               options: {
                 'Font': CNPicker(
                   selectedIndex: availableFonts.indexWhere((f) => f.name == font?.name),
-                  onValueChanged: (index) => setState(() => font = availableFonts[index].copyWith(size: CNFontSize.points(fontSize))),
+                  onValueChanged: (index) =>
+                      setState(() => font = availableFonts[index].copyWith(size: CNFontSize.points(fontSize))),
                   items: availableFonts.map((font) => CNText(font.name ?? font.kind.name)).toList(),
                   pickerStyle: CNPickerStyle.automatic,
                 ),

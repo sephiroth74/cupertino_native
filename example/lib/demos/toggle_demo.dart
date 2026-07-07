@@ -1,7 +1,8 @@
 import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
-import 'package:cupertino_native_example/demos/pixel_perfect_probe.dart';
+import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:flutter/material.dart';
 
 class ToggleDemo extends StatefulWidget {
@@ -33,11 +34,10 @@ class _ToggleDemoState extends State<ToggleDemo> {
           mainAxisSize: MainAxisSize.max,
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
+              child: Center(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text('Switch Style Toggle', style: CNTheme.of(context).typography.title2),
@@ -49,7 +49,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
                       ),
                       padding: const EdgeInsets.all(16),
                       child: PixelPerfectProbe(
-                        enforcePixelPerfectPosition: true,
+                        adjustPosition: true,
                         onGeometryChanged: (geometry) {
                           setState(() {
                             _flutterGeometry = geometry;
@@ -95,76 +95,26 @@ class _ToggleDemoState extends State<ToggleDemo> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                constraints: const BoxConstraints.expand(width: 350),
-                decoration: BoxDecoration(
-                  color: CNTheme.of(context).fillPrimaryColor,
-                  border: Border.all(color: CNTheme.of(context).separatorColor, width: 1),
-                  borderRadius: BorderRadius.circular(12),
+            RightSideOptionContainer(
+              options: {
+                'Control Size': CNPicker(
+                  pickerStyle: CNPickerStyle.menu,
+                  selectedIndex: CNControlSize.values.indexOf(_controlSize),
+                  onValueChanged: (index) => setState(() => _controlSize = CNControlSize.values[index]),
+                  items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
                 ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(child: const Text('Control Size')),
-                        CNPicker(
-                          selectedIndex: CNControlSize.values.indexOf(_controlSize),
-                          onValueChanged: (index) => setState(() => _controlSize = CNControlSize.values[index]),
-                          items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
-                          pickerStyle: CNPickerStyle.automatic,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    Row(
-                      children: [
-                        Expanded(child: const Text('Button Style')),
-                        CNPicker(
-                          selectedIndex: CNToggleStyle.values.indexOf(_toggleStyle),
-                          onValueChanged: (index) => setState(() => _toggleStyle = CNToggleStyle.values[index]),
-                          items: CNToggleStyle.values.map((style) => CNText(style.name)).toList(),
-                          pickerStyle: CNPickerStyle.automatic,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    Row(
-                      children: [
-                        Expanded(child: const Text('Tint Color')),
-                        CNPicker(
-                          selectedIndex: kSystemColors.keys.toList().indexOf(
-                            _tintColor == null
-                                ? 'none'
-                                : kSystemColors.entries.firstWhere((entry) => entry.value == _tintColor).key,
-                          ),
-                          onValueChanged: (index) => setState(() => _tintColor = kSystemColors.values.elementAt(index)),
-                          items: kSystemColors.keys
-                              .map(
-                                (colorName) => CNLabel(
-                                  CNText(colorName),
-                                  icon: CNImage(
-                                    systemSymbolName: 'circle.fill',
-                                    modifiers: CNViewModifiers(tint: kSystemColors[colorName]),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          pickerStyle: CNPickerStyle.menu,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                'Toggle Style': CNPicker(
+                  pickerStyle: CNPickerStyle.menu,
+                  selectedIndex: CNToggleStyle.values.indexOf(_toggleStyle),
+                  onValueChanged: (index) => setState(() => _toggleStyle = CNToggleStyle.values[index]),
+                  items: CNToggleStyle.values.map((style) => CNText(style.name)).toList(),
                 ),
-              ),
+                'Tint Color': ColorPicker(
+                  colors: kSystemColors,
+                  currentValue: _tintColor,
+                  onValueChanged: (index) => setState(() => _tintColor = kSystemColors.values.elementAt(index)),
+                ),
+              },
             ),
           ],
         ),

@@ -185,8 +185,7 @@ class _CNTabViewState extends State<CNTabView> {
                   items: pickerItems,
                   selectedIndex: _controller.selectedIndex,
                   pickerStyle: CNPickerStyle.segmented,
-                  modifiers: CNViewModifiers(controlSize: widget.controlSize, enabled: widget.enabled),
-                  shrinkWrap: true,
+                  modifiers: CNViewModifiers(controlSize: widget.controlSize, enabled: widget.enabled, shrinkWrap: true),
                   onValueChanged: (index) {
                     _controller.selectedIndex = index;
                     _measurePicker();

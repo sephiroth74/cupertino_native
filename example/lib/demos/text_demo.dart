@@ -2,7 +2,7 @@ import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
-import 'package:cupertino_native_example/demos/pixel_perfect_probe.dart';
+import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:flutter/cupertino.dart';
 
 class TextDemoPage extends StatefulWidget {
@@ -40,7 +40,7 @@ class _TextDemoPageState extends State<TextDemoPage> {
                   const Text('Default rendering', style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
                   PixelPerfectProbe(
-                    enforcePixelPerfectPosition: true,
+                    adjustPosition: true,
                     onGeometryChanged: null,
                     child: CNText(
                       'The quick brown fox jumps over the lazy dog.',
