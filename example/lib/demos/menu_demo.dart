@@ -1,5 +1,7 @@
+import 'package:cupertino_native/components/divider.dart';
 import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -14,7 +16,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
   CNControlSize _controlSize = CNControlSize.large;
   String _lastAction = 'None';
   CNMenuStyle _menuStyle = CNMenuStyle.automatic;
-  Color? _tintColor;
+  CupertinoDynamicColor? _tintColor;
 
   void _setLastAction(String value) {
     setState(() {
@@ -42,13 +44,12 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                     alignment: Alignment.centerLeft,
                     child: CNMenu(
                       style: _menuStyle,
-                      controlSize: _controlSize,
-                      tint: _tintColor,
+                      modifiers: CNViewModifiers(tint: _tintColor, controlSize: _controlSize),
                       labels: [
                         CNImage(systemSymbolName: 'star.fill'),
                         CNText('File'),
                       ],
-                      onPrimaryAction: () => _setLastAction('Primary action pressed'),
+                      onPrimaryAction: () => _setLastAction('Menu_0'),
                       children: [
                         CNButton(
                           children: [
@@ -59,7 +60,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                             ),
                             const CNText('Button 0'),
                           ],
-                          onPressed: () => _setLastAction('Button 0'),
+                          onPressed: () => _setLastAction('Menu_0 -> Button_0'),
                         ),
                         const CNText('Button 0', badge: 2),
                         const CNDivider(),
@@ -72,11 +73,11 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                             ),
                             CNText('Button 1'),
                           ],
-                          onPressed: () => _setLastAction('Button 1'),
+                          onPressed: () => _setLastAction('Menu_0 -> Button_1'),
                         ),
                         CNButton(
                           badge: 5,
-                          onPressed: () => _setLastAction('Button 2'),
+                          onPressed: () => _setLastAction('Menu_0 -> Button_2'),
                           children: [
                             CNImage(
                               systemSymbolName: 'star.fill',
@@ -87,7 +88,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                         ),
                         CNButton(
                           badge: '1',
-                          onPressed: () => _setLastAction('Button 3'),
+                          onPressed: () => _setLastAction('Menu_0 -> Button_3'),
                           children: [
                             CNImage(systemSymbolName: 'star.fill'),
                             CNText('Button 3'),
@@ -104,8 +105,8 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                     alignment: Alignment.centerLeft,
                     child: CNMenu(
                       style: _menuStyle,
-                      controlSize: _controlSize,
-                      tint: _tintColor,
+                      onPrimaryAction: () => _setLastAction('Menu_1'),
+                      modifiers: CNViewModifiers(controlSize: _controlSize, tint: _tintColor),
                       labels: const [CNImage(systemSymbolName: 'ellipsis.circle')],
                       children: [
                         CNButton(
@@ -113,14 +114,14 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                             CNImage(systemSymbolName: 'gear'),
                             CNText('Settings'),
                           ],
-                          onPressed: () => _setLastAction('Settings'),
+                          onPressed: () => _setLastAction('Menu_1 -> Settings'),
                         ),
                         CNButton(
                           children: [
                             CNImage(systemSymbolName: 'info.circle'),
                             CNText('About'),
                           ],
-                          onPressed: () => _setLastAction('About'),
+                          onPressed: () => _setLastAction('Menu_1 -> About'),
                         ),
                       ],
                     ),
@@ -132,89 +133,41 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                     alignment: Alignment.centerLeft,
                     child: CNMenu(
                       style: _menuStyle,
-                      controlSize: _controlSize,
-                      tint: _tintColor,
-                      labels: [CNLabel.text(_lastAction, icon: CNImage(systemSymbolName: 'wand.and.stars'))],
+                      onPrimaryAction: () => _setLastAction('Menu_2'),
+                      modifiers: CNViewModifiers(controlSize: _controlSize, tint: _tintColor),
+                      labels: [
+                        CNLabel(CNText(_lastAction), icon: CNImage(systemSymbolName: 'wand.and.stars'))
+                      ],
                       children: [
-                        CNButton(children: const [CNText('Action A')], onPressed: () => _setLastAction('Action A')),
+                        CNButton(children: const [CNText('Action A')], onPressed: () => _setLastAction('Menu_2 -> Action_A')),
                       ],
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Text('Last action: $_lastAction'),
+                  Text('Last action: $_lastAction', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                constraints: BoxConstraints.expand(width: 350),
-                decoration: BoxDecoration(
-                  color: CNTheme.of(context).fillPrimaryColor,
-                  border: Border.all(color: CNTheme.of(context).separatorColor, width: 1),
-                  borderRadius: BorderRadius.circular(12),
+            RightSideOptionContainer(
+              options: {
+                'Control Size': CNPicker(
+                  selectedIndex: CNControlSize.values.indexOf(_controlSize),
+                  onValueChanged: (index) => setState(() => _controlSize = CNControlSize.values[index]),
+                  items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
+                  pickerStyle: CNPickerStyle.automatic,
                 ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(child: const Text('Control Size')),
-                        CNPicker(
-                          selectedIndex: CNControlSize.values.indexOf(_controlSize),
-                          onValueChanged: (index) => setState(() => _controlSize = CNControlSize.values[index]),
-                          items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
-                          pickerStyle: CNPickerStyle.automatic,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    Row(
-                      children: [
-                        Expanded(child: const Text('Button Style')),
-                        CNPicker(
-                          selectedIndex: CNMenuStyle.values.indexOf(_menuStyle),
-                          onValueChanged: (index) => setState(() => _menuStyle = CNMenuStyle.values[index]),
-                          items: CNMenuStyle.values.map((style) => CNText(style.name)).toList(),
-                          pickerStyle: CNPickerStyle.automatic,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    Row(
-                      children: [
-                        Expanded(child: const Text('Tint Color')),
-                        CNPicker(
-                          selectedIndex: kSystemColors.keys.toList().indexOf(
-                            _tintColor == null
-                                ? 'none'
-                                : kSystemColors.entries.firstWhere((entry) => entry.value == _tintColor).key,
-                          ),
-                          onValueChanged: (index) => setState(() => _tintColor = kSystemColors.values.elementAt(index)),
-                          items: kSystemColors.keys
-                              .map(
-                                (colorName) => CNLabel(
-                                  CNText(colorName),
-                                  icon: CNImage(
-                                    systemSymbolName: 'circle.fill',
-                                    modifiers: CNViewModifiers(tint: kSystemColors[colorName]),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          pickerStyle: CNPickerStyle.menu,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                'Menu Style': CNPicker(
+                  selectedIndex: CNMenuStyle.values.indexOf(_menuStyle),
+                  onValueChanged: (index) => setState(() => _menuStyle = CNMenuStyle.values[index]),
+                  items: CNMenuStyle.values.map((style) => CNText(style.name)).toList(),
+                  pickerStyle: CNPickerStyle.automatic,
                 ),
-              ),
+                'Tint Color': ColorPicker(
+                  colors: kSystemColors,
+                  currentValue: _tintColor,
+                  onValueChanged: (index) => setState(() => _tintColor = kSystemColors.values.elementAt(index)),
+                ),
+              },
             ),
           ],
         ),

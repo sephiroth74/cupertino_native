@@ -24,43 +24,55 @@ struct CNMenuChildPayload: CNChannelSerializable {
 }
 
 struct CNMenuPayload: CNChannelSerializable {
-    let children: [CNMenuChildPayload]
-    let controlSize: String?
-    let enabled: Bool?
-    let foregroundColor: Int?
-    let height: Double?
-    let isDark: Bool?
-    let labelChildren: [CNButtonChildPayload]
-    let menuStyle: String?
-    let tint: Int?
-    let width: Double?
+    var children: [CNMenuChildPayload]
+    var isDark: Bool?
+    var labelChildren: [CNButtonChildPayload]
+    var menuStyle: String?
+    var viewModifiers: CNViewModifiersPayload
 
     init?(channel: [String: Any]) {
-        children = CNChannelSerialization.decodeArray(channel["children"])
-        labelChildren = CNChannelSerialization.decodeArray(channel["labelChildren"])
-        menuStyle = channel["menuStyle"] as? String
-        enabled = (channel["enabled"] as? NSNumber)?.boolValue ?? channel["enabled"] as? Bool
-        isDark = (channel["isDark"] as? NSNumber)?.boolValue ?? channel["isDark"] as? Bool
-        controlSize = channel["controlSize"] as? String
-        tint = (channel["tint"] as? NSNumber)?.intValue ?? channel["tint"] as? Int
-        foregroundColor = (channel["foregroundColor"] as? NSNumber)?.intValue ?? channel["foregroundColor"] as? Int
-        width = (channel["width"] as? NSNumber)?.doubleValue ?? channel["width"] as? Double
-        height = (channel["height"] as? NSNumber)?.doubleValue ?? channel["height"] as? Double
+        children = []
+        labelChildren = []
+        menuStyle = nil
+        isDark = nil
+        viewModifiers = CNViewModifiersPayload()
+        applyPatch(channel)
+    }
+
+    mutating func applyPatch(_ channel: [String: Any]) {
+        if channel.keys.contains("children") {
+            children = CNChannelSerialization.decodeArray(channel["children"])
+        }
+
+        if channel.keys.contains("labelChildren") {
+            labelChildren = CNChannelSerialization.decodeArray(channel["labelChildren"])
+        }
+
+        if channel.keys.contains("menuStyle") {
+            if channel["menuStyle"] is NSNull {
+                menuStyle = nil
+            } else {
+                menuStyle = channel["menuStyle"] as? String
+            }
+        }
+
+        if channel.keys.contains("isDark") {
+            isDark = CNViewModifiersPayload.decodeBool(channel["isDark"])
+        }
+
+        viewModifiers.applyPatch(channel)
     }
 
     func toChannel() -> [String: Any] {
-        [
+        var channel = viewModifiers.toChannel()
+        channel.merge([
             "children": CNChannelSerialization.encodeArray(children),
             "labelChildren": CNChannelSerialization.encodeArray(labelChildren),
             "menuStyle": menuStyle as Any,
-            "enabled": enabled as Any,
             "isDark": isDark as Any,
-            "controlSize": controlSize as Any,
-            "tint": tint as Any,
-            "foregroundColor": foregroundColor as Any,
-            "width": width as Any,
-            "height": height as Any,
-        ]
+        ]) { _, new in new }
+
+        return channel
     }
 }
 
@@ -113,25 +125,8 @@ enum CNMenuDeserializer {
     ) -> AnyView {
         var menu = baseMenu(from: payload, onPrimaryAction: onPrimaryAction, onMenuButtonPressed: onMenuButtonPressed)
 
-        menu = AnyView(menu.disabled(!(payload.enabled ?? true)))
         menu = applyMenuStyle(to: menu, style: payload.menuStyle)
-        menu = applyControlSize(to: menu, controlSize: payload.controlSize)
-
-        if let tint = payload.tint {
-            menu = AnyView(menu.tint(ColorUtils.swiftUIColorFromARGB(tint)))
-        }
-
-        if let foregroundColor = payload.foregroundColor {
-            menu = AnyView(menu.foregroundStyle(ColorUtils.swiftUIColorFromARGB(foregroundColor)))
-        }
-
-        if let width = payload.width, let height = payload.height {
-            menu = AnyView(menu.frame(width: CGFloat(width), height: CGFloat(height)))
-        } else if let width = payload.width {
-            menu = AnyView(menu.frame(width: CGFloat(width)))
-        } else if let height = payload.height {
-            menu = AnyView(menu.frame(height: CGFloat(height)))
-        }
+        menu = CNViewModifiers.apply(payload.viewModifiers, to: menu)
 
         if let onSizeChanged {
             menu = AnyView(
@@ -386,25 +381,15 @@ enum CNMenuDeserializer {
         let childrenKey = payload.children.map { String(describing: $0.toChannel()) }.joined(separator: ";")
         let labelKey = payload.labelChildren.map { String(describing: $0.toChannel()) }.joined(separator: ";")
         let styleKey = payload.menuStyle ?? "nil"
-        let controlSizeKey = payload.controlSize ?? "nil"
-        let enabledKey = payload.enabled.map { String($0) } ?? "nil"
-        let tintKey = payload.tint.map { String($0) } ?? "nil"
-        let foregroundKey = payload.foregroundColor.map { String($0) } ?? "nil"
-        let widthKey = payload.width.map { String($0) } ?? "nil"
-        let heightKey = payload.height.map { String($0) } ?? "nil"
         let darkKey = payload.isDark.map { String($0) } ?? "nil"
+        let modifiersKey = payload.viewModifiers.identityKey()
 
         return [
             childrenKey,
             labelKey,
             styleKey,
-            controlSizeKey,
-            enabledKey,
-            tintKey,
-            foregroundKey,
-            widthKey,
-            heightKey,
             darkKey,
+            modifiersKey,
         ].joined(separator: "|")
     }
 }

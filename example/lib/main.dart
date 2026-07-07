@@ -9,7 +9,7 @@ import 'demos/picker.dart';
 import 'demos/icon.dart';
 import 'demos/image_demo.dart';
 import 'demos/popup_menu_button.dart';
-import 'demos/menu_button.dart';
+import 'demos/menu_demo.dart';
 import 'demos/button_demo.dart';
 import 'demos/color_well_demo.dart';
 import 'demos/path_control.dart';

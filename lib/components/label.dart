@@ -114,9 +114,11 @@ class CNLabel extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
   // ignore: public_member_api_docs
   Map<String, dynamic> toMap(BuildContext context, {bool ignoreTheme = false, Map<String, dynamic>? layoutConstraintsPayload}) {
     final payload = <String, dynamic>{
-      'primaryText': text.toMap(context, ignoreTheme: ignoreTheme),
-      if (secondaryText != null) 'secondaryText': secondaryText!.toMap(context, ignoreTheme: ignoreTheme),
-      if (icon != null) 'icon': icon!.toMap(context, ignoreTheme: ignoreTheme),
+      'nodes': {
+        'primaryText': text.toMap(context, ignoreTheme: ignoreTheme),
+        'secondaryText': secondaryText?.toMap(context, ignoreTheme: ignoreTheme),
+        'icon': icon?.toMap(context, ignoreTheme: ignoreTheme),
+      },
       if (badge != null) 'badge': serializeMenuBadge(badge),
       'labelStyle': labelStyle.name,
       if (labelReservedIconWidth != null) 'labelReservedIconWidth': labelReservedIconWidth,
@@ -304,15 +306,7 @@ class _CNLabelState extends State<CNLabel> {
   }
 
   Map<String, dynamic> _toPayload() {
-    final map = widget.toMap(context, layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload);
-
-    final primaryText = map.remove('primaryText') as Map<String, dynamic>?;
-    final secondaryText = map.remove('secondaryText');
-    final icon = map.remove('icon');
-
-    map['nodes'] = {'primaryText': primaryText, 'secondaryText': secondaryText, 'icon': icon};
-
-    return map;
+    return widget.toMap(context, layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload);
   }
 
   @override

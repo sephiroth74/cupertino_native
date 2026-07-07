@@ -1,13 +1,14 @@
 import 'dart:convert';
 
 import 'package:cupertino_native/channel/channel_serialization.dart';
-import 'package:cupertino_native/channel/params.dart';
+import 'package:cupertino_native/channel/layout_constraints_payload.dart';
+import 'package:cupertino_native/channel/payload_patch.dart';
 import 'package:cupertino_native/components/button.dart';
 import 'package:cupertino_native/components/button_child.dart';
+import 'package:cupertino_native/components/divider.dart';
 import 'package:cupertino_native/components/menu_child.dart';
 import 'package:cupertino_native/components/text.dart';
 import 'package:cupertino_native/components/view_modifiers.dart';
-import 'package:cupertino_native/model/control_size.dart';
 import 'package:cupertino_native/style/menu_style.dart';
 import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/foundation.dart';
@@ -21,50 +22,6 @@ const double _kDefaultWidth = 120.0;
 @Deprecated('Use CNDivider instead.')
 typedef CNMenuDivider = CNDivider;
 
-/// A visual divider entry used inside [CNMenu.children].
-class CNDivider with CNMenuChild {
-  /// Creates a divider menu entry.
-  const CNDivider();
-
-  final CNViewModifiers _modifiers = const CNViewModifiers();
-
-  @override
-  bool get enabled => _modifiers.enabled ?? true;
-
-  @override
-  String get menuChildType => 'divider';
-
-  @override
-  CNViewModifiers get modifiers => _modifiers;
-
-  @override
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-
-  @override
-  EdgeInsets? get padding => _modifiers.padding;
-
-  @override
-  List<Object?> get props => [];
-
-  @override
-  bool get stringify => false;
-
-  @override
-  Object? get tag => _modifiers.tag;
-
-  @override
-  Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) {
-    return {};
-  }
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'CNDivider()';
-  }
-
-  @override
-  void writeModifiers(Map<String, dynamic> payload, BuildContext context) {}
-}
 
 /// A native SwiftUI Menu wrapper.
 ///
@@ -77,48 +34,24 @@ class CNMenu extends StatefulWidget {
     this.children = const [],
     this.labels = const [],
     this.onPrimaryAction,
-    this.enabled = true,
-    this.tint,
-    this.foregroundColor,
-    this.width,
-    this.height,
-    this.shrinkWrap = false,
     this.style = CNMenuStyle.automatic,
-    this.controlSize = CNControlSize.regular,
+    this.modifiers,
   });
 
   /// Menu content children.
   final List<CNMenuChild> children;
 
-  /// Control size.
-  final CNControlSize controlSize;
-
-  /// Whether the control is interactive.
-  final bool enabled;
-
-  /// Foreground color.
-  final Color? foregroundColor;
-
-  /// Optional fixed height.
-  final double? height;
-
   /// Label content children for the tappable menu trigger.
   final List<CNButtonChild> labels;
+
+  /// Shared native view modifiers.
+  final CNViewModifiers? modifiers;
 
   /// Callback fired when the menu trigger primary action is invoked.
   final VoidCallback? onPrimaryAction;
 
-  /// If true, sizes to intrinsic width/height.
-  final bool shrinkWrap;
-
   /// SwiftUI menu style.
   final CNMenuStyle style;
-
-  /// Tint color.
-  final Color? tint;
-
-  /// Optional fixed width.
-  final double? width;
 
   @override
   State<CNMenu> createState() => _CNMenuState();
@@ -128,9 +61,9 @@ class _CNMenuState extends State<CNMenu> {
   MethodChannel? _channel;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
+  Map<String, dynamic>? _lastPayload;
   String? _lastSerializedPayload;
-  double? _layoutHeight;
-  double? _layoutWidth;
+  final CNLayoutConstraintsSyncState _layoutConstraintsSyncState = CNLayoutConstraintsSyncState();
 
   @override
   void didChangeDependencies() {
@@ -143,17 +76,13 @@ class _CNMenuState extends State<CNMenu> {
     super.didUpdateWidget(oldWidget);
 
     final shouldResetPayload =
-        oldWidget.enabled != widget.enabled ||
         oldWidget.style != widget.style ||
-        oldWidget.tint != widget.tint ||
-        oldWidget.foregroundColor != widget.foregroundColor ||
-        oldWidget.width != widget.width ||
-        oldWidget.height != widget.height ||
-        oldWidget.shrinkWrap != widget.shrinkWrap ||
+        oldWidget.modifiers != widget.modifiers ||
         !listEquals(oldWidget.children, widget.children) ||
         !listEquals(oldWidget.labels, widget.labels);
 
     if (shouldResetPayload) {
+      _lastPayload = null;
       _lastSerializedPayload = null;
     }
 
@@ -169,7 +98,9 @@ class _CNMenuState extends State<CNMenu> {
   bool get _isDark => CNTheme.of(context).brightness == Brightness.dark;
 
   void _cacheCurrentProps() {
-    _lastSerializedPayload = _serializeCurrentPayload();
+    final payload = _toPayload();
+    _lastSerializedPayload = jsonEncode(payload);
+    _lastPayload = Map<String, dynamic>.from(payload);
   }
 
   void _onCreated(int id) {
@@ -183,7 +114,7 @@ class _CNMenuState extends State<CNMenu> {
   Future<dynamic> _onMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'primaryActionPressed':
-        if (widget.enabled) {
+        if (widget.modifiers?.enabled != false) {
           widget.onPrimaryAction?.call();
         }
         break;
@@ -250,8 +181,6 @@ class _CNMenuState extends State<CNMenu> {
     return serialized;
   }
 
-  String _serializeCurrentPayload() => jsonEncode(_toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight));
-
   List<Map<String, dynamic>> _serializeLabelChildren(List<CNButtonChild> labelChildren, BuildContext context) {
     return labelChildren
         .map((child) => {'type': child.buttonChildType, 'payload': child.toChannelMap(context, ignoreTheme: true)})
@@ -262,35 +191,47 @@ class _CNMenuState extends State<CNMenu> {
     final ch = _channel;
     if (ch == null) return;
 
-    final payload = _toPayload(frameWidth: _layoutWidth, frameHeight: _layoutHeight);
+    final payload = _toPayload();
     final serializedPayload = jsonEncode(payload);
 
-    if (_lastSerializedPayload != serializedPayload) {
-      await ch.invokeMethod('setMenu', payload);
-      _cacheCurrentProps();
-      _requestIntrinsicSize();
+    if (_lastPayload == null) {
+      if (_lastSerializedPayload != serializedPayload) {
+        await ch.invokeMethod('setData', payload);
+      }
+
+      _lastSerializedPayload = serializedPayload;
+      _lastPayload = Map<String, dynamic>.from(payload);
+      // _requestIntrinsicSize();
+      return;
     }
+
+    final patch = computeJsonSafePatch(_lastPayload!, payload);
+    if (patch.isEmpty) {
+      _lastSerializedPayload = serializedPayload;
+      return;
+    }
+
+    await ch.invokeMethod('applyPatch', patch);
+    _lastSerializedPayload = serializedPayload;
+    _lastPayload = Map<String, dynamic>.from(payload);
+    // _requestIntrinsicSize();
   }
 
-  Map<String, dynamic> _toPayload({double? frameWidth, double? frameHeight}) {
-    final payload = {
+  Map<String, dynamic> _toPayload() {
+    final payload = <String, dynamic>{
       'children': _serializeChildren(widget.children, context),
       'labelChildren': _serializeLabelChildren(widget.labels, context),
       'menuStyle': widget.style.name,
-      'enabled': widget.enabled,
       'isDark': _isDark,
-      'controlSize': widget.controlSize.name,
-      'tint': resolveColorToArgb(widget.tint, context),
-      'foregroundColor': resolveColorToArgb(widget.foregroundColor, context),
     };
 
-    if (frameWidth != null) {
-      payload['width'] = frameWidth;
-    }
+    writeLayoutConstraintsPayload(
+      payload,
+      layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload,
+      explicitConstraints: widget.modifiers?.constraints,
+    );
 
-    if (frameHeight != null) {
-      payload['height'] = frameHeight;
-    }
+    widget.modifiers?.writeToPayload(payload, context);
 
     return payload;
   }
@@ -303,37 +244,58 @@ class _CNMenuState extends State<CNMenu> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final hasFixedWidth = constraints.hasTightWidth;
-        final hasFixedHeight = constraints.hasTightHeight;
-        final hasExplicitWidth = widget.width != null;
-        final hasExplicitHeight = widget.height != null;
-        final shouldSendWidth = hasExplicitWidth || hasFixedWidth;
-        final shouldSendHeight = hasExplicitHeight || hasFixedHeight;
+        final explicitConstraints = widget.modifiers?.constraints;
+        final effectiveShrinkWrap = widget.modifiers?.shrinkWrap ?? true;
+        final hasBoundedParentSize = constraints.hasBoundedWidth || constraints.hasBoundedHeight;
+        final hasBoundedExplicitSize =
+            (explicitConstraints?.hasBoundedWidth ?? false) || (explicitConstraints?.hasBoundedHeight ?? false);
 
-        final resolvedWidth = widget.width ?? (hasFixedWidth ? constraints.maxWidth : (_intrinsicWidth ?? _kDefaultWidth));
-        final resolvedHeight = widget.height ?? (hasFixedHeight ? constraints.maxHeight : (_intrinsicHeight ?? _kDefaultHeight));
+        assert(
+          effectiveShrinkWrap || hasBoundedExplicitSize || hasBoundedParentSize,
+          'CNMenu requires at least one bounded axis when shrinkWrap is false. '
+          'Provide bounded constraints in CNViewModifiers.constraints or place CNMenu in a parent with bounded size.',
+        );
 
-        final nextLayoutWidth = shouldSendWidth ? resolvedWidth : null;
-        final nextLayoutHeight = shouldSendHeight ? resolvedHeight : null;
+        final resolvedLayoutConstraints = resolveLayoutConstraintsPayload(
+          parentConstraints: constraints,
+          explicitConstraints: explicitConstraints,
+        );
+        final resolvedConstraints = resolvedLayoutConstraints.resolvedConstraints;
+        _layoutConstraintsSyncState.apply(resolvedLayoutConstraints, sync: _syncPropsToNativeIfNeeded);
 
-        if (_layoutWidth != nextLayoutWidth || _layoutHeight != nextLayoutHeight) {
-          _layoutWidth = nextLayoutWidth;
-          _layoutHeight = nextLayoutHeight;
-          _syncPropsToNativeIfNeeded();
+        final hasBoundedWidth = constraints.hasBoundedWidth;
+        final hasBoundedHeight = constraints.hasBoundedHeight;
+
+        final intrinsicOrDefaultWidth = _intrinsicWidth ?? _kDefaultWidth;
+        final intrinsicOrDefaultHeight = _intrinsicHeight ?? _kDefaultHeight;
+
+        final resolvedWidth = effectiveShrinkWrap
+            ? (hasBoundedWidth ? intrinsicOrDefaultWidth.clamp(0.0, constraints.maxWidth).toDouble() : intrinsicOrDefaultWidth)
+            : (resolvedConstraints.hasBoundedWidth ? resolvedConstraints.maxWidth : intrinsicOrDefaultWidth);
+        final resolvedHeight = effectiveShrinkWrap
+            ? (hasBoundedHeight ? intrinsicOrDefaultHeight.clamp(0.0, constraints.maxHeight).toDouble() : intrinsicOrDefaultHeight)
+            : (resolvedConstraints.hasBoundedHeight ? resolvedConstraints.maxHeight : intrinsicOrDefaultHeight);
+
+        final creationParams = _toPayload();
+
+        Widget nativeView = AppKitView(
+          viewType: 'CupertinoNativeMenu',
+          creationParams: creationParams,
+          creationParamsCodec: const StandardMessageCodec(),
+          onPlatformViewCreated: _onCreated,
+        );
+
+        if (!effectiveShrinkWrap) {
+          nativeView = SizedBox(
+            width: resolvedConstraints.hasBoundedWidth ? null : resolvedWidth,
+            height: resolvedConstraints.hasBoundedHeight ? null : resolvedHeight,
+            child: nativeView,
+          );
+          nativeView = ConstrainedBox(constraints: resolvedConstraints, child: nativeView);
+          return nativeView;
         }
 
-        final creationParams = _toPayload(frameWidth: nextLayoutWidth, frameHeight: nextLayoutHeight);
-
-        return SizedBox(
-          width: resolvedWidth,
-          height: resolvedHeight,
-          child: AppKitView(
-            viewType: 'CupertinoNativeMenu',
-            creationParams: creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            onPlatformViewCreated: _onCreated,
-          ),
-        );
+        return SizedBox(width: resolvedWidth, height: resolvedHeight, child: nativeView);
       },
     );
   }

@@ -41,7 +41,7 @@ class CupertinoMenuNSView: NSView {
             case "getIntrinsicSize":
                 let s = currentIntrinsicSize()
                 result(["width": Double(s.width), "height": Double(s.height)])
-            case "setMenu":
+            case "setData":
                 if let parsed: CNMenuPayload = CNChannelSerialization.decode(call.arguments) {
                     payload = parsed
                     rebuild()
@@ -49,6 +49,19 @@ class CupertinoMenuNSView: NSView {
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Invalid menu payload", details: nil))
+                }
+            case "applyPatch":
+                if let patch = CNChannelSerialization.asDict(call.arguments) {
+                    if payload == nil {
+                        payload = CNMenuPayload(channel: [:])
+                    }
+
+                    payload?.applyPatch(patch)
+                    rebuild()
+                    notifyIntrinsicSizeChanged(force: true)
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "bad_args", message: "Invalid menu patch payload", details: nil))
                 }
             default:
                 result(FlutterMethodNotImplemented)
