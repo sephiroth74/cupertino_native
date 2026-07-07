@@ -23,19 +23,6 @@ const double _kDefaultWidth = 80.0;
 /// Embeds a native SwiftUI Button for authentic visuals and behavior on
 /// macOS. Falls back to [CupertinoButton] on other platforms.
 class CNButton extends StatefulWidget with CNViewModifiable, CNMenuChild {
-  /// Creates a native SwiftUI button.
-  ///
-  /// Supported child types are [CNImage], [CNLabel], and [CNText].
-  const CNButton({
-    super.key,
-    this.children = const [],
-    this.badge,
-    this.role = CNButtonRole.none,
-    this.onPressed,
-    this.style = CNButtonStyle.automatic,
-    this.modifiers,
-  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
-
   /// Optional badge shown next to the menu item when used inside [CNMenu].
   final Object? badge;
 
@@ -54,8 +41,18 @@ class CNButton extends StatefulWidget with CNViewModifiable, CNMenuChild {
   @override
   final CNViewModifiers? modifiers;
 
-  @override
-  State<CNButton> createState() => _CNButtonState();
+  /// Creates a native SwiftUI button.
+  ///
+  /// Supported child types are [CNImage], [CNLabel], and [CNText].
+  const CNButton({
+    super.key,
+    this.children = const [],
+    this.badge,
+    this.role = CNButtonRole.none,
+    this.onPressed,
+    this.style = CNButtonStyle.automatic,
+    this.modifiers,
+  }) : assert(badge == null || badge is String || badge is int, 'Badge must be a String or int.');
 
   @override
   String get menuChildType => 'button';
@@ -65,6 +62,9 @@ class CNButton extends StatefulWidget with CNViewModifiable, CNMenuChild {
 
   @override
   bool get stringify => true;
+
+  @override
+  State<CNButton> createState() => _CNButtonState();
 
   @override
   Map<String, dynamic> toChannelMap(BuildContext context, {bool ignoreTheme = false}) => _toPayloadForMenu(context);
@@ -108,6 +108,98 @@ class _CNButtonState extends State<CNButton> {
   String? _lastSerializedPayload;
   final CNLayoutConstraintsSyncState _layoutConstraintsSyncState = CNLayoutConstraintsSyncState();
 
+  // double? _layoutHeight;
+  // double? _layoutWidth;
+
+  bool get _isDark => CNTheme.of(context).brightness == Brightness.dark;
+
+  String get _role => widget.role.name;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
+      // Fallback Flutter implementation
+      return SizedBox.shrink();
+    }
+
+    const viewType = 'CupertinoNativeButton';
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final effectiveShrinkWrap = widget.modifiers?.shrinkWrap ?? false;
+        final explicitConstraints = widget.modifiers?.constraints;
+        final hasBoundedParentSize = constraints.hasBoundedWidth || constraints.hasBoundedHeight;
+        final hasBoundedModifierSize =
+            (explicitConstraints?.hasBoundedWidth ?? false) || (explicitConstraints?.hasBoundedHeight ?? false);
+
+        assert(
+          effectiveShrinkWrap || hasBoundedModifierSize || hasBoundedParentSize,
+          'CNButton requires at least one bounded axis when shrinkWrap is false. '
+          'Provide bounded constraints in CNViewModifiers.constraints or place CNButton in a parent with bounded size.',
+        );
+
+        final resolvedLayoutConstraints = resolveLayoutConstraintsPayload(
+          parentConstraints: constraints,
+          explicitConstraints: explicitConstraints,
+        );
+        final resolvedConstraints = resolvedLayoutConstraints.resolvedConstraints;
+        _layoutConstraintsSyncState.apply(resolvedLayoutConstraints, sync: _syncPropsToNativeIfNeeded);
+
+        final hasBoundedWidth = constraints.hasBoundedWidth;
+        final hasBoundedHeight = constraints.hasBoundedHeight;
+
+        // When to use intrinsic size:
+        // 1. If shrinkWrap is true, use intrinsic size.
+        // 2. If the parent constraints are unbounded, use intrinsic size.
+
+        // How to resolve the final width and height:
+        // 1. If the user has specified a width/height via modifiers, use that.
+        // 2. constraints are tight, use the constraint value.
+        // 3. Otherwise, use the intrinsic size (if available), or fallback to default
+
+        final intrinsicOrDefaultWidth = _intrinsicWidth ?? _kDefaultWidth;
+        final intrinsicOrDefaultHeight = _intrinsicHeight ?? _kDefaultHeight;
+
+        final resolvedWidth = effectiveShrinkWrap
+            ? (hasBoundedWidth ? intrinsicOrDefaultWidth.clamp(0.0, constraints.maxWidth).toDouble() : intrinsicOrDefaultWidth)
+            : (resolvedConstraints.hasBoundedWidth ? resolvedConstraints.maxWidth : intrinsicOrDefaultWidth);
+        final resolvedHeight = effectiveShrinkWrap
+            ? (hasBoundedHeight ? intrinsicOrDefaultHeight.clamp(0.0, constraints.maxHeight).toDouble() : intrinsicOrDefaultHeight)
+            : (resolvedConstraints.hasBoundedHeight ? resolvedConstraints.maxHeight : intrinsicOrDefaultHeight);
+
+        debugPrint(
+          '[CNButton][Dart] build -> constrains: $constraints, hasBoundedWidth=$hasBoundedWidth, hasBoundedHeight=$hasBoundedHeight',
+        );
+        debugPrint(
+          '[CNButton][Dart] build -> resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight, effectiveShrinkWrap=$effectiveShrinkWrap',
+        );
+
+        final creationParams = _toPayload();
+
+        Widget nativeView = AppKitView(
+          viewType: viewType,
+          creationParams: creationParams,
+          creationParamsCodec: const StandardMessageCodec(),
+          onPlatformViewCreated: _onCreated,
+        );
+
+        if (!effectiveShrinkWrap) {
+          // Platform views expand to biggest constraints; force finite fallback
+          // sizes on unbounded axes to avoid Infinity during Wrap/Column layout.
+          nativeView = SizedBox(
+            width: resolvedConstraints.hasBoundedWidth ? null : resolvedWidth,
+            height: resolvedConstraints.hasBoundedHeight ? null : resolvedHeight,
+            child: nativeView,
+          );
+          nativeView = ConstrainedBox(constraints: resolvedConstraints, child: nativeView);
+          return nativeView;
+        }
+
+        return SizedBox(width: resolvedWidth, height: resolvedHeight, child: nativeView);
+      },
+    );
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -121,8 +213,8 @@ class _CNButtonState extends State<CNButton> {
     final childrenStructureChanged = _isChildrenStructureChanged(oldWidget.children, widget.children);
 
     if (childrenStructureChanged) {
-      // _intrinsicWidth = null;
-      // _intrinsicHeight = null;
+      // Keep previous intrinsic size until the updated native subtree reports
+      // a fresh intrinsic measurement; this avoids one-frame fallback flicker.
       _lastPayload = null;
       _lastSerializedPayload = null;
     }
@@ -135,13 +227,6 @@ class _CNButtonState extends State<CNButton> {
     _channel?.setMethodCallHandler(null);
     super.dispose();
   }
-
-  // double? _layoutHeight;
-  // double? _layoutWidth;
-
-  bool get _isDark => CNTheme.of(context).brightness == Brightness.dark;
-
-  String get _role => widget.role.name;
 
   void _cacheCurrentProps() {
     final payload = _toPayload();
@@ -280,90 +365,5 @@ class _CNButtonState extends State<CNButton> {
 
     widget.writeModifiers(payload, context);
     return payload;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!(defaultTargetPlatform == TargetPlatform.macOS)) {
-      // Fallback Flutter implementation
-      return SizedBox.shrink();
-    }
-
-    const viewType = 'CupertinoNativeButton';
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final effectiveShrinkWrap = widget.modifiers?.shrinkWrap ?? false;
-        final explicitConstraints = widget.modifiers?.constraints;
-        final hasBoundedParentSize = constraints.hasBoundedWidth || constraints.hasBoundedHeight;
-        final hasBoundedModifierSize =
-            (explicitConstraints?.hasBoundedWidth ?? false) || (explicitConstraints?.hasBoundedHeight ?? false);
-
-        assert(
-          effectiveShrinkWrap || hasBoundedModifierSize || hasBoundedParentSize,
-          'CNButton requires at least one bounded axis when shrinkWrap is false. '
-          'Provide bounded constraints in CNViewModifiers.constraints or place CNButton in a parent with bounded size.',
-        );
-
-        final resolvedLayoutConstraints = resolveLayoutConstraintsPayload(
-          parentConstraints: constraints,
-          explicitConstraints: explicitConstraints,
-        );
-        final resolvedConstraints = resolvedLayoutConstraints.resolvedConstraints;
-        _layoutConstraintsSyncState.apply(resolvedLayoutConstraints, sync: _syncPropsToNativeIfNeeded);
-
-        final hasBoundedWidth = constraints.hasBoundedWidth;
-        final hasBoundedHeight = constraints.hasBoundedHeight;
-
-        // When to use intrinsic size:
-        // 1. If shrinkWrap is true, use intrinsic size.
-        // 2. If the parent constraints are unbounded, use intrinsic size.
-
-        // How to resolve the final width and height:
-        // 1. If the user has specified a width/height via modifiers, use that.
-        // 2. constraints are tight, use the constraint value.
-        // 3. Otherwise, use the intrinsic size (if available), or fallback to default
-
-        final intrinsicOrDefaultWidth = _intrinsicWidth ?? _kDefaultWidth;
-        final intrinsicOrDefaultHeight = _intrinsicHeight ?? _kDefaultHeight;
-
-        final resolvedWidth = effectiveShrinkWrap
-            ? (hasBoundedWidth ? intrinsicOrDefaultWidth.clamp(0.0, constraints.maxWidth).toDouble() : intrinsicOrDefaultWidth)
-            : (resolvedConstraints.hasBoundedWidth ? resolvedConstraints.maxWidth : intrinsicOrDefaultWidth);
-        final resolvedHeight = effectiveShrinkWrap
-            ? (hasBoundedHeight ? intrinsicOrDefaultHeight.clamp(0.0, constraints.maxHeight).toDouble() : intrinsicOrDefaultHeight)
-            : (resolvedConstraints.hasBoundedHeight ? resolvedConstraints.maxHeight : intrinsicOrDefaultHeight);
-
-        debugPrint(
-          '[CNButton][Dart] build -> constrains: $constraints, hasBoundedWidth=$hasBoundedWidth, hasBoundedHeight=$hasBoundedHeight',
-        );
-        debugPrint(
-          '[CNButton][Dart] build -> resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight, effectiveShrinkWrap=$effectiveShrinkWrap',
-        );
-
-        final creationParams = _toPayload();
-
-        Widget nativeView = AppKitView(
-          viewType: viewType,
-          creationParams: creationParams,
-          creationParamsCodec: const StandardMessageCodec(),
-          onPlatformViewCreated: _onCreated,
-        );
-
-        if (!effectiveShrinkWrap) {
-          // Platform views expand to biggest constraints; force finite fallback
-          // sizes on unbounded axes to avoid Infinity during Wrap/Column layout.
-          nativeView = SizedBox(
-            width: resolvedConstraints.hasBoundedWidth ? null : resolvedWidth,
-            height: resolvedConstraints.hasBoundedHeight ? null : resolvedHeight,
-            child: nativeView,
-          );
-          nativeView = ConstrainedBox(constraints: resolvedConstraints, child: nativeView);
-          return nativeView;
-        }
-
-        return SizedBox(width: resolvedWidth, height: resolvedHeight, child: nativeView);
-      },
-    );
   }
 }
