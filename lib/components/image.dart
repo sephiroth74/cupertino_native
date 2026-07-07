@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:cupertino_native/channel/layout_constraints_payload.dart';
 import 'package:cupertino_native/channel/params.dart';
+import 'package:cupertino_native/channel/payload_patch.dart';
 import 'package:cupertino_native/components/menu_badge_support.dart';
 import 'package:cupertino_native/components/paddable.dart';
 import 'package:cupertino_native/components/taggable.dart';
@@ -97,8 +99,13 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
       'symbolColorRenderingMode': resolvedColorRenderingMode?.name,
       'foregroundStyleColors': resolvedForegroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
       'font': resolvedFont?.toMap(),
-      if (layoutConstraintsPayload != null && modifiers?.constraints == null) 'constraints': layoutConstraintsPayload,
     };
+
+    writeLayoutConstraintsPayload(
+      payload,
+      layoutConstraintsPayload: layoutConstraintsPayload,
+      explicitConstraints: modifiers?.constraints,
+    );
 
     writeModifiers(payload, context);
     return payload;
@@ -107,12 +114,11 @@ class CNImage extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModi
 
 class _CNImageState extends State<CNImage> {
   MethodChannel? _channel;
-  Map<String, dynamic>? _currentConstraintsPayload;
-  String? _currentConstraintsSerialized;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
   Map<String, dynamic>? _lastPayload;
   String? _lastSerializedPayload;
+  final CNLayoutConstraintsSyncState _layoutConstraintsSyncState = CNLayoutConstraintsSyncState();
 
   @override
   void didChangeDependencies() {
@@ -133,28 +139,9 @@ class _CNImageState extends State<CNImage> {
   }
 
   void _cacheCurrentProps() {
-    final payload = widget.toMap(context, layoutConstraintsPayload: _currentConstraintsPayload);
+    final payload = widget.toMap(context, layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload);
     _lastSerializedPayload = jsonEncode(payload);
     _lastPayload = Map<String, dynamic>.from(payload);
-  }
-
-  Map<String, dynamic> _computePayloadPatch(Map<String, dynamic> previous, Map<String, dynamic> next) {
-    final patch = <String, dynamic>{};
-    final keys = <String>{...previous.keys, ...next.keys};
-
-    for (final key in keys) {
-      final hadPrevious = previous.containsKey(key);
-      final hasNext = next.containsKey(key);
-      final oldValue = hadPrevious ? previous[key] : null;
-      final newValue = hasNext ? next[key] : null;
-
-      final changed = jsonEncode(oldValue) != jsonEncode(newValue);
-      if (!changed) continue;
-
-      patch[key] = hasNext ? newValue : null;
-    }
-
-    return patch;
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
@@ -195,7 +182,7 @@ class _CNImageState extends State<CNImage> {
     final channel = _channel;
     if (channel == null) return;
 
-    final payload = widget.toMap(context, layoutConstraintsPayload: _currentConstraintsPayload);
+    final payload = widget.toMap(context, layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload);
     final serializedPayload = jsonEncode(payload);
 
     if (_lastPayload == null) {
@@ -208,7 +195,7 @@ class _CNImageState extends State<CNImage> {
       return;
     }
 
-    final patch = _computePayloadPatch(_lastPayload!, payload);
+    final patch = computeJsonSafePatch(_lastPayload!, payload);
     if (patch.isEmpty) {
       _lastSerializedPayload = serializedPayload;
       return;
@@ -222,30 +209,23 @@ class _CNImageState extends State<CNImage> {
   @override
   Widget build(BuildContext context) {
     if (defaultTargetPlatform != TargetPlatform.macOS) {
-      Widget fallback = const Icon(CupertinoIcons.question_circle);
-      if (widget.padding != null) {
-        fallback = Padding(padding: widget.padding!, child: fallback);
-      }
-      return fallback;
+      return SizedBox.shrink();
     }
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final hasExplicitConstraints = widget.modifiers?.constraints != null;
         final shrinkWrap = widget.modifiers?.shrinkWrap ?? true;
 
-        final resolvedConstraints = hasExplicitConstraints ? widget.modifiers!.constraints! : constraints;
+        final resolvedLayoutConstraints = resolveLayoutConstraintsPayload(
+          parentConstraints: constraints,
+          explicitConstraints: widget.modifiers?.constraints,
+        );
+        _layoutConstraintsSyncState.apply(resolvedLayoutConstraints, sync: _syncPropsToNativeIfNeeded);
 
-        _currentConstraintsPayload = resolvedConstraints.toMap();
-        final serializedConstraints = jsonEncode(_currentConstraintsPayload);
-        if (_currentConstraintsSerialized != serializedConstraints) {
-          _currentConstraintsSerialized = serializedConstraints;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _syncPropsToNativeIfNeeded();
-          });
-        }
-
-        final creationParams = widget.toMap(context, layoutConstraintsPayload: _currentConstraintsPayload);
+        final creationParams = widget.toMap(
+          context,
+          layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload,
+        );
 
         // Constraints are always serialized; native side decides whether to use them based on shrinkWrap.
 

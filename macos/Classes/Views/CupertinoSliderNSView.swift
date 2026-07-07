@@ -116,6 +116,7 @@ class CupertinoSliderNSView: NSView {
         hostingView.rootView = CNSlider.deserialize(
             model: model,
             onValueChanged: { [weak self] newValue in
+                self?.payload.applyPatch(["value": newValue])
                 self?.channel.invokeMethod("valueChanged", arguments: ["value": newValue])
             },
             onEditingChanged: { [weak self] editing in

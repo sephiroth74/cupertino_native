@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:cupertino_native/channel/layout_constraints_payload.dart';
+import 'package:cupertino_native/channel/payload_patch.dart';
 import 'package:cupertino_native/components/button_child.dart';
 import 'package:cupertino_native/components/menu_badge_support.dart';
 import 'package:cupertino_native/components/menu_child.dart';
@@ -7,7 +9,6 @@ import 'package:cupertino_native/components/paddable.dart';
 import 'package:cupertino_native/components/taggable.dart';
 import 'package:cupertino_native/components/view_modifiable.dart';
 import 'package:cupertino_native/components/view_modifiers.dart';
-import 'package:cupertino_native/extensions/box_constraints.dart';
 import 'package:cupertino_native/style/font.dart';
 import 'package:cupertino_native/style/text.dart';
 import 'package:cupertino_native/style/text_utils.dart';
@@ -104,8 +105,13 @@ class CNText extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModif
       'lineLimitReservesSpace': lineLimitReservesSpace,
       'textScale': textScale?.name,
       'truncationMode': truncationMode?.name,
-      if (layoutConstraintsPayload != null && modifiers.constraints == null) 'constraints': layoutConstraintsPayload,
     };
+
+    writeLayoutConstraintsPayload(
+      payload,
+      layoutConstraintsPayload: layoutConstraintsPayload,
+      explicitConstraints: modifiers.constraints,
+    );
 
     writeModifiers(payload, context);
     return payload;
@@ -114,12 +120,11 @@ class CNText extends StatefulWidget with CNButtonChild, CNMenuChild, CNViewModif
 
 class _CNTextState extends State<CNText> {
   MethodChannel? _channel;
-  Map<String, dynamic>? _currentConstraintsPayload;
-  String? _currentConstraintsSerialized;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
   Map<String, dynamic>? _lastPayload;
   String? _lastSerializedPayload;
+  final CNLayoutConstraintsSyncState _layoutConstraintsSyncState = CNLayoutConstraintsSyncState();
 
   @override
   void didChangeDependencies() {
@@ -140,28 +145,9 @@ class _CNTextState extends State<CNText> {
   }
 
   void _cacheCurrentProps() {
-    final payload = widget.toMap(context, layoutConstraintsPayload: _currentConstraintsPayload);
+    final payload = widget.toMap(context, layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload);
     _lastSerializedPayload = jsonEncode(payload);
     _lastPayload = Map<String, dynamic>.from(payload);
-  }
-
-  Map<String, dynamic> _computePayloadPatch(Map<String, dynamic> previous, Map<String, dynamic> next) {
-    final patch = <String, dynamic>{};
-    final keys = <String>{...previous.keys, ...next.keys};
-
-    for (final key in keys) {
-      final hadPrevious = previous.containsKey(key);
-      final hasNext = next.containsKey(key);
-      final oldValue = hadPrevious ? previous[key] : null;
-      final newValue = hasNext ? next[key] : null;
-
-      final changed = jsonEncode(oldValue) != jsonEncode(newValue);
-      if (!changed) continue;
-
-      patch[key] = hasNext ? newValue : null;
-    }
-
-    return patch;
   }
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
@@ -213,7 +199,7 @@ class _CNTextState extends State<CNText> {
     final channel = _channel;
     if (channel == null) return;
 
-    final payload = widget.toMap(context, layoutConstraintsPayload: _currentConstraintsPayload);
+    final payload = widget.toMap(context, layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload);
     final serializedPayload = jsonEncode(payload);
 
     if (_lastPayload == null) {
@@ -227,7 +213,7 @@ class _CNTextState extends State<CNText> {
       return;
     }
 
-    final patch = _computePayloadPatch(_lastPayload!, payload);
+    final patch = computeJsonSafePatch(_lastPayload!, payload);
     if (patch.isEmpty) {
       debugPrint('[CNText][Dart] No patch to send (payload unchanged)');
       _lastSerializedPayload = serializedPayload;
@@ -242,55 +228,28 @@ class _CNTextState extends State<CNText> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = CNTheme.of(context);
-    final resolvedColor = widget.modifiers.foregroundColor ?? theme.textTheme.labelColor ?? theme.labelColor;
-    final resolvedFont = widget.font ?? theme.textTheme.font ?? cnFontFromTextStyle(theme.typography.body);
-    final textStyle = theme.typography.body.copyWith(
-      color: resolvedColor,
-      fontSize: resolvedFont.size.points,
-      fontWeight: fontWeightFromCNFontWeight(resolvedFont.weight),
-    );
-
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      return SizedBox.shrink();
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
-        final hasExplicitConstraints = widget.modifiers.constraints != null;
         final shrinkWrap = widget.modifiers.shrinkWrap;
-        final resolvedConstraints = hasExplicitConstraints ? widget.modifiers.constraints! : constraints;
-        _currentConstraintsPayload = resolvedConstraints.toMap();
-
-        final serializedConstraints = jsonEncode(_currentConstraintsPayload);
-        if (_currentConstraintsSerialized != serializedConstraints) {
-          _currentConstraintsSerialized = serializedConstraints;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _syncPropsToNativeIfNeeded();
-          });
-        }
+        final resolvedLayoutConstraints = resolveLayoutConstraintsPayload(
+          parentConstraints: constraints,
+          explicitConstraints: widget.modifiers.constraints,
+        );
+        final resolvedConstraints = resolvedLayoutConstraints.resolvedConstraints;
+        _layoutConstraintsSyncState.apply(resolvedLayoutConstraints, sync: _syncPropsToNativeIfNeeded);
 
         final hasBoundedWidth = constraints.hasBoundedWidth;
         final hasBoundedHeight = constraints.hasBoundedHeight;
         final resolvedWidth = hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth ?? _kDefaultTextWidth;
         final resolvedHeight = hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? _kDefaultTextHeight;
 
-        if (defaultTargetPlatform != TargetPlatform.macOS) {
-          Widget fallbackText = Text(
-            widget.text,
-            maxLines: widget.lineLimit,
-            overflow: overflowFromTruncationMode(widget.truncationMode),
-            style: textStyle,
-          );
-
-          if (widget.padding != null) {
-            fallbackText = Padding(padding: widget.padding!, child: fallbackText);
-          }
-
-          if (!shrinkWrap) {
-            return ConstrainedBox(constraints: resolvedConstraints, child: fallbackText);
-          }
-
-          return SizedBox(width: resolvedWidth, height: resolvedHeight, child: fallbackText);
-        }
-
-        final creationParams = widget.toMap(context, layoutConstraintsPayload: _currentConstraintsPayload);
+        final creationParams = widget.toMap(
+          context,
+          layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload,
+        );
 
         Widget nativeView = AppKitView(
           viewType: 'CupertinoNativeText',

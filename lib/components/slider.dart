@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:cupertino_native/channel/layout_constraints_payload.dart';
+import 'package:cupertino_native/channel/payload_patch.dart';
 import 'package:cupertino_native/components/view_modifiable.dart';
 import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/model/control_size.dart';
@@ -92,8 +94,7 @@ class _CNSliderState extends State<CNSlider> {
   bool _isEditingFromNative = false;
   Map<String, dynamic>? _lastPayload;
   String? _lastSerializedPayload;
-  double? _layoutHeight;
-  double? _layoutWidth;
+  final CNLayoutConstraintsSyncState _layoutConstraintsSyncState = CNLayoutConstraintsSyncState();
 
   @override
   void didChangeDependencies() {
@@ -124,25 +125,6 @@ class _CNSliderState extends State<CNSlider> {
     _lastPayload = Map<String, dynamic>.from(payload);
   }
 
-  Map<String, dynamic> _computePayloadPatch(Map<String, dynamic> previous, Map<String, dynamic> next) {
-    final patch = <String, dynamic>{};
-    final keys = <String>{...previous.keys, ...next.keys};
-
-    for (final key in keys) {
-      final hadPrevious = previous.containsKey(key);
-      final hasNext = next.containsKey(key);
-      final oldValue = hadPrevious ? previous[key] : null;
-      final newValue = hasNext ? next[key] : null;
-
-      final changed = jsonEncode(oldValue) != jsonEncode(newValue);
-      if (!changed) continue;
-
-      patch[key] = hasNext ? newValue : null;
-    }
-
-    return patch;
-  }
-
   double _defaultHeightForControlSize() {
     switch (widget.modifiers?.controlSize ?? CNControlSize.regular) {
       case CNControlSize.mini:
@@ -160,10 +142,10 @@ class _CNSliderState extends State<CNSlider> {
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
     if (!mounted || width == null || height == null) return;
-    if (width == _intrinsicWidth && height == _intrinsicHeight) return;
+    if (width == _intrinsicWidth && height + 20 == _intrinsicHeight) return;
     setState(() {
       _intrinsicWidth = width > 0 ? width : null;
-      _intrinsicHeight = height > 0 ? height : null;
+      _intrinsicHeight = height > 0 ? height + 20 : null;
     });
   }
 
@@ -199,19 +181,6 @@ class _CNSliderState extends State<CNSlider> {
     _controller._attach(channel);
     channel.setMethodCallHandler(_onMethodCall);
     _cacheCurrentProps();
-    _requestIntrinsicSize();
-  }
-
-  Future<void> _requestIntrinsicSize() async {
-    final channel = _channel;
-    if (channel == null) return;
-
-    try {
-      final size = await channel.invokeMethod<Map>('getIntrinsicSize');
-      _onIntrinsicSizeChanged((size?['width'] as num?)?.toDouble(), (size?['height'] as num?)?.toDouble());
-    } catch (_) {
-      // Ignored.
-    }
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
@@ -229,11 +198,10 @@ class _CNSliderState extends State<CNSlider> {
 
       _lastSerializedPayload = serializedPayload;
       _lastPayload = Map<String, dynamic>.from(payload);
-      _requestIntrinsicSize();
       return;
     }
 
-    final patch = _computePayloadPatch(_lastPayload!, payload);
+    final patch = computeJsonSafePatch(_lastPayload!, payload);
     if (patch.isEmpty) {
       _lastSerializedPayload = serializedPayload;
       return;
@@ -262,6 +230,12 @@ class _CNSliderState extends State<CNSlider> {
       'isDark': _isDark,
     };
 
+    writeLayoutConstraintsPayload(
+      payload,
+      layoutConstraintsPayload: _layoutConstraintsSyncState.layoutConstraintsPayload,
+      explicitConstraints: widget.modifiers?.constraints,
+    );
+
     widget.writeModifiers(payload, context);
     return payload;
   }
@@ -274,31 +248,35 @@ class _CNSliderState extends State<CNSlider> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final shrinkWrap = widget.modifiers?.shrinkWrap ?? true;
+        final resolvedLayoutConstraints = resolveLayoutConstraintsPayload(
+          parentConstraints: constraints,
+          explicitConstraints: widget.modifiers?.constraints,
+        );
+        final resolvedConstraints = resolvedLayoutConstraints.resolvedConstraints;
+        _layoutConstraintsSyncState.apply(resolvedLayoutConstraints, sync: _syncPropsToNativeIfNeeded);
+
         final hasBoundedWidth = constraints.hasBoundedWidth;
         final hasBoundedHeight = constraints.hasBoundedHeight;
 
-        final resolvedWidth = widget.width ?? (hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth ?? _kDefaultSliderWidth);
-        final resolvedHeight =
-            widget.height ?? (hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? _defaultHeightForControlSize());
-
-        if (_layoutWidth != resolvedWidth || _layoutHeight != resolvedHeight) {
-          _layoutWidth = resolvedWidth;
-          _layoutHeight = resolvedHeight;
-          _syncPropsToNativeIfNeeded();
-        }
+        final resolvedWidth = hasBoundedWidth ? constraints.maxWidth : _intrinsicWidth ?? _kDefaultSliderWidth;
+        final resolvedHeight = hasBoundedHeight ? constraints.maxHeight : _intrinsicHeight ?? _defaultHeightForControlSize();
 
         final creationParams = _toPayload();
 
-        return SizedBox(
-          width: resolvedWidth,
-          height: resolvedHeight + 10,
-          child: AppKitView(
-            viewType: 'CupertinoNativeSlider',
-            creationParams: creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            onPlatformViewCreated: _onPlatformViewCreated,
-          ),
+        Widget nativeView = AppKitView(
+          viewType: 'CupertinoNativeSlider',
+          creationParams: creationParams,
+          creationParamsCodec: const StandardMessageCodec(),
+          onPlatformViewCreated: _onPlatformViewCreated,
         );
+
+        if (!shrinkWrap) {
+          nativeView = ConstrainedBox(constraints: resolvedConstraints, child: nativeView);
+          return nativeView;
+        }
+
+        return SizedBox(width: resolvedWidth, height: resolvedHeight, child: nativeView);
       },
     );
   }
