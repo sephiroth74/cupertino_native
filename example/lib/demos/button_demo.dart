@@ -51,8 +51,9 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                         child: CNButton(
                           onPressed: () => _set('Default'),
                           modifiers: CNViewModifiers(
+                            shrinkWrap: false,
                             controlSize: _controlSize,
-                            constraints: BoxConstraints(minWidth: 300, maxWidth: 300),
+                            constraints: BoxConstraints(maxWidth: 300),
                             tint: tintColor,
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           ),
@@ -62,9 +63,10 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                               CNProgressView(
                                 progressViewStyle: progressViewStyle,
                                 modifiers: CNViewModifiers(
+                                  shrinkWrap: false,
                                   controlSize: CNControlSize.small,
                                   padding: EdgeInsets.only(right: 6),
-                                  constraints: BoxConstraints(minWidth: 20, maxWidth: 20),
+                                  constraints: BoxConstraints(maxWidth: 30),
                                 ),
                               ),
                             if (withIcon)
