@@ -190,7 +190,7 @@ class _CNToggleState extends State<CNToggle> with CNWidgetDebugIdMixin<CNToggle>
   void _onIntrinsicSizeChanged(double? width, double? height) {
     if (!mounted || width == null || height == null) return;
 
-    debugPrint('CNToggle intrinsic size changed: width=$width, height=$height');
+    // debugPrint('CNToggle intrinsic size changed: width=$width, height=$height');
 
     if (width == _intrinsicWidth && height == _intrinsicHeight) {
       return; // No change
@@ -262,7 +262,7 @@ class _CNToggleState extends State<CNToggle> with CNWidgetDebugIdMixin<CNToggle>
 
     if (_lastPayload == null) {
       if (_lastSerializedPayload != serializedPayload) {
-        debugPrint('$debugLogPrefix sending full update via setData: $serializedPayload');
+        // debugPrint('$debugLogPrefix sending full update via setData: $serializedPayload');
         await channel.invokeMethod('setData', payload);
       }
 
@@ -273,13 +273,13 @@ class _CNToggleState extends State<CNToggle> with CNWidgetDebugIdMixin<CNToggle>
 
     final patch = computeJsonSafePatch(_lastPayload!, payload);
     if (patch.isEmpty) {
-      debugPrint('$debugLogPrefix no patch to send (payload unchanged)');
+      // debugPrint('$debugLogPrefix no patch to send (payload unchanged)');
       _lastSerializedPayload = serializedPayload;
       return;
     }
 
     final serializedPatch = jsonEncode(patch);
-    debugPrint('$debugLogPrefix sending patch via applyPatch: $serializedPatch');
+    // debugPrint('$debugLogPrefix sending patch via applyPatch: $serializedPatch');
     await channel.invokeMethod('applyPatch', patch);
     _lastSerializedPayload = serializedPayload;
     _lastPayload = Map<String, dynamic>.from(payload);

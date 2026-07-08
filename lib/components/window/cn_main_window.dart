@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cupertino_native/style/cn_colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -128,6 +129,7 @@ class CNMainWindow extends StatefulWidget {
     this.sidebar,
     this.endSidebar,
     this.backgroundColor,
+    this.toolbarColor,
     this.toolbarTitle,
     this.toolbarGroups,
     this.toolbarShowSearch = false,
@@ -159,6 +161,9 @@ class CNMainWindow extends StatefulWidget {
 
   /// Optional leading sidebar.
   final CNSidebar? sidebar;
+
+  /// Toolbar color.
+  final Color? toolbarColor;
 
   /// Toolbar groups rendered by native SwiftUI toolbar bridge.
   final List<CNToolbarGroup>? toolbarGroups;
@@ -319,7 +324,7 @@ class _CNMainWindowState extends State<CNMainWindow> implements _CNMainWindowBin
     final groups = widget.toolbarGroups ?? const <CNToolbarGroup>[];
     final title = widget.toolbarTitle ?? '';
 
-    await CNToolbar.create(context: context, title: title, groups: groups, showSearch: widget.toolbarShowSearch);
+    await CNToolbar.create(context: context, title: title, groups: groups, showSearch: widget.toolbarShowSearch, toolbarColor: widget.toolbarColor);
 
     if (widget.onToolbarSearchChanged != null) {
       CNToolbar.onSearchChanged(widget.onToolbarSearchChanged!);

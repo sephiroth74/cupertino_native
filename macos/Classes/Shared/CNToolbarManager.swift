@@ -69,8 +69,21 @@ final class CNToolbarManager: NSObject, FlutterStreamHandler {
         eventChannel.setStreamHandler(self)
     }
 
+    func setToolbarColor(window: NSWindow, args: [String: Any], result: @escaping FlutterResult) {
+        if args.keys.contains("color") {
+            let colorInt: Int? = args["color"] as? Int
+            let color = colorInt != nil ? ColorUtils.colorFromARGB(colorInt!) : nil
+            DispatchQueue.main.async {
+                window.titlebarAppearsTransparent = color != nil ? true : false
+                window.backgroundColor = color ?? NSColor.windowBackgroundColor
+                result(nil)
+            }
+        } else {
+            result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing 'color' argument", details: nil))
+        }
+    }
+
     func makeToolbar(window: NSWindow, args: [String: Any], result: @escaping FlutterResult) {
-        // print("Making toolbar with args: \(args)")
         let title = (args["title"] as? String) ?? "Toolbar"
         let items = parseToolbarItems(args["items"])
         let showSearch = (args["showSearch"] as? Bool) ?? false

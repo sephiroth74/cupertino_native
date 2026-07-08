@@ -1,11 +1,12 @@
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_example/demos/test_demo.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/scheduler.dart';
 import 'demos/slider_demo.dart';
 import 'demos/toggle_demo.dart';
 import 'demos/segmented_control.dart';
-import 'demos/picker.dart';
+import 'demos/picker_demo.dart';
 import 'demos/icon.dart';
 import 'demos/image_demo.dart';
 import 'demos/popup_menu_button.dart';
@@ -151,7 +152,9 @@ class _DesktopDemoShell extends StatefulWidget {
 
 class _DesktopDemoShellState extends State<_DesktopDemoShell> {
   static const _entries = <_DemoEntry>[
+    _DemoEntry('Test', 'testtube.2', TestDemoPage()),
     _DemoEntry('Image', 'photo', ImageDemoPage()),
+    _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
     _DemoEntry('Text', 'text.viewfinder', TextDemoPage()),
     _DemoEntry('Label', 'textformat', LabelDemoPage()),
     _DemoEntry('Color Well', 'paintpalette', ColorWellDemoPage()),
@@ -160,7 +163,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Button', 'button.horizontal', ButtonDemoPage()),
     _DemoEntry('Menu', 'ellipsis.circle', MenuButtonDemoPage()),
     _DemoEntry('Toggle', 'switch.2', ToggleDemo()),
-    _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Segmented Control', 'rectangle.split.3x1', SegmentedControlDemoPage()),
@@ -202,13 +204,13 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     final visibleEntries = search.isEmpty
         ? _entries
         : _entries.where((entry) => entry.title.toLowerCase().contains(search)).toList();
-    final selectedEntry = _entries[_selectedIndex];
     final isDark = theme.brightness == Brightness.dark;
 
     return CNMainWindow(
       controller: _windowController,
       toolbarTitle: 'Cupertino Native',
       toolbarShowSearch: true,
+      toolbarColor: widget.accentColor,
       toolbarGroups: [
         CNToolbarGroup(
           id: 'left-window',
@@ -309,7 +311,9 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
                             entry.symbolName,
                             color: _selectedIndex == _entries.indexOf(entry)
                                 ? CupertinoColors.label.darkColor
-                                : isDark ? CupertinoColors.label.darkColor : CupertinoColors.label.color,
+                                : isDark
+                                ? CupertinoColors.label.darkColor
+                                : CupertinoColors.label.color,
                           ),
                         ),
                         selected: _selectedIndex == _entries.indexOf(entry),
@@ -323,26 +327,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-      endSidebar: CNSidebar(
-        shownByDefault: false,
-        startWidth: 280,
-        child: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.all(12),
-            children: [
-              const Text('Inspector', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 8),
-              Text('Sidebar sinistra: ${_windowController.isSidebarVisible ? 'aperta' : 'chiusa'}'),
-              const SizedBox(height: 4),
-              Text('Sidebar destra: ${_windowController.isTrailingSidebarVisible ? 'aperta' : 'chiusa'}'),
-              const SizedBox(height: 4),
-              Text('Selezione: ${selectedEntry.title}'),
-              const SizedBox(height: 4),
-              Text('Search: ${_searchQuery.isEmpty ? '-' : _searchQuery}'),
-            ],
           ),
         ),
       ),

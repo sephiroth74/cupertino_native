@@ -34,9 +34,13 @@ class CNToolbar {
     required String title,
     required List<CNToolbarGroup> groups,
     bool showSearch = false,
+    Color? toolbarColor,
   }) async {
     _controller.init();
     await _controller.makeToolbar(title: title, items: groups, showSearch: showSearch, context: context);
+    if (context.mounted) {
+      await _controller.setToolbarColor(toolbarColor, context);
+    }
   }
 
   /// Remove and dispose the toolbar

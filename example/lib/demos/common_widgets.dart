@@ -1,6 +1,5 @@
 import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
 class RightSideOptionContainer extends StatelessWidget {
@@ -81,7 +80,7 @@ class ColorPicker extends StatelessWidget {
           CNText(colorName),
           icon: CNImage(
             systemSymbolName: 'circle.fill',
-            modifiers: CNViewModifiers(tint: kSystemColors[colorName]),
+            modifiers: CNViewModifiers(tint: colors[colorName]),
           ),
         );
         // return CNText(colorName);

@@ -42,7 +42,7 @@ class CupertinoPickerNSView: NSView {
 
             switch call.method {
             case "getIntrinsicSize":
-                NSLog("\(logPrefix) method call received: \(call.method)")
+                // NSLog("\(logPrefix) method call received: \(call.method)")
                 var size = currentIntrinsicSize()
                 if isTransientIntrinsicSize(size) {
                     size = .zero
@@ -50,7 +50,7 @@ class CupertinoPickerNSView: NSView {
 
                 result(["width": size.width, "height": size.height])
             case "setData":
-                NSLog("\(logPrefix) method call received: \(call.method) with args: \(String(describing: call.arguments))")
+                // NSLog("\(logPrefix) method call received: \(call.method) with args: \(String(describing: call.arguments))")
                 if let parsed = CNPickerDeserializer.decode(call.arguments) {
                     measuredSize = nil
                     payload = parsed
@@ -62,7 +62,7 @@ class CupertinoPickerNSView: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing picker payload", details: nil))
                 }
             case "applyPatch":
-                NSLog("\(logPrefix) method call received: \(call.method) with args: \(String(describing: call.arguments))")
+                // NSLog("\(logPrefix) method call received: \(call.method) with args: \(String(describing: call.arguments))")
                 if let patch = CNChannelSerialization.asDict(call.arguments) {
                     measuredSize = nil
                     payload.applyPatch(patch)
@@ -98,12 +98,12 @@ class CupertinoPickerNSView: NSView {
             onSizeChange: { [weak self] newSize in
                 guard let self else { return }
                 if isTransientIntrinsicSize(newSize) {
-                    NSLog("\(logPrefix) ignoring transient intrinsic size: width=\(newSize.width), height=\(newSize.height)")
+                    // NSLog("\(logPrefix) ignoring transient intrinsic size: width=\(newSize.width), height=\(newSize.height)")
                     return
                 }
 
                 measuredSize = currentIntrinsicSize()
-                NSLog("\(logPrefix) onSizeChange. newSize: \(newSize), currentSize: \(measuredSize!)")
+                // NSLog("\(logPrefix) onSizeChange. newSize: \(newSize), currentSize: \(measuredSize!)")
 
                 channel.invokeMethod(
                     "intrinsicSizeChanged",
@@ -116,6 +116,7 @@ class CupertinoPickerNSView: NSView {
     }
 
     private func updateAppearance() {
+        // NSLog("\(logPrefix) updateAppearance. isDark: \(payload.isDark)")
         appearance = NSAppearance(named: payload.isDark ? .darkAqua : .aqua)
     }
 

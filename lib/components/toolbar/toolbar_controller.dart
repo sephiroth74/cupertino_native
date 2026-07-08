@@ -74,6 +74,17 @@ class CNToolbarController {
     }
   }
 
+  // ignore: public_member_api_docs
+  Future<void> setToolbarColor(Color? color, BuildContext context) async {
+    try {
+      final argbColor = resolveColorToArgb(color, context);
+      await platform.invokeMethod('setToolbarColor', {'color': argbColor});
+    } catch (e) {
+      debugPrint('Error setting toolbar color: $e');
+      rethrow;
+    }
+  }
+
   /// Clear/remove toolbar
   Future<void> clearToolbar() async {
     try {

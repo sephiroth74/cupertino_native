@@ -89,6 +89,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let imageFactory = CupertinoImageFactory(messenger: registrar.messenger)
         registrar.register(imageFactory, withId: "CupertinoNativeImage")
+
+        let testFactory = CupertinoTestViewFactory(messenger: registrar.messenger)
+        registrar.register(testFactory, withId: "CupertinoNativeTest")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -155,6 +158,18 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
             makeToolbar(args: args, result: result)
         case "clearToolbar":
             clearToolbar(result: result)
+        case "setToolbarColor":
+            guard let args = CNChannelSerialization.asDict(call.arguments) else {
+                result(
+                    FlutterError(
+                        code: "invalid_args",
+                        message: "setToolbarColor expects a map of arguments",
+                        details: nil,
+                    ),
+                )
+                return
+            }
+            setToolbarColor(args: args, result: result)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -322,6 +337,32 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         }
 
         manager.makeToolbar(window: window, args: args, result: result)
+    }
+
+    private func setToolbarColor(args: [String: Any], result: @escaping FlutterResult) {
+        guard let window = CupertinoNativePlugin.registrar?.view?.window else {
+            result(
+                FlutterError(
+                    code: "window_unavailable",
+                    message: "Unable to find host window for toolbar configuration",
+                    details: nil,
+                ),
+            )
+            return
+        }
+
+        guard let manager = CupertinoNativePlugin.toolbarManager else {
+            result(
+                FlutterError(
+                    code: "toolbar_manager_unavailable",
+                    message: "Toolbar manager is not initialized",
+                    details: nil,
+                ),
+            )
+            return
+        }
+
+        manager.setToolbarColor(window: window, args: args, result: result)
     }
 
     private func clearToolbar(result: @escaping FlutterResult) {

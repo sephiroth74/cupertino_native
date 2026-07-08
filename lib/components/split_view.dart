@@ -943,6 +943,9 @@ class _CNSplitViewState extends State<CNSplitView> implements _SplitViewControll
           final divider = _buildDivider(context);
           if (widget.axis == CNSplitAxis.horizontal) {
             return Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.max,
               children: [
                 AnimatedContainer(
                   duration: programmaticDuration,

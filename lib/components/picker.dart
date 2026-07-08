@@ -77,14 +77,14 @@ class _CNPickerState extends State<CNPicker> with CNWidgetDebugIdMixin<CNPicker>
 
   @override
   void didChangeDependencies() {
-    debugPrint('$debugLogPrefix didChangeDependencies');
+    // debugPrint('$debugLogPrefix didChangeDependencies');
     super.didChangeDependencies();
     _syncPropsToNativeIfNeeded();
   }
 
   @override
   void didUpdateWidget(covariant CNPicker oldWidget) {
-    debugPrint('$debugLogPrefix didUpdateWidget');
+    // debugPrint('$debugLogPrefix didUpdateWidget');
     super.didUpdateWidget(oldWidget);
     _syncPropsToNativeIfNeeded();
   }
@@ -104,12 +104,12 @@ class _CNPickerState extends State<CNPicker> with CNWidgetDebugIdMixin<CNPicker>
   }
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
-    debugPrint('$debugLogPrefix intrinsic size changed: width=$width, height=$height');
+    // debugPrint('$debugLogPrefix intrinsic size changed: width=$width, height=$height');
     if (!mounted || width == null || height == null) return;
 
     final hasExplicitTightWidth = widget.modifiers.constraints?.hasTightWidth ?? false;
     if (!hasExplicitTightWidth && width > 0 && width <= 12.0) {
-      debugPrint('$debugLogPrefix ignoring transient intrinsic width=$width before stable layout');
+      // debugPrint('$debugLogPrefix ignoring transient intrinsic width=$width before stable layout');
       return;
     }
 
@@ -155,7 +155,7 @@ class _CNPickerState extends State<CNPicker> with CNWidgetDebugIdMixin<CNPicker>
         _onIntrinsicSizeChanged((result['width'] as num?)?.toDouble(), (result['height'] as num?)?.toDouble());
       }
     } catch (e) {
-      debugPrint('$debugLogPrefix failed to get intrinsic size: $e');
+      // debugPrint('$debugLogPrefix failed to get intrinsic size: $e');
       // Fallback to default height
       _intrinsicWidth = null;
       _intrinsicHeight = null;

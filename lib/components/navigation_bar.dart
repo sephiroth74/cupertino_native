@@ -69,7 +69,7 @@ class CNNavigationBar extends StatelessWidget implements CNObstructingPreferredS
           children: [
             SizedBox(
               width: 160,
-              child: Align(alignment: Alignment.centerLeft, child: leading),
+              child: Align(alignment: Alignment.topCenter, child: leading),
             ),
             Expanded(
               child: Align(

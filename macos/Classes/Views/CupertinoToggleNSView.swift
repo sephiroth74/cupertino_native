@@ -37,7 +37,7 @@ class CupertinoToggleNSView: NSView {
 
         installRootView()
         updateAppearance()
-        NSLog("[CNToggle][Swift] Root view installed for viewId=\(viewId)")
+        // NSLog("[CNToggle][Swift] Root view installed for viewId=\(viewId)")
 
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self else {
@@ -48,26 +48,26 @@ class CupertinoToggleNSView: NSView {
             switch call.method {
             case "getIntrinsicSize":
                 let s = currentIntrinsicSize()
-                NSLog("[CNToggle][Swift] getIntrinsicSize -> width=\(s.width), height=\(s.height)")
+                // NSLog("[CNToggle][Swift] getIntrinsicSize -> width=\(s.width), height=\(s.height)")
                 result(["width": Double(s.width), "height": Double(s.height)])
             case "setData":
                 if let parsed: CNTogglePayload = CNChannelSerialization.decode(call.arguments) {
-                    NSLog("[CNToggle][Swift] setData received full payload")
+                    // NSLog("[CNToggle][Swift] setData received full payload")
                     payload = parsed
                     model.replace(with: payload)
                     updateAppearance()
-                    NSLog("[CNToggle][Swift] setData applied (full model replace)")
+                    // NSLog("[CNToggle][Swift] setData applied (full model replace)")
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Invalid toggle payload", details: nil))
                 }
             case "applyPatch":
                 if let patch = CNChannelSerialization.asDict(call.arguments) {
-                    NSLog("[CNToggle][Swift] applyPatch received keys=\(Array(patch.keys))")
+                    // NSLog("[CNToggle][Swift] applyPatch received keys=\(Array(patch.keys))")
                     payload.applyPatch(patch)
                     model.replace(with: payload)
                     updateAppearance()
-                    NSLog("[CNToggle][Swift] applyPatch applied")
+                    // NSLog("[CNToggle][Swift] applyPatch applied")
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Invalid toggle patch payload", details: nil))
@@ -117,8 +117,8 @@ class CupertinoToggleNSView: NSView {
                 self?.payload.value = newValue
                 self?.channel.invokeMethod("onChanged", arguments: ["value": newValue])
             },
-            onSizeChanged: { [weak self] newSize in
-                NSLog("CupertinoToggleNSView: onSizeChanged: \(newSize)")
+            onSizeChanged: { [weak self] _ in
+                // NSLog("CupertinoToggleNSView: onSizeChanged: \(newSize)")
                 self?.notifyIntrinsicSizeChanged()
             },
         )
