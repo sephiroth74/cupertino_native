@@ -315,18 +315,12 @@ class _CNImage2State extends State<CNImage2> with CNWidgetDebugIdMixin<CNImage2>
         } else {
           logDebug('shrink=false mode: lastConstraints=$lastConstraints');
 
-          double resolvedWidth = intrinsicWidth ?? lastConstraints!.tightWidth ?? lastConstraints!.maxWidth;
-          double resolvedHeight = intrinsicHeight ?? lastConstraints!.tightHeight ?? lastConstraints!.maxHeight;
+          double resolvedWidth = lastConstraints!.tightWidth ?? lastConstraints!.maxWidth;
+          double resolvedHeight = lastConstraints!.tightHeight ?? lastConstraints!.maxHeight;
 
           logDebug('shrink=false mode: resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight');
 
-          if (!resolvedWidth.isFinite) {
-            resolvedWidth = 0;
-          }
-
-          if (!resolvedHeight.isFinite) {
-            resolvedHeight = 0;
-          }
+          assert(resolvedWidth.isFinite && resolvedHeight.isFinite, 'Resolved width and height must be finite when shrink is false.');
 
           return ConstrainedBox(
             constraints: BoxConstraints(

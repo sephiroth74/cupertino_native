@@ -8,7 +8,7 @@ import 'package:flutter/cupertino.dart';
 
 const kMaxImages = 50;
 
-const kShrink = true;
+const kShrink = false;
 
 const _kBackgroundColors = {'Default': null, 'Light': CNColors.white, 'Dark': CNColors.black};
 const _kImageNames = [
