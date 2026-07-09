@@ -126,6 +126,7 @@ class CNImage2 extends StatefulWidget with CNWidget {
   @override
   String get nativeViewType => _kNativeViewType;
 
+  /// Converts the widget to a map for sending to the native SwiftUI view.
   Map<String, dynamic> toMap(BuildContext context, {BoxConstraints? constraints}) {
     final payload = <String, dynamic>{'systemSymbolName': systemSymbolName};
     payload['font'] = font?.toMap();
