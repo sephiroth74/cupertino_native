@@ -626,7 +626,7 @@ class _TestDemoPageState extends State<TestDemoPage> {
                       currentValue: color1,
                       onValueChanged: (index) => setState(() {
                         color1 = kSystemColors.values.elementAt(index);
-                        colors = [if (color1 != null) color1!, if (color2 != null) color2!, if (color3 != null) color3!];
+                        colors = [?color1, ?color2, ?color3];
                       }),
                     ),
                     const SizedBox(height: 8),
@@ -637,7 +637,7 @@ class _TestDemoPageState extends State<TestDemoPage> {
                       onValueChanged: (index) => setState(() {
                         if (paletteColors) {
                           color2 = kSystemColors.values.elementAt(index);
-                          colors = [if (color1 != null) color1!, if (color2 != null) color2!, if (color3 != null) color3!];
+                          colors = [?color1, ?color2, ?color3];
                         }
                       }),
                     ),
@@ -649,7 +649,7 @@ class _TestDemoPageState extends State<TestDemoPage> {
                       onValueChanged: (index) => setState(() {
                         if (paletteColors) {
                           color3 = kSystemColors.values.elementAt(index);
-                          colors = [if (color1 != null) color1!, if (color2 != null) color2!, if (color3 != null) color3!];
+                          colors = [?color1, ?color2, ?color3];
                         }
                       }),
                     ),

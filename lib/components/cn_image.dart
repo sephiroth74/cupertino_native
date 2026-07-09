@@ -14,6 +14,7 @@ const _kNativeViewType = 'CupertinoNativeImage2';
 mixin CNWidget on Widget {
   late final BoxConstraints? constraints;
   late final Color? foregroundColor;
+  late final String? nativeViewType;
   late final bool shrink;
   late final Color? tint;
 
@@ -53,30 +54,48 @@ class CNImage2 extends StatefulWidget with CNWidget {
     this.foregroundStyleColors,
   });
 
+  /// Optional font to apply to the image. If null, the image will be rendered with its original size.
   final CNFont? font;
+
+  /// Optional list of colors to apply to the image's foreground style. If null, the image will be rendered with its original colors.
   final List<Color>? foregroundStyleColors;
+
+  /// Optional SwiftUI symbol color rendering mode.
   final CNSymbolColorRenderingMode? symbolColorRenderingMode;
+
+  /// Optional SwiftUI symbol rendering mode.
   final CNSymbolRenderingMode? symbolRenderingMode;
+
+  /// The name of the system symbol to display. This should be a valid SF Symbols name.
   final String systemSymbolName;
 
+  /// Optional constraints to apply to the image. If null, the image will size itself to its intrinsic size.
+  /// If shrink is true, the image will size itself to its intrinsic size regardless of the constraints.
   @override
   // ignore: overridden_fields
   final BoxConstraints? constraints;
 
+  /// The foreground color to apply to the image. If null, the image will be rendered with its original colors.
   @override
   // ignore: overridden_fields
   final Color? foregroundColor;
 
+  /// Whether the widget should shrink to fit its content. If true, the widget will size itself to the intrinsic size of the image. If false, the widget will expand to fill its parent constraints.
   @override
   // ignore: overridden_fields
   final bool shrink;
 
+  /// The tint color to apply to the image. If null, the image will be rendered with its original colors.
   @override
   // ignore: overridden_fields
   final Color? tint;
 
   @override
   State<CNImage2> createState() => _CNImage2State();
+
+  /// Native swift view type
+  @override
+  String get nativeViewType => _kNativeViewType;
 
   Map<String, dynamic> toMap(BuildContext context, {BoxConstraints? constraints}) {
     final payload = <String, dynamic>{'systemSymbolName': systemSymbolName};
@@ -216,7 +235,7 @@ class _CNImage2State extends State<CNImage2> with CNWidgetDebugIdMixin<CNImage2>
 
   Future<void> onPlatformViewCreated(int id) async {
     logDebug('onPlatformViewCreated id=$id');
-    channel = MethodChannel('${_kNativeViewType}_$id');
+    channel = MethodChannel('${widget.nativeViewType}_$id');
     channel?.setMethodCallHandler(onMethodCall);
     //cacheCurrentProps();
   }
@@ -276,7 +295,7 @@ class _CNImage2State extends State<CNImage2> with CNWidgetDebugIdMixin<CNImage2>
         lastPayload = toPayload(constraints: lastConstraints);
 
         Widget platformView = AppKitView(
-          viewType: _kNativeViewType,
+          viewType: widget.nativeViewType,
           creationParams: lastPayload!,
           creationParamsCodec: const StandardMessageCodec(),
           onPlatformViewCreated: onPlatformViewCreated,
