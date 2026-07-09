@@ -463,8 +463,8 @@ const _kImageNames = [
 
 const _kBackgroundColors = {'Default': null, 'Light': CNColors.white, 'Dark': CNColors.black};
 
-const kShrink = false;
-const kMaxImages = 10;
+const kShrink = true;
+const kMaxImages = 1;
 
 class TestDemoPage extends StatefulWidget {
   const TestDemoPage({super.key});
@@ -481,6 +481,7 @@ class _TestDemoPageState extends State<TestDemoPage> {
   CNSymbolColorRenderingMode colorMode = CNSymbolColorRenderingMode.flat;
   List<Color> colors = [];
   CNFont font = CNFont.system(CNFontSize.points(32), weight: CNFontWeight.regular);
+  double fontSize = 32;
   Color? foregroundColor;
   bool isDark = false;
   CNSymbolRenderingMode renderingMode = CNSymbolRenderingMode.monochrome;
@@ -503,8 +504,8 @@ class _TestDemoPageState extends State<TestDemoPage> {
   }) {
     final theme = CNTheme.of(context);
     final labelStyle = theme.typography.caption1;
-    final containerSize = shrink ? null : (font.size.points ?? 24) * 4;
-    final imageSize = shrink ? null : (font.size.points ?? 24) * 3;
+    final containerSize = (font.size.points ?? 24) * 4;
+    final imageSize = (font.size.points ?? 24) * 3;
 
     final realForegroundColor = isDark && foregroundColor is CupertinoDynamicColor ? foregroundColor.darkColor : foregroundColor;
     final realForegroundStyleColors = foregroundStyleColors.map((color) {
@@ -517,6 +518,9 @@ class _TestDemoPageState extends State<TestDemoPage> {
     final widget = Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             decoration: BoxDecoration(
@@ -524,6 +528,7 @@ class _TestDemoPageState extends State<TestDemoPage> {
               borderRadius: BorderRadius.circular(16),
               color: backgroundColor,
             ),
+            padding: shrink ? const EdgeInsets.all(16) : const EdgeInsets.all(0),
             child: CNTest(
               systemSymbolName: systemSymbolName,
               shrink: shrink,
@@ -532,7 +537,7 @@ class _TestDemoPageState extends State<TestDemoPage> {
               symbolColorRenderingMode: symbolColorRenderingMode,
               foregroundStyleColors: realForegroundStyleColors,
               foregroundColor: realForegroundColor,
-              constraints: imageSize != null ? BoxConstraints.tightFor(width: imageSize, height: imageSize) : null,
+              constraints: BoxConstraints.tightFor(width: imageSize, height: imageSize),
             ),
           ),
           const SizedBox(height: 6),
@@ -546,7 +551,7 @@ class _TestDemoPageState extends State<TestDemoPage> {
     if (!shrink) {
       return SizedBox(width: containerSize, child: widget);
     } else {
-      return widget;
+      return SizedBox(width: containerSize, child: widget);
     }
   }
 
@@ -617,47 +622,47 @@ class _TestDemoPageState extends State<TestDemoPage> {
                 'Colors': Column(
                   children: [
                     ColorPicker(
-                      colors: kNonNullColors,
+                      colors: kSystemColors,
                       currentValue: color1,
                       onValueChanged: (index) => setState(() {
-                        color1 = kNonNullColors.values.elementAt(index);
+                        color1 = kSystemColors.values.elementAt(index);
                         colors = [if (color1 != null) color1!, if (color2 != null) color2!, if (color3 != null) color3!];
                       }),
                     ),
                     const SizedBox(height: 8),
                     ColorPicker(
-                      colors: kNonNullColors,
+                      colors: kSystemColors,
                       currentValue: color2,
                       enabled: paletteColors,
                       onValueChanged: (index) => setState(() {
                         if (paletteColors) {
-                          color2 = kNonNullColors.values.elementAt(index);
+                          color2 = kSystemColors.values.elementAt(index);
                           colors = [if (color1 != null) color1!, if (color2 != null) color2!, if (color3 != null) color3!];
                         }
                       }),
                     ),
                     const SizedBox(height: 8),
                     ColorPicker(
-                      colors: kNonNullColors,
+                      colors: kSystemColors,
                       currentValue: color3,
                       enabled: paletteColors,
                       onValueChanged: (index) => setState(() {
                         if (paletteColors) {
-                          color3 = kNonNullColors.values.elementAt(index);
+                          color3 = kSystemColors.values.elementAt(index);
                           colors = [if (color1 != null) color1!, if (color2 != null) color2!, if (color3 != null) color3!];
                         }
                       }),
                     ),
                   ],
                 ),
-                'Foreground Color': ColorPicker(
+                'Foreground': ColorPicker(
                   colors: kSystemColors,
                   currentValue: foregroundColor,
                   onValueChanged: (index) => setState(() {
                     foregroundColor = kSystemColors.values.elementAt(index);
                   }),
                 ),
-                'Background Color': ColorPicker(
+                'Background': ColorPicker(
                   colors: _kBackgroundColors,
                   currentValue: backgroundColor,
                   onValueChanged: (index) => setState(() {
@@ -682,9 +687,19 @@ class _TestDemoPageState extends State<TestDemoPage> {
                 ),
                 'Font Weight': CNPicker(
                   selectedIndex: CNFontWeight.values.indexOf(font.weight ?? CNFontWeight.regular),
-                  onValueChanged: (index) => setState(() => font = font.copyWith(weight: CNFontWeight.values[index])),
+                  onValueChanged: (index) =>
+                      setState(() => font = font.copyWith(weight: CNFontWeight.values[index], size: CNFontSize.points(fontSize))),
                   items: CNFontWeight.values.map((weight) => CNText(weight.name)).toList(),
                   pickerStyle: CNPickerStyle.automatic,
+                ),
+                'Font Size': CNSlider(
+                  value: fontSize,
+                  min: 8,
+                  max: 64,
+                  onChanged: (value) => setState(() {
+                    fontSize = value;
+                    font = font.copyWith(size: CNFontSize.points(fontSize));
+                  }),
                 ),
               },
             ),

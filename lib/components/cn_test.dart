@@ -228,6 +228,32 @@ class _CNTestState extends State<CNTest> with CNWidgetDebugIdMixin<CNTest> {
     });
   }
 
+  Size computeDefaultSize() {
+    final double fontSize;
+    if (widget.font != null) {
+      if (widget.font!.size.points != null) {
+        fontSize = widget.font!.size.points! + 4;
+      } else if (widget.font!.size.preset != null) {
+        switch (widget.font!.size.preset!) {
+          case CNFontSizePreset.system:
+            fontSize = 18;
+            break;
+          case CNFontSizePreset.smallSystem:
+            fontSize = 15;
+            break;
+          case CNFontSizePreset.label:
+            fontSize = 14;
+            break;
+        }
+      } else {
+        fontSize = 36;
+      }
+    } else {
+      fontSize = 36;
+    }
+    return Size(fontSize, fontSize);
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -260,8 +286,9 @@ class _CNTestState extends State<CNTest> with CNWidgetDebugIdMixin<CNTest> {
         );
 
         if (widget.shrink) {
-          final resolvedWidth = intrinsicWidth ?? constraints.minWidth;
-          final resolvedHeight = intrinsicHeight ?? constraints.minHeight;
+          final defaultSize = computeDefaultSize();
+          final resolvedWidth = intrinsicWidth ?? constraints.tightWidth ?? defaultSize.width;
+          final resolvedHeight = intrinsicHeight ?? constraints.tightHeight ?? defaultSize.height;
           logDebug('shrink mode: resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight');
           return SizedBox(width: resolvedWidth, height: resolvedHeight, child: platformView);
         } else {

@@ -16,7 +16,7 @@ class RightSideOptionContainer extends StatelessWidget {
         width: 350,
         decoration: BoxDecoration(
           color: CNTheme.of(context).fillPrimaryColor,
-          border: Border.all(color: CNTheme.of(context).separatorColor, width: 1),
+          // border: Border.all(color: CNTheme.of(context).separatorColor, width: 1),
           borderRadius: BorderRadius.circular(12),
         ),
         padding: const EdgeInsets.all(16),
@@ -72,7 +72,7 @@ class ColorPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CNPicker(
-      modifiers: CNViewModifiers(enabled: enabled),
+      modifiers: CNViewModifiers(enabled: enabled, constraints: BoxConstraints.tightFor(width: 150), shrinkWrap: false),
       selectedIndex: currentValue == null ? 0 : colors.values.toList().indexOf(currentValue!),
       onValueChanged: enabled ? (index) => onValueChanged(index) : null,
       items: colors.keys.map((colorName) {
