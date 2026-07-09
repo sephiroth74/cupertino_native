@@ -5,6 +5,7 @@ struct CNImage2Payload: CNChannelDeserializable {
     var viewDebugId: String
     var shrink: Bool
     var constraints: CNBoxConstraintsPayload?
+    var paddings: CNPaddingsPayload?
     var font: [String: Any]?
     var tint: Int?
     var foregroundColor: Int?
@@ -23,6 +24,7 @@ struct CNImage2Payload: CNChannelDeserializable {
         symbolRenderingMode = nil
         symbolColorRenderingMode = nil
         foregroundStyleColors = []
+        paddings = nil
     }
 
     init?(channel: [String: Any], viewId: Int64) {
@@ -72,6 +74,16 @@ struct CNImage2Payload: CNChannelDeserializable {
             }
         }
 
+        if channel.keys.contains("paddings") {
+            if channel["paddings"] is NSNull {
+                paddings = nil
+            } else if let paddingsMap = channel["paddings"] as? [String: Any] {
+                paddings = CNPaddingsPayload.fromChannel(paddingsMap)
+            } else {
+                paddings = nil
+            }
+        }
+
         if channel.keys.contains("tint") {
             tint = CNChannelDeserialization.decodeInt(channel["tint"])
         }
@@ -110,6 +122,7 @@ struct CNImage2Payload: CNChannelDeserializable {
         let symbolRenderingModeKey = symbolRenderingMode ?? "nil"
         let symbolColorRenderingModeKey = symbolColorRenderingMode ?? "nil"
         let foregroundStyleColorsKey = foregroundStyleColors.map { String(describing: $0) }.joined(separator: ",")
+        let paddingsKey = paddings?.identityKey() ?? "nil"
         return [
             viewDebugId,
             systemSymbolName,
@@ -121,6 +134,7 @@ struct CNImage2Payload: CNChannelDeserializable {
             symbolRenderingModeKey,
             symbolColorRenderingModeKey,
             foregroundStyleColorsKey,
+            paddingsKey,
         ].joined(separator: "|")
     }
 }

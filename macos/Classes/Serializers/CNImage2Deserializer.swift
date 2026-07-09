@@ -22,6 +22,7 @@ enum CNImage2Deserializer {
             view = applyTint(payload.tint, to: view)
             view = applyColorRenderingMode(to: view, payload: payload)
             view = applyRenderingMode(to: view, payload: payload)
+            view = applyPaddings(payload.paddings, to: view)
 
             if let onSizeChanged {
                 view = AnyView(
@@ -35,6 +36,23 @@ enum CNImage2Deserializer {
 
             return AnyView(view.id(identityKey(for: payload)))
         }
+    }
+
+    static func applyPaddings(_ paddings: CNPaddingsPayload?, to view: AnyView) -> AnyView {
+        guard let paddings else {
+            return view
+        }
+
+        return AnyView(
+            view.padding(
+                EdgeInsets(
+                    top: paddings.top,
+                    leading: paddings.leading,
+                    bottom: paddings.bottom,
+                    trailing: paddings.trailing,
+                ),
+            ),
+        )
     }
 
     static func applyConstraints(constraints: CNBoxConstraintsPayload?, shrink: Bool, to view: AnyView) -> AnyView {

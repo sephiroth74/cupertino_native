@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct CNBoxConstraintsPayload {
+struct CNBoxConstraintsPayload: Identifiable {
     let minWidth: CGFloat?
     let maxWidth: CGFloat?
     let minHeight: CGFloat?

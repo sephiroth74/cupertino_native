@@ -1,40 +1,47 @@
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:cupertino_native_example/demos/test_demo.dart';
+import 'package:cupertino_native_example/demos/cn_image_demo.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/scheduler.dart';
-import 'demos/slider_demo.dart';
-import 'demos/toggle_demo.dart';
-import 'demos/segmented_control.dart';
-import 'demos/picker_demo.dart';
-import 'demos/icon.dart';
-import 'demos/image_demo.dart';
-import 'demos/popup_menu_button.dart';
-import 'demos/menu_demo.dart';
-import 'demos/button_demo.dart';
-import 'demos/color_well_demo.dart';
-import 'demos/path_control.dart';
-import 'demos/progress_demo.dart';
-import 'demos/level_indicators.dart';
-import 'demos/stepper.dart';
-import 'demos/date_picker.dart';
-import 'demos/search_field.dart';
-import 'demos/text_field.dart';
-import 'demos/text_demo.dart';
-import 'demos/secure_text_field.dart';
-import 'demos/text_view.dart';
-import 'demos/combo_box.dart';
-import 'demos/alert.dart';
-import 'demos/popover.dart';
-import 'demos/context_menu.dart';
-import 'demos/label_demo.dart';
-import 'demos/sheet.dart';
-import 'demos/split_view.dart';
-import 'demos/group_box.dart';
-import 'demos/tab_view.dart';
-import 'demos/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:system_theme/system_theme.dart';
+
+import 'demos/alert.dart';
+import 'demos/button_demo.dart';
+import 'demos/color_well_demo.dart';
+import 'demos/combo_box.dart';
+import 'demos/context_menu.dart';
+import 'demos/date_picker.dart';
+import 'demos/group_box.dart';
+import 'demos/icon.dart';
+import 'demos/image_demo.dart';
+import 'demos/label_demo.dart';
+import 'demos/level_indicators.dart';
+import 'demos/menu_demo.dart';
+import 'demos/path_control.dart';
+import 'demos/picker_demo.dart';
+import 'demos/popover.dart';
+import 'demos/popup_menu_button.dart';
+import 'demos/progress_demo.dart';
+import 'demos/search_field.dart';
+import 'demos/secure_text_field.dart';
+import 'demos/segmented_control.dart';
+import 'demos/sheet.dart';
+import 'demos/slider_demo.dart';
+import 'demos/split_view.dart';
+import 'demos/stepper.dart';
+import 'demos/tab_view.dart';
+import 'demos/text_demo.dart';
+import 'demos/text_field.dart';
+import 'demos/text_view.dart';
+import 'demos/theme.dart';
+import 'demos/toggle_demo.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemTheme.accentColor.load();
+  runApp(const MyApp());
+}
 
 const _systemColors = <MapEntry<String, Color>>[
   MapEntry('Red', CNColors.red),
@@ -48,12 +55,6 @@ const _systemColors = <MapEntry<String, Color>>[
   MapEntry('Pink', CNColors.pink),
   MapEntry('Gray', CNColors.gray),
 ];
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await SystemTheme.accentColor.load();
-  runApp(const MyApp());
-}
 
 class AppTheme extends ChangeNotifier {
   ThemeMode _mode = ThemeMode.system;
@@ -73,70 +74,12 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  Color? _accentColor;
+class _DemoEntry {
+  const _DemoEntry(this.title, this.symbolName, this.page);
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    setState(() {});
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    var dispatcher = SchedulerBinding.instance.platformDispatcher;
-
-    // This callback is called every time the brightness changes.
-    dispatcher.onPlatformBrightnessChanged = () {
-      var brightness = dispatcher.platformBrightness;
-      debugPrint('Platform brightness changed: $brightness');
-      setState(() {});
-    };
-  }
-
-  void _setAccentColor(Color color) {
-    setState(() {
-      _accentColor = color;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SystemThemeBuilder(
-      builder: (context, color) {
-        debugPrint('System accent color: ${color.accent}');
-        _accentColor ??= color.accent;
-        return ChangeNotifierProvider(
-          create: (_) => AppTheme(),
-          builder: (context, child) {
-            final appTheme = context.watch<AppTheme>();
-            final brightness = appTheme.mode == ThemeMode.system
-                ? WidgetsBinding.instance.platformDispatcher.platformBrightness
-                : (appTheme.mode == ThemeMode.dark ? Brightness.dark : Brightness.light);
-
-            debugPrint('App brightness: $brightness, accent color: $_accentColor');
-
-            return CNDesktopApp(
-              debugShowCheckedModeBanner: false,
-              themeMode: appTheme.mode,
-              theme: CNThemeData(brightness: brightness, primaryColor: _accentColor ?? color.accent),
-              home: _DesktopDemoShell(
-                isDarkMode: brightness == Brightness.dark,
-                accentColor: _accentColor ?? color.accent,
-                onSelectAccentColor: _setAccentColor,
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
+  final Widget page;
+  final String symbolName;
+  final String title;
 }
 
 class _DesktopDemoShell extends StatefulWidget {
@@ -152,7 +95,7 @@ class _DesktopDemoShell extends StatefulWidget {
 
 class _DesktopDemoShellState extends State<_DesktopDemoShell> {
   static const _entries = <_DemoEntry>[
-    _DemoEntry('Test', 'testtube.2', TestDemoPage()),
+    _DemoEntry('CNImage', 'testtube.2', CNImage2DemoPage()),
     _DemoEntry('Image', 'photo', ImageDemoPage()),
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
     _DemoEntry('Text', 'text.viewfinder', TextDemoPage()),
@@ -335,10 +278,68 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
   }
 }
 
-class _DemoEntry {
-  const _DemoEntry(this.title, this.symbolName, this.page);
+class _MyAppState extends State<MyApp> {
+  Color? _accentColor;
 
-  final Widget page;
-  final String symbolName;
-  final String title;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    var dispatcher = SchedulerBinding.instance.platformDispatcher;
+
+    // This callback is called every time the brightness changes.
+    dispatcher.onPlatformBrightnessChanged = () {
+      var brightness = dispatcher.platformBrightness;
+      debugPrint('Platform brightness changed: $brightness');
+      setState(() {});
+    };
+  }
+
+  void _setAccentColor(Color color) {
+    setState(() {
+      _accentColor = color;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SystemThemeBuilder(
+      builder: (context, color) {
+        debugPrint('System accent color: ${color.accent}');
+        _accentColor ??= color.accent;
+        return ChangeNotifierProvider(
+          create: (_) => AppTheme(),
+          builder: (context, child) {
+            final appTheme = context.watch<AppTheme>();
+            final brightness = appTheme.mode == ThemeMode.system
+                ? WidgetsBinding.instance.platformDispatcher.platformBrightness
+                : (appTheme.mode == ThemeMode.dark ? Brightness.dark : Brightness.light);
+
+            debugPrint('App brightness: $brightness, accent color: $_accentColor');
+
+            return CNDesktopApp(
+              debugShowCheckedModeBanner: false,
+              themeMode: appTheme.mode,
+              theme: CNThemeData(brightness: brightness, primaryColor: _accentColor ?? color.accent),
+              home: _DesktopDemoShell(
+                isDarkMode: brightness == Brightness.dark,
+                accentColor: _accentColor ?? color.accent,
+                onSelectAccentColor: _setAccentColor,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 }

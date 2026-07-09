@@ -1,5 +1,3 @@
-// ignore_for_file: public_member_api_docs
-
 import 'package:collection/collection.dart';
 import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/components/cn_widget_debug_id_mixin.dart';
@@ -11,13 +9,27 @@ import 'package:flutter/widgets.dart';
 const _kNativeViewType = 'CupertinoNativeImage2';
 
 @immutable
+/// Base class for SwiftUI native macOS image widgets.
 mixin CNWidget on Widget {
+  /// Optional constraints to apply to the widget. If null, the image will size itself to its intrinsic size.
   late final BoxConstraints? constraints;
+
+  /// The foreground color to apply to the widget. If null, the image will be rendered with its original colors.
   late final Color? foregroundColor;
+
+  /// Native view type to use for the widget for the SwiftUI native macOS view. This is used to register the view with the Flutter platform view system.
   late final String? nativeViewType;
+
+  /// Optional paddings to apply to the widget. If null, the image will size itself to its intrinsic size.
+  late final EdgeInsetsGeometry? paddings;
+
+  /// Whether the widget should shrink to fit its content. If true, the widget will size itself to the intrinsic size of the image. If false, the widget will expand to fill its parent constraints.
   late final bool shrink;
+
+  /// The tint color to apply to the widget. If null, the image will be rendered with its original colors.
   late final Color? tint;
 
+  /// Converts the widget to a payload map for sending to the native SwiftUI view.
   Map<String, dynamic> toPayload(
     BuildContext context, {
     required Map<String, dynamic> payload,
@@ -26,6 +38,16 @@ mixin CNWidget on Widget {
     payload['foregroundColor'] = resolveColorToArgb(foregroundColor, context);
     payload['tint'] = resolveColorToArgb(tint, context);
     payload['shrink'] = shrink;
+
+    if (paddings != null) {
+      final resolvedPadding = paddings!.resolve(Directionality.of(context));
+      payload['paddings'] = {
+        'top': resolvedPadding.top,
+        'leading': resolvedPadding.left,
+        'bottom': resolvedPadding.bottom,
+        'trailing': resolvedPadding.right,
+      };
+    }
 
     if (constraints != null) {
       payload['constraints'] = {
@@ -40,7 +62,9 @@ mixin CNWidget on Widget {
 }
 
 @immutable
+/// A SwiftUI Image-backed native macOS image widget.
 class CNImage2 extends StatefulWidget with CNWidget {
+  /// Creates a new image widget.
   CNImage2({
     super.key,
     required this.systemSymbolName,
@@ -52,6 +76,7 @@ class CNImage2 extends StatefulWidget with CNWidget {
     this.symbolRenderingMode,
     this.symbolColorRenderingMode,
     this.foregroundStyleColors,
+    this.paddings,
   });
 
   /// Optional font to apply to the image. If null, the image will be rendered with its original size.
@@ -79,6 +104,10 @@ class CNImage2 extends StatefulWidget with CNWidget {
   @override
   // ignore: overridden_fields
   final Color? foregroundColor;
+
+  @override
+  // ignore: overridden_fields
+  final EdgeInsetsGeometry? paddings;
 
   /// Whether the widget should shrink to fit its content. If true, the widget will size itself to the intrinsic size of the image. If false, the widget will expand to fill its parent constraints.
   @override
@@ -159,7 +188,11 @@ class _CNImage2State extends State<CNImage2> with CNWidgetDebugIdMixin<CNImage2>
     } else {
       fontSize = 36;
     }
-    return Size(fontSize, fontSize);
+
+    final double defaultWidth = fontSize + (widget.paddings?.horizontal ?? 0);
+    final double defaultHeight = fontSize + (widget.paddings?.vertical ?? 0);
+
+    return Size(defaultWidth, defaultHeight);
   }
 
   Map<String, dynamic> computePatch(Map<String, dynamic> oldMap, Map<String, dynamic> newMap) {
@@ -179,6 +212,10 @@ class _CNImage2State extends State<CNImage2> with CNWidgetDebugIdMixin<CNImage2>
 
     if (!mapEquals(newMap['constraints'], oldMap['constraints'])) {
       patch['constraints'] = newMap['constraints'];
+    }
+
+    if (!mapEquals(newMap['paddings'], oldMap['paddings'])) {
+      patch['paddings'] = newMap['paddings'];
     }
 
     if (!DeepCollectionEquality().equals(newMap['font'], oldMap['font'])) {
@@ -277,6 +314,10 @@ class _CNImage2State extends State<CNImage2> with CNWidgetDebugIdMixin<CNImage2>
 
   @override
   Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.macOS) {
+      return const SizedBox.shrink();
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
         lastConstraints = !widget.shrink && widget.constraints != null
@@ -320,7 +361,10 @@ class _CNImage2State extends State<CNImage2> with CNWidgetDebugIdMixin<CNImage2>
 
           logDebug('shrink=false mode: resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight');
 
-          assert(resolvedWidth.isFinite && resolvedHeight.isFinite, 'Resolved width and height must be finite when shrink is false.');
+          assert(
+            resolvedWidth.isFinite && resolvedHeight.isFinite,
+            'Resolved width and height must be finite when shrink is false.',
+          );
 
           return ConstrainedBox(
             constraints: BoxConstraints(

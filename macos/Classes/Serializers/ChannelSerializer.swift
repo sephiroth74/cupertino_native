@@ -1,8 +1,11 @@
 import SwiftUI
 
-protocol CNChannelDeserializable {
-    init?(channel: [String: Any], viewId: Int64)
+protocol Identifiable {
     func identityKey() -> String
+}
+
+protocol CNChannelDeserializable: Identifiable {
+    init?(channel: [String: Any], viewId: Int64)
     var viewDebugId: String { get }
 }
 

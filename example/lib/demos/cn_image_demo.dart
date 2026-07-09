@@ -8,7 +8,7 @@ import 'package:flutter/cupertino.dart';
 
 const kMaxImages = 50;
 
-const kShrink = false;
+const kShrink = true;
 
 const _kBackgroundColors = {'Default': null, 'Light': CNColors.white, 'Dark': CNColors.black};
 const _kImageNames = [
@@ -466,14 +466,14 @@ const _kImageNames = [
   "arrowtriangle.down.2.fill",
 ];
 
-class TestDemoPage extends StatefulWidget {
-  const TestDemoPage({super.key});
+class CNImage2DemoPage extends StatefulWidget {
+  const CNImage2DemoPage({super.key});
 
   @override
-  State<TestDemoPage> createState() => _TestDemoPageState();
+  State<CNImage2DemoPage> createState() => _CNImage2DemoPageState();
 }
 
-class _TestDemoPageState extends State<TestDemoPage> {
+class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
   Color? backgroundColor;
   CupertinoDynamicColor? color1;
   CupertinoDynamicColor? color2;
@@ -538,11 +538,18 @@ class _TestDemoPageState extends State<TestDemoPage> {
               foregroundStyleColors: realForegroundStyleColors,
               foregroundColor: realForegroundColor,
               constraints: BoxConstraints.tightFor(width: imageSize, height: imageSize),
+              paddings: EdgeInsets.all(8.0),
             ),
           ),
           const SizedBox(height: 6),
           Center(
-            child: Text(systemSymbolName, style: labelStyle, maxLines: 1, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis,),
+            child: Text(
+              systemSymbolName,
+              style: labelStyle,
+              maxLines: 1,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
@@ -572,6 +579,8 @@ class _TestDemoPageState extends State<TestDemoPage> {
                 child: Wrap(
                   clipBehavior: Clip.hardEdge,
                   alignment: WrapAlignment.start,
+                  runSpacing: 16.0,
+                  spacing: 16.0,
                   children: _kImageNames.getRange(0, min(kMaxImages, _kImageNames.length)).map((name) {
                     return _symbolRow(
                       systemSymbolName: name,
