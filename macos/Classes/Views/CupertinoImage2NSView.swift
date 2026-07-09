@@ -2,24 +2,24 @@ import Cocoa
 import FlutterMacOS
 import SwiftUI
 
-class CupertinoTestNSView: NSView {
+class CupertinoImage2NSView: NSView {
     private let channel: FlutterMethodChannel
     private let hostingView: NSHostingView<AnyView>
-    private let model: CNTestViewModel
-    private var payload: CNTestPayload
+    private let model: CNImage2ViewModel
+    private var payload: CNImage2Payload
     private var measuredSize: CGSize?
 
     private var logPrefix: String {
         let debugId = payload.viewDebugId
-        return "[CNTest][\(debugId)][Swift]"
+        return "[CNImage2][\(debugId)][Swift]"
     }
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
-        channel = FlutterMethodChannel(name: "CupertinoNativeTest_\(viewId)", binaryMessenger: messenger)
+        channel = FlutterMethodChannel(name: "CupertinoNativeImage2_\(viewId)", binaryMessenger: messenger)
         hostingView = NSHostingView(rootView: AnyView(EmptyView()))
 
         payload = CNChannelDeserialization.decode(args, viewId: viewId) ?? Self.defaultPayload(viewId)
-        model = CNTestViewModel(payload: payload)
+        model = CNImage2ViewModel(payload: payload)
 
         super.init(frame: .zero)
 
@@ -43,7 +43,7 @@ class CupertinoTestNSView: NSView {
             case "setData":
                 if let args = CNChannelDeserialization.asDict(call.arguments) {
                     NSLog("\(logPrefix) setData received full payload keys=\(Array(args.keys))")
-                    guard let decoded = CNTestPayload(channel: args, viewId: viewId) else {
+                    guard let decoded = CNImage2Payload(channel: args, viewId: viewId) else {
                         result(FlutterError(code: "bad_args", message: "Missing args", details: nil))
                         return
                     }
@@ -73,12 +73,12 @@ class CupertinoTestNSView: NSView {
         nil
     }
 
-    private static func defaultPayload(_ viewId: Int64) -> CNTestPayload {
-        CNTestPayload(channel: ["systemSymbolName": "questionmark.circle"], viewId: viewId)!
+    private static func defaultPayload(_ viewId: Int64) -> CNImage2Payload {
+        CNImage2Payload(channel: ["systemSymbolName": "questionmark.circle"], viewId: viewId)!
     }
 
     private func installRootView() {
-        hostingView.rootView = CNTest.deserialize(
+        hostingView.rootView = CNImage2Deserializer.deserialize(
             model: model,
             onSizeChanged: { [weak self] newSize in
                 guard let self else { return }

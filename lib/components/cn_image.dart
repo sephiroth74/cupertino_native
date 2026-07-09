@@ -2,11 +2,13 @@
 
 import 'package:collection/collection.dart';
 import 'package:cupertino_native/channel/params.dart';
-import 'package:cupertino_native/components/widget_debug_id_mixin.dart';
+import 'package:cupertino_native/components/cn_widget_debug_id_mixin.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+
+const _kNativeViewType = 'CupertinoNativeImage2';
 
 @immutable
 mixin CNWidget on Widget {
@@ -37,8 +39,8 @@ mixin CNWidget on Widget {
 }
 
 @immutable
-class CNTest extends StatefulWidget with CNWidget {
-  CNTest({
+class CNImage2 extends StatefulWidget with CNWidget {
+  CNImage2({
     super.key,
     required this.systemSymbolName,
     this.shrink = false,
@@ -74,7 +76,7 @@ class CNTest extends StatefulWidget with CNWidget {
   final Color? tint;
 
   @override
-  State<CNTest> createState() => _CNTestState();
+  State<CNImage2> createState() => _CNImage2State();
 
   Map<String, dynamic> toMap(BuildContext context, {BoxConstraints? constraints}) {
     final payload = <String, dynamic>{'systemSymbolName': systemSymbolName};
@@ -88,7 +90,7 @@ class CNTest extends StatefulWidget with CNWidget {
   }
 }
 
-class _CNTestState extends State<CNTest> with CNWidgetDebugIdMixin<CNTest> {
+class _CNImage2State extends State<CNImage2> with CNWidgetDebugIdMixin<CNImage2> {
   MethodChannel? channel;
   double? intrinsicHeight;
   double? intrinsicWidth;
@@ -102,7 +104,7 @@ class _CNTestState extends State<CNTest> with CNWidgetDebugIdMixin<CNTest> {
   }
 
   @override
-  void didUpdateWidget(covariant CNTest oldWidget) {
+  void didUpdateWidget(covariant CNImage2 oldWidget) {
     logDebug('didUpdateWidget');
     super.didUpdateWidget(oldWidget);
     syncPropsToNativeIfNeeded(oldWidget: oldWidget);
@@ -115,37 +117,30 @@ class _CNTestState extends State<CNTest> with CNWidgetDebugIdMixin<CNTest> {
     super.dispose();
   }
 
-  void logDebug(String message) {
-    debugPrint('$debugLogPrefix $message');
-  }
-
-  Future<void> syncPropsToNativeIfNeeded({required CNTest oldWidget}) async {
-    logDebug('syncPropsToNativeIfNeeded');
-
-    if (channel == null) return;
-    if (lastPayload == null) return;
-
-    // requires a full rebuild if shrink is changed
-    if (oldWidget.shrink != widget.shrink) {
-      logDebug('shrink changed, requires full rebuild');
-      lastPayload = toPayload(constraints: lastConstraints);
-      await channel?.invokeMethod('setData', lastPayload);
-      return;
-    }
-
-    final patch = toPayload(constraints: lastConstraints);
-
-    // compare with last payload to avoid unnecessary updates
-    // compute the difference between the last payload and the new payload
-    final diff = computePatch(lastPayload!, patch);
-    if (diff.isEmpty) {
-      logDebug('no changes detected, skipping update');
-      return;
+  Size computeDefaultSize() {
+    final double fontSize;
+    if (widget.font != null) {
+      if (widget.font!.size.points != null) {
+        fontSize = widget.font!.size.points! + 4;
+      } else if (widget.font!.size.preset != null) {
+        switch (widget.font!.size.preset!) {
+          case CNFontSizePreset.system:
+            fontSize = 18;
+            break;
+          case CNFontSizePreset.smallSystem:
+            fontSize = 15;
+            break;
+          case CNFontSizePreset.label:
+            fontSize = 14;
+            break;
+        }
+      } else {
+        fontSize = 36;
+      }
     } else {
-      logDebug('changes detected, sending patch: $diff');
-      await channel?.invokeMethod('applyPatch', diff);
+      fontSize = 36;
     }
-    lastPayload = patch;
+    return Size(fontSize, fontSize);
   }
 
   Map<String, dynamic> computePatch(Map<String, dynamic> oldMap, Map<String, dynamic> newMap) {
@@ -190,26 +185,8 @@ class _CNTestState extends State<CNTest> with CNWidgetDebugIdMixin<CNTest> {
     return patch;
   }
 
-  Future<void> onPlatformViewCreated(int id) async {
-    logDebug('onPlatformViewCreated id=$id');
-    channel = MethodChannel('CupertinoNativeTest_$id');
-    channel?.setMethodCallHandler(onMethodCall);
-    //cacheCurrentProps();
-  }
-
-  Future<dynamic> onMethodCall(MethodCall call) async {
-    logDebug('onMethodCall ${call.method} args=${call.arguments}');
-    if (call.method == 'intrinsicSizeChanged') {
-      final args = call.arguments as Map?;
-      onIntrinsicSizeChanged((args?['width'] as num?)?.toDouble(), (args?['height'] as num?)?.toDouble());
-    }
-    return null;
-  }
-
-  Map<String, dynamic> toPayload({required BoxConstraints? constraints}) {
-    final payload = widget.toMap(context, constraints: constraints);
-    writeDebugWidgetId(payload);
-    return payload;
+  void logDebug(String message) {
+    debugPrint('$debugLogPrefix $message');
   }
 
   void onIntrinsicSizeChanged(double? width, double? height) {
@@ -228,30 +205,55 @@ class _CNTestState extends State<CNTest> with CNWidgetDebugIdMixin<CNTest> {
     });
   }
 
-  Size computeDefaultSize() {
-    final double fontSize;
-    if (widget.font != null) {
-      if (widget.font!.size.points != null) {
-        fontSize = widget.font!.size.points! + 4;
-      } else if (widget.font!.size.preset != null) {
-        switch (widget.font!.size.preset!) {
-          case CNFontSizePreset.system:
-            fontSize = 18;
-            break;
-          case CNFontSizePreset.smallSystem:
-            fontSize = 15;
-            break;
-          case CNFontSizePreset.label:
-            fontSize = 14;
-            break;
-        }
-      } else {
-        fontSize = 36;
-      }
-    } else {
-      fontSize = 36;
+  Future<dynamic> onMethodCall(MethodCall call) async {
+    logDebug('onMethodCall ${call.method} args=${call.arguments}');
+    if (call.method == 'intrinsicSizeChanged') {
+      final args = call.arguments as Map?;
+      onIntrinsicSizeChanged((args?['width'] as num?)?.toDouble(), (args?['height'] as num?)?.toDouble());
     }
-    return Size(fontSize, fontSize);
+    return null;
+  }
+
+  Future<void> onPlatformViewCreated(int id) async {
+    logDebug('onPlatformViewCreated id=$id');
+    channel = MethodChannel('${_kNativeViewType}_$id');
+    channel?.setMethodCallHandler(onMethodCall);
+    //cacheCurrentProps();
+  }
+
+  Future<void> syncPropsToNativeIfNeeded({required CNImage2 oldWidget}) async {
+    logDebug('syncPropsToNativeIfNeeded');
+
+    if (channel == null) return;
+    if (lastPayload == null) return;
+
+    // requires a full rebuild if shrink is changed
+    if (oldWidget.shrink != widget.shrink) {
+      logDebug('shrink changed, requires full rebuild');
+      lastPayload = toPayload(constraints: lastConstraints);
+      await channel?.invokeMethod('setData', lastPayload);
+      return;
+    }
+
+    final patch = toPayload(constraints: lastConstraints);
+
+    // compare with last payload to avoid unnecessary updates
+    // compute the difference between the last payload and the new payload
+    final diff = computePatch(lastPayload!, patch);
+    if (diff.isEmpty) {
+      logDebug('no changes detected, skipping update');
+      return;
+    } else {
+      logDebug('changes detected, sending patch: $diff');
+      await channel?.invokeMethod('applyPatch', diff);
+    }
+    lastPayload = patch;
+  }
+
+  Map<String, dynamic> toPayload({required BoxConstraints? constraints}) {
+    final payload = widget.toMap(context, constraints: constraints);
+    writeDebugWidgetId(payload);
+    return payload;
   }
 
   @override
@@ -274,7 +276,7 @@ class _CNTestState extends State<CNTest> with CNWidgetDebugIdMixin<CNTest> {
         lastPayload = toPayload(constraints: lastConstraints);
 
         Widget platformView = AppKitView(
-          viewType: 'CupertinoNativeTest',
+          viewType: _kNativeViewType,
           creationParams: lastPayload!,
           creationParamsCodec: const StandardMessageCodec(),
           onPlatformViewCreated: onPlatformViewCreated,

@@ -1,7 +1,7 @@
 import Cocoa
 import FlutterMacOS
 
-class CupertinoTestViewFactory: NSObject, FlutterPlatformViewFactory {
+class CupertinoImage2ViewFactory: NSObject, FlutterPlatformViewFactory {
     private let messenger: FlutterBinaryMessenger
 
     init(messenger: FlutterBinaryMessenger) {
@@ -14,6 +14,6 @@ class CupertinoTestViewFactory: NSObject, FlutterPlatformViewFactory {
     }
 
     func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
-        CupertinoTestNSView(viewId: viewId, args: args, messenger: messenger)
+        CupertinoImage2NSView(viewId: viewId, args: args, messenger: messenger)
     }
 }

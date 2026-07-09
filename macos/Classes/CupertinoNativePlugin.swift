@@ -90,8 +90,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         let imageFactory = CupertinoImageFactory(messenger: registrar.messenger)
         registrar.register(imageFactory, withId: "CupertinoNativeImage")
 
-        let testFactory = CupertinoTestViewFactory(messenger: registrar.messenger)
-        registrar.register(testFactory, withId: "CupertinoNativeTest")
+        let testFactory = CupertinoImage2ViewFactory(messenger: registrar.messenger)
+        registrar.register(testFactory, withId: "CupertinoNativeImage2")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

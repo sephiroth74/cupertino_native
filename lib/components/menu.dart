@@ -9,7 +9,7 @@ import 'package:cupertino_native/components/divider.dart';
 import 'package:cupertino_native/components/menu_child.dart';
 import 'package:cupertino_native/components/text.dart';
 import 'package:cupertino_native/components/view_modifiers.dart';
-import 'package:cupertino_native/components/widget_debug_id_mixin.dart';
+import 'package:cupertino_native/components/cn_widget_debug_id_mixin.dart';
 import 'package:cupertino_native/style/menu_style.dart';
 import 'package:cupertino_native/theme/cn_theme.dart';
 import 'package:flutter/foundation.dart';

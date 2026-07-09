@@ -6,6 +6,11 @@ import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
+const kMaxImages = 50;
+
+const kShrink = true;
+
+const _kBackgroundColors = {'Default': null, 'Light': CNColors.white, 'Dark': CNColors.black};
 const _kImageNames = [
   "square.and.arrow.up",
   "eraser.badge.xmark",
@@ -461,11 +466,6 @@ const _kImageNames = [
   "arrowtriangle.down.2.fill",
 ];
 
-const _kBackgroundColors = {'Default': null, 'Light': CNColors.white, 'Dark': CNColors.black};
-
-const kShrink = true;
-const kMaxImages = 1;
-
 class TestDemoPage extends StatefulWidget {
   const TestDemoPage({super.key});
 
@@ -529,7 +529,7 @@ class _TestDemoPageState extends State<TestDemoPage> {
               color: backgroundColor,
             ),
             padding: shrink ? const EdgeInsets.all(16) : const EdgeInsets.all(0),
-            child: CNTest(
+            child: CNImage2(
               systemSymbolName: systemSymbolName,
               shrink: shrink,
               font: font,
@@ -542,7 +542,7 @@ class _TestDemoPageState extends State<TestDemoPage> {
           ),
           const SizedBox(height: 6),
           Center(
-            child: Text(systemSymbolName, style: labelStyle, maxLines: 2, textAlign: TextAlign.center),
+            child: Text(systemSymbolName, style: labelStyle, maxLines: 1, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis,),
           ),
         ],
       ),
