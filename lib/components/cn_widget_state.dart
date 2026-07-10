@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:cupertino_native/components/cn_widget.dart';
 import 'package:cupertino_native/components/cn_widget_debug_id_mixin.dart';
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:cupertino_native/extensions/box_constraints.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -89,6 +88,25 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
     logDebug('onPlatformViewCreated id=$id');
     _channel = MethodChannel('${widget.nativeViewType}_$id');
     _channel?.setMethodCallHandler(_handleMethodCall);
+
+    if (widget.shrink) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _requestIntrinsicSize();
+      });
+    }
+  }
+
+  Future<void> _requestIntrinsicSize() async {
+    final channel = _channel;
+    if (channel == null || !mounted) return;
+
+    try {
+      final size = await channel.invokeMethod<Map>('getIntrinsicSize');
+      _onIntrinsicSizeChanged(
+        (size?['width'] as num?)?.toDouble(),
+        (size?['height'] as num?)?.toDouble(),
+      );
+    } catch (_) {}
   }
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {

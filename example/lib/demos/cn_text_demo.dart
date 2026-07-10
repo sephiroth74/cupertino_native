@@ -13,8 +13,8 @@ class TextDemoPage extends StatefulWidget {
 
 class _TextDemoPageState extends State<TextDemoPage> {
   CNFont? font = CNFont.boldSystem(CNFontSize.points(32));
-  Color? foregroundColor;
   double fontSize = 32;
+  Color? foregroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -40,12 +40,17 @@ class _TextDemoPageState extends State<TextDemoPage> {
                   PixelPerfectProbe(
                     adjustPosition: true,
                     child: Container(
+                      padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         border: Border.all(color: CupertinoColors.systemGrey, width: 1),
                         borderRadius: BorderRadius.circular(16)
                       ),
                       child: CNText2(
                         'The quick brown fox jumps over the lazy dog.',
+                        lineLimit: 2,
+                        truncationMode: CNTextTruncationMode.middle,
+                        textScale: CNTextScale.defaultScale,
+                        lineLimitReservesSpace: false,
                         font: font,
                         foregroundColor: foregroundColor,
                         debugLog: true,

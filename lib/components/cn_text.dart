@@ -92,7 +92,6 @@ class _CNText2State extends CNWidgetState<CNText2> {
 
     defaultWidth += (widget.paddings?.horizontal ?? 0);
     defaultHeight += (widget.paddings?.vertical ?? 0);
-
     return Size(defaultWidth, defaultHeight);
   }
 
