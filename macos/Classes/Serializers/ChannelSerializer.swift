@@ -7,6 +7,7 @@ protocol Identifiable {
 protocol CNChannelDeserializable: Identifiable {
     init?(channel: [String: Any], viewId: Int64)
     var viewDebugId: String { get }
+    mutating func applyPatch(_ channel: [String: Any])
 }
 
 enum CNChannelDeserialization {

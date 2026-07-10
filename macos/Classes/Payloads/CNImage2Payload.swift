@@ -1,44 +1,47 @@
 import SwiftUI
 
-struct CNImage2Payload: CNChannelDeserializable {
-    var systemSymbolName: String
+struct CNImage2Payload: CNSharedPayloadFields {
+    // Shared fields
     var viewDebugId: String
     var shrink: Bool
     var constraints: CNBoxConstraintsPayload?
     var paddings: CNPaddingsPayload?
-    var font: [String: Any]?
     var tint: Int?
     var foregroundColor: Int?
+
+    // Image-specific fields
+    var systemSymbolName: String
+    var font: [String: Any]?
     var symbolRenderingMode: String?
     var symbolColorRenderingMode: String?
     var foregroundStyleColors: [Int]
 
     init(viewId: String) {
-        systemSymbolName = "questionmark.circle"
         viewDebugId = viewId
-        font = nil
         shrink = false
         constraints = nil
+        paddings = nil
         tint = nil
         foregroundColor = nil
+        systemSymbolName = "questionmark.circle"
+        font = nil
         symbolRenderingMode = nil
         symbolColorRenderingMode = nil
         foregroundStyleColors = []
-        paddings = nil
     }
 
     init?(channel: [String: Any], viewId: Int64) {
         guard channel["systemSymbolName"] != nil else {
             return nil
         }
-
-        let viewDebugId: String = channel["debugWidgetId"] as? String ?? String(viewId)
-        self.init(viewId: viewDebugId)
+        let debugId = channel["debugWidgetId"] as? String ?? String(viewId)
+        self.init(viewId: debugId)
         applyPatch(channel)
     }
 
     mutating func applyPatch(_ channel: [String: Any]) {
-        NSLog("[CNImage2Payload_\(viewDebugId)][Swift] Applying patch: \(channel)")
+        applySharedPatch(channel)
+
         if channel.keys.contains("systemSymbolName"),
            let symbol = channel["systemSymbolName"] as? String,
            !symbol.isEmpty
@@ -58,38 +61,6 @@ struct CNImage2Payload: CNChannelDeserializable {
             } else {
                 font = nil
             }
-        }
-
-        if channel.keys.contains("shrink") {
-            shrink = CNChannelDeserialization.decodeBool(channel["shrink"]) ?? false
-        }
-
-        if channel.keys.contains("constraints") {
-            if channel["constraints"] is NSNull {
-                constraints = nil
-            } else if let constraintsMap = channel["constraints"] as? [String: Any] {
-                constraints = CNBoxConstraintsPayload.fromChannel(constraintsMap)
-            } else {
-                constraints = nil
-            }
-        }
-
-        if channel.keys.contains("paddings") {
-            if channel["paddings"] is NSNull {
-                paddings = nil
-            } else if let paddingsMap = channel["paddings"] as? [String: Any] {
-                paddings = CNPaddingsPayload.fromChannel(paddingsMap)
-            } else {
-                paddings = nil
-            }
-        }
-
-        if channel.keys.contains("tint") {
-            tint = CNChannelDeserialization.decodeInt(channel["tint"])
-        }
-
-        if channel.keys.contains("foregroundColor") {
-            foregroundColor = CNChannelDeserialization.decodeInt(channel["foregroundColor"])
         }
 
         if channel.keys.contains("symbolRenderingMode") {
@@ -114,27 +85,14 @@ struct CNImage2Payload: CNChannelDeserializable {
     }
 
     func identityKey() -> String {
-        let fontKey = font.map { String(describing: $0) } ?? "nil"
-        let tintKey = tint.map { String(describing: $0) } ?? "nil"
-        let foregroundColorKey = foregroundColor.map { String(describing: $0) } ?? "nil"
-        let constraintsKey = constraints?.identityKey() ?? "nil"
-        let shrinkKey = String(describing: shrink)
-        let symbolRenderingModeKey = symbolRenderingMode ?? "nil"
-        let symbolColorRenderingModeKey = symbolColorRenderingMode ?? "nil"
-        let foregroundStyleColorsKey = foregroundStyleColors.map { String(describing: $0) }.joined(separator: ",")
-        let paddingsKey = paddings?.identityKey() ?? "nil"
-        return [
-            viewDebugId,
+        var parts = sharedIdentityKey()
+        parts.append(contentsOf: [
             systemSymbolName,
-            fontKey,
-            tintKey,
-            foregroundColorKey,
-            constraintsKey,
-            shrinkKey,
-            symbolRenderingModeKey,
-            symbolColorRenderingModeKey,
-            foregroundStyleColorsKey,
-            paddingsKey,
-        ].joined(separator: "|")
+            font.map { String(describing: $0) } ?? "nil",
+            symbolRenderingMode ?? "nil",
+            symbolColorRenderingMode ?? "nil",
+            foregroundStyleColors.map { String(describing: $0) }.joined(separator: ","),
+        ])
+        return parts.joined(separator: "|")
     }
 }

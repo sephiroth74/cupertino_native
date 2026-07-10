@@ -1,0 +1,64 @@
+import SwiftUI
+
+/// Protocol for payloads that carry the standard shared fields
+/// (shrink, constraints, paddings, tint, foregroundColor, viewDebugId).
+///
+/// Conforming types get `applySharedPatch(_:)` and `sharedIdentityKey()` for free.
+protocol CNSharedPayloadFields: CNChannelDeserializable {
+    var viewDebugId: String { get set }
+    var shrink: Bool { get set }
+    var constraints: CNBoxConstraintsPayload? { get set }
+    var paddings: CNPaddingsPayload? { get set }
+    var tint: Int? { get set }
+    var foregroundColor: Int? { get set }
+}
+
+extension CNSharedPayloadFields {
+    /// Decodes the shared fields from a channel dictionary.
+    /// Call this from your payload's `applyPatch(_:)` implementation.
+    mutating func applySharedPatch(_ channel: [String: Any]) {
+        if channel.keys.contains("shrink") {
+            shrink = CNChannelDeserialization.decodeBool(channel["shrink"]) ?? false
+        }
+
+        if channel.keys.contains("constraints") {
+            if channel["constraints"] is NSNull {
+                constraints = nil
+            } else if let constraintsMap = channel["constraints"] as? [String: Any] {
+                constraints = CNBoxConstraintsPayload.fromChannel(constraintsMap)
+            } else {
+                constraints = nil
+            }
+        }
+
+        if channel.keys.contains("paddings") {
+            if channel["paddings"] is NSNull {
+                paddings = nil
+            } else if let paddingsMap = channel["paddings"] as? [String: Any] {
+                paddings = CNPaddingsPayload.fromChannel(paddingsMap)
+            } else {
+                paddings = nil
+            }
+        }
+
+        if channel.keys.contains("tint") {
+            tint = CNChannelDeserialization.decodeInt(channel["tint"])
+        }
+
+        if channel.keys.contains("foregroundColor") {
+            foregroundColor = CNChannelDeserialization.decodeInt(channel["foregroundColor"])
+        }
+    }
+
+    /// Returns the identity key components for the shared fields.
+    func sharedIdentityKey() -> [String] {
+        [
+            viewDebugId,
+            String(describing: shrink),
+            constraints?.identityKey() ?? "nil",
+            paddings?.identityKey() ?? "nil",
+            tint.map { String(describing: $0) } ?? "nil",
+            foregroundColor.map { String(describing: $0) } ?? "nil",
+        ]
+    }
+}
