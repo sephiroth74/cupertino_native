@@ -6,6 +6,7 @@ import SwiftUI
 /// Conforming types get `applySharedPatch(_:)` and `sharedIdentityKey()` for free.
 protocol CNSharedPayloadFields: CNChannelDeserializable {
     var viewDebugId: String { get set }
+    var debugLog: Bool { get set }
     var shrink: Bool { get set }
     var constraints: CNBoxConstraintsPayload? { get set }
     var paddings: CNPaddingsPayload? { get set }
@@ -17,6 +18,10 @@ extension CNSharedPayloadFields {
     /// Decodes the shared fields from a channel dictionary.
     /// Call this from your payload's `applyPatch(_:)` implementation.
     mutating func applySharedPatch(_ channel: [String: Any]) {
+        if channel.keys.contains("debugLog") {
+            debugLog = CNChannelDeserialization.decodeBool(channel["debugLog"]) ?? false
+        }
+
         if channel.keys.contains("shrink") {
             shrink = CNChannelDeserialization.decodeBool(channel["shrink"]) ?? false
         }

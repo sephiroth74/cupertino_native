@@ -11,6 +11,7 @@ const _kNativeViewType = 'CupertinoNativeImage2';
 class CNImage2 extends CNWidget {
   const CNImage2({
     super.key,
+    super.debugLog,
     required this.systemSymbolName,
     this.shrink = false,
     this.constraints,

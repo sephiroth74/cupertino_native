@@ -59,6 +59,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
   Future<void> onNativeMethodCall(MethodCall call) async {}
 
   void logDebug(String message) {
+    if (!widget.debugLog) return;
     debugPrint('$debugLogPrefix $message');
   }
 

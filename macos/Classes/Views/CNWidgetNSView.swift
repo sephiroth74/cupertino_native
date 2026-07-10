@@ -24,6 +24,12 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
         "[\(type(of: self))][\(payload.viewDebugId)][Swift]"
     }
 
+    /// Logs a message only when the payload's `debugLog` flag is enabled.
+    func log(_ message: String) {
+        guard let shared = payload as? any CNSharedPayloadFields, shared.debugLog else { return }
+        NSLog("\(logPrefix) \(message)")
+    }
+
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         let channelName = Self.channelName
         channel = FlutterMethodChannel(name: "\(channelName)_\(viewId)", binaryMessenger: messenger)
@@ -85,6 +91,7 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
         hostingView.rootView = makeRootView(model: model) { [weak self] _ in
             guard let self else { return }
             measuredSize = currentIntrinsicSize()
+            log("intrinsicSizeChanged -> \(measuredSize!)")
             channel.invokeMethod(
                 "intrinsicSizeChanged",
                 arguments: ["width": measuredSize!.width, "height": measuredSize!.height],
@@ -104,6 +111,7 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
                     }
                     payload = decoded
                     model.replace(with: payload)
+                    log("setData keys=\(Array(args.keys))")
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing args", details: nil))
@@ -112,12 +120,14 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
                 if let patch = CNChannelDeserialization.asDict(call.arguments) {
                     payload.applyPatch(patch)
                     model.replace(with: payload)
+                    log("applyPatch keys=\(Array(patch.keys))")
                     result(nil)
                 } else {
                     result(FlutterError(code: "bad_args", message: "Missing patch args", details: nil))
                 }
             case "getIntrinsicSize":
                 let size = currentIntrinsicSize()
+                log("getIntrinsicSize -> \(size)")
                 result(["width": size.width, "height": size.height])
             default:
                 handleMethodCall(call, result: result)

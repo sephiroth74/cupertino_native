@@ -3,6 +3,7 @@ import SwiftUI
 struct CNImage2Payload: CNSharedPayloadFields {
     // Shared fields
     var viewDebugId: String
+    var debugLog: Bool
     var shrink: Bool
     var constraints: CNBoxConstraintsPayload?
     var paddings: CNPaddingsPayload?
@@ -18,6 +19,7 @@ struct CNImage2Payload: CNSharedPayloadFields {
 
     init(viewId: String) {
         viewDebugId = viewId
+        debugLog = false
         shrink = false
         constraints = nil
         paddings = nil

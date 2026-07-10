@@ -9,7 +9,10 @@ import 'package:flutter/widgets.dart';
 /// to serialize them for the native side. Shared concerns (constraints, padding,
 /// shrink, tint, foregroundColor) are defined here.
 abstract class CNWidget extends StatefulWidget {
-  const CNWidget({super.key});
+  const CNWidget({super.key, this.debugLog = false});
+
+  /// When true, enables debug logging for this specific widget instance.
+  final bool debugLog;
 
   /// Optional explicit constraints forwarded to native frame handling.
   BoxConstraints? get constraints;
@@ -37,6 +40,7 @@ abstract class CNWidget extends StatefulWidget {
     required Map<String, dynamic> payload,
     required BoxConstraints? constraints,
   }) {
+    payload['debugLog'] = debugLog;
     payload['foregroundColor'] = resolveColorToArgb(foregroundColor, context);
     payload['tint'] = resolveColorToArgb(tint, context);
     payload['shrink'] = shrink;
