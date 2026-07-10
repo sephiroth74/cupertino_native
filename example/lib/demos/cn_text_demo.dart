@@ -1,8 +1,7 @@
-import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
-import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:flutter/cupertino.dart';
 
 class TextDemoPage extends StatefulWidget {
@@ -13,8 +12,9 @@ class TextDemoPage extends StatefulWidget {
 }
 
 class _TextDemoPageState extends State<TextDemoPage> {
-  CNFont? font;
+  CNFont? font = CNFont.boldSystem(CNFontSize.points(32));
   Color? foregroundColor;
+  double fontSize = 32;
 
   @override
   Widget build(BuildContext context) {
@@ -37,15 +37,21 @@ class _TextDemoPageState extends State<TextDemoPage> {
                     style: theme.typography.body.copyWith(color: theme.labelColor),
                   ),
                   const SizedBox(height: 24),
-                  const Text('Default rendering', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 12),
                   PixelPerfectProbe(
                     adjustPosition: true,
-                    onGeometryChanged: null,
-                    child: CNText(
-                      'The quick brown fox jumps over the lazy dog.',
-                      font: font,
-                      modifiers: CNViewModifiers(foregroundColor: foregroundColor),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: CupertinoColors.systemGrey, width: 1),
+                        borderRadius: BorderRadius.circular(16)
+                      ),
+                      child: CNText2(
+                        'The quick brown fox jumps over the lazy dog.',
+                        font: font,
+                        foregroundColor: foregroundColor,
+                        debugLog: true,
+                        shrink: true,
+                        paddings: EdgeInsets.symmetric(horizontal: 2, vertical: 16),
+                      ),
                     ),
                   ),
                 ],
@@ -55,15 +61,31 @@ class _TextDemoPageState extends State<TextDemoPage> {
             RightSideOptionContainer(
               options: {
                 'Font': CNPicker(
-                  selectedIndex: availableFonts.indexOf(font ?? CNFont.system(defaultFontSize)),
-                  onValueChanged: (index) => setState(() => font = availableFonts[index]),
-                  items: availableFonts.map((font) => CNText(font.name ?? font.kind.name)).toList(),
+                  selectedIndex: availableFonts.indexWhere((font) {
+                    // first check if the font name matches, otherwise check if the font kind matches
+                    if (font == null && this.font == null) return true;
+                    if (font == null || this.font == null) return false;
+                    return font.name == this.font!.name || font.kind == this.font!.kind;
+                  }),
+                  onValueChanged: (index) =>
+                      setState(() => font = availableFonts[index]?.copyWith(size: CNFontSize.points(fontSize))),
+                  items: availableFonts.map((font) => CNText(font != null ? (font.name ?? font.kind.name) : 'None')).toList(),
                   pickerStyle: CNPickerStyle.automatic,
                 ),
                 'Color': ColorPicker(
                   colors: kSystemColors,
                   currentValue: foregroundColor,
                   onValueChanged: (index) => setState(() => foregroundColor = kSystemColors.values.elementAt(index)),
+                ),
+                'Font Size': CNSlider(
+                  value: fontSize,
+                  min: 8,
+                  max: 64,
+                  step: 1,
+                  onChanged: (value) => setState(() {
+                    fontSize = value;
+                    font = font?.copyWith(size: CNFontSize.points(fontSize));
+                  }),
                 ),
               },
             ),

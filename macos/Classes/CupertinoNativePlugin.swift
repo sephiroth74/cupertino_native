@@ -92,6 +92,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let testFactory = CupertinoImage2ViewFactory(messenger: registrar.messenger)
         registrar.register(testFactory, withId: "CupertinoNativeImage2")
+
+        let text2Factory = CupertinoText2ViewFactory(messenger: registrar.messenger)
+        registrar.register(text2Factory, withId: "CupertinoNativeText2")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

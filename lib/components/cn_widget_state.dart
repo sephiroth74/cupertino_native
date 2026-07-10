@@ -3,6 +3,7 @@
 import 'package:collection/collection.dart';
 import 'package:cupertino_native/components/cn_widget.dart';
 import 'package:cupertino_native/components/cn_widget_debug_id_mixin.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native/extensions/box_constraints.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -94,10 +95,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
     logDebug('onMethodCall ${call.method} args=${call.arguments}');
     if (call.method == 'intrinsicSizeChanged') {
       final args = call.arguments as Map?;
-      _onIntrinsicSizeChanged(
-        (args?['width'] as num?)?.toDouble(),
-        (args?['height'] as num?)?.toDouble(),
-      );
+      _onIntrinsicSizeChanged((args?['width'] as num?)?.toDouble(), (args?['height'] as num?)?.toDouble());
     } else {
       await onNativeMethodCall(call);
     }
@@ -172,9 +170,39 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
         if (widget.shrink) {
           final defaultSize = computeDefaultSize();
-          final resolvedWidth = _intrinsicWidth ?? parentConstraints.tightWidth ?? defaultSize.width;
-          final resolvedHeight = _intrinsicHeight ?? parentConstraints.tightHeight ?? defaultSize.height;
+          final double resolvedWidth;
+          final double resolvedHeight;
+
+          if (intrinsicWidth != null) {
+            resolvedWidth = intrinsicWidth!;
+            logDebug('shrink mode: using intrinsicWidth');
+          } else if (_lastConstraints?.tightWidth != null) {
+            resolvedWidth = _lastConstraints!.tightWidth!;
+            logDebug('shrink mode: using tightWidth from constraints');
+          } else {
+            resolvedWidth = defaultSize.width;
+            logDebug('shrink mode: using defaultSize.width');
+          }
+
+          if(intrinsicHeight != null) {
+            resolvedHeight = intrinsicHeight!;
+            logDebug('shrink mode: using intrinsicHeight');
+          } else if (_lastConstraints?.tightHeight != null) {
+            resolvedHeight = _lastConstraints!.tightHeight!;
+            logDebug('shrink mode: using tightHeight from constraints');
+          } else {
+            resolvedHeight = defaultSize.height;
+            logDebug('shrink mode: using defaultSize.height');
+          }
+          
           logDebug('shrink mode: resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight');
+
+          if (widget.debugLog) {
+            platformView = Container(
+              decoration: BoxDecoration(border: Border.all(color: CNColors.red, width: 1)),
+              child: platformView,
+            );
+          }
           return SizedBox(width: resolvedWidth, height: resolvedHeight, child: platformView);
         } else {
           final resolvedWidth = _lastConstraints!.tightWidth ?? _lastConstraints!.maxWidth;
@@ -187,6 +215,13 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
             '${widget.runtimeType} requires finite dimensions when shrink is false. '
             'Provide explicit constraints or place the widget in a bounded parent.',
           );
+
+          if (widget.debugLog) {
+            platformView = Container(
+              decoration: BoxDecoration(border: Border.all(color: CNColors.red, width: 1)),
+              child: platformView,
+            );
+          }
 
           return ConstrainedBox(
             constraints: BoxConstraints.tightFor(width: resolvedWidth, height: resolvedHeight),

@@ -31,7 +31,7 @@ import 'demos/slider_demo.dart';
 import 'demos/split_view.dart';
 import 'demos/stepper.dart';
 import 'demos/tab_view.dart';
-import 'demos/text_demo.dart';
+import 'demos/cn_text_demo.dart';
 import 'demos/text_field.dart';
 import 'demos/text_view.dart';
 import 'demos/theme.dart';
@@ -96,9 +96,9 @@ class _DesktopDemoShell extends StatefulWidget {
 class _DesktopDemoShellState extends State<_DesktopDemoShell> {
   static const _entries = <_DemoEntry>[
     _DemoEntry('CNImage', 'testtube.2', CNImage2DemoPage()),
+    _DemoEntry('CNText', 'text.viewfinder', TextDemoPage()),
     _DemoEntry('Image', 'photo', ImageDemoPage()),
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
-    _DemoEntry('Text', 'text.viewfinder', TextDemoPage()),
     _DemoEntry('Label', 'textformat', LabelDemoPage()),
     _DemoEntry('Color Well', 'paintpalette', ColorWellDemoPage()),
     _DemoEntry('Slider', 'slider.horizontal.3', SliderDemoPage()),

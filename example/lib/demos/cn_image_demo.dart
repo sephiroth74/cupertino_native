@@ -530,6 +530,7 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
             ),
             padding: shrink ? const EdgeInsets.all(16) : const EdgeInsets.all(0),
             child: CNImage2(
+              debugLog: false,
               systemSymbolName: systemSymbolName,
               shrink: shrink,
               font: font,

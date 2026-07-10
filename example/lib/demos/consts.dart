@@ -54,7 +54,8 @@ const kNonNullColors = {
 
 CNFontSize defaultFontSize = CNFontSize.points(17);
 
-List<CNFont> get availableFonts => [
+List<CNFont?> get availableFonts => [
+  null,
   CNFont.system(defaultFontSize),
   CNFont.monospacedSystem(defaultFontSize),
   CNFont.boldSystem(defaultFontSize),

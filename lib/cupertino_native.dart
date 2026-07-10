@@ -42,6 +42,7 @@ export 'components/list.dart';
 export 'components/toolbar/toolbar.dart';
 export 'components/window/window.dart';
 export 'components/cn_image.dart';
+export 'components/cn_text.dart';
 
 export 'model/control_size.dart';
 export 'model/slider_tickmark_position.dart';

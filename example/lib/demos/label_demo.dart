@@ -63,10 +63,10 @@ class _LabelDemoPageState extends State<LabelDemoPage> {
             RightSideOptionContainer(
               options: {
                 'Font': CNPicker(
-                  selectedIndex: availableFonts.indexWhere((f) => f.name == font?.name),
+                  selectedIndex: availableFonts.indexWhere((f) => f?.name == font?.name),
                   onValueChanged: (index) =>
-                      setState(() => font = availableFonts[index].copyWith(size: CNFontSize.points(fontSize))),
-                  items: availableFonts.map((font) => CNText(font.name ?? font.kind.name)).toList(),
+                      setState(() => font = availableFonts[index]?.copyWith(size: CNFontSize.points(fontSize))),
+                  items: availableFonts.map((font) => CNText(font != null ? (font.name ?? font.kind.name) : 'None')).toList(),
                   pickerStyle: CNPickerStyle.automatic,
                 ),
                 'Primary Text Color': ColorPicker(
