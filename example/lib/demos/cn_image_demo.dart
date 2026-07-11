@@ -6,9 +6,10 @@ import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
-const kMaxImages = 50;
+const _kMaxImages = 100;
 
-const kShrink = true;
+const _kShrink = true;
+const _kDebugLog = false;
 
 const _kBackgroundColors = {'Default': null, 'Light': CNColors.white, 'Dark': CNColors.black};
 const _kImageNames = [
@@ -515,51 +516,49 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
       return color;
     }).toList();
 
-    final widget = Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: foregroundColor ?? theme.separatorColor, width: 2),
-              borderRadius: BorderRadius.circular(16),
-              color: backgroundColor,
-            ),
-            padding: shrink ? const EdgeInsets.all(16) : const EdgeInsets.all(0),
-            child: CNImage2(
-              debugLog: false,
-              systemSymbolName: systemSymbolName,
-              shrink: shrink,
-              font: font,
-              symbolRenderingMode: symbolRenderingMode,
-              symbolColorRenderingMode: symbolColorRenderingMode,
-              foregroundStyleColors: realForegroundStyleColors,
-              foregroundColor: realForegroundColor,
-              constraints: BoxConstraints.tightFor(width: imageSize, height: imageSize),
-              paddings: EdgeInsets.all(8.0),
-            ),
+    final widget = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: foregroundColor ?? theme.separatorColor, width: 2),
+            borderRadius: BorderRadius.circular(16),
+            color: backgroundColor,
           ),
-          const SizedBox(height: 6),
-          Center(
-            child: Text(
-              systemSymbolName,
-              style: labelStyle,
-              maxLines: 1,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-            ),
+          padding: shrink ? const EdgeInsets.all(16) : const EdgeInsets.all(0),
+          child: CNImage2(
+            debugLog: _kDebugLog,
+            systemSymbolName: systemSymbolName,
+            shrink: shrink,
+            font: font,
+            symbolRenderingMode: symbolRenderingMode,
+            symbolColorRenderingMode: symbolColorRenderingMode,
+            foregroundStyleColors: realForegroundStyleColors,
+            foregroundColor: realForegroundColor,
+            constraints: shrink ? null : BoxConstraints.tightFor(width: imageSize, height: imageSize),
+            paddings: EdgeInsets.all(8.0),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 6),
+        SizedBox(
+          width: containerSize,
+          child: Text(
+            systemSymbolName,
+            style: labelStyle,
+            maxLines: 1,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
 
     if (!shrink) {
       return SizedBox(width: containerSize, child: widget);
     } else {
-      return SizedBox(width: containerSize, child: widget);
+      return widget;
     }
   }
 
@@ -580,12 +579,12 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                 child: Wrap(
                   clipBehavior: Clip.hardEdge,
                   alignment: WrapAlignment.start,
-                  runSpacing: 16.0,
                   spacing: 16.0,
-                  children: _kImageNames.getRange(0, min(kMaxImages, _kImageNames.length)).map((name) {
+                  runSpacing: 16.0,
+                  children: _kImageNames.getRange(0, min(_kMaxImages, _kImageNames.length)).map((name) {
                     return _symbolRow(
                       systemSymbolName: name,
-                      shrink: kShrink,
+                      shrink: _kShrink,
                       font: font,
                       symbolRenderingMode: renderingMode,
                       symbolColorRenderingMode: colorMode,
@@ -702,14 +701,23 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                   items: CNFontWeight.values.map((weight) => CNText(weight.name)).toList(),
                   pickerStyle: CNPickerStyle.automatic,
                 ),
-                'Font Size': CNSlider(
-                  value: fontSize,
-                  min: 8,
-                  max: 64,
-                  onChanged: (value) => setState(() {
-                    fontSize = value;
-                    font = font.copyWith(size: CNFontSize.points(fontSize));
-                  }),
+                'Font Size': Row(
+                  children: [
+                    SizedBox(width: 50, child: Text('$fontSize')),
+                    Expanded(
+                      child: CNStepper(
+                        value: fontSize,
+                        min: 8.0,
+                        max: 64.0,
+                        onChanged: (value) {
+                          setState(() {
+                            fontSize = value;
+                            font = font.copyWith(size: CNFontSize.points(fontSize));
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               },
             ),

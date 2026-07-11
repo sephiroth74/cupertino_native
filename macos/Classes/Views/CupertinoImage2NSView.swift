@@ -11,7 +11,7 @@ class CupertinoImage2NSView: CNWidgetNSView<CNImage2Payload> {
         CNImage2Payload(channel: ["systemSymbolName": "questionmark.circle"], viewId: viewId)!
     }
 
-    override func makeRootView(model: CNViewModel<CNImage2Payload>, onSizeChanged: @escaping (CGSize) -> Void) -> AnyView {
-        CNImage2Deserializer.makeRootView(model: model, onSizeChanged: onSizeChanged)
+    override func makeRootView(model: CNViewModel<CNImage2Payload>) -> AnyView {
+        CNImage2Deserializer.makeRootView(model: model)
     }
 }

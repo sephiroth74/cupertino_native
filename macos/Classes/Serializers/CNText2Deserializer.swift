@@ -1,20 +1,18 @@
 import SwiftUI
 
 enum CNText2Deserializer {
-    static func makeRootView(model: CNViewModel<CNText2Payload>, onSizeChanged: ((CGSize) -> Void)? = nil) -> AnyView {
-        AnyView(_CNBoundText2View(model: model, onSizeChanged: onSizeChanged))
+    static func makeRootView(model: CNViewModel<CNText2Payload>) -> AnyView {
+        AnyView(_CNBoundText2View(model: model))
     }
 
     private struct _CNBoundText2View: View {
         @ObservedObject var model: CNViewModel<CNText2Payload>
-        let onSizeChanged: ((CGSize) -> Void)?
 
         var body: some View {
             let payload = model.payload
             var view = AnyView(Text(payload.text))
 
             // Apply shared modifiers
-            view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
             view = CNViewModifierApplicator.applyFont(payload.font, to: view)
             view = CNViewModifierApplicator.applyForegroundColor(payload.foregroundColor, to: view)
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
@@ -28,20 +26,13 @@ enum CNText2Deserializer {
 
             view = Self.applyTruncationMode(to: view, payload: payload)
 
-            // Paddings last (outermost)
+            // Paddings
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
 
-            if let onSizeChanged {
-                view = AnyView(
-                    view.onGeometryChange(for: CGSize.self) { proxy in
-                        proxy.size
-                    } action: { newSize in
-                        onSizeChanged(newSize)
-                    },
-                )
-            }
+            // Constraints last (outermost)
+            view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
 
-            return AnyView(view.id(payload.identityKey()))
+            return AnyView(view.id(payload.viewDebugId))
         }
 
         private static func applyLineLimit(to view: AnyView, payload: CNText2Payload) -> AnyView {

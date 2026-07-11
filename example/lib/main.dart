@@ -129,7 +129,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Split View', 'rectangle.split.2x1', SplitViewDemoPage()),
   ];
 
-  String _searchQuery = '';
+  final String _searchQuery = '';
   int _selectedIndex = 0;
   final CNMainWindowController _windowController = CNMainWindowController();
 
@@ -152,88 +152,88 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     return CNMainWindow(
       controller: _windowController,
       toolbarTitle: 'Cupertino Native',
-      toolbarShowSearch: true,
-      toolbarColor: widget.accentColor,
-      toolbarGroups: [
-        CNToolbarGroup(
-          id: 'left-window',
-          placement: CNToolbarItemPlacement.navigation,
-          items: [
-            CNToolbarButtonItem(
-              id: 'toggle-left-sidebar',
-              systemSymbolName: 'sidebar.left',
-              onPressed: _windowController.toggleSidebar,
-            ),
-          ],
-        ),
-        CNToolbarGroup(
-          id: 'status-window',
-          placement: CNToolbarItemPlacement.status,
-          items: [
-            CNToolbarButtonItem(
-              id: 'toggle-right-sidebar',
-              systemSymbolName: 'sidebar.right',
-              onPressed: _windowController.toggleTrailingSidebar,
-            ),
-          ],
-        ),
-        CNToolbarGroup(
-          id: 'appearance',
-          placement: CNToolbarItemPlacement.principal,
-          items: [
-            CNToolbarPickerItem(
-              id: 'accent-colors',
-              pickerStyle: CNPickerStyle.menu,
-              controlSize: CNControlSize.regular,
-              items: _systemColors.map((e) => e.key).toList(),
-              selectedValue: _systemColors.firstWhere((e) => e.value == accentColor, orElse: () => _systemColors.first).key,
-              onChanged: (value) {
-                final selected = _systemColors.firstWhere((e) => e.key == value, orElse: () => _systemColors.first);
-                widget.onSelectAccentColor(selected.value);
-              },
-            ),
-            CNToolbarMenuButtonItem(
-              id: 'menu-button',
-              label: 'Accent Color',
-              image: const CNImage(systemSymbolName: 'circle.fill'),
-              menuStyle: CNMenuStyle.borderedButton,
-              onSelected: (value) {},
-              menu: CNMenuModel(
-                items: _systemColors.map((e) {
-                  return CNMenuModelItem(
-                    title: e.key,
-                    state: e.value == accentColor ? CNMenuModelItemState.on : CNMenuModelItemState.off,
-                    image: CNImage(
-                      systemSymbolName: 'circle.fill',
-                      symbolRenderingMode: CNSymbolRenderingMode.monochrome,
-                      foregroundStyleColors: [e.value],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
+      // toolbarShowSearch: true,
+      // toolbarColor: widget.accentColor,
+      // toolbarGroups: [
+      //   CNToolbarGroup(
+      //     id: 'left-window',
+      //     placement: CNToolbarItemPlacement.navigation,
+      //     items: [
+      //       CNToolbarButtonItem(
+      //         id: 'toggle-left-sidebar',
+      //         systemSymbolName: 'sidebar.left',
+      //         onPressed: _windowController.toggleSidebar,
+      //       ),
+      //     ],
+      //   ),
+      //   CNToolbarGroup(
+      //     id: 'status-window',
+      //     placement: CNToolbarItemPlacement.status,
+      //     items: [
+      //       CNToolbarButtonItem(
+      //         id: 'toggle-right-sidebar',
+      //         systemSymbolName: 'sidebar.right',
+      //         onPressed: _windowController.toggleTrailingSidebar,
+      //       ),
+      //     ],
+      //   ),
+      //   CNToolbarGroup(
+      //     id: 'appearance',
+      //     placement: CNToolbarItemPlacement.principal,
+      //     items: [
+      //       CNToolbarPickerItem(
+      //         id: 'accent-colors',
+      //         pickerStyle: CNPickerStyle.menu,
+      //         controlSize: CNControlSize.regular,
+      //         items: _systemColors.map((e) => e.key).toList(),
+      //         selectedValue: _systemColors.firstWhere((e) => e.value == accentColor, orElse: () => _systemColors.first).key,
+      //         onChanged: (value) {
+      //           final selected = _systemColors.firstWhere((e) => e.key == value, orElse: () => _systemColors.first);
+      //           widget.onSelectAccentColor(selected.value);
+      //         },
+      //       ),
+      //       CNToolbarMenuButtonItem(
+      //         id: 'menu-button',
+      //         label: 'Accent Color',
+      //         image: const CNImage(systemSymbolName: 'circle.fill'),
+      //         menuStyle: CNMenuStyle.borderedButton,
+      //         onSelected: (value) {},
+      //         menu: CNMenuModel(
+      //           items: _systemColors.map((e) {
+      //             return CNMenuModelItem(
+      //               title: e.key,
+      //               state: e.value == accentColor ? CNMenuModelItemState.on : CNMenuModelItemState.off,
+      //               image: CNImage(
+      //                 systemSymbolName: 'circle.fill',
+      //                 symbolRenderingMode: CNSymbolRenderingMode.monochrome,
+      //                 foregroundStyleColors: [e.value],
+      //               ),
+      //             );
+      //           }).toList(),
+      //         ),
+      //       ),
 
-            CNToolbarToggleItem(
-              id: 'dark-mode-toggle',
-              systemSymbolName: 'moon.fill',
-              isOn: widget.isDarkMode,
-              toggleStyle: CNToggleStyle.automatic,
-              controlSize: CNControlSize.small,
-              onChanged: (_) {
-                setState(() {
-                  final theme = context.read<AppTheme>();
-                  theme.mode = theme.mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
-                });
-              },
-            ),
-          ],
-        ),
-      ],
-      onToolbarSearchChanged: (value) {
-        setState(() {
-          _searchQuery = value;
-        });
-      },
+      //       CNToolbarToggleItem(
+      //         id: 'dark-mode-toggle',
+      //         systemSymbolName: 'moon.fill',
+      //         isOn: widget.isDarkMode,
+      //         toggleStyle: CNToggleStyle.automatic,
+      //         controlSize: CNControlSize.small,
+      //         onChanged: (_) {
+      //           setState(() {
+      //             final theme = context.read<AppTheme>();
+      //             theme.mode = theme.mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+      //           });
+      //         },
+      //       ),
+      //     ],
+      //   ),
+      // ],
+      // onToolbarSearchChanged: (value) {
+      //   setState(() {
+      //     _searchQuery = value;
+      //   });
+      // },
       sidebar: CNSidebar(
         shownByDefault: true,
         startWidth: 250,

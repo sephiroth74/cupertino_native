@@ -12,13 +12,14 @@ import SwiftUI
 /// Subclasses only need to provide:
 /// - `channelName`: the channel prefix (e.g. `"CupertinoNativeImage2"`)
 /// - `defaultPayload(viewId:)`: fallback payload when creation args are invalid
-/// - `makeRootView(model:onSizeChanged:)`: the SwiftUI view bound to the model
+/// - `makeRootView(model:)`: the SwiftUI view bound to the model
 class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
     let channel: FlutterMethodChannel
     let hostingView: NSHostingView<AnyView>
     let model: CNViewModel<P>
     var payload: P
-    private var measuredSize: CGSize?
+
+    private var hostingWidthConstraint: NSLayoutConstraint?
 
     var logPrefix: String {
         "[\(type(of: self))][\(payload.viewDebugId)][Swift]"
@@ -45,12 +46,27 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
 
         hostingView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(hostingView)
-        NSLayoutConstraint.activate([
-            hostingView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            hostingView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            hostingView.topAnchor.constraint(equalTo: topAnchor),
-            hostingView.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
+
+        let isShrink = (payload as? any CNSharedPayloadFields)?.shrink ?? false
+        if isShrink {
+            NSLayoutConstraint.activate([
+                hostingView.leadingAnchor.constraint(equalTo: leadingAnchor),
+                hostingView.topAnchor.constraint(equalTo: topAnchor),
+            ])
+        } else {
+            NSLayoutConstraint.activate([
+                hostingView.leadingAnchor.constraint(equalTo: leadingAnchor),
+                hostingView.trailingAnchor.constraint(equalTo: trailingAnchor),
+                hostingView.topAnchor.constraint(equalTo: topAnchor),
+                hostingView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            ])
+        }
+
+        if isShrink {
+            updateWidthConstraint()
+        }
+
+        log("init: viewId=\(viewId), args=\(String(describing: args)), payload=\(payload)")
 
         installRootView()
         configureMethodChannel(viewId: viewId)
@@ -75,8 +91,8 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
 
     /// Creates the SwiftUI root view bound to the view model.
     /// Override in subclasses to provide the widget-specific SwiftUI body.
-    func makeRootView(model _: CNViewModel<P>, onSizeChanged _: @escaping (CGSize) -> Void) -> AnyView {
-        fatalError("Subclasses must override makeRootView(model:onSizeChanged:)")
+    func makeRootView(model _: CNViewModel<P>) -> AnyView {
+        fatalError("Subclasses must override makeRootView(model:)")
     }
 
     /// Override to handle additional method calls beyond `setData`, `applyPatch`, `getIntrinsicSize`.
@@ -87,16 +103,30 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
 
     // MARK: - Private
 
-    private func installRootView() {
-        hostingView.rootView = makeRootView(model: model) { [weak self] _ in
-            guard let self else { return }
-            measuredSize = currentIntrinsicSize()
-            log("intrinsicSizeChanged -> \(measuredSize!)")
-            channel.invokeMethod(
-                "intrinsicSizeChanged",
-                arguments: ["width": measuredSize!.width, "height": measuredSize!.height],
-            )
+    private func updateWidthConstraint() {
+        guard let shared = payload as? any CNSharedPayloadFields, shared.shrink else {
+            hostingWidthConstraint?.isActive = false
+            hostingWidthConstraint = nil
+            return
         }
+
+        let maxW = shared.constraints?.maxWidth
+        if let maxW {
+            if let existing = hostingWidthConstraint {
+                existing.constant = CGFloat(maxW)
+                existing.isActive = true
+            } else {
+                let c = hostingView.widthAnchor.constraint(lessThanOrEqualToConstant: CGFloat(maxW))
+                c.isActive = true
+                hostingWidthConstraint = c
+            }
+        } else {
+            hostingWidthConstraint?.isActive = false
+        }
+    }
+
+    private func installRootView() {
+        hostingView.rootView = makeRootView(model: model)
     }
 
     private func configureMethodChannel(viewId: Int64) {
@@ -111,6 +141,7 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
                     }
                     payload = decoded
                     model.replace(with: payload)
+                    updateWidthConstraint()
                     log("setData keys=\(Array(args.keys))")
                     result(nil)
                 } else {
@@ -120,6 +151,7 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
                 if let patch = CNChannelDeserialization.asDict(call.arguments) {
                     payload.applyPatch(patch)
                     model.replace(with: payload)
+                    updateWidthConstraint()
                     log("applyPatch keys=\(Array(patch.keys))")
                     result(nil)
                 } else {

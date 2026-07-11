@@ -4,6 +4,12 @@ import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
+const _kShrink = true;
+const _kDebugLog = true;
+const _kFontSize = 48.0;
+
+const _kTextScales = {'default': CNTextScale.defaultScale, 'secondary': CNTextScale.secondary};
+
 class TextDemoPage extends StatefulWidget {
   const TextDemoPage({super.key});
 
@@ -12,9 +18,12 @@ class TextDemoPage extends StatefulWidget {
 }
 
 class _TextDemoPageState extends State<TextDemoPage> {
-  CNFont? font = CNFont.boldSystem(CNFontSize.points(32));
-  double fontSize = 32;
+  CNFont? font = CNFont.boldSystem(CNFontSize.points(_kFontSize));
+  double fontSize = _kFontSize;
   Color? foregroundColor;
+  int lineLimit = 2;
+  CNTextScale textScale = CNTextScale.defaultScale;
+  CNTextTruncationMode truncationMode = CNTextTruncationMode.tail;
 
   @override
   Widget build(BuildContext context) {
@@ -43,19 +52,18 @@ class _TextDemoPageState extends State<TextDemoPage> {
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         border: Border.all(color: CupertinoColors.systemGrey, width: 1),
-                        borderRadius: BorderRadius.circular(16)
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: CNText2(
                         'The quick brown fox jumps over the lazy dog.',
-                        lineLimit: 2,
-                        truncationMode: CNTextTruncationMode.middle,
-                        textScale: CNTextScale.defaultScale,
+                        lineLimit: lineLimit,
                         lineLimitReservesSpace: false,
+                        textScale: textScale,
+                        truncationMode: truncationMode,
                         font: font,
                         foregroundColor: foregroundColor,
-                        debugLog: true,
-                        shrink: true,
-                        paddings: EdgeInsets.symmetric(horizontal: 2, vertical: 16),
+                        debugLog: _kDebugLog,
+                        shrink: _kShrink,
                       ),
                     ),
                   ),
@@ -82,15 +90,52 @@ class _TextDemoPageState extends State<TextDemoPage> {
                   currentValue: foregroundColor,
                   onValueChanged: (index) => setState(() => foregroundColor = kSystemColors.values.elementAt(index)),
                 ),
-                'Font Size': CNSlider(
-                  value: fontSize,
-                  min: 8,
-                  max: 64,
-                  step: 1,
-                  onChanged: (value) => setState(() {
-                    fontSize = value;
-                    font = font?.copyWith(size: CNFontSize.points(fontSize));
-                  }),
+                'Font Size': Row(
+                  children: [
+                    SizedBox(width: 50, child: Text('$fontSize')),
+                    Expanded(
+                      child: CNStepper(
+                        value: fontSize,
+                        min: 8.0,
+                        max: 64.0,
+                        onChanged: (value) {
+                          setState(() {
+                            fontSize = value;
+                            font = font?.copyWith(size: CNFontSize.points(fontSize));
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                'Line Limit': Row(
+                  children: [
+                    SizedBox(width: 50, child: Text(lineLimit.toString())),
+                    Expanded(
+                      child: CNStepper(
+                        value: lineLimit.toDouble(),
+                        min: 1,
+                        max: 10,
+                        onChanged: (value) {
+                          setState(() {
+                            lineLimit = value.toInt();
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                'Text Scale': CNPicker(
+                  selectedIndex: _kTextScales.values.toList().indexOf(textScale),
+                  onValueChanged: (index) => setState(() => textScale = _kTextScales.values.elementAt(index)),
+                  items: _kTextScales.keys.map((key) => CNText(key)).toList(),
+                  pickerStyle: CNPickerStyle.automatic,
+                ),
+                'Truncation Mode': CNPicker(
+                  selectedIndex: CNTextTruncationMode.values.indexOf(truncationMode),
+                  onValueChanged: (index) => setState(() => truncationMode = CNTextTruncationMode.values[index]),
+                  items: CNTextTruncationMode.values.map((mode) => CNText(mode.name)).toList(),
+                  pickerStyle: CNPickerStyle.automatic,
                 ),
               },
             ),

@@ -18,7 +18,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
   double? _intrinsicHeight;
   double? _intrinsicWidth;
   BoxConstraints? _lastConstraints;
-  Map<String, dynamic>? _lastPayload;
+  Map<String, dynamic>? _lastSentPayload;
 
   @override
   void didChangeDependencies() {
@@ -102,21 +102,20 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
     try {
       final size = await channel.invokeMethod<Map>('getIntrinsicSize');
-      _onIntrinsicSizeChanged(
-        (size?['width'] as num?)?.toDouble(),
-        (size?['height'] as num?)?.toDouble(),
-      );
+      _onIntrinsicSizeChanged((size?['width'] as num?)?.toDouble(), (size?['height'] as num?)?.toDouble());
     } catch (_) {}
+  }
+
+  void _scheduleIntrinsicSizeRequest() {
+    if (!widget.shrink) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestIntrinsicSize();
+    });
   }
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     logDebug('onMethodCall ${call.method} args=${call.arguments}');
-    if (call.method == 'intrinsicSizeChanged') {
-      final args = call.arguments as Map?;
-      _onIntrinsicSizeChanged((args?['width'] as num?)?.toDouble(), (args?['height'] as num?)?.toDouble());
-    } else {
-      await onNativeMethodCall(call);
-    }
+    await onNativeMethodCall(call);
     return null;
   }
 
@@ -140,17 +139,18 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
     logDebug('syncPropsToNativeIfNeeded');
 
     if (_channel == null) return;
-    if (_lastPayload == null) return;
+    if (_lastSentPayload == null) return;
 
     if (oldWidget.shrink != widget.shrink) {
       logDebug('shrink changed, sending full setData');
-      _lastPayload = _buildPayload(constraints: _lastConstraints);
-      await _channel?.invokeMethod('setData', _lastPayload);
+      _lastSentPayload = _buildPayload(constraints: _lastConstraints);
+      await _channel?.invokeMethod('setData', _lastSentPayload);
+      _scheduleIntrinsicSizeRequest();
       return;
     }
 
     final newPayload = _buildPayload(constraints: _lastConstraints);
-    final diff = computePayloadPatch(_lastPayload!, newPayload);
+    final diff = computePayloadPatch(_lastSentPayload!, newPayload);
     if (diff.isEmpty) {
       logDebug('no changes detected, skipping update');
       return;
@@ -158,7 +158,8 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
     logDebug('sending patch: $diff');
     await _channel?.invokeMethod('applyPatch', diff);
-    _lastPayload = newPayload;
+    _lastSentPayload = newPayload;
+    _scheduleIntrinsicSizeRequest();
   }
 
   @override
@@ -172,7 +173,22 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
         _lastConstraints = _resolveConstraints(parentConstraints);
 
         final payload = _buildPayload(constraints: _lastConstraints);
-        _lastPayload = payload;
+
+        logDebug('build: payload=$payload');
+
+        // Detect constraint changes from LayoutBuilder (e.g. window resize).
+        // didUpdateWidget won't fire for these since the widget instance hasn't changed.
+        if (_lastSentPayload != null && _channel != null) {
+          final diff = computePayloadPatch(_lastSentPayload!, payload);
+          if (diff.isNotEmpty) {
+            logDebug('build: constraints changed, sending patch: $diff');
+            _lastSentPayload = payload;
+            _channel?.invokeMethod('applyPatch', diff);
+            _scheduleIntrinsicSizeRequest();
+          }
+        } else {
+          _lastSentPayload = payload;
+        }
 
         Widget platformView = AppKitView(
           viewType: widget.nativeViewType,
@@ -202,7 +218,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
             logDebug('shrink mode: using defaultSize.width');
           }
 
-          if(intrinsicHeight != null) {
+          if (intrinsicHeight != null) {
             resolvedHeight = intrinsicHeight!;
             logDebug('shrink mode: using intrinsicHeight');
           } else if (_lastConstraints?.tightHeight != null) {
@@ -212,7 +228,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
             resolvedHeight = defaultSize.height;
             logDebug('shrink mode: using defaultSize.height');
           }
-          
+
           logDebug('shrink mode: resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight');
 
           if (widget.debugLog) {
