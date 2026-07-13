@@ -47,24 +47,12 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
         hostingView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(hostingView)
 
-        let isShrink = (payload as? any CNSharedPayloadFields)?.shrink ?? false
-        if isShrink {
-            NSLayoutConstraint.activate([
-                hostingView.leadingAnchor.constraint(equalTo: leadingAnchor),
-                hostingView.topAnchor.constraint(equalTo: topAnchor),
-            ])
-        } else {
-            NSLayoutConstraint.activate([
-                hostingView.leadingAnchor.constraint(equalTo: leadingAnchor),
-                hostingView.trailingAnchor.constraint(equalTo: trailingAnchor),
-                hostingView.topAnchor.constraint(equalTo: topAnchor),
-                hostingView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            ])
-        }
-
-        if isShrink {
-            updateWidthConstraint()
-        }
+        NSLayoutConstraint.activate([
+            hostingView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            hostingView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            hostingView.topAnchor.constraint(equalTo: topAnchor),
+            hostingView.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
 
         log("init: viewId=\(viewId), args=\(String(describing: args)), payload=\(payload)")
 
@@ -101,30 +89,6 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
         result(FlutterMethodNotImplemented)
     }
 
-    // MARK: - Private
-
-    private func updateWidthConstraint() {
-        guard let shared = payload as? any CNSharedPayloadFields, shared.shrink else {
-            hostingWidthConstraint?.isActive = false
-            hostingWidthConstraint = nil
-            return
-        }
-
-        let maxW = shared.constraints?.maxWidth
-        if let maxW {
-            if let existing = hostingWidthConstraint {
-                existing.constant = CGFloat(maxW)
-                existing.isActive = true
-            } else {
-                let c = hostingView.widthAnchor.constraint(lessThanOrEqualToConstant: CGFloat(maxW))
-                c.isActive = true
-                hostingWidthConstraint = c
-            }
-        } else {
-            hostingWidthConstraint?.isActive = false
-        }
-    }
-
     private func installRootView() {
         hostingView.rootView = makeRootView(model: model)
     }
@@ -141,7 +105,6 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
                     }
                     payload = decoded
                     model.replace(with: payload)
-                    updateWidthConstraint()
                     log("setData keys=\(Array(args.keys))")
                     result(nil)
                 } else {
@@ -151,7 +114,6 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
                 if let patch = CNChannelDeserialization.asDict(call.arguments) {
                     payload.applyPatch(patch)
                     model.replace(with: payload)
-                    updateWidthConstraint()
                     log("applyPatch keys=\(Array(patch.keys))")
                     result(nil)
                 } else {

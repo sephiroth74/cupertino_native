@@ -152,7 +152,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     return CNMainWindow(
       controller: _windowController,
       toolbarTitle: 'Cupertino Native',
-      // toolbarShowSearch: true,
+      toolbarShowSearch: false,
       // toolbarColor: widget.accentColor,
       // toolbarGroups: [
       //   CNToolbarGroup(

@@ -204,8 +204,8 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
         if (widget.shrink) {
           final defaultSize = computeDefaultSize();
-          final double resolvedWidth;
-          final double resolvedHeight;
+          double resolvedWidth;
+          double resolvedHeight;
 
           if (intrinsicWidth != null) {
             resolvedWidth = intrinsicWidth!;
@@ -228,6 +228,9 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
             resolvedHeight = defaultSize.height;
             logDebug('shrink mode: using defaultSize.height');
           }
+
+          resolvedWidth = parentConstraints.constrainWidth(resolvedWidth);
+          resolvedHeight = parentConstraints.constrainHeight(resolvedHeight);
 
           logDebug('shrink mode: resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight');
 

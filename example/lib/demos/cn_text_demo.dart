@@ -21,7 +21,7 @@ class _TextDemoPageState extends State<TextDemoPage> {
   CNFont? font = CNFont.boldSystem(CNFontSize.points(_kFontSize));
   double fontSize = _kFontSize;
   Color? foregroundColor;
-  int lineLimit = 2;
+  int lineLimit = 1;
   CNTextScale textScale = CNTextScale.defaultScale;
   CNTextTruncationMode truncationMode = CNTextTruncationMode.tail;
 
@@ -57,7 +57,7 @@ class _TextDemoPageState extends State<TextDemoPage> {
                       child: CNText2(
                         'The quick brown fox jumps over the lazy dog.',
                         lineLimit: lineLimit,
-                        lineLimitReservesSpace: false,
+                        lineLimitReservesSpace: true,
                         textScale: textScale,
                         truncationMode: truncationMode,
                         font: font,
