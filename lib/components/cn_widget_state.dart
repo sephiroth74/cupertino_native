@@ -166,7 +166,9 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
     logDebug('sending patch: $diff');
     _lastSentPayload = newPayload;
     await _channel?.invokeMethod('applyPatch', diff);
-    _scheduleIntrinsicSizeRequest();
+    if (widget.shrink) {
+      await _requestIntrinsicSize();
+    }
   }
 
   @override
