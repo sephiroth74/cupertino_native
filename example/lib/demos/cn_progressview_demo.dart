@@ -4,6 +4,8 @@ import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
+const _kDebugLog = true;
+
 class ProgressIndicatorsPageDemo extends StatefulWidget {
   const ProgressIndicatorsPageDemo({super.key});
 
@@ -34,40 +36,14 @@ class _ProgressIndicatorsPageDemoState extends State<ProgressIndicatorsPageDemo>
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
                   Center(
-                    child: CNProgressView(
+                    child: CNProgressView2(
+                      debugLog: _kDebugLog,
                       value: isDetermininate ? progressValue : null,
-                      progressViewStyle: progressViewStyle,
-                      modifiers: CNViewModifiers(controlSize: controlSize, tint: tintColor),
+                      style: progressViewStyle,
+                      controlSize: controlSize,
+                      tint: tintColor,
                     ),
                   ),
-
-                  // const SizedBox(height: 12),
-                  // const Text('Linear progress view'),
-                  // const SizedBox(height: 12),
-                  // CNProgressView(
-                  //   progressViewStyle: CNProgressViewStyle.linear,
-                  //   modifiers: CNViewModifiers(controlSize: CNControlSize.regular),
-                  // ),
-
-                  // const SizedBox(height: 12),
-                  // const Text('Indeterminate circular progress view'),
-                  // const SizedBox(height: 12),
-                  // Align(
-                  //   alignment: Alignment.centerLeft,
-                  //   child: Row(
-                  //     children: [
-                  //       CNProgressView(
-                  //         progressViewStyle: CNProgressViewStyle.circular,
-                  //         modifiers: CNViewModifiers(controlSize: CNControlSize.small),
-                  //       ),
-                  //       const SizedBox(width: 12),
-                  //       CNProgressView(
-                  //         progressViewStyle: CNProgressViewStyle.circular,
-                  //         modifiers: CNViewModifiers(controlSize: CNControlSize.regular, tint: CNColors.brown),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
                 ],
               ),
             ),

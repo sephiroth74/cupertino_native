@@ -22,7 +22,7 @@ import 'demos/path_control.dart';
 import 'demos/picker_demo.dart';
 import 'demos/popover.dart';
 import 'demos/popup_menu_button.dart';
-import 'demos/progress_demo.dart';
+import 'demos/cn_progressview_demo.dart';
 import 'demos/search_field.dart';
 import 'demos/secure_text_field.dart';
 import 'demos/segmented_control.dart';
@@ -43,18 +43,6 @@ void main() async {
   runApp(const MyApp());
 }
 
-const _systemColors = <MapEntry<String, Color>>[
-  MapEntry('Red', CNColors.red),
-  MapEntry('Orange', CNColors.orange),
-  MapEntry('Yellow', CNColors.yellow),
-  MapEntry('Green', CNColors.green),
-  MapEntry('Teal', CNColors.teal),
-  MapEntry('Blue', CNColors.blue),
-  MapEntry('Indigo', CNColors.indigo),
-  MapEntry('Purple', CNColors.purple),
-  MapEntry('Pink', CNColors.pink),
-  MapEntry('Gray', CNColors.gray),
-];
 
 class AppTheme extends ChangeNotifier {
   ThemeMode _mode = ThemeMode.system;
@@ -97,12 +85,13 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
   static const _entries = <_DemoEntry>[
     _DemoEntry('CNImage', 'testtube.2', CNImage2DemoPage()),
     _DemoEntry('CNText', 'text.viewfinder', TextDemoPage()),
+    _DemoEntry('CNProgressView', 'progress.indicator', ProgressIndicatorsPageDemo()),
+
     _DemoEntry('Image', 'photo', ImageDemoPage()),
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
     _DemoEntry('Label', 'textformat', LabelDemoPage()),
     _DemoEntry('Color Well', 'paintpalette', ColorWellDemoPage()),
     _DemoEntry('Slider', 'slider.horizontal.3', SliderDemoPage()),
-    _DemoEntry('Progress', 'progress.indicator', ProgressIndicatorsPageDemo()),
     _DemoEntry('Button', 'button.horizontal', ButtonDemoPage()),
     _DemoEntry('Menu', 'ellipsis.circle', MenuButtonDemoPage()),
     _DemoEntry('Toggle', 'switch.2', ToggleDemo()),

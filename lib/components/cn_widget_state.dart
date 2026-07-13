@@ -164,8 +164,8 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
     }
 
     logDebug('sending patch: $diff');
-    await _channel?.invokeMethod('applyPatch', diff);
     _lastSentPayload = newPayload;
+    await _channel?.invokeMethod('applyPatch', diff);
     _scheduleIntrinsicSizeRequest();
   }
 
@@ -220,6 +220,9 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
           } else if (_lastConstraints?.tightWidth != null) {
             resolvedWidth = _lastConstraints!.tightWidth!;
             logDebug('shrink mode: using tightWidth from constraints');
+          } else if (_lastConstraints!.hasBoundedWidth) {
+            resolvedWidth = _lastConstraints!.maxWidth;
+            logDebug('shrink mode: using maxWidth from constraints');
           } else {
             resolvedWidth = defaultSize.width;
             logDebug('shrink mode: using defaultSize.width');
@@ -231,6 +234,9 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
           } else if (_lastConstraints?.tightHeight != null) {
             resolvedHeight = _lastConstraints!.tightHeight!;
             logDebug('shrink mode: using tightHeight from constraints');
+          } else if (_lastConstraints!.hasBoundedHeight) {
+            resolvedHeight = _lastConstraints!.maxHeight;
+            logDebug('shrink mode: using maxHeight from constraints');
           } else {
             resolvedHeight = defaultSize.height;
             logDebug('shrink mode: using defaultSize.height');
@@ -242,9 +248,16 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
           logDebug('shrink mode: resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight');
 
           if (widget.debugLog) {
-            platformView = Container(
-              color: CNColors.red.withOpacity(0.1),
-              child: platformView,
+            platformView = Stack(
+              fit: StackFit.passthrough,
+              children: [
+                Container(
+                  decoration: BoxDecoration(border: Border.all(color: CNColors.red.withOpacity(0.5), width: 1.0)),
+                  width: resolvedWidth,
+                  height: resolvedHeight,
+                ),
+                platformView,
+              ],
             );
           }
           return SizedBox(width: resolvedWidth, height: resolvedHeight, child: platformView);
@@ -261,9 +274,16 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
           );
 
           if (widget.debugLog) {
-            platformView = Container(
-              color: CNColors.red.withOpacity(0.1),
-              child: platformView,
+            platformView = Stack(
+              fit: StackFit.passthrough,
+              children: [
+                Container(
+                  decoration: BoxDecoration(border: Border.all(color: CNColors.red.withOpacity(0.5), width: 1.0)),
+                  width: resolvedWidth,
+                  height: resolvedHeight,
+                ),
+                platformView,
+              ],
             );
           }
 
