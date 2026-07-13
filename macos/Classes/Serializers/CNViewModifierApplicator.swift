@@ -19,7 +19,7 @@ enum CNViewModifierApplicator {
         )
     }
 
-    static func applyConstraints(constraints: CNBoxConstraintsPayload?, shrink _: Bool, to view: AnyView) -> AnyView {
+    static func applyConstraints(constraints: CNBoxConstraintsPayload?, shrink: Bool, to view: AnyView) -> AnyView {
         guard let constraints else {
             return view
         }
@@ -31,18 +31,18 @@ enum CNViewModifierApplicator {
         let idealHeight = constraints.tightHeight
         let maxHeight = constraints.maxHeight
 
-        // if shrink {
-        //     // In shrink mode, width constraint is handled via AutoLayout on the hosting view.
-        //     // SwiftUI .frame(maxWidth:) doesn't propagate to fittingSize correctly.
-        //     return AnyView(
-        //         view.frame(
-        //             minWidth: minWidth,
-        //             maxWidth: maxWidth,
-        //             minHeight: minHeight,
-        //             maxHeight: maxHeight,
-        //         ),
-        //     )
-        // }
+        if shrink {
+            // In shrink mode, width constraint is handled via AutoLayout on the hosting view.
+            // SwiftUI .frame(maxWidth:) doesn't propagate to fittingSize correctly.
+            return AnyView(
+                view.frame(
+                    minWidth: minWidth,
+                    maxWidth: maxWidth,
+                    minHeight: minHeight,
+                    maxHeight: maxHeight,
+                ),
+            )
+        }
 
         return AnyView(
             view.frame(

@@ -115,7 +115,14 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     logDebug('onMethodCall ${call.method} args=${call.arguments}');
-    await onNativeMethodCall(call);
+    if (call.method == 'intrinsicSizeChanged') {
+      final args = call.arguments as Map?;
+      final width = (args?['width'] as num?)?.toDouble();
+      final height = (args?['height'] as num?)?.toDouble();
+      _onIntrinsicSizeChanged(width, height);
+    } else {
+      await onNativeMethodCall(call);
+    }
     return null;
   }
 
@@ -236,7 +243,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
           if (widget.debugLog) {
             platformView = Container(
-              decoration: BoxDecoration(border: Border.all(color: CNColors.red, width: 1)),
+              color: CNColors.red.withOpacity(0.1),
               child: platformView,
             );
           }
@@ -255,7 +262,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
           if (widget.debugLog) {
             platformView = Container(
-              decoration: BoxDecoration(border: Border.all(color: CNColors.red, width: 1)),
+              color: CNColors.red.withOpacity(0.1),
               child: platformView,
             );
           }
@@ -310,7 +317,11 @@ bool _valuesEqual(dynamic a, dynamic b) {
   if (a == null || b == null) return false;
 
   if (a is Map<String, dynamic> && b is Map<String, dynamic>) {
-    return mapEquals(a, b);
+    if (a.length != b.length) return false;
+    for (final key in a.keys) {
+      if (!b.containsKey(key) || !_valuesEqual(a[key], b[key])) return false;
+    }
+    return true;
   }
 
   if (a is List && b is List) {

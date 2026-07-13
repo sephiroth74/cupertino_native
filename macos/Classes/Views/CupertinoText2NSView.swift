@@ -11,7 +11,7 @@ class CupertinoText2NSView: CNWidgetNSView<CNText2Payload> {
         CNText2Payload(channel: ["text": ""], viewId: viewId)!
     }
 
-    override func makeRootView(model: CNViewModel<CNText2Payload>) -> AnyView {
-        CNText2Deserializer.makeRootView(model: model)
+    override func makeRootView(model: CNViewModel<CNText2Payload>, onSizeChanged: ((CGSize) -> Void)?) -> AnyView {
+        CNText2Deserializer.makeRootView(model: model, onSizeChanged: onSizeChanged)
     }
 }

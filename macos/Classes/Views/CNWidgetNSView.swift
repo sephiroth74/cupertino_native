@@ -19,8 +19,6 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
     let model: CNViewModel<P>
     var payload: P
 
-    private var hostingWidthConstraint: NSLayoutConstraint?
-
     var logPrefix: String {
         "[\(type(of: self))][\(payload.viewDebugId)][Swift]"
     }
@@ -79,8 +77,8 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
 
     /// Creates the SwiftUI root view bound to the view model.
     /// Override in subclasses to provide the widget-specific SwiftUI body.
-    func makeRootView(model _: CNViewModel<P>) -> AnyView {
-        fatalError("Subclasses must override makeRootView(model:)")
+    func makeRootView(model _: CNViewModel<P>, onSizeChanged _: ((CGSize) -> Void)?) -> AnyView {
+        fatalError("Subclasses must override makeRootView(model:onSizeChanged:)")
     }
 
     /// Override to handle additional method calls beyond `setData`, `applyPatch`, `getIntrinsicSize`.
@@ -90,7 +88,13 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
     }
 
     private func installRootView() {
-        hostingView.rootView = makeRootView(model: model)
+        hostingView.rootView = makeRootView(model: model, onSizeChanged: { [weak self] size in
+            guard let self else { return }
+            let currentSize = currentIntrinsicSize(originalSize: size)
+            guard currentSize != size else { return }
+            log("onSizeChanged: current: \(currentSize), size: \(size)")
+            channel.invokeMethod("intrinsicSizeChanged", arguments: ["width": currentSize.width, "height": currentSize.height])
+        })
     }
 
     private func configureMethodChannel(viewId: Int64) {
@@ -120,7 +124,7 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
                     result(FlutterError(code: "bad_args", message: "Missing patch args", details: nil))
                 }
             case "getIntrinsicSize":
-                let size = currentIntrinsicSize()
+                let size = currentIntrinsicSize(originalSize: nil)
                 log("getIntrinsicSize -> \(size)")
                 result(["width": size.width, "height": size.height])
             default:
@@ -129,20 +133,23 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
         }
     }
 
-    func currentIntrinsicSize() -> CGSize {
+    func currentIntrinsicSize(originalSize: CGSize?) -> CGSize {
         layoutSubtreeIfNeeded()
         hostingView.layoutSubtreeIfNeeded()
 
         let intrinsic = hostingView.intrinsicContentSize
         let fitting = hostingView.fittingSize
+        let original = originalSize ?? .zero
 
         let width = max(
             intrinsic.width == NSView.noIntrinsicMetric ? 0 : intrinsic.width,
             fitting.width,
+            original.width,
         )
         let height = max(
             intrinsic.height == NSView.noIntrinsicMetric ? 0 : intrinsic.height,
             fitting.height,
+            original.height,
         )
 
         return CGSize(width: width, height: height)

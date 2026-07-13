@@ -1,12 +1,11 @@
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
 const _kShrink = true;
-const _kDebugLog = true;
-const _kFontSize = 48.0;
+const _kDebugLog = false;
+const _kFontSize = 32.0;
 
 const _kTextScales = {'default': CNTextScale.defaultScale, 'secondary': CNTextScale.secondary};
 
@@ -27,8 +26,6 @@ class _TextDemoPageState extends State<TextDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = CNTheme.of(context);
-
     return CNPageScaffold(
       navigationBar: const CNNavigationBar(middle: Text('CNText')),
       child: SafeArea(
@@ -38,32 +35,31 @@ class _TextDemoPageState extends State<TextDemoPage> {
           mainAxisSize: MainAxisSize.max,
           children: [
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'CNText is the reusable SwiftUI text bridge used by future widgets.',
-                    style: theme.typography.body.copyWith(color: theme.labelColor),
-                  ),
-                  const SizedBox(height: 24),
-                  PixelPerfectProbe(
-                    adjustPosition: true,
+                  Center(
                     child: Container(
-                      padding: EdgeInsets.all(16),
+                      padding: EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         border: Border.all(color: CupertinoColors.systemGrey, width: 1),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: CNText2(
-                        'The quick brown fox jumps over the lazy dog.',
-                        lineLimit: lineLimit,
-                        lineLimitReservesSpace: true,
-                        textScale: textScale,
-                        truncationMode: truncationMode,
-                        font: font,
-                        foregroundColor: foregroundColor,
-                        debugLog: _kDebugLog,
-                        shrink: _kShrink,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: CNText2(
+                          'Hello World.',
+                          lineLimit: lineLimit,
+                          lineLimitReservesSpace: true,
+                          textScale: textScale,
+                          truncationMode: truncationMode,
+                          font: font,
+                          foregroundColor: foregroundColor,
+                          debugLog: _kDebugLog,
+                          shrink: _kShrink,
+                        ),
                       ),
                     ),
                   ),

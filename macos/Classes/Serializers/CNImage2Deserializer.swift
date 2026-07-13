@@ -1,12 +1,13 @@
 import SwiftUI
 
 enum CNImage2Deserializer {
-    static func makeRootView(model: CNViewModel<CNImage2Payload>) -> AnyView {
-        AnyView(_CNBoundImage2View(model: model))
+    static func makeRootView(model: CNViewModel<CNImage2Payload>, onSizeChanged: ((CGSize) -> Void)? = nil) -> AnyView {
+        AnyView(_CNBoundImage2View(model: model, onSizeChanged: onSizeChanged))
     }
 
     private struct _CNBoundImage2View: View {
         @ObservedObject var model: CNViewModel<CNImage2Payload>
+        let onSizeChanged: ((CGSize) -> Void)?
 
         var body: some View {
             let payload = model.payload
@@ -26,6 +27,16 @@ enum CNImage2Deserializer {
 
             // Constraints last (outermost)
             view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
+
+            if let onSizeChanged {
+                view = AnyView(
+                    view.onGeometryChange(for: CGSize.self) { proxy in
+                        proxy.size
+                    } action: { size in
+                        onSizeChanged(size)
+                    },
+                )
+            }
 
             return AnyView(view.id(payload.viewDebugId))
         }
