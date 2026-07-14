@@ -44,7 +44,7 @@ enum CNSlider2Deserializer {
             }
 
             // Apply control size
-            view = Self.applyControlSize(to: view, payload: payload)
+            view = CNViewModifierApplicator.applyControlSize(payload.controlSize, to: view)
 
             // Apply shared modifiers
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
@@ -193,21 +193,6 @@ enum CNSlider2Deserializer {
                         onEditingChanged: { editing in onEditingChanged?(editing) },
                     ),
                 )
-            }
-        }
-
-        private static func applyControlSize(to view: AnyView, payload: CNSlider2Payload) -> AnyView {
-            switch payload.controlSize {
-            case "mini":
-                AnyView(view.controlSize(.mini))
-            case "small":
-                AnyView(view.controlSize(.small))
-            case "large":
-                AnyView(view.controlSize(.large))
-            case "extraLarge":
-                AnyView(view.controlSize(.extraLarge))
-            default:
-                AnyView(view.controlSize(.regular))
             }
         }
     }

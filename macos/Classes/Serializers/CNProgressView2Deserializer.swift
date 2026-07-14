@@ -25,7 +25,7 @@ enum CNProgressView2Deserializer {
             view = Self.applyStyle(to: view, payload: payload)
 
             // Apply control size
-            view = Self.applyControlSize(to: view, payload: payload)
+            view = CNViewModifierApplicator.applyControlSize(payload.controlSize, to: view)
 
             // Apply shared modifiers
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
@@ -56,21 +56,6 @@ enum CNProgressView2Deserializer {
                 AnyView(view.progressViewStyle(.circular))
             default:
                 AnyView(view.progressViewStyle(.linear))
-            }
-        }
-
-        private static func applyControlSize(to view: AnyView, payload: CNProgressView2Payload) -> AnyView {
-            switch payload.controlSize {
-            case "mini":
-                AnyView(view.controlSize(.mini))
-            case "small":
-                AnyView(view.controlSize(.small))
-            case "large":
-                AnyView(view.controlSize(.large))
-            case "extraLarge":
-                AnyView(view.controlSize(.extraLarge))
-            default:
-                AnyView(view.controlSize(.regular))
             }
         }
     }

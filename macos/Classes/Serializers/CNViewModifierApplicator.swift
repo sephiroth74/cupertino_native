@@ -79,4 +79,19 @@ enum CNViewModifierApplicator {
         }
         return AnyView(view.tint(ColorUtils.swiftUIColorFromARGB(tint)))
     }
+
+    static func applyControlSize(_ controlSize: String?, to view: AnyView) -> AnyView {
+        switch controlSize {
+        case "mini":
+            AnyView(view.controlSize(.mini))
+        case "small":
+            AnyView(view.controlSize(.small))
+        case "large":
+            AnyView(view.controlSize(.large))
+        case "extraLarge":
+            AnyView(view.controlSize(.extraLarge))
+        default:
+            AnyView(view.controlSize(.regular))
+        }
+    }
 }
