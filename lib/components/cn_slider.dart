@@ -1,0 +1,146 @@
+// ignore_for_file: public_member_api_docs
+
+import 'package:cupertino_native/components/cn_widget.dart';
+import 'package:cupertino_native/components/cn_widget_state.dart';
+import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
+const _kNativeViewType = 'CupertinoNativeSlider2';
+const double _kDefaultSliderWidth = 140.0;
+
+class CNSlider2 extends CNWidget {
+  const CNSlider2({
+    super.key,
+    super.debugLog,
+    required this.value,
+    this.onChanged,
+    this.onEditingChanged,
+    this.min = 0.0,
+    this.max = 1.0,
+    this.step,
+    this.controlSize = CNControlSize.regular,
+    this.shrink = true,
+    this.constraints,
+    this.tint,
+    this.foregroundColor,
+    this.paddings,
+  }) : assert(min < max),
+       assert(value >= min && value <= max),
+       assert(step == null || step > 0);
+
+  /// Control size for the slider.
+  final CNControlSize controlSize;
+
+  /// Maximum value.
+  final double max;
+
+  /// Minimum value.
+  final double min;
+
+  /// Called when slider value changes.
+  final ValueChanged<double>? onChanged;
+
+  /// Called when editing starts/ends.
+  final ValueChanged<bool>? onEditingChanged;
+
+  /// Optional step increment.
+  final double? step;
+
+  /// Current value.
+  final double value;
+
+  @override
+  final BoxConstraints? constraints;
+
+  @override
+  final Color? foregroundColor;
+
+  @override
+  final EdgeInsetsGeometry? paddings;
+
+  @override
+  final bool shrink;
+
+  @override
+  final Color? tint;
+
+  @override
+  State<CNSlider2> createState() => _CNSlider2State();
+
+  @override
+  String get nativeViewType => _kNativeViewType;
+}
+
+class _CNSlider2State extends CNWidgetState<CNSlider2> {
+  @override
+  Size computeDefaultSize() => Size(_kDefaultSliderWidth, _defaultHeight());
+
+  @override
+  double computeShrinkWidth({
+    required BoxConstraints constraints,
+    required BoxConstraints parentConstraints,
+    required double defaultWidth,
+    double? intrinsicWidth,
+  }) {
+    double resolvedWidth;
+    if (intrinsicWidth != null) {
+      resolvedWidth = intrinsicWidth;
+      logDebug('shrink mode: using intrinsicWidth');
+    } else if (parentConstraints.hasBoundedWidth) {
+      resolvedWidth = parentConstraints.maxWidth;
+      logDebug('shrink mode: using parent maxWidth');
+    } else {
+      resolvedWidth = defaultWidth;
+      logDebug('shrink mode: using defaultSize.width');
+    }
+    resolvedWidth = parentConstraints.constrainWidth(resolvedWidth);
+    return resolvedWidth;
+  }
+
+  @override
+  Future<void> onNativeMethodCall(MethodCall call) async {
+    switch (call.method) {
+      case 'valueChanged':
+        final args = call.arguments as Map?;
+        final value = (args?['value'] as num?)?.toDouble();
+        if (value != null) {
+          widget.onChanged?.call(value);
+        }
+      case 'editingChanged':
+        final args = call.arguments as Map?;
+        final editing = (args?['editing'] as bool?) ?? (args?['editing'] as num?)?.toInt() == 1;
+        widget.onEditingChanged?.call(editing);
+    }
+  }
+
+  @override
+  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+    final payload = <String, dynamic>{
+      'value': widget.value,
+      'min': widget.min,
+      'max': widget.max,
+      'step': widget.step,
+      'controlSize': widget.controlSize.name,
+    };
+
+    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    return payload;
+  }
+
+  double _defaultHeight() {
+    final verticalPaddings = widget.paddings?.vertical ?? 0;
+    switch (widget.controlSize) {
+      case CNControlSize.mini:
+        return 12.0 + verticalPaddings;
+      case CNControlSize.small:
+        return 14.0 + verticalPaddings;
+      case CNControlSize.regular:
+        return 16.0 + verticalPaddings;
+      case CNControlSize.large:
+        return 20.0 + verticalPaddings;
+      case CNControlSize.extraLarge:
+        return 20.0 + verticalPaddings;
+    }
+  }
+}

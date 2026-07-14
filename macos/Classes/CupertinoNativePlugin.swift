@@ -98,6 +98,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let progressView2Factory = CupertinoProgressView2Factory(messenger: registrar.messenger)
         registrar.register(progressView2Factory, withId: "CupertinoNativeProgressView2")
+
+        let slider2Factory = CupertinoSlider2Factory(messenger: registrar.messenger)
+        registrar.register(slider2Factory, withId: "CupertinoNativeSlider2")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

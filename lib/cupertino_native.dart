@@ -44,6 +44,7 @@ export 'components/window/window.dart';
 export 'components/cn_image.dart';
 export 'components/cn_text.dart';
 export 'components/cn_progress_view.dart';
+export 'components/cn_slider.dart';
 
 export 'model/control_size.dart';
 export 'model/slider_tickmark_position.dart';

@@ -3,7 +3,7 @@ import SwiftUI
 /// Generic observable view model for any CN widget payload.
 /// Holds a `@Published` payload and forwards patch/replace operations.
 final class CNViewModel<P: CNChannelDeserializable>: ObservableObject {
-    @Published private(set) var payload: P
+    @Published var payload: P
 
     init(payload: P) {
         self.payload = payload

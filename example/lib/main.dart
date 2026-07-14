@@ -86,12 +86,12 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNImage', 'testtube.2', CNImage2DemoPage()),
     _DemoEntry('CNText', 'text.viewfinder', TextDemoPage()),
     _DemoEntry('CNProgressView', 'progress.indicator', ProgressIndicatorsPageDemo()),
+    _DemoEntry('CNSlider', 'slider.horizontal.3', SliderDemoPage()),
 
     _DemoEntry('Image', 'photo', ImageDemoPage()),
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
     _DemoEntry('Label', 'textformat', LabelDemoPage()),
     _DemoEntry('Color Well', 'paintpalette', ColorWellDemoPage()),
-    _DemoEntry('Slider', 'slider.horizontal.3', SliderDemoPage()),
     _DemoEntry('Button', 'button.horizontal', ButtonDemoPage()),
     _DemoEntry('Menu', 'ellipsis.circle', MenuButtonDemoPage()),
     _DemoEntry('Toggle', 'switch.2', ToggleDemo()),
