@@ -16,6 +16,10 @@ struct CNSlider2Payload: CNSharedPayloadFields {
     var max: Double
     var step: Double?
     var controlSize: String?
+    var minimumValueLabel: String?
+    var maximumValueLabel: String?
+    var enabled: Bool
+    var ticks: [CNSliderTickPayload]?
 
     init(viewId: String) {
         viewDebugId = viewId
@@ -30,6 +34,10 @@ struct CNSlider2Payload: CNSharedPayloadFields {
         max = 1.0
         step = nil
         controlSize = "regular"
+        minimumValueLabel = nil
+        maximumValueLabel = nil
+        enabled = true
+        ticks = nil
     }
 
     init?(channel: [String: Any], viewId: Int64) {
@@ -72,6 +80,28 @@ struct CNSlider2Payload: CNSharedPayloadFields {
         if channel.keys.contains("controlSize") {
             controlSize = CNChannelDeserialization.decodeString(channel["controlSize"])
         }
+
+        if channel.keys.contains("minimumValueLabel") {
+            minimumValueLabel = CNChannelDeserialization.decodeString(channel["minimumValueLabel"])
+        }
+
+        if channel.keys.contains("maximumValueLabel") {
+            maximumValueLabel = CNChannelDeserialization.decodeString(channel["maximumValueLabel"])
+        }
+
+        if channel.keys.contains("enabled") {
+            enabled = CNChannelDeserialization.decodeBool(channel["enabled"]) ?? true
+        }
+
+        if channel.keys.contains("ticks") {
+            if channel["ticks"] is NSNull || channel["ticks"] == nil {
+                ticks = nil
+            } else if let ticksList = channel["ticks"] as? [[String: Any]] {
+                ticks = ticksList.compactMap { CNSliderTickPayload.fromChannel($0) }
+            } else {
+                ticks = nil
+            }
+        }
     }
 
     func identityKey() -> String {
@@ -81,7 +111,21 @@ struct CNSlider2Payload: CNSharedPayloadFields {
             String(max),
             step.map { String($0) } ?? "nil",
             controlSize ?? "nil",
+            ticks.map { t in t.map { "\($0.value):\($0.label ?? "")" }.joined(separator: ",") } ?? "nil",
         ])
         return parts.joined(separator: "|")
+    }
+}
+
+struct CNSliderTickPayload {
+    var value: Double
+    var label: String?
+
+    static func fromChannel(_ dict: [String: Any]) -> CNSliderTickPayload? {
+        guard let value = CNChannelDeserialization.decodeDouble(dict["value"]) else {
+            return nil
+        }
+        let label = CNChannelDeserialization.decodeString(dict["label"])
+        return CNSliderTickPayload(value: value, label: label)
     }
 }

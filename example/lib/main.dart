@@ -27,7 +27,7 @@ import 'demos/search_field.dart';
 import 'demos/secure_text_field.dart';
 import 'demos/segmented_control.dart';
 import 'demos/sheet.dart';
-import 'demos/slider_demo.dart';
+import 'demos/cn_slider_demo.dart';
 import 'demos/split_view.dart';
 import 'demos/stepper.dart';
 import 'demos/tab_view.dart';

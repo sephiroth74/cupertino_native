@@ -9,6 +9,18 @@ import 'package:flutter/widgets.dart';
 const _kNativeViewType = 'CupertinoNativeSlider2';
 const double _kDefaultSliderWidth = 140.0;
 
+/// A tick mark for [CNSlider2].
+class CNSliderTick {
+  /// Creates a tick at the given [value] with an optional [label].
+  const CNSliderTick(this.value, {this.label});
+
+  /// Optional label displayed at this tick.
+  final String? label;
+
+  /// The value where this tick should appear.
+  final double value;
+}
+
 class CNSlider2 extends CNWidget {
   const CNSlider2({
     super.key,
@@ -19,6 +31,9 @@ class CNSlider2 extends CNWidget {
     this.min = 0.0,
     this.max = 1.0,
     this.step,
+    this.ticks,
+    this.minimumValueLabel,
+    this.maximumValueLabel,
     this.controlSize = CNControlSize.regular,
     this.shrink = true,
     this.constraints,
@@ -27,7 +42,8 @@ class CNSlider2 extends CNWidget {
     this.paddings,
   }) : assert(min < max),
        assert(value >= min && value <= max),
-       assert(step == null || step > 0);
+       assert(step == null || step > 0),
+       assert(step == null || ticks == null, 'step and ticks cannot be used together');
 
   /// Control size for the slider.
   final CNControlSize controlSize;
@@ -35,8 +51,14 @@ class CNSlider2 extends CNWidget {
   /// Maximum value.
   final double max;
 
+  /// Label displayed at the maximum end of the slider.
+  final String? maximumValueLabel;
+
   /// Minimum value.
   final double min;
+
+  /// Label displayed at the minimum end of the slider.
+  final String? minimumValueLabel;
 
   /// Called when slider value changes.
   final ValueChanged<double>? onChanged;
@@ -44,8 +66,11 @@ class CNSlider2 extends CNWidget {
   /// Called when editing starts/ends.
   final ValueChanged<bool>? onEditingChanged;
 
-  /// Optional step increment.
+  /// Optional step increment. Mutually exclusive with [ticks].
   final double? step;
+
+  /// Optional tick marks. Mutually exclusive with [step].
+  final List<CNSliderTick>? ticks;
 
   /// Current value.
   final double value;
@@ -122,6 +147,10 @@ class _CNSlider2State extends CNWidgetState<CNSlider2> {
       'max': widget.max,
       'step': widget.step,
       'controlSize': widget.controlSize.name,
+      'minimumValueLabel': widget.minimumValueLabel,
+      'maximumValueLabel': widget.maximumValueLabel,
+      'enabled': widget.onChanged != null,
+      'ticks': widget.ticks?.map((t) => {'value': t.value, 'label': t.label}).toList(),
     };
 
     widget.writeSharedFields(context, payload: payload, constraints: constraints);
@@ -130,17 +159,21 @@ class _CNSlider2State extends CNWidgetState<CNSlider2> {
 
   double _defaultHeight() {
     final verticalPaddings = widget.paddings?.vertical ?? 0;
+    final hasTickLabels = widget.ticks?.any((e) => e.label != null) ?? false;
+    double defaultHeight;
+
     switch (widget.controlSize) {
       case CNControlSize.mini:
-        return 12.0 + verticalPaddings;
+        defaultHeight = 12.0;
       case CNControlSize.small:
-        return 14.0 + verticalPaddings;
+        defaultHeight = 14.0;
       case CNControlSize.regular:
-        return 16.0 + verticalPaddings;
+        defaultHeight = 16.0;
       case CNControlSize.large:
-        return 20.0 + verticalPaddings;
+        defaultHeight = 20.0;
       case CNControlSize.extraLarge:
-        return 20.0 + verticalPaddings;
+        defaultHeight = 20.0;
     }
+    return defaultHeight + verticalPaddings + (hasTickLabels ? 15 : 0);
   }
 }
