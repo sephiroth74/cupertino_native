@@ -57,13 +57,39 @@ class CNProgressView2 extends CNWidget {
 }
 
 class _CNProgressView2State extends CNWidgetState<CNProgressView2> {
+
+  @override
+  double computeShrinkWidth({
+    required BoxConstraints constraints,
+    required BoxConstraints parentConstraints,
+    required double defaultWidth,
+    double? intrinsicWidth,
+  }) {
+    double resolvedWidth;
+    if (intrinsicWidth != null) {
+      resolvedWidth = intrinsicWidth;
+      logDebug('shrink mode: using intrinsicWidth');
+    } else if (constraints.tightWidth != null) {
+      resolvedWidth = constraints.tightWidth!;
+      logDebug('shrink mode: using tightWidth from constraints');
+    } else if (constraints.hasBoundedWidth) {
+      resolvedWidth = constraints.maxWidth;
+      logDebug('shrink mode: using maxWidth from constraints');
+    } else {
+      resolvedWidth = defaultWidth;
+      logDebug('shrink mode: using defaultSize.width');
+    }
+    resolvedWidth = parentConstraints.constrainWidth(resolvedWidth);
+    return resolvedWidth;
+  }
+
   @override
   Size computeDefaultSize() {
     if (widget.style == CNProgressViewStyle.circular) {
       final size = _circularSize();
       return Size(size, size);
     }
-    return Size(10, _linearHeight());
+    return Size(double.infinity, _linearHeight());
   }
 
   @override
