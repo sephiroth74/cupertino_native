@@ -104,6 +104,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let colorWell2Factory = CupertinoColorWell2Factory(messenger: registrar.messenger)
         registrar.register(colorWell2Factory, withId: "CupertinoNativeColorWell2")
+
+        let datePicker2Factory = CupertinoDatePicker2Factory(messenger: registrar.messenger)
+        registrar.register(datePicker2Factory, withId: "CupertinoNativeDatePicker2")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

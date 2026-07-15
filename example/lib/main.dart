@@ -11,7 +11,7 @@ import 'demos/button_demo.dart';
 import 'demos/cn_color_well_demo.dart';
 import 'demos/combo_box.dart';
 import 'demos/context_menu.dart';
-import 'demos/date_picker.dart';
+import 'demos/cn_date_picker_demo.dart';
 import 'demos/group_box.dart';
 import 'demos/icon.dart';
 import 'demos/image_demo.dart';
@@ -88,6 +88,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNProgressView', 'progress.indicator', ProgressIndicatorsPageDemo()),
     _DemoEntry('CNSlider', 'slider.horizontal.3', SliderDemoPage()),
     _DemoEntry('CNColorWell', 'paintpalette', ColorWellDemoPage()),
+    _DemoEntry('CNDatePicker', 'calendar', DatePickerDemoPage()),
 
     _DemoEntry('Image', 'photo', ImageDemoPage()),
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
@@ -104,7 +105,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Path Control', 'folder', PathControlDemoPage()),
     _DemoEntry('Level Indicators', 'gauge', LevelIndicatorDemoPage()),
     _DemoEntry('Steppers', 'plusminus', StepperDemoPage()),
-    _DemoEntry('Date Picker', 'calendar', DatePickerDemoPage()),
     _DemoEntry('Search Field', 'magnifyingglass', SearchFieldDemoPage()),
     _DemoEntry('Text Field', 'character.cursor.ibeam', TextFieldDemoPage()),
     _DemoEntry('Secure Text Field', 'lock.shield', SecureTextFieldDemoPage()),
