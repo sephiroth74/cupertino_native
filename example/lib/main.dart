@@ -8,7 +8,7 @@ import 'package:system_theme/system_theme.dart';
 
 import 'demos/alert.dart';
 import 'demos/button_demo.dart';
-import 'demos/color_well_demo.dart';
+import 'demos/cn_color_well_demo.dart';
 import 'demos/combo_box.dart';
 import 'demos/context_menu.dart';
 import 'demos/date_picker.dart';
@@ -87,11 +87,11 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNText', 'text.viewfinder', TextDemoPage()),
     _DemoEntry('CNProgressView', 'progress.indicator', ProgressIndicatorsPageDemo()),
     _DemoEntry('CNSlider', 'slider.horizontal.3', SliderDemoPage()),
+    _DemoEntry('CNColorWell', 'paintpalette', ColorWellDemoPage()),
 
     _DemoEntry('Image', 'photo', ImageDemoPage()),
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
     _DemoEntry('Label', 'textformat', LabelDemoPage()),
-    _DemoEntry('Color Well', 'paintpalette', ColorWellDemoPage()),
     _DemoEntry('Button', 'button.horizontal', ButtonDemoPage()),
     _DemoEntry('Menu', 'ellipsis.circle', MenuButtonDemoPage()),
     _DemoEntry('Toggle', 'switch.2', ToggleDemo()),

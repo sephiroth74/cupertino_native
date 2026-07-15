@@ -26,7 +26,7 @@ class _ColorWellDemoPageState extends State<ColorWellDemoPage> {
                 SizedBox(
                   width: 44,
                   height: 24,
-                  child: CNColorWell(
+                  child: CNColorWell2(
                     color: _color,
                     style: CNColorWellStyle.regular,
                     onColorChanged: (color) {
@@ -35,7 +35,7 @@ class _ColorWellDemoPageState extends State<ColorWellDemoPage> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                CNColorWell(
+                CNColorWell2(
                   color: _color,
                   style: CNColorWellStyle.expanded,
                   onColorChanged: (color) {
@@ -43,7 +43,7 @@ class _ColorWellDemoPageState extends State<ColorWellDemoPage> {
                   },
                 ),
                 const SizedBox(width: 12),
-                CNColorWell(
+                CNColorWell2(
                   color: _color,
                   style: CNColorWellStyle.minimal,
                   supportsAlpha: false,

@@ -5,6 +5,7 @@ import 'package:cupertino_native/components/cn_widget.dart';
 import 'package:cupertino_native/components/cn_widget_debug_id_mixin.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -98,6 +99,9 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
   /// Returns the default size to use before the native view reports its intrinsic size.
   /// Typically computed from font size or other widget properties.
   Size computeDefaultSize();
+
+  /// Optional gesture recognizers to forward to the platform view.
+  Set<Factory<OneSequenceGestureRecognizer>>? get gestureRecognizers => null;
 
   /// Produces the widget-specific payload map for the native side.
   /// Called on every build and for patch computation.
@@ -298,6 +302,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
           creationParams: payload,
           creationParamsCodec: const StandardMessageCodec(),
           onPlatformViewCreated: _onPlatformViewCreated,
+          gestureRecognizers: gestureRecognizers,
         );
 
         logDebug(

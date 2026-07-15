@@ -101,6 +101,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let slider2Factory = CupertinoSlider2Factory(messenger: registrar.messenger)
         registrar.register(slider2Factory, withId: "CupertinoNativeSlider2")
+
+        let colorWell2Factory = CupertinoColorWell2Factory(messenger: registrar.messenger)
+        registrar.register(colorWell2Factory, withId: "CupertinoNativeColorWell2")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
