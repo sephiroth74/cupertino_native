@@ -328,7 +328,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
             platformView = Stack(
               fit: StackFit.passthrough,
               children: [
-                Container(
+                SizedBox(
                   // decoration: BoxDecoration(border: Border.all(color: CNColors.red.withValues(alpha: 0.5), width: 1.0)),
                   width: resolvedWidth,
                   height: resolvedHeight,
@@ -354,7 +354,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
             platformView = Stack(
               fit: StackFit.passthrough,
               children: [
-                Container(
+                SizedBox(
                   // decoration: BoxDecoration(border: Border.all(color: CNColors.red.withValues(alpha: 0.5), width: 1.0)),
                   width: resolvedWidth,
                   height: resolvedHeight,

@@ -1,5 +1,4 @@
 import 'package:cupertino_native_example/demos/common_widgets.dart';
-import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 

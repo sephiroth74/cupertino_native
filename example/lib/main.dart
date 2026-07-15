@@ -14,7 +14,6 @@ import 'demos/context_menu.dart';
 import 'demos/cn_date_picker_demo.dart';
 import 'demos/group_box.dart';
 import 'demos/icon.dart';
-import 'demos/image_demo.dart';
 import 'demos/label_demo.dart';
 import 'demos/level_indicators.dart';
 import 'demos/menu_demo.dart';
