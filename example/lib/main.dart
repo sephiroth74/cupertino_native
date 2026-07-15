@@ -29,7 +29,7 @@ import 'demos/segmented_control.dart';
 import 'demos/sheet.dart';
 import 'demos/cn_slider_demo.dart';
 import 'demos/split_view.dart';
-import 'demos/stepper.dart';
+import 'demos/cn_stepper_demo.dart';
 import 'demos/tab_view.dart';
 import 'demos/cn_text_demo.dart';
 import 'demos/text_field.dart';
@@ -89,8 +89,8 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNSlider', 'slider.horizontal.3', SliderDemoPage()),
     _DemoEntry('CNColorWell', 'paintpalette', ColorWellDemoPage()),
     _DemoEntry('CNDatePicker', 'calendar', DatePickerDemoPage()),
+    _DemoEntry('CNStepper', 'plusminus', StepperDemoPage()),
 
-    _DemoEntry('Image', 'photo', ImageDemoPage()),
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
     _DemoEntry('Label', 'textformat', LabelDemoPage()),
     _DemoEntry('Button', 'button.horizontal', ButtonDemoPage()),
@@ -104,7 +104,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Popup Menu Button', 'ellipsis.circle', PopupMenuButtonDemoPage()),
     _DemoEntry('Path Control', 'folder', PathControlDemoPage()),
     _DemoEntry('Level Indicators', 'gauge', LevelIndicatorDemoPage()),
-    _DemoEntry('Steppers', 'plusminus', StepperDemoPage()),
     _DemoEntry('Search Field', 'magnifyingglass', SearchFieldDemoPage()),
     _DemoEntry('Text Field', 'character.cursor.ibeam', TextFieldDemoPage()),
     _DemoEntry('Secure Text Field', 'lock.shield', SecureTextFieldDemoPage()),
