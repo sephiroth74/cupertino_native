@@ -34,7 +34,7 @@ import 'demos/cn_text_demo.dart';
 import 'demos/cn_text_field_demo.dart';
 import 'demos/text_view.dart';
 import 'demos/theme.dart';
-import 'demos/toggle_demo.dart';
+import 'demos/cn_toggle_demo.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -90,12 +90,12 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNDatePicker', 'calendar', DatePickerDemoPage()),
     _DemoEntry('CNStepper', 'plusminus', StepperDemoPage()),
     _DemoEntry('CNTextField', 'character.cursor.ibeam', TextFieldDemoPage()),
+    _DemoEntry('CNToggle2', 'switch.2', ToggleDemo()),
 
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
     _DemoEntry('Label', 'textformat', LabelDemoPage()),
     _DemoEntry('Button', 'button.horizontal', ButtonDemoPage()),
     _DemoEntry('Menu', 'ellipsis.circle', MenuButtonDemoPage()),
-    _DemoEntry('Toggle', 'switch.2', ToggleDemo()),
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Segmented Control', 'rectangle.split.3x1', SegmentedControlDemoPage()),
