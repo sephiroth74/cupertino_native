@@ -20,41 +20,14 @@ class CupertinoTextField2NSView: CNWidgetNSView<CNTextField2Payload> {
                 guard let self, !isUpdatingFromDart else { return }
                 channel.invokeMethod("textChanged", arguments: newText)
             },
+            onSelectionChanged: { [weak self] base, extent in
+                guard let self, !isUpdatingFromDart else { return }
+                channel.invokeMethod("selectionChanged", arguments: ["base": base, "extent": extent])
+            },
             onSubmitted: { [weak self] text in
                 self?.channel.invokeMethod("submitted", arguments: text)
             },
             onSizeChanged: onSizeChanged,
         )
-    }
-
-    override func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        switch call.method {
-        case "setText":
-            if let args = CNChannelDeserialization.asDict(call.arguments),
-               let value = args["value"] as? String
-            {
-                isUpdatingFromDart = true
-                payload.text = value
-                model.replace(with: payload)
-                isUpdatingFromDart = false
-                result(nil)
-            } else {
-                result(FlutterError(code: "bad_args", message: "Missing text value", details: nil))
-            }
-        case "setSelection":
-            if let args = CNChannelDeserialization.asDict(call.arguments),
-               let base = args["base"] as? Int,
-               let extent = args["extent"] as? Int
-            {
-                isUpdatingFromDart = true
-                channel.invokeMethod("selectionChanged", arguments: ["base": base, "extent": extent])
-                isUpdatingFromDart = false
-                result(nil)
-            } else {
-                result(FlutterError(code: "bad_args", message: "Missing selection values", details: nil))
-            }
-        default:
-            super.handleMethodCall(call, result: result)
-        }
     }
 }

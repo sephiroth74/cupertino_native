@@ -12,6 +12,8 @@ struct CNTextField2Payload: CNSharedPayloadFields {
 
     // TextField-specific fields
     var text: String
+    var selectionBase: Int?
+    var selectionExtent: Int?
     var placeholder: String?
     var prompt: String?
     var textFieldStyle: String?
@@ -29,6 +31,8 @@ struct CNTextField2Payload: CNSharedPayloadFields {
         tint = nil
         foregroundColor = nil
         text = ""
+        selectionBase = nil
+        selectionExtent = nil
         placeholder = nil
         prompt = nil
         textFieldStyle = "automatic"
@@ -49,6 +53,14 @@ struct CNTextField2Payload: CNSharedPayloadFields {
 
         if channel.keys.contains("text") {
             text = CNChannelDeserialization.decodeString(channel["text"]) ?? ""
+        }
+
+        if channel.keys.contains("selectionBase") {
+            selectionBase = CNChannelDeserialization.decodeInt(channel["selectionBase"])
+        }
+
+        if channel.keys.contains("selectionExtent") {
+            selectionExtent = CNChannelDeserialization.decodeInt(channel["selectionExtent"])
         }
 
         if channel.keys.contains("placeholder") {

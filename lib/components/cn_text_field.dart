@@ -150,6 +150,7 @@ class _CNTextField2State extends CNWidgetState<CNTextField2> {
     switch (call.method) {
       case 'textChanged':
         final text = call.arguments as String? ?? '';
+        logDebug('textChanged: "$text" (len=${text.length})');
         _isUpdatingFromNative = true;
         _controller.text = text;
         _isUpdatingFromNative = false;
@@ -158,6 +159,7 @@ class _CNTextField2State extends CNWidgetState<CNTextField2> {
         final args = call.arguments as Map?;
         final base = (args?['base'] as num?)?.toInt();
         final extent = (args?['extent'] as num?)?.toInt();
+        logDebug('selectionChanged: base=$base, extent=$extent, textLen=${_controller.text.length}');
         if (base != null && extent != null) {
           _isUpdatingFromNative = true;
           final textLength = _controller.text.length;
@@ -172,8 +174,11 @@ class _CNTextField2State extends CNWidgetState<CNTextField2> {
 
   @override
   Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+    final selection = _controller.selection;
     final payload = <String, dynamic>{
       'text': _controller.text,
+      'selectionBase': selection.isValid ? selection.baseOffset : null,
+      'selectionExtent': selection.isValid ? selection.extentOffset : null,
       'placeholder': widget.placeholder,
       'prompt': widget.prompt,
       'textFieldStyle': widget.textFieldStyle.name,
@@ -191,6 +196,7 @@ class _CNTextField2State extends CNWidgetState<CNTextField2> {
 
   void _onControllerChanged() {
     if (_isUpdatingFromNative) return;
+    logDebug('_onControllerChanged: text="${_controller.text}" (len=${_controller.text.length}), selection=${_controller.selection}');
     // Programmatic change from Dart — trigger rebuild so the patch system
     // sends the updated text to native via applyPatch.
     setState(() {});

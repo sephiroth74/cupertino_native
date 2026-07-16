@@ -3,7 +3,7 @@ import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
-const _kDebugLog = true;
+const _kDebugLog = false;
 const _kFontSize = 24.0;
 
 class TextFieldDemoPage extends StatefulWidget {
@@ -41,9 +41,13 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
 
   void _updateSelectionInfo() {
     final selection = controller.selection;
+    debugPrint(
+      'Selection changed: valid: ${selection.isValid}, start: ${selection.start}, end: ${selection.end}, text: ${controller.text}',
+    );
     if (selection.isValid && mounted) {
       setState(() {
-        selectionInfo = 'Selection: [${selection.baseOffset}, ${selection.extentOffset}]';
+        selectionInfo =
+            'Selection: [${selection.baseOffset}, ${selection.extentOffset}]\nText: "${controller.text.substring(selection.start, selection.end)}"';
       });
     }
   }
