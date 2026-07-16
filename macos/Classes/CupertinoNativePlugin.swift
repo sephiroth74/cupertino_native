@@ -110,6 +110,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let stepper2Factory = CupertinoStepper2Factory(messenger: registrar.messenger)
         registrar.register(stepper2Factory, withId: "CupertinoNativeStepper2")
+
+        let textField2Factory = CupertinoTextField2Factory(messenger: registrar.messenger)
+        registrar.register(textField2Factory, withId: "CupertinoNativeTextField2")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

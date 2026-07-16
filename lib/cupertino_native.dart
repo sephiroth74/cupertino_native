@@ -48,6 +48,7 @@ export 'components/cn_slider.dart';
 export 'components/cn_color_well.dart';
 export 'components/cn_date_picker.dart';
 export 'components/cn_stepper.dart';
+export 'components/cn_text_field.dart';
 
 export 'model/control_size.dart';
 export 'model/slider_tickmark_position.dart';

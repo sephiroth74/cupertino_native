@@ -31,7 +31,7 @@ import 'demos/split_view.dart';
 import 'demos/cn_stepper_demo.dart';
 import 'demos/tab_view.dart';
 import 'demos/cn_text_demo.dart';
-import 'demos/text_field.dart';
+import 'demos/cn_text_field_demo.dart';
 import 'demos/text_view.dart';
 import 'demos/theme.dart';
 import 'demos/toggle_demo.dart';
@@ -89,6 +89,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNColorWell', 'paintpalette', ColorWellDemoPage()),
     _DemoEntry('CNDatePicker', 'calendar', DatePickerDemoPage()),
     _DemoEntry('CNStepper', 'plusminus', StepperDemoPage()),
+    _DemoEntry('CNTextField', 'character.cursor.ibeam', TextFieldDemoPage()),
 
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
     _DemoEntry('Label', 'textformat', LabelDemoPage()),
@@ -104,7 +105,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Path Control', 'folder', PathControlDemoPage()),
     _DemoEntry('Level Indicators', 'gauge', LevelIndicatorDemoPage()),
     _DemoEntry('Search Field', 'magnifyingglass', SearchFieldDemoPage()),
-    _DemoEntry('Text Field', 'character.cursor.ibeam', TextFieldDemoPage()),
     _DemoEntry('Secure Text Field', 'lock.shield', SecureTextFieldDemoPage()),
     _DemoEntry('Text View / Text Area', 'text.justify.left', TextViewDemoPage()),
     _DemoEntry('Combo Box', 'list.bullet.rectangle', ComboBoxDemoPage()),

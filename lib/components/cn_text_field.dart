@@ -1,0 +1,250 @@
+// ignore_for_file: public_member_api_docs
+
+import 'package:cupertino_native/channel/params.dart';
+import 'package:cupertino_native/components/cn_widget.dart';
+import 'package:cupertino_native/components/cn_widget_state.dart';
+import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
+const _kNativeViewType = 'CupertinoNativeTextField2';
+
+/// Style for CNTextField2.
+enum CNTextFieldStyle {
+  /// Automatic style (system default).
+  automatic,
+
+  /// Plain style with no border.
+  plain,
+
+  /// Rounded border style.
+  roundedBorder,
+}
+
+/// A native SwiftUI TextField widget controllable via [TextEditingController].
+class CNTextField2 extends CNWidget {
+  const CNTextField2({
+    super.key,
+    super.debugLog,
+    this.controller,
+    this.placeholder,
+    this.prompt,
+    this.textFieldStyle = CNTextFieldStyle.automatic,
+    this.controlSize = CNControlSize.regular,
+    this.font,
+    this.borderColor,
+    this.borderWidth,
+    this.onChanged,
+    this.onSubmitted,
+    this.shrink = true,
+    this.constraints,
+    this.tint,
+    this.foregroundColor,
+    this.paddings,
+  });
+
+  /// Border color applied via `.border()` modifier.
+  final Color? borderColor;
+
+  /// Border width applied via `.border()` modifier.
+  final double? borderWidth;
+
+  /// Control size.
+  final CNControlSize controlSize;
+
+  /// The text editing controller that controls the text field.
+  /// If null, an internal controller is created.
+  final TextEditingController? controller;
+
+  /// Font descriptor.
+  final CNFont? font;
+
+  /// Called when the text changes from user input.
+  final ValueChanged<String>? onChanged;
+
+  /// Called when the user presses Enter.
+  final ValueChanged<String>? onSubmitted;
+
+  /// The label shown in the text field (used by some styles).
+  final String? placeholder;
+
+  /// Prompt text shown when the field is empty.
+  final String? prompt;
+
+  /// Text field visual style.
+  final CNTextFieldStyle textFieldStyle;
+
+  @override
+  final BoxConstraints? constraints;
+
+  @override
+  final Color? foregroundColor;
+
+  @override
+  final EdgeInsetsGeometry? paddings;
+
+  @override
+  final bool shrink;
+
+  @override
+  final Color? tint;
+
+  @override
+  State<CNTextField2> createState() => _CNTextField2State();
+
+  @override
+  String get nativeViewType => _kNativeViewType;
+}
+
+class _CNTextField2State extends CNWidgetState<CNTextField2> {
+  TextEditingController? _internalController;
+  bool _isUpdatingFromNative = false;
+
+  @override
+  Size computeDefaultSize() => Size(_defaultWidth(), _defaultHeight());
+
+  @override
+  void didUpdateWidget(covariant CNTextField2 oldWidget) {
+    if (oldWidget.controller != widget.controller) {
+      final oldController = oldWidget.controller ?? _internalController!;
+      oldController.removeListener(_onControllerChanged);
+
+      if (widget.controller == null && _internalController == null) {
+        _internalController = TextEditingController(text: oldController.text);
+      } else if (widget.controller != null && _internalController != null) {
+        _internalController!.dispose();
+        _internalController = null;
+      }
+
+      _controller.addListener(_onControllerChanged);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onControllerChanged);
+    _internalController?.dispose();
+    _internalController = null;
+    super.dispose();
+  }
+
+  @override
+  Set<Factory<OneSequenceGestureRecognizer>>? get gestureRecognizers => {
+    Factory<OneSequenceGestureRecognizer>(() => TapGestureRecognizer()),
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller == null) {
+      _internalController = TextEditingController();
+    }
+    _controller.addListener(_onControllerChanged);
+  }
+
+  @override
+  Future<void> onNativeMethodCall(MethodCall call) async {
+    switch (call.method) {
+      case 'textChanged':
+        final text = call.arguments as String? ?? '';
+        _isUpdatingFromNative = true;
+        _controller.text = text;
+        _isUpdatingFromNative = false;
+        widget.onChanged?.call(text);
+      case 'selectionChanged':
+        final args = call.arguments as Map?;
+        final base = (args?['base'] as num?)?.toInt();
+        final extent = (args?['extent'] as num?)?.toInt();
+        if (base != null && extent != null) {
+          _isUpdatingFromNative = true;
+          final textLength = _controller.text.length;
+          _controller.selection = TextSelection(baseOffset: base.clamp(0, textLength), extentOffset: extent.clamp(0, textLength));
+          _isUpdatingFromNative = false;
+        }
+      case 'submitted':
+        final text = call.arguments as String? ?? _controller.text;
+        widget.onSubmitted?.call(text);
+    }
+  }
+
+  @override
+  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+    final payload = <String, dynamic>{
+      'text': _controller.text,
+      'placeholder': widget.placeholder,
+      'prompt': widget.prompt,
+      'textFieldStyle': widget.textFieldStyle.name,
+      'controlSize': widget.controlSize.name,
+      'font': widget.font?.toMap(),
+      'borderColor': resolveColorToArgb(widget.borderColor, context),
+      'borderWidth': widget.borderWidth,
+    };
+
+    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    return payload;
+  }
+
+  TextEditingController get _controller => widget.controller ?? _internalController!;
+
+  void _onControllerChanged() {
+    if (_isUpdatingFromNative) return;
+    // Programmatic change from Dart — trigger rebuild so the patch system
+    // sends the updated text to native via applyPatch.
+    setState(() {});
+  }
+
+  double _defaultWidth() => 200.0;
+
+  double _defaultHeight() {
+    double resolvedHeight = 26.0; // default height for regular control size
+
+    if (widget.font != null) {
+      if (widget.font!.size.points != null) {
+        resolvedHeight = widget.font!.size.points! + 14;
+      } else if (widget.font!.size.preset != null) {
+        switch (widget.font!.size.preset!) {
+          case CNFontSizePreset.system:
+            resolvedHeight = 26;
+            break;
+          case CNFontSizePreset.smallSystem:
+            resolvedHeight = 24;
+            break;
+          case CNFontSizePreset.label:
+            resolvedHeight = 23;
+            break;
+        }
+      }
+    } else {
+      switch (widget.controlSize) {
+        case CNControlSize.mini:
+          resolvedHeight = 21.0;
+          break;
+        case CNControlSize.small:
+          resolvedHeight = 24.0;
+          break;
+        case CNControlSize.regular:
+          resolvedHeight = 26.0;
+          break;
+        case CNControlSize.large:
+          resolvedHeight = 26.0;
+          break;
+        case CNControlSize.extraLarge:
+          resolvedHeight = 26.0;
+          break;
+      }
+    }
+
+    if (widget.textFieldStyle == CNTextFieldStyle.plain) {
+      resolvedHeight -= 8.0;
+    }
+
+    if (widget.borderWidth != null) {
+      resolvedHeight += widget.borderWidth!;
+    }
+
+    return resolvedHeight;
+  }
+}
