@@ -135,9 +135,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                       style: _menuStyle,
                       onPrimaryAction: () => _setLastAction('Menu_2'),
                       modifiers: CNViewModifiers(controlSize: _controlSize, tint: _tintColor),
-                      labels: [
-                        CNLabel(CNText(_lastAction), icon: CNImage(systemSymbolName: 'wand.and.stars'))
-                      ],
+                      labels: [CNLabel(CNText(_lastAction), icon: CNImage(systemSymbolName: 'wand.and.stars'))],
                       children: [
                         CNButton(children: const [CNText('Action A')], onPressed: () => _setLastAction('Menu_2 -> Action_A')),
                       ],
@@ -164,8 +162,8 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                 ),
                 'Tint Color': ColorPicker(
                   colors: kSystemColors,
-                  currentValue: _tintColor,
-                  onValueChanged: (index) => setState(() => _tintColor = kSystemColors.values.elementAt(index)),
+                  value: _tintColor,
+                  onChanged: (c) => setState(() => _tintColor = c),
                 ),
               },
             ),

@@ -1,8 +1,8 @@
 import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
-import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:flutter/cupertino.dart';
 
 class LabelDemoPage extends StatefulWidget {
@@ -63,26 +63,26 @@ class _LabelDemoPageState extends State<LabelDemoPage> {
             RightSideOptionContainer(
               options: {
                 'Font': CNPicker(
-                  selectedIndex: availableFonts.indexWhere((f) => f?.name == font?.name),
+                  selectedIndex: kAvailableFonts.indexWhere((f) => f?.name == font?.name),
                   onValueChanged: (index) =>
-                      setState(() => font = availableFonts[index]?.copyWith(size: CNFontSize.points(fontSize))),
-                  items: availableFonts.map((font) => CNText(font != null ? (font.name ?? font.kind.name) : 'None')).toList(),
+                      setState(() => font = kAvailableFonts[index]?.copyWith(size: CNFontSize.points(fontSize))),
+                  items: kAvailableFonts.map((font) => CNText(font != null ? (font.name ?? font.kind.name) : 'None')).toList(),
                   pickerStyle: CNPickerStyle.automatic,
                 ),
                 'Primary Text Color': ColorPicker(
                   colors: kSystemColors,
-                  currentValue: foregroundTextColor,
-                  onValueChanged: (index) => setState(() => foregroundTextColor = kSystemColors.values.elementAt(index)),
+                  value: foregroundTextColor,
+                  onChanged: (color) => setState(() => foregroundTextColor = color),
                 ),
                 'Secondary Text Color': ColorPicker(
                   colors: kSystemColors,
-                  currentValue: foregroundSecondaryTextColor,
-                  onValueChanged: (index) => setState(() => foregroundSecondaryTextColor = kSystemColors.values.elementAt(index)),
+                  value: foregroundSecondaryTextColor,
+                  onChanged: (color) => setState(() => foregroundSecondaryTextColor = color),
                 ),
                 'Icon Foreground Color': ColorPicker(
                   colors: kSystemColors,
-                  currentValue: foregroundIconColor,
-                  onValueChanged: (index) => setState(() => foregroundIconColor = kSystemColors.values.elementAt(index)),
+                  value: foregroundIconColor,
+                  onChanged: (color) => setState(() => foregroundIconColor = color),
                 ),
                 'Icon to Title Spacing': CNSlider(
                   value: labelIconToTitleSpacing,

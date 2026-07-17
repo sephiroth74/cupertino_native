@@ -2,26 +2,20 @@ import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 
-class ColorPicker extends StatelessWidget {
-  const ColorPicker({
-    super.key,
-    required this.colors,
-    required this.currentValue,
-    required this.onValueChanged,
-    this.enabled = true,
-  });
+class ColorPicker<T extends Color> extends StatelessWidget {
+  const ColorPicker({super.key, required this.colors, required this.value, required this.onChanged, this.enabled = true});
 
-  final Map<String, Color?> colors;
-  final Color? currentValue;
+  final Map<String, T?> colors;
   final bool enabled;
-  final ValueChanged<int> onValueChanged;
+  final ValueChanged<T?> onChanged;
+  final T? value;
 
   @override
   Widget build(BuildContext context) {
     return CNPicker(
       modifiers: CNViewModifiers(enabled: enabled, constraints: BoxConstraints.tightFor(width: 150), shrinkWrap: false),
-      selectedIndex: currentValue == null ? 0 : colors.values.toList().indexOf(currentValue!),
-      onValueChanged: enabled ? (index) => onValueChanged(index) : null,
+      selectedIndex: value == null ? 0 : colors.values.toList().indexOf(value),
+      onValueChanged: enabled ? (index) => onChanged(colors.values.elementAt(index)) : null,
       items: colors.keys.map((colorName) {
         return CNLabel(
           CNText(colorName),
@@ -33,6 +27,40 @@ class ColorPicker extends StatelessWidget {
         // return CNText(colorName);
       }).toList(),
       pickerStyle: CNPickerStyle.menu,
+    );
+  }
+}
+
+class ControlSizePicker extends StatelessWidget {
+  const ControlSizePicker({super.key, required this.value, required this.onChanged});
+
+  final ValueChanged<CNControlSize> onChanged;
+  final CNControlSize value;
+
+  @override
+  Widget build(BuildContext context) {
+    return CNPicker(
+      selectedIndex: CNControlSize.values.indexOf(value),
+      onValueChanged: (index) => onChanged(CNControlSize.values[index]),
+      items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
+      pickerStyle: CNPickerStyle.automatic,
+    );
+  }
+}
+
+class BezelStylePicker extends StatelessWidget {
+  const BezelStylePicker({super.key, required this.value, required this.onChanged});
+
+  final ValueChanged<CNTextFieldBezelStyle> onChanged;
+  final CNTextFieldBezelStyle value;
+
+  @override
+  Widget build(BuildContext context) {
+    return CNPicker(
+      selectedIndex: CNTextFieldBezelStyle.values.indexOf(value),
+      onValueChanged: (index) => onChanged(CNTextFieldBezelStyle.values[index]),
+      items: CNTextFieldBezelStyle.values.map((style) => CNText(style.name)).toList(),
+      pickerStyle: CNPickerStyle.automatic,
     );
   }
 }
@@ -57,23 +85,6 @@ class FontPicker extends StatelessWidget {
       }),
       onValueChanged: enabled ? (index) => onChanged!(fonts[index]) : null,
       items: fonts.map((font) => CNText(font != null ? (font.name ?? font.kind.name) : 'None')).toList(),
-      pickerStyle: CNPickerStyle.automatic,
-    );
-  }
-}
-
-class ControlSizePicker extends StatelessWidget {
-  const ControlSizePicker({super.key, required this.value, required this.onChanged});
-
-  final ValueChanged<CNControlSize> onChanged;
-  final CNControlSize value;
-
-  @override
-  Widget build(BuildContext context) {
-    return CNPicker(
-      selectedIndex: CNControlSize.values.indexOf(value),
-      onValueChanged: (index) => onChanged(CNControlSize.values[index]),
-      items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
       pickerStyle: CNPickerStyle.automatic,
     );
   }

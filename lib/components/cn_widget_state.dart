@@ -218,10 +218,9 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
       final width = (args?['width'] as num?)?.toDouble();
       final height = (args?['height'] as num?)?.toDouble();
       _onIntrinsicSizeChanged(width, height);
-    } else {
-      await onNativeMethodCall(call);
+      return null;
     }
-    return null;
+    return onNativeMethodCall(call);
   }
 
   void _onIntrinsicSizeChanged(double? width, double? height) {

@@ -53,7 +53,9 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                         adjustPosition: true,
                         child: CNPicker(
                           key: ValueKey(1),
-                          labelChildren: withLabels ? [CNText('Control Size: ${_controlSize.name}'), CNText('Select an option from the list')] : [],
+                          labelChildren: withLabels
+                              ? [CNText('Control Size: ${_controlSize.name}'), CNText('Select an option from the list')]
+                              : [],
                           items: CNControlSize.values
                               .map(
                                 (e) => CNLabel(
@@ -101,18 +103,15 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                 ),
                 'Tint Color': ColorPicker(
                   colors: kSystemColors,
-                  currentValue: _tintColor,
-                  onValueChanged: (index) => setState(() => _tintColor = kSystemColors.values.elementAt(index)),
+                  value: _tintColor,
+                  onChanged: (c) => setState(() => _tintColor = c),
                 ),
                 'Foreground Color': ColorPicker(
                   colors: kSystemColors,
-                  currentValue: _foregroundColor,
-                  onValueChanged: (index) => setState(() => _foregroundColor = kSystemColors.values.elementAt(index)),
+                  value: _foregroundColor,
+                  onChanged: (c) => setState(() => _foregroundColor = c),
                 ),
-                'With Labels': CNToggle(
-                  value: withLabels,
-                  onChanged: (value) => setState(() => withLabels = value),
-                ),
+                'With Labels': CNToggle(value: withLabels, onChanged: (value) => setState(() => withLabels = value)),
               },
             ),
           ],

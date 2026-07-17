@@ -1,8 +1,8 @@
 import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
-import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:flutter/cupertino.dart';
 
 class ButtonDemoPage extends StatefulWidget {
@@ -100,15 +100,15 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                 ),
                 'Tint Color': ColorPicker(
                   colors: kSystemColors,
-                  currentValue: tintColor,
-                  onValueChanged: (index) => setState(() => tintColor = kSystemColors.values.elementAt(index)),
+                  value: tintColor,
+                  onChanged: (color) => setState(() => tintColor = color),
                 ),
                 'With Icon': CNToggle(value: withIcon, onChanged: (value) => setState(() => withIcon = value)),
                 'Icon Color': ColorPicker(
                   enabled: withIcon,
                   colors: kSystemColors,
-                  currentValue: iconColor,
-                  onValueChanged: (index) => setState(() => iconColor = kSystemColors.values.elementAt(index)),
+                  value: iconColor,
+                  onChanged: (color) => setState(() => iconColor = color),
                 ),
                 'With Progress': CNToggle(value: withProgress, onChanged: (value) => setState(() => withProgress = value)),
                 'Progress Style': CNPicker(

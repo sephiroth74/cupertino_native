@@ -105,7 +105,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                   items: CNTextFieldStyle.values.map((style) => CNText(style.name)).toList(),
                   pickerStyle: CNPickerStyle.automatic,
                 ),
-                'Font': FontPicker(value: font, fonts: availableFonts, onChanged: (newFont) => setState(() => font = newFont)),
+                'Font': FontPicker(value: font, fonts: kAvailableFonts, onChanged: (newFont) => setState(() => font = newFont)),
                 'Font Size': Row(
                   children: [
                     Expanded(child: Text(fontSize.toStringAsFixed(1))),
@@ -122,18 +122,18 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                 ),
                 'Tint Color': ColorPicker(
                   colors: kSystemColors,
-                  currentValue: tintColor,
-                  onValueChanged: (index) => setState(() => tintColor = kSystemColors.values.elementAt(index)),
+                  value: tintColor,
+                  onChanged: (color) => setState(() => tintColor = color),
                 ),
                 'Foreground Color': ColorPicker(
                   colors: kSystemColors,
-                  currentValue: foregroundColor,
-                  onValueChanged: (index) => setState(() => foregroundColor = kSystemColors.values.elementAt(index)),
+                  value: foregroundColor,
+                  onChanged: (color) => setState(() => foregroundColor = color),
                 ),
                 'Border Color': ColorPicker(
                   colors: kSystemColors,
-                  currentValue: borderColor,
-                  onValueChanged: (index) => setState(() => borderColor = kSystemColors.values.elementAt(index)),
+                  value: borderColor,
+                  onChanged: (color) => setState(() => borderColor = color),
                 ),
                 'Border Width': Row(
                   children: [

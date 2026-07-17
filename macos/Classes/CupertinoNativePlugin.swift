@@ -116,6 +116,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let toggle2Factory = CupertinoToggle2Factory(messenger: registrar.messenger)
         registrar.register(toggle2Factory, withId: "CupertinoNativeToggle2")
+
+        let searchField2Factory = CupertinoSearchField2Factory(messenger: registrar.messenger)
+        registrar.register(searchField2Factory, withId: "CupertinoNativeSearchField2")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

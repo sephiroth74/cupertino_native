@@ -1,6 +1,31 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 
+const kNonNullColors = {
+  'red': CNColors.red,
+  'orange': CNColors.orange,
+  'yellow': CNColors.yellow,
+  'green': CNColors.green,
+  'mint': CNColors.mint,
+  'teal': CNColors.teal,
+  'cyan': CNColors.cyan,
+  'blue': CNColors.blue,
+  'indigo': CNColors.indigo,
+  'pink': CNColors.pink,
+  'purple': CNColors.purple,
+  'brown': CNColors.brown,
+  'gray': CNColors.gray,
+  'Primary': CupertinoColors.label,
+  'Secondary': CupertinoColors.secondaryLabel,
+  'Tertiary': CupertinoColors.tertiaryLabel,
+  'Quaternary': CupertinoColors.quaternaryLabel,
+  'fillPrimary': CNColors.fillPrimary,
+  'fillSecondary': CNColors.fillSecondary,
+  'fillTertiary': CNColors.fillTertiary,
+  'fillQuaternary': CNColors.fillQuaternary,
+  'fillQuinary': CNColors.fillQuinary,
+};
+
 const kSystemColors = {
   'none': null,
   'red': CNColors.red,
@@ -27,34 +52,9 @@ const kSystemColors = {
   'fillQuinary': CNColors.fillQuinary,
 };
 
-const kNonNullColors = {
-  'red': CNColors.red,
-  'orange': CNColors.orange,
-  'yellow': CNColors.yellow,
-  'green': CNColors.green,
-  'mint': CNColors.mint,
-  'teal': CNColors.teal,
-  'cyan': CNColors.cyan,
-  'blue': CNColors.blue,
-  'indigo': CNColors.indigo,
-  'pink': CNColors.pink,
-  'purple': CNColors.purple,
-  'brown': CNColors.brown,
-  'gray': CNColors.gray,
-  'Primary': CupertinoColors.label,
-  'Secondary': CupertinoColors.secondaryLabel,
-  'Tertiary': CupertinoColors.tertiaryLabel,
-  'Quaternary': CupertinoColors.quaternaryLabel,
-  'fillPrimary': CNColors.fillPrimary,
-  'fillSecondary': CNColors.fillSecondary,
-  'fillTertiary': CNColors.fillTertiary,
-  'fillQuaternary': CNColors.fillQuaternary,
-  'fillQuinary': CNColors.fillQuinary,
-};
-
 CNFontSize defaultFontSize = CNFontSize.points(17);
 
-List<CNFont?> get availableFonts => [
+List<CNFont?> get kAvailableFonts => [
   null,
   CNFont.system(defaultFontSize),
   CNFont.monospacedSystem(defaultFontSize),

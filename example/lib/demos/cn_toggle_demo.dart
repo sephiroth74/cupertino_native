@@ -1,10 +1,7 @@
-import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
-import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 const _kDebugLog = true;
 
@@ -21,10 +18,6 @@ class _ToggleDemoState extends State<ToggleDemo> {
   bool isOn = true;
   Color? tintColor;
   CNToggle2Style toggleStyle = CNToggle2Style.switchStyle;
-
-  void _showNotification(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), duration: const Duration(milliseconds: 800)));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,8 +68,8 @@ class _ToggleDemoState extends State<ToggleDemo> {
                 ),
                 'Tint Color': ColorPicker(
                   colors: kSystemColors,
-                  currentValue: tintColor,
-                  onValueChanged: (index) => setState(() => tintColor = kSystemColors.values.elementAt(index)),
+                  value: tintColor,
+                  onChanged: (color) => setState(() => tintColor = color),
                 ),
                 'Enabled': CNToggle2(
                   isOn: isEnabled,

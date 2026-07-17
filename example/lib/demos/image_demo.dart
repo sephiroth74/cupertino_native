@@ -598,9 +598,9 @@ class _ImageDemoPageState extends State<ImageDemoPage> {
                   children: [
                     ColorPicker(
                       colors: kSystemColors,
-                      currentValue: color,
-                      onValueChanged: (index) => setState(() {
-                        color = kSystemColors.values.elementAt(index);
+                      value: color,
+                      onChanged: (color) => setState(() {
+                        color = color;
                         if (color != null) {
                           colors = [CNColors.red, color!];
                         } else {

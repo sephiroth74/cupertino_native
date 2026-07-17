@@ -3,9 +3,9 @@ import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
-const _kShrink = true;
 const _kDebugLog = false;
 const _kFontSize = 32.0;
+const _kShrink = true;
 
 const _kTextScales = {'default': CNTextScale.defaultScale, 'secondary': CNTextScale.secondary};
 
@@ -70,21 +70,21 @@ class _TextDemoPageState extends State<TextDemoPage> {
             RightSideOptionContainer(
               options: {
                 'Font': CNPicker(
-                  selectedIndex: availableFonts.indexWhere((font) {
+                  selectedIndex: kAvailableFonts.indexWhere((font) {
                     // first check if the font name matches, otherwise check if the font kind matches
                     if (font == null && this.font == null) return true;
                     if (font == null || this.font == null) return false;
                     return font.name == this.font!.name || font.kind == this.font!.kind;
                   }),
                   onValueChanged: (index) =>
-                      setState(() => font = availableFonts[index]?.copyWith(size: CNFontSize.points(fontSize))),
-                  items: availableFonts.map((font) => CNText(font != null ? (font.name ?? font.kind.name) : 'None')).toList(),
+                      setState(() => font = kAvailableFonts[index]?.copyWith(size: CNFontSize.points(fontSize))),
+                  items: kAvailableFonts.map((font) => CNText(font != null ? (font.name ?? font.kind.name) : 'None')).toList(),
                   pickerStyle: CNPickerStyle.automatic,
                 ),
                 'Color': ColorPicker(
                   colors: kSystemColors,
-                  currentValue: foregroundColor,
-                  onValueChanged: (index) => setState(() => foregroundColor = kSystemColors.values.elementAt(index)),
+                  value: foregroundColor,
+                  onChanged: (color) => setState(() => foregroundColor = color),
                 ),
                 'Font Size': Row(
                   children: [

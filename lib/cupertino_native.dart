@@ -51,6 +51,7 @@ export 'components/cn_stepper.dart';
 export 'components/cn_text_field.dart';
 export 'components/cn_toggle.dart';
 export 'components/cn_child.dart';
+export 'components/cn_search_field.dart';
 
 export 'model/control_size.dart';
 export 'model/slider_tickmark_position.dart';

@@ -22,7 +22,7 @@ import 'demos/picker_demo.dart';
 import 'demos/popover.dart';
 import 'demos/popup_menu_button.dart';
 import 'demos/cn_progressview_demo.dart';
-import 'demos/search_field.dart';
+import 'demos/cn_search_field_demo.dart';
 import 'demos/secure_text_field.dart';
 import 'demos/segmented_control.dart';
 import 'demos/sheet.dart';
@@ -91,6 +91,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNStepper', 'plusminus', StepperDemoPage()),
     _DemoEntry('CNTextField', 'character.cursor.ibeam', TextFieldDemoPage()),
     _DemoEntry('CNToggle2', 'switch.2', ToggleDemo()),
+    _DemoEntry('CNSearchField', 'magnifyingglass', SearchFieldDemoPage()),
 
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
     _DemoEntry('Label', 'textformat', LabelDemoPage()),
@@ -104,7 +105,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Popup Menu Button', 'ellipsis.circle', PopupMenuButtonDemoPage()),
     _DemoEntry('Path Control', 'folder', PathControlDemoPage()),
     _DemoEntry('Level Indicators', 'gauge', LevelIndicatorDemoPage()),
-    _DemoEntry('Search Field', 'magnifyingglass', SearchFieldDemoPage()),
     _DemoEntry('Secure Text Field', 'lock.shield', SecureTextFieldDemoPage()),
     _DemoEntry('Text View / Text Area', 'text.justify.left', TextViewDemoPage()),
     _DemoEntry('Combo Box', 'list.bullet.rectangle', ComboBoxDemoPage()),

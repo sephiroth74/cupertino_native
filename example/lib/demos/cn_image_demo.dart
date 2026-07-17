@@ -6,12 +6,9 @@ import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
-const _kMaxImages = 100;
-
-const _kShrink = true;
-const _kDebugLog = false;
-
 const _kBackgroundColors = {'Default': null, 'Light': CNColors.white, 'Dark': CNColors.black};
+
+const _kDebugLog = false;
 const _kImageNames = [
   "square.and.arrow.up",
   "eraser.badge.xmark",
@@ -467,6 +464,9 @@ const _kImageNames = [
   "arrowtriangle.down.2.fill",
 ];
 
+const _kMaxImages = 100;
+const _kShrink = true;
+
 class CNImage2DemoPage extends StatefulWidget {
   const CNImage2DemoPage({super.key});
 
@@ -632,20 +632,20 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                   children: [
                     ColorPicker(
                       colors: kSystemColors,
-                      currentValue: color1,
-                      onValueChanged: (index) => setState(() {
-                        color1 = kSystemColors.values.elementAt(index);
+                      value: color1,
+                      onChanged: (color) => setState(() {
+                        color1 = color;
                         colors = [?color1, ?color2, ?color3];
                       }),
                     ),
                     const SizedBox(height: 8),
                     ColorPicker(
                       colors: kSystemColors,
-                      currentValue: color2,
+                      value: color2,
                       enabled: paletteColors,
-                      onValueChanged: (index) => setState(() {
+                      onChanged: (color) => setState(() {
                         if (paletteColors) {
-                          color2 = kSystemColors.values.elementAt(index);
+                          color2 = color;
                           colors = [?color1, ?color2, ?color3];
                         }
                       }),
@@ -653,11 +653,11 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                     const SizedBox(height: 8),
                     ColorPicker(
                       colors: kSystemColors,
-                      currentValue: color3,
+                      value: color3,
                       enabled: paletteColors,
-                      onValueChanged: (index) => setState(() {
+                      onChanged: (color) => setState(() {
                         if (paletteColors) {
-                          color3 = kSystemColors.values.elementAt(index);
+                          color3 = color;
                           colors = [?color1, ?color2, ?color3];
                         }
                       }),
@@ -666,16 +666,17 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                 ),
                 'Foreground': ColorPicker(
                   colors: kSystemColors,
-                  currentValue: foregroundColor,
-                  onValueChanged: (index) => setState(() {
-                    foregroundColor = kSystemColors.values.elementAt(index);
+                  value: foregroundColor,
+                  onChanged: (color) => setState(() {
+                    foregroundColor = color;
                   }),
                 ),
                 'Background': ColorPicker(
                   colors: _kBackgroundColors,
-                  currentValue: backgroundColor,
-                  onValueChanged: (index) => setState(() {
-                    final key = _kBackgroundColors.keys.elementAt(index);
+                  value: backgroundColor,
+                  onChanged: (c) => setState(() {
+                    final key = _kBackgroundColors.entries.firstWhere((entry) => entry.value == c).key;
+
                     switch (key) {
                       case 'Default':
                         backgroundColor = theme.canvasColor;

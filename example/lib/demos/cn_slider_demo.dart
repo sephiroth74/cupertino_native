@@ -117,8 +117,8 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                 ),
                 'Tint Color': ColorPicker(
                   colors: kSystemColors,
-                  currentValue: _tintColor,
-                  onValueChanged: (value) => setState(() => _tintColor = kSystemColors.values.elementAt(value)),
+                  value: _tintColor,
+                  onChanged: (c) => setState(() => _tintColor = c),
                 ),
               },
             ),
