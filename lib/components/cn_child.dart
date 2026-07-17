@@ -5,13 +5,7 @@ import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/widgets.dart';
 
 /// Alignment for SwiftUI stacks.
-enum CNAlignment {
-  leading,
-  center,
-  trailing,
-  top,
-  bottom,
-}
+enum CNAlignment { leading, center, trailing, top, bottom }
 
 /// A child widget that can be serialized as inline content for a container widget.
 ///
@@ -31,12 +25,18 @@ class CNChildText extends CNChild {
     this.font,
     this.foregroundColor,
     this.lineLimit,
+    this.lineLimitReservesSpace,
+    this.textScale,
+    this.truncationMode,
   });
 
   final CNFont? font;
   final Color? foregroundColor;
   final int? lineLimit;
+  final bool? lineLimitReservesSpace;
   final String text;
+  final CNTextScale? textScale;
+  final CNTextTruncationMode? truncationMode;
 
   @override
   Map<String, dynamic> toChildPayload(BuildContext context) {
@@ -46,6 +46,9 @@ class CNChildText extends CNChild {
       'font': font?.toMap(),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'lineLimit': lineLimit,
+      'lineLimitReservesSpace': lineLimitReservesSpace,
+      'textScale': textScale?.name,
+      'truncationMode': truncationMode?.name,
     };
   }
 }
@@ -56,10 +59,16 @@ class CNChildImage extends CNChild {
     this.systemSymbolName, {
     this.font,
     this.foregroundColor,
+    this.symbolRenderingMode,
+    this.symbolColorRenderingMode,
+    this.foregroundStyleColors,
   });
 
   final CNFont? font;
   final Color? foregroundColor;
+  final List<Color>? foregroundStyleColors;
+  final CNSymbolColorRenderingMode? symbolColorRenderingMode;
+  final CNSymbolRenderingMode? symbolRenderingMode;
   final String systemSymbolName;
 
   @override
@@ -69,17 +78,16 @@ class CNChildImage extends CNChild {
       'systemSymbolName': systemSymbolName,
       'font': font?.toMap(),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
+      'symbolRenderingMode': symbolRenderingMode?.name,
+      'symbolColorRenderingMode': symbolColorRenderingMode?.name,
+      'foregroundStyleColors': foregroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
     };
   }
 }
 
 /// A VStack container child.
 class CNChildVStack extends CNChild {
-  const CNChildVStack({
-    required this.children,
-    this.alignment = CNAlignment.center,
-    this.spacing,
-  });
+  const CNChildVStack({required this.children, this.alignment = CNAlignment.center, this.spacing});
 
   final CNAlignment alignment;
   final List<CNChild> children;
@@ -98,11 +106,7 @@ class CNChildVStack extends CNChild {
 
 /// An HStack container child.
 class CNChildHStack extends CNChild {
-  const CNChildHStack({
-    required this.children,
-    this.alignment = CNAlignment.center,
-    this.spacing,
-  });
+  const CNChildHStack({required this.children, this.alignment = CNAlignment.center, this.spacing});
 
   final CNAlignment alignment;
   final List<CNChild> children;
@@ -127,10 +131,7 @@ class CNChildGroup extends CNChild {
 
   @override
   Map<String, dynamic> toChildPayload(BuildContext context) {
-    return {
-      'type': 'group',
-      'children': children.map((c) => c.toChildPayload(context)).toList(),
-    };
+    return {'type': 'group', 'children': children.map((c) => c.toChildPayload(context)).toList()};
   }
 }
 
@@ -141,10 +142,22 @@ class CNChildLabel extends CNChild {
     this.systemImage,
     this.font,
     this.foregroundColor,
+    this.symbolRenderingMode,
+    this.symbolColorRenderingMode,
+    this.foregroundStyleColors,
+    this.labelReservedIconWidth,
+    this.labelIconToTitleSpacing,
+    this.labelStyle = CNLabel2Style.automatic,
   });
 
   final CNFont? font;
   final Color? foregroundColor;
+  final List<Color>? foregroundStyleColors;
+  final double? labelIconToTitleSpacing;
+  final double? labelReservedIconWidth;
+  final CNLabel2Style labelStyle;
+  final CNSymbolColorRenderingMode? symbolColorRenderingMode;
+  final CNSymbolRenderingMode? symbolRenderingMode;
   final String? systemImage;
   final String title;
 
@@ -156,6 +169,12 @@ class CNChildLabel extends CNChild {
       'systemImage': systemImage,
       'font': font?.toMap(),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
+      'symbolRenderingMode': symbolRenderingMode?.name,
+      'symbolColorRenderingMode': symbolColorRenderingMode?.name,
+      'foregroundStyleColors': foregroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
+      'labelReservedIconWidth': labelReservedIconWidth,
+      'labelIconToTitleSpacing': labelIconToTitleSpacing,
+      'labelStyle': labelStyle.name,
     };
   }
 }

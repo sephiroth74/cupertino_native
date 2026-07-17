@@ -55,8 +55,8 @@ class _LabelDemoPageState extends State<LabelDemoPage> {
 
                   CNLabel2(
                     debugLog: _kDebugLog,
-                    title: CNLabelTitle('Custom Label', font: font, foregroundColor: foregroundColor),
-                    image: CNLabelImage(
+                    title: CNChildText('Custom Label', font: font, foregroundColor: foregroundColor),
+                    image: CNChildImage(
                       'sparkle.text.clipboard.fill',
                       symbolRenderingMode: CNSymbolRenderingMode.palette,
                       foregroundStyleColors: [CNColors.cyan, foregroundColor ?? CNColors.black],

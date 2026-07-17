@@ -1,6 +1,5 @@
 // ignore_for_file: public_member_api_docs
 
-import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/components/cn_widget.dart';
 import 'package:cupertino_native/components/cn_widget_state.dart';
 import 'package:cupertino_native/cupertino_native.dart';
@@ -23,101 +22,10 @@ enum CNLabel2Style {
   iconOnly,
 }
 
-/// Title configuration for [CNLabel2].
-///
-/// Wraps a text string with optional CNText2-equivalent properties.
-class CNLabelTitle {
-  const CNLabelTitle(
-    this.text, {
-    this.font,
-    this.foregroundColor,
-    this.lineLimit,
-    this.lineLimitReservesSpace,
-    this.textScale,
-    this.truncationMode,
-  });
-
-  /// Optional font descriptor.
-  final CNFont? font;
-
-  /// Optional text color.
-  final Color? foregroundColor;
-
-  /// Maximum number of lines.
-  final int? lineLimit;
-
-  /// Whether the text should reserve space for [lineLimit].
-  final bool? lineLimitReservesSpace;
-
-  /// The title text.
-  final String text;
-
-  /// Optional SwiftUI text scale.
-  final CNTextScale? textScale;
-
-  /// Optional SwiftUI truncation mode.
-  final CNTextTruncationMode? truncationMode;
-
-  Map<String, dynamic> toPayload(BuildContext context) {
-    return {
-      'text': text,
-      'font': font?.toMap(),
-      'foregroundColor': resolveColorToArgb(foregroundColor, context),
-      'lineLimit': lineLimit,
-      'lineLimitReservesSpace': lineLimitReservesSpace,
-      'textScale': textScale?.name,
-      'truncationMode': truncationMode?.name,
-    };
-  }
-}
-
-/// Image configuration for [CNLabel2].
-///
-/// Wraps an SF Symbol name with optional CNImage2-equivalent properties.
-class CNLabelImage {
-  const CNLabelImage(
-    this.systemSymbolName, {
-    this.font,
-    this.foregroundColor,
-    this.symbolRenderingMode,
-    this.symbolColorRenderingMode,
-    this.foregroundStyleColors,
-  });
-
-  /// Optional font to apply to the image.
-  final CNFont? font;
-
-  /// Optional image color.
-  final Color? foregroundColor;
-
-  /// Optional list of colors for the image's foreground style.
-  final List<Color>? foregroundStyleColors;
-
-  /// Optional SwiftUI symbol color rendering mode.
-  final CNSymbolColorRenderingMode? symbolColorRenderingMode;
-
-  /// Optional SwiftUI symbol rendering mode.
-  final CNSymbolRenderingMode? symbolRenderingMode;
-
-  /// The SF Symbols name to display.
-  final String systemSymbolName;
-
-  Map<String, dynamic> toPayload(BuildContext context) {
-    return {
-      'systemSymbolName': systemSymbolName,
-      'font': font?.toMap(),
-      'foregroundColor': resolveColorToArgb(foregroundColor, context),
-      'symbolRenderingMode': symbolRenderingMode?.name,
-      'symbolColorRenderingMode': symbolColorRenderingMode?.name,
-      'foregroundStyleColors': foregroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
-    };
-  }
-}
-
 /// A native SwiftUI Label widget.
 ///
-/// A Label is composed of a [title] (text with full CNText2 properties)
-/// and an optional [image] (SF Symbol with full CNImage2 properties).
+/// A Label is composed of a [title] (a [CNChildText] with full text properties)
+/// and an optional [image] (a [CNChildImage] with full image properties).
 class CNLabel2 extends CNWidget {
   const CNLabel2({
     super.key,
@@ -156,7 +64,7 @@ class CNLabel2 extends CNWidget {
   final CNFont? font;
 
   /// Optional image (icon) for the label.
-  final CNLabelImage? image;
+  final CNChildImage? image;
 
   /// Optional spacing between icon and title.
   final double? labelIconToTitleSpacing;
@@ -168,7 +76,7 @@ class CNLabel2 extends CNWidget {
   final CNLabel2Style labelStyle;
 
   /// The title of the label.
-  final CNLabelTitle title;
+  final CNChildText title;
 
   @override
   final BoxConstraints? constraints;
@@ -211,7 +119,7 @@ class _CNLabel2Simple extends CNLabel2 {
        _font = font,
        _foregroundColor2 = foregroundColor,
        _systemImage = systemImage,
-       super(title: const CNLabelTitle(''));
+       super(title: const CNChildText(''));
 
   final CNFont? _font;
   final Color? _foregroundColor2;
@@ -219,10 +127,10 @@ class _CNLabel2Simple extends CNLabel2 {
   final String _titleText;
 
   @override
-  CNLabelImage? get image => _systemImage != null ? CNLabelImage(_systemImage) : null;
+  CNChildImage? get image => _systemImage != null ? CNChildImage(_systemImage) : null;
 
   @override
-  CNLabelTitle get title => CNLabelTitle(_titleText, font: _font, foregroundColor: _foregroundColor2);
+  CNChildText get title => CNChildText(_titleText, font: _font, foregroundColor: _foregroundColor2);
 }
 
 class _CNLabel2State extends CNWidgetState<CNLabel2> {
@@ -232,8 +140,8 @@ class _CNLabel2State extends CNWidgetState<CNLabel2> {
   @override
   Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
     final payload = <String, dynamic>{
-      'title': widget.title.toPayload(context),
-      'image': widget.image?.toPayload(context),
+      'title': widget.title.toChildPayload(context),
+      'image': widget.image?.toChildPayload(context),
       'font': widget.font?.toMap(),
       'labelStyle': widget.labelStyle.name,
       'labelReservedIconWidth': widget.labelReservedIconWidth,
