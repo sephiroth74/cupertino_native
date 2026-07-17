@@ -1,6 +1,24 @@
 import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
+
+class BezelStylePicker extends StatelessWidget {
+  const BezelStylePicker({super.key, required this.value, required this.onChanged});
+
+  final ValueChanged<CNTextFieldBezelStyle> onChanged;
+  final CNTextFieldBezelStyle value;
+
+  @override
+  Widget build(BuildContext context) {
+    return CNPicker(
+      selectedIndex: CNTextFieldBezelStyle.values.indexOf(value),
+      onValueChanged: (index) => onChanged(CNTextFieldBezelStyle.values[index]),
+      items: CNTextFieldBezelStyle.values.map((style) => CNText(style.name)).toList(),
+      pickerStyle: CNPickerStyle.automatic,
+    );
+  }
+}
 
 class ColorPicker<T extends Color> extends StatelessWidget {
   const ColorPicker({super.key, required this.colors, required this.value, required this.onChanged, this.enabled = true});
@@ -43,23 +61,6 @@ class ControlSizePicker extends StatelessWidget {
       selectedIndex: CNControlSize.values.indexOf(value),
       onValueChanged: (index) => onChanged(CNControlSize.values[index]),
       items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
-      pickerStyle: CNPickerStyle.automatic,
-    );
-  }
-}
-
-class BezelStylePicker extends StatelessWidget {
-  const BezelStylePicker({super.key, required this.value, required this.onChanged});
-
-  final ValueChanged<CNTextFieldBezelStyle> onChanged;
-  final CNTextFieldBezelStyle value;
-
-  @override
-  Widget build(BuildContext context) {
-    return CNPicker(
-      selectedIndex: CNTextFieldBezelStyle.values.indexOf(value),
-      onValueChanged: (index) => onChanged(CNTextFieldBezelStyle.values[index]),
-      items: CNTextFieldBezelStyle.values.map((style) => CNText(style.name)).toList(),
       pickerStyle: CNPickerStyle.automatic,
     );
   }
@@ -138,6 +139,42 @@ class RightSideOptionContainer extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class SizeSliderPicker extends StatelessWidget {
+  const SizeSliderPicker({
+    super.key,
+    required this.value,
+    this.min = kFontSizeMin,
+    this.max = kFontSizeMax,
+    required this.onChanged,
+  });
+
+  final double max;
+  final double min;
+  final ValueChanged<double>? onChanged;
+  final double value;
+
+  bool get enabled => onChanged != null;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        SizedBox(
+          width: 40,
+          child: Text(value.toStringAsFixed(0).padRight(2), style: TextStyle(color: enabled ? null : CupertinoColors.inactiveGray)),
+        ),
+        const SizedBox(width: 2),
+        Expanded(
+          child: CNSlider2(value: value, min: min, max: max, onChanged: onChanged),
+        ),
+      ],
     );
   }
 }

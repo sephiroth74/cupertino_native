@@ -5,6 +5,7 @@ import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 const _kBackgroundColors = {'Default': null, 'Light': CNColors.white, 'Dark': CNColors.black};
 
@@ -516,43 +517,49 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
       return color;
     }).toList();
 
-    final widget = Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: foregroundColor ?? theme.separatorColor, width: 2),
-            borderRadius: BorderRadius.circular(16),
-            color: backgroundColor,
+    final widget = GestureDetector(
+      onTap: () {
+        // copy the symbol name to the clipboard
+        Clipboard.setData(ClipboardData(text: systemSymbolName));
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: foregroundColor ?? theme.separatorColor, width: 2),
+              borderRadius: BorderRadius.circular(16),
+              color: backgroundColor,
+            ),
+            padding: shrink ? const EdgeInsets.all(16) : const EdgeInsets.all(0),
+            child: CNImage2(
+              debugLog: _kDebugLog,
+              systemSymbolName: systemSymbolName,
+              shrink: shrink,
+              font: font,
+              symbolRenderingMode: symbolRenderingMode,
+              symbolColorRenderingMode: symbolColorRenderingMode,
+              foregroundStyleColors: realForegroundStyleColors,
+              foregroundColor: realForegroundColor,
+              constraints: shrink ? null : BoxConstraints.tightFor(width: imageSize, height: imageSize),
+              paddings: EdgeInsets.all(8.0),
+            ),
           ),
-          padding: shrink ? const EdgeInsets.all(16) : const EdgeInsets.all(0),
-          child: CNImage2(
-            debugLog: _kDebugLog,
-            systemSymbolName: systemSymbolName,
-            shrink: shrink,
-            font: font,
-            symbolRenderingMode: symbolRenderingMode,
-            symbolColorRenderingMode: symbolColorRenderingMode,
-            foregroundStyleColors: realForegroundStyleColors,
-            foregroundColor: realForegroundColor,
-            constraints: shrink ? null : BoxConstraints.tightFor(width: imageSize, height: imageSize),
-            paddings: EdgeInsets.all(8.0),
+          const SizedBox(height: 6),
+          SizedBox(
+            width: containerSize,
+            child: Text(
+              systemSymbolName,
+              style: labelStyle,
+              maxLines: 1,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-        ),
-        const SizedBox(height: 6),
-        SizedBox(
-          width: containerSize,
-          child: Text(
-            systemSymbolName,
-            style: labelStyle,
-            maxLines: 1,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
 
     if (!shrink) {

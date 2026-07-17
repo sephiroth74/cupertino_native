@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 const _kNativeViewType = 'CupertinoNativeSlider2';
-const double _kDefaultSliderWidth = 140.0;
+const double _kDefaultSliderWidth = 100.0;
 
 /// A tick mark for [CNSlider2].
 class CNSliderTick {

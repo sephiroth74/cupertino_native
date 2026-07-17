@@ -119,6 +119,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let searchField2Factory = CupertinoSearchField2Factory(messenger: registrar.messenger)
         registrar.register(searchField2Factory, withId: "CupertinoNativeSearchField2")
+
+        let label2Factory = CupertinoLabel2Factory(messenger: registrar.messenger)
+        registrar.register(label2Factory, withId: "CupertinoNativeLabel2")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

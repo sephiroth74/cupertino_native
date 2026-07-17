@@ -14,7 +14,7 @@ import 'demos/context_menu.dart';
 import 'demos/cn_date_picker_demo.dart';
 import 'demos/group_box.dart';
 import 'demos/icon.dart';
-import 'demos/label_demo.dart';
+import 'demos/cn_label_demo.dart';
 import 'demos/level_indicators.dart';
 import 'demos/menu_demo.dart';
 import 'demos/path_control.dart';
@@ -90,11 +90,11 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNDatePicker', 'calendar', DatePickerDemoPage()),
     _DemoEntry('CNStepper', 'plusminus', StepperDemoPage()),
     _DemoEntry('CNTextField', 'character.cursor.ibeam', TextFieldDemoPage()),
-    _DemoEntry('CNToggle2', 'switch.2', ToggleDemo()),
+    _DemoEntry('CNToggle', 'switch.2', ToggleDemo()),
     _DemoEntry('CNSearchField', 'magnifyingglass', SearchFieldDemoPage()),
+    _DemoEntry('CNLabel', 'textformat', LabelDemoPage()),
 
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
-    _DemoEntry('Label', 'textformat', LabelDemoPage()),
     _DemoEntry('Button', 'button.horizontal', ButtonDemoPage()),
     _DemoEntry('Menu', 'ellipsis.circle', MenuButtonDemoPage()),
 

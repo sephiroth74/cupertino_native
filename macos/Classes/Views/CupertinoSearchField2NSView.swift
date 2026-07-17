@@ -196,8 +196,6 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
                 return
             }
 
-            log("requestSuggestions: \result=\(String(describing: result))")
-
             let values = result as? [String] ?? []
             log("suggestions received: \(values.count) items")
             let items = values.map { NSSuggestionItem<String>(representedValue: $0, title: $0) }

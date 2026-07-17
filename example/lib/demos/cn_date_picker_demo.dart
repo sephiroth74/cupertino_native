@@ -44,7 +44,7 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
                   displayedComponents: displayedComponents,
                   minDate: DateTime.now().subtract(const Duration(days: 365)),
                   maxDate: DateTime.now().add(const Duration(days: 365)),
-                  debugLog: true,
+                  debugLog: false,
                   onChanged: enabled
                       ? (value) {
                           setState(() {

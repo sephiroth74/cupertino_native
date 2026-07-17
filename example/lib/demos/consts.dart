@@ -72,3 +72,7 @@ List<CNFont?> get kAvailableFonts => [
   CNFont.label(defaultFontSize),
   CNFont.named('Helvetica Neue', defaultFontSize),
 ];
+
+const kDefaultFontSize = 18.0;
+const kFontSizeMin = 8.0;
+const kFontSizeMax = 48.0;
