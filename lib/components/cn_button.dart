@@ -34,9 +34,6 @@ class CNButton2 extends CNWidget {
     this.role = CNButtonRole2.none,
     this.controlSize,
     this.labelStyle,
-    this.labelReservedIconWidth,
-    this.labelIconToTitleSpacing,
-    this.font,
     this.shrink = true,
     this.constraints,
     this.tint,
@@ -52,15 +49,6 @@ class CNButton2 extends CNWidget {
 
   /// Control size.
   final CNControlSize? controlSize;
-
-  /// Font applied to the button.
-  final CNFont? font;
-
-  /// Optional spacing between icon and title.
-  final double? labelIconToTitleSpacing;
-
-  /// Optional reserved width for icon area.
-  final double? labelReservedIconWidth;
 
   /// Label style applied inside the button.
   final CNLabel2Style? labelStyle;
@@ -112,10 +100,7 @@ class _CNButton2State extends CNWidgetState<CNButton2> {
       'buttonStyle': widget.buttonStyle.name,
       'role': widget.role.name,
       'controlSize': widget.controlSize?.name,
-      'font': widget.font?.toMap(),
       'labelStyle': widget.labelStyle?.name,
-      'labelReservedIconWidth': widget.labelReservedIconWidth,
-      'labelIconToTitleSpacing': widget.labelIconToTitleSpacing,
       'enabled': enabled,
     };
 

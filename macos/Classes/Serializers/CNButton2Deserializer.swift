@@ -29,17 +29,7 @@ enum CNButton2Deserializer {
             view = CNViewModifierApplicator.applyControlSize(payload.controlSize, to: view)
             view = CNViewModifierApplicator.applyLabelStyle(payload.labelStyle, to: view)
 
-            if #available(macOS 26.0, *) {
-                if let reservedIconWidth = payload.labelReservedIconWidth {
-                    view = AnyView(view.labelReservedIconWidth(reservedIconWidth))
-                }
-                if let iconToTitleSpacing = payload.labelIconToTitleSpacing {
-                    view = AnyView(view.labelIconToTitleSpacing(iconToTitleSpacing))
-                }
-            }
-
             // Shared modifiers
-            view = CNViewModifierApplicator.applyFont(payload.font, to: view)
             view = CNViewModifierApplicator.applyForegroundColor(payload.foregroundColor, to: view)
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)

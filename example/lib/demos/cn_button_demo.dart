@@ -21,15 +21,35 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
   CNFont? font;
   double fontSize = kFontSizeDefault;
   bool isEnabled = true;
+  bool isProgressRunning = false;
   double labelIconToTitleSpacing = 8;
-  double labelReservedIconWidth = 0;
+  double labelReservedIconWidth = 2;
+  int progressMax = 100;
+  int progressValue = 0;
   CNProgressViewStyle progressViewStyle = CNProgressViewStyle.linear;
   Color? tintColor;
-  bool withIcon = false;
-  bool withProgress = true;
 
   // ignore: unused_field
   String _last = 'None';
+
+  void startProgress() {
+    progressValue = 0;
+    isProgressRunning = true;
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(milliseconds: 100));
+      setState(() {
+        progressValue++;
+        if (progressValue > progressMax) {
+          progressValue = 0;
+        }
+      });
+      return isProgressRunning;
+    });
+  }
+
+  void stopProgress() {
+    isProgressRunning = false;
+  }
 
   void _set(String what) {
     setState(() {
@@ -62,7 +82,6 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                           controlSize: controlSize,
                           tint: tintColor,
                           debugLog: _kDebugLog,
-                          font: font,
                           children: [CNChildText('Text Only', font: font)],
                         ),
                       ),
@@ -137,7 +156,42 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                               paddings: EdgeInsets.symmetric(horizontal: labelReservedIconWidth),
                             ),
                             CNChildText(
-                              'Icon and Text',
+                              'Icon Progress and Text',
+                              font: font,
+                              paddings: EdgeInsets.only(left: labelIconToTitleSpacing),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      PixelPerfectProbe(
+                        adjustPosition: true,
+                        child: CNButton2(
+                          onPressed: isEnabled
+                              ? () {
+                                  _set('Default.5');
+                                  if (isProgressRunning) {
+                                    stopProgress();
+                                  } else {
+                                    startProgress();
+                                  }
+                                }
+                              : null,
+                          buttonStyle: buttonStyle,
+                          controlSize: controlSize,
+                          tint: tintColor,
+                          debugLog: false,
+                          children: [
+                            CNChildProgressView(
+                              tint: CNColors.fillSecondary,
+                              value: progressValue.toDouble(),
+                              total: progressMax.toDouble(),
+                              style: CNProgressViewStyle.linear,
+                              controlSize: CNControlSize.small,
+                              constraints: BoxConstraints.tightFor(width: 100),
+                            ),
+                            CNChildText(
+                              'Icon and Progress',
                               font: font,
                               paddings: EdgeInsets.only(left: labelIconToTitleSpacing),
                             ),
@@ -183,13 +237,13 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                 ),
                 'Icon Width': SizeSliderPicker(
                   min: 0,
-                  max: 64,
+                  max: 32,
                   value: labelReservedIconWidth,
                   onChanged: (value) => setState(() => labelReservedIconWidth = value),
                 ),
                 'Icon Spacing': SizeSliderPicker(
                   min: 0,
-                  max: 8,
+                  max: 32,
                   value: labelIconToTitleSpacing,
                   onChanged: (value) => setState(() => labelIconToTitleSpacing = value),
                 ),

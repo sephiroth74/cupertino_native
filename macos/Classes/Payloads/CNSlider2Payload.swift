@@ -52,12 +52,6 @@ struct CNSlider2Payload: CNSharedPayloadFields {
     mutating func applyPatch(_ channel: [String: Any]) {
         applySharedPatch(channel)
 
-        if channel.keys.contains("value") {
-            if let rawValue = CNChannelDeserialization.decodeDouble(channel["value"]) {
-                value = Swift.min(Swift.max(rawValue, min), max)
-            }
-        }
-
         if channel.keys.contains("min") {
             min = CNChannelDeserialization.decodeDouble(channel["min"]) ?? min
         }
@@ -70,8 +64,14 @@ struct CNSlider2Payload: CNSharedPayloadFields {
             max = min + 1.0
         }
 
-        // Re-clamp value after range change
-        value = Swift.min(Swift.max(value, min), max)
+        if channel.keys.contains("value") {
+            if let rawValue = CNChannelDeserialization.decodeDouble(channel["value"]) {
+                value = Swift.min(Swift.max(rawValue, min), max)
+            }
+        } else {
+            // Re-clamp value after range change
+            value = Swift.min(Swift.max(value, min), max)
+        }
 
         if channel.keys.contains("step") {
             step = CNChannelDeserialization.decodeDouble(channel["step"])

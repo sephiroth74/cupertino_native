@@ -14,10 +14,7 @@ struct CNButton2Payload: CNSharedPayloadFields {
     var buttonStyle: String?
     var role: String?
     var controlSize: String?
-    var font: [String: Any]?
     var labelStyle: String?
-    var labelReservedIconWidth: Double?
-    var labelIconToTitleSpacing: Double?
 
     init(viewId _: Int64) {
         viewDebugId = ""
@@ -31,10 +28,7 @@ struct CNButton2Payload: CNSharedPayloadFields {
         buttonStyle = nil
         role = nil
         controlSize = nil
-        font = nil
         labelStyle = nil
-        labelReservedIconWidth = nil
-        labelIconToTitleSpacing = nil
         enabled = nil
     }
 
@@ -64,24 +58,8 @@ struct CNButton2Payload: CNSharedPayloadFields {
             controlSize = channel["controlSize"] as? String
         }
 
-        if channel.keys.contains("font") {
-            if channel["font"] is NSNull {
-                font = nil
-            } else {
-                font = channel["font"] as? [String: Any]
-            }
-        }
-
         if channel.keys.contains("labelStyle") {
             labelStyle = channel["labelStyle"] as? String
-        }
-
-        if channel.keys.contains("labelReservedIconWidth") {
-            labelReservedIconWidth = CNChannelDeserialization.decodeDouble(channel["labelReservedIconWidth"])
-        }
-
-        if channel.keys.contains("labelIconToTitleSpacing") {
-            labelIconToTitleSpacing = CNChannelDeserialization.decodeDouble(channel["labelIconToTitleSpacing"])
         }
 
         if channel.keys.contains("enabled") {
@@ -95,10 +73,7 @@ struct CNButton2Payload: CNSharedPayloadFields {
         parts.append(buttonStyle ?? "automatic")
         parts.append(role ?? "none")
         parts.append(controlSize ?? "nil")
-        parts.append(font.map { String(describing: $0) } ?? "nil")
         parts.append(labelStyle ?? "nil")
-        parts.append(labelReservedIconWidth.map { String($0) } ?? "nil")
-        parts.append(labelIconToTitleSpacing.map { String($0) } ?? "nil")
         parts.append(enabled.map { String($0) } ?? "nil")
         return parts.joined(separator: "|")
     }
