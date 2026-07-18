@@ -54,6 +54,7 @@ export 'components/cn_child.dart';
 export 'components/cn_search_field.dart';
 export 'components/cn_label.dart';
 export 'components/cn_button.dart';
+export 'components/cn_menu2.dart';
 
 export 'model/control_size.dart';
 export 'model/slider_tickmark_position.dart';

@@ -27,6 +27,10 @@ enum CNChildViewBuilder {
             view = CNViewModifierApplicator.applyPaddings(paddings, to: view)
         }
 
+        if let enabled = dict["enabled"] as? Bool {
+            view = AnyView(view.disabled(!enabled))
+        }
+
         return view
     }
 

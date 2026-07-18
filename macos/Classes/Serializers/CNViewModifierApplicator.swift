@@ -124,6 +124,24 @@ enum CNViewModifierApplicator {
         }
     }
 
+    static func applyBadge(_ badge: Any?, to view: AnyView) -> AnyView {
+        guard let badge else {
+            return view
+        }
+
+        if #available(macOS 14.0, *) {
+            if let badgeString = badge as? String {
+                return AnyView(view.badge(badgeString))
+            } else if let badgeInt = badge as? Int {
+                return AnyView(view.badge(badgeInt))
+            } else {
+                return view
+            }
+        } else {
+            return view
+        }
+    }
+
     static func applyButtonStyle(_ style: String?, to view: AnyView) -> AnyView {
         switch style {
         case "plain":

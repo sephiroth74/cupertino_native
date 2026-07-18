@@ -16,7 +16,7 @@ import 'demos/group_box.dart';
 import 'demos/icon.dart';
 import 'demos/cn_label_demo.dart';
 import 'demos/level_indicators.dart';
-import 'demos/menu_demo.dart';
+import 'demos/cn_menu_demo.dart';
 import 'demos/path_control.dart';
 import 'demos/picker_demo.dart';
 import 'demos/popover.dart';
@@ -94,9 +94,9 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNSearchField', 'magnifyingglass', SearchFieldDemoPage()),
     _DemoEntry('CNLabel', 'textformat', LabelDemoPage()),
     _DemoEntry('CNButton', 'button.horizontal', ButtonDemoPage()),
+    _DemoEntry('CNMenu', 'ellipsis.circle', MenuButtonDemoPage()),
 
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
-    _DemoEntry('Menu', 'ellipsis.circle', MenuButtonDemoPage()),
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Segmented Control', 'rectangle.split.3x1', SegmentedControlDemoPage()),

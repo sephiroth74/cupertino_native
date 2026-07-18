@@ -18,7 +18,7 @@ enum CNButton2Deserializer {
             let payload = model.payload
 
             var view = AnyView(
-                Button(role: resolveRole(payload.role), action: onPressed) {
+                Button(role: CNChannelDeserialization.resolveButtonRole(payload.role), action: onPressed) {
                     ForEach(Array(payload.children.enumerated()), id: \.offset) { _, child in
                         CNChildViewBuilder.buildChild(child)
                     }
@@ -47,16 +47,6 @@ enum CNButton2Deserializer {
             }
 
             return view
-        }
-
-        private func resolveRole(_ role: String?) -> ButtonRole? {
-            switch role {
-            case "cancel": .cancel
-            case "close": .close
-            case "confirm": .confirm
-            case "destructive": .destructive
-            default: nil
-            }
         }
     }
 }

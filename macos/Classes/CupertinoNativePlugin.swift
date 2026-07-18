@@ -125,6 +125,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let button2Factory = CupertinoButton2Factory(messenger: registrar.messenger)
         registrar.register(button2Factory, withId: "CupertinoNativeButton2")
+
+        let menu2Factory = CupertinoMenu2Factory(messenger: registrar.messenger)
+        registrar.register(menu2Factory, withId: "CupertinoNativeMenu2")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

@@ -144,21 +144,29 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                           tint: tintColor,
                           debugLog: false,
                           children: [
-                            const CNChildProgressView(
-                              style: CNProgressViewStyle.linear,
-                              controlSize: CNControlSize.small,
-                              constraints: BoxConstraints.tightFor(width: 100),
-                            ),
-                            CNChildImage(
-                              'square.and.arrow.down.badge.checkmark.fill',
-                              font: font,
-                              symbolRenderingMode: CNSymbolRenderingMode.hierarchical,
-                              paddings: EdgeInsets.symmetric(horizontal: labelReservedIconWidth),
-                            ),
-                            CNChildText(
-                              'Icon Progress and Text',
-                              font: font,
-                              paddings: EdgeInsets.only(left: labelIconToTitleSpacing),
+                            CNChildVStack(
+                              children: [
+                                const CNChildProgressView(
+                                  style: CNProgressViewStyle.linear,
+                                  controlSize: CNControlSize.small,
+                                  constraints: BoxConstraints.tightFor(width: 150),
+                                ),
+                                CNChildHStack(
+                                  children: [
+                                    CNChildImage(
+                                      'square.and.arrow.down.badge.checkmark.fill',
+                                      font: font,
+                                      symbolRenderingMode: CNSymbolRenderingMode.hierarchical,
+                                      paddings: EdgeInsets.symmetric(horizontal: labelReservedIconWidth),
+                                    ),
+                                    CNChildText(
+                                      'Icon Progress and Text',
+                                      font: font,
+                                      paddings: EdgeInsets.only(left: labelIconToTitleSpacing),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -188,7 +196,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                               total: progressMax.toDouble(),
                               style: CNProgressViewStyle.linear,
                               controlSize: CNControlSize.small,
-                              constraints: BoxConstraints.tightFor(width: 100),
+                              constraints: BoxConstraints.tightFor(width: 80),
                             ),
                             CNChildText(
                               'Icon and Progress',

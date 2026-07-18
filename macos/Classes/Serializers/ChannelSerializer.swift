@@ -94,6 +94,16 @@ enum CNChannelDeserialization {
         }
         return nil
     }
+
+    static func resolveButtonRole(_ role: String?) -> ButtonRole? {
+        switch role {
+        case "cancel": .cancel
+        case "close": .close
+        case "confirm": .confirm
+        case "destructive": .destructive
+        default: nil
+        }
+    }
 }
 
 protocol CNChannelSerializable {
