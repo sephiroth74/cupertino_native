@@ -69,69 +69,45 @@ class _TextDemoPageState extends State<TextDemoPage> {
 
             RightSideOptionContainer(
               options: {
-                'Font': CNPicker(
-                  selectedIndex: kAvailableFonts.indexWhere((font) {
-                    // first check if the font name matches, otherwise check if the font kind matches
-                    if (font == null && this.font == null) return true;
-                    if (font == null || this.font == null) return false;
-                    return font.name == this.font!.name || font.kind == this.font!.kind;
+                'Font': FontPicker(
+                  value: font,
+                  fonts: kAvailableFonts,
+                  onChanged: (newFont) => setState(() {
+                    debugPrint('Font changed: ${newFont?.name ?? newFont?.kind.name}');
+                    font = newFont?.copyWith(size: CNFontSize.points(fontSize));
                   }),
-                  onValueChanged: (index) =>
-                      setState(() => font = kAvailableFonts[index]?.copyWith(size: CNFontSize.points(fontSize))),
-                  items: kAvailableFonts.map((font) => CNText(font != null ? (font.name ?? font.kind.name) : 'None')).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
                 ),
                 'Color': ColorPicker(
                   colors: kSystemColors,
                   value: foregroundColor,
                   onChanged: (color) => setState(() => foregroundColor = color),
                 ),
-                'Font Size': Row(
-                  children: [
-                    SizedBox(width: 50, child: Text('$fontSize')),
-                    Expanded(
-                      child: CNStepper(
-                        value: fontSize,
-                        min: 8.0,
-                        max: 64.0,
-                        onChanged: (value) {
-                          setState(() {
-                            fontSize = value;
-                            font = font?.copyWith(size: CNFontSize.points(fontSize));
-                          });
-                        },
-                      ),
-                    ),
-                  ],
+                'Font Size': SizeSliderPicker(
+                  value: fontSize,
+                  onChanged: font != null
+                      ? (newSize) => setState(() {
+                          fontSize = newSize;
+                          font = font?.copyWith(size: CNFontSize.points(fontSize));
+                        })
+                      : null,
                 ),
-                'Line Limit': Row(
-                  children: [
-                    SizedBox(width: 50, child: Text(lineLimit.toString())),
-                    Expanded(
-                      child: CNStepper(
-                        value: lineLimit.toDouble(),
-                        min: 1,
-                        max: 10,
-                        onChanged: (value) {
-                          setState(() {
-                            lineLimit = value.toInt();
-                          });
-                        },
-                      ),
-                    ),
-                  ],
+                'Line Limit': SizeSliderPicker(
+                  value: lineLimit.toDouble(),
+                  min: 1,
+                  max: 10,
+                  onChanged: (newValue) => setState(() => lineLimit = newValue.toInt()),
                 ),
-                'Text Scale': CNPicker(
-                  selectedIndex: _kTextScales.values.toList().indexOf(textScale),
-                  onValueChanged: (index) => setState(() => textScale = _kTextScales.values.elementAt(index)),
-                  items: _kTextScales.keys.map((key) => CNText(key)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
+                'Text Scale': CNPicker2(
+                  selection: textScale.name,
+                  children: _kTextScales.entries.map((entry) => CNChildLabel(entry.key, tag: entry.value.name)).toList(),
+                  onChanged: (tag) =>
+                      setState(() => textScale = _kTextScales.entries.firstWhere((entry) => entry.value.name == tag).value),
                 ),
-                'Truncation Mode': CNPicker(
-                  selectedIndex: CNTextTruncationMode.values.indexOf(truncationMode),
-                  onValueChanged: (index) => setState(() => truncationMode = CNTextTruncationMode.values[index]),
-                  items: CNTextTruncationMode.values.map((mode) => CNText(mode.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
+                'Truncation Mode': CNPicker2(
+                  selection: truncationMode.name,
+                  children: CNTextTruncationMode.values.map((mode) => CNChildLabel(mode.name, tag: mode.name)).toList(),
+                  onChanged: (tag) =>
+                      setState(() => truncationMode = CNTextTruncationMode.values.firstWhere((mode) => mode.name == tag)),
                 ),
               },
             ),

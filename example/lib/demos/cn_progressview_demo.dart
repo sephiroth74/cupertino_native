@@ -18,7 +18,7 @@ class _ProgressIndicatorsPageDemoState extends State<ProgressIndicatorsPageDemo>
   bool isDetermininate = true;
   double progressValue = 0.75;
   CNProgressViewStyle progressViewStyle = CNProgressViewStyle.linear;
-  CupertinoDynamicColor? tintColor;
+  Color? tintColor;
 
   @override
   Widget build(BuildContext context) {
@@ -49,30 +49,25 @@ class _ProgressIndicatorsPageDemoState extends State<ProgressIndicatorsPageDemo>
             ),
             RightSideOptionContainer(
               options: {
-                'Control Size': CNPicker(
-                  selectedIndex: CNControlSize.values.indexOf(controlSize),
-                  onValueChanged: (index) => setState(() => controlSize = CNControlSize.values[index]),
-                  items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
+                'Control Size': ControlSizePicker(
+                  value: controlSize,
+                  onChanged: (newSize) => setState(() => controlSize = newSize),
                 ),
-                'Tint Color': CNPicker(
-                  selectedIndex: kSystemColors.keys.toList().indexOf(
-                    tintColor == null ? 'none' : kSystemColors.entries.firstWhere((entry) => entry.value == tintColor).key,
-                  ),
-                  onValueChanged: (index) => setState(() => tintColor = kSystemColors.values.toList()[index]),
-                  items: kSystemColors.keys.map((key) => CNText(key)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
+                'Tint Color': ColorPicker(
+                  colors: kSystemColors,
+                  value: tintColor,
+                  onChanged: (newColor) => setState(() => tintColor = newColor),
                 ),
-                'Progress Style': CNPicker(
-                  selectedIndex: CNProgressViewStyle.values.indexOf(progressViewStyle),
-                  onValueChanged: (index) => setState(() => progressViewStyle = CNProgressViewStyle.values[index]),
-                  items: CNProgressViewStyle.values.map((style) => CNText(style.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
+                'Progress Style': CNPicker2(
+                  selection: progressViewStyle.name,
+                  onChanged: (newStyle) =>
+                      setState(() => progressViewStyle = CNProgressViewStyle.values.firstWhere((style) => style.name == newStyle)),
+                  children: CNProgressViewStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
+                  pickerStyle: CNPickerStyle2.automatic,
                 ),
-                'Determinate': CNToggle(value: isDetermininate, onChanged: (value) => setState(() => isDetermininate = value)),
-                'Value': CNSlider(
+                'Determinate': CNToggle2(isOn: isDetermininate, onChanged: (value) => setState(() => isDetermininate = value)),
+                'Value': CNSlider2(
                   value: progressValue,
-                  modifiers: CNViewModifiers(enabled: isDetermininate),
                   onChanged: isDetermininate
                       ? (value) {
                           setState(() {

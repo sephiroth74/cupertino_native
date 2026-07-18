@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
@@ -487,6 +486,7 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
   Color? foregroundColor;
   bool isDark = false;
   CNSymbolRenderingMode renderingMode = CNSymbolRenderingMode.monochrome;
+  Color? selectedBackgroundColor;
 
   @override
   initState() {
@@ -607,28 +607,29 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
             RightSideOptionContainer(
               title: 'Options',
               options: {
-                'Rendering Mode': CNPicker(
-                  selectedIndex: CNSymbolRenderingMode.values.toList().indexOf(renderingMode),
-                  onValueChanged: (index) => setState(() {
-                    renderingMode = CNSymbolRenderingMode.values.elementAt(index);
-                    if (renderingMode == CNSymbolRenderingMode.palette) {
-                      color1 = color1 ?? kNonNullColors.values.elementAt(0);
-                      color2 = color2 ?? kNonNullColors.values.elementAt(1);
-                      color3 = color3 ?? kNonNullColors.values.elementAt(2);
-                      colors = [color1!, color2!, color3!];
-                    } else {
-                      color2 = null;
-                      color3 = null;
-                      colors = color1 != null ? [color1!] : [];
-                    }
-                  }),
-                  items: CNSymbolRenderingMode.values.map((mode) => CNText(mode.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
+                'Rendering Mode': CNPicker2(
+                  selection: renderingMode.name,
+                  onChanged: (value) {
+                    setState(() {
+                      renderingMode = CNSymbolRenderingMode.values.firstWhere((e) => e.name == value);
+                      if (renderingMode == CNSymbolRenderingMode.palette) {
+                        color1 = color1 ?? kNonNullColors.values.elementAt(0);
+                        color2 = color2 ?? kNonNullColors.values.elementAt(1);
+                        color3 = color3 ?? kNonNullColors.values.elementAt(2);
+                        colors = [color1!, color2!, color3!];
+                      } else {
+                        color2 = null;
+                        color3 = null;
+                        colors = color1 != null ? [color1!] : [];
+                      }
+                    });
+                  },
+                  children: CNSymbolRenderingMode.values.map((mode) => CNChildText(mode.name, tag: mode.name)).toList(),
+                  pickerStyle: CNPickerStyle2.automatic,
                 ),
-                'Gradient': CNToggle(
-                  toggleStyle: CNToggleStyle.switch_,
-                  value: colorMode == CNSymbolColorRenderingMode.gradient,
-                  modifiers: CNViewModifiers(controlSize: CNControlSize.small),
+                'Gradient': CNToggle2(
+                  toggleStyle: CNToggle2Style.switchStyle,
+                  isOn: colorMode == CNSymbolColorRenderingMode.gradient,
                   onChanged: (value) {
                     setState(() {
                       colorMode = value ? CNSymbolColorRenderingMode.gradient : CNSymbolColorRenderingMode.flat;
@@ -680,8 +681,9 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                 ),
                 'Background': ColorPicker(
                   colors: _kBackgroundColors,
-                  value: backgroundColor,
+                  value: selectedBackgroundColor,
                   onChanged: (c) => setState(() {
+                    selectedBackgroundColor = c;
                     final key = _kBackgroundColors.entries.firstWhere((entry) => entry.value == c).key;
 
                     switch (key) {
@@ -702,30 +704,25 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                     }
                   }),
                 ),
-                'Font Weight': CNPicker(
-                  selectedIndex: CNFontWeight.values.indexOf(font.weight ?? CNFontWeight.regular),
-                  onValueChanged: (index) =>
-                      setState(() => font = font.copyWith(weight: CNFontWeight.values[index], size: CNFontSize.points(fontSize))),
-                  items: CNFontWeight.values.map((weight) => CNText(weight.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
+                'Font Weight': CNPicker2(
+                  selection: font.weight?.name ?? CNFontWeight.regular.name,
+                  onChanged: (value) {
+                    setState(() {
+                      font = font.copyWith(
+                        weight: CNFontWeight.values.firstWhere((e) => e.name == value),
+                        size: CNFontSize.points(fontSize),
+                      );
+                    });
+                  },
+                  children: CNFontWeight.values.map((weight) => CNChildText(weight.name, tag: weight.name)).toList(),
+                  pickerStyle: CNPickerStyle2.automatic,
                 ),
-                'Font Size': Row(
-                  children: [
-                    SizedBox(width: 50, child: Text('$fontSize')),
-                    Expanded(
-                      child: CNStepper(
-                        value: fontSize,
-                        min: 8.0,
-                        max: 64.0,
-                        onChanged: (value) {
-                          setState(() {
-                            fontSize = value;
-                            font = font.copyWith(size: CNFontSize.points(fontSize));
-                          });
-                        },
-                      ),
-                    ),
-                  ],
+                'Font Size': SizeSliderPicker(
+                  value: fontSize,
+                  onChanged: (value) => setState(() {
+                    fontSize = value;
+                    font = font.copyWith(size: CNFontSize.points(fontSize));
+                  }),
                 ),
               },
             ),
