@@ -10,7 +10,7 @@ import 'demos/alert.dart';
 import 'demos/cn_button_demo.dart';
 import 'demos/cn_color_well_demo.dart';
 import 'demos/combo_box.dart';
-import 'demos/context_menu.dart';
+import 'demos/cn_context_menu.dart';
 import 'demos/cn_date_picker_demo.dart';
 import 'demos/group_box.dart';
 import 'demos/icon.dart';
@@ -96,6 +96,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNButton', 'button.horizontal', ButtonDemoPage()),
     _DemoEntry('CNMenu', 'ellipsis.circle', MenuButtonDemoPage()),
     _DemoEntry('CNPicker', 'rectangle.split.3x1.fill', PickerDemoPage()),
+    _DemoEntry('CNContextMenu', 'ellipsis.rectangle', ContextMenuDemoPage()),
 
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
@@ -110,7 +111,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('Combo Box', 'list.bullet.rectangle', ComboBoxDemoPage()),
     _DemoEntry('Alert', 'exclamationmark.bubble', AlertDemoPage()),
     _DemoEntry('Popover', 'rectangle.on.rectangle', PopoverDemoPage()),
-    _DemoEntry('Context Menu', 'ellipsis.rectangle', ContextMenuDemoPage()),
     _DemoEntry('GroupBox', 'textformat', GroupBoxDemoPage()),
     _DemoEntry('Sheet', 'square.and.line.vertical.and.square', SheetDemoPage()),
     _DemoEntry('Split View', 'rectangle.split.2x1', SplitViewDemoPage()),

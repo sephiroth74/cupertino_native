@@ -9,6 +9,111 @@ final class CupertinoContextMenuHandler: NSObject {
         self.registrar = registrar
     }
 
+    // MARK: - CNChild-based context menu (showContextMenu2)
+
+    func showContextMenu2(args: [String: Any], result: @escaping FlutterResult) {
+        guard let items = args["items"] as? [[String: Any]] else {
+            result(
+                FlutterError(
+                    code: "invalid_args",
+                    message: "showContextMenu2 expects an 'items' list",
+                    details: nil,
+                ),
+            )
+            return
+        }
+
+        guard
+            let window = registrar?.getFlutterWindow(),
+            let contentView = window.contentView
+        else {
+            result(
+                FlutterError(
+                    code: "window_unavailable",
+                    message: "Unable to resolve Flutter window/content view",
+                    details: nil,
+                ),
+            )
+            return
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self else {
+                result(nil)
+                return
+            }
+            let menu = buildNSMenu(from: items)
+            let anchorPoint = resolveMenuPoint(args: args, contentView: contentView)
+            selectedMenuItem = nil
+            _ = menu.popUp(positioning: nil, at: anchorPoint, in: contentView)
+
+            if let tag = selectedMenuItem?.identifier?.rawValue, !tag.isEmpty {
+                result(tag)
+            } else {
+                result(nil)
+            }
+        }
+    }
+
+    private func buildNSMenu(from items: [[String: Any]]) -> NSMenu {
+        let menu = NSMenu()
+        menu.autoenablesItems = false
+
+        for item in items {
+            let type = item["type"] as? String ?? ""
+            switch type {
+            case "button":
+                let menuItem = buildNSMenuItem(from: item)
+                menu.addItem(menuItem)
+            case "divider":
+                menu.addItem(.separator())
+            case "menu":
+                let menuItem = buildNSSubMenu(from: item)
+                menu.addItem(menuItem)
+            default:
+                break
+            }
+        }
+
+        return menu
+    }
+
+    private func buildNSMenuItem(from dict: [String: Any]) -> NSMenuItem {
+        let title = dict["title"] as? String ?? ""
+        let tag = dict["tag"] as? String ?? ""
+        let systemImage = dict["systemImage"] as? String
+        let enabled = dict["enabled"] as? Bool ?? true
+
+        let menuItem = NSMenuItem(title: title, action: #selector(menuItemSelected(_:)), keyEquivalent: "")
+        menuItem.target = self
+        menuItem.identifier = NSUserInterfaceItemIdentifier(tag)
+        menuItem.isEnabled = enabled
+
+        if let systemImage, !systemImage.isEmpty {
+            if let nsImage = NSImage(systemSymbolName: systemImage, accessibilityDescription: nil) {
+                menuItem.image = nsImage
+            }
+        }
+
+        return menuItem
+    }
+
+    private func buildNSSubMenu(from dict: [String: Any]) -> NSMenuItem {
+        let labelItems = dict["label"] as? [[String: Any]] ?? []
+        let subItems = dict["items"] as? [[String: Any]] ?? []
+
+        let title = labelItems.first(where: { ($0["type"] as? String) == "text" || ($0["type"] as? String) == "label" })?["title"] as? String
+            ?? labelItems.first?["text"] as? String
+            ?? ""
+
+        let menuItem = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+        menuItem.submenu = buildNSMenu(from: subItems)
+
+        return menuItem
+    }
+
+    // MARK: - Legacy JSON-based context menu
+
     func showContextMenu(args: [String: Any], result: @escaping FlutterResult) {
         guard let menuJson = args["menu"] as? String else {
             result(

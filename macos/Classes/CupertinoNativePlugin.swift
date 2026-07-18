@@ -171,6 +171,28 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 return
             }
             handler.showContextMenu(args: args, result: result)
+        case "showContextMenu2":
+            guard let args = CNChannelSerialization.asDict(call.arguments) else {
+                result(
+                    FlutterError(
+                        code: "invalid_args",
+                        message: "showContextMenu2 expects a map of arguments",
+                        details: nil,
+                    ),
+                )
+                return
+            }
+            guard let handler = CupertinoNativePlugin.contextMenuHandler else {
+                result(
+                    FlutterError(
+                        code: "handler_unavailable",
+                        message: "Context menu handler is not initialized",
+                        details: nil,
+                    ),
+                )
+                return
+            }
+            handler.showContextMenu2(args: args, result: result)
         case "showSheet":
             guard let args = CNChannelSerialization.asDict(call.arguments) else {
                 result(

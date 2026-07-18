@@ -36,12 +36,7 @@ sealed class CNChild {
   static Map<String, double>? serializePaddings(EdgeInsetsGeometry? p) {
     if (p == null) return null;
     final resolved = p.resolve(TextDirection.ltr);
-    return {
-      'top': resolved.top,
-      'bottom': resolved.bottom,
-      'leading': resolved.left,
-      'trailing': resolved.right,
-    };
+    return {'top': resolved.top, 'bottom': resolved.bottom, 'leading': resolved.left, 'trailing': resolved.right};
   }
 }
 
@@ -128,7 +123,16 @@ class CNChildImage extends CNChild {
 
 /// A VStack container child.
 class CNChildVStack extends CNChild {
-  const CNChildVStack({required this.children, this.alignment = CNAlignment.center, this.spacing, super.enabled, super.tint, super.foregroundColor, super.paddings, super.tag});
+  const CNChildVStack({
+    required this.children,
+    this.alignment = CNAlignment.center,
+    this.spacing,
+    super.enabled,
+    super.tint,
+    super.foregroundColor,
+    super.paddings,
+    super.tag,
+  });
 
   final CNAlignment alignment;
   final List<CNChild> children;
@@ -152,7 +156,16 @@ class CNChildVStack extends CNChild {
 
 /// An HStack container child.
 class CNChildHStack extends CNChild {
-  const CNChildHStack({required this.children, this.alignment = CNAlignment.center, this.spacing, super.enabled, super.tint, super.foregroundColor, super.paddings, super.tag});
+  const CNChildHStack({
+    required this.children,
+    this.alignment = CNAlignment.center,
+    this.spacing,
+    super.enabled,
+    super.tint,
+    super.foregroundColor,
+    super.paddings,
+    super.tag,
+  });
 
   final CNAlignment alignment;
   final List<CNChild> children;
@@ -297,14 +310,25 @@ class CNChildButton extends CNChild {
 
 /// A sub-Menu child (for nesting menus).
 class CNChildMenu extends CNChild {
-  const CNChildMenu({
-    required this.items,
-    required this.label,
-    super.enabled,
-    super.tint,
-    super.foregroundColor,
-    super.tag,
-  });
+  const CNChildMenu({required this.items, required this.label, super.enabled, super.tint, super.foregroundColor, super.tag});
+
+  factory CNChildMenu.simple(
+    String title, {
+    required List<CNChild> items,
+    String? tag,
+    Color? tint,
+    Color? foregroundColor,
+    bool? enabled,
+  }) {
+    return CNChildMenu(
+      items: items,
+      label: [CNChildText(title)],
+      tag: tag,
+      tint: tint,
+      foregroundColor: foregroundColor,
+      enabled: enabled,
+    );
+  }
 
   /// The menu items (buttons, dividers, and nested menus).
   final List<CNChild> items;
