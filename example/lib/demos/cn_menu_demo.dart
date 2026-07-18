@@ -73,11 +73,10 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
             RightSideOptionContainer(
               options: {
                 'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
-                'Menu Style': CNPicker(
-                  selectedIndex: CNMenuStyle2.values.indexOf(menuStyle),
-                  onValueChanged: (index) => setState(() => menuStyle = CNMenuStyle2.values[index]),
-                  items: CNMenuStyle2.values.map((style) => CNText(style.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
+                'Menu Style': CNPicker2(
+                  selection: menuStyle.name,
+                  onChanged: (value) => setState(() => menuStyle = CNMenuStyle2.values.firstWhere((style) => style.name == value)),
+                  children: CNMenuStyle2.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
                 ),
                 'Tint Color': ColorPicker(colors: kSystemColors, value: tintColor, onChanged: (c) => setState(() => tintColor = c)),
                 'Enabled': CNToggle2(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value)),

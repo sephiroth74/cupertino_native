@@ -215,11 +215,10 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
             RightSideOptionContainer(
               options: {
                 'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
-                'Button Style': CNPicker(
-                  selectedIndex: CNButtonStyle.values.indexOf(buttonStyle),
-                  onValueChanged: (index) => setState(() => buttonStyle = CNButtonStyle.values[index]),
-                  items: CNButtonStyle.values.map((size) => CNText(size.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
+                'Button Style': CNPicker2(
+                  selection: buttonStyle.name,
+                  onChanged: (value) => setState(() => buttonStyle = CNButtonStyle.values.firstWhere((style) => style.name == value)),
+                  children: CNButtonStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
                 ),
                 'Tint Color': ColorPicker(
                   colors: kSystemColors,

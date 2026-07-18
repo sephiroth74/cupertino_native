@@ -111,28 +111,19 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
                   value: font,
                   onChanged: (f) => setState(() => font = f?.copyWith(size: CNFontSize.points(fontSize))),
                 ),
-                'Font Size': Row(
-                  children: [
-                    Expanded(child: Text('${fontSize.toStringAsFixed(0)} pt', style: const TextStyle(fontSize: 16))),
-                    CNStepper2(
-                      value: fontSize,
-                      min: 8.0,
-                      max: 72.0,
-                      step: 1.0,
-                      onChanged: font != null
-                          ? (v) => setState(() {
-                              fontSize = v;
-                              if (font != null) {
-                                font = font!.copyWith(size: CNFontSize.points(fontSize));
-                              }
-                            })
-                          : null,
-                    ),
-                  ],
+                'Font Size': SizeSliderPicker(
+                  value: fontSize,
+                  min: 8.0,
+                  max: 72.0,
+                  onChanged: (newSize) => setState(() {
+                    fontSize = newSize;
+                    if (font != null) {
+                      font = font!.copyWith(size: CNFontSize.points(fontSize));
+                    }
+                  }),
                 ),
                 'Enabled': CNToggle2(
                   isOn: isEnabled,
-                  toggleStyle: CNToggle2Style.switchStyle,
                   controlSize: CNControlSize.regular,
                   onChanged: (v) => setState(() => isEnabled = v),
                 ),
