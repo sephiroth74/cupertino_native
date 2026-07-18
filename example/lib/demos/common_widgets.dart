@@ -1,4 +1,3 @@
-import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,11 +10,11 @@ class BezelStylePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CNPicker(
-      selectedIndex: CNTextFieldBezelStyle.values.indexOf(value),
-      onValueChanged: (index) => onChanged(CNTextFieldBezelStyle.values[index]),
-      items: CNTextFieldBezelStyle.values.map((style) => CNText(style.name)).toList(),
-      pickerStyle: CNPickerStyle.automatic,
+    return CNPicker2(
+      selection: value.name,
+      children: CNTextFieldBezelStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
+      onChanged: (value) => onChanged(CNTextFieldBezelStyle.values.firstWhere((e) => e.name == value)),
+      pickerStyle: CNPickerStyle2.automatic,
     );
   }
 }
@@ -30,21 +29,19 @@ class ColorPicker<T extends Color> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CNPicker(
-      modifiers: CNViewModifiers(enabled: enabled, constraints: BoxConstraints.tightFor(width: 150), shrinkWrap: false),
-      selectedIndex: value == null ? 0 : colors.values.toList().indexOf(value),
-      onValueChanged: enabled ? (index) => onChanged(colors.values.elementAt(index)) : null,
-      items: colors.keys.map((colorName) {
-        return CNLabel(
-          CNText(colorName),
-          icon: CNImage(
-            systemSymbolName: 'circle.fill',
-            modifiers: CNViewModifiers(tint: colors[colorName]),
-          ),
+    return CNPicker2(
+      selection: value == null ? colors.keys.first.toString() : colors.entries.firstWhere((entry) => entry.value == value).key,
+      children: colors.entries.map((entry) {
+        return CNChildLabel(
+          entry.key,
+          systemImage: 'circle.fill',
+          tint: entry.value,
+          symbolRenderingMode: CNSymbolRenderingMode.monochrome,
+          tag: entry.key,
         );
-        // return CNText(colorName);
       }).toList(),
-      pickerStyle: CNPickerStyle.menu,
+      onChanged: enabled ? (tag) => onChanged(colors[tag]) : null,
+      pickerStyle: CNPickerStyle2.menu,
     );
   }
 }
@@ -57,11 +54,11 @@ class ControlSizePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CNPicker(
-      selectedIndex: CNControlSize.values.indexOf(value),
-      onValueChanged: (index) => onChanged(CNControlSize.values[index]),
-      items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
-      pickerStyle: CNPickerStyle.automatic,
+    return CNPicker2(
+      selection: value.name,
+      children: CNControlSize.values.map((size) => CNChildText(size.name, tag: size.name)).toList(),
+      onChanged: (value) => onChanged(CNControlSize.values.firstWhere((e) => e.name == value)),
+      pickerStyle: CNPickerStyle2.automatic,
     );
   }
 }
@@ -77,16 +74,13 @@ class FontPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CNPicker(
-      selectedIndex: fonts.indexWhere((font) {
-        // first check if the font name matches, otherwise check if the font kind matches
-        if (font == null && value == null) return true;
-        if (font == null || value == null) return false;
-        return font.name == value!.name || font.kind == value!.kind;
-      }),
-      onValueChanged: enabled ? (index) => onChanged!(fonts[index]) : null,
-      items: fonts.map((font) => CNText(font != null ? (font.name ?? font.kind.name) : 'None')).toList(),
-      pickerStyle: CNPickerStyle.automatic,
+    return CNPicker2(
+      selection: value?.name ?? 'none',
+      children: fonts.map((font) {
+        return CNChildText(font != null ? (font.name ?? font.kind.name) : 'None', tag: font?.name ?? 'none');
+      }).toList(),
+      onChanged: enabled ? (tag) => onChanged!(fonts.firstWhere((font) => font?.name == tag)) : null,
+      pickerStyle: CNPickerStyle2.automatic,
     );
   }
 }

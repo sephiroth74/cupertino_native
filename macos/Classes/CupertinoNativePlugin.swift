@@ -128,6 +128,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let menu2Factory = CupertinoMenu2Factory(messenger: registrar.messenger)
         registrar.register(menu2Factory, withId: "CupertinoNativeMenu2")
+
+        let picker2Factory = CupertinoPicker2Factory(messenger: registrar.messenger)
+        registrar.register(picker2Factory, withId: "CupertinoNativePicker2")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

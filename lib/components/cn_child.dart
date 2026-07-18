@@ -12,16 +12,22 @@ enum CNAlignment { leading, center, trailing, top, bottom }
 /// These are NOT platform views — they are pure data that the native side
 /// reconstructs as SwiftUI views inside a parent widget's content closure.
 sealed class CNChild {
-  const CNChild({this.paddings, this.tag, this.enabled});
+  const CNChild({this.paddings, this.tag, this.enabled, this.tint, this.foregroundColor});
 
   /// Whether this child is enabled (nil = inherit from parent).
   final bool? enabled;
+
+  /// Optional foreground color applied to this child.
+  final Color? foregroundColor;
 
   /// Optional padding applied around this child.
   final EdgeInsetsGeometry? paddings;
 
   /// Optional tag to identify this child in callbacks (e.g. menu item pressed).
   final String? tag;
+
+  /// Optional tint color applied to this child.
+  final Color? tint;
 
   /// Serializes this child into a payload map for the native side.
   Map<String, dynamic> toChildPayload(BuildContext context);
@@ -44,18 +50,18 @@ class CNChildText extends CNChild {
   const CNChildText(
     this.text, {
     this.font,
-    this.foregroundColor,
+    super.foregroundColor,
     this.lineLimit,
     this.lineLimitReservesSpace,
     this.textScale,
     this.truncationMode,
     super.enabled,
+    super.tint,
     super.paddings,
     super.tag,
   });
 
   final CNFont? font;
-  final Color? foregroundColor;
   final int? lineLimit;
   final bool? lineLimitReservesSpace;
   final String text;
@@ -68,9 +74,10 @@ class CNChildText extends CNChild {
       'type': 'text',
       'tag': tag,
       'enabled': enabled,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'text': text,
       'font': font?.toMap(),
-      'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'lineLimit': lineLimit,
       'lineLimitReservesSpace': lineLimitReservesSpace,
       'textScale': textScale?.name,
@@ -85,17 +92,17 @@ class CNChildImage extends CNChild {
   const CNChildImage(
     this.systemSymbolName, {
     this.font,
-    this.foregroundColor,
+    super.foregroundColor,
     this.symbolRenderingMode,
     this.symbolColorRenderingMode,
     this.foregroundStyleColors,
     super.enabled,
+    super.tint,
     super.paddings,
     super.tag,
   });
 
   final CNFont? font;
-  final Color? foregroundColor;
   final List<Color>? foregroundStyleColors;
   final CNSymbolColorRenderingMode? symbolColorRenderingMode;
   final CNSymbolRenderingMode? symbolRenderingMode;
@@ -107,9 +114,10 @@ class CNChildImage extends CNChild {
       'type': 'image',
       'tag': tag,
       'enabled': enabled,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'systemSymbolName': systemSymbolName,
       'font': font?.toMap(),
-      'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'symbolRenderingMode': symbolRenderingMode?.name,
       'symbolColorRenderingMode': symbolColorRenderingMode?.name,
       'foregroundStyleColors': foregroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
@@ -120,7 +128,7 @@ class CNChildImage extends CNChild {
 
 /// A VStack container child.
 class CNChildVStack extends CNChild {
-  const CNChildVStack({required this.children, this.alignment = CNAlignment.center, this.spacing, super.enabled, super.paddings, super.tag});
+  const CNChildVStack({required this.children, this.alignment = CNAlignment.center, this.spacing, super.enabled, super.tint, super.foregroundColor, super.paddings, super.tag});
 
   final CNAlignment alignment;
   final List<CNChild> children;
@@ -132,6 +140,8 @@ class CNChildVStack extends CNChild {
       'type': 'vstack',
       'tag': tag,
       'enabled': enabled,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'alignment': alignment.name,
       'spacing': spacing,
       'children': children.map((c) => c.toChildPayload(context)).toList(),
@@ -142,7 +152,7 @@ class CNChildVStack extends CNChild {
 
 /// An HStack container child.
 class CNChildHStack extends CNChild {
-  const CNChildHStack({required this.children, this.alignment = CNAlignment.center, this.spacing, super.enabled, super.paddings, super.tag});
+  const CNChildHStack({required this.children, this.alignment = CNAlignment.center, this.spacing, super.enabled, super.tint, super.foregroundColor, super.paddings, super.tag});
 
   final CNAlignment alignment;
   final List<CNChild> children;
@@ -154,6 +164,8 @@ class CNChildHStack extends CNChild {
       'type': 'hstack',
       'tag': tag,
       'enabled': enabled,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'alignment': alignment.name,
       'spacing': spacing,
       'children': children.map((c) => c.toChildPayload(context)).toList(),
@@ -164,7 +176,7 @@ class CNChildHStack extends CNChild {
 
 /// A Group container child (no layout, just grouping).
 class CNChildGroup extends CNChild {
-  const CNChildGroup({required this.children, super.enabled, super.paddings, super.tag});
+  const CNChildGroup({required this.children, super.enabled, super.tint, super.foregroundColor, super.paddings, super.tag});
 
   final List<CNChild> children;
 
@@ -174,6 +186,8 @@ class CNChildGroup extends CNChild {
       'type': 'group',
       'tag': tag,
       'enabled': enabled,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'children': children.map((c) => c.toChildPayload(context)).toList(),
       'paddings': CNChild.serializePaddings(paddings),
     };
@@ -187,7 +201,8 @@ class CNChildProgressView extends CNChild {
     this.total = 1.0,
     this.style = CNProgressViewStyle.linear,
     this.controlSize = CNControlSize.regular,
-    this.tint,
+    super.tint,
+    super.foregroundColor,
     this.constraints,
     super.enabled,
     super.paddings,
@@ -197,7 +212,6 @@ class CNChildProgressView extends CNChild {
   final BoxConstraints? constraints;
   final CNControlSize controlSize;
   final CNProgressViewStyle style;
-  final Color? tint;
   final double total;
   final double? value;
 
@@ -207,11 +221,12 @@ class CNChildProgressView extends CNChild {
       'type': 'progressView',
       'tag': tag,
       'enabled': enabled,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'value': value,
       'total': total,
       'style': style.name,
       'controlSize': controlSize.name,
-      'tint': resolveColorToArgb(tint, context),
       'constraints': constraints != null
           ? {
               'minWidth': constraints!.minWidth.isFinite ? constraints!.minWidth : null,
@@ -246,6 +261,8 @@ class CNChildButton extends CNChild {
     this.role,
     this.badge,
     super.enabled,
+    super.tint,
+    super.foregroundColor,
     super.paddings,
   }) : assert(badge == null || badge is String || badge is int);
 
@@ -267,6 +284,8 @@ class CNChildButton extends CNChild {
       'type': 'button',
       'tag': tag,
       'enabled': enabled,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'title': title,
       'systemImage': systemImage,
       'role': role?.name,
@@ -282,6 +301,8 @@ class CNChildMenu extends CNChild {
     required this.items,
     required this.label,
     super.enabled,
+    super.tint,
+    super.foregroundColor,
     super.tag,
   });
 
@@ -297,6 +318,8 @@ class CNChildMenu extends CNChild {
       'type': 'menu',
       'tag': tag,
       'enabled': enabled,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'items': items.map((c) => c.toChildPayload(context)).toList(),
       'label': label.map((c) => c.toChildPayload(context)).toList(),
     };
@@ -309,7 +332,7 @@ class CNChildLabel extends CNChild {
     this.title, {
     this.systemImage,
     this.font,
-    this.foregroundColor,
+    super.foregroundColor,
     this.symbolRenderingMode,
     this.symbolColorRenderingMode,
     this.foregroundStyleColors,
@@ -317,12 +340,12 @@ class CNChildLabel extends CNChild {
     this.labelIconToTitleSpacing,
     this.labelStyle = CNLabel2Style.automatic,
     super.enabled,
+    super.tint,
     super.paddings,
     super.tag,
   });
 
   final CNFont? font;
-  final Color? foregroundColor;
   final List<Color>? foregroundStyleColors;
   final double? labelIconToTitleSpacing;
   final double? labelReservedIconWidth;
@@ -338,10 +361,11 @@ class CNChildLabel extends CNChild {
       'type': 'label',
       'tag': tag,
       'enabled': enabled,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'title': title,
       'systemImage': systemImage,
       'font': font?.toMap(),
-      'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'symbolRenderingMode': symbolRenderingMode?.name,
       'symbolColorRenderingMode': symbolColorRenderingMode?.name,
       'foregroundStyleColors': foregroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),

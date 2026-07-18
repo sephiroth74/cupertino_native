@@ -1,11 +1,9 @@
-import 'package:cupertino_native/components/divider.dart';
-import 'package:cupertino_native/components/view_modifiers.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
-const _kDebugLog = true;
+const _kDebugLog = false;
 
 class MenuButtonDemoPage extends StatefulWidget {
   const MenuButtonDemoPage({super.key});

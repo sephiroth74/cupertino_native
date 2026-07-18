@@ -17,11 +17,16 @@ enum CNChildViewBuilder {
             AnyView(buildGroup(dict))
         case "label":
             AnyView(buildLabel(dict))
+        case "divider":
+            AnyView(Divider())
         case "progressView":
             AnyView(buildProgressView(dict))
         default:
             AnyView(EmptyView())
         }
+
+        view = CNViewModifierApplicator.applyForegroundColor(dict["foregroundColor"] as? Int, to: view)
+        view = CNViewModifierApplicator.applyTint(dict["tint"] as? Int, to: view)
 
         if let paddings = CNPaddingsPayload.fromChannel(dict["paddings"] as? [String: Any]) {
             view = CNViewModifierApplicator.applyPaddings(paddings, to: view)
@@ -49,7 +54,6 @@ enum CNChildViewBuilder {
         let text = dict["text"] as? String ?? ""
         var view = AnyView(Text(text))
         view = CNViewModifierApplicator.applyFont(dict["font"] as? [String: Any], to: view)
-        view = CNViewModifierApplicator.applyForegroundColor(dict["foregroundColor"] as? Int, to: view)
         if let lineLimit = dict["lineLimit"] as? Int {
             let reservesSpace = dict["lineLimitReservesSpace"] as? Bool ?? false
             view = AnyView(view.lineLimit(lineLimit, reservesSpace: reservesSpace))
@@ -85,7 +89,6 @@ enum CNChildViewBuilder {
         let name = dict["systemSymbolName"] as? String ?? "questionmark"
         var view = AnyView(Image(systemName: name))
         view = CNViewModifierApplicator.applyFont(dict["font"] as? [String: Any], to: view)
-        view = CNViewModifierApplicator.applyForegroundColor(dict["foregroundColor"] as? Int, to: view)
         if let renderingMode = dict["symbolRenderingMode"] as? String {
             view = applySymbolRenderingMode(renderingMode, colors: dict["foregroundStyleColors"], to: view)
         }
@@ -125,7 +128,6 @@ enum CNChildViewBuilder {
         }
 
         view = CNViewModifierApplicator.applyControlSize(dict["controlSize"] as? String, to: view)
-        view = CNViewModifierApplicator.applyTint(dict["tint"] as? Int, to: view)
 
         if let constraints = CNBoxConstraintsPayload.fromChannel(dict["constraints"] as? [String: Any]) {
             view = CNViewModifierApplicator.applyConstraints(constraints: constraints, shrink: false, to: view)
@@ -165,7 +167,6 @@ enum CNChildViewBuilder {
         }
 
         view = CNViewModifierApplicator.applyFont(dict["font"] as? [String: Any], to: view)
-        view = CNViewModifierApplicator.applyForegroundColor(dict["foregroundColor"] as? Int, to: view)
 
         if let labelStyleStr = dict["labelStyle"] as? String {
             switch labelStyleStr {
