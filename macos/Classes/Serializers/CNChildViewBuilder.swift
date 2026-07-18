@@ -2,25 +2,32 @@ import SwiftUI
 
 enum CNChildViewBuilder {
     /// Builds a single child view from a dictionary payload.
-    @ViewBuilder
-    static func buildChild(_ dict: [String: Any]) -> some View {
+    static func buildChild(_ dict: [String: Any]) -> AnyView {
         let type = dict["type"] as? String ?? ""
-        switch type {
+        var view = switch type {
         case "text":
-            buildText(dict)
+            AnyView(buildText(dict))
         case "image":
-            buildImage(dict)
+            AnyView(buildImage(dict))
         case "vstack":
-            buildVStack(dict)
+            AnyView(buildVStack(dict))
         case "hstack":
-            buildHStack(dict)
+            AnyView(buildHStack(dict))
         case "group":
-            buildGroup(dict)
+            AnyView(buildGroup(dict))
         case "label":
-            buildLabel(dict)
+            AnyView(buildLabel(dict))
+        case "progressView":
+            AnyView(buildProgressView(dict))
         default:
-            EmptyView()
+            AnyView(EmptyView())
         }
+
+        if let paddings = CNPaddingsPayload.fromChannel(dict["paddings"] as? [String: Any]) {
+            view = CNViewModifierApplicator.applyPaddings(paddings, to: view)
+        }
+
+        return view
     }
 
     /// Builds multiple children into a single AnyView (using Group + ForEach pattern).
@@ -90,6 +97,36 @@ enum CNChildViewBuilder {
                 }
             }
         }
+        return view
+    }
+
+    private static func buildProgressView(_ dict: [String: Any]) -> some View {
+        let total = CNChannelDeserialization.decodeDouble(dict["total"]) ?? 1.0
+        let clampedTotal = max(total, 0.000001)
+
+        var view: AnyView
+        if let rawValue = CNChannelDeserialization.decodeDouble(dict["value"]) {
+            let clamped = min(max(rawValue, 0.0), clampedTotal)
+            view = AnyView(ProgressView(value: clamped, total: clampedTotal))
+        } else {
+            view = AnyView(ProgressView())
+        }
+
+        let style = dict["style"] as? String
+        switch style {
+        case "circular":
+            view = AnyView(view.progressViewStyle(.circular))
+        default:
+            view = AnyView(view.progressViewStyle(.linear))
+        }
+
+        view = CNViewModifierApplicator.applyControlSize(dict["controlSize"] as? String, to: view)
+        view = CNViewModifierApplicator.applyTint(dict["tint"] as? Int, to: view)
+
+        if let constraints = CNBoxConstraintsPayload.fromChannel(dict["constraints"] as? [String: Any]) {
+            view = CNViewModifierApplicator.applyConstraints(constraints: constraints, shrink: false, to: view)
+        }
+
         return view
     }
 

@@ -80,18 +80,88 @@ enum CNViewModifierApplicator {
         return AnyView(view.tint(ColorUtils.swiftUIColorFromARGB(tint)))
     }
 
-    static func applyControlSize(_ controlSize: String?, to view: AnyView) -> AnyView {
-        switch controlSize {
+    static func applyControlSize(_ size: String?, to view: AnyView) -> AnyView {
+        switch size {
         case "mini":
             AnyView(view.controlSize(.mini))
         case "small":
             AnyView(view.controlSize(.small))
+        case "regular":
+            AnyView(view.controlSize(.regular))
         case "large":
             AnyView(view.controlSize(.large))
         case "extraLarge":
-            AnyView(view.controlSize(.extraLarge))
+            if #available(macOS 14.0, *) {
+                AnyView(view.controlSize(.extraLarge))
+            } else {
+                AnyView(view.controlSize(.large))
+            }
         default:
-            AnyView(view.controlSize(.regular))
+            view
+        }
+    }
+
+    static func applyEnabled(_ enabled: Bool?, to view: AnyView) -> AnyView {
+        guard let enabled else {
+            return view
+        }
+        return AnyView(view.disabled(!enabled))
+    }
+
+    static func applyLabelStyle(_ style: String?, to view: AnyView) -> AnyView {
+        guard let style else {
+            return view
+        }
+        switch style {
+        case "titleOnly":
+            return AnyView(view.labelStyle(.titleOnly))
+        case "iconOnly":
+            return AnyView(view.labelStyle(.iconOnly))
+        case "titleAndIcon":
+            return AnyView(view.labelStyle(.titleAndIcon))
+        default:
+            return view
+        }
+    }
+
+    static func applyButtonStyle(_ style: String?, to view: AnyView) -> AnyView {
+        switch style {
+        case "plain":
+            AnyView(view.buttonStyle(PlainButtonStyle()))
+        case "borderless":
+            AnyView(view.buttonStyle(BorderlessButtonStyle()))
+        case "link":
+            AnyView(view.buttonStyle(LinkButtonStyle()))
+        case "bordered":
+            AnyView(view.buttonStyle(BorderedButtonStyle()))
+        case "borderedProminent":
+            AnyView(view.buttonStyle(BorderedProminentButtonStyle()))
+        case "accessoryBar":
+            if #available(macOS 14.0, *) {
+                AnyView(view.buttonStyle(AccessoryBarButtonStyle()))
+            } else {
+                view
+            }
+        case "accessoryBarAction":
+            if #available(macOS 14.0, *) {
+                AnyView(view.buttonStyle(AccessoryBarActionButtonStyle()))
+            } else {
+                view
+            }
+        case "glass":
+            if #available(macOS 26.0, *) {
+                AnyView(view.buttonStyle(GlassButtonStyle()))
+            } else {
+                AnyView(view.buttonStyle(BorderedButtonStyle()))
+            }
+        case "prominentGlass", "glassProminent":
+            if #available(macOS 26.0, *) {
+                AnyView(view.buttonStyle(GlassProminentButtonStyle()))
+            } else {
+                AnyView(view.buttonStyle(BorderedProminentButtonStyle()))
+            }
+        default:
+            view
         }
     }
 }

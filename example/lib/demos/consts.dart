@@ -52,7 +52,7 @@ const kSystemColors = {
   'fillQuinary': CNColors.fillQuinary,
 };
 
-CNFontSize defaultFontSize = CNFontSize.points(17);
+CNFontSize defaultFontSize = CNFontSize.points(kDefaultFontSize);
 
 List<CNFont?> get kAvailableFonts => [
   null,
@@ -73,6 +73,6 @@ List<CNFont?> get kAvailableFonts => [
   CNFont.named('Helvetica Neue', defaultFontSize),
 ];
 
-const kDefaultFontSize = 18.0;
+const kFontSizeDefault = kDefaultFontSize;
 const kFontSizeMin = 8.0;
 const kFontSizeMax = 48.0;

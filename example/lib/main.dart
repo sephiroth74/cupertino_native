@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:system_theme/system_theme.dart';
 
 import 'demos/alert.dart';
-import 'demos/button_demo.dart';
+import 'demos/cn_button_demo.dart';
 import 'demos/cn_color_well_demo.dart';
 import 'demos/combo_box.dart';
 import 'demos/context_menu.dart';
@@ -93,9 +93,9 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNToggle', 'switch.2', ToggleDemo()),
     _DemoEntry('CNSearchField', 'magnifyingglass', SearchFieldDemoPage()),
     _DemoEntry('CNLabel', 'textformat', LabelDemoPage()),
+    _DemoEntry('CNButton', 'button.horizontal', ButtonDemoPage()),
 
     _DemoEntry('Picker', 'rectangle.split.3x1.fill', PickerDemoPage()),
-    _DemoEntry('Button', 'button.horizontal', ButtonDemoPage()),
     _DemoEntry('Menu', 'ellipsis.circle', MenuButtonDemoPage()),
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),

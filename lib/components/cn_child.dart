@@ -12,10 +12,25 @@ enum CNAlignment { leading, center, trailing, top, bottom }
 /// These are NOT platform views — they are pure data that the native side
 /// reconstructs as SwiftUI views inside a parent widget's content closure.
 sealed class CNChild {
-  const CNChild();
+  const CNChild({this.paddings});
+
+  /// Optional padding applied around this child.
+  final EdgeInsetsGeometry? paddings;
 
   /// Serializes this child into a payload map for the native side.
   Map<String, dynamic> toChildPayload(BuildContext context);
+
+  /// Serializes paddings to a map for the channel.
+  static Map<String, double>? serializePaddings(EdgeInsetsGeometry? p) {
+    if (p == null) return null;
+    final resolved = p.resolve(TextDirection.ltr);
+    return {
+      'top': resolved.top,
+      'bottom': resolved.bottom,
+      'leading': resolved.left,
+      'trailing': resolved.right,
+    };
+  }
 }
 
 /// A text child.
@@ -28,6 +43,7 @@ class CNChildText extends CNChild {
     this.lineLimitReservesSpace,
     this.textScale,
     this.truncationMode,
+    super.paddings,
   });
 
   final CNFont? font;
@@ -49,6 +65,7 @@ class CNChildText extends CNChild {
       'lineLimitReservesSpace': lineLimitReservesSpace,
       'textScale': textScale?.name,
       'truncationMode': truncationMode?.name,
+      'paddings': CNChild.serializePaddings(paddings),
     };
   }
 }
@@ -62,6 +79,7 @@ class CNChildImage extends CNChild {
     this.symbolRenderingMode,
     this.symbolColorRenderingMode,
     this.foregroundStyleColors,
+    super.paddings,
   });
 
   final CNFont? font;
@@ -81,13 +99,14 @@ class CNChildImage extends CNChild {
       'symbolRenderingMode': symbolRenderingMode?.name,
       'symbolColorRenderingMode': symbolColorRenderingMode?.name,
       'foregroundStyleColors': foregroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
+      'paddings': CNChild.serializePaddings(paddings),
     };
   }
 }
 
 /// A VStack container child.
 class CNChildVStack extends CNChild {
-  const CNChildVStack({required this.children, this.alignment = CNAlignment.center, this.spacing});
+  const CNChildVStack({required this.children, this.alignment = CNAlignment.center, this.spacing, super.paddings});
 
   final CNAlignment alignment;
   final List<CNChild> children;
@@ -100,13 +119,14 @@ class CNChildVStack extends CNChild {
       'alignment': alignment.name,
       'spacing': spacing,
       'children': children.map((c) => c.toChildPayload(context)).toList(),
+      'paddings': CNChild.serializePaddings(paddings),
     };
   }
 }
 
 /// An HStack container child.
 class CNChildHStack extends CNChild {
-  const CNChildHStack({required this.children, this.alignment = CNAlignment.center, this.spacing});
+  const CNChildHStack({required this.children, this.alignment = CNAlignment.center, this.spacing, super.paddings});
 
   final CNAlignment alignment;
   final List<CNChild> children;
@@ -119,19 +139,65 @@ class CNChildHStack extends CNChild {
       'alignment': alignment.name,
       'spacing': spacing,
       'children': children.map((c) => c.toChildPayload(context)).toList(),
+      'paddings': CNChild.serializePaddings(paddings),
     };
   }
 }
 
 /// A Group container child (no layout, just grouping).
 class CNChildGroup extends CNChild {
-  const CNChildGroup({required this.children});
+  const CNChildGroup({required this.children, super.paddings});
 
   final List<CNChild> children;
 
   @override
   Map<String, dynamic> toChildPayload(BuildContext context) {
-    return {'type': 'group', 'children': children.map((c) => c.toChildPayload(context)).toList()};
+    return {
+      'type': 'group',
+      'children': children.map((c) => c.toChildPayload(context)).toList(),
+      'paddings': CNChild.serializePaddings(paddings),
+    };
+  }
+}
+
+/// A ProgressView child.
+class CNChildProgressView extends CNChild {
+  const CNChildProgressView({
+    this.value,
+    this.total = 1.0,
+    this.style = CNProgressViewStyle.linear,
+    this.controlSize = CNControlSize.regular,
+    this.tint,
+    this.constraints,
+    super.paddings,
+  });
+
+  final BoxConstraints? constraints;
+  final CNControlSize controlSize;
+  final CNProgressViewStyle style;
+  final Color? tint;
+  final double total;
+  final double? value;
+
+  @override
+  Map<String, dynamic> toChildPayload(BuildContext context) {
+    return {
+      'type': 'progressView',
+      'value': value,
+      'total': total,
+      'style': style.name,
+      'controlSize': controlSize.name,
+      'tint': resolveColorToArgb(tint, context),
+      'constraints': constraints != null
+          ? {
+              'minWidth': constraints!.minWidth.isFinite ? constraints!.minWidth : null,
+              'maxWidth': constraints!.maxWidth.isFinite ? constraints!.maxWidth : null,
+              'minHeight': constraints!.minHeight.isFinite ? constraints!.minHeight : null,
+              'maxHeight': constraints!.maxHeight.isFinite ? constraints!.maxHeight : null,
+            }
+          : null,
+      'paddings': CNChild.serializePaddings(paddings),
+    };
   }
 }
 
@@ -148,6 +214,7 @@ class CNChildLabel extends CNChild {
     this.labelReservedIconWidth,
     this.labelIconToTitleSpacing,
     this.labelStyle = CNLabel2Style.automatic,
+    super.paddings,
   });
 
   final CNFont? font;
@@ -175,6 +242,7 @@ class CNChildLabel extends CNChild {
       'labelReservedIconWidth': labelReservedIconWidth,
       'labelIconToTitleSpacing': labelIconToTitleSpacing,
       'labelStyle': labelStyle.name,
+      'paddings': CNChild.serializePaddings(paddings),
     };
   }
 }
