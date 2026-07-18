@@ -60,11 +60,11 @@ class _ToggleDemoState extends State<ToggleDemo> {
             RightSideOptionContainer(
               options: {
                 'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
-                'Toggle Style': CNPicker(
-                  pickerStyle: CNPickerStyle.menu,
-                  selectedIndex: CNToggle2Style.values.indexOf(toggleStyle),
-                  onValueChanged: (index) => setState(() => toggleStyle = CNToggle2Style.values[index]),
-                  items: CNToggle2Style.values.map((style) => CNText(style.name)).toList(),
+                'Toggle Style': CNPicker2(
+                  selection: toggleStyle.name,
+                  onChanged: (value) =>
+                      setState(() => toggleStyle = CNToggle2Style.values.firstWhere((style) => style.name == value)),
+                  children: CNToggle2Style.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
                 ),
                 'Tint Color': ColorPicker(
                   colors: kSystemColors,
@@ -73,8 +73,6 @@ class _ToggleDemoState extends State<ToggleDemo> {
                 ),
                 'Enabled': CNToggle2(
                   isOn: isEnabled,
-                  toggleStyle: CNToggle2Style.switchStyle,
-                  controlSize: CNControlSize.regular,
                   onChanged: (v) => setState(() => isEnabled = v),
                 ),
               },

@@ -49,13 +49,11 @@ class _StepperDemoPageState extends State<StepperDemoPage> {
             RightSideOptionContainer(
               title: 'Options',
               options: {
-                'Control Size': CNPicker(
-                  selectedIndex: CNControlSize.values.indexOf(controlSize),
-                  onValueChanged: (index) => setState(() => controlSize = CNControlSize.values[index]),
-                  items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
+                'Control Size': ControlSizePicker(
+                  value: controlSize,
+                  onChanged: (newSize) => setState(() => controlSize = newSize),
                 ),
-                'Enabled': CNToggle(value: enabled, onChanged: (v) => setState(() => enabled = v)),
+                'Enabled': CNToggle2(isOn: enabled, onChanged: (v) => setState(() => enabled = v)),
               },
             ),
           ],

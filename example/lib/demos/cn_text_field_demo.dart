@@ -99,27 +99,14 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
               title: 'Options',
               options: {
                 'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
-                'Style': CNPicker(
-                  selectedIndex: CNTextFieldStyle.values.indexOf(textFieldStyle),
-                  onValueChanged: (index) => setState(() => textFieldStyle = CNTextFieldStyle.values[index]),
-                  items: CNTextFieldStyle.values.map((style) => CNText(style.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
+                'Style': CNPicker2(
+                  selection: textFieldStyle.name,
+                  onChanged: (value) =>
+                      setState(() => textFieldStyle = CNTextFieldStyle.values.firstWhere((style) => style.name == value)),
+                  children: CNTextFieldStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
                 ),
                 'Font': FontPicker(value: font, fonts: kAvailableFonts, onChanged: (newFont) => setState(() => font = newFont)),
-                'Font Size': Row(
-                  children: [
-                    Expanded(child: Text(fontSize.toStringAsFixed(1))),
-                    CNStepper2(
-                      value: fontSize,
-                      min: 8,
-                      max: 72,
-                      onChanged: (value) => setState(() {
-                        fontSize = value;
-                        font = font?.copyWith(size: CNFontSize.points(value));
-                      }),
-                    ),
-                  ],
-                ),
+                'Font Size': SizeSliderPicker(value: fontSize, onChanged: (newSize) => setState(() => fontSize = newSize)),
                 'Tint Color': ColorPicker(
                   colors: kSystemColors,
                   value: tintColor,
@@ -135,16 +122,11 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                   value: borderColor,
                   onChanged: (color) => setState(() => borderColor = color),
                 ),
-                'Border Width': Row(
-                  children: [
-                    Expanded(child: Text(borderWidth?.toStringAsFixed(1) ?? '0')),
-                    CNStepper2(
-                      value: borderWidth ?? 0,
-                      min: 0,
-                      max: 10,
-                      onChanged: borderColor != null ? (value) => setState(() => borderWidth = value) : null,
-                    ),
-                  ],
+                'Border Width': SizeSliderPicker(
+                  value: borderWidth ?? 0,
+                  min: 0.0,
+                  max: 10.0,
+                  onChanged: borderColor != null ? (newWidth) => setState(() => borderWidth = newWidth) : null,
                 ),
               },
             ),

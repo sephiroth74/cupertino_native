@@ -79,42 +79,23 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
             const SizedBox(width: 8),
             RightSideOptionContainer(
               options: {
-                'Control Size': CNPicker(
-                  selectedIndex: CNControlSize.values.indexOf(_size),
-                  onValueChanged: (index) => setState(() => _size = CNControlSize.values[index]),
-                  items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
-                ),
-                'Enabled': CNToggle(
-                  value: _isEnabled,
-                  onChanged: (enabled) => setState(() => _isEnabled = enabled),
-                  modifiers: CNViewModifiers(controlSize: CNControlSize.small),
-                  toggleStyle: CNToggleStyle.switch_,
-                ),
-                'Stepped': CNToggle(
-                  value: _isStepped,
+                'Control Size': ControlSizePicker(value: _size, onChanged: (newSize) => setState(() => _size = newSize)),
+                'Enabled': CNToggle2(isOn: _isEnabled, onChanged: (enabled) => setState(() => _isEnabled = enabled)),
+                'Stepped': CNToggle2(
+                  isOn: _isStepped,
                   onChanged: (enabled) => setState(() {
                     _hasTicks = false;
                     _isStepped = enabled;
                   }),
-                  modifiers: CNViewModifiers(controlSize: CNControlSize.small),
-                  toggleStyle: CNToggleStyle.switch_,
                 ),
-                'Ticks': CNToggle(
-                  value: _hasTicks,
+                'Ticks': CNToggle2(
+                  isOn: _hasTicks,
                   onChanged: (enabled) => setState(() {
                     _isStepped = false;
                     _hasTicks = enabled;
                   }),
-                  modifiers: CNViewModifiers(controlSize: CNControlSize.small),
-                  toggleStyle: CNToggleStyle.switch_,
                 ),
-                'Labels': CNToggle(
-                  value: _showLabels,
-                  onChanged: (enabled) => setState(() => _showLabels = enabled),
-                  modifiers: CNViewModifiers(controlSize: CNControlSize.small),
-                  toggleStyle: CNToggleStyle.switch_,
-                ),
+                'Labels': CNToggle2(isOn: _showLabels, onChanged: (enabled) => setState(() => _showLabels = enabled)),
                 'Tint Color': ColorPicker(
                   colors: kSystemColors,
                   value: _tintColor,

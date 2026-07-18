@@ -1,6 +1,6 @@
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:cupertino_native/cupertino_native.dart';
 
 enum _DatePickerComponents { date, time, dateAndTime }
 
@@ -58,23 +58,21 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
             RightSideOptionContainer(
               title: 'Options',
               options: {
-                'Control Size': CNPicker(
-                  selectedIndex: CNControlSize.values.indexOf(controlSize),
-                  onValueChanged: (index) => setState(() => controlSize = CNControlSize.values[index]),
-                  items: CNControlSize.values.map((size) => CNText(size.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
+                'Control Size': ControlSizePicker(
+                  value: controlSize,
+                  onChanged: (newSize) => setState(() => controlSize = newSize),
                 ),
-                'DatePicker Style': CNPicker(
-                  selectedIndex: CNDatePicker2Style.values.indexOf(datePickerStyle),
-                  onValueChanged: (index) => setState(() => datePickerStyle = CNDatePicker2Style.values[index]),
-                  items: CNDatePicker2Style.values.map((style) => CNText(style.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
+                'DatePicker Style': CNPicker2(
+                  selection: datePickerStyle.name,
+                  onChanged: (newStyle) =>
+                      setState(() => datePickerStyle = CNDatePicker2Style.values.firstWhere((style) => style.name == newStyle)),
+                  children: CNDatePicker2Style.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
                 ),
-                'Enabled': CNToggle(value: enabled, onChanged: (value) => setState(() => enabled = value)),
-                'Displayed Components': CNPicker(
-                  selectedIndex: _DatePickerComponents.values.indexOf(displayedComponentsEnum),
-                  onValueChanged: (index) => setState(() {
-                    displayedComponentsEnum = _DatePickerComponents.values[index];
+                'Enabled': CNToggle2(isOn: enabled, onChanged: (value) => setState(() => enabled = value)),
+                'Components': CNPicker2(
+                  selection: displayedComponentsEnum.name,
+                  onChanged: (newValue) => setState(() {
+                    displayedComponentsEnum = _DatePickerComponents.values.firstWhere((component) => component.name == newValue);
                     switch (displayedComponentsEnum) {
                       case _DatePickerComponents.date:
                         displayedComponents = [CNDatePicker2Component.date];
@@ -87,8 +85,9 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
                         break;
                     }
                   }),
-                  items: _DatePickerComponents.values.map((component) => CNText(component.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
+                  children: _DatePickerComponents.values
+                      .map((component) => CNChildText(component.name, tag: component.name))
+                      .toList(),
                 ),
               },
             ),
