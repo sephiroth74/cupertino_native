@@ -9,8 +9,6 @@ final class CupertinoContextMenuHandler: NSObject {
         self.registrar = registrar
     }
 
-    // MARK: - CNChild-based context menu (showContextMenu2)
-
     func showContextMenu2(args: [String: Any], result: @escaping FlutterResult) {
         guard let items = args["items"] as? [[String: Any]] else {
             result(
@@ -112,78 +110,7 @@ final class CupertinoContextMenuHandler: NSObject {
         return menuItem
     }
 
-    // MARK: - Legacy JSON-based context menu
-
-    func showContextMenu(args: [String: Any], result: @escaping FlutterResult) {
-        guard let menuJson = args["menu"] as? String else {
-            result(
-                FlutterError(
-                    code: "invalid_args",
-                    message: "showContextMenu expects a menu JSON string",
-                    details: nil,
-                ),
-            )
-            return
-        }
-
-        guard
-            let window = registrar?.getFlutterWindow(),
-            let contentView = window.contentView
-        else {
-            result(
-                FlutterError(
-                    code: "window_unavailable",
-                    message: "Unable to resolve Flutter window/content view",
-                    details: nil,
-                ),
-            )
-            return
-        }
-
-        DispatchQueue.main.async { [weak self] in
-            guard let self else {
-                result(nil)
-                return
-            }
-            presentContextMenu(
-                menuJson: menuJson,
-                args: args,
-                contentView: contentView,
-                result: result,
-            )
-        }
-    }
-
-    private func presentContextMenu(
-        menuJson: String,
-        args: [String: Any],
-        contentView: NSView,
-        result: @escaping FlutterResult,
-    ) {
-        let menu = deserializeMenu(jsonString: menuJson)
-        let anchorPoint = resolveMenuPoint(args: args, contentView: contentView)
-        selectedMenuItem = nil
-        _ = menu.popUp(positioning: nil, at: anchorPoint, in: contentView)
-
-        guard let selectedItem = selectedMenuItem else {
-            result(nil)
-            return
-        }
-
-        let title: String = selectedItem.title
-        let identifier: String = selectedItem.identifier?.rawValue ?? ""
-        let tag: Int = selectedItem.tag
-        let index: Int = selectedItem.menu?.index(of: selectedItem) ?? -1
-
-        let payload: [String: Any] = [
-            "title": title,
-            "identifier": identifier,
-            "tag": tag,
-            "index": index,
-        ]
-
-        result(payload)
-    }
+    // MARK: - Private
 
     @objc
     private func menuItemSelected(_ sender: NSMenuItem) {
@@ -216,72 +143,5 @@ final class CupertinoContextMenuHandler: NSObject {
             return CGFloat(value)
         }
         return nil
-    }
-
-    private func deserializeMenu(jsonString: String) -> NSMenu {
-        guard
-            let data = jsonString.data(using: .utf8),
-            let json = try? JSONSerialization.jsonObject(with: data, options: []),
-            let root = json as? [String: Any]
-        else {
-            return NSMenu()
-        }
-        return deserializeMenu(dict: root)
-    }
-
-    private func deserializeMenu(dict: [String: Any]) -> NSMenu {
-        let menu = NSMenu()
-        menu.autoenablesItems = false
-        menu.selectionMode = .automatic
-
-        guard let items = dict["items"] as? [[String: Any]] else {
-            return menu
-        }
-
-        for item in items {
-            if let separator = item["separator"] as? Bool, separator {
-                menu.addItem(.separator())
-                continue
-            }
-
-            guard let title = item["title"] as? String else { continue }
-
-            let menuItem = NSMenuItem(title: title, action: nil, keyEquivalent: "")
-            menuItem.target = self
-            menuItem.action = #selector(menuItemSelected(_:))
-
-            if let identifier = item["identifier"] as? String, !identifier.isEmpty {
-                menuItem.identifier = NSUserInterfaceItemIdentifier(identifier)
-            }
-
-            if let tag = item["tag"] as? NSNumber {
-                menuItem.tag = tag.intValue
-            } else if let tag = item["tag"] as? Int {
-                menuItem.tag = tag
-            }
-
-            if let enabled = item["enabled"] as? Bool {
-                menuItem.isEnabled = enabled
-            }
-
-            if let stateString = item["state"] as? String {
-                switch stateString {
-                case "on":
-                    menuItem.state = .on
-                case "mixed":
-                    menuItem.state = .mixed
-                default:
-                    menuItem.state = .off
-                }
-            }
-
-            if let submenu = item["submenu"] as? [String: Any] {
-                menuItem.submenu = deserializeMenu(dict: submenu)
-            }
-
-            menu.addItem(menuItem)
-        }
-
-        return menu
     }
 }

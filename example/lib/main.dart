@@ -12,18 +12,15 @@ import 'demos/cn_color_well_demo.dart';
 import 'demos/combo_box.dart';
 import 'demos/cn_context_menu.dart';
 import 'demos/cn_date_picker_demo.dart';
-import 'demos/group_box.dart';
-import 'demos/icon.dart';
 import 'demos/cn_label_demo.dart';
 import 'demos/level_indicators.dart';
 import 'demos/cn_menu_demo.dart';
 import 'demos/path_control.dart';
 import 'demos/cn_picker_demo.dart';
 import 'demos/popover.dart';
-import 'demos/popup_menu_button.dart';
 import 'demos/cn_progressview_demo.dart';
 import 'demos/cn_search_field_demo.dart';
-import 'demos/secure_text_field.dart';
+import 'demos/cn_secure_field_demo.dart';
 import 'demos/segmented_control.dart';
 import 'demos/sheet.dart';
 import 'demos/cn_slider_demo.dart';
@@ -41,7 +38,6 @@ void main() async {
   await SystemTheme.accentColor.load();
   runApp(const MyApp());
 }
-
 
 class AppTheme extends ChangeNotifier {
   ThemeMode _mode = ThemeMode.system;
@@ -97,21 +93,17 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNMenu', 'ellipsis.circle', MenuButtonDemoPage()),
     _DemoEntry('CNPicker', 'rectangle.split.3x1.fill', PickerDemoPage()),
     _DemoEntry('CNContextMenu', 'ellipsis.rectangle', ContextMenuDemoPage()),
-
+    _DemoEntry('CNSecureField', 'lock.shield', SecureTextFieldDemoPage()),
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Segmented Control', 'rectangle.split.3x1', SegmentedControlDemoPage()),
     _DemoEntry('TabView', 'rectangle.split.3x1', TabViewDemoPage()),
-    _DemoEntry('Icon', 'app', IconDemoPage()),
-    _DemoEntry('Popup Menu Button', 'ellipsis.circle', PopupMenuButtonDemoPage()),
     _DemoEntry('Path Control', 'folder', PathControlDemoPage()),
     _DemoEntry('Level Indicators', 'gauge', LevelIndicatorDemoPage()),
-    _DemoEntry('Secure Text Field', 'lock.shield', SecureTextFieldDemoPage()),
     _DemoEntry('Text View / Text Area', 'text.justify.left', TextViewDemoPage()),
     _DemoEntry('Combo Box', 'list.bullet.rectangle', ComboBoxDemoPage()),
     _DemoEntry('Alert', 'exclamationmark.bubble', AlertDemoPage()),
     _DemoEntry('Popover', 'rectangle.on.rectangle', PopoverDemoPage()),
-    _DemoEntry('GroupBox', 'textformat', GroupBoxDemoPage()),
     _DemoEntry('Sheet', 'square.and.line.vertical.and.square', SheetDemoPage()),
     _DemoEntry('Split View', 'rectangle.split.2x1', SplitViewDemoPage()),
   ];
@@ -138,8 +130,8 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
 
     return CNMainWindow(
       controller: _windowController,
-      toolbarTitle: 'Cupertino Native',
-      toolbarShowSearch: false,
+      // toolbarTitle: 'Cupertino Native',
+      // toolbarShowSearch: false,
       // toolbarColor: widget.accentColor,
       // toolbarGroups: [
       //   CNToolbarGroup(
@@ -236,15 +228,14 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
                     for (final entry in visibleEntries)
                       CNListTile(
                         title: Text(entry.title),
-                        leading: CNIcon(
-                          symbol: CNSymbol(
-                            entry.symbolName,
-                            color: _selectedIndex == _entries.indexOf(entry)
-                                ? CupertinoColors.label.darkColor
-                                : isDark
-                                ? CupertinoColors.label.darkColor
-                                : CupertinoColors.label.color,
-                          ),
+                        leading: CNImage2(
+                          constraints: BoxConstraints(maxWidth: 20, maxHeight: 20),
+                          systemSymbolName: entry.symbolName,
+                          foregroundColor: _selectedIndex == _entries.indexOf(entry)
+                              ? CupertinoColors.label.darkColor
+                              : isDark
+                              ? CupertinoColors.label.darkColor
+                              : CupertinoColors.label.color,
                         ),
                         selected: _selectedIndex == _entries.indexOf(entry),
                         onTap: () {

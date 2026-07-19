@@ -21,7 +21,7 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
           children: [
             const Text('Right-click inside the card to open the native context menu.'),
             const SizedBox(height: 16),
-            CNContextMenu2(
+            CNContextMenuRegion(
               onItemPressed: (value) {
                 setState(() => _lastSelection = value);
               },

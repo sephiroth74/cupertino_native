@@ -10,8 +10,8 @@ import 'package:flutter/widgets.dart';
 /// The menu is built from [items] which can be [CNChildButton],
 /// [CNChildDivider], or [CNChildMenu] (for sub-menus).
 /// When a button is pressed, [onItemPressed] is called with its [CNChild.tag].
-class CNContextMenu2 extends StatefulWidget {
-  const CNContextMenu2({
+class CNContextMenuRegion extends StatefulWidget {
+  const CNContextMenuRegion({
     super.key,
     required this.child,
     required this.items,
@@ -36,10 +36,10 @@ class CNContextMenu2 extends StatefulWidget {
   final ValueChanged<String>? onItemPressed;
 
   @override
-  State<CNContextMenu2> createState() => _CNContextMenu2State();
+  State<CNContextMenuRegion> createState() => _CNContextMenuRegionState();
 }
 
-class _CNContextMenu2State extends State<CNContextMenu2> {
+class _CNContextMenuRegionState extends State<CNContextMenuRegion> {
   static const MethodChannel _channel = MethodChannel('cupertino_native');
 
   Future<void> _openContextMenu(Offset globalPosition) async {

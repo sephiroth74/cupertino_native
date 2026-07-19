@@ -16,9 +16,6 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         let instance = CupertinoNativePlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
 
-        let sliderFactory = CupertinoSliderViewFactory(messenger: registrar.messenger)
-        registrar.register(sliderFactory, withId: "CupertinoNativeSlider")
-
         let toggleFactory = CupertinoToggleViewFactory(messenger: registrar.messenger)
         registrar.register(toggleFactory, withId: "cupertino_native/toggle")
 
@@ -27,9 +24,6 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let pickerFactory = CupertinoPickerViewFactory(messenger: registrar.messenger)
         registrar.register(pickerFactory, withId: "CupertinoNativePicker")
-
-        let iconFactory = CupertinoIconViewFactory(messenger: registrar.messenger)
-        registrar.register(iconFactory, withId: "CupertinoNativeIcon")
 
         let labelFactory = CupertinoLabelViewFactory(messenger: registrar.messenger)
         registrar.register(labelFactory, withId: "CupertinoNativeLabel")
@@ -49,34 +43,11 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         let buttonFactory = CupertinoButtonViewFactory(messenger: registrar.messenger)
         registrar.register(buttonFactory, withId: "CupertinoNativeButton")
 
-        let colorWellFactory = CupertinoColorWellViewFactory(messenger: registrar.messenger)
-        registrar.register(colorWellFactory, withId: "CupertinoNativeColorWell")
-
         let pathControlFactory = CupertinoPathControlViewFactory(registrar: registrar)
         registrar.register(pathControlFactory, withId: "CupertinoNativePathControl")
 
-        let progressIndicatorFactory = CupertinoProgressIndicatorViewFactory(
-            messenger: registrar.messenger,
-        )
-        registrar.register(progressIndicatorFactory, withId: "CupertinoNativeProgressIndicator")
-
         let levelIndicatorFactory = CupertinoLevelIndicatorViewFactory(messenger: registrar.messenger)
         registrar.register(levelIndicatorFactory, withId: "CupertinoNativeLevelIndicator")
-
-        let stepperFactory = CupertinoStepperViewFactory(messenger: registrar.messenger)
-        registrar.register(stepperFactory, withId: "CupertinoNativeStepper")
-
-        let datePickerFactory = CupertinoDatePickerViewFactory(messenger: registrar.messenger)
-        registrar.register(datePickerFactory, withId: "CupertinoNativeDatePicker")
-
-        let searchFieldFactory = CupertinoSearchFieldViewFactory(messenger: registrar.messenger)
-        registrar.register(searchFieldFactory, withId: "CupertinoNativeSearchField")
-
-        let textFieldFactory = CupertinoTextFieldFactory(messenger: registrar.messenger)
-        registrar.register(textFieldFactory, withId: "CupertinoNativeTextField")
-
-        let secureTextFieldFactory = CupertinoSecureTextFieldFactory(messenger: registrar.messenger)
-        registrar.register(secureTextFieldFactory, withId: "CupertinoNativeSecureTextField")
 
         let textViewFactory = CupertinoTextViewFactory(messenger: registrar.messenger)
         registrar.register(textViewFactory, withId: "CupertinoNativeTextView")
@@ -131,6 +102,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let picker2Factory = CupertinoPicker2Factory(messenger: registrar.messenger)
         registrar.register(picker2Factory, withId: "CupertinoNativePicker2")
+
+        let secureFieldFactory = CupertinoSecureFieldFactory(messenger: registrar.messenger)
+        registrar.register(secureFieldFactory, withId: "CupertinoNativeSecureField")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -149,28 +123,6 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 return
             }
             showAlert(args: args, result: result)
-        case "showContextMenu":
-            guard let args = CNChannelSerialization.asDict(call.arguments) else {
-                result(
-                    FlutterError(
-                        code: "invalid_args",
-                        message: "showContextMenu expects a map of arguments",
-                        details: nil,
-                    ),
-                )
-                return
-            }
-            guard let handler = CupertinoNativePlugin.contextMenuHandler else {
-                result(
-                    FlutterError(
-                        code: "handler_unavailable",
-                        message: "Context menu handler is not initialized",
-                        details: nil,
-                    ),
-                )
-                return
-            }
-            handler.showContextMenu(args: args, result: result)
         case "showContextMenu2":
             guard let args = CNChannelSerialization.asDict(call.arguments) else {
                 result(

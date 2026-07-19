@@ -165,7 +165,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
   BoxConstraints _resolveConstraints(BoxConstraints parentConstraints) {
     final explicit = widget.constraints;
-    if (!widget.shrink && explicit != null) {
+    if (/*!widget.shrink && */explicit != null) {
       return BoxConstraints(
         minWidth: parentConstraints.minWidth > explicit.minWidth ? parentConstraints.minWidth : explicit.minWidth,
         maxWidth: parentConstraints.maxWidth < explicit.maxWidth ? parentConstraints.maxWidth : explicit.maxWidth,

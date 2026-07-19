@@ -1,6 +1,8 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 
+const _kDebugLog = true;
+
 class SecureTextFieldDemoPage extends StatefulWidget {
   const SecureTextFieldDemoPage({super.key});
 
@@ -41,50 +43,47 @@ class _SecureTextFieldDemoPageState extends State<SecureTextFieldDemoPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const Text('Default Secure Text Field', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-            CNSecureTextField(
+            CNSecureField(
+              prompt: 'Enter password...',
               controller: _controller,
-              placeholder: 'Enter password...',
-              width: 320,
-              bezelStyle: CNTextFieldBezelStyle.round,
-              onChanged: (_) {},
+              textFieldStyle: CNTextFieldStyle.roundedBorder,
+              constraints: BoxConstraints(maxWidth: 400),
+              controlSize: CNControlSize.large,
+              onSubmitted: (value) {
+                debugPrint('Submitted value: $value');
+                _controller.text = value;
+              },
+              onChanged: (value) {
+                debugPrint('Changed value: $value');
+                _controller.text = value;
+              },
+              debugLog: _kDebugLog,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(_valueInfo),
             const SizedBox(height: 24),
-            Wrap(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               spacing: 8,
-              runSpacing: 8,
               children: [
-                CNButton(
-                  children: const [CNText('Set Sample')],
+                CNButton2(
+                  children: [const CNChildText('Set Value')],
                   onPressed: () {
                     _controller.text = 's3cr3t-passw0rd';
                   },
                 ),
-                CNButton(
-                  children: const [CNText('Clear')],
+                CNButton2(
+                  children: [const CNChildText('Clear')],
                   onPressed: () {
                     _controller.clear();
                   },
+                  buttonStyle: CNButtonStyle.borderedProminent,
+                  tint: CNColors.red,
                 ),
               ],
-            ),
-            const SizedBox(height: 32),
-            const Text('Styled Secure Text Field', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            CNSecureTextField(
-              controller: TextEditingController(text: ''),
-              placeholder: 'Styled secure input',
-              placeholderColor: CupertinoColors.systemGrey,
-              placeholderFont: const CNFont.monospacedSystem(CNFontSize.points(14), weight: CNFontWeight.medium),
-              backgroundColor: CupertinoColors.systemYellow.withValues(alpha: 0.25),
-              font: const CNFont.system(CNFontSize.points(15), weight: CNFontWeight.semibold),
-              controlSize: CNControlSize.regular,
-              bezelStyle: CNTextFieldBezelStyle.round,
-              width: 320,
-              onChanged: (_) {},
             ),
           ],
         ),
