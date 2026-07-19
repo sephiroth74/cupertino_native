@@ -32,6 +32,7 @@ class CNAlertResult {
 class CNAlert2 {
   static const MethodChannel _channel = MethodChannel('cupertino_native');
 
+  /// Shows a modal alert dialog (blocks interaction with the app).
   static Future<CNAlertResult?> show(
     BuildContext context, {
     String? title,
@@ -54,15 +55,7 @@ class CNAlert2 {
         'suppressionButtonLabel': suppressionButtonLabel,
         'suppressionInitiallySelected': suppressionInitiallySelected,
       });
-      final resultMap = response is Map ? Map<Object?, Object?>.from(response) : const <Object?, Object?>{};
-      final selectedIndex = (resultMap['selectedIndex'] as num?)?.toInt();
-      if (selectedIndex == null) return null;
-
-      return CNAlertResult(
-        selectedIndex: selectedIndex,
-        selectedTag: resultMap['selectedTag'] as String?,
-        suppressionSelected: (resultMap['suppressionSelected'] as bool?) ?? false,
-      );
+      return _parseResult(response);
     }
 
     // Non-macOS fallback
@@ -90,6 +83,77 @@ class CNAlert2 {
       selectedIndex: selected,
       selectedTag: actions[selected].tag,
       suppressionSelected: false,
+    );
+  }
+
+  /// Shows a sheet alert attached to the current window.
+  ///
+  /// Unlike [show], this does not block interaction with the rest of the app —
+  /// the alert slides down from the window title bar as a sheet.
+  static Future<CNAlertResult?> showSheet(
+    BuildContext context, {
+    String? title,
+    required String message,
+    required List<CNChildButton> actions,
+    CNAlertStyle2 style = CNAlertStyle2.informational,
+    String? suppressionButtonLabel,
+    bool suppressionInitiallySelected = false,
+  }) async {
+    if (actions.isEmpty) {
+      throw ArgumentError('actions must not be empty.');
+    }
+
+    if (defaultTargetPlatform == TargetPlatform.macOS) {
+      final response = await _channel.invokeMethod<Object>('showSheet2', {
+        'title': title,
+        'message': message,
+        'style': style.name,
+        'actions': actions.map((a) => a.toChildPayload(context)).toList(),
+        'suppressionButtonLabel': suppressionButtonLabel,
+        'suppressionInitiallySelected': suppressionInitiallySelected,
+      });
+      return _parseResult(response);
+    }
+
+    // Non-macOS fallback
+    final selected = await showCupertinoModalPopup<int>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: title == null ? null : Text(title),
+        message: Text(message),
+        actions: [
+          for (var i = 0; i < actions.length; i++)
+            CupertinoActionSheetAction(
+              isDefaultAction: i == 0,
+              isDestructiveAction: actions[i].role == CNButtonRole2.destructive,
+              onPressed: () => Navigator.of(ctx).pop(i),
+              child: Text(actions[i].title),
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(ctx).pop(),
+          child: const Text('Cancel'),
+        ),
+      ),
+    );
+    if (selected == null) return null;
+
+    return CNAlertResult(
+      selectedIndex: selected,
+      selectedTag: actions[selected].tag,
+      suppressionSelected: false,
+    );
+  }
+
+  static CNAlertResult? _parseResult(Object? response) {
+    final resultMap = response is Map ? Map<Object?, Object?>.from(response) : const <Object?, Object?>{};
+    final selectedIndex = (resultMap['selectedIndex'] as num?)?.toInt();
+    if (selectedIndex == null) return null;
+
+    return CNAlertResult(
+      selectedIndex: selectedIndex,
+      selectedTag: resultMap['selectedTag'] as String?,
+      suppressionSelected: (resultMap['suppressionSelected'] as bool?) ?? false,
     );
   }
 }

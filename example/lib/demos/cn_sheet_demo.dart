@@ -9,48 +9,48 @@ class SheetDemoPage extends StatefulWidget {
 }
 
 class _SheetDemoPageState extends State<SheetDemoPage> {
-  int? _lastSelectedIndex;
+  CNAlertResult? _lastSelected;
 
-  Widget _buildSheetButton({required String title, required CNSheetStyle style, required String message}) {
-    return CNButton(
-      children: [CNText(title)],
+  Widget _buildSheetButton({required String title, required CNAlertStyle2 style, required String message}) {
+    return CNButton2(
+      children: [CNChildText(title)],
       onPressed: () => _showSimpleSheet(title: title, style: style, message: message),
     );
   }
 
-  Future<void> _showSimpleSheet({required String title, required CNSheetStyle style, required String message}) async {
-    final selected = await CNSheet.show(
+  Future<void> _showSimpleSheet({required String title, required CNAlertStyle2 style, required String message}) async {
+    final selected = await CNAlert2.showSheet(
       context,
       title: title,
       message: message,
       style: style,
-      actions: const [CNSheetAction('OK', isDefault: true)],
+      actions: const [CNChildButton(title: 'OK', tag: 'ok')],
     );
     if (!mounted) {
       return;
     }
     setState(() {
-      _lastSelectedIndex = selected;
+      _lastSelected = selected;
     });
   }
 
   Future<void> _showCustomActionsSheet() async {
-    final selected = await CNSheet.show(
+    final selected = await CNAlert2.showSheet(
       context,
       title: 'Document Actions',
       message: 'Choose what to do with the selected document.',
-      style: CNSheetStyle.warning,
+      style: CNAlertStyle2.warning,
       actions: const [
-        CNSheetAction('Save', isDefault: true),
-        CNSheetAction('Duplicate'),
-        CNSheetAction('Delete', isDestructive: true),
+        CNChildButton(title: 'Open', tag: 'open'),
+        CNChildButton(title: 'Duplicate', tag: 'duplicate'),
+        CNChildButton(title: 'Delete', tag: 'delete', role: CNButtonRole2.destructive),
       ],
     );
     if (!mounted) {
       return;
     }
     setState(() {
-      _lastSelectedIndex = selected;
+      _lastSelected = selected;
     });
   }
 
@@ -68,26 +68,26 @@ class _SheetDemoPageState extends State<SheetDemoPage> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(color: CupertinoColors.systemGrey6, borderRadius: BorderRadius.circular(8)),
               child: Text(
-                _lastSelectedIndex == null ? 'No sheet opened yet' : 'Selected action index: $_lastSelectedIndex',
+                _lastSelected == null ? 'No sheet opened yet' : 'Selected action index: $_lastSelected',
                 style: const TextStyle(fontSize: 12, color: CupertinoColors.systemGrey),
               ),
             ),
             const SizedBox(height: 32),
             _buildSheetButton(
               title: 'Informational Sheet',
-              style: CNSheetStyle.informational,
+              style: CNAlertStyle2.informational,
               message: 'This is a standard informational native sheet.',
             ),
             const SizedBox(height: 16),
             _buildSheetButton(
               title: 'Warning Sheet',
-              style: CNSheetStyle.warning,
+              style: CNAlertStyle2.warning,
               message: 'This action may change project state permanently.',
             ),
             const SizedBox(height: 16),
             _buildSheetButton(
               title: 'Critical Sheet',
-              style: CNSheetStyle.critical,
+              style: CNAlertStyle2.critical,
               message: 'Deleting this item cannot be undone.',
             ),
             const SizedBox(height: 16),

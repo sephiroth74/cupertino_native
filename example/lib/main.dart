@@ -1,6 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/cn_gauge_demo.dart';
 import 'package:cupertino_native_example/demos/cn_image_demo.dart';
+import 'package:cupertino_native_example/demos/cn_sheet_demo.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/scheduler.dart';
@@ -21,7 +22,6 @@ import 'demos/cn_progressview_demo.dart';
 import 'demos/cn_search_field_demo.dart';
 import 'demos/cn_secure_field_demo.dart';
 import 'demos/segmented_control.dart';
-import 'demos/sheet.dart';
 import 'demos/cn_slider_demo.dart';
 import 'demos/split_view.dart';
 import 'demos/cn_stepper_demo.dart';
@@ -96,13 +96,13 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNGauge', 'gauge.chart.lefthalf.righthalf', GaugeDemoPage()),
     _DemoEntry('CNPathControl', 'folder', PathControlDemoPage()),
     _DemoEntry('CNAlert', 'exclamationmark.bubble', AlertDemoPage()),
+    _DemoEntry('CNSheet', 'exclamationmark.message', SheetDemoPage()),
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Segmented Control', 'rectangle.split.3x1', SegmentedControlDemoPage()),
     _DemoEntry('TabView', 'rectangle.split.3x1', TabViewDemoPage()),
     _DemoEntry('Text View / Text Area', 'text.justify.left', TextViewDemoPage()),
     _DemoEntry('Popover', 'rectangle.on.rectangle', PopoverDemoPage()),
-    _DemoEntry('Sheet', 'square.and.line.vertical.and.square', SheetDemoPage()),
     _DemoEntry('Split View', 'rectangle.split.2x1', SplitViewDemoPage()),
   ];
 
