@@ -21,6 +21,7 @@ struct CNTextField2Payload: CNSharedPayloadFields {
     var font: [String: Any]?
     var borderColor: Int?
     var borderWidth: Double?
+    var autofocus: Bool
 
     init(viewId: String) {
         viewDebugId = viewId
@@ -40,6 +41,7 @@ struct CNTextField2Payload: CNSharedPayloadFields {
         font = nil
         borderColor = nil
         borderWidth = nil
+        autofocus = false
     }
 
     init?(channel: [String: Any], viewId: Int64) {
@@ -89,6 +91,10 @@ struct CNTextField2Payload: CNSharedPayloadFields {
 
         if channel.keys.contains("borderWidth") {
             borderWidth = CNChannelDeserialization.decodeDouble(channel["borderWidth"])
+        }
+
+        if let value = channel["autofocus"] as? Bool {
+            autofocus = value
         }
     }
 

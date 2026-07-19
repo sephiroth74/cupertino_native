@@ -26,6 +26,7 @@ class CNSecureField extends CNWidget {
     this.font,
     this.borderColor,
     this.borderWidth,
+    this.autofocus = false,
     this.onChanged,
     this.onSubmitted,
     this.shrink = true,
@@ -34,6 +35,9 @@ class CNSecureField extends CNWidget {
     this.foregroundColor,
     this.paddings,
   });
+
+  /// Whether the field should automatically receive focus when created.
+  final bool autofocus;
 
   /// Border color applied via `.border()` modifier.
   final Color? borderColor;
@@ -161,6 +165,7 @@ class _CNSecureFieldState extends CNWidgetState<CNSecureField> {
       'font': widget.font?.toMap(),
       'borderColor': resolveColorToArgb(widget.borderColor, context),
       'borderWidth': widget.borderWidth,
+      'autofocus': widget.autofocus,
     };
 
     widget.writeSharedFields(context, payload: payload, constraints: constraints);

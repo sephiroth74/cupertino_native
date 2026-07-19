@@ -34,6 +34,7 @@ class CNSearchField2 extends CNWidget {
     this.font,
     this.controlSize = CNControlSize.regular,
     this.bezelStyle = CNTextFieldBezelStyle.round,
+    this.autofocus = false,
     this.onChanged,
     this.onSubmitted,
     this.onSuggestionsRequested,
@@ -43,6 +44,9 @@ class CNSearchField2 extends CNWidget {
     this.foregroundColor,
     this.paddings,
   });
+
+  /// Whether the field should automatically receive focus when created.
+  final bool autofocus;
 
   /// The border/bezel style of the search field.
   final CNTextFieldBezelStyle bezelStyle;
@@ -148,6 +152,7 @@ class _CNSearchField2State extends CNWidgetState<CNSearchField2> {
       'font': widget.font?.toMap(),
       'controlSize': widget.controlSize.name,
       'bezelStyle': widget.bezelStyle.name,
+      'autofocus': widget.autofocus,
       'enabled': widget.enabled,
       'hasSuggestions': widget.onSuggestionsRequested != null,
     };

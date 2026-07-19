@@ -20,6 +20,7 @@ enum CNSecureFieldDeserializer {
         let onTextChanged: ((String) -> Void)?
         let onSubmitted: ((String) -> Void)?
         let onSizeChanged: ((CGSize) -> Void)?
+        @FocusState private var isFocused: Bool
 
         var body: some View {
             let payload = model.payload
@@ -39,12 +40,14 @@ enum CNSecureFieldDeserializer {
             var view = if let promptView {
                 AnyView(
                     SecureField(placeholder, text: textBinding, prompt: promptView)
-                        .onSubmit { onSubmitted?(model.payload.text) },
+                        .onSubmit { onSubmitted?(model.payload.text) }
+                        .focused($isFocused),
                 )
             } else {
                 AnyView(
                     SecureField(placeholder, text: textBinding)
-                        .onSubmit { onSubmitted?(model.payload.text) },
+                        .onSubmit { onSubmitted?(model.payload.text) }
+                        .focused($isFocused),
                 )
             }
 
@@ -62,6 +65,12 @@ enum CNSecureFieldDeserializer {
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
             view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
+
+            if payload.autofocus {
+                view = AnyView(
+                    view.onAppear { isFocused = true },
+                )
+            }
 
             if let onSizeChanged {
                 view = AnyView(

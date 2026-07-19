@@ -46,6 +46,7 @@ class _SecureTextFieldDemoPageState extends State<SecureTextFieldDemoPage> {
             const SizedBox(height: 12),
             CNSecureField(
               prompt: 'Enter password...',
+              autofocus: true,
               controller: _controller,
               textFieldStyle: CNTextFieldStyle.roundedBorder,
               constraints: BoxConstraints(maxWidth: 400),

@@ -23,6 +23,7 @@ enum CNTextField2Deserializer {
         let onSelectionChanged: ((_ base: Int, _ extent: Int) -> Void)?
         let onSubmitted: ((String) -> Void)?
         let onSizeChanged: ((CGSize) -> Void)?
+        @FocusState private var isFocused: Bool
 
         var body: some View {
             let payload = model.payload
@@ -41,6 +42,7 @@ enum CNTextField2Deserializer {
                     model: model,
                     textBinding: textBinding,
                     payload: payload,
+                    autofocus: payload.autofocus,
                     onSelectionChanged: onSelectionChanged,
                     onSubmitted: onSubmitted,
                 ))
@@ -73,6 +75,14 @@ enum CNTextField2Deserializer {
 
             // Constraints last (outermost)
             view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
+
+            // Autofocus for legacy path (macOS < 15)
+            if #unavailable(macOS 15.0), payload.autofocus {
+                view = AnyView(
+                    view.focused($isFocused)
+                        .onAppear { isFocused = true },
+                )
+            }
 
             if let onSizeChanged {
                 view = AnyView(
@@ -121,11 +131,13 @@ enum CNTextField2Deserializer {
         @ObservedObject var model: CNViewModel<CNTextField2Payload>
         let textBinding: Binding<String>
         let payload: CNTextField2Payload
+        let autofocus: Bool
         let onSelectionChanged: ((_ base: Int, _ extent: Int) -> Void)?
         let onSubmitted: ((String) -> Void)?
 
         @State private var localText: String = ""
         @State private var selection: TextSelection?
+        @FocusState private var isFocused: Bool
 
         var body: some View {
             let placeholder = payload.placeholder ?? ""
@@ -147,6 +159,7 @@ enum CNTextField2Deserializer {
                         .onSubmit { onSubmitted?(localText) }
                 }
             }
+            .focused($isFocused)
             .onChange(of: localText) { _, newText in
                 guard newText != model.payload.text else { return }
                 // textBinding setter updates model.payload.text AND calls onTextChanged
@@ -163,6 +176,9 @@ enum CNTextField2Deserializer {
             }
             .onAppear {
                 localText = model.payload.text
+                if autofocus {
+                    isFocused = true
+                }
             }
         }
 

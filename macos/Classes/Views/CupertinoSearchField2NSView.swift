@@ -10,6 +10,7 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
     private var placeholderColor: NSColor?
     private var isUpdatingFromDart = false
     private var hasSuggestions = false
+    private var autofocus = false
     private var debugLog = false
     private var font: NSFont?
 
@@ -33,6 +34,15 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
     @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        if autofocus, window != nil {
+            DispatchQueue.main.async { [weak self] in
+                self?.window?.makeFirstResponder(self?.searchField)
+            }
+        }
     }
 
     // MARK: - Setup
@@ -116,6 +126,10 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
 
         if let value = args["hasSuggestions"] as? Bool {
             hasSuggestions = value
+        }
+
+        if let value = args["autofocus"] as? Bool {
+            autofocus = value
         }
 
         applyPlaceholder()
