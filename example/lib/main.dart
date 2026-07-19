@@ -10,13 +10,11 @@ import 'package:system_theme/system_theme.dart';
 import 'demos/alert.dart';
 import 'demos/cn_button_demo.dart';
 import 'demos/cn_color_well_demo.dart';
-import 'demos/combo_box.dart';
 import 'demos/cn_context_menu.dart';
 import 'demos/cn_date_picker_demo.dart';
 import 'demos/cn_label_demo.dart';
-import 'demos/level_indicators.dart';
 import 'demos/cn_menu_demo.dart';
-import 'demos/path_control.dart';
+import 'demos/cn_path_control_demo.dart';
 import 'demos/cn_picker_demo.dart';
 import 'demos/popover.dart';
 import 'demos/cn_progressview_demo.dart';
@@ -96,14 +94,12 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNContextMenu', 'ellipsis.rectangle', ContextMenuDemoPage()),
     _DemoEntry('CNSecureField', 'lock.shield', SecureTextFieldDemoPage()),
     _DemoEntry('CNGauge', 'gauge.chart.lefthalf.righthalf', GaugeDemoPage()),
+    _DemoEntry('CNPathControl', 'folder', PathControlDemoPage()),
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Segmented Control', 'rectangle.split.3x1', SegmentedControlDemoPage()),
     _DemoEntry('TabView', 'rectangle.split.3x1', TabViewDemoPage()),
-    _DemoEntry('Path Control', 'folder', PathControlDemoPage()),
-    _DemoEntry('Level Indicators', 'gauge', LevelIndicatorDemoPage()),
     _DemoEntry('Text View / Text Area', 'text.justify.left', TextViewDemoPage()),
-    _DemoEntry('Combo Box', 'list.bullet.rectangle', ComboBoxDemoPage()),
     _DemoEntry('Alert', 'exclamationmark.bubble', AlertDemoPage()),
     _DemoEntry('Popover', 'rectangle.on.rectangle', PopoverDemoPage()),
     _DemoEntry('Sheet', 'square.and.line.vertical.and.square', SheetDemoPage()),

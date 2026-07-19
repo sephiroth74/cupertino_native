@@ -11,9 +11,6 @@ export 'components/button_child.dart';
 export 'components/menu_child.dart';
 export 'components/label.dart';
 export 'components/button.dart';
-export 'components/path_control.dart';
-export 'components/level_indicator.dart';
-export 'components/combo_box.dart';
 export 'components/image.dart';
 export 'components/text.dart';
 export 'components/menu.dart';
@@ -49,6 +46,7 @@ export 'components/cn_context_menu.dart';
 export 'components/cn_picker.dart';
 export 'components/cn_secure_field.dart';
 export 'components/cn_gauge.dart';
+export 'components/cn_path_control.dart';
 
 export 'model/control_size.dart';
 export 'model/checkbox_state.dart';

@@ -28,8 +28,7 @@ class _PathControlDemoPageState extends State<PathControlDemoPage> {
   void _handlePressed(String url) {
     setState(() {
       _pathControlPath = url;
-      _pathControlIsDirectory =
-          FileSystemEntity.typeSync(url) == FileSystemEntityType.directory;
+      _pathControlIsDirectory = FileSystemEntity.typeSync(url) == FileSystemEntityType.directory;
     });
   }
 
@@ -53,17 +52,17 @@ class _PathControlDemoPageState extends State<PathControlDemoPage> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CNPathControl(
+                    CNPathControl2(
                       editable: true,
-                      controlStyle: CNPathControlStyle.popup,
+                      controlStyle: CNPathControlStyle2.popup,
                       controlSize: CNControlSize.large,
                       url: Uri.parse(_pathControlPath),
                       isDirectory: _pathControlIsDirectory,
                       onPressed: _handlePressed,
                     ),
                     const SizedBox(height: 12),
-                    CNPathControl(
-                      controlStyle: CNPathControlStyle.standard,
+                    CNPathControl2(
+                      controlStyle: CNPathControlStyle2.standard,
                       controlSize: CNControlSize.large,
                       url: Uri.parse(_pathControlPath),
                       isDirectory: _pathControlIsDirectory,

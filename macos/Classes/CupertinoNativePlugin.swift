@@ -43,17 +43,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         let buttonFactory = CupertinoButtonViewFactory(messenger: registrar.messenger)
         registrar.register(buttonFactory, withId: "CupertinoNativeButton")
 
-        let pathControlFactory = CupertinoPathControlViewFactory(registrar: registrar)
-        registrar.register(pathControlFactory, withId: "CupertinoNativePathControl")
-
-        let levelIndicatorFactory = CupertinoLevelIndicatorViewFactory(messenger: registrar.messenger)
-        registrar.register(levelIndicatorFactory, withId: "CupertinoNativeLevelIndicator")
-
         let textViewFactory = CupertinoTextViewFactory(messenger: registrar.messenger)
         registrar.register(textViewFactory, withId: "CupertinoNativeTextView")
-
-        let comboBoxFactory = CupertinoComboBoxFactory(messenger: registrar.messenger)
-        registrar.register(comboBoxFactory, withId: "CupertinoNativeComboBox")
 
         let textFactory = CupertinoTextFactory(messenger: registrar.messenger)
         registrar.register(textFactory, withId: "CupertinoNativeText")
@@ -108,6 +99,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let gauge2Factory = CupertinoGauge2Factory(messenger: registrar.messenger)
         registrar.register(gauge2Factory, withId: "CupertinoNativeGauge2")
+
+        let pathControl2Factory = CupertinoPathControl2Factory(messenger: registrar.messenger)
+        registrar.register(pathControl2Factory, withId: "CupertinoNativePathControl2")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
