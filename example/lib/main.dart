@@ -1,4 +1,5 @@
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_example/demos/cn_gauge_demo.dart';
 import 'package:cupertino_native_example/demos/cn_image_demo.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show ThemeMode;
@@ -94,6 +95,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNPicker', 'rectangle.split.3x1.fill', PickerDemoPage()),
     _DemoEntry('CNContextMenu', 'ellipsis.rectangle', ContextMenuDemoPage()),
     _DemoEntry('CNSecureField', 'lock.shield', SecureTextFieldDemoPage()),
+    _DemoEntry('CNGauge', 'gauge.chart.lefthalf.righthalf', GaugeDemoPage()),
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Segmented Control', 'rectangle.split.3x1', SegmentedControlDemoPage()),

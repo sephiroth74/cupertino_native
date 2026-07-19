@@ -10,7 +10,7 @@ protocol CNSharedPayloadFields: CNChannelDeserializable {
     var shrink: Bool { get set }
     var constraints: CNBoxConstraintsPayload? { get set }
     var paddings: CNPaddingsPayload? { get set }
-    var tint: Int? { get set }
+    var tint: Any? { get set }
     var foregroundColor: Int? { get set }
 }
 
@@ -47,7 +47,13 @@ extension CNSharedPayloadFields {
         }
 
         if channel.keys.contains("tint") {
-            tint = CNChannelDeserialization.decodeInt(channel["tint"])
+            if let tintInt = CNChannelDeserialization.decodeInt(channel["tint"]) {
+                tint = tintInt
+            } else if let tintDict = channel["tint"] as? [String: Any] {
+                tint = tintDict
+            } else {
+                tint = nil
+            }
         }
 
         if channel.keys.contains("foregroundColor") {
@@ -57,12 +63,19 @@ extension CNSharedPayloadFields {
 
     /// Returns the identity key components for the shared fields.
     func sharedIdentityKey() -> [String] {
-        [
+        let tintKey = if let tintInt = tint as? Int {
+            String(describing: tintInt)
+        } else if let tintDict = tint as? [String: Any] {
+            String(describing: tintDict)
+        } else {
+            "nil"
+        }
+        return [
             viewDebugId,
             String(describing: shrink),
             constraints?.identityKey() ?? "nil",
             paddings?.identityKey() ?? "nil",
-            tint.map { String(describing: $0) } ?? "nil",
+            tintKey,
             foregroundColor.map { String(describing: $0) } ?? "nil",
         ]
     }

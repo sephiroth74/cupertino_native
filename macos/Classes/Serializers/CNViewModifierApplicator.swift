@@ -73,11 +73,86 @@ enum CNViewModifierApplicator {
         return AnyView(view.foregroundColor(ColorUtils.swiftUIColorFromARGB(foregroundColor)))
     }
 
-    static func applyTint(_ tint: Int?, to view: AnyView) -> AnyView {
+    static func applyTint(_ tint: Any?, to view: AnyView) -> AnyView {
         guard let tint else {
             return view
         }
-        return AnyView(view.tint(ColorUtils.swiftUIColorFromARGB(tint)))
+
+        if let colorInt = tint as? Int {
+            return AnyView(view.tint(ColorUtils.swiftUIColorFromARGB(colorInt)))
+        }
+
+        if let shapeStyleDict = tint as? [String: Any],
+           let shapeStyle = decodeShapeStyle(shapeStyleDict)
+        {
+            return AnyView(view.tint(shapeStyle))
+        }
+
+        return view
+    }
+
+    static func decodeShapeStyle(_ dict: [String: Any]) -> AnyShapeStyle? {
+        guard let type = dict["type"] as? String,
+              let stopsArr = dict["stops"] as? [[String: Any]]
+        else { return nil }
+
+        let stops = stopsArr.compactMap { stopDict -> Gradient.Stop? in
+            guard let colorInt = stopDict["color"] as? Int,
+                  let location = stopDict["location"] as? Double
+            else { return nil }
+            return Gradient.Stop(
+                color: ColorUtils.swiftUIColorFromARGB(colorInt),
+                location: CGFloat(location),
+            )
+        }
+
+        guard !stops.isEmpty else { return nil }
+        let gradient = Gradient(stops: stops)
+
+        switch type {
+        case "gradient":
+            return AnyShapeStyle(gradient)
+
+        case "linearGradient":
+            let startPoint = decodeUnitPoint(dict["startPoint"] as? [String: Any]) ?? .leading
+            let endPoint = decodeUnitPoint(dict["endPoint"] as? [String: Any]) ?? .trailing
+            return AnyShapeStyle(
+                LinearGradient(gradient: gradient, startPoint: startPoint, endPoint: endPoint),
+            )
+
+        case "angularGradient":
+            let center = decodeUnitPoint(dict["center"] as? [String: Any]) ?? .center
+            let startAngle = Angle.degrees(dict["startAngle"] as? Double ?? 0)
+            let endAngle = Angle.degrees(dict["endAngle"] as? Double ?? 360)
+            return AnyShapeStyle(
+                AngularGradient(gradient: gradient, center: center, startAngle: startAngle, endAngle: endAngle),
+            )
+
+        case "radialGradient":
+            let center = decodeUnitPoint(dict["center"] as? [String: Any]) ?? .center
+            let startRadius = CGFloat(dict["startRadius"] as? Double ?? 0)
+            let endRadius = CGFloat(dict["endRadius"] as? Double ?? 100)
+            return AnyShapeStyle(
+                RadialGradient(gradient: gradient, center: center, startRadius: startRadius, endRadius: endRadius),
+            )
+
+        case "ellipticalGradient":
+            let center = decodeUnitPoint(dict["center"] as? [String: Any]) ?? .center
+            return AnyShapeStyle(
+                EllipticalGradient(gradient: gradient, center: center),
+            )
+
+        default:
+            return nil
+        }
+    }
+
+    private static func decodeUnitPoint(_ dict: [String: Any]?) -> UnitPoint? {
+        guard let dict,
+              let x = dict["x"] as? Double,
+              let y = dict["y"] as? Double
+        else { return nil }
+        return UnitPoint(x: x, y: y)
     }
 
     static func applyControlSize(_ size: String?, to view: AnyView) -> AnyView {

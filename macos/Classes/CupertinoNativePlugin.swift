@@ -105,6 +105,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let secureFieldFactory = CupertinoSecureFieldFactory(messenger: registrar.messenger)
         registrar.register(secureFieldFactory, withId: "CupertinoNativeSecureField")
+
+        let gauge2Factory = CupertinoGauge2Factory(messenger: registrar.messenger)
+        registrar.register(gauge2Factory, withId: "CupertinoNativeGauge2")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

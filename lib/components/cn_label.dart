@@ -91,7 +91,7 @@ class CNLabel2 extends CNWidget {
   final bool shrink;
 
   @override
-  final Color? tint;
+  final Object? tint;
 
   @override
   State<CNLabel2> createState() => _CNLabel2State();

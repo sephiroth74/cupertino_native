@@ -83,7 +83,7 @@ class CNSecureField extends CNWidget {
   final bool shrink;
 
   @override
-  final Color? tint;
+  final Object? tint;
 
   @override
   State<CNSecureField> createState() => _CNSecureFieldState();

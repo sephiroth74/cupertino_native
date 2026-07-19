@@ -47,7 +47,7 @@ class CNProgressView2 extends CNWidget {
   final bool shrink;
 
   @override
-  final Color? tint;
+  final Object? tint;
 
   @override
   State<CNProgressView2> createState() => _CNProgressView2State();

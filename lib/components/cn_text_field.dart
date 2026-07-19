@@ -93,7 +93,7 @@ class CNTextField2 extends CNWidget {
   final bool shrink;
 
   @override
-  final Color? tint;
+  final Object? tint;
 
   @override
   State<CNTextField2> createState() => _CNTextField2State();

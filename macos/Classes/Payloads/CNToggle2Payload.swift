@@ -7,7 +7,7 @@ struct CNToggle2Payload: CNSharedPayloadFields {
     var shrink: Bool
     var constraints: CNBoxConstraintsPayload?
     var paddings: CNPaddingsPayload?
-    var tint: Int?
+    var tint: Any?
     var foregroundColor: Int?
 
     // Toggle-specific fields

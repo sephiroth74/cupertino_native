@@ -90,7 +90,7 @@ class CNDatePicker2 extends CNWidget {
   final bool shrink;
 
   @override
-  final Color? tint;
+  final Object? tint;
 
   @override
   State<CNDatePicker2> createState() => _CNDatePicker2State();

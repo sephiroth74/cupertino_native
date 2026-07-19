@@ -26,7 +26,7 @@ enum CNChildViewBuilder {
         }
 
         view = CNViewModifierApplicator.applyForegroundColor(dict["foregroundColor"] as? Int, to: view)
-        view = CNViewModifierApplicator.applyTint(dict["tint"] as? Int, to: view)
+        view = CNViewModifierApplicator.applyTint(dict["tint"], to: view)
 
         if let paddings = CNPaddingsPayload.fromChannel(dict["paddings"] as? [String: Any]) {
             view = CNViewModifierApplicator.applyPaddings(paddings, to: view)

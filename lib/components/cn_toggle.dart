@@ -72,7 +72,7 @@ class CNToggle2 extends CNWidget {
   final bool shrink;
 
   @override
-  final Color? tint;
+  final Object? tint;
 
   @override
   State<CNToggle2> createState() => _CNToggle2State();

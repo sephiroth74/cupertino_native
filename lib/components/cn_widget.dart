@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:cupertino_native/channel/params.dart';
+import 'package:cupertino_native/style/cn_shape_style.dart';
 import 'package:flutter/widgets.dart';
 
 /// Base class for all new CN widgets that render via a native SwiftUI platform view.
@@ -30,8 +31,9 @@ abstract class CNWidget extends StatefulWidget {
   /// When false, the widget expands to fill its resolved constraints.
   bool get shrink;
 
-  /// Optional tint color forwarded to native rendering.
-  Color? get tint;
+  /// Optional tint applied to the native view.
+  /// Accepts a [Color] or a [CNShapeStyle] (gradient).
+  Object? get tint;
 
   /// Serializes the shared modifier fields into a payload map.
   /// Subclasses should call this from [toPayload] to include the common fields.
@@ -40,9 +42,18 @@ abstract class CNWidget extends StatefulWidget {
     required Map<String, dynamic> payload,
     required BoxConstraints? constraints,
   }) {
+    assert(
+      tint == null || tint is Color || tint is CNShapeStyle,
+      'tint must be a Color or a CNShapeStyle',
+    );
+
     payload['debugLog'] = debugLog;
     payload['foregroundColor'] = resolveColorToArgb(foregroundColor, context);
-    payload['tint'] = resolveColorToArgb(tint, context);
+    if (tint is CNShapeStyle) {
+      payload['tint'] = (tint! as CNShapeStyle).toMap(context);
+    } else {
+      payload['tint'] = resolveColorToArgb(tint as Color?, context);
+    }
     payload['shrink'] = shrink;
 
     if (paddings != null) {

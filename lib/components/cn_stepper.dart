@@ -62,7 +62,7 @@ class CNStepper2 extends CNWidget {
   final bool shrink;
 
   @override
-  final Color? tint;
+  final Object? tint;
 
   @override
   State<CNStepper2> createState() => _CNStepper2State();

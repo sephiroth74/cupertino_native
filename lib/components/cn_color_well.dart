@@ -53,7 +53,7 @@ class CNColorWell2 extends CNWidget {
   final bool shrink;
 
   @override
-  final Color? tint;
+  final Object? tint;
 
   @override
   State<CNColorWell2> createState() => _CNColorWell2State();

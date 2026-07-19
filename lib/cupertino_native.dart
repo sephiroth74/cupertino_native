@@ -48,6 +48,7 @@ export 'components/cn_menu2.dart';
 export 'components/cn_context_menu.dart';
 export 'components/cn_picker.dart';
 export 'components/cn_secure_field.dart';
+export 'components/cn_gauge.dart';
 
 export 'model/control_size.dart';
 export 'model/checkbox_state.dart';
@@ -70,6 +71,7 @@ export 'theme/cn_theme_data.dart';
 export 'style/text_field_bezel_style.dart';
 export 'style/font.dart';
 export 'style/combo_box_behavior.dart';
+export 'style/cn_shape_style.dart';
 
 export 'extensions/box_constraints.dart';
 

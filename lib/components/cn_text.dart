@@ -57,7 +57,7 @@ class CNText2 extends CNWidget {
   final bool shrink;
 
   @override
-  final Color? tint;
+  final Object? tint;
 
   @override
   State<CNText2> createState() => _CNText2State();

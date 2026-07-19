@@ -1,7 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 
-const _kDebugLog = true;
+const _kDebugLog = false;
 
 class SecureTextFieldDemoPage extends StatefulWidget {
   const SecureTextFieldDemoPage({super.key});

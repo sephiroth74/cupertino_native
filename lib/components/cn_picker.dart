@@ -91,7 +91,7 @@ class CNPicker2 extends CNWidget {
   final bool shrink;
 
   @override
-  final Color? tint;
+  final Object? tint;
 
   @override
   State<CNPicker2> createState() => _CNPicker2State();

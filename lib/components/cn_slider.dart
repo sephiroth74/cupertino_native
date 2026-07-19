@@ -88,7 +88,7 @@ class CNSlider2 extends CNWidget {
   final bool shrink;
 
   @override
-  final Color? tint;
+  final Object? tint;
 
   @override
   State<CNSlider2> createState() => _CNSlider2State();

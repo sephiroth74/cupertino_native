@@ -70,6 +70,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: CNTextField2(
+                      autofocus: true,
                       paddings: EdgeInsets.all(1.0),
                       controlSize: controlSize,
                       debugLog: _kDebugLog,
