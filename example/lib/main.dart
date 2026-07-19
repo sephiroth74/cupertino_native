@@ -7,7 +7,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:system_theme/system_theme.dart';
 
-import 'demos/alert.dart';
+import 'demos/cn_alert_demo.dart';
 import 'demos/cn_button_demo.dart';
 import 'demos/cn_color_well_demo.dart';
 import 'demos/cn_context_menu.dart';
@@ -95,12 +95,12 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNSecureField', 'lock.shield', SecureTextFieldDemoPage()),
     _DemoEntry('CNGauge', 'gauge.chart.lefthalf.righthalf', GaugeDemoPage()),
     _DemoEntry('CNPathControl', 'folder', PathControlDemoPage()),
+    _DemoEntry('CNAlert', 'exclamationmark.bubble', AlertDemoPage()),
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Segmented Control', 'rectangle.split.3x1', SegmentedControlDemoPage()),
     _DemoEntry('TabView', 'rectangle.split.3x1', TabViewDemoPage()),
     _DemoEntry('Text View / Text Area', 'text.justify.left', TextViewDemoPage()),
-    _DemoEntry('Alert', 'exclamationmark.bubble', AlertDemoPage()),
     _DemoEntry('Popover', 'rectangle.on.rectangle', PopoverDemoPage()),
     _DemoEntry('Sheet', 'square.and.line.vertical.and.square', SheetDemoPage()),
     _DemoEntry('Split View', 'rectangle.split.2x1', SplitViewDemoPage()),

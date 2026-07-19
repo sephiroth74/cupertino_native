@@ -12,7 +12,10 @@ enum CNAlignment { leading, center, trailing, top, bottom }
 /// These are NOT platform views — they are pure data that the native side
 /// reconstructs as SwiftUI views inside a parent widget's content closure.
 sealed class CNChild {
-  const CNChild({this.paddings, this.tag, this.enabled, this.tint, this.foregroundColor});
+  const CNChild({this.constraints, this.paddings, this.tag, this.enabled, this.tint, this.foregroundColor});
+
+  /// Optional layout constraints applied to this child.
+  final BoxConstraints? constraints;
 
   /// Whether this child is enabled (nil = inherit from parent).
   final bool? enabled;
@@ -31,6 +34,17 @@ sealed class CNChild {
 
   /// Serializes this child into a payload map for the native side.
   Map<String, dynamic> toChildPayload(BuildContext context);
+
+  /// Serializes constraints to a map for the channel.
+  static Map<String, double?>? serializeConstraints(BoxConstraints? c) {
+    if (c == null) return null;
+    return {
+      'minWidth': c.minWidth.isFinite ? c.minWidth : null,
+      'maxWidth': c.maxWidth.isFinite ? c.maxWidth : null,
+      'minHeight': c.minHeight.isFinite ? c.minHeight : null,
+      'maxHeight': c.maxHeight.isFinite ? c.maxHeight : null,
+    };
+  }
 
   /// Serializes paddings to a map for the channel.
   static Map<String, double>? serializePaddings(EdgeInsetsGeometry? p) {
@@ -52,6 +66,7 @@ class CNChildText extends CNChild {
     this.truncationMode,
     super.enabled,
     super.tint,
+    super.constraints,
     super.paddings,
     super.tag,
   });
@@ -77,6 +92,7 @@ class CNChildText extends CNChild {
       'lineLimitReservesSpace': lineLimitReservesSpace,
       'textScale': textScale?.name,
       'truncationMode': truncationMode?.name,
+      'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };
   }
@@ -93,6 +109,7 @@ class CNChildImage extends CNChild {
     this.foregroundStyleColors,
     super.enabled,
     super.tint,
+    super.constraints,
     super.paddings,
     super.tag,
   });
@@ -116,6 +133,7 @@ class CNChildImage extends CNChild {
       'symbolRenderingMode': symbolRenderingMode?.name,
       'symbolColorRenderingMode': symbolColorRenderingMode?.name,
       'foregroundStyleColors': foregroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
+      'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };
   }
@@ -130,6 +148,7 @@ class CNChildVStack extends CNChild {
     super.enabled,
     super.tint,
     super.foregroundColor,
+    super.constraints,
     super.paddings,
     super.tag,
   });
@@ -149,6 +168,7 @@ class CNChildVStack extends CNChild {
       'alignment': alignment.name,
       'spacing': spacing,
       'children': children.map((c) => c.toChildPayload(context)).toList(),
+      'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };
   }
@@ -163,6 +183,7 @@ class CNChildHStack extends CNChild {
     super.enabled,
     super.tint,
     super.foregroundColor,
+    super.constraints,
     super.paddings,
     super.tag,
   });
@@ -182,6 +203,7 @@ class CNChildHStack extends CNChild {
       'alignment': alignment.name,
       'spacing': spacing,
       'children': children.map((c) => c.toChildPayload(context)).toList(),
+      'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };
   }
@@ -189,7 +211,7 @@ class CNChildHStack extends CNChild {
 
 /// A Group container child (no layout, just grouping).
 class CNChildGroup extends CNChild {
-  const CNChildGroup({required this.children, super.enabled, super.tint, super.foregroundColor, super.paddings, super.tag});
+  const CNChildGroup({required this.children, super.enabled, super.tint, super.foregroundColor, super.constraints, super.paddings, super.tag});
 
   final List<CNChild> children;
 
@@ -202,6 +224,7 @@ class CNChildGroup extends CNChild {
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'children': children.map((c) => c.toChildPayload(context)).toList(),
+      'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };
   }
@@ -216,13 +239,12 @@ class CNChildProgressView extends CNChild {
     this.controlSize = CNControlSize.regular,
     super.tint,
     super.foregroundColor,
-    this.constraints,
+    super.constraints,
     super.enabled,
     super.paddings,
     super.tag,
   });
 
-  final BoxConstraints? constraints;
   final CNControlSize controlSize;
   final CNProgressViewStyle style;
   final double total;
@@ -240,14 +262,7 @@ class CNChildProgressView extends CNChild {
       'total': total,
       'style': style.name,
       'controlSize': controlSize.name,
-      'constraints': constraints != null
-          ? {
-              'minWidth': constraints!.minWidth.isFinite ? constraints!.minWidth : null,
-              'maxWidth': constraints!.maxWidth.isFinite ? constraints!.maxWidth : null,
-              'minHeight': constraints!.minHeight.isFinite ? constraints!.minHeight : null,
-              'maxHeight': constraints!.maxHeight.isFinite ? constraints!.maxHeight : null,
-            }
-          : null,
+      'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };
   }
@@ -276,6 +291,7 @@ class CNChildButton extends CNChild {
     super.enabled,
     super.tint,
     super.foregroundColor,
+    super.constraints,
     super.paddings,
   }) : assert(badge == null || badge is String || badge is int);
 
@@ -303,6 +319,7 @@ class CNChildButton extends CNChild {
       'systemImage': systemImage,
       'role': role?.name,
       'badge': badge,
+      'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };
   }
@@ -310,7 +327,7 @@ class CNChildButton extends CNChild {
 
 /// A sub-Menu child (for nesting menus).
 class CNChildMenu extends CNChild {
-  const CNChildMenu({required this.items, required this.label, super.enabled, super.tint, super.foregroundColor, super.tag});
+  const CNChildMenu({required this.items, required this.label, super.enabled, super.tint, super.foregroundColor, super.constraints, super.paddings, super.tag});
 
   factory CNChildMenu.simple(
     String title, {
@@ -346,6 +363,8 @@ class CNChildMenu extends CNChild {
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'items': items.map((c) => c.toChildPayload(context)).toList(),
       'label': label.map((c) => c.toChildPayload(context)).toList(),
+      'constraints': CNChild.serializeConstraints(constraints),
+      'paddings': CNChild.serializePaddings(paddings),
     };
   }
 }
@@ -365,6 +384,7 @@ class CNChildLabel extends CNChild {
     this.labelStyle = CNLabel2Style.automatic,
     super.enabled,
     super.tint,
+    super.constraints,
     super.paddings,
     super.tag,
   });
@@ -396,6 +416,7 @@ class CNChildLabel extends CNChild {
       'labelReservedIconWidth': labelReservedIconWidth,
       'labelIconToTitleSpacing': labelIconToTitleSpacing,
       'labelStyle': labelStyle.name,
+      'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };
   }

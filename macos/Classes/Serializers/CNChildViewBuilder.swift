@@ -28,6 +28,10 @@ enum CNChildViewBuilder {
         view = CNViewModifierApplicator.applyForegroundColor(dict["foregroundColor"] as? Int, to: view)
         view = CNViewModifierApplicator.applyTint(dict["tint"], to: view)
 
+        if let constraints = CNBoxConstraintsPayload.fromChannel(dict["constraints"] as? [String: Any]) {
+            view = CNViewModifierApplicator.applyConstraints(constraints: constraints, shrink: false, to: view)
+        }
+
         if let paddings = CNPaddingsPayload.fromChannel(dict["paddings"] as? [String: Any]) {
             view = CNViewModifierApplicator.applyPaddings(paddings, to: view)
         }
@@ -128,10 +132,6 @@ enum CNChildViewBuilder {
         }
 
         view = CNViewModifierApplicator.applyControlSize(dict["controlSize"] as? String, to: view)
-
-        if let constraints = CNBoxConstraintsPayload.fromChannel(dict["constraints"] as? [String: Any]) {
-            view = CNViewModifierApplicator.applyConstraints(constraints: constraints, shrink: false, to: view)
-        }
 
         return view
     }

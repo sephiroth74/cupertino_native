@@ -124,8 +124,9 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
   }) {
     double resolvedWidth;
     if (intrinsicWidth != null) {
+      // check also for tightWidth in constraints, since the widget may have been given a tight width by its parent (e.g. a SizedBox).
+      // check also minWidth and maxWidth in constraints, since the widget may have been given a bounded width by its parent (e.g. a Row or Column).
       resolvedWidth = intrinsicWidth;
-      logDebug('shrink mode: using intrinsicWidth');
     } else if (constraints.tightWidth != null) {
       resolvedWidth = constraints.tightWidth!;
       logDebug('shrink mode: using tightWidth from constraints');
@@ -133,7 +134,8 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
       resolvedWidth = defaultWidth;
       logDebug('shrink mode: using defaultSize.width: $defaultWidth');
     }
-    resolvedWidth = parentConstraints.constrainWidth(resolvedWidth);
+    resolvedWidth = constraints.constrainWidth(resolvedWidth);
+    logDebug('shrink mode: resolvedWidth after constraints: $resolvedWidth');
     return resolvedWidth;
   }
 
@@ -165,12 +167,17 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
   BoxConstraints _resolveConstraints(BoxConstraints parentConstraints) {
     final explicit = widget.constraints;
-    if (/*!widget.shrink && */explicit != null) {
+    if ( /*!widget.shrink && */ explicit != null) {
+      // We should return the smallest constraints that satisfy both the explicit constraints and the parent constraints.
+      final minWidth = explicit.minWidth.isFinite ? explicit.minWidth : parentConstraints.minWidth;
+      final maxWidth = explicit.maxWidth.isFinite ? explicit.maxWidth : parentConstraints.maxWidth;
+      final minHeight = explicit.minHeight.isFinite ? explicit.minHeight : parentConstraints.minHeight;
+      final maxHeight = explicit.maxHeight.isFinite ? explicit.maxHeight : parentConstraints.maxHeight;
       return BoxConstraints(
-        minWidth: parentConstraints.minWidth > explicit.minWidth ? parentConstraints.minWidth : explicit.minWidth,
-        maxWidth: parentConstraints.maxWidth < explicit.maxWidth ? parentConstraints.maxWidth : explicit.maxWidth,
-        minHeight: parentConstraints.minHeight > explicit.minHeight ? parentConstraints.minHeight : explicit.minHeight,
-        maxHeight: parentConstraints.maxHeight < explicit.maxHeight ? parentConstraints.maxHeight : explicit.maxHeight,
+        minWidth: minWidth,
+        maxWidth: maxWidth,
+        minHeight: minHeight,
+        maxHeight: maxHeight,
       );
     }
     return parentConstraints;

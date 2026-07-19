@@ -47,6 +47,7 @@ export 'components/cn_picker.dart';
 export 'components/cn_secure_field.dart';
 export 'components/cn_gauge.dart';
 export 'components/cn_path_control.dart';
+export 'components/cn_alert2.dart';
 
 export 'model/control_size.dart';
 export 'model/checkbox_state.dart';
