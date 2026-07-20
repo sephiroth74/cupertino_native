@@ -69,7 +69,6 @@ class _CNProgressView2State extends CNWidgetState<CNProgressView2> {
   @override
   double computeShrinkWidth({
     required BoxConstraints constraints,
-    required BoxConstraints parentConstraints,
     required double defaultWidth,
     double? intrinsicWidth,
   }) {
@@ -87,7 +86,6 @@ class _CNProgressView2State extends CNWidgetState<CNProgressView2> {
       resolvedWidth = defaultWidth;
       logDebug('shrink mode: using defaultSize.width');
     }
-    resolvedWidth = parentConstraints.constrainWidth(resolvedWidth);
     return resolvedWidth;
   }
 

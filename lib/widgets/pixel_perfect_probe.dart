@@ -89,7 +89,7 @@ class PixelPerfectProbe extends StatefulWidget {
   State<PixelPerfectProbe> createState() => _PixelPerfectProbeState();
 
   /// Whether the probe is enabled. If false, no geometry will be reported.
-  bool get enabled => onGeometryChanged != null;
+  bool get enabled => adjustPosition;
 }
 
 class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindingObserver {
@@ -152,6 +152,8 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
 
     final rawPhysicalX = origin.dx * dpr;
     final rawPhysicalY = origin.dy * dpr;
+
+    debugPrint('origin: $origin, size: $size, dpr: $dpr, rawPhysicalX: $rawPhysicalX, rawPhysicalY: $rawPhysicalY');
 
     if (widget.adjustPosition) {
       final desiredDx = _snapDx + _snapDelta(rawPhysicalX, dpr);

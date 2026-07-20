@@ -4,7 +4,7 @@ import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
-const _kDebugLog = true;
+const _kDebugLog = false;
 
 class PickerDemoPage extends StatefulWidget {
   const PickerDemoPage({super.key});
@@ -17,7 +17,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
   CNControlSize controlSize = CNControlSize.regular;
   Color? foregroundColor;
   bool isEnabled = true;
-  CNPickerStyle2 pickerStyle = CNPickerStyle2.segmented;
+  CNPickerStyle2 pickerStyle = CNPickerStyle2.menu;
   Color? tintColor;
   String value = 'walk';
   bool withLabels = true;
@@ -58,7 +58,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                           CNChildLabel('Sailboat', systemImage: 'sailboat', tag: 'sailboat'),
                           CNChildLabel('Bicycle', systemImage: 'bicycle', tag: 'bicycle'),
                         ],
-                        label: withLabels ? [CNChildText('Picker Style'), CNChildText('Make a selection from the list')] : null,
+                        label: withLabels ? [CNChildText('Picker Style'), CNChildText('Make a selection')] : null,
                         tint: tintColor,
                         foregroundColor: foregroundColor,
                         selection: value,

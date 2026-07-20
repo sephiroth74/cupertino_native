@@ -6,12 +6,14 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     static var contextMenuHandler: CupertinoContextMenuHandler?
     static var toolbarManager: CNToolbarManager?
     static var alert2Handler: CNAlert2Handler?
+    static var popover2Handler: CNPopover2Handler?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         CupertinoNativePlugin.registrar = registrar
         CupertinoNativePlugin.contextMenuHandler = CupertinoContextMenuHandler(registrar: registrar)
         CupertinoNativePlugin.toolbarManager = CNToolbarManager(messenger: registrar.messenger)
         CupertinoNativePlugin.alert2Handler = CNAlert2Handler(registrar: registrar)
+        CupertinoNativePlugin.popover2Handler = CNPopover2Handler(registrar: registrar)
         let channel = FlutterMethodChannel(
             name: "cupertino_native", binaryMessenger: registrar.messenger,
         )
@@ -38,9 +40,6 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let menuFactory = CupertinoMenuViewFactory(messenger: registrar.messenger)
         registrar.register(menuFactory, withId: "CupertinoNativeMenu")
-
-        let popoverFactory = CupertinoPopoverViewFactory(messenger: registrar.messenger)
-        registrar.register(popoverFactory, withId: "CupertinoNativePopover")
 
         let buttonFactory = CupertinoButtonViewFactory(messenger: registrar.messenger)
         registrar.register(buttonFactory, withId: "CupertinoNativeButton")
@@ -154,6 +153,28 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 return
             }
             handler.showSheet(args: args, result: result)
+        case "showPopover2":
+            guard let args = CNChannelSerialization.asDict(call.arguments) else {
+                result(
+                    FlutterError(
+                        code: "invalid_args",
+                        message: "showPopover2 expects a map of arguments",
+                        details: nil,
+                    ),
+                )
+                return
+            }
+            guard let handler = CupertinoNativePlugin.popover2Handler else {
+                result(
+                    FlutterError(
+                        code: "handler_unavailable",
+                        message: "Popover2 handler is not initialized",
+                        details: nil,
+                    ),
+                )
+                return
+            }
+            handler.showPopover(args: args, result: result)
         case "showContextMenu2":
             guard let args = CNChannelSerialization.asDict(call.arguments) else {
                 result(

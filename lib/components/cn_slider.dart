@@ -104,7 +104,6 @@ class _CNSlider2State extends CNWidgetState<CNSlider2> {
   @override
   double computeShrinkWidth({
     required BoxConstraints constraints,
-    required BoxConstraints parentConstraints,
     required double defaultWidth,
     double? intrinsicWidth,
   }) {
@@ -112,14 +111,14 @@ class _CNSlider2State extends CNWidgetState<CNSlider2> {
     if (intrinsicWidth != null) {
       resolvedWidth = intrinsicWidth;
       logDebug('shrink mode: using intrinsicWidth');
-    } else if (parentConstraints.hasBoundedWidth) {
-      resolvedWidth = parentConstraints.maxWidth;
+    } else if (constraints.hasBoundedWidth) {
+      resolvedWidth = constraints.maxWidth;
       logDebug('shrink mode: using parent maxWidth');
     } else {
       resolvedWidth = defaultWidth;
       logDebug('shrink mode: using defaultSize.width');
     }
-    resolvedWidth = parentConstraints.constrainWidth(resolvedWidth);
+    resolvedWidth = constraints.constrainWidth(resolvedWidth);
     return resolvedWidth;
   }
 

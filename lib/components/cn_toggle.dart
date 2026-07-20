@@ -88,7 +88,6 @@ class _CNToggle2State extends CNWidgetState<CNToggle2> {
   @override
   double computeShrinkHeight({
     required BoxConstraints constraints,
-    required BoxConstraints parentConstraints,
     required double defaultHeight,
     double? intrinsicHeight,
   }) {
@@ -103,7 +102,7 @@ class _CNToggle2State extends CNWidgetState<CNToggle2> {
       resolvedHeight = defaultHeight;
       logDebug('shrink mode: using defaultSize.height: $defaultHeight');
     }
-    resolvedHeight = parentConstraints.constrainHeight(resolvedHeight);
+    // resolvedHeight = parentConstraints.constrainHeight(resolvedHeight);
     return resolvedHeight;
   }
 

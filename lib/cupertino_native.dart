@@ -36,6 +36,7 @@ export 'components/page_route.dart';
 export 'components/page_scaffold.dart';
 export 'components/picker.dart';
 export 'components/popover.dart';
+export 'components/cn_popover2.dart';
 export 'components/popup_menu_button.dart';
 export 'components/segmented_control.dart';
 export 'components/split_view.dart';

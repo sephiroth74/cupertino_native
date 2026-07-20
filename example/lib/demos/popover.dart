@@ -1,14 +1,14 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 
-class PopoverDemoPage extends StatefulWidget {
-  const PopoverDemoPage({super.key});
+class OldPopoverDemoPage extends StatefulWidget {
+  const OldPopoverDemoPage({super.key});
 
   @override
-  State<PopoverDemoPage> createState() => _PopoverDemoPageState();
+  State<OldPopoverDemoPage> createState() => _OldPopoverDemoPageState();
 }
 
-class _PopoverDemoPageState extends State<PopoverDemoPage> {
+class _OldPopoverDemoPageState extends State<OldPopoverDemoPage> {
   int? _lastSelectedIndex;
 
   List<CNPopoverAction> get _actions => const [

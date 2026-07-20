@@ -17,7 +17,7 @@ import 'demos/cn_label_demo.dart';
 import 'demos/cn_menu_demo.dart';
 import 'demos/cn_path_control_demo.dart';
 import 'demos/cn_picker_demo.dart';
-import 'demos/popover.dart';
+import 'demos/cn_popover_demo.dart';
 import 'demos/cn_progressview_demo.dart';
 import 'demos/cn_search_field_demo.dart';
 import 'demos/cn_secure_field_demo.dart';
@@ -97,12 +97,12 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     _DemoEntry('CNPathControl', 'folder', PathControlDemoPage()),
     _DemoEntry('CNAlert', 'exclamationmark.bubble', AlertDemoPage()),
     _DemoEntry('CNSheet', 'exclamationmark.message', SheetDemoPage()),
+    _DemoEntry('CNPopover', 'rectangle.on.rectangle', PopoverDemoPage()),
 
     _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
     _DemoEntry('Segmented Control', 'rectangle.split.3x1', SegmentedControlDemoPage()),
     _DemoEntry('TabView', 'rectangle.split.3x1', TabViewDemoPage()),
     _DemoEntry('Text View / Text Area', 'text.justify.left', TextViewDemoPage()),
-    _DemoEntry('Popover', 'rectangle.on.rectangle', PopoverDemoPage()),
     _DemoEntry('Split View', 'rectangle.split.2x1', SplitViewDemoPage()),
   ];
 

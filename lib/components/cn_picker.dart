@@ -143,7 +143,6 @@ class _CNPicker2State extends CNWidgetState<CNPicker2> {
   @override
   double computeShrinkHeight({
     required BoxConstraints constraints,
-    required BoxConstraints parentConstraints,
     required double defaultHeight,
     double? intrinsicHeight,
   }) {
@@ -158,7 +157,7 @@ class _CNPicker2State extends CNWidgetState<CNPicker2> {
       resolvedHeight = defaultHeight;
       logDebug('shrink mode: using defaultSize.height: $defaultHeight');
     }
-    resolvedHeight = parentConstraints.constrainHeight(resolvedHeight);
+    // resolvedHeight = parentConstraints.constrainHeight(resolvedHeight);
     return resolvedHeight;
   }
 
