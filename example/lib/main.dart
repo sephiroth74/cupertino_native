@@ -3,8 +3,10 @@ import 'package:cupertino_native_example/demos/cn_gauge_demo.dart';
 import 'package:cupertino_native_example/demos/cn_image_demo.dart';
 import 'package:cupertino_native_example/demos/cn_sheet_demo.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show ThemeMode;
+import 'package:flutter/material.dart' show Colors, ThemeMode;
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_acrylic/window.dart';
+import 'package:flutter_acrylic/window_effect.dart';
 import 'package:provider/provider.dart';
 import 'package:system_theme/system_theme.dart';
 
@@ -21,20 +23,26 @@ import 'demos/cn_popover_demo.dart';
 import 'demos/cn_progressview_demo.dart';
 import 'demos/cn_search_field_demo.dart';
 import 'demos/cn_secure_field_demo.dart';
-import 'demos/segmented_control.dart';
+import 'demos/cn_segmented_control_demo.dart';
 import 'demos/cn_slider_demo.dart';
-import 'demos/split_view.dart';
 import 'demos/cn_stepper_demo.dart';
-import 'demos/tab_view.dart';
 import 'demos/cn_text_demo.dart';
 import 'demos/cn_text_field_demo.dart';
+import 'demos/cn_toggle_demo.dart';
+import 'demos/split_view.dart';
+import 'demos/tab_view.dart';
 import 'demos/text_view.dart';
 import 'demos/theme.dart';
-import 'demos/cn_toggle_demo.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemTheme.accentColor.load();
+  await Window.initialize();
+
+  await Window.setEffect(
+    effect: WindowEffect.sidebar,
+    // Opzioni alternative: WindowEffect.acrylic, WindowEffect.menu, WindowEffect.titlebar
+  );
   runApp(const MyApp());
 }
 
@@ -77,33 +85,33 @@ class _DesktopDemoShell extends StatefulWidget {
 
 class _DesktopDemoShellState extends State<_DesktopDemoShell> {
   static const _entries = <_DemoEntry>[
-    _DemoEntry('CNImage', 'testtube.2', CNImage2DemoPage()),
-    _DemoEntry('CNText', 'text.viewfinder', TextDemoPage()),
-    _DemoEntry('CNProgressView', 'progress.indicator', ProgressIndicatorsPageDemo()),
-    _DemoEntry('CNSlider', 'slider.horizontal.3', SliderDemoPage()),
+    _DemoEntry('CNAlert', 'exclamationmark.bubble', AlertDemoPage()),
+    _DemoEntry('CNButton', 'button.horizontal', ButtonDemoPage()),
     _DemoEntry('CNColorWell', 'paintpalette', ColorWellDemoPage()),
+    _DemoEntry('CNContextMenu', 'ellipsis.rectangle', ContextMenuDemoPage()),
     _DemoEntry('CNDatePicker', 'calendar', DatePickerDemoPage()),
+    _DemoEntry('CNGauge', 'gauge.chart.lefthalf.righthalf', GaugeDemoPage()),
+    _DemoEntry('CNImage', 'testtube.2', CNImage2DemoPage()),
+    _DemoEntry('CNLabel', 'textformat', LabelDemoPage()),
+    _DemoEntry('CNMenu', 'ellipsis.circle', MenuButtonDemoPage()),
+    _DemoEntry('CNPathControl', 'folder', PathControlDemoPage()),
+    _DemoEntry('CNPicker', 'rectangle.split.3x1.fill', PickerDemoPage()),
+    _DemoEntry('CNPopover', 'rectangle.on.rectangle', PopoverDemoPage()),
+    _DemoEntry('CNProgressView', 'progress.indicator', ProgressIndicatorsPageDemo()),
+    _DemoEntry('CNSearchField', 'magnifyingglass', SearchFieldDemoPage()),
+    _DemoEntry('CNSecureField', 'lock.shield', SecureTextFieldDemoPage()),
+    _DemoEntry('CNSegmentedControl2', 'rectangle.split.3x1', SegmentedControl2DemoPage()),
+    _DemoEntry('CNSheet', 'exclamationmark.message', SheetDemoPage()),
+    _DemoEntry('CNSlider', 'slider.horizontal.3', SliderDemoPage()),
     _DemoEntry('CNStepper', 'plusminus', StepperDemoPage()),
+    _DemoEntry('CNText', 'text.viewfinder', TextDemoPage()),
     _DemoEntry('CNTextField', 'character.cursor.ibeam', TextFieldDemoPage()),
     _DemoEntry('CNToggle', 'switch.2', ToggleDemo()),
-    _DemoEntry('CNSearchField', 'magnifyingglass', SearchFieldDemoPage()),
-    _DemoEntry('CNLabel', 'textformat', LabelDemoPage()),
-    _DemoEntry('CNButton', 'button.horizontal', ButtonDemoPage()),
-    _DemoEntry('CNMenu', 'ellipsis.circle', MenuButtonDemoPage()),
-    _DemoEntry('CNPicker', 'rectangle.split.3x1.fill', PickerDemoPage()),
-    _DemoEntry('CNContextMenu', 'ellipsis.rectangle', ContextMenuDemoPage()),
-    _DemoEntry('CNSecureField', 'lock.shield', SecureTextFieldDemoPage()),
-    _DemoEntry('CNGauge', 'gauge.chart.lefthalf.righthalf', GaugeDemoPage()),
-    _DemoEntry('CNPathControl', 'folder', PathControlDemoPage()),
-    _DemoEntry('CNAlert', 'exclamationmark.bubble', AlertDemoPage()),
-    _DemoEntry('CNSheet', 'exclamationmark.message', SheetDemoPage()),
-    _DemoEntry('CNPopover', 'rectangle.on.rectangle', PopoverDemoPage()),
-
-    _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
-    _DemoEntry('Segmented Control', 'rectangle.split.3x1', SegmentedControlDemoPage()),
     _DemoEntry('TabView', 'rectangle.split.3x1', TabViewDemoPage()),
     _DemoEntry('Text View / Text Area', 'text.justify.left', TextViewDemoPage()),
     _DemoEntry('Split View', 'rectangle.split.2x1', SplitViewDemoPage()),
+    
+    _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
   ];
 
   final String _searchQuery = '';
@@ -118,7 +126,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
 
   @override
   Widget build(BuildContext context) {
-    final accentColor = widget.accentColor;
     final theme = CNTheme.of(context);
     final search = _searchQuery.trim().toLowerCase();
     final visibleEntries = search.isEmpty
@@ -127,6 +134,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     final isDark = theme.brightness == Brightness.dark;
 
     return CNMainWindow(
+      backgroundColor: Colors.transparent,
       controller: _windowController,
       // toolbarTitle: 'Cupertino Native',
       // toolbarShowSearch: false,
@@ -216,12 +224,12 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
         startWidth: 250,
         child: SafeArea(
           child: Container(
-            color: theme.groupedBackgroundColor,
+            // color: theme.groupedBackgroundColor,
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
                 CNListSection.insetGrouped(
-                  backgroundColor: theme.groupedBackgroundColor,
+                  // backgroundColor: theme.groupedBackgroundColor,
                   children: [
                     for (final entry in visibleEntries)
                       CNListTile(

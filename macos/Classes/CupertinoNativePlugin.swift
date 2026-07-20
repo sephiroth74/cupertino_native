@@ -103,6 +103,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let pathControl2Factory = CupertinoPathControl2Factory(messenger: registrar.messenger)
         registrar.register(pathControl2Factory, withId: "CupertinoNativePathControl2")
+
+        let segmentedControl2Factory = CupertinoSegmentedControl2Factory(messenger: registrar.messenger)
+        registrar.register(segmentedControl2Factory, withId: "CupertinoNativeSegmentedControl2")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

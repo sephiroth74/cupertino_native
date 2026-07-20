@@ -60,7 +60,6 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
             CNButton2(
               onPressed: _showInfoAlert,
               shrink: true,
-              debugLog: true,
               controlSize: CNControlSize.large,
               children: [
                 CNChildLabel(

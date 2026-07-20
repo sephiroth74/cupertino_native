@@ -1,5 +1,6 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class ContextMenuDemoPage extends StatefulWidget {
   const ContextMenuDemoPage({super.key});
@@ -59,11 +60,16 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
                     Text('Editor Area', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     SizedBox(height: 8),
                     Text('Right-click to test a multi-level context menu without icons.'),
+
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 16),
+            TextButton(
+              onPressed: () => setState(() => _lastSelection = 'None'),
+              child: const Text('Reset Last Selection'),
+            ),
             Text('Last selection: $_lastSelection'),
           ],
         ),

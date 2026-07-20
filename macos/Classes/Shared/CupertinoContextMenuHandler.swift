@@ -35,21 +35,37 @@ final class CupertinoContextMenuHandler: NSObject {
             return
         }
 
-        DispatchQueue.main.async { [weak self] in
-            guard let self else {
-                result(nil)
-                return
-            }
-            let menu = buildNSMenu(from: items)
-            let anchorPoint = resolveMenuPoint(args: args, contentView: contentView)
-            selectedMenuItem = nil
-            _ = menu.popUp(positioning: nil, at: anchorPoint, in: contentView)
+        let menu = buildNSMenu(from: items)
+        let anchorPoint = resolveMenuPoint(args: args, contentView: contentView)
+        selectedMenuItem = nil
+        _ = menu.popUp(positioning: nil, at: anchorPoint, in: contentView)
 
-            if let tag = selectedMenuItem?.identifier?.rawValue, !tag.isEmpty {
-                result(tag)
-            } else {
-                result(nil)
+        // menu.popUp runs a nested event loop that consumes the rightMouseUp.
+        // Flutter never sees the release, leaving a phantom active pointer that
+        // blocks subsequent left-click gesture recognition. Post a synthetic
+        // rightMouseUp so the engine's pointer state resets properly.
+        if let flutterView = registrar?.view {
+            let locationInWindow = window.mouseLocationOutsideOfEventStream
+            let syntheticUp = NSEvent.mouseEvent(
+                with: .rightMouseUp,
+                location: locationInWindow,
+                modifierFlags: [],
+                timestamp: ProcessInfo.processInfo.systemUptime,
+                windowNumber: window.windowNumber,
+                context: nil,
+                eventNumber: 0,
+                clickCount: 1,
+                pressure: 0,
+            )
+            if let syntheticUp {
+                flutterView.rightMouseUp(with: syntheticUp)
             }
+        }
+
+        if let tag = selectedMenuItem?.identifier?.rawValue, !tag.isEmpty {
+            result(tag)
+        } else {
+            result(nil)
         }
     }
 

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../theme/cn_theme.dart';
 import '../split_view.dart';
 import '../toolbar/toolbar.dart';
 
@@ -366,7 +365,7 @@ class _CNMainWindowState extends State<CNMainWindow> implements _CNMainWindowBin
 
   @override
   Widget build(BuildContext context) {
-    final background = widget.backgroundColor ?? CNTheme.of(context).canvasColor;
+    final background = widget.backgroundColor;
 
     Widget content = DecoratedBox(
       decoration: BoxDecoration(color: background),

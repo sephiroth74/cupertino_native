@@ -43,15 +43,15 @@ class _TextViewDemoPageState extends State<TextViewDemoPage> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                CNButton(
-                  children: const [CNText('Set Sample')],
+                CNButton2(
+                  children: const [CNChildText('Set Sample')],
                   onPressed: () {
                     _controller.text = 'Project Notes\n- Finish Text View API\n- Add tests\n- Update docs';
                     setState(() {});
                   },
                 ),
-                CNButton(
-                  children: const [CNText('Clear')],
+                CNButton2(
+                  children: const [CNChildText('Clear')],
                   onPressed: () {
                     _controller.clear();
                     setState(() {});

@@ -20,12 +20,10 @@ class CNPopover2Handler: NSObject, NSPopoverDelegate {
             return
         }
 
-        // Close any existing popover
+        // Close any existing popover without sending a result
         if let existing = activePopover, existing.isShown {
+            pendingResult = nil
             existing.performClose(nil)
-            if let pending = pendingResult {
-                pending(nil)
-            }
         }
 
         let title = args["title"] as? String
@@ -35,7 +33,6 @@ class CNPopover2Handler: NSObject, NSPopoverDelegate {
         let preferredEdgeStr = (args["preferredEdge"] as? String) ?? "bottom"
         let popoverWidth = (args["popoverWidth"] as? NSNumber)?.doubleValue ?? 280.0
 
-        // Anchor rect in Flutter coordinates (origin top-left)
         let anchorX = (args["anchorX"] as? NSNumber)?.doubleValue ?? 0
         let anchorY = (args["anchorY"] as? NSNumber)?.doubleValue ?? 0
         let anchorWidth = (args["anchorWidth"] as? NSNumber)?.doubleValue ?? 0
@@ -67,8 +64,8 @@ class CNPopover2Handler: NSObject, NSPopoverDelegate {
                 width: CGFloat(popoverWidth),
             ) { [weak self] index in
                 guard let self else { return }
-                activePopover?.performClose(nil)
                 completePending(index: index)
+                activePopover?.performClose(nil)
             }
 
             controller.loadViewIfNeeded()
@@ -85,10 +82,15 @@ class CNPopover2Handler: NSObject, NSPopoverDelegate {
     // MARK: - NSPopoverDelegate
 
     func popoverDidClose(_: Notification) {
+        // Restore first responder to the Flutter view so mouse events work again
+        if let flutterView = registrar?.view, let window = flutterView.window {
+            window.makeFirstResponder(flutterView)
+        }
+
         // If closed without selection (e.g. clicking outside), return nil
-        if pendingResult != nil {
-            pendingResult?(nil)
+        if let pending = pendingResult {
             pendingResult = nil
+            pending(nil)
         }
         activePopover = nil
     }

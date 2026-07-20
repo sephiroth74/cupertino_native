@@ -105,7 +105,7 @@ class CNListSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = CNTheme.of(context);
-    final sectionColor = backgroundColor ?? theme.groupedBackgroundColor;
+    final sectionColor = backgroundColor;
 
     return Padding(
       padding: margin,
