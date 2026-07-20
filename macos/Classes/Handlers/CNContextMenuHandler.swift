@@ -1,7 +1,7 @@
 import Cocoa
 import FlutterMacOS
 
-final class CupertinoContextMenuHandler: NSObject {
+final class CNContextMenuHandler: NSObject {
     private weak var registrar: FlutterPluginRegistrar?
     private var selectedMenuItem: NSMenuItem?
 

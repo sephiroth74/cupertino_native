@@ -3,13 +3,13 @@ import FlutterMacOS
 
 public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     static var registrar: FlutterPluginRegistrar?
-    static var contextMenuHandler: CupertinoContextMenuHandler?
+    static var contextMenuHandler: CNContextMenuHandler?
     static var alert2Handler: CNAlert2Handler?
     static var popover2Handler: CNPopover2Handler?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         CupertinoNativePlugin.registrar = registrar
-        CupertinoNativePlugin.contextMenuHandler = CupertinoContextMenuHandler(registrar: registrar)
+        CupertinoNativePlugin.contextMenuHandler = CNContextMenuHandler(registrar: registrar)
         CupertinoNativePlugin.alert2Handler = CNAlert2Handler(registrar: registrar)
         CupertinoNativePlugin.popover2Handler = CNPopover2Handler(registrar: registrar)
 
