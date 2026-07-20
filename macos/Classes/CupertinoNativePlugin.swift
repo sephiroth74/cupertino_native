@@ -4,57 +4,24 @@ import FlutterMacOS
 public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     static var registrar: FlutterPluginRegistrar?
     static var contextMenuHandler: CupertinoContextMenuHandler?
-    static var toolbarManager: CNToolbarManager?
     static var alert2Handler: CNAlert2Handler?
     static var popover2Handler: CNPopover2Handler?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         CupertinoNativePlugin.registrar = registrar
         CupertinoNativePlugin.contextMenuHandler = CupertinoContextMenuHandler(registrar: registrar)
-        CupertinoNativePlugin.toolbarManager = CNToolbarManager(messenger: registrar.messenger)
         CupertinoNativePlugin.alert2Handler = CNAlert2Handler(registrar: registrar)
         CupertinoNativePlugin.popover2Handler = CNPopover2Handler(registrar: registrar)
+
         let channel = FlutterMethodChannel(
             name: "cupertino_native", binaryMessenger: registrar.messenger,
         )
         let instance = CupertinoNativePlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
 
-        let toggleFactory = CupertinoToggleViewFactory(messenger: registrar.messenger)
-        registrar.register(toggleFactory, withId: "cupertino_native/toggle")
-
-        let segmentedFactory = CupertinoSegmentedControlViewFactory(messenger: registrar.messenger)
-        registrar.register(segmentedFactory, withId: "CupertinoNativeSegmentedControl")
-
-        let pickerFactory = CupertinoPickerViewFactory(messenger: registrar.messenger)
-        registrar.register(pickerFactory, withId: "CupertinoNativePicker")
-
-        let labelFactory = CupertinoLabelViewFactory(messenger: registrar.messenger)
-        registrar.register(labelFactory, withId: "CupertinoNativeLabel")
-
-        let tabBarFactory = CupertinoTabBarViewFactory(messenger: registrar.messenger)
-        registrar.register(tabBarFactory, withId: "CupertinoNativeTabBar")
-
-        let popupMenuFactory = CupertinoPopupMenuButtonViewFactory(messenger: registrar.messenger)
-        registrar.register(popupMenuFactory, withId: "CupertinoNativePopupMenuButton")
-
-        let menuFactory = CupertinoMenuViewFactory(messenger: registrar.messenger)
-        registrar.register(menuFactory, withId: "CupertinoNativeMenu")
-
-        let buttonFactory = CupertinoButtonViewFactory(messenger: registrar.messenger)
-        registrar.register(buttonFactory, withId: "CupertinoNativeButton")
-
-        let textViewFactory = CupertinoTextViewFactory(messenger: registrar.messenger)
-        registrar.register(textViewFactory, withId: "CupertinoNativeTextView")
-
-        let textFactory = CupertinoTextFactory(messenger: registrar.messenger)
-        registrar.register(textFactory, withId: "CupertinoNativeText")
-
-        let imageFactory = CupertinoImageFactory(messenger: registrar.messenger)
-        registrar.register(imageFactory, withId: "CupertinoNativeImage")
-
-        let testFactory = CupertinoImage2ViewFactory(messenger: registrar.messenger)
-        registrar.register(testFactory, withId: "CupertinoNativeImage2")
+        // New architecture widgets
+        let image2Factory = CupertinoImage2ViewFactory(messenger: registrar.messenger)
+        registrar.register(image2Factory, withId: "CupertinoNativeImage2")
 
         let text2Factory = CupertinoText2ViewFactory(messenger: registrar.messenger)
         registrar.register(text2Factory, withId: "CupertinoNativeText2")
@@ -103,9 +70,6 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let pathControl2Factory = CupertinoPathControl2Factory(messenger: registrar.messenger)
         registrar.register(pathControl2Factory, withId: "CupertinoNativePathControl2")
-
-        let segmentedControl2Factory = CupertinoSegmentedControl2Factory(messenger: registrar.messenger)
-        registrar.register(segmentedControl2Factory, withId: "CupertinoNativeSegmentedControl2")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -114,199 +78,47 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
             result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
         case "showAlert2":
             guard let args = CNChannelSerialization.asDict(call.arguments) else {
-                result(
-                    FlutterError(
-                        code: "invalid_args",
-                        message: "showAlert2 expects a map of arguments",
-                        details: nil,
-                    ),
-                )
+                result(FlutterError(code: "invalid_args", message: "showAlert2 expects a map of arguments", details: nil))
                 return
             }
             guard let handler = CupertinoNativePlugin.alert2Handler else {
-                result(
-                    FlutterError(
-                        code: "handler_unavailable",
-                        message: "Alert2 handler is not initialized",
-                        details: nil,
-                    ),
-                )
+                result(FlutterError(code: "handler_unavailable", message: "Alert2 handler is not initialized", details: nil))
                 return
             }
             handler.showAlert(args: args, result: result)
         case "showSheet2":
             guard let args = CNChannelSerialization.asDict(call.arguments) else {
-                result(
-                    FlutterError(
-                        code: "invalid_args",
-                        message: "showSheet2 expects a map of arguments",
-                        details: nil,
-                    ),
-                )
+                result(FlutterError(code: "invalid_args", message: "showSheet2 expects a map of arguments", details: nil))
                 return
             }
             guard let handler = CupertinoNativePlugin.alert2Handler else {
-                result(
-                    FlutterError(
-                        code: "handler_unavailable",
-                        message: "Alert2 handler is not initialized",
-                        details: nil,
-                    ),
-                )
+                result(FlutterError(code: "handler_unavailable", message: "Alert2 handler is not initialized", details: nil))
                 return
             }
             handler.showSheet(args: args, result: result)
         case "showPopover2":
             guard let args = CNChannelSerialization.asDict(call.arguments) else {
-                result(
-                    FlutterError(
-                        code: "invalid_args",
-                        message: "showPopover2 expects a map of arguments",
-                        details: nil,
-                    ),
-                )
+                result(FlutterError(code: "invalid_args", message: "showPopover2 expects a map of arguments", details: nil))
                 return
             }
             guard let handler = CupertinoNativePlugin.popover2Handler else {
-                result(
-                    FlutterError(
-                        code: "handler_unavailable",
-                        message: "Popover2 handler is not initialized",
-                        details: nil,
-                    ),
-                )
+                result(FlutterError(code: "handler_unavailable", message: "Popover2 handler is not initialized", details: nil))
                 return
             }
             handler.showPopover(args: args, result: result)
         case "showContextMenu2":
             guard let args = CNChannelSerialization.asDict(call.arguments) else {
-                result(
-                    FlutterError(
-                        code: "invalid_args",
-                        message: "showContextMenu2 expects a map of arguments",
-                        details: nil,
-                    ),
-                )
+                result(FlutterError(code: "invalid_args", message: "showContextMenu2 expects a map of arguments", details: nil))
                 return
             }
             guard let handler = CupertinoNativePlugin.contextMenuHandler else {
-                result(
-                    FlutterError(
-                        code: "handler_unavailable",
-                        message: "Context menu handler is not initialized",
-                        details: nil,
-                    ),
-                )
+                result(FlutterError(code: "handler_unavailable", message: "Context menu handler is not initialized", details: nil))
                 return
             }
             handler.showContextMenu2(args: args, result: result)
-        case "makeToolbar":
-            guard let args = CNChannelSerialization.asDict(call.arguments) else {
-                result(
-                    FlutterError(
-                        code: "invalid_args",
-                        message: "makeToolbar expects a map of arguments",
-                        details: nil,
-                    ),
-                )
-                return
-            }
-            makeToolbar(args: args, result: result)
-        case "clearToolbar":
-            clearToolbar(result: result)
-        case "setToolbarColor":
-            guard let args = CNChannelSerialization.asDict(call.arguments) else {
-                result(
-                    FlutterError(
-                        code: "invalid_args",
-                        message: "setToolbarColor expects a map of arguments",
-                        details: nil,
-                    ),
-                )
-                return
-            }
-            setToolbarColor(args: args, result: result)
         default:
             result(FlutterMethodNotImplemented)
         }
-    }
-
-    private func makeToolbar(args: [String: Any], result: @escaping FlutterResult) {
-        guard let window = CupertinoNativePlugin.registrar?.view?.window else {
-            result(
-                FlutterError(
-                    code: "window_unavailable",
-                    message: "Unable to find host window for toolbar configuration",
-                    details: nil,
-                ),
-            )
-            return
-        }
-
-        guard let manager = CupertinoNativePlugin.toolbarManager else {
-            result(
-                FlutterError(
-                    code: "toolbar_manager_unavailable",
-                    message: "Toolbar manager is not initialized",
-                    details: nil,
-                ),
-            )
-            return
-        }
-
-        manager.makeToolbar(window: window, args: args, result: result)
-    }
-
-    private func setToolbarColor(args: [String: Any], result: @escaping FlutterResult) {
-        guard let window = CupertinoNativePlugin.registrar?.view?.window else {
-            result(
-                FlutterError(
-                    code: "window_unavailable",
-                    message: "Unable to find host window for toolbar configuration",
-                    details: nil,
-                ),
-            )
-            return
-        }
-
-        guard let manager = CupertinoNativePlugin.toolbarManager else {
-            result(
-                FlutterError(
-                    code: "toolbar_manager_unavailable",
-                    message: "Toolbar manager is not initialized",
-                    details: nil,
-                ),
-            )
-            return
-        }
-
-        manager.setToolbarColor(window: window, args: args, result: result)
-    }
-
-    private func clearToolbar(result: @escaping FlutterResult) {
-        guard let window = CupertinoNativePlugin.registrar?.view?.window else {
-            result(
-                FlutterError(
-                    code: "window_unavailable",
-                    message: "Unable to find host window for toolbar configuration",
-                    details: nil,
-                ),
-            )
-            return
-        }
-
-        guard let manager = CupertinoNativePlugin.toolbarManager else {
-            result(
-                FlutterError(
-                    code: "toolbar_manager_unavailable",
-                    message: "Toolbar manager is not initialized",
-                    details: nil,
-                ),
-            )
-            return
-        }
-
-        manager.clearToolbar(window: window, result: result)
     }
 }
 

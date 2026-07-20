@@ -4,7 +4,7 @@ import FlutterMacOS
 class MainFlutterWindow: NSWindow {
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
-    flutterViewController.backgroundColor = .clear // <-- Rendiamo trasparente il view controller
+    flutterViewController.backgroundColor = .clear // <-- Make the view controller transparent
     var windowFrame = self.frame
     windowFrame.size = NSSize(width: 1280, height: 1024)
     self.contentViewController = flutterViewController

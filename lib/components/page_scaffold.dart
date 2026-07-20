@@ -71,13 +71,15 @@ class CNPageScaffold extends StatelessWidget {
       );
     }
 
-    return DecoratedBox(
-      decoration: BoxDecoration(color: resolvedBackground),
-      child: Stack(
-        children: [
-          paddedContent,
-          if (navigationBar != null) Positioned(top: 0, left: 0, right: 0, child: navigationBar!),
-        ],
+    return SizedBox.expand(
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: resolvedBackground),
+        child: Stack(
+          children: [
+            paddedContent,
+            if (navigationBar != null) Positioned(top: 0, left: 0, right: 0, child: navigationBar!),
+          ],
+        ),
       ),
     );
   }

@@ -41,24 +41,27 @@ class _TextDemoPageState extends State<TextDemoPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Center(
-                    child: Container(
-                      padding: EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: CupertinoColors.systemGrey, width: 1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: CNText2(
-                          'Hello World.',
-                          lineLimit: lineLimit,
-                          lineLimitReservesSpace: true,
-                          textScale: textScale,
-                          truncationMode: truncationMode,
-                          font: font,
-                          foregroundColor: foregroundColor,
-                          debugLog: _kDebugLog,
-                          shrink: _kShrink,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        padding: EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: CupertinoColors.systemGrey, width: 1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: CNText2(
+                            'Hello World.',
+                            lineLimit: lineLimit,
+                            lineLimitReservesSpace: true,
+                            textScale: textScale,
+                            truncationMode: truncationMode,
+                            font: font,
+                            foregroundColor: foregroundColor,
+                            debugLog: _kDebugLog,
+                            shrink: _kShrink,
+                          ),
                         ),
                       ),
                     ),

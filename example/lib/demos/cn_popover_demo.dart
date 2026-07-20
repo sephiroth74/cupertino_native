@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:flutter/cupertino.dart';

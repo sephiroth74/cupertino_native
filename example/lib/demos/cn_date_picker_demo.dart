@@ -33,6 +33,7 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
           children: [
             Expanded(
               child: Padding(

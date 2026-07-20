@@ -111,7 +111,7 @@ class RightSideOptionContainer extends StatelessWidget {
             if (title != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
-                child: Text(title!, style: CNTheme.of(context).typography.title1),
+                child: Text(title!, style: CNTheme.of(context).typography.title2),
               ),
             if (options.isNotEmpty) ...[
               const SizedBox(height: 16),
@@ -120,7 +120,7 @@ class RightSideOptionContainer extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
                   child: Row(
                     children: [
-                      Expanded(child: Text(entry.key)),
+                      Expanded(child: Text(entry.key, style: TextStyle(fontSize: 12),)),
                       SizedBox(
                         width: 175,
                         child: Align(alignment: Alignment.centerLeft, child: entry.value),
@@ -162,7 +162,7 @@ class SizeSliderPicker extends StatelessWidget {
       children: [
         SizedBox(
           width: 40,
-          child: Text(value.toStringAsFixed(0).padRight(2), style: TextStyle(color: enabled ? null : CupertinoColors.inactiveGray)),
+          child: Text(value.toStringAsFixed(0).padRight(2), style: TextStyle(color: enabled ? null : CupertinoColors.inactiveGray, fontSize: 12)),
         ),
         const SizedBox(width: 2),
         Expanded(

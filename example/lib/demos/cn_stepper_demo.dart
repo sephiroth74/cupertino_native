@@ -26,11 +26,12 @@ class _StepperDemoPageState extends State<StepperDemoPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(width: 150, child: Text('Current Value: ${value.toStringAsFixed(0)}')),
+                    CNText2('Value: ${value.toStringAsFixed(0)}', constraints: BoxConstraints(minWidth: 100, maxWidth: 100, maxHeight: 32)),
                     const SizedBox(width: 8),
                     CNStepper2(
                       debugLog: _kDebugLog,

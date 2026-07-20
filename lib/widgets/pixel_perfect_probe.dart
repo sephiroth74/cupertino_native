@@ -153,7 +153,7 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
     final rawPhysicalX = origin.dx * dpr;
     final rawPhysicalY = origin.dy * dpr;
 
-    debugPrint('origin: $origin, size: $size, dpr: $dpr, rawPhysicalX: $rawPhysicalX, rawPhysicalY: $rawPhysicalY');
+    // debugPrint('origin: $origin, size: $size, dpr: $dpr, rawPhysicalX: $rawPhysicalX, rawPhysicalY: $rawPhysicalY');
 
     if (widget.adjustPosition) {
       final desiredDx = _snapDx + _snapDelta(rawPhysicalX, dpr);
