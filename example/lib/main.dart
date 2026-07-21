@@ -149,7 +149,7 @@ class _MyAppState extends State<MyApp> {
                   },
                   searchable: true,
                   titleDisplayMode: CNToolbarTitleDisplayMode.automatic,
-                  toolbarBackground: accentColor.withAlpha(234),
+                  toolbarBackground: accentColor.withAlpha(244),
                   toolbarBlurEnabled: true,
                   toolbarBlurMaterial: CNToolbarBlurMaterial.titlebar,
                   title: CNChildText('Cupertino Native Demo'),
@@ -219,7 +219,7 @@ class _SideBar extends StatelessWidget {
     final isBright = accentColor.computeLuminance() > 0.5;
     final labelColor = theme.labelColor;
     return Container(
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+      color: CNColors.canvasColor.color.withValues(alpha: 0.08),
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: _entries.length,
@@ -305,7 +305,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
 
   void setWindowEffect() {
     // Window.setEffect(effect: value!, color: color, dark: widget.brightness == Brightness.dark);
-    WindowManipulator.setMaterial(NSVisualEffectViewMaterial.sidebar);
+    WindowManipulator.setMaterial(NSVisualEffectViewMaterial.fullScreenUI);
 
     if (Platform.isMacOS) {
       if (widget.brightness != Brightness.light && widget.brightness != Brightness.dark) {
