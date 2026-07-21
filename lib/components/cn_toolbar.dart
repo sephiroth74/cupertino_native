@@ -53,6 +53,23 @@ class CNToolbarItemGroup {
   }
 }
 
+/// Blur material for the toolbar background.
+enum CNToolbarBlurMaterial {
+  titlebar,
+  menu,
+  popover,
+  sidebar,
+  headerView,
+  sheet,
+  windowBackground,
+  hudWindow,
+  fullScreenUI,
+  toolTip,
+  contentBackground,
+  underWindowBackground,
+  underPageBackground,
+}
+
 /// Configuration for the native toolbar.
 class CNToolbarConfig {
   const CNToolbarConfig({
@@ -61,6 +78,8 @@ class CNToolbarConfig {
     this.groups = const [],
     this.searchable = false,
     this.toolbarBackground,
+    this.toolbarBlurEnabled = false,
+    this.toolbarBlurMaterial,
     this.onSearchChanged,
     this.onItemPressed,
   });
@@ -83,8 +102,24 @@ class CNToolbarConfig {
   /// Title display mode.
   final CNToolbarTitleDisplayMode titleDisplayMode;
 
-  /// Background color for the toolbar (ARGB int).
+  /// Background color for the toolbar.
+  ///
+  /// When [toolbarBlurEnabled] is true, this color is used as a tint overlay
+  /// on top of the blur effect (use semi-transparent colors for best results).
+  /// When [toolbarBlurEnabled] is false, this is a solid background color.
   final Color? toolbarBackground;
+
+  /// Whether to enable the blur (vibrancy) effect behind the toolbar.
+  ///
+  /// When true, a [NSVisualEffectView] is placed behind the toolbar area,
+  /// providing the native macOS blur. Use [toolbarBackground] with a
+  /// semi-transparent color to tint the blur.
+  final bool toolbarBlurEnabled;
+
+  /// The blur material to use when [toolbarBlurEnabled] is true.
+  ///
+  /// Defaults to [CNToolbarBlurMaterial.titlebar] if not specified.
+  final CNToolbarBlurMaterial? toolbarBlurMaterial;
 }
 
 /// A widget that configures the native macOS toolbar for the window.
@@ -155,6 +190,9 @@ class _CNToolbarState extends State<CNToolbar> {
       'groups': config.groups.map((g) => g.toPayload(context)).toList(),
       if (config.toolbarBackground != null)
         'toolbarBackground': resolveColorToArgb(config.toolbarBackground, context),
+      'toolbarBlurEnabled': config.toolbarBlurEnabled,
+      if (config.toolbarBlurMaterial != null)
+        'toolbarBlurMaterial': config.toolbarBlurMaterial!.name,
     });
   }
 

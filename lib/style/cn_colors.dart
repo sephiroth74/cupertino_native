@@ -1,3 +1,4 @@
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 
 /// macOS 26 (Liquid Glass era) color palette extracted from the
@@ -93,6 +94,14 @@ abstract final class CNColors {
     darkColor: Color(0xFF8E8E93),
   );
 
+  /// https://developer.apple.com/design/human-interface-guidelines/color#macOS-system-colors
+  static const CupertinoDynamicColor systemGray = CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color(0xFF8E8E93),
+    darkColor: Color(0xFF98989D),
+    highContrastColor: Color.fromRGBO(132, 132, 137, 1),
+    darkHighContrastColor: Color.fromRGBO(162, 162, 167, 1),
+  );
+
   // ignore: public_member_api_docs
   static const Color white = Color(0xFFFFFFFF);
 
@@ -156,6 +165,23 @@ abstract final class CNColors {
     gray,
   ];
 
+  /// All accent colors with their resolved names.
+  static const List<CNAccentColor> accentColors = [
+    CNAccentColor(accent: red, name: CNAccentColorName.red),
+    CNAccentColor(accent: orange, name: CNAccentColorName.orange),
+    CNAccentColor(accent: yellow, name: CNAccentColorName.yellow),
+    CNAccentColor(accent: green, name: CNAccentColorName.green),
+    CNAccentColor(accent: mint, name: CNAccentColorName.green),
+    CNAccentColor(accent: teal, name: CNAccentColorName.green),
+    CNAccentColor(accent: cyan, name: CNAccentColorName.blue),
+    CNAccentColor(accent: blue, name: CNAccentColorName.blue),
+    CNAccentColor(accent: indigo, name: CNAccentColorName.blue),
+    CNAccentColor(accent: purple, name: CNAccentColorName.purple),
+    CNAccentColor(accent: pink, name: CNAccentColorName.pink),
+    CNAccentColor(accent: brown, name: CNAccentColorName.graphite),
+    CNAccentColor(accent: gray, name: CNAccentColorName.graphite),
+  ];
+
   /// All fill levels in order from most opaque to least opaque.
   static const List<CupertinoDynamicColor> fills = [fillPrimary, fillSecondary, fillTertiary, fillQuaternary, fillQuinary];
 
@@ -164,12 +190,19 @@ abstract final class CNColors {
     color: Color(0xFFFFFFFF),
     darkColor: Color(0xFF1C1C1E),
   );
-  
+
   /// Secondary background color
   static const CupertinoDynamicColor secondaryBackgroundColor = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFF4F4F4),
     darkColor: Color(0xFF1C1C1E),
   );
 
-  
+  /// https://developer.apple.com/documentation/appkit/nscolor/scrollbarcolor
+  static CupertinoDynamicColor scrollbarColor = CupertinoDynamicColor.withBrightness(
+    color: CNColors.systemGray.color.withValues(alpha: 0.8),
+    darkColor: CNColors.systemGray.darkColor.withValues(alpha: 0.8),
+  );
+
+  /// Transparent color (fully transparent, no matter the brightness)
+  static const Color transparent = Color(0x00000000);
 }

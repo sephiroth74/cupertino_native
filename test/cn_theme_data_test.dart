@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('CNThemeData', () {
     test('light factory provides expected defaults', () {
-      final theme = CNThemeData.light();
+      final theme = CNThemeData.light(accentColor: CNColors.accentColors[0], isMainWindow: true);
 
       expect(theme.brightness, Brightness.light);
       expect(theme.typography.body.fontSize, 13);
@@ -17,7 +17,7 @@ void main() {
     });
 
     test('copyWith overrides selected fields', () {
-      final base = CNThemeData.light();
+      final base = CNThemeData.light(accentColor: CNColors.accentColors[0], isMainWindow: true);
       final updated = base.copyWith(primaryColor: CupertinoColors.systemGreen.color);
 
       expect(updated.primaryColor, CupertinoColors.systemGreen.color);
@@ -27,7 +27,7 @@ void main() {
     });
 
     test('toggle theme can override tint independently', () {
-      final base = CNThemeData.light();
+      final base = CNThemeData.light(accentColor: CNColors.accentColors[0], isMainWindow: true);
       final updated = base.copyWith(toggleTheme: const CNToggleThemeData(tint: Color(0xFF123456)));
 
       expect(updated.toggleTheme.tint, const Color(0xFF123456));
@@ -35,8 +35,8 @@ void main() {
     });
 
     test('merge overrides with other theme values', () {
-      final light = CNThemeData.light();
-      final dark = CNThemeData.dark();
+      final light = CNThemeData.light(accentColor: CNColors.accentColors[0], isMainWindow: true);
+      final dark = CNThemeData.dark(accentColor: CNColors.accentColors[0], isMainWindow: true);
       final merged = light.merge(dark);
 
       expect(merged.brightness, Brightness.dark);
@@ -45,8 +45,8 @@ void main() {
     });
 
     test('lerp interpolates colors and typography', () {
-      final a = CNThemeData.light();
-      final b = CNThemeData.dark();
+      final a = CNThemeData.light(accentColor: CNColors.accentColors[0], isMainWindow: true);
+      final b = CNThemeData.dark(accentColor: CNColors.accentColors[0], isMainWindow: true);
       final lerped = CNThemeData.lerp(a, b, 0.5);
 
       expect(lerped.primaryColor, Color.lerp(a.primaryColor, b.primaryColor, 0.5));

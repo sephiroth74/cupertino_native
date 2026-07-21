@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('of returns provided theme data', (tester) async {
     late CNThemeData resolved;
-    final expected = CNThemeData(brightness: Brightness.dark, primaryColor: CupertinoColors.systemOrange.darkColor);
+    final expected = CNThemeData(brightness: Brightness.dark, primaryColor: CupertinoColors.systemOrange.darkColor, isMainWindow: true);
 
     await tester.pumpWidget(
       CNTheme(

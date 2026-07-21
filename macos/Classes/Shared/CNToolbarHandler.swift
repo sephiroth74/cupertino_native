@@ -53,6 +53,7 @@ final class CNToolbarHandler: NSObject {
         // Apply toolbar background via AppKit
         if let toolbarBackground {
             window.titlebarAppearsTransparent = true
+            // window.styleMask.insert(.fullSizeContentView)
             window.backgroundColor = ColorUtils.colorFromARGB(toolbarBackground)
         } else {
             window.titlebarAppearsTransparent = false
@@ -67,6 +68,25 @@ final class CNToolbarHandler: NSObject {
         hostingView?.removeFromSuperview()
         hostingView = nil
         result(nil)
+    }
+
+    private func mapBlurMaterial(_ name: String?) -> NSVisualEffectView.Material {
+        switch name {
+        case "titlebar": .titlebar
+        case "menu": .menu
+        case "popover": .popover
+        case "sidebar": .sidebar
+        case "headerView": .headerView
+        case "sheet": .sheet
+        case "windowBackground": .windowBackground
+        case "hudWindow": .hudWindow
+        case "fullScreenUI": .fullScreenUI
+        case "toolTip": .toolTip
+        case "contentBackground": .contentBackground
+        case "underWindowBackground": .underWindowBackground
+        case "underPageBackground": .underPageBackground
+        default: .titlebar
+        }
     }
 }
 
@@ -247,16 +267,40 @@ private enum CNToolbarChildBuilder {
         }
     }
 
+    /// Applies shared CNChild properties: foregroundColor, tint, constraints, paddings, enabled.
+    private static func applySharedProperties(_ dict: [String: Any], to view: AnyView) -> AnyView {
+        var result = view
+        result = CNViewModifierApplicator.applyForegroundColor(dict["foregroundColor"] as? Int, to: result)
+        result = CNViewModifierApplicator.applyTint(dict["tint"], to: result)
+
+        if let constraints = CNBoxConstraintsPayload.fromChannel(dict["constraints"] as? [String: Any]) {
+            result = CNViewModifierApplicator.applyConstraints(constraints: constraints, shrink: false, to: result)
+        }
+        if let paddings = CNPaddingsPayload.fromChannel(dict["paddings"] as? [String: Any]) {
+            result = CNViewModifierApplicator.applyPaddings(paddings, to: result)
+        }
+        if let enabled = dict["enabled"] as? Bool {
+            result = AnyView(result.disabled(!enabled))
+        }
+        return result
+    }
+
     private static func buildButton(_ dict: [String: Any], onItemPressed: @escaping (String) -> Void) -> AnyView {
         let title = dict["title"] as? String ?? ""
         let tag = dict["tag"] as? String ?? ""
         let systemImage = dict["systemImage"] as? String
-        let enabled = dict["enabled"] as? Bool ?? true
+        let role = dict["role"] as? String
         let buttonStyle = dict["buttonStyle"] as? String
         let labelStyle = dict["labelStyle"] as? String
 
+        let buttonRole: ButtonRole? = switch role {
+        case "destructive": .destructive
+        case "cancel": .cancel
+        default: nil
+        }
+
         var view = AnyView(
-            Button {
+            Button(role: buttonRole) {
                 onItemPressed(tag)
             } label: {
                 if let systemImage, !systemImage.isEmpty {
@@ -268,8 +312,7 @@ private enum CNToolbarChildBuilder {
                 } else {
                     Text(title)
                 }
-            }
-            .disabled(!enabled),
+            },
         )
 
         if let labelStyle {
@@ -280,42 +323,56 @@ private enum CNToolbarChildBuilder {
             view = applyButtonStyle(buttonStyle, to: view)
         }
 
-        view = CNViewModifierApplicator.applyForegroundColor(dict["foregroundColor"] as? Int, to: view)
-        view = CNViewModifierApplicator.applyTint(dict["tint"], to: view)
+        // Badge
+        if let badgeInt = dict["badge"] as? Int {
+            view = AnyView(view.badge(badgeInt))
+        } else if let badgeStr = dict["badge"] as? String {
+            view = AnyView(view.badge(Text(badgeStr)))
+        }
+
         view = CNViewModifierApplicator.applyControlSize(dict["controlSize"] as? String, to: view)
+        view = applySharedProperties(dict, to: view)
 
         return view
     }
 
     private static func buildHStack(_ dict: [String: Any], onItemPressed: @escaping (String) -> Void) -> AnyView {
         let items = dict["children"] as? [[String: Any]] ?? []
+        let alignment = resolveVerticalAlignment(dict["alignment"] as? String)
         let spacing = dict["spacing"] as? CGFloat
-        return AnyView(
-            HStack(spacing: spacing ?? 4) {
+
+        var view = AnyView(
+            HStack(alignment: alignment, spacing: spacing) {
                 ForEach(Array(items.enumerated()), id: \.offset) { _, child in
                     buildChild(child, onItemPressed: onItemPressed)
                 }
             },
         )
+        view = applySharedProperties(dict, to: view)
+        return view
     }
 
     private static func buildVStack(_ dict: [String: Any], onItemPressed: @escaping (String) -> Void) -> AnyView {
         let items = dict["children"] as? [[String: Any]] ?? []
+        let alignment = resolveHorizontalAlignment(dict["alignment"] as? String)
         let spacing = dict["spacing"] as? CGFloat
-        return AnyView(
-            VStack(spacing: spacing ?? 4) {
+
+        var view = AnyView(
+            VStack(alignment: alignment, spacing: spacing) {
                 ForEach(Array(items.enumerated()), id: \.offset) { _, child in
                     buildChild(child, onItemPressed: onItemPressed)
                 }
             },
         )
+        view = applySharedProperties(dict, to: view)
+        return view
     }
 
     private static func buildMenu(_ dict: [String: Any], onItemPressed: @escaping (String) -> Void) -> AnyView {
         let items = dict["items"] as? [[String: Any]] ?? []
         let labelList = dict["label"] as? [[String: Any]] ?? []
 
-        return AnyView(
+        var view = AnyView(
             Menu {
                 ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                     let itemType = item["type"] as? String ?? ""
@@ -323,7 +380,9 @@ private enum CNToolbarChildBuilder {
                         let itemTitle = item["title"] as? String ?? ""
                         let itemTag = item["tag"] as? String ?? ""
                         let itemSystemImage = item["systemImage"] as? String
-                        Button {
+                        let itemRole = item["role"] as? String
+                        let btnRole: ButtonRole? = itemRole == "destructive" ? .destructive : (itemRole == "cancel" ? .cancel : nil)
+                        Button(role: btnRole) {
                             onItemPressed(itemTag)
                         } label: {
                             if let itemSystemImage, !itemSystemImage.isEmpty {
@@ -334,6 +393,8 @@ private enum CNToolbarChildBuilder {
                         }
                     } else if itemType == "divider" {
                         Divider()
+                    } else if itemType == "menu" {
+                        buildNestedMenu(item, onItemPressed: onItemPressed)
                     }
                 }
             } label: {
@@ -344,6 +405,41 @@ private enum CNToolbarChildBuilder {
                 }
             },
         )
+        view = applySharedProperties(dict, to: view)
+        return view
+    }
+
+    private static func buildNestedMenu(_ dict: [String: Any], onItemPressed: @escaping (String) -> Void) -> some View {
+        let items = dict["items"] as? [[String: Any]] ?? []
+        let labelList = dict["label"] as? [[String: Any]] ?? []
+
+        return Menu {
+            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                let itemType = item["type"] as? String ?? ""
+                if itemType == "button" {
+                    let itemTitle = item["title"] as? String ?? ""
+                    let itemTag = item["tag"] as? String ?? ""
+                    let itemSystemImage = item["systemImage"] as? String
+                    Button {
+                        onItemPressed(itemTag)
+                    } label: {
+                        if let itemSystemImage, !itemSystemImage.isEmpty {
+                            Label(itemTitle, systemImage: itemSystemImage)
+                        } else {
+                            Text(itemTitle)
+                        }
+                    }
+                } else if itemType == "divider" {
+                    Divider()
+                }
+            }
+        } label: {
+            if let firstLabel = labelList.first {
+                CNChildViewBuilder.buildChild(firstLabel)
+            } else {
+                Text("Submenu")
+            }
+        }
     }
 
     private static func buildPicker(_ dict: [String: Any], onItemPressed: @escaping (String) -> Void) -> AnyView {
@@ -368,8 +464,8 @@ private enum CNToolbarChildBuilder {
 
         var view = AnyView(pickerView)
         view = CNViewModifierApplicator.applyControlSize(dict["controlSize"] as? String, to: view)
-        view = CNViewModifierApplicator.applyTint(dict["tint"], to: view)
-        view = CNViewModifierApplicator.applyForegroundColor(dict["foregroundColor"] as? Int, to: view)
+        view = CNViewModifierApplicator.applyFont(dict["font"] as? [String: Any], to: view)
+        view = applySharedProperties(dict, to: view)
         return view
     }
 
@@ -393,8 +489,7 @@ private enum CNToolbarChildBuilder {
 
         var view = AnyView(toggleView)
         view = CNViewModifierApplicator.applyControlSize(dict["controlSize"] as? String, to: view)
-        view = CNViewModifierApplicator.applyTint(dict["tint"], to: view)
-        view = CNViewModifierApplicator.applyForegroundColor(dict["foregroundColor"] as? Int, to: view)
+        view = applySharedProperties(dict, to: view)
         return view
     }
 
@@ -415,6 +510,7 @@ private enum CNToolbarChildBuilder {
         var view = AnyView(textFieldView)
         view = CNViewModifierApplicator.applyControlSize(dict["controlSize"] as? String, to: view)
         view = CNViewModifierApplicator.applyFont(dict["font"] as? [String: Any], to: view)
+        view = applySharedProperties(dict, to: view)
         return view
     }
 
@@ -455,6 +551,22 @@ private enum CNToolbarChildBuilder {
             AnyView(view.labelStyle(.titleAndIcon))
         default:
             view
+        }
+    }
+
+    private static func resolveHorizontalAlignment(_ value: String?) -> HorizontalAlignment {
+        switch value {
+        case "leading": .leading
+        case "trailing": .trailing
+        default: .center
+        }
+    }
+
+    private static func resolveVerticalAlignment(_ value: String?) -> VerticalAlignment {
+        switch value {
+        case "top": .top
+        case "bottom": .bottom
+        default: .center
         }
     }
 }

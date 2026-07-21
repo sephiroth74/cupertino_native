@@ -20,7 +20,7 @@ class CNTheme extends StatelessWidget {
       return inherited.theme.data;
     }
 
-    return CNThemeData.fallback(brightness: maybeBrightnessOf(context) ?? Brightness.light);
+    return CNThemeData.fallback(brightness: maybeBrightnessOf(context) ?? Brightness.light, isMainWindow: true);
   }
 
   /// Returns nearest [CNThemeData], or null if absent.

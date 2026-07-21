@@ -1,4 +1,5 @@
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native/theme/cn_scrollbar_theme.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -216,6 +217,8 @@ class CNThemeData extends Equatable {
     CNTextThemeData? textTheme,
     CNSliderThemeData? sliderTheme,
     CNProgressThemeData? progressTheme,
+    CNScrollbarThemeData? scrollbarTheme,
+    required bool isMainWindow,
   }) {
     final isDark = brightness == Brightness.dark;
 
@@ -242,8 +245,7 @@ class CNThemeData extends Equatable {
       primaryColor: resolvedPrimaryColor,
       secondaryColor: secondaryColor ?? (isDark ? CNColors.indigo.darkColor : CNColors.indigo.color),
       destructiveColor: destructiveColor ?? (isDark ? CNColors.red.darkColor : CNColors.red.color),
-      canvasColor:
-          canvasColor ?? (isDark ? CNColors.canvasColor.darkColor : CNColors.canvasColor.color),
+      canvasColor: canvasColor ?? (isDark ? CNColors.canvasColor.darkColor : CNColors.canvasColor.color),
       groupedBackgroundColor:
           groupedBackgroundColor ??
           (isDark ? CupertinoColors.systemGroupedBackground.darkColor : CupertinoColors.systemGroupedBackground.color),
@@ -265,17 +267,24 @@ class CNThemeData extends Equatable {
       textTheme: resolvedTextTheme,
       sliderTheme: resolvedSliderTheme,
       progressTheme: resolvedProgressTheme,
+      scrollbarTheme:
+          scrollbarTheme ??
+          CNScrollbarThemeData(thumbColor: isDark ? CNColors.scrollbarColor.darkColor : CNColors.scrollbarColor.color),
+      isMainWindow: isMainWindow,
     );
   }
 
   /// A default dark theme.
-  factory CNThemeData.dark() => CNThemeData(brightness: Brightness.dark);
+  factory CNThemeData.dark({required CNAccentColor accentColor, required bool isMainWindow}) =>
+      CNThemeData(brightness: Brightness.dark, primaryColor: accentColor.accent, isMainWindow: isMainWindow);
 
   /// The default fallback theme used when no [CNTheme] is in scope.
-  factory CNThemeData.fallback({Brightness brightness = Brightness.light}) => CNThemeData(brightness: brightness);
+  factory CNThemeData.fallback({Brightness brightness = Brightness.light, required bool isMainWindow}) =>
+      CNThemeData(brightness: brightness, isMainWindow: isMainWindow);
 
   /// A default light theme.
-  factory CNThemeData.light() => CNThemeData(brightness: Brightness.light);
+  factory CNThemeData.light({required CNAccentColor accentColor, required bool isMainWindow}) =>
+      CNThemeData(brightness: Brightness.light, primaryColor: accentColor.accent, isMainWindow: isMainWindow);
 
   /// Creates a theme from exact values.
   const CNThemeData.raw({
@@ -302,6 +311,8 @@ class CNThemeData extends Equatable {
     required this.textTheme,
     required this.sliderTheme,
     required this.progressTheme,
+    required this.scrollbarTheme,
+    required this.isMainWindow,
   });
 
   /// Overall brightness for descendant widgets.
@@ -328,6 +339,9 @@ class CNThemeData extends Equatable {
   /// Widget-specific image theme overrides.
   final CNImageThemeData imageTheme;
 
+  /// Whether this theme is for the main window.
+  final bool isMainWindow;
+
   /// Primary text color.
   final Color labelColor;
 
@@ -351,6 +365,9 @@ class CNThemeData extends Equatable {
 
   /// Widget-specific progress view theme overrides.
   final CNProgressThemeData progressTheme;
+
+  /// Widget-specific scrollbar theme overrides.
+  final CNScrollbarThemeData scrollbarTheme;
 
   /// Secondary interactive color.
   final Color secondaryColor;
@@ -431,6 +448,8 @@ class CNThemeData extends Equatable {
     CNTextThemeData? textTheme,
     CNSliderThemeData? sliderTheme,
     CNProgressThemeData? progressTheme,
+    CNScrollbarThemeData? scrollbarTheme,
+    bool? isMainWindow,
   }) {
     return CNThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -456,6 +475,8 @@ class CNThemeData extends Equatable {
       textTheme: this.textTheme.merge(textTheme),
       sliderTheme: this.sliderTheme.merge(sliderTheme),
       progressTheme: this.progressTheme.merge(progressTheme),
+      scrollbarTheme: this.scrollbarTheme.merge(scrollbarTheme),
+      isMainWindow: isMainWindow ?? this.isMainWindow,
     );
   }
 
@@ -486,6 +507,8 @@ class CNThemeData extends Equatable {
       textTheme: other.textTheme,
       sliderTheme: other.sliderTheme,
       progressTheme: other.progressTheme,
+      scrollbarTheme: other.scrollbarTheme,
+      isMainWindow: other.isMainWindow,
     );
   }
 
@@ -515,6 +538,8 @@ class CNThemeData extends Equatable {
       textTheme: CNTextThemeData.lerp(a.textTheme, b.textTheme, t),
       sliderTheme: CNSliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       progressTheme: CNProgressThemeData.lerp(a.progressTheme, b.progressTheme, t),
+      scrollbarTheme: CNScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
+      isMainWindow: t < 0.5 ? a.isMainWindow : b.isMainWindow,
     );
   }
 }

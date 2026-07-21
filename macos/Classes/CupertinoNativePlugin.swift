@@ -7,6 +7,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     static var alert2Handler: CNAlert2Handler?
     static var popover2Handler: CNPopover2Handler?
     static var toolbarHandler: CNToolbarHandler?
+    static var accentColorHandler: CNAccentColorHandler?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         CupertinoNativePlugin.registrar = registrar
@@ -19,6 +20,10 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         )
 
         CupertinoNativePlugin.toolbarHandler = CNToolbarHandler(registrar: registrar, channel: channel)
+
+        let accentColorHandler = CNAccentColorHandler()
+        accentColorHandler.register(with: registrar)
+        CupertinoNativePlugin.accentColorHandler = accentColorHandler
 
         let instance = CupertinoNativePlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
@@ -136,6 +141,12 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 return
             }
             handler.clearToolbar(result: result)
+        case "getAccentColor":
+            guard let handler = CupertinoNativePlugin.accentColorHandler else {
+                result(FlutterError(code: "handler_unavailable", message: "AccentColor handler is not initialized", details: nil))
+                return
+            }
+            result(handler.getCurrentAccentColor())
         default:
             result(FlutterMethodNotImplemented)
         }
