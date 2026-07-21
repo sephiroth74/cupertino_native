@@ -83,140 +83,6 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _SideBar extends StatelessWidget {
-  const _SideBar({required this.onItemSelected, required this.accentColor, required this.selectedIndex});
-
-  final Color? accentColor;
-  final void Function(int index) onItemSelected;
-  final int selectedIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = CNTheme.of(context).brightness == Brightness.dark;
-    return Container(
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: _entries.length,
-        itemBuilder: (context, index) {
-          final entry = _entries[index];
-          final isSelected = index == selectedIndex;
-          return GestureDetector(
-            onTap: () => onItemSelected(index),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-              decoration: BoxDecoration(
-                color: isSelected ? CupertinoColors.activeBlue.withValues(alpha: 0.2) : Colors.transparent,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Row(
-                children: [
-                  CNImage2(
-                    constraints: const BoxConstraints(maxWidth: 18, maxHeight: 18),
-                    systemSymbolName: entry.symbolName,
-                    foregroundColor: isSelected
-                        ? CupertinoColors.activeBlue
-                        : (isDark ? CupertinoColors.label.darkColor : CupertinoColors.label.color),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      entry.title,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: isDark ? CupertinoColors.label.darkColor : CupertinoColors.label.color,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _DemoEntry {
-  const _DemoEntry(this.title, this.symbolName, this.page);
-
-  final Widget page;
-  final String symbolName;
-  final String title;
-}
-
-class _DesktopDemoShell extends StatefulWidget {
-  const _DesktopDemoShell({required this.appTheme, required this.brightness, required this.accentColor});
-
-  final Color? accentColor;
-  final AppTheme appTheme;
-  final Brightness brightness;
-
-  @override
-  State<_DesktopDemoShell> createState() => _DesktopDemoShellState();
-}
-
-class _DesktopDemoShellState extends State<_DesktopDemoShell> {
-  int _selectedIndex = 0;
-
-  @override
-  void didUpdateWidget(covariant _DesktopDemoShell oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (mounted) {
-      setBrightness(widget.brightness);
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    setWindowEffect();
-  }
-
-  void setWindowEffect() {
-    // Window.setEffect(effect: value!, color: color, dark: widget.brightness == Brightness.dark);
-    WindowManipulator.setMaterial(NSVisualEffectViewMaterial.sidebar);
-
-    if (Platform.isMacOS) {
-      if (widget.brightness != Brightness.light && widget.brightness != Brightness.dark) {
-        WindowManipulator.overrideMacOSBrightness(dark: widget.brightness == Brightness.dark);
-      }
-    }
-    // setState(() => effect = value);
-  }
-
-  void setBrightness(Brightness brightness) {
-    // this.brightness = brightness;
-    setWindowEffect();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 250,
-          child: _SideBar(
-            selectedIndex: _selectedIndex,
-            accentColor: widget.accentColor,
-            onItemSelected: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-          ),
-        ),
-        Expanded(
-          child: KeyedSubtree(key: ValueKey(_selectedIndex), child: _entries[_selectedIndex].page),
-        ),
-      ],
-    );
-  }
-}
-
 class _MyAppState extends State<MyApp> {
   late Brightness brightness;
 
@@ -334,6 +200,146 @@ class _MyAppState extends State<MyApp> {
           ),
         );
       },
+    );
+  }
+}
+
+class _SideBar extends StatelessWidget {
+  const _SideBar({required this.onItemSelected, required this.accentColor, required this.selectedIndex});
+
+  final Color? accentColor;
+  final void Function(int index) onItemSelected;
+  final int selectedIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = CNTheme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accentColor = this.accentColor ?? CNTheme.of(context).accentColor;
+    final isBright = accentColor.computeLuminance() > 0.5;
+    final labelColor = theme.labelColor;
+    return Container(
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: _entries.length,
+        itemBuilder: (context, index) {
+          final entry = _entries[index];
+          final isSelected = index == selectedIndex;
+          return GestureDetector(
+            onTap: () => onItemSelected(index),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+              decoration: BoxDecoration(
+                color: isSelected ? accentColor.withValues(alpha: 1.0) : Colors.transparent,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                children: [
+                  CNImage2(
+                    constraints: const BoxConstraints(maxWidth: 18, maxHeight: 18),
+                    systemSymbolName: entry.symbolName,
+                    foregroundColor: isSelected
+                        ? isBright
+                              ? CNColors.black
+                              : CNColors.white
+                        : (isDark ? CupertinoColors.label.darkColor : CupertinoColors.label.color),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      entry.title,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isSelected ? (isBright ? CNColors.label.color : CNColors.label.darkColor) : labelColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _DemoEntry {
+  const _DemoEntry(this.title, this.symbolName, this.page);
+
+  final Widget page;
+  final String symbolName;
+  final String title;
+}
+
+class _DesktopDemoShell extends StatefulWidget {
+  const _DesktopDemoShell({required this.appTheme, required this.brightness, required this.accentColor});
+
+  final Color? accentColor;
+  final AppTheme appTheme;
+  final Brightness brightness;
+
+  @override
+  State<_DesktopDemoShell> createState() => _DesktopDemoShellState();
+}
+
+class _DesktopDemoShellState extends State<_DesktopDemoShell> {
+  int _selectedIndex = 0;
+
+  @override
+  void didUpdateWidget(covariant _DesktopDemoShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (mounted) {
+      setBrightness(widget.brightness);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setWindowEffect();
+  }
+
+  void setWindowEffect() {
+    // Window.setEffect(effect: value!, color: color, dark: widget.brightness == Brightness.dark);
+    WindowManipulator.setMaterial(NSVisualEffectViewMaterial.sidebar);
+
+    if (Platform.isMacOS) {
+      if (widget.brightness != Brightness.light && widget.brightness != Brightness.dark) {
+        WindowManipulator.overrideMacOSBrightness(dark: widget.brightness == Brightness.dark);
+      }
+    }
+    setState(() {});
+  }
+
+  void setBrightness(Brightness brightness) {
+    // this.brightness = brightness;
+    setWindowEffect();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 250,
+          child: _SideBar(
+            selectedIndex: _selectedIndex,
+            accentColor: widget.accentColor,
+            onItemSelected: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+          ),
+        ),
+        Expanded(
+          child: KeyedSubtree(key: ValueKey(_selectedIndex), child: _entries[_selectedIndex].page),
+        ),
+      ],
     );
   }
 }

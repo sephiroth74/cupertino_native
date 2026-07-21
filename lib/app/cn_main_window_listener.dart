@@ -41,11 +41,6 @@ class _MainWindowStreamBuilderState extends State<MainWindowStreamBuilder> {
     Future.microtask(() async {
       await _initIsWindowMain(isMainWindow);
     });
-
-    // isMainWindow = await WindowManipulator.isMainWindow();
-    // if (mounted && isMainWindow != oldIsMainWindow) {
-    //   setState(() {});
-    // }
   }
 
   Future<void> _initIsWindowMain(bool oldIsMainWindow) async {
@@ -83,9 +78,4 @@ class _MainWindowStateListenerNSWindowDelegate extends NSWindowDelegate {
     super.windowDidResignMain();
     onMainWindowChanged?.call(false);
   }
-
-  /// Initializes the [_isMainWindow] variable.
-  // Future<void> _initIsWindowMain() async {
-  // MainWindowStateListener.instance.isMainWindow.sink.add(await WindowManipulator.isMainWindow());
-  // }
 }

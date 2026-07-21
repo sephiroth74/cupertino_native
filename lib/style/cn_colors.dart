@@ -103,6 +103,9 @@ abstract final class CNColors {
   );
 
   // ignore: public_member_api_docs
+  static const label = CupertinoColors.label;
+
+  // ignore: public_member_api_docs
   static const Color white = Color(0xFFFFFFFF);
 
   // ignore: public_member_api_docs
