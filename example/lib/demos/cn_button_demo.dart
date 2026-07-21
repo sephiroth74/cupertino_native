@@ -38,12 +38,15 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
     Future.doWhile(() async {
       await Future.delayed(const Duration(milliseconds: 100));
       setState(() {
+        if (!mounted) {
+          return;
+        }
         progressValue++;
         if (progressValue > progressMax) {
           progressValue = 0;
         }
       });
-      return isProgressRunning;
+      return isProgressRunning && mounted;
     });
   }
 
@@ -217,7 +220,8 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                 'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
                 'Button Style': CNPicker2(
                   selection: buttonStyle.name,
-                  onChanged: (value) => setState(() => buttonStyle = CNButtonStyle.values.firstWhere((style) => style.name == value)),
+                  onChanged: (value) =>
+                      setState(() => buttonStyle = CNButtonStyle.values.firstWhere((style) => style.name == value)),
                   children: CNButtonStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
                 ),
                 'Tint Color': ColorPicker(

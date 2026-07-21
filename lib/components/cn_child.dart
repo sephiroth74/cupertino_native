@@ -288,6 +288,7 @@ class CNChildButton extends CNChild {
     this.systemImage,
     this.role,
     this.badge,
+    this.labelStyle,
     super.enabled,
     super.tint,
     super.foregroundColor,
@@ -297,6 +298,9 @@ class CNChildButton extends CNChild {
 
   /// Optional badge value (String or int).
   final Object? badge;
+
+  /// Label style (titleOnly, iconOnly, titleAndIcon).
+  final CNLabel2Style? labelStyle;
 
   /// Semantic role.
   final CNButtonRole2? role;
@@ -319,6 +323,7 @@ class CNChildButton extends CNChild {
       'systemImage': systemImage,
       'role': role?.name,
       'badge': badge,
+      'labelStyle': labelStyle?.name,
       'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };
@@ -363,6 +368,161 @@ class CNChildMenu extends CNChild {
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'items': items.map((c) => c.toChildPayload(context)).toList(),
       'label': label.map((c) => c.toChildPayload(context)).toList(),
+      'constraints': CNChild.serializeConstraints(constraints),
+      'paddings': CNChild.serializePaddings(paddings),
+    };
+  }
+}
+
+/// A Picker child for inline use in toolbars and other containers.
+class CNChildPicker extends CNChild {
+  const CNChildPicker({
+    required super.tag,
+    required this.children,
+    required this.selection,
+    this.label,
+    this.labelStyle,
+    this.pickerStyle = 'menu',
+    this.controlSize,
+    this.font,
+    super.enabled,
+    super.tint,
+    super.foregroundColor,
+    super.constraints,
+    super.paddings,
+  });
+
+  /// Picker items (should be CNChildText, CNChildImage, or CNChildLabel with tags).
+  final List<CNChild> children;
+
+  /// Control size.
+  final String? controlSize;
+
+  /// Font.
+  final CNFont? font;
+
+  /// Optional label content.
+  final List<CNChild>? label;
+
+  /// Label style (titleOnly, iconOnly, titleAndIcon).
+  final CNLabel2Style? labelStyle;
+
+  /// Picker style (menu, segmented, radioGroup, inline, palette).
+  final String pickerStyle;
+
+  /// Currently selected tag value.
+  final String selection;
+
+  @override
+  Map<String, dynamic> toChildPayload(BuildContext context) {
+    return {
+      'type': 'picker',
+      'tag': tag,
+      'enabled': enabled,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
+      'children': children.map((c) => c.toChildPayload(context)).toList(),
+      'selection': selection,
+      if (label != null) 'label': label!.map((c) => c.toChildPayload(context)).toList(),
+      'labelStyle': labelStyle?.name,
+      'pickerStyle': pickerStyle,
+      'controlSize': controlSize,
+      'font': font?.toMap(),
+      'constraints': CNChild.serializeConstraints(constraints),
+      'paddings': CNChild.serializePaddings(paddings),
+    };
+  }
+}
+
+/// A Toggle child for inline use in toolbars and other containers.
+class CNChildToggle extends CNChild {
+  const CNChildToggle({
+    required super.tag,
+    required this.isOn,
+    this.label,
+    this.systemImage,
+    this.toggleStyle = 'switch',
+    this.controlSize,
+    super.enabled,
+    super.tint,
+    super.foregroundColor,
+    super.constraints,
+    super.paddings,
+  });
+
+  /// Control size.
+  final String? controlSize;
+
+  /// Whether the toggle is on.
+  final bool isOn;
+
+  /// Label text.
+  final String? label;
+
+  /// Optional SF Symbol for the label.
+  final String? systemImage;
+
+  /// Toggle style (switch, button, checkbox).
+  final String toggleStyle;
+
+  @override
+  Map<String, dynamic> toChildPayload(BuildContext context) {
+    return {
+      'type': 'toggle',
+      'tag': tag,
+      'enabled': enabled,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
+      'isOn': isOn,
+      'label': label,
+      'systemImage': systemImage,
+      'toggleStyle': toggleStyle,
+      'controlSize': controlSize,
+      'constraints': CNChild.serializeConstraints(constraints),
+      'paddings': CNChild.serializePaddings(paddings),
+    };
+  }
+}
+
+/// A TextField child for inline use in toolbars and other containers.
+class CNChildTextField extends CNChild {
+  const CNChildTextField({
+    required super.tag,
+    this.text = '',
+    this.placeholder,
+    this.font,
+    this.controlSize,
+    super.enabled,
+    super.tint,
+    super.foregroundColor,
+    super.constraints,
+    super.paddings,
+  });
+
+  /// Control size.
+  final String? controlSize;
+
+  /// Font.
+  final CNFont? font;
+
+  /// Placeholder text.
+  final String? placeholder;
+
+  /// Current text value.
+  final String text;
+
+  @override
+  Map<String, dynamic> toChildPayload(BuildContext context) {
+    return {
+      'type': 'textField',
+      'tag': tag,
+      'enabled': enabled,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
+      'text': text,
+      'placeholder': placeholder,
+      'font': font?.toMap(),
+      'controlSize': controlSize,
       'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };

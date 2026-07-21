@@ -6,6 +6,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
     static var contextMenuHandler: CNContextMenuHandler?
     static var alert2Handler: CNAlert2Handler?
     static var popover2Handler: CNPopover2Handler?
+    static var toolbarHandler: CNToolbarHandler?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         CupertinoNativePlugin.registrar = registrar
@@ -16,6 +17,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         let channel = FlutterMethodChannel(
             name: "cupertino_native", binaryMessenger: registrar.messenger,
         )
+
+        CupertinoNativePlugin.toolbarHandler = CNToolbarHandler(registrar: registrar, channel: channel)
+
         let instance = CupertinoNativePlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
 
@@ -116,6 +120,22 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 return
             }
             handler.showContextMenu2(args: args, result: result)
+        case "makeToolbar":
+            guard let args = CNChannelSerialization.asDict(call.arguments) else {
+                result(FlutterError(code: "invalid_args", message: "makeToolbar expects a map of arguments", details: nil))
+                return
+            }
+            guard let handler = CupertinoNativePlugin.toolbarHandler else {
+                result(FlutterError(code: "handler_unavailable", message: "Toolbar handler is not initialized", details: nil))
+                return
+            }
+            handler.makeToolbar(args: args, result: result)
+        case "clearToolbar":
+            guard let handler = CupertinoNativePlugin.toolbarHandler else {
+                result(FlutterError(code: "handler_unavailable", message: "Toolbar handler is not initialized", details: nil))
+                return
+            }
+            handler.clearToolbar(result: result)
         default:
             result(FlutterMethodNotImplemented)
         }

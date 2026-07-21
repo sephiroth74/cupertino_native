@@ -216,6 +216,9 @@ enum CNTextField2Deserializer {
                     base = text.distance(from: text.startIndex, to: first.lowerBound)
                     extent = base
                     log("insertion .multiSelection -> base=\(base)")
+                @unknown default:
+                    log("ERROR: insertion selection indices is neither .selection nor .multiSelection")
+                    return
                 }
             } else {
                 switch newSelection.indices {
@@ -240,6 +243,9 @@ enum CNTextField2Deserializer {
                     base = text.distance(from: text.startIndex, to: first.lowerBound)
                     extent = text.distance(from: text.startIndex, to: first.upperBound)
                     log("selection .multiSelection -> base=\(base), extent=\(extent)")
+                @unknown default:
+                    log("ERROR: selection indices is neither .selection nor .multiSelection")
+                    return
                 }
             }
             let oldBase = model.payload.selectionBase

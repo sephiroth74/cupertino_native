@@ -29,9 +29,6 @@ enum CNPickerStyle2 {
   palette,
 }
 
-/// Allowed child types for picker items.
-typedef CNPickerChild = CNChild;
-
 /// A native SwiftUI Picker widget.
 ///
 /// Each item in [children] must be a [CNChildText], [CNChildImage], or
@@ -58,7 +55,7 @@ class CNPicker2 extends CNWidget {
        );
 
   /// Picker items. Each must have a non-null [CNChild.tag].
-  final List<CNPickerChild> children;
+  final List<CNChild> children;
 
   /// Control size.
   final CNControlSize? controlSize;

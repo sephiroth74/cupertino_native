@@ -91,11 +91,11 @@ enum CNChildViewBuilder {
 
     private static func buildImage(_ dict: [String: Any]) -> some View {
         let name = dict["systemSymbolName"] as? String ?? "questionmark"
-        var view = AnyView(Image(systemName: name))
+        let renderingMode = dict["symbolRenderingMode"] as? String
+        let palette = decodePalette(dict["foregroundStyleColors"])
+
+        var view = AnyView(makeSymbolImage(name, renderingMode: renderingMode, palette: palette))
         view = CNViewModifierApplicator.applyFont(dict["font"] as? [String: Any], to: view)
-        if let renderingMode = dict["symbolRenderingMode"] as? String {
-            view = applySymbolRenderingMode(renderingMode, colors: dict["foregroundStyleColors"], to: view)
-        }
         if #available(macOS 15.0, *) {
             if let colorRenderingMode = dict["symbolColorRenderingMode"] as? String {
                 switch colorRenderingMode {
@@ -142,11 +142,16 @@ enum CNChildViewBuilder {
 
         var view: AnyView
         if let systemImage, !systemImage.isEmpty {
-            var labelView = AnyView(Label(title, systemImage: systemImage))
+            let renderingMode = dict["symbolRenderingMode"] as? String
+            let palette = decodePalette(dict["foregroundStyleColors"])
 
-            if let renderingMode = dict["symbolRenderingMode"] as? String {
-                labelView = applySymbolRenderingMode(renderingMode, colors: dict["foregroundStyleColors"], to: labelView)
-            }
+            var labelView = AnyView(
+                Label {
+                    Text(title)
+                } icon: {
+                    makeSymbolImage(systemImage, renderingMode: renderingMode, palette: palette)
+                },
+            )
 
             if #available(macOS 15.0, *) {
                 if let colorRenderingMode = dict["symbolColorRenderingMode"] as? String {
@@ -194,55 +199,52 @@ enum CNChildViewBuilder {
     }
 
     @available(macOS 12.0, *)
-    private static func applySymbolRenderingMode(_ mode: String, colors: Any?, to view: AnyView) -> AnyView {
-        let palette: [Int] = if let rawColors = colors as? [NSNumber] {
-            rawColors.map(\.intValue)
-        } else if let rawColors = colors as? [Int] {
-            rawColors
-        } else {
-            []
-        }
+    private static func makeSymbolImage(_ name: String, renderingMode: String?, palette: [Int]) -> AnyView {
+        var image = AnyView(Image(systemName: name))
 
-        switch mode {
+        guard let renderingMode else { return image }
+
+        switch renderingMode {
         case "hierarchical":
+            image = AnyView(Image(systemName: name).symbolRenderingMode(.hierarchical))
             if let first = palette.first {
-                return AnyView(
-                    view.symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(ColorUtils.swiftUIColorFromARGB(first)),
-                )
+                image = AnyView(image.foregroundStyle(ColorUtils.swiftUIColorFromARGB(first)))
             }
-            return AnyView(view.symbolRenderingMode(.hierarchical))
         case "monochrome":
+            image = AnyView(Image(systemName: name).symbolRenderingMode(.monochrome))
             if let first = palette.first {
-                return AnyView(
-                    view.symbolRenderingMode(.monochrome)
-                        .foregroundStyle(ColorUtils.swiftUIColorFromARGB(first)),
-                )
+                image = AnyView(image.foregroundStyle(ColorUtils.swiftUIColorFromARGB(first)))
             }
-            return AnyView(view.symbolRenderingMode(.monochrome))
         case "palette":
             let colors = palette.map(ColorUtils.swiftUIColorFromARGB)
-            guard !colors.isEmpty else {
-                return AnyView(view.symbolRenderingMode(.palette))
+            if colors.count >= 3 {
+                image = AnyView(Image(systemName: name).symbolRenderingMode(.palette).foregroundStyle(colors[0], colors[1], colors[2]))
+            } else if colors.count == 2 {
+                image = AnyView(Image(systemName: name).symbolRenderingMode(.palette).foregroundStyle(colors[0], colors[1]))
+            } else if colors.count == 1 {
+                image = AnyView(Image(systemName: name).symbolRenderingMode(.palette).foregroundStyle(colors[0]))
+            } else {
+                image = AnyView(Image(systemName: name).symbolRenderingMode(.palette))
             }
-            if colors.count == 1 {
-                return AnyView(view.symbolRenderingMode(.palette).foregroundStyle(colors[0]))
-            }
-            if colors.count == 2 {
-                return AnyView(view.symbolRenderingMode(.palette).foregroundStyle(colors[0], colors[1]))
-            }
-            return AnyView(view.symbolRenderingMode(.palette).foregroundStyle(colors[0], colors[1], colors[2]))
         case "multicolor":
+            image = AnyView(Image(systemName: name).symbolRenderingMode(.multicolor))
             if let first = palette.first {
-                return AnyView(
-                    view.symbolRenderingMode(.multicolor)
-                        .foregroundStyle(ColorUtils.swiftUIColorFromARGB(first)),
-                )
+                image = AnyView(image.foregroundStyle(ColorUtils.swiftUIColorFromARGB(first)))
             }
-            return AnyView(view.symbolRenderingMode(.multicolor))
         default:
-            return view
+            break
         }
+
+        return image
+    }
+
+    private static func decodePalette(_ raw: Any?) -> [Int] {
+        if let rawColors = raw as? [NSNumber] {
+            return rawColors.map(\.intValue)
+        } else if let rawColors = raw as? [Int] {
+            return rawColors
+        }
+        return []
     }
 
     // MARK: - Container builders

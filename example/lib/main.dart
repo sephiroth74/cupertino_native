@@ -1,4 +1,5 @@
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, ThemeMode;
 import 'package:flutter/scheduler.dart';
@@ -109,7 +110,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
           child: Container(
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1E1E1E) : const Color(0x00F0F0F0),
-              borderRadius: BorderRadius.circular(8)
+              borderRadius: BorderRadius.circular(8),
             ),
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -123,9 +124,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? CupertinoColors.activeBlue.withValues(alpha: 0.2)
-                          : Colors.transparent,
+                      color: isSelected ? CupertinoColors.activeBlue.withValues(alpha: 0.2) : Colors.transparent,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
@@ -157,10 +156,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
           ),
         ),
         Expanded(
-          child: KeyedSubtree(
-            key: ValueKey(_selectedIndex),
-            child: _entries[_selectedIndex].page,
-          ),
+          child: KeyedSubtree(key: ValueKey(_selectedIndex), child: _entries[_selectedIndex].page),
         ),
       ],
     );
@@ -168,6 +164,8 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
 }
 
 class _MyAppState extends State<MyApp> {
+  late Brightness brightness;
+
   Color? _accentColor;
 
   @override
@@ -188,15 +186,91 @@ class _MyAppState extends State<MyApp> {
           create: (_) => AppTheme(),
           builder: (context, child) {
             final appTheme = context.watch<AppTheme>();
-            final brightness = appTheme.mode == ThemeMode.system
+            brightness = appTheme.mode == ThemeMode.system
                 ? WidgetsBinding.instance.platformDispatcher.platformBrightness
                 : (appTheme.mode == ThemeMode.dark ? Brightness.dark : Brightness.light);
+            final isDark = brightness == Brightness.dark;
 
             return CNTheme(
               data: CNThemeData(brightness: brightness, primaryColor: _accentColor ?? color.accent),
               child: CupertinoApp(
                 debugShowCheckedModeBanner: false,
-                home: const _DesktopDemoShell(),
+                home: CNToolbar(
+                  config: CNToolbarConfig(
+                    onSearchChanged: (value) {
+                      debugPrint('Search changed: $value');
+                    },
+                    onItemPressed: (value) {
+                      debugPrint('Toolbar item pressed: $value');
+                      final tags = value.split(':');
+                      if (tags.length == 2 && tags[0] == 'theme_picker') {
+                        final selectedTag = tags[1];
+                        if (selectedTag == ThemeMode.system.name) {
+                          appTheme.mode = ThemeMode.system;
+                        } else if (selectedTag == ThemeMode.light.name) {
+                          appTheme.mode = ThemeMode.light;
+                        } else {
+                          appTheme.mode = ThemeMode.dark;
+                        }
+                      } else if (tags.length == 2 && tags[0] == 'accent_color') {
+                        final selectedTag = tags[1];
+                        if (selectedTag == 'system') {
+                          _accentColor = color.accent;
+                        } else {
+                          final selectedColor = kSystemColors[selectedTag];
+                          if (selectedColor != null) {
+                            context.read<CNTheme>().data.copyWith(primaryColor: selectedColor);
+                          }
+                        }
+                        setState(() {});
+                      }
+                    },
+                    searchable: true,
+                    titleDisplayMode: CNToolbarTitleDisplayMode.automatic,
+                    toolbarBackground: isDark ? CNColors.blue.darkColor : CNColors.blue.color,
+                    title: CNChildText('Cupertino Native Demo'),
+                    groups: [
+                      CNToolbarItemGroup(
+                        placement: CNToolbarPlacement.navigation,
+                        children: [
+                          CNChildButton(
+                            tag: 'toggle_navigation',
+                            title: 'Toggle Navigation',
+                            systemImage: 'sidebar.left',
+                            labelStyle: CNLabel2Style.iconOnly,
+                          ),
+                        ],
+                      ),
+                      CNToolbarItemGroup(
+                        placement: CNToolbarPlacement.automatic,
+                        children: [
+                          CNChildPicker(
+                            pickerStyle: CNPickerStyle2.menu.name,
+                            labelStyle: CNLabel2Style.titleAndIcon,
+                            tag: 'theme_picker',
+                            label: [
+                              CNChildLabel(
+                                appTheme.mode.name,
+                                labelStyle: CNLabel2Style.titleAndIcon,
+                                tag: appTheme.mode.name,
+                                systemImage: appTheme.mode == ThemeMode.system
+                                    ? 'sun.max'
+                                    : (appTheme.mode == ThemeMode.light ? 'sun.max' : 'moon.fill'),
+                              ),
+                            ],
+                            children: [
+                              CNChildLabel('System Theme', tag: ThemeMode.system.name, systemImage: 'sun.lefthalf.filled'),
+                              CNChildLabel('Light Theme', tag: ThemeMode.light.name, systemImage: 'sun.max'),
+                              CNChildLabel('Dark Theme', tag: ThemeMode.dark.name, systemImage: 'moon.fill'),
+                            ],
+                            selection: appTheme.mode.name,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  child: const _DesktopDemoShell(),
+                ),
               ),
             );
           },
