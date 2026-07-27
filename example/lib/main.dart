@@ -209,6 +209,7 @@ class _MyAppState extends State<MyApp> {
               isResizable: true,
               maxWidth: 400,
               startWidth: 250,
+              dragClosed: false,
             ),
             child: Builder(
               builder: (context) {
