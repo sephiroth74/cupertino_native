@@ -72,6 +72,8 @@ enum CNSecureFieldDeserializer {
                 )
             }
 
+            view = CNViewModifierApplicator.applyHelp(payload.help, to: view)
+
             if let onSizeChanged {
                 view = AnyView(
                     view.onGeometryChange(for: CGSize.self) { proxy in

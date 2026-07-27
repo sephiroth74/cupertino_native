@@ -12,6 +12,7 @@ protocol CNSharedPayloadFields: CNChannelDeserializable {
     var paddings: CNPaddingsPayload? { get set }
     var tint: Any? { get set }
     var foregroundColor: Int? { get set }
+    var help: String? { get set }
 }
 
 extension CNSharedPayloadFields {
@@ -59,6 +60,10 @@ extension CNSharedPayloadFields {
         if channel.keys.contains("foregroundColor") {
             foregroundColor = CNChannelDeserialization.decodeInt(channel["foregroundColor"])
         }
+
+        if channel.keys.contains("help") {
+            help = channel["help"] as? String
+        }
     }
 
     /// Returns the identity key components for the shared fields.
@@ -77,6 +82,7 @@ extension CNSharedPayloadFields {
             paddings?.identityKey() ?? "nil",
             tintKey,
             foregroundColor.map { String(describing: $0) } ?? "nil",
+            help ?? "nil",
         ]
     }
 }

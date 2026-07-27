@@ -35,6 +35,7 @@ class CNComboBox extends CNWidget {
     this.tint,
     this.foregroundColor,
     this.paddings,
+    this.help,
   });
 
   /// Whether the combo box auto-completes as the user types.
@@ -76,6 +77,9 @@ class CNComboBox extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final String? help;
 
   @override
   final EdgeInsetsGeometry? paddings;

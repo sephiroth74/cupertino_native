@@ -8,6 +8,7 @@ struct CNMenu2Payload: CNSharedPayloadFields {
     var paddings: CNPaddingsPayload?
     var tint: Any?
     var foregroundColor: Int?
+    var help: String?
     var enabled: Bool?
 
     var items: [[String: Any]]
@@ -25,6 +26,7 @@ struct CNMenu2Payload: CNSharedPayloadFields {
         paddings = nil
         tint = nil
         foregroundColor = nil
+        help = nil
         enabled = nil
         items = []
         label = []

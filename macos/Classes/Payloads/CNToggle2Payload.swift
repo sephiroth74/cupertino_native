@@ -9,6 +9,7 @@ struct CNToggle2Payload: CNSharedPayloadFields {
     var paddings: CNPaddingsPayload?
     var tint: Any?
     var foregroundColor: Int?
+    var help: String?
 
     // Toggle-specific fields
     var isOn: Bool
@@ -25,6 +26,7 @@ struct CNToggle2Payload: CNSharedPayloadFields {
         paddings = nil
         tint = nil
         foregroundColor = nil
+        help = nil
         isOn = false
         enabled = true
         toggleStyle = "automatic"

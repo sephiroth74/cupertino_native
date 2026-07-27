@@ -8,6 +8,7 @@ struct CNGauge2Payload: CNSharedPayloadFields {
     var paddings: CNPaddingsPayload?
     var tint: Any?
     var foregroundColor: Int?
+    var help: String?
 
     var value: Double
     var min: Double
@@ -27,6 +28,7 @@ struct CNGauge2Payload: CNSharedPayloadFields {
         paddings = nil
         tint = nil
         foregroundColor = nil
+        help = nil
         value = 0
         min = 0
         max = 1

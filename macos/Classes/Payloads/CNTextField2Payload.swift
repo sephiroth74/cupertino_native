@@ -9,6 +9,7 @@ struct CNTextField2Payload: CNSharedPayloadFields {
     var paddings: CNPaddingsPayload?
     var tint: Any?
     var foregroundColor: Int?
+    var help: String?
 
     // TextField-specific fields
     var text: String
@@ -31,6 +32,7 @@ struct CNTextField2Payload: CNSharedPayloadFields {
         paddings = nil
         tint = nil
         foregroundColor = nil
+        help = nil
         text = ""
         selectionBase = nil
         selectionExtent = nil

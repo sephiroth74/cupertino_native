@@ -206,6 +206,14 @@ abstract final class CNColors {
     darkColor: CNColors.systemGray.darkColor.withValues(alpha: 0.8),
   );
 
+
+  /// The color to use for the window background.
+  /// https://developer.apple.com/documentation/appkit/nscolor/windowbackgroundcolor
+  static const CupertinoDynamicColor windowBackgroundColor = CupertinoDynamicColor.withBrightness(
+    color: Color(0xFFECECEC),
+    darkColor: Color(0xFF323232),
+  );  
+
   /// Transparent color (fully transparent, no matter the brightness)
   static const Color transparent = Color(0x00000000);
 }

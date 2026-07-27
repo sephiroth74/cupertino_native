@@ -107,6 +107,10 @@ class CupertinoComboBoxNSView: NSView, NSComboBoxDelegate, NSComboBoxDataSource 
         if let enabled = args["enabled"] as? Bool {
             comboBox.isEnabled = enabled
         }
+
+        if args.keys.contains("help") {
+            comboBox.toolTip = args["help"] as? String
+        }
     }
 
     // MARK: - Channel

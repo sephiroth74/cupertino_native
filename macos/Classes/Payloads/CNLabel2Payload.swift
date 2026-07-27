@@ -8,6 +8,7 @@ struct CNLabel2Payload: CNSharedPayloadFields {
     var paddings: CNPaddingsPayload?
     var tint: Any?
     var foregroundColor: Int?
+    var help: String?
 
     var title: [String: Any]?
     var image: [String: Any]?
@@ -24,6 +25,7 @@ struct CNLabel2Payload: CNSharedPayloadFields {
         paddings = nil
         tint = nil
         foregroundColor = nil
+        help = nil
         title = nil
         image = nil
         font = nil

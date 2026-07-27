@@ -124,6 +124,10 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
             searchField.isEnabled = enabled
         }
 
+        if args.keys.contains("help") {
+            searchField.toolTip = args["help"] as? String
+        }
+
         if let value = args["hasSuggestions"] as? Bool {
             hasSuggestions = value
         }

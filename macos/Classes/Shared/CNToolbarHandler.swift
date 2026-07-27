@@ -282,6 +282,7 @@ private enum CNToolbarChildBuilder {
         if let enabled = dict["enabled"] as? Bool {
             result = AnyView(result.disabled(!enabled))
         }
+        result = CNViewModifierApplicator.applyHelp(dict["help"] as? String, to: result)
         return result
     }
 

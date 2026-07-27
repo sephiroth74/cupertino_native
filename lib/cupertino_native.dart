@@ -54,6 +54,7 @@ export 'app/cn_main_window_listener.dart';
 export 'app/cn_sidebar.dart';
 export 'app/cn_window.dart';
 export 'app/cn_scrollbar.dart';
+export 'app/cn_content_area.dart';
 
 /// Top-level facade for simple plugin interactions.
 class CupertinoNative {

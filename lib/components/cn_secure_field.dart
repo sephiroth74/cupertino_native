@@ -34,6 +34,7 @@ class CNSecureField extends CNWidget {
     this.tint,
     this.foregroundColor,
     this.paddings,
+    this.help,
   });
 
   /// Whether the field should automatically receive focus when created.
@@ -75,6 +76,9 @@ class CNSecureField extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final String? help;
 
   @override
   final EdgeInsetsGeometry? paddings;

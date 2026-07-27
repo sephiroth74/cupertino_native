@@ -8,6 +8,7 @@ struct CNButton2Payload: CNSharedPayloadFields {
     var paddings: CNPaddingsPayload?
     var tint: Any?
     var foregroundColor: Int?
+    var help: String?
     var enabled: Bool?
 
     var children: [[String: Any]]
@@ -24,6 +25,7 @@ struct CNButton2Payload: CNSharedPayloadFields {
         paddings = nil
         tint = nil
         foregroundColor = nil
+        help = nil
         children = []
         buttonStyle = nil
         role = nil

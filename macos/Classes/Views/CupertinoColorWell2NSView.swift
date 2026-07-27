@@ -81,6 +81,10 @@ class CupertinoColorWell2NSView: NSView {
             colorWell.isEnabled = enabled
         }
 
+        if dict.keys.contains("help") {
+            colorWell.toolTip = dict["help"] as? String
+        }
+
         if dict.keys.contains("supportsAlpha") {
             supportsAlpha = CNChannelDeserialization.decodeBool(dict["supportsAlpha"]) ?? true
             colorWell.supportsAlpha = supportsAlpha

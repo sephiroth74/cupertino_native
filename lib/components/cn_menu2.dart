@@ -43,6 +43,7 @@ class CNMenu2 extends CNWidget {
     this.tint,
     this.foregroundColor,
     this.paddings,
+    this.help,
   });
 
   /// Control size.
@@ -71,6 +72,9 @@ class CNMenu2 extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final String? help;
 
   @override
   final EdgeInsetsGeometry? paddings;

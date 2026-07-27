@@ -39,6 +39,7 @@ class CNPathControl2 extends CNWidget {
     this.tint,
     this.foregroundColor,
     this.paddings,
+    this.help,
   });
 
   /// Allowed file types (extensions) for the open panel.
@@ -67,6 +68,9 @@ class CNPathControl2 extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final String? help;
 
   @override
   final EdgeInsetsGeometry? paddings;

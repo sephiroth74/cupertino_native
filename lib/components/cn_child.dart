@@ -12,7 +12,7 @@ enum CNAlignment { leading, center, trailing, top, bottom }
 /// These are NOT platform views — they are pure data that the native side
 /// reconstructs as SwiftUI views inside a parent widget's content closure.
 sealed class CNChild {
-  const CNChild({this.constraints, this.paddings, this.tag, this.enabled, this.tint, this.foregroundColor});
+  const CNChild({this.constraints, this.paddings, this.tag, this.enabled, this.tint, this.foregroundColor, this.help});
 
   /// Optional layout constraints applied to this child.
   final BoxConstraints? constraints;
@@ -22,6 +22,9 @@ sealed class CNChild {
 
   /// Optional foreground color applied to this child.
   final Color? foregroundColor;
+
+  /// Optional tooltip text shown on hover (SwiftUI `.help()`).
+  final String? help;
 
   /// Optional padding applied around this child.
   final EdgeInsetsGeometry? paddings;
@@ -69,6 +72,7 @@ class CNChildText extends CNChild {
     super.constraints,
     super.paddings,
     super.tag,
+    super.help,
   });
 
   final CNFont? font;
@@ -84,6 +88,7 @@ class CNChildText extends CNChild {
       'type': 'text',
       'tag': tag,
       'enabled': enabled,
+      'help': help,
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'text': text,
@@ -112,6 +117,7 @@ class CNChildImage extends CNChild {
     super.constraints,
     super.paddings,
     super.tag,
+    super.help,
   });
 
   final CNFont? font;
@@ -126,6 +132,7 @@ class CNChildImage extends CNChild {
       'type': 'image',
       'tag': tag,
       'enabled': enabled,
+      'help': help,
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'systemSymbolName': systemSymbolName,
@@ -151,6 +158,7 @@ class CNChildVStack extends CNChild {
     super.constraints,
     super.paddings,
     super.tag,
+    super.help,
   });
 
   final CNAlignment alignment;
@@ -163,6 +171,7 @@ class CNChildVStack extends CNChild {
       'type': 'vstack',
       'tag': tag,
       'enabled': enabled,
+      'help': help,
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'alignment': alignment.name,
@@ -186,6 +195,7 @@ class CNChildHStack extends CNChild {
     super.constraints,
     super.paddings,
     super.tag,
+    super.help,
   });
 
   final CNAlignment alignment;
@@ -198,6 +208,7 @@ class CNChildHStack extends CNChild {
       'type': 'hstack',
       'tag': tag,
       'enabled': enabled,
+      'help': help,
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'alignment': alignment.name,
@@ -211,7 +222,7 @@ class CNChildHStack extends CNChild {
 
 /// A Group container child (no layout, just grouping).
 class CNChildGroup extends CNChild {
-  const CNChildGroup({required this.children, super.enabled, super.tint, super.foregroundColor, super.constraints, super.paddings, super.tag});
+  const CNChildGroup({required this.children, super.enabled, super.tint, super.foregroundColor, super.constraints, super.paddings, super.tag, super.help});
 
   final List<CNChild> children;
 
@@ -221,6 +232,7 @@ class CNChildGroup extends CNChild {
       'type': 'group',
       'tag': tag,
       'enabled': enabled,
+      'help': help,
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'children': children.map((c) => c.toChildPayload(context)).toList(),
@@ -243,6 +255,7 @@ class CNChildProgressView extends CNChild {
     super.enabled,
     super.paddings,
     super.tag,
+    super.help,
   });
 
   final CNControlSize controlSize;
@@ -256,6 +269,7 @@ class CNChildProgressView extends CNChild {
       'type': 'progressView',
       'tag': tag,
       'enabled': enabled,
+      'help': help,
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'value': value,
@@ -294,6 +308,7 @@ class CNChildButton extends CNChild {
     super.foregroundColor,
     super.constraints,
     super.paddings,
+    super.help,
   }) : assert(badge == null || badge is String || badge is int);
 
   /// Optional badge value (String or int).
@@ -317,6 +332,7 @@ class CNChildButton extends CNChild {
       'type': 'button',
       'tag': tag,
       'enabled': enabled,
+      'help': help,
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'title': title,
@@ -332,7 +348,7 @@ class CNChildButton extends CNChild {
 
 /// A sub-Menu child (for nesting menus).
 class CNChildMenu extends CNChild {
-  const CNChildMenu({required this.items, required this.label, super.enabled, super.tint, super.foregroundColor, super.constraints, super.paddings, super.tag});
+  const CNChildMenu({required this.items, required this.label, super.enabled, super.tint, super.foregroundColor, super.constraints, super.paddings, super.tag, super.help});
 
   factory CNChildMenu.simple(
     String title, {
@@ -364,6 +380,7 @@ class CNChildMenu extends CNChild {
       'type': 'menu',
       'tag': tag,
       'enabled': enabled,
+      'help': help,
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'items': items.map((c) => c.toChildPayload(context)).toList(),
@@ -390,6 +407,7 @@ class CNChildPicker extends CNChild {
     super.foregroundColor,
     super.constraints,
     super.paddings,
+    super.help,
   });
 
   /// Picker items (should be CNChildText, CNChildImage, or CNChildLabel with tags).
@@ -419,6 +437,7 @@ class CNChildPicker extends CNChild {
       'type': 'picker',
       'tag': tag,
       'enabled': enabled,
+      'help': help,
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'children': children.map((c) => c.toChildPayload(context)).toList(),
@@ -448,6 +467,7 @@ class CNChildToggle extends CNChild {
     super.foregroundColor,
     super.constraints,
     super.paddings,
+    super.help,
   });
 
   /// Control size.
@@ -471,6 +491,7 @@ class CNChildToggle extends CNChild {
       'type': 'toggle',
       'tag': tag,
       'enabled': enabled,
+      'help': help,
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'isOn': isOn,
@@ -497,6 +518,7 @@ class CNChildTextField extends CNChild {
     super.foregroundColor,
     super.constraints,
     super.paddings,
+    super.help,
   });
 
   /// Control size.
@@ -517,6 +539,7 @@ class CNChildTextField extends CNChild {
       'type': 'textField',
       'tag': tag,
       'enabled': enabled,
+      'help': help,
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'text': text,
@@ -547,6 +570,7 @@ class CNChildLabel extends CNChild {
     super.constraints,
     super.paddings,
     super.tag,
+    super.help,
   });
 
   final CNFont? font;
@@ -565,6 +589,7 @@ class CNChildLabel extends CNChild {
       'type': 'label',
       'tag': tag,
       'enabled': enabled,
+      'help': help,
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'title': title,

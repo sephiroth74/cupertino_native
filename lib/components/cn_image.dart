@@ -22,6 +22,7 @@ class CNImage2 extends CNWidget {
     this.symbolColorRenderingMode,
     this.foregroundStyleColors,
     this.paddings,
+    this.help,
   });
 
   /// Optional font to apply to the image.
@@ -44,6 +45,9 @@ class CNImage2 extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final String? help;
 
   @override
   final EdgeInsetsGeometry? paddings;

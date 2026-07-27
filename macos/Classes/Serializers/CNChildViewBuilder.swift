@@ -40,6 +40,8 @@ enum CNChildViewBuilder {
             view = AnyView(view.disabled(!enabled))
         }
 
+        view = CNViewModifierApplicator.applyHelp(dict["help"] as? String, to: view)
+
         return view
     }
 

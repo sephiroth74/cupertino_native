@@ -35,6 +35,9 @@ abstract class CNWidget extends StatefulWidget {
   /// Accepts a [Color] or a [CNShapeStyle] (gradient).
   Object? get tint;
 
+  /// Optional tooltip text shown on hover (SwiftUI `.help()`).
+  String? get help;
+
   /// Serializes the shared modifier fields into a payload map.
   /// Subclasses should call this from [toPayload] to include the common fields.
   Map<String, dynamic> writeSharedFields(
@@ -48,6 +51,7 @@ abstract class CNWidget extends StatefulWidget {
     );
 
     payload['debugLog'] = debugLog;
+    payload['help'] = help;
     payload['foregroundColor'] = resolveColorToArgb(foregroundColor, context);
     if (tint is CNShapeStyle) {
       payload['tint'] = (tint! as CNShapeStyle).toMap(context);

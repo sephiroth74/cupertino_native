@@ -40,6 +40,7 @@ class CNSlider2 extends CNWidget {
     this.tint,
     this.foregroundColor,
     this.paddings,
+    this.help,
   }) : assert(min < max),
        assert(value >= min && value <= max),
        assert(step == null || step > 0),
@@ -80,6 +81,9 @@ class CNSlider2 extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final String? help;
 
   @override
   final EdgeInsetsGeometry? paddings;

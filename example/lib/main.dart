@@ -151,27 +151,9 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // SizedBox(
-        //   width: 250,
-        //   child: _SideBar(
-        //     selectedIndex: _selectedIndex,
-        //     accentColor: widget.accentColor,
-        //     onItemSelected: (index) {
-        //       setState(() {
-        //         _selectedIndex = index;
-        //       });
-        //     },
-        //   ),
-        // ),
-        Expanded(
-          child: KeyedSubtree(
-            key: ValueKey(widget.selectedIndex),
-            child: Container(color: CNTheme.of(context).canvasColor.withAlpha(127), child: _entries[widget.selectedIndex].page),
-          ),
-        ),
-      ],
+    return KeyedSubtree(
+      key: ValueKey(widget.selectedIndex),
+      child: Container(color: CNTheme.of(context).canvasColor.withAlpha(127), child: _entries[widget.selectedIndex].page),
     );
   }
 }
@@ -282,6 +264,7 @@ class _MyAppState extends State<MyApp> {
                             title: 'Toggle Navigation',
                             systemImage: 'sidebar.left',
                             labelStyle: CNLabel2Style.iconOnly,
+                            help: 'Toggle the navigation sidebar',
                           ),
                         ],
                       ),

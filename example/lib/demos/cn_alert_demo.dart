@@ -53,59 +53,62 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
   Widget build(BuildContext context) {
     return CNPageScaffold(
       navigationBar: const CNNavigationBar(middle: Text('Alert')),
-      child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            CNButton2(
-              onPressed: _showInfoAlert,
-              shrink: true,
-              controlSize: CNControlSize.large,
-              children: [
-                CNChildLabel(
-                  'Show Info Alert',
-                  systemImage: 'info.triangle',
-                  constraints: BoxConstraints.tightFor(width: 250),
-                ),
+      child: CNContentArea(
+        builder: (context, scrollController) {
+          return ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.all(16),
+            children: [
+              CNButton2(
+                onPressed: _showInfoAlert,
+                shrink: true,
+                controlSize: CNControlSize.large,
+                children: [
+                  CNChildLabel(
+                    'Show Info Alert',
+                    systemImage: 'info.triangle',
+                    constraints: BoxConstraints.tightFor(width: 250),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              CNButton2(
+                shrink: true,
+                controlSize: CNControlSize.large,
+                onPressed: _showConfirmAlert,
+                children: [
+                  CNChildLabel(
+                    'Show Confirm Alert',
+                    systemImage: 'questionmark.circle',
+                    constraints: BoxConstraints.tightFor(width: 250),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              CNButton2(
+                debugLog: false,
+                shrink: true,
+                controlSize: CNControlSize.large,
+                onPressed: _showCriticalAlert,
+                children: [
+                  CNChildLabel(
+                    'Show Critical Alert',
+                    systemImage: 'exclamationmark.triangle',
+                    constraints: BoxConstraints.tightFor(width: 250),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (_lastResult != null) ...[
+                Text('Selected index: ${_lastResult!.selectedIndex}'),
+                const SizedBox(height: 4),
+                Text('Selected tag: ${_lastResult!.selectedTag ?? '-'}'),
+                const SizedBox(height: 4),
+                Text('Suppression selected: ${_lastResult!.suppressionSelected}'),
               ],
-            ),
-            const SizedBox(height: 12),
-            CNButton2(
-              shrink: true,
-              controlSize: CNControlSize.large,
-              onPressed: _showConfirmAlert,
-              children: [
-                CNChildLabel(
-                  'Show Confirm Alert',
-                  systemImage: 'questionmark.circle',
-                  constraints: BoxConstraints.tightFor(width: 250),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            CNButton2(
-              debugLog: false,
-              shrink: true,
-              controlSize: CNControlSize.large,
-              onPressed: _showCriticalAlert,
-              children: [
-                CNChildLabel(
-                  'Show Critical Alert',
-                  systemImage: 'exclamationmark.triangle',
-                  constraints: BoxConstraints.tightFor(width: 250),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (_lastResult != null) ...[
-              Text('Selected index: ${_lastResult!.selectedIndex}'),
-              const SizedBox(height: 4),
-              Text('Selected tag: ${_lastResult!.selectedTag ?? '-'}'),
-              const SizedBox(height: 4),
-              Text('Suppression selected: ${_lastResult!.suppressionSelected}'),
             ],
-          ],
-        ),
+          );
+        }
       ),
     );
   }

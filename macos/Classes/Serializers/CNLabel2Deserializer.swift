@@ -52,6 +52,7 @@ enum CNLabel2Deserializer {
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
             view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
+            view = CNViewModifierApplicator.applyHelp(payload.help, to: view)
 
             if let onSizeChanged {
                 view = AnyView(

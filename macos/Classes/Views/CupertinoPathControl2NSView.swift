@@ -102,6 +102,10 @@ class CupertinoPathControl2NSView: NSView, NSPathControlDelegate {
             pathControl.isEnabled = enabled
         }
 
+        if args.keys.contains("help") {
+            pathControl.toolTip = args["help"] as? String
+        }
+
         if let value = args["editable"] as? Bool {
             editable = value
             pathControl.isEditable = value

@@ -20,6 +20,7 @@ class CNText2 extends CNWidget {
     this.foregroundColor,
     this.tint,
     this.paddings,
+    this.help,
     this.lineLimit,
     this.lineLimitReservesSpace,
     this.textScale,
@@ -49,6 +50,9 @@ class CNText2 extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final String? help;
 
   @override
   final EdgeInsetsGeometry? paddings;

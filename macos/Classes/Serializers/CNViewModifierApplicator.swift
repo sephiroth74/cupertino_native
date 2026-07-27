@@ -217,6 +217,13 @@ enum CNViewModifierApplicator {
         }
     }
 
+    static func applyHelp(_ help: String?, to view: AnyView) -> AnyView {
+        guard let help, !help.isEmpty else {
+            return view
+        }
+        return AnyView(view.help(help))
+    }
+
     static func applyButtonStyle(_ style: String?, to view: AnyView) -> AnyView {
         switch style {
         case "plain":

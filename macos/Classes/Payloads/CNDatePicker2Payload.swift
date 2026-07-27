@@ -9,6 +9,7 @@ struct CNDatePicker2Payload: CNSharedPayloadFields {
     var paddings: CNPaddingsPayload?
     var tint: Any?
     var foregroundColor: Int?
+    var help: String?
 
     // DatePicker-specific fields
     var selection: Double?
@@ -28,6 +29,7 @@ struct CNDatePicker2Payload: CNSharedPayloadFields {
         paddings = nil
         tint = nil
         foregroundColor = nil
+        help = nil
         selection = nil
         displayedComponents = ["date"]
         datePickerStyle = "automatic"

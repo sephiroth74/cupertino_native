@@ -41,6 +41,7 @@ class CNToggle2 extends CNWidget {
     this.tint,
     this.foregroundColor,
     this.paddings,
+    this.help,
   });
 
   /// The content of the toggle (label area). If null, an empty label is used.
@@ -64,6 +65,9 @@ class CNToggle2 extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final String? help;
 
   @override
   final EdgeInsetsGeometry? paddings;
