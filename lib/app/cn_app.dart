@@ -170,7 +170,7 @@ class CNApp extends StatefulWidget {
   final bool debugShowCheckedModeBanner;
 
   /// {@macro flutter.widgets.widgetsApp.home}
-  final Widget? home;
+  final WidgetBuilder? home;
 
   /// {@macro flutter.widgets.widgetsApp.initialRoute}
   final String? initialRoute;
@@ -325,7 +325,6 @@ class _CNAppState extends State<CNApp> {
             final mode = widget.themeMode ?? ThemeMode.system;
             final platformBrightness = MediaQuery.platformBrightnessOf(context);
             final useDarkTheme = mode == ThemeMode.dark || (mode == ThemeMode.system && platformBrightness == Brightness.dark);
-            debugPrint('CNApp: platformBrightness: $platformBrightness, mode: $mode, useDarkTheme: $useDarkTheme');
 
             late CNThemeData theme;
             if (useDarkTheme) {
@@ -390,7 +389,7 @@ class _CNAppState extends State<CNApp> {
       key: GlobalObjectKey(this),
       navigatorKey: widget.navigatorKey,
       navigatorObservers: widget.navigatorObservers!,
-      home: widget.home,
+      home: widget.home != null ? Builder(builder: widget.home!) : null,
       routes: widget.routes!,
       initialRoute: widget.initialRoute,
       onGenerateRoute: widget.onGenerateRoute,

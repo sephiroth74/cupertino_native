@@ -190,120 +190,208 @@ class _MyAppState extends State<MyApp> {
           themeMode: appTheme.mode,
           color: null,
           debugShowCheckedModeBanner: false,
-          home: CNWindow(
-            state: NSVisualEffectViewState.followsWindowActiveState,
-            backgroundColor: CNTheme.of(context).canvasColor.withAlpha(51),
-            sidebar: CNSidebar(
-              builder: (context, scrollController) {
-                return _SideBar(
-                  selectedIndex: selectedIndex,
-                  scrollController: scrollController,
-                  onItemSelected: (index) {
-                    setState(() {
-                      selectedIndex = index;
-                    });
-                  },
-                );
-              },
-              minWidth: 250,
-              isResizable: true,
-              maxWidth: 400,
-              startWidth: 250,
-              dragClosed: false,
-            ),
-            child: Builder(
-              builder: (context) {
-                final theme = CNTheme.of(context);
-                final accentColor = theme.accentColor;
+          home: (context) {
+            final accentColor = CNTheme.of(context).accentColor;
+            debugPrint('Building home with accentColor: $accentColor, brightness: $brightness, appTheme.mode: ${appTheme.mode}');
 
-                return CNToolbar(
-                  config: CNToolbarConfig(
-                    onSearchChanged: (value) {
-                      debugPrint('Search changed: $value');
+            return CNWindow(
+              state: NSVisualEffectViewState.followsWindowActiveState,
+              backgroundColor: CNTheme.of(context).canvasColor.withAlpha(51),
+              sidebar: CNSidebar(
+                builder: (context, scrollController) {
+                  return _SideBar(
+                    selectedIndex: selectedIndex,
+                    scrollController: scrollController,
+                    onItemSelected: (index) {
+                      setState(() {
+                        selectedIndex = index;
+                      });
                     },
-                    onItemPressed: (value) {
-                      debugPrint('Toolbar item pressed: $value');
-                      final tags = value.split(':');
-                      if (tags.length == 2 && tags[0] == 'theme_picker') {
-                        final selectedTag = tags[1];
-                        if (selectedTag == ThemeMode.system.name) {
-                          appTheme.mode = ThemeMode.system;
-                        } else if (selectedTag == ThemeMode.light.name) {
-                          appTheme.mode = ThemeMode.light;
-                        } else {
-                          appTheme.mode = ThemeMode.dark;
-                        }
-                      } else if (tags.length == 2 && tags[0] == 'accent_color') {
-                        final selectedTag = tags[1];
-                        if (selectedTag == 'system') {
-                          context.read<CNTheme>().data.copyWith(primaryColor: SystemTheme.accentColor.accent);
-                        } else {
-                          final selectedColor = kSystemColors[selectedTag];
-                          if (selectedColor != null) {
-                            context.read<CNTheme>().data.copyWith(primaryColor: selectedColor);
-                          }
-                        }
-                        setState(() {});
-                      } else if (tags.length == 1 && tags[0] == 'toggle_navigation') {
-                        setState(() {
-                          CNWindowScope.of(context).toggleSidebar();
-                        });
-                      }
-                    },
-                    searchable: true,
-                    titleDisplayMode: CNToolbarTitleDisplayMode.automatic,
-                    toolbarBackground: accentColor.withAlpha(244),
-                    toolbarBlurEnabled: true,
-                    toolbarBlurMaterial: CNToolbarBlurMaterial.titlebar,
-                    title: CNChildText('Cupertino Native Demo'),
-                    groups: [
-                      CNToolbarItemGroup(
-                        placement: CNToolbarPlacement.navigation,
-                        children: [
-                          CNChildButton(
-                            tag: 'toggle_navigation',
-                            title: 'Toggle Navigation',
-                            systemImage: 'sidebar.left',
-                            labelStyle: CNLabel2Style.iconOnly,
-                            help: 'Toggle the navigation sidebar',
-                          ),
-                        ],
-                      ),
-                      CNToolbarItemGroup(
-                        placement: CNToolbarPlacement.automatic,
-                        children: [
-                          CNChildPicker(
-                            pickerStyle: CNPickerStyle2.menu.name,
-                            labelStyle: CNLabel2Style.titleAndIcon,
-                            tag: 'theme_picker',
-                            label: [
-                              CNChildLabel(
-                                appTheme.mode.name,
-                                labelStyle: CNLabel2Style.titleAndIcon,
-                                tag: appTheme.mode.name,
-                                systemImage: appTheme.mode == ThemeMode.system
-                                    ? 'sun.max'
-                                    : (appTheme.mode == ThemeMode.light ? 'sun.max' : 'moon.fill'),
-                              ),
-                            ],
-                            children: [
-                              CNChildLabel('System Theme', tag: ThemeMode.system.name, systemImage: 'sun.lefthalf.filled'),
-                              CNChildLabel('Light Theme', tag: ThemeMode.light.name, systemImage: 'sun.max'),
-                              CNChildLabel('Dark Theme', tag: ThemeMode.dark.name, systemImage: 'moon.fill'),
-                            ],
-                            selection: appTheme.mode.name,
-                          ),
-                        ],
-                      ),
+                  );
+                },
+                minWidth: 250,
+                isResizable: true,
+                maxWidth: 400,
+                startWidth: 250,
+                dragClosed: false,
+              ),
+              statusBar: CNStatusBar(
+                height: 32,
+                color: accentColor.withAlpha(127),
+                expandedColor: CNTheme.of(context).canvasColor,
+                expansionMode: CNStatusBarExpansionMode.overAll,
+                presentationStyle: CNStatusBarPresentationStyle.push,
+                expandedMinHeight: 120,
+                expandedMaxHeight: 400,
+                expandedStartHeight: 200,
+                dragClosed: true,
+                leftItems: (context, isExpanded) {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(width: 8),
+                      _StatusBarButton(icon: CupertinoIcons.exclamationmark_triangle, label: '0', onPressed: () {}),
+                      _StatusBarButton(icon: CupertinoIcons.info_circle, label: '2', onPressed: () {}),
                     ],
-                  ),
-                  child: _DesktopDemoShell(selectedIndex: selectedIndex),
-                );
-              },
-            ),
-          ),
+                  );
+                },
+                rightItems: (context, isExpanded) {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _StatusBarButton(
+                        icon: CupertinoIcons.text_alignleft,
+                        label: 'Terminal',
+                        isActive: isExpanded,
+                        onPressed: () {
+                          CNWindowScope.of(context).toggleStatusBar();
+                        },
+                      ),
+                      _StatusBarButton(icon: CupertinoIcons.doc_text, label: 'Dart', onPressed: () {}),
+                      _StatusBarButton(icon: CupertinoIcons.checkmark_circle, label: 'UTF-8', onPressed: () {}),
+                      const SizedBox(width: 8),
+                    ],
+                  );
+                },
+                expandedBuilder: (context, scrollController) {
+                  return ListView.builder(
+                    controller: scrollController,
+                    padding: const EdgeInsets.all(8),
+                    itemCount: 50,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 1),
+                        child: Text(
+                          '[\$ flutter run] Line $index: Application output...',
+                          style: TextStyle(fontSize: 12, fontFamily: 'Menlo', color: CNTheme.of(context).labelColor),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+              child: Builder(
+                builder: (context) {
+                  return CNToolbar(
+                    config: CNToolbarConfig(
+                      onSearchChanged: (value) {
+                        debugPrint('Search changed: $value');
+                      },
+                      onItemPressed: (value) {
+                        debugPrint('Toolbar item pressed: $value');
+                        final tags = value.split(':');
+                        if (tags.length == 2 && tags[0] == 'theme_picker') {
+                          final selectedTag = tags[1];
+                          if (selectedTag == ThemeMode.system.name) {
+                            appTheme.mode = ThemeMode.system;
+                          } else if (selectedTag == ThemeMode.light.name) {
+                            appTheme.mode = ThemeMode.light;
+                          } else {
+                            appTheme.mode = ThemeMode.dark;
+                          }
+                        } else if (tags.length == 2 && tags[0] == 'accent_color') {
+                          final selectedTag = tags[1];
+                          if (selectedTag == 'system') {
+                            context.read<CNTheme>().data.copyWith(primaryColor: SystemTheme.accentColor.accent);
+                          } else {
+                            final selectedColor = kSystemColors[selectedTag];
+                            if (selectedColor != null) {
+                              context.read<CNTheme>().data.copyWith(primaryColor: selectedColor);
+                            }
+                          }
+                          setState(() {});
+                        } else if (tags.length == 1 && tags[0] == 'toggle_navigation') {
+                          setState(() {
+                            CNWindowScope.of(context).toggleSidebar();
+                          });
+                        }
+                      },
+                      searchable: true,
+                      titleDisplayMode: CNToolbarTitleDisplayMode.automatic,
+                      toolbarBackground: accentColor.withAlpha(244),
+                      toolbarBlurEnabled: true,
+                      toolbarBlurMaterial: CNToolbarBlurMaterial.titlebar,
+                      title: CNChildText('Cupertino Native Demo'),
+                      groups: [
+                        CNToolbarItemGroup(
+                          placement: CNToolbarPlacement.navigation,
+                          children: [
+                            CNChildButton(
+                              tag: 'toggle_navigation',
+                              title: 'Toggle Navigation',
+                              systemImage: 'sidebar.left',
+                              labelStyle: CNLabel2Style.iconOnly,
+                              help: 'Toggle the navigation sidebar',
+                            ),
+                          ],
+                        ),
+                        CNToolbarItemGroup(
+                          placement: CNToolbarPlacement.automatic,
+                          children: [
+                            CNChildPicker(
+                              pickerStyle: CNPickerStyle2.menu.name,
+                              labelStyle: CNLabel2Style.titleAndIcon,
+                              tag: 'theme_picker',
+                              label: [
+                                CNChildLabel(
+                                  appTheme.mode.name,
+                                  labelStyle: CNLabel2Style.titleAndIcon,
+                                  tag: appTheme.mode.name,
+                                  systemImage: appTheme.mode == ThemeMode.system
+                                      ? 'sun.max'
+                                      : (appTheme.mode == ThemeMode.light ? 'sun.max' : 'moon.fill'),
+                                ),
+                              ],
+                              children: [
+                                CNChildLabel('System Theme', tag: ThemeMode.system.name, systemImage: 'sun.lefthalf.filled'),
+                                CNChildLabel('Light Theme', tag: ThemeMode.light.name, systemImage: 'sun.max'),
+                                CNChildLabel('Dark Theme', tag: ThemeMode.dark.name, systemImage: 'moon.fill'),
+                              ],
+                              selection: appTheme.mode.name,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    child: _DesktopDemoShell(selectedIndex: selectedIndex),
+                  );
+                },
+              ),
+            );
+          },
         );
       },
+    );
+  }
+}
+
+class _StatusBarButton extends StatelessWidget {
+  const _StatusBarButton({required this.icon, required this.label, required this.onPressed, this.isActive = false});
+
+  final IconData icon;
+  final bool isActive;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: isActive ? CNColors.fillPrimary.withAlpha(40) : Colors.transparent,
+          borderRadius: BorderRadius.circular(3),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 12, color: CNColors.label),
+            const SizedBox(width: 4),
+            Text(label, style: const TextStyle(fontSize: 11, color: CNColors.label)),
+          ],
+        ),
+      ),
     );
   }
 }

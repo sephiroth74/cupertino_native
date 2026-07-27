@@ -52,6 +52,7 @@ export 'theme/cn_theme_data.dart';
 export 'app/cn_app.dart';
 export 'app/cn_main_window_listener.dart';
 export 'app/cn_sidebar.dart';
+export 'app/cn_status_bar.dart';
 export 'app/cn_window.dart';
 export 'app/cn_scrollbar.dart';
 export 'app/cn_content_area.dart';

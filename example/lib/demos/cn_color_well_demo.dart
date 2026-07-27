@@ -15,61 +15,62 @@ class _ColorWellDemoPageState extends State<ColorWellDemoPage> {
   Widget build(BuildContext context) {
     return CNPageScaffold(
       navigationBar: const CNNavigationBar(middle: Text('Color Well')),
-      child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            const Text('Styles'),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                SizedBox(
-                  width: 44,
-                  height: 24,
-                  child: CNColorWell2(
+      child: CNContentArea(
+        builder: (context, scrollController) {
+          return ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.all(16),
+            children: [
+              const Text('Styles'),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 44,
+                    height: 24,
+                    child: CNColorWell2(
+                      color: _color,
+                      style: CNColorWellStyle.regular,
+                      onColorChanged: (color) {
+                        setState(() => _color = color);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  CNColorWell2(
                     color: _color,
-                    style: CNColorWellStyle.regular,
+                    style: CNColorWellStyle.expanded,
                     onColorChanged: (color) {
                       setState(() => _color = color);
                     },
                   ),
-                ),
-                const SizedBox(width: 12),
-                CNColorWell2(
-                  color: _color,
-                  style: CNColorWellStyle.expanded,
-                  onColorChanged: (color) {
-                    setState(() => _color = color);
-                  },
-                ),
-                const SizedBox(width: 12),
-                CNColorWell2(
-                  color: _color,
-                  style: CNColorWellStyle.minimal,
-                  supportsAlpha: false,
-                  onColorChanged: (color) {
-                    setState(() => _color = color);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            const Text('Current color preview'),
-            const SizedBox(height: 12),
-            Container(
-              height: 64,
-              decoration: BoxDecoration(
-                color: _color,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: CupertinoColors.separator),
+                  const SizedBox(width: 12),
+                  CNColorWell2(
+                    color: _color,
+                    style: CNColorWellStyle.minimal,
+                    supportsAlpha: false,
+                    onColorChanged: (color) {
+                      setState(() => _color = color);
+                    },
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'ARGB: 0x${_color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}',
-            ),
-          ],
-        ),
+              const SizedBox(height: 24),
+              const Text('Current color preview'),
+              const SizedBox(height: 12),
+              Container(
+                height: 64,
+                decoration: BoxDecoration(
+                  color: _color,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: CupertinoColors.separator),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text('ARGB: 0x${_color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}'),
+            ],
+          );
+        },
       ),
     );
   }
