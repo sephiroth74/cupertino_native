@@ -6,6 +6,7 @@ export 'components/cn_accent_color_listener.dart';
 export 'components/cn_alert2.dart';
 export 'components/cn_button.dart';
 export 'components/cn_child.dart';
+export 'components/cn_combo_box.dart';
 export 'components/cn_color_well.dart';
 export 'components/cn_context_menu.dart';
 export 'components/cn_date_picker.dart';
@@ -48,6 +49,11 @@ export 'style/text.dart';
 export 'style/text_field_bezel_style.dart';
 export 'theme/cn_theme.dart';
 export 'theme/cn_theme_data.dart';
+export 'app/cn_app.dart';
+export 'app/cn_main_window_listener.dart';
+export 'app/cn_sidebar.dart';
+export 'app/cn_window.dart';
+export 'app/cn_scrollbar.dart';
 
 /// Top-level facade for simple plugin interactions.
 class CupertinoNative {

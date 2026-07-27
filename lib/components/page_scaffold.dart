@@ -30,7 +30,7 @@ class CNPageScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedBackground = backgroundColor ?? CNTheme.of(context).canvasColor;
+    final resolvedBackground = backgroundColor;
     final mediaQuery = MediaQuery.of(context);
 
     Widget paddedContent = child;

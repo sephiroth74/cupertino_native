@@ -1,5 +1,3 @@
-import 'package:cupertino_native/app/cn_main_window_listener.dart';
-import 'package:cupertino_native/app/cn_scrollbar.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart' as c;
 import 'package:flutter/material.dart';
@@ -69,7 +67,7 @@ class CNApp extends StatefulWidget {
     this.restorationScopeId,
     this.scrollBehavior = const MacosScrollBehavior(),
     this.themeMode,
-    this.theme,
+    this.lightTheme,
     this.darkTheme,
   }) : routeInformationProvider = null,
        routeInformationParser = null,
@@ -104,7 +102,7 @@ class CNApp extends StatefulWidget {
     this.restorationScopeId,
     this.scrollBehavior = const MacosScrollBehavior(),
     this.themeMode,
-    this.theme,
+    this.lightTheme,
     this.darkTheme,
   }) : assert(routerDelegate != null || routerConfig != null),
        assert(supportedLocales.isNotEmpty),
@@ -176,6 +174,9 @@ class CNApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.initialRoute}
   final String? initialRoute;
+
+  /// The style used if [themeMode] is [ThemeMode.light]
+  final CNThemeData? lightTheme;
 
   /// {@macro flutter.widgets.widgetsApp.locale}
   final Locale? locale;
@@ -290,9 +291,6 @@ class CNApp extends StatefulWidget {
   /// It is passed along unmodified to the [WidgetsApp] built by this widget.
   final Iterable<Locale> supportedLocales;
 
-  /// The style used if [themeMode] is [ThemeMode.light]
-  final CNThemeData? theme;
-
   /// The current theme mode.
   final ThemeMode? themeMode;
 
@@ -333,7 +331,7 @@ class _CNAppState extends State<CNApp> {
             if (useDarkTheme) {
               theme = widget.darkTheme ?? CNThemeData.dark(accentColor: accentColor, isMainWindow: isMainWindow);
             } else {
-              theme = widget.theme ?? CNThemeData.light(accentColor: accentColor, isMainWindow: isMainWindow);
+              theme = widget.lightTheme ?? CNThemeData.light(accentColor: accentColor, isMainWindow: isMainWindow);
             }
 
             return CNTheme(

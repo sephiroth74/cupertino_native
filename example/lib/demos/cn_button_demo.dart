@@ -37,6 +37,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
     isProgressRunning = true;
     Future.doWhile(() async {
       await Future.delayed(const Duration(milliseconds: 100));
+      if(!mounted) return false;
       setState(() {
         if (!mounted) {
           return;

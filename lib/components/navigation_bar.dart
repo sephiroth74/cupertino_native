@@ -19,7 +19,7 @@ class CNNavigationBar extends StatelessWidget implements CNObstructingPreferredS
     this.middle,
     this.trailing,
     this.backgroundColor,
-    this.enableBackgroundFilterBlur = true,
+    this.enableBackgroundFilterBlur = false,
     this.height = 44,
     this.padding = const EdgeInsets.symmetric(horizontal: 12),
   });
@@ -50,14 +50,14 @@ class CNNavigationBar extends StatelessWidget implements CNObstructingPreferredS
 
   @override
   bool shouldFullyObstruct(BuildContext context) {
-    final resolved = backgroundColor ?? CNTheme.of(context).canvasColor;
-    return resolved.a == 1.0;
+    final resolved = backgroundColor;
+    return resolved?.a == 1.0;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = CNTheme.of(context);
-    final resolvedBackground = backgroundColor ?? theme.canvasColor;
+    final resolvedBackground = backgroundColor;
     final topInset = MediaQuery.of(context).padding.top;
 
     Widget bar = Container(
