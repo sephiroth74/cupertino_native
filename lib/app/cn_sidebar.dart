@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:macos_window_utils/macos_window_utils.dart';
 
 /// Configuration for a resizable sidebar panel in a [CNWindow].
 class CNSidebar {
@@ -7,7 +8,7 @@ class CNSidebar {
     required this.builder,
     required this.minWidth,
     this.key,
-    this.decoration,
+    this.backgroundColor,
     this.isResizable = true,
     this.dragClosed = true,
     double? dragClosedBuffer,
@@ -17,13 +18,14 @@ class CNSidebar {
     this.padding = EdgeInsets.zero,
     this.windowBreakpoint = 556.0,
     this.shownByDefault = true,
+    this.material = NSVisualEffectViewMaterial.sidebar,
   }) : dragClosedBuffer = dragClosedBuffer ?? minWidth / 2;
+
+  /// Optional background color applied to the sidebar container.
+  final Color? backgroundColor;
 
   /// The builder function that constructs the sidebar content.
   final ScrollableWidgetBuilder builder;
-
-  /// Optional decoration applied to the sidebar container.
-  final BoxDecoration? decoration;
 
   /// Whether dragging the sidebar below its minimum width closes it.
   final bool dragClosed;
@@ -36,6 +38,9 @@ class CNSidebar {
 
   /// Optional key to identify the sidebar for state preservation.
   final Key? key;
+
+  /// The material to use for the sidebar's visual effect view. Defaults to [NSVisualEffectViewMaterial.sidebar].
+  final NSVisualEffectViewMaterial material;
 
   /// The maximum width the sidebar can be resized to.
   final double? maxWidth;

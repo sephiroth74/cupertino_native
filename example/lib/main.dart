@@ -120,36 +120,6 @@ class _DesktopDemoShell extends StatefulWidget {
 
 class _DesktopDemoShellState extends State<_DesktopDemoShell> {
   @override
-  void didUpdateWidget(covariant _DesktopDemoShell oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // if (mounted) {
-    //   setBrightness(widget.brightness);
-    // }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // setWindowEffect();
-  }
-
-  void setBrightness(Brightness brightness) {
-    // this.brightness = brightness;
-    // setWindowEffect();
-  }
-
-  void setWindowEffect() {
-    // Window.setEffect(effect: value!, color: color, dark: widget.brightness == Brightness.dark);
-    // WindowManipulator.setMaterial(NSVisualEffectViewMaterial.fullScreenUI);
-    // if (Platform.isMacOS) {
-    //   if (widget.brightness != Brightness.light && widget.brightness != Brightness.dark) {
-    //     WindowManipulator.overrideMacOSBrightness(dark: widget.brightness == Brightness.dark);
-    //   }
-    // }
-    setState(() {});
-  }
-
-  @override
   Widget build(BuildContext context) {
     return KeyedSubtree(
       key: ValueKey(widget.selectedIndex),
@@ -160,7 +130,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
 
 class _MyAppState extends State<MyApp> {
   late Brightness brightness;
-  late NSWindowDelegateHandle? handle;
   int selectedIndex = 0;
   bool sideBarClosed = false;
 
@@ -196,7 +165,7 @@ class _MyAppState extends State<MyApp> {
 
             return CNWindow(
               state: NSVisualEffectViewState.followsWindowActiveState,
-              backgroundColor: CNTheme.of(context).canvasColor.withAlpha(51),
+              backgroundColor: CNTheme.of(context).canvasColor.withAlpha(1),
               sidebar: CNSidebar(
                 builder: (context, scrollController) {
                   return _SideBar(
@@ -214,6 +183,8 @@ class _MyAppState extends State<MyApp> {
                 maxWidth: 400,
                 startWidth: 250,
                 dragClosed: false,
+                material: NSVisualEffectViewMaterial.fullScreenUI,
+                backgroundColor: CNColors.transparent,
               ),
               statusBar: CNStatusBar(
                 height: 32,

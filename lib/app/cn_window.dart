@@ -229,19 +229,7 @@ class _CNWindowState extends State<CNWindow> {
     late Color backgroundColor = widget.backgroundColor ?? theme.canvasColor;
     late Color endSidebarBackgroundColor;
     Color dividerColor = theme.separatorColor;
-
-    if (sidebar?.decoration?.color != null) {
-      sidebar!.decoration!.color!;
-    }
-
     CNBrightnessOverrideHandler.ensureMatchingBrightness(theme.brightness);
-
-    if (endSidebar?.decoration?.color != null) {
-      endSidebarBackgroundColor = endSidebar!.decoration!.color!;
-    } else {
-      endSidebarBackgroundColor = theme.canvasColor;
-    }
-
     const curve = Curves.linearToEaseOut;
     final duration = Duration(milliseconds: _sidebarSlideDuration);
 
@@ -298,12 +286,15 @@ class _CNWindowState extends State<CNWindow> {
                 width: _sidebarWidth,
                 child: VisualEffectSubviewContainer(
                   state: state,
-                  material: NSVisualEffectViewMaterial.sidebar,
+                  material: sidebar.material,
                   child: DecoratedBox(
                     decoration: const BoxDecoration(color: Color.fromRGBO(0, 0, 0, 1.0), backgroundBlendMode: BlendMode.clear),
-                    child: CNScrollbar(
-                      controller: _sidebarScrollController,
-                      child: Padding(padding: sidebar.padding, child: sidebar.builder(context, _sidebarScrollController)),
+                    child: Container(
+                      color: sidebar.backgroundColor ?? theme.canvasColor,
+                      child: CNScrollbar(
+                        controller: _sidebarScrollController,
+                        child: Padding(padding: sidebar.padding, child: sidebar.builder(context, _sidebarScrollController)),
+                      ),
                     ),
                   ),
                 ),
@@ -378,16 +369,28 @@ class _CNWindowState extends State<CNWindow> {
                 height: stackHeight,
                 width: _endSidebarWidth,
                 child: Container(
-                  color: endSidebarBackgroundColor,
                   constraints: BoxConstraints(
                     minWidth: endSidebar.minWidth,
                     maxWidth: endSidebar.maxWidth!,
                     minHeight: stackHeight,
                     maxHeight: stackHeight,
                   ).normalize(),
-                  child: CNScrollbar(
-                    controller: _endSidebarScrollController,
-                    child: Padding(padding: endSidebar.padding, child: endSidebar.builder(context, _endSidebarScrollController)),
+                  child: VisualEffectSubviewContainer(
+                    state: state,
+                    material: endSidebar.material,
+                    child: DecoratedBox(
+                      decoration: const BoxDecoration(color: Color.fromRGBO(0, 0, 0, 1.0), backgroundBlendMode: BlendMode.clear),
+                      child: Container(
+                        color: endSidebar.backgroundColor ?? theme.canvasColor,
+                        child: CNScrollbar(
+                          controller: _endSidebarScrollController,
+                          child: Padding(
+                            padding: endSidebar.padding,
+                            child: endSidebar.builder(context, _endSidebarScrollController),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -493,11 +496,7 @@ class _CNWindowState extends State<CNWindow> {
               ),
 
             // Status bar panel resizer: push mode (vertical drag)
-            if (hasStatusBar &&
-                statusBar.isResizable &&
-                statusBar.expandedBuilder != null &&
-                _showStatusBarPanel &&
-                !isFloating)
+            if (hasStatusBar && statusBar.isResizable && statusBar.expandedBuilder != null && _showStatusBarPanel && !isFloating)
               AnimatedPositioned(
                 curve: curve,
                 duration: duration,
@@ -545,11 +544,7 @@ class _CNWindowState extends State<CNWindow> {
               ),
 
             // Status bar panel resizer: floating mode (vertical drag on top edge)
-            if (hasStatusBar &&
-                statusBar.isResizable &&
-                statusBar.expandedBuilder != null &&
-                _showStatusBarPanel &&
-                isFloating)
+            if (hasStatusBar && statusBar.isResizable && statusBar.expandedBuilder != null && _showStatusBarPanel && isFloating)
               AnimatedPositioned(
                 curve: curve,
                 duration: duration,
@@ -586,10 +581,7 @@ class _CNWindowState extends State<CNWindow> {
                       }
                     });
                   },
-                  child: MouseRegion(
-                    cursor: _statusBarCursor,
-                    child: const SizedBox.expand(),
-                  ),
+                  child: MouseRegion(cursor: _statusBarCursor, child: const SizedBox.expand()),
                 ),
               ),
           ],
@@ -672,13 +664,19 @@ class _StatusBarContent extends StatelessWidget {
       children: [
         if (leftItems != null)
           Expanded(
-            child: Padding(padding: EdgeInsets.only(left: paddingStart), child: leftItems!(context, isExpanded)),
+            child: Padding(
+              padding: EdgeInsets.only(left: paddingStart),
+              child: leftItems!(context, isExpanded),
+            ),
           ),
         if (rightItems != null)
           Expanded(
             child: Align(
               alignment: Alignment.centerRight,
-              child: Padding(padding: EdgeInsets.only(right: paddingEnd), child: rightItems!(context, isExpanded)),
+              child: Padding(
+                padding: EdgeInsets.only(right: paddingEnd),
+                child: rightItems!(context, isExpanded),
+              ),
             ),
           ),
       ],
