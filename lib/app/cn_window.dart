@@ -1,8 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:cupertino_native/app/cn_brightness_override_handler.dart';
+import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native/utils/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:macos_window_utils/macos_window_utils.dart';
@@ -64,6 +66,7 @@ class CNWindowScope extends InheritedWidget {
 
   /// Toggles the [Sidebar] of the [CNWindow].
   void toggleSidebar() {
+    debugPrint('toggleSidebar: $isSidebarShown -> ${!isSidebarShown}');
     _sidebarToggler();
   }
 
@@ -97,6 +100,7 @@ class CNWindow extends StatefulWidget {
     this.backgroundColor,
     this.endSidebar,
     this.statusBar,
+    this.toolbar,
     this.state = NSVisualEffectViewState.followsWindowActiveState,
   });
 
@@ -118,21 +122,28 @@ class CNWindow extends StatefulWidget {
   /// The status bar configuration (bottom).
   final CNStatusBar? statusBar;
 
+  /// The native toolbar configuration.
+  final CNToolbarConfig? toolbar;
+
   @override
   State<CNWindow> createState() => _CNWindowState();
 }
 
 class _CNWindowState extends State<CNWindow> {
+  static const bool _debugToolbar = true;
+  static const MethodChannel _toolbarChannel = MethodChannel('cupertino_native');
+
   SystemMouseCursor _endSidebarCursor = SystemMouseCursors.resizeLeft;
   double _endSidebarDragStartPosition = 0.0;
   double _endSidebarDragStartWidth = 0.0;
   var _endSidebarScrollController = ScrollController();
   double _endSidebarWidth = 0.0;
+  bool _isUpdatingSearchFromNative = false;
+  Map<String, dynamic>? _lastToolbarPayload;
+  final GlobalKey _scopeChildKey = GlobalKey();
   late bool _showEndSidebar = widget.endSidebar?.shownByDefault ?? false;
   bool _showSidebar = true;
-  // Status bar state
   late bool _showStatusBarPanel = widget.statusBar?.shownByDefault ?? false;
-
   SystemMouseCursor _sidebarCursor = SystemMouseCursors.resizeColumn;
   double _sidebarDragStartPosition = 0.0;
   double _sidebarDragStartWidth = 0.0;
@@ -180,10 +191,13 @@ class _CNWindowState extends State<CNWindow> {
       _endSidebarScrollController = ScrollController();
       _addEndSidebarScrollControllerListenerIfNeeded();
     }
+    _syncToolbar();
   }
 
   @override
   void dispose() {
+    _clearToolbar();
+    _toolbarChannel.setMethodCallHandler(null);
     _sidebarScrollController.dispose();
     _endSidebarScrollController.dispose();
     _statusBarScrollController.dispose();
@@ -198,6 +212,8 @@ class _CNWindowState extends State<CNWindow> {
     _statusBarPanelHeight = (widget.statusBar?.expandedStartHeight ?? widget.statusBar?.expandedMinHeight) ?? _statusBarPanelHeight;
     _addSidebarScrollControllerListenerIfNeeded();
     _addEndSidebarScrollControllerListenerIfNeeded();
+    _toolbarChannel.setMethodCallHandler(_handleToolbarCall);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncToolbar());
   }
 
   void _addEndSidebarScrollControllerListenerIfNeeded() {
@@ -210,6 +226,131 @@ class _CNWindowState extends State<CNWindow> {
     if (widget.sidebar?.builder != null) {
       _sidebarScrollController.addListener(() => setState(() {}));
     }
+  }
+
+  void _logToolbar(String message) {
+    if (_debugToolbar) debugPrint('[CNWindow:toolbar] $message');
+  }
+
+  Future<void> _handleToolbarCall(MethodCall call) async {
+    final toolbar = widget.toolbar;
+    if (toolbar == null) return;
+    switch (call.method) {
+      case 'toolbarItemPressed':
+        final tag = call.arguments as String?;
+        _logToolbar('toolbarItemPressed: tag=$tag');
+        if (tag != null) {
+          final scopeContext = _scopeChildKey.currentContext ?? context;
+          toolbar.onItemPressed?.call(scopeContext, tag);
+        }
+      case 'toolbarSearchChanged':
+        final text = call.arguments as String? ?? '';
+        _logToolbar('toolbarSearchChanged: "$text" (fromNative)');
+        _isUpdatingSearchFromNative = true;
+        final scopeContext = _scopeChildKey.currentContext ?? context;
+        toolbar.onSearchChanged?.call(scopeContext, text);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _isUpdatingSearchFromNative = false;
+        });
+    }
+  }
+
+  void _syncToolbar() {
+    if (defaultTargetPlatform != TargetPlatform.macOS) return;
+    final toolbar = widget.toolbar;
+    if (toolbar == null) {
+      if (_lastToolbarPayload != null) {
+        _logToolbar('_syncToolbar: no config, clearing');
+        _clearToolbar();
+        _lastToolbarPayload = null;
+      }
+      return;
+    }
+    if (_isUpdatingSearchFromNative) {
+      _logToolbar('_syncToolbar: skipped (updating from native)');
+      return;
+    }
+
+    final payload = <String, dynamic>{
+      if (toolbar.title != null) 'title': toolbar.title!.toChildPayload(context),
+      'titleDisplayMode': toolbar.titleDisplayMode.name,
+      'searchable': toolbar.searchable,
+      'groups': toolbar.groups.map((g) => g.toPayload(context)).toList(),
+      if (toolbar.toolbarBackground != null) 'toolbarBackground': resolveColorToArgb(toolbar.toolbarBackground, context),
+      'toolbarBlurEnabled': toolbar.toolbarBlurEnabled,
+      if (toolbar.toolbarBlurMaterial != null) 'toolbarBlurMaterial': toolbar.toolbarBlurMaterial!.name,
+    };
+
+    if (_lastToolbarPayload != null && _toolbarPayloadEquals(_lastToolbarPayload!, payload)) {
+      _logToolbar('_syncToolbar: skipped (payload unchanged)');
+      return;
+    }
+
+    _logToolbar('_syncToolbar: syncing');
+    _lastToolbarPayload = payload;
+    _toolbarChannel.invokeMethod<void>('makeToolbar', payload);
+
+    // Send searchText separately after toolbar recreation so the field isn't reset
+    if (toolbar.searchText != null && toolbar.searchText!.isNotEmpty) {
+      _logToolbar('_syncToolbar: restoring searchText="${toolbar.searchText}"');
+      _toolbarChannel.invokeMethod<void>('setToolbarSearchText', toolbar.searchText);
+    }
+  }
+
+  bool _toolbarPayloadEquals(Map<String, dynamic> a, Map<String, dynamic> b) {
+    if (a.length != b.length) return false;
+    for (final key in a.keys) {
+      if (!b.containsKey(key)) return false;
+      final va = a[key];
+      final vb = b[key];
+      if (va is Map && vb is Map) {
+        if (!_mapEquals(va, vb)) return false;
+      } else if (va is List && vb is List) {
+        if (!_listEquals(va, vb)) return false;
+      } else if (va != vb) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool _mapEquals(Map a, Map b) {
+    if (a.length != b.length) return false;
+    for (final key in a.keys) {
+      if (!b.containsKey(key)) return false;
+      final va = a[key];
+      final vb = b[key];
+      if (va is Map && vb is Map) {
+        if (!_mapEquals(va, vb)) return false;
+      } else if (va is List && vb is List) {
+        if (!_listEquals(va, vb)) return false;
+      } else if (va != vb) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool _listEquals(List a, List b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      final va = a[i];
+      final vb = b[i];
+      if (va is Map && vb is Map) {
+        if (!_mapEquals(va, vb)) return false;
+      } else if (va is List && vb is List) {
+        if (!_listEquals(va, vb)) return false;
+      } else if (va != vb) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void _clearToolbar() {
+    if (defaultTargetPlatform != TargetPlatform.macOS) return;
+    _logToolbar('_clearToolbar');
+    _toolbarChannel.invokeMethod<void>('clearToolbar');
   }
 
   @override
@@ -613,6 +754,7 @@ class _CNWindowState extends State<CNWindow> {
           isEndSidebarShown: canShowEndSidebar,
           isStatusBarExpanded: _showStatusBarPanel,
           sidebarToggler: () async {
+            debugPrint('toggleSidebar: $_showSidebar -> ${!_showSidebar}');
             setState(() => _sidebarSlideDuration = 300);
             setState(() => _showSidebar = !_showSidebar);
             await Future.delayed(Duration(milliseconds: _sidebarSlideDuration));
@@ -636,7 +778,7 @@ class _CNWindowState extends State<CNWindow> {
               setState(() => _sidebarSlideDuration = 0);
             }
           },
-          child: layout,
+          child: KeyedSubtree(key: _scopeChildKey, child: layout),
         );
       },
     );

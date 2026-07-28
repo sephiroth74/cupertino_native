@@ -13,7 +13,7 @@ const _kNativeViewType = 'CupertinoNativeSecureField';
 
 /// A native SwiftUI SecureField widget controllable via [TextEditingController].
 ///
-/// Unlike [CNTextField2], SecureField does not expose text selection.
+/// Unlike [CNTextField], SecureField does not expose text selection.
 class CNSecureField extends CNWidget {
   const CNSecureField({
     super.key,
@@ -178,13 +178,6 @@ class _CNSecureFieldState extends CNWidgetState<CNSecureField> {
 
   TextEditingController get _controller => widget.controller ?? _internalController!;
 
-  void _onControllerChanged() {
-    if (_isUpdatingFromNative) return;
-    setState(() {});
-  }
-
-  double _defaultWidth() => 200.0;
-
   double _defaultHeight() {
     double resolvedHeight = 26.0;
 
@@ -225,5 +218,12 @@ class _CNSecureFieldState extends CNWidgetState<CNSecureField> {
     }
 
     return resolvedHeight;
+  }
+
+  double _defaultWidth() => 200.0;
+
+  void _onControllerChanged() {
+    if (_isUpdatingFromNative) return;
+    setState(() {});
   }
 }

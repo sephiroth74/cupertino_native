@@ -10,38 +10,14 @@ import 'package:flutter/widgets.dart';
 
 const _kNativeViewType = 'CupertinoNativeDatePicker2';
 
-/// Style for the SwiftUI DatePicker.
-enum CNDatePicker2Style {
-  /// System-determined style.
-  automatic,
-
-  /// Compact inline style.
-  compact,
-
-  /// Full graphical calendar/clock.
-  graphical,
-
-  /// Text field style.
-  field,
-}
-
-/// Displayed components for the SwiftUI DatePicker.
-enum CNDatePicker2Component {
-  /// Date component (year, month, day).
-  date,
-
-  /// Hour and minute component.
-  hourAndMinute,
-}
-
-class CNDatePicker2 extends CNWidget {
-  const CNDatePicker2({
+class CNDatePicker extends CNWidget {
+  const CNDatePicker({
     super.key,
     super.debugLog,
     required this.selection,
     this.onChanged,
-    this.displayedComponents = const [CNDatePicker2Component.date],
-    this.datePickerStyle = CNDatePicker2Style.automatic,
+    this.displayedComponents = const [CNDatePickerComponent.date],
+    this.datePickerStyle = CNDatePickerStyle.automatic,
     this.controlSize = CNControlSize.regular,
     this.label,
     this.minDate,
@@ -58,10 +34,10 @@ class CNDatePicker2 extends CNWidget {
   final CNControlSize controlSize;
 
   /// Style of the date picker.
-  final CNDatePicker2Style datePickerStyle;
+  final CNDatePickerStyle datePickerStyle;
 
   /// Which components to display.
-  final List<CNDatePicker2Component> displayedComponents;
+  final List<CNDatePickerComponent> displayedComponents;
 
   /// Optional label displayed next to the picker.
   final String? label;
@@ -97,24 +73,48 @@ class CNDatePicker2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNDatePicker2> createState() => _CNDatePicker2State();
+  State<CNDatePicker> createState() => _CNDatePicker2State();
 
   @override
   String get nativeViewType => _kNativeViewType;
 }
 
-class _CNDatePicker2State extends CNWidgetState<CNDatePicker2> {
+/// Displayed components for the SwiftUI DatePicker.
+enum CNDatePickerComponent {
+  /// Date component (year, month, day).
+  date,
+
+  /// Hour and minute component.
+  hourAndMinute,
+}
+
+/// Style for the SwiftUI DatePicker.
+enum CNDatePickerStyle {
+  /// System-determined style.
+  automatic,
+
+  /// Compact inline style.
+  compact,
+
+  /// Full graphical calendar/clock.
+  graphical,
+
+  /// Text field style.
+  field,
+}
+
+class _CNDatePicker2State extends CNWidgetState<CNDatePicker> {
   @override
   Size computeDefaultSize() {
     final showFull =
-        (widget.displayedComponents.contains(CNDatePicker2Component.date) &&
-            widget.displayedComponents.contains(CNDatePicker2Component.hourAndMinute)) ||
+        (widget.displayedComponents.contains(CNDatePickerComponent.date) &&
+            widget.displayedComponents.contains(CNDatePickerComponent.hourAndMinute)) ||
         widget.displayedComponents.isEmpty;
 
-    final showDateOnly = !showFull && widget.displayedComponents.contains(CNDatePicker2Component.date);
+    final showDateOnly = !showFull && widget.displayedComponents.contains(CNDatePickerComponent.date);
 
     switch (widget.datePickerStyle) {
-      case CNDatePicker2Style.field:
+      case CNDatePickerStyle.field:
         switch (widget.controlSize) {
           case CNControlSize.extraLarge:
             if (showFull) {
@@ -158,7 +158,7 @@ class _CNDatePicker2State extends CNWidgetState<CNDatePicker2> {
             }
         }
 
-      case CNDatePicker2Style.graphical:
+      case CNDatePickerStyle.graphical:
         if (showFull) {
           return const Size(284, 148);
         } else if (showDateOnly) {
@@ -167,8 +167,8 @@ class _CNDatePicker2State extends CNWidgetState<CNDatePicker2> {
           return const Size(127, 119);
         }
 
-      case CNDatePicker2Style.compact:
-      case CNDatePicker2Style.automatic:
+      case CNDatePickerStyle.compact:
+      case CNDatePickerStyle.automatic:
         switch (widget.controlSize) {
           case CNControlSize.extraLarge:
             if (showFull) {

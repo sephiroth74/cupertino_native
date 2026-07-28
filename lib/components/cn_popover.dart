@@ -7,34 +7,11 @@ import 'package:flutter/services.dart';
 import 'cn_button.dart';
 import 'cn_child.dart';
 
-/// Popover behavior.
-enum CNPopoverBehavior2 {
-  transient,
-  semitransient,
-  applicationDefined,
-}
-
-/// Preferred edge for popover anchor.
-enum CNPopoverEdge2 {
-  top,
-  bottom,
-  leading,
-  trailing,
-}
-
-/// Result returned by [CNPopover2.show].
-class CNPopoverResult {
-  const CNPopoverResult({required this.selectedIndex, this.selectedTag});
-
-  final int selectedIndex;
-  final String? selectedTag;
-}
-
 /// Utility API to show native macOS popovers anchored to any widget.
 ///
 /// Call [show] from an `onPressed` callback, passing the [BuildContext] of
 /// the widget that should serve as the anchor.
-class CNPopover2 {
+class CNPopover {
   static const MethodChannel _channel = MethodChannel('cupertino_native');
 
   static Future<CNPopoverResult?> show(
@@ -42,8 +19,8 @@ class CNPopover2 {
     String? title,
     String? message,
     required List<CNChildButton> actions,
-    CNPopoverBehavior2 behavior = CNPopoverBehavior2.transient,
-    CNPopoverEdge2 preferredEdge = CNPopoverEdge2.bottom,
+    CNPopoverBehavior behavior = CNPopoverBehavior.transient,
+    CNPopoverEdge preferredEdge = CNPopoverEdge.bottom,
     double popoverWidth = 280,
   }) async {
     if (actions.isEmpty) {
@@ -76,10 +53,7 @@ class CNPopover2 {
       final selectedIndex = (resultMap['selectedIndex'] as num?)?.toInt();
       if (selectedIndex == null) return null;
 
-      return CNPopoverResult(
-        selectedIndex: selectedIndex,
-        selectedTag: resultMap['selectedTag'] as String?,
-      );
+      return CNPopoverResult(selectedIndex: selectedIndex, selectedTag: resultMap['selectedTag'] as String?);
     }
 
     // Non-macOS fallback
@@ -92,22 +66,30 @@ class CNPopover2 {
           for (var i = 0; i < actions.length; i++)
             CupertinoActionSheetAction(
               isDefaultAction: i == 0,
-              isDestructiveAction: actions[i].role == CNButtonRole2.destructive,
+              isDestructiveAction: actions[i].role == CNButtonRole.destructive,
               onPressed: () => Navigator.of(ctx).pop(i),
               child: Text(actions[i].title),
             ),
         ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.of(ctx).pop(),
-          child: const Text('Cancel'),
-        ),
+        cancelButton: CupertinoActionSheetAction(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
       ),
     );
     if (selected == null) return null;
 
-    return CNPopoverResult(
-      selectedIndex: selected,
-      selectedTag: actions[selected].tag,
-    );
+    return CNPopoverResult(selectedIndex: selected, selectedTag: actions[selected].tag);
   }
+}
+
+/// Popover behavior.
+enum CNPopoverBehavior { transient, semitransient, applicationDefined }
+
+/// Preferred edge for popover anchor.
+enum CNPopoverEdge { top, bottom, leading, trailing }
+
+/// Result returned by [CNPopover.show].
+class CNPopoverResult {
+  const CNPopoverResult({required this.selectedIndex, this.selectedTag});
+
+  final int selectedIndex;
+  final String? selectedTag;
 }

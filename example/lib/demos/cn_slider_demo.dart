@@ -40,7 +40,7 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                   const SizedBox(height: 16),
                   Text('Value: ${_defaultSliderValue.toStringAsFixed(2)}'),
                   const SizedBox(height: 16),
-                  CNSlider2(
+                  CNSlider(
                     debugLog: _kDebugLog,
                     value: _defaultSliderValue,
                     onChanged: _isEnabled
@@ -79,22 +79,22 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
             RightSideOptionContainer(
               options: {
                 'Control Size': ControlSizePicker(value: _size, onChanged: (newSize) => setState(() => _size = newSize)),
-                'Enabled': CNToggle2(isOn: _isEnabled, onChanged: (enabled) => setState(() => _isEnabled = enabled)),
-                'Stepped': CNToggle2(
+                'Enabled': CNToggle(isOn: _isEnabled, onChanged: (enabled) => setState(() => _isEnabled = enabled)),
+                'Stepped': CNToggle(
                   isOn: _isStepped,
                   onChanged: (enabled) => setState(() {
                     _hasTicks = false;
                     _isStepped = enabled;
                   }),
                 ),
-                'Ticks': CNToggle2(
+                'Ticks': CNToggle(
                   isOn: _hasTicks,
                   onChanged: (enabled) => setState(() {
                     _isStepped = false;
                     _hasTicks = enabled;
                   }),
                 ),
-                'Labels': CNToggle2(isOn: _showLabels, onChanged: (enabled) => setState(() => _showLabels = enabled)),
+                'Labels': CNToggle(isOn: _showLabels, onChanged: (enabled) => setState(() => _showLabels = enabled)),
                 'Tint Color': ColorPicker(
                   colors: kSystemColors,
                   value: _tintColor,

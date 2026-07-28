@@ -35,7 +35,7 @@ class _ProgressIndicatorsPageDemoState extends State<ProgressIndicatorsPageDemo>
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
                   Center(
-                    child: CNProgressView2(
+                    child: CNProgressView(
                       debugLog: _kDebugLog,
                       value: isDetermininate ? progressValue : null,
                       style: progressViewStyle,
@@ -57,15 +57,15 @@ class _ProgressIndicatorsPageDemoState extends State<ProgressIndicatorsPageDemo>
                   value: tintColor,
                   onChanged: (newColor) => setState(() => tintColor = newColor),
                 ),
-                'Progress Style': CNPicker2(
+                'Progress Style': CNPicker(
                   selection: progressViewStyle.name,
                   onChanged: (newStyle) =>
                       setState(() => progressViewStyle = CNProgressViewStyle.values.firstWhere((style) => style.name == newStyle)),
                   children: CNProgressViewStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
-                  pickerStyle: CNPickerStyle2.automatic,
+                  pickerStyle: CNPickerStyle.automatic,
                 ),
-                'Determinate': CNToggle2(isOn: isDetermininate, onChanged: (value) => setState(() => isDetermininate = value)),
-                'Value': CNSlider2(
+                'Determinate': CNToggle(isOn: isDetermininate, onChanged: (value) => setState(() => isDetermininate = value)),
+                'Value': CNSlider(
                   value: progressValue,
                   onChanged: isDetermininate
                       ? (value) {

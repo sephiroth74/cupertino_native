@@ -17,7 +17,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
   CNControlSize controlSize = CNControlSize.regular;
   Color? foregroundColor;
   bool isEnabled = true;
-  CNPickerStyle2 pickerStyle = CNPickerStyle2.menu;
+  CNPickerStyle pickerStyle = CNPickerStyle.menu;
   Color? tintColor;
   String value = 'walk';
   bool withLabels = true;
@@ -42,13 +42,13 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                   Center(
                     child: PixelPerfectProbe(
                       adjustPosition: true,
-                      child: CNPicker2(
+                      child: CNPicker(
                         debugLog: _kDebugLog,
                         controlSize: controlSize,
                         pickerStyle: pickerStyle,
                         children: [
                           CNChildLabel('Walk', systemImage: 'figure.walk', tag: 'walk'),
-                          if (pickerStyle == CNPickerStyle2.menu || pickerStyle == CNPickerStyle2.automatic) CNChildDivider(),
+                          if (pickerStyle == CNPickerStyle.menu || pickerStyle == CNPickerStyle.automatic) CNChildDivider(),
                           CNChildLabel('Airplane', systemImage: 'airplane', tag: 'airplane'),
                           CNChildLabel('Car', systemImage: 'car', tag: 'car'),
                           CNChildLabel('Bus', systemImage: 'bus', tag: 'bus'),
@@ -80,21 +80,21 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
             RightSideOptionContainer(
               options: {
                 'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
-                'Picker Style': CNPicker2(
-                  pickerStyle: CNPickerStyle2.menu,
+                'Picker Style': CNPicker(
+                  pickerStyle: CNPickerStyle.menu,
                   children: [
-                    CNChildLabel('automatic', systemImage: 'automatic.brakesignal', tag: CNPickerStyle2.automatic.name),
+                    CNChildLabel('automatic', systemImage: 'automatic.brakesignal', tag: CNPickerStyle.automatic.name),
                     CNChildDivider(),
-                    CNChildLabel('inline', systemImage: 'lines.measurement.vertical', tag: CNPickerStyle2.inline.name),
-                    CNChildLabel('menu', systemImage: 'filemenu.and.pointer.arrow', tag: CNPickerStyle2.menu.name),
-                    CNChildLabel('palette', systemImage: 'swatchpalette', tag: CNPickerStyle2.palette.name),
-                    CNChildLabel('radioGroup', systemImage: 'radio', tag: CNPickerStyle2.radioGroup.name),
-                    CNChildLabel('segmented', systemImage: 'tablecells', tag: CNPickerStyle2.segmented.name),
+                    CNChildLabel('inline', systemImage: 'lines.measurement.vertical', tag: CNPickerStyle.inline.name),
+                    CNChildLabel('menu', systemImage: 'filemenu.and.pointer.arrow', tag: CNPickerStyle.menu.name),
+                    CNChildLabel('palette', systemImage: 'swatchpalette', tag: CNPickerStyle.palette.name),
+                    CNChildLabel('radioGroup', systemImage: 'radio', tag: CNPickerStyle.radioGroup.name),
+                    CNChildLabel('segmented', systemImage: 'tablecells', tag: CNPickerStyle.segmented.name),
                   ],
                   selection: pickerStyle.name,
                   onChanged: (value) {
                     setState(() {
-                      pickerStyle = CNPickerStyle2.values.firstWhere((e) => e.name == value);
+                      pickerStyle = CNPickerStyle.values.firstWhere((e) => e.name == value);
                     });
                   },
                 ),
@@ -104,8 +104,8 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                   value: foregroundColor,
                   onChanged: (c) => setState(() => foregroundColor = c),
                 ),
-                'Labels': CNToggle2(isOn: withLabels, onChanged: (value) => setState(() => withLabels = value)),
-                'Enabled': CNToggle2(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value)),
+                'Labels': CNToggle(isOn: withLabels, onChanged: (value) => setState(() => withLabels = value)),
+                'Enabled': CNToggle(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value)),
               },
             ),
           ],

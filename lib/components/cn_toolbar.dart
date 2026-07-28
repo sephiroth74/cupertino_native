@@ -77,6 +77,7 @@ class CNToolbarConfig {
     this.titleDisplayMode = CNToolbarTitleDisplayMode.automatic,
     this.groups = const [],
     this.searchable = false,
+    this.searchText,
     this.toolbarBackground,
     this.toolbarBlurEnabled = false,
     this.toolbarBlurMaterial,
@@ -84,14 +85,28 @@ class CNToolbarConfig {
     this.onItemPressed,
   });
 
+  /// Callback when a toolbar button is pressed (identified by tag).
+  ///
+  /// The [BuildContext] parameter provides a context that is guaranteed to be
+  /// below [CNWindowScope] when used via [CNWindow.toolbar], allowing
+  /// `CNWindowScope.of(context)` to work correctly.
+  final void Function(BuildContext context, String tag)? onItemPressed;
+
+  /// Callback when search text changes.
+  ///
+  /// The [BuildContext] parameter provides a context that is guaranteed to be
+  /// below [CNWindowScope] when used via [CNWindow.toolbar].
+  final void Function(BuildContext context, String text)? onSearchChanged;
+
   /// The toolbar item groups.
   final List<CNToolbarItemGroup> groups;
 
-  /// Callback when a toolbar button is pressed (identified by tag).
-  final ValueChanged<String>? onItemPressed;
-
-  /// Callback when search text changes.
-  final ValueChanged<String>? onSearchChanged;
+  /// The current text in the search field.
+  ///
+  /// Set this to programmatically update the search field text.
+  /// When native reports a change via [onSearchChanged], avoid setting this
+  /// to the same value in the same frame to prevent sync loops.
+  final String? searchText;
 
   /// Whether to show the search field.
   final bool searchable;
@@ -122,19 +137,18 @@ class CNToolbarConfig {
   final CNToolbarBlurMaterial? toolbarBlurMaterial;
 }
 
-/// A widget that configures the native macOS toolbar for the window.
+/// A standalone widget that configures the native macOS toolbar for the window.
 ///
-/// Wrap your top-level content with [CNToolbar] to set up the toolbar.
-/// Changes to the configuration are automatically synced to native.
+/// Prefer using [CNWindow.toolbar] instead of this widget directly.
+/// This widget is retained for cases where the toolbar needs to be managed
+/// independently of [CNWindow].
+@Deprecated('Use CNWindow.toolbar instead')
 class CNToolbar extends StatefulWidget {
+  /// Creates a toolbar widget.
   const CNToolbar({
     super.key,
     required this.config,
-    required this.child,
   });
-
-  /// The child widget (your app content).
-  final Widget child;
 
   /// Toolbar configuration.
   final CNToolbarConfig config;
@@ -171,11 +185,11 @@ class _CNToolbarState extends State<CNToolbar> {
       case 'toolbarItemPressed':
         final tag = call.arguments as String?;
         if (tag != null) {
-          widget.config.onItemPressed?.call(tag);
+          widget.config.onItemPressed?.call(context, tag);
         }
       case 'toolbarSearchChanged':
         final text = call.arguments as String? ?? '';
-        widget.config.onSearchChanged?.call(text);
+        widget.config.onSearchChanged?.call(context, text);
     }
   }
 
@@ -202,5 +216,5 @@ class _CNToolbarState extends State<CNToolbar> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }

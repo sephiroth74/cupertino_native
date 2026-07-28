@@ -5,12 +5,12 @@ import 'package:cupertino_native/components/cn_widget_state.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/widgets.dart';
 
-const _kNativeViewType = 'CupertinoNativeText2';
-const double _kDefaultTextWidth = 20.0;
 const double _kDefaultTextHeight = 24.0;
+const double _kDefaultTextWidth = 20.0;
+const _kNativeViewType = 'CupertinoNativeText2';
 
-class CNText2 extends CNWidget {
-  const CNText2(
+class CNText extends CNWidget {
+  const CNText(
     this.text, {
     super.key,
     super.debugLog,
@@ -64,13 +64,13 @@ class CNText2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNText2> createState() => _CNText2State();
+  State<CNText> createState() => _CNTextState();
 
   @override
   String get nativeViewType => _kNativeViewType;
 }
 
-class _CNText2State extends CNWidgetState<CNText2> {
+class _CNTextState extends CNWidgetState<CNText> {
   @override
   Size computeDefaultSize() {
     double defaultWidth = _kDefaultTextWidth;

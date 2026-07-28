@@ -10,28 +10,19 @@ import 'package:flutter/widgets.dart';
 
 const _kNativeViewType = 'CupertinoNativePathControl2';
 
-/// Style for CNPathControl2.
-enum CNPathControlStyle2 {
-  /// Standard breadcrumb path style.
-  standard,
-
-  /// Popup menu style.
-  popup,
-}
-
 /// A native macOS NSPathControl widget.
 ///
 /// Displays a file path as a clickable breadcrumb. Supports editable paths
 /// with an open panel for choosing files/directories.
-class CNPathControl2 extends CNWidget {
-  const CNPathControl2({
+class CNPathControl extends CNWidget {
+  const CNPathControl({
     super.key,
     super.debugLog,
     required this.url,
     this.isDirectory = false,
     this.editable = true,
     this.controlSize = CNControlSize.regular,
-    this.controlStyle = CNPathControlStyle2.standard,
+    this.controlStyle = CNPathControlStyle.standard,
     this.allowedTypes,
     this.onPressed,
     this.shrink = true,
@@ -49,7 +40,7 @@ class CNPathControl2 extends CNWidget {
   final CNControlSize controlSize;
 
   /// The style of the control.
-  final CNPathControlStyle2 controlStyle;
+  final CNPathControlStyle controlStyle;
 
   /// Whether the path is editable (shows open panel on click).
   final bool editable;
@@ -82,13 +73,22 @@ class CNPathControl2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNPathControl2> createState() => _CNPathControl2State();
+  State<CNPathControl> createState() => _CNPathControlState();
 
   @override
   String get nativeViewType => _kNativeViewType;
 }
 
-class _CNPathControl2State extends CNWidgetState<CNPathControl2> {
+/// Style for CNPathControl2.
+enum CNPathControlStyle {
+  /// Standard breadcrumb path style.
+  standard,
+
+  /// Popup menu style.
+  popup,
+}
+
+class _CNPathControlState extends CNWidgetState<CNPathControl> {
   @override
   Size computeDefaultSize() => const Size(200, 24);
 
@@ -109,10 +109,7 @@ class _CNPathControl2State extends CNWidgetState<CNPathControl2> {
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(
-    BuildContext context, {
-    required BoxConstraints? constraints,
-  }) {
+  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
     final payload = <String, dynamic>{
       'path': widget.url.toFilePath(),
       'isDirectory': widget.isDirectory,

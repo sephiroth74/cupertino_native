@@ -7,29 +7,13 @@ import 'package:flutter/services.dart';
 import 'cn_button.dart';
 import 'cn_child.dart';
 
-/// Visual style for a native macOS alert.
-enum CNAlertStyle2 {
-  informational,
-  warning,
-  critical,
-}
-
-/// Result returned by [CNAlert2.show].
-class CNAlertResult {
-  const CNAlertResult({required this.selectedIndex, this.selectedTag, this.suppressionSelected = false});
-
-  final int selectedIndex;
-  final String? selectedTag;
-  final bool suppressionSelected;
-}
-
 /// Utility API to show native macOS alerts using NSAlert.
 ///
 /// Actions are [CNChildButton] items. The first action becomes the default
-/// (Return key). A button with [CNButtonRole2.cancel] gets the Escape key
-/// equivalent. A button with [CNButtonRole2.destructive] renders with
+/// (Return key). A button with [CNButtonRole.cancel] gets the Escape key
+/// equivalent. A button with [CNButtonRole.destructive] renders with
 /// destructive styling.
-class CNAlert2 {
+class CNAlert {
   static const MethodChannel _channel = MethodChannel('cupertino_native');
 
   /// Shows a modal alert dialog (blocks interaction with the app).
@@ -69,7 +53,7 @@ class CNAlert2 {
             for (var i = 0; i < actions.length; i++)
               CupertinoDialogAction(
                 isDefaultAction: i == 0,
-                isDestructiveAction: actions[i].role == CNButtonRole2.destructive,
+                isDestructiveAction: actions[i].role == CNButtonRole.destructive,
                 onPressed: () => Navigator.of(ctx).pop(i),
                 child: Text(actions[i].title),
               ),
@@ -79,11 +63,7 @@ class CNAlert2 {
     );
     if (selected == null) return null;
 
-    return CNAlertResult(
-      selectedIndex: selected,
-      selectedTag: actions[selected].tag,
-      suppressionSelected: false,
-    );
+    return CNAlertResult(selectedIndex: selected, selectedTag: actions[selected].tag, suppressionSelected: false);
   }
 
   /// Shows a sheet alert attached to the current window.
@@ -125,24 +105,17 @@ class CNAlert2 {
           for (var i = 0; i < actions.length; i++)
             CupertinoActionSheetAction(
               isDefaultAction: i == 0,
-              isDestructiveAction: actions[i].role == CNButtonRole2.destructive,
+              isDestructiveAction: actions[i].role == CNButtonRole.destructive,
               onPressed: () => Navigator.of(ctx).pop(i),
               child: Text(actions[i].title),
             ),
         ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.of(ctx).pop(),
-          child: const Text('Cancel'),
-        ),
+        cancelButton: CupertinoActionSheetAction(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
       ),
     );
     if (selected == null) return null;
 
-    return CNAlertResult(
-      selectedIndex: selected,
-      selectedTag: actions[selected].tag,
-      suppressionSelected: false,
-    );
+    return CNAlertResult(selectedIndex: selected, selectedTag: actions[selected].tag, suppressionSelected: false);
   }
 
   static CNAlertResult? _parseResult(Object? response) {
@@ -157,3 +130,15 @@ class CNAlert2 {
     );
   }
 }
+
+/// Result returned by [CNAlert.show].
+class CNAlertResult {
+  const CNAlertResult({required this.selectedIndex, this.selectedTag, this.suppressionSelected = false});
+
+  final int selectedIndex;
+  final String? selectedTag;
+  final bool suppressionSelected;
+}
+
+/// Visual style for a native macOS alert.
+enum CNAlertStyle2 { informational, warning, critical }

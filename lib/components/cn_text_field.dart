@@ -11,21 +11,9 @@ import 'package:flutter/widgets.dart';
 
 const _kNativeViewType = 'CupertinoNativeTextField2';
 
-/// Style for CNTextField2.
-enum CNTextFieldStyle {
-  /// Automatic style (system default).
-  automatic,
-
-  /// Plain style with no border.
-  plain,
-
-  /// Rounded border style.
-  roundedBorder,
-}
-
 /// A native SwiftUI TextField widget controllable via [TextEditingController].
-class CNTextField2 extends CNWidget {
-  const CNTextField2({
+class CNTextField extends CNWidget {
+  const CNTextField({
     super.key,
     super.debugLog,
     this.controller,
@@ -100,13 +88,25 @@ class CNTextField2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNTextField2> createState() => _CNTextField2State();
+  State<CNTextField> createState() => _CNTextFieldState();
 
   @override
   String get nativeViewType => _kNativeViewType;
 }
 
-class _CNTextField2State extends CNWidgetState<CNTextField2> {
+/// Style for CNTextField2.
+enum CNTextFieldStyle {
+  /// Automatic style (system default).
+  automatic,
+
+  /// Plain style with no border.
+  plain,
+
+  /// Rounded border style.
+  roundedBorder,
+}
+
+class _CNTextFieldState extends CNWidgetState<CNTextField> {
   TextEditingController? _internalController;
   bool _isUpdatingFromNative = false;
 
@@ -114,7 +114,7 @@ class _CNTextField2State extends CNWidgetState<CNTextField2> {
   Size computeDefaultSize() => Size(_defaultWidth(), _defaultHeight());
 
   @override
-  void didUpdateWidget(covariant CNTextField2 oldWidget) {
+  void didUpdateWidget(covariant CNTextField oldWidget) {
     if (oldWidget.controller != widget.controller) {
       final oldController = oldWidget.controller ?? _internalController!;
       oldController.removeListener(_onControllerChanged);
@@ -203,16 +203,6 @@ class _CNTextField2State extends CNWidgetState<CNTextField2> {
 
   TextEditingController get _controller => widget.controller ?? _internalController!;
 
-  void _onControllerChanged() {
-    if (_isUpdatingFromNative) return;
-    logDebug('_onControllerChanged: text="${_controller.text}" (len=${_controller.text.length}), selection=${_controller.selection}');
-    // Programmatic change from Dart — trigger rebuild so the patch system
-    // sends the updated text to native via applyPatch.
-    setState(() {});
-  }
-
-  double _defaultWidth() => 200.0;
-
   double _defaultHeight() {
     double resolvedHeight = 26.0; // default height for regular control size
 
@@ -261,5 +251,17 @@ class _CNTextField2State extends CNWidgetState<CNTextField2> {
     }
 
     return resolvedHeight;
+  }
+
+  double _defaultWidth() => 200.0;
+
+  void _onControllerChanged() {
+    if (_isUpdatingFromNative) return;
+    logDebug(
+      '_onControllerChanged: text="${_controller.text}" (len=${_controller.text.length}), selection=${_controller.selection}',
+    );
+    // Programmatic change from Dart — trigger rebuild so the patch system
+    // sends the updated text to native via applyPatch.
+    setState(() {});
   }
 }

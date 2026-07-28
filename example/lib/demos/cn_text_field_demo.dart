@@ -69,7 +69,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                   const SizedBox(height: 12),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: CNTextField2(
+                    child: CNTextField(
                       autofocus: true,
                       paddings: EdgeInsets.all(1.0),
                       controlSize: controlSize,
@@ -100,7 +100,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
               title: 'Options',
               options: {
                 'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
-                'Style': CNPicker2(
+                'Style': CNPicker(
                   selection: textFieldStyle.name,
                   onChanged: (value) =>
                       setState(() => textFieldStyle = CNTextFieldStyle.values.firstWhere((style) => style.name == value)),

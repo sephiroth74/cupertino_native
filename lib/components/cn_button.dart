@@ -8,30 +8,18 @@ import 'package:flutter/widgets.dart';
 
 const _kNativeViewType = 'CupertinoNativeButton2';
 
-/// Semantic role for button actions.
-enum CNButtonRole2 {
-  /// Default role.
-  none,
-
-  /// Cancel role.
-  cancel,
-
-  /// Destructive role.
-  destructive,
-}
-
 /// A native SwiftUI Button widget.
 ///
 /// The button's label is built from [children], which can be any combination of
 /// [CNChild] elements (text, image, label, stacks, etc.).
-class CNButton2 extends CNWidget {
-  const CNButton2({
+class CNButton extends CNWidget {
+  const CNButton({
     super.key,
     super.debugLog,
     required this.children,
     this.onPressed,
     this.buttonStyle = CNButtonStyle.automatic,
-    this.role = CNButtonRole2.none,
+    this.role = CNButtonRole.none,
     this.controlSize,
     this.labelStyle,
     this.shrink = true,
@@ -52,13 +40,13 @@ class CNButton2 extends CNWidget {
   final CNControlSize? controlSize;
 
   /// Label style applied inside the button.
-  final CNLabel2Style? labelStyle;
+  final CNLabelStyle? labelStyle;
 
   /// Callback when the button is pressed.
   final VoidCallback? onPressed;
 
   /// Semantic role for the button action.
-  final CNButtonRole2 role;
+  final CNButtonRole role;
 
   @override
   final BoxConstraints? constraints;
@@ -79,13 +67,25 @@ class CNButton2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNButton2> createState() => _CNButton2State();
+  State<CNButton> createState() => _CNButton2State();
 
   @override
   String get nativeViewType => _kNativeViewType;
 }
 
-class _CNButton2State extends CNWidgetState<CNButton2> {
+/// Semantic role for button actions.
+enum CNButtonRole {
+  /// Default role.
+  none,
+
+  /// Cancel role.
+  cancel,
+
+  /// Destructive role.
+  destructive,
+}
+
+class _CNButton2State extends CNWidgetState<CNButton> {
   @override
   Size computeDefaultSize() => const Size(80.0, 32.0);
 

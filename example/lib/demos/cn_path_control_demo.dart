@@ -52,17 +52,17 @@ class _PathControlDemoPageState extends State<PathControlDemoPage> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CNPathControl2(
+                    CNPathControl(
                       editable: true,
-                      controlStyle: CNPathControlStyle2.popup,
+                      controlStyle: CNPathControlStyle.popup,
                       controlSize: CNControlSize.large,
                       url: Uri.parse(_pathControlPath),
                       isDirectory: _pathControlIsDirectory,
                       onPressed: _handlePressed,
                     ),
                     const SizedBox(height: 12),
-                    CNPathControl2(
-                      controlStyle: CNPathControlStyle2.standard,
+                    CNPathControl(
+                      controlStyle: CNPathControlStyle.standard,
                       controlSize: CNControlSize.large,
                       url: Uri.parse(_pathControlPath),
                       isDirectory: _pathControlIsDirectory,

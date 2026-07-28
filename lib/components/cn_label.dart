@@ -7,33 +7,18 @@ import 'package:flutter/widgets.dart';
 
 const _kNativeViewType = 'CupertinoNativeLabel2';
 
-/// Style options for [CNLabel2].
-enum CNLabel2Style {
-  /// Let SwiftUI choose the most appropriate style.
-  automatic,
-
-  /// Show both title and icon.
-  titleAndIcon,
-
-  /// Show only title.
-  titleOnly,
-
-  /// Show only icon.
-  iconOnly,
-}
-
 /// A native SwiftUI Label widget.
 ///
 /// A Label is composed of a [title] (a [CNChildText] with full text properties)
 /// and an optional [image] (a [CNChildImage] with full image properties).
-class CNLabel2 extends CNWidget {
-  const CNLabel2({
+class CNLabel extends CNWidget {
+  const CNLabel({
     super.key,
     super.debugLog,
     required this.title,
     this.image,
     this.font,
-    this.labelStyle = CNLabel2Style.automatic,
+    this.labelStyle = CNLabelStyle.automatic,
     this.labelReservedIconWidth,
     this.labelIconToTitleSpacing,
     this.shrink = true,
@@ -45,21 +30,21 @@ class CNLabel2 extends CNWidget {
   });
 
   /// Convenience constructor that accepts plain strings.
-  const factory CNLabel2.simple(
+  const factory CNLabel.simple(
     String titleText, {
     Key? key,
     bool debugLog,
     String? systemImage,
     CNFont? font,
     Color? foregroundColor,
-    CNLabel2Style labelStyle,
+    CNLabelStyle labelStyle,
     double? labelReservedIconWidth,
     double? labelIconToTitleSpacing,
     bool shrink,
     BoxConstraints? constraints,
     Color? tint,
     EdgeInsetsGeometry? paddings,
-  }) = _CNLabel2Simple;
+  }) = _CNLabelSimple;
 
   /// Optional font applied to the entire label.
   final CNFont? font;
@@ -74,7 +59,7 @@ class CNLabel2 extends CNWidget {
   final double? labelReservedIconWidth;
 
   /// Visual style applied to the SwiftUI label.
-  final CNLabel2Style labelStyle;
+  final CNLabelStyle labelStyle;
 
   /// The title of the label.
   final CNChildText title;
@@ -98,14 +83,29 @@ class CNLabel2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNLabel2> createState() => _CNLabel2State();
+  State<CNLabel> createState() => _CNLabelState();
 
   @override
   String get nativeViewType => _kNativeViewType;
 }
 
-class _CNLabel2Simple extends CNLabel2 {
-  const _CNLabel2Simple(
+/// Style options for [CNLabel].
+enum CNLabelStyle {
+  /// Let SwiftUI choose the most appropriate style.
+  automatic,
+
+  /// Show both title and icon.
+  titleAndIcon,
+
+  /// Show only title.
+  titleOnly,
+
+  /// Show only icon.
+  iconOnly,
+}
+
+class _CNLabelSimple extends CNLabel {
+  const _CNLabelSimple(
     String titleText, {
     super.key,
     super.debugLog,
@@ -137,7 +137,7 @@ class _CNLabel2Simple extends CNLabel2 {
   CNChildText get title => CNChildText(_titleText, font: _font, foregroundColor: _foregroundColor2);
 }
 
-class _CNLabel2State extends CNWidgetState<CNLabel2> {
+class _CNLabelState extends CNWidgetState<CNLabel> {
   @override
   Size computeDefaultSize() => const Size(80.0, 20.0);
 

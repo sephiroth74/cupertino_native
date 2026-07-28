@@ -52,7 +52,7 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-                    CNSearchField2(
+                    CNSearchField(
                       debugLog: _kDebugLog,
                       text: text,
                       font: font,
@@ -122,7 +122,7 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
                     }
                   }),
                 ),
-                'Enabled': CNToggle2(
+                'Enabled': CNToggle(
                   isOn: isEnabled,
                   controlSize: CNControlSize.regular,
                   onChanged: (v) => setState(() => isEnabled = v),

@@ -35,7 +35,7 @@ class _LabelDemoPageState extends State<LabelDemoPage> {
                 children: [
                   const SizedBox(height: 12),
 
-                  CNLabel2.simple(
+                  CNLabel.simple(
                     'Simple Label Only',
                     foregroundColor: foregroundColor,
                     tint: tintColor,
@@ -44,7 +44,7 @@ class _LabelDemoPageState extends State<LabelDemoPage> {
                   ),
                   const SizedBox(height: 12),
 
-                  CNLabel2.simple(
+                  CNLabel.simple(
                     'Simple Label and Icon',
                     systemImage: 'microphone.fill',
                     foregroundColor: foregroundColor,
@@ -53,7 +53,7 @@ class _LabelDemoPageState extends State<LabelDemoPage> {
                   ),
                   const SizedBox(height: 12),
 
-                  CNLabel2(
+                  CNLabel(
                     debugLog: _kDebugLog,
                     title: CNChildText('Custom Label', font: font, foregroundColor: foregroundColor),
                     image: CNChildImage(
@@ -62,7 +62,7 @@ class _LabelDemoPageState extends State<LabelDemoPage> {
                       foregroundStyleColors: [CNColors.cyan, foregroundColor ?? CNColors.black],
                     ),
                     labelIconToTitleSpacing: labelIconToTitleSpacing,
-                    labelStyle: CNLabel2Style.automatic,
+                    labelStyle: CNLabelStyle.automatic,
                     font: font,
                   ),
                 ],

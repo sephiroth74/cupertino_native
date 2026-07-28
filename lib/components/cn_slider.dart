@@ -6,23 +6,11 @@ import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-const _kNativeViewType = 'CupertinoNativeSlider2';
 const double _kDefaultSliderWidth = 100.0;
+const _kNativeViewType = 'CupertinoNativeSlider2';
 
-/// A tick mark for [CNSlider2].
-class CNSliderTick {
-  /// Creates a tick at the given [value] with an optional [label].
-  const CNSliderTick(this.value, {this.label});
-
-  /// Optional label displayed at this tick.
-  final String? label;
-
-  /// The value where this tick should appear.
-  final double value;
-}
-
-class CNSlider2 extends CNWidget {
-  const CNSlider2({
+class CNSlider extends CNWidget {
+  const CNSlider({
     super.key,
     super.debugLog,
     required this.value,
@@ -95,22 +83,30 @@ class CNSlider2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNSlider2> createState() => _CNSlider2State();
+  State<CNSlider> createState() => _CNSliderState();
 
   @override
   String get nativeViewType => _kNativeViewType;
 }
 
-class _CNSlider2State extends CNWidgetState<CNSlider2> {
+/// A tick mark for [CNSlider].
+class CNSliderTick {
+  /// Creates a tick at the given [value] with an optional [label].
+  const CNSliderTick(this.value, {this.label});
+
+  /// Optional label displayed at this tick.
+  final String? label;
+
+  /// The value where this tick should appear.
+  final double value;
+}
+
+class _CNSliderState extends CNWidgetState<CNSlider> {
   @override
   Size computeDefaultSize() => Size(_kDefaultSliderWidth, _defaultHeight());
 
   @override
-  double computeShrinkWidth({
-    required BoxConstraints constraints,
-    required double defaultWidth,
-    double? intrinsicWidth,
-  }) {
+  double computeShrinkWidth({required BoxConstraints constraints, required double defaultWidth, double? intrinsicWidth}) {
     double resolvedWidth;
     if (intrinsicWidth != null) {
       resolvedWidth = intrinsicWidth;

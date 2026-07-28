@@ -82,6 +82,9 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let comboBoxFactory = CupertinoComboBoxFactory(messenger: registrar.messenger)
         registrar.register(comboBoxFactory, withId: "CupertinoNativeComboBox")
+
+        let segmentedControlFactory = CupertinoSegmentedControlFactory(messenger: registrar.messenger)
+        registrar.register(segmentedControlFactory, withId: "CupertinoNativeSegmentedControl")
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -144,6 +147,13 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 return
             }
             handler.clearToolbar(result: result)
+        case "setToolbarSearchText":
+            guard let handler = CupertinoNativePlugin.toolbarHandler else {
+                result(FlutterError(code: "handler_unavailable", message: "Toolbar handler is not initialized", details: nil))
+                return
+            }
+            let text = call.arguments as? String ?? ""
+            handler.setToolbarSearchText(text: text, result: result)
         case "getAccentColor":
             guard let handler = CupertinoNativePlugin.accentColorHandler else {
                 result(FlutterError(code: "handler_unavailable", message: "AccentColor handler is not initialized", details: nil))

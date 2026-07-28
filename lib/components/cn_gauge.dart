@@ -7,32 +7,11 @@ import 'package:flutter/widgets.dart';
 
 const _kNativeViewType = 'CupertinoNativeGauge2';
 
-/// Gauge style matching SwiftUI GaugeStyle.
-enum CNGaugeStyle {
-  /// Automatic style (system default).
-  automatic,
-
-  /// Accessory circular style.
-  accessoryCircular,
-
-  /// Accessory circular capacity style.
-  accessoryCircularCapacity,
-
-  /// Accessory linear style.
-  accessoryLinear,
-
-  /// Accessory linear capacity style.
-  accessoryLinearCapacity,
-
-  /// Linear capacity style.
-  linearCapacity,
-}
-
 /// A native SwiftUI Gauge widget.
 ///
 /// Displays a value within a range, with optional labels and gradient tint.
-class CNGauge2 extends CNWidget {
-  const CNGauge2({
+class CNGauge extends CNWidget {
+  const CNGauge({
     super.key,
     super.debugLog,
     required this.value,
@@ -99,21 +78,39 @@ class CNGauge2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNGauge2> createState() => _CNGauge2State();
+  State<CNGauge> createState() => _CNGaugeState();
 
   @override
   String get nativeViewType => _kNativeViewType;
 }
 
-class _CNGauge2State extends CNWidgetState<CNGauge2> {
+/// Gauge style matching SwiftUI GaugeStyle.
+enum CNGaugeStyle {
+  /// Automatic style (system default).
+  automatic,
+
+  /// Accessory circular style.
+  accessoryCircular,
+
+  /// Accessory circular capacity style.
+  accessoryCircularCapacity,
+
+  /// Accessory linear style.
+  accessoryLinear,
+
+  /// Accessory linear capacity style.
+  accessoryLinearCapacity,
+
+  /// Linear capacity style.
+  linearCapacity,
+}
+
+class _CNGaugeState extends CNWidgetState<CNGauge> {
   @override
   Size computeDefaultSize() => _defaultSize();
 
   @override
-  Map<String, dynamic> toWidgetPayload(
-    BuildContext context, {
-    required BoxConstraints? constraints,
-  }) {
+  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
     final payload = <String, dynamic>{
       'value': widget.value,
       'min': widget.min,
@@ -121,12 +118,9 @@ class _CNGauge2State extends CNWidgetState<CNGauge2> {
       'gaugeStyle': widget.gaugeStyle.name,
       'controlSize': widget.controlSize.name,
       'label': widget.label?.map((c) => c.toChildPayload(context)).toList(),
-      'currentValueLabel':
-          widget.currentValueLabel?.map((c) => c.toChildPayload(context)).toList(),
-      'minimumValueLabel':
-          widget.minimumValueLabel?.map((c) => c.toChildPayload(context)).toList(),
-      'maximumValueLabel':
-          widget.maximumValueLabel?.map((c) => c.toChildPayload(context)).toList(),
+      'currentValueLabel': widget.currentValueLabel?.map((c) => c.toChildPayload(context)).toList(),
+      'minimumValueLabel': widget.minimumValueLabel?.map((c) => c.toChildPayload(context)).toList(),
+      'maximumValueLabel': widget.maximumValueLabel?.map((c) => c.toChildPayload(context)).toList(),
     };
 
     widget.writeSharedFields(context, payload: payload, constraints: constraints);

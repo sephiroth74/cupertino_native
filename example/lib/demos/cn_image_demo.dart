@@ -534,7 +534,7 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
               color: backgroundColor,
             ),
             padding: shrink ? const EdgeInsets.all(16) : const EdgeInsets.all(0),
-            child: CNImage2(
+            child: CNImage(
               debugLog: _kDebugLog,
               systemSymbolName: systemSymbolName,
               shrink: shrink,
@@ -607,7 +607,7 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
             RightSideOptionContainer(
               title: 'Options',
               options: {
-                'Rendering Mode': CNPicker2(
+                'Rendering Mode': CNPicker(
                   selection: renderingMode.name,
                   onChanged: (value) {
                     setState(() {
@@ -625,10 +625,10 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                     });
                   },
                   children: CNSymbolRenderingMode.values.map((mode) => CNChildText(mode.name, tag: mode.name)).toList(),
-                  pickerStyle: CNPickerStyle2.automatic,
+                  pickerStyle: CNPickerStyle.automatic,
                 ),
-                'Gradient': CNToggle2(
-                  toggleStyle: CNToggle2Style.switchStyle,
+                'Gradient': CNToggle(
+                  toggleStyle: CNToggleStyle.switchStyle,
                   isOn: colorMode == CNSymbolColorRenderingMode.gradient,
                   onChanged: (value) {
                     setState(() {
@@ -704,7 +704,7 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                     }
                   }),
                 ),
-                'Font Weight': CNPicker2(
+                'Font Weight': CNPicker(
                   selection: font.weight?.name ?? CNFontWeight.regular.name,
                   onChanged: (value) {
                     setState(() {
@@ -715,7 +715,7 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                     });
                   },
                   children: CNFontWeight.values.map((weight) => CNChildText(weight.name, tag: weight.name)).toList(),
-                  pickerStyle: CNPickerStyle2.automatic,
+                  pickerStyle: CNPickerStyle.automatic,
                 ),
                 'Font Size': SizeSliderPicker(
                   value: fontSize,

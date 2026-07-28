@@ -16,7 +16,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
   CNControlSize controlSize = CNControlSize.large;
   bool isEnabled = true;
   String lastAction = 'None';
-  CNMenuStyle2 menuStyle = CNMenuStyle2.automatic;
+  CNMenuStyle menuStyle = CNMenuStyle.automatic;
   CupertinoDynamicColor? tintColor;
   bool usePrimaryAction = false;
 
@@ -43,7 +43,7 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                   const SizedBox(height: 16),
                   Text('Last Action: $lastAction', style: CNTheme.of(context).typography.title2),
                   const SizedBox(height: 16),
-                  CNMenu2(
+                  CNMenu(
                     debugLog: _kDebugLog,
                     items: [
                       CNChildButton(tag: 'open', title: 'Open in Preview', systemImage: 'star', badge: 2),
@@ -73,14 +73,14 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
             RightSideOptionContainer(
               options: {
                 'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
-                'Menu Style': CNPicker2(
+                'Menu Style': CNPicker(
                   selection: menuStyle.name,
-                  onChanged: (value) => setState(() => menuStyle = CNMenuStyle2.values.firstWhere((style) => style.name == value)),
-                  children: CNMenuStyle2.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
+                  onChanged: (value) => setState(() => menuStyle = CNMenuStyle.values.firstWhere((style) => style.name == value)),
+                  children: CNMenuStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
                 ),
                 'Tint Color': ColorPicker(colors: kSystemColors, value: tintColor, onChanged: (c) => setState(() => tintColor = c)),
-                'Enabled': CNToggle2(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value)),
-                'Primary Action': CNToggle2(isOn: usePrimaryAction, onChanged: (value) => setState(() => usePrimaryAction = value)),
+                'Enabled': CNToggle(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value)),
+                'Primary Action': CNToggle(isOn: usePrimaryAction, onChanged: (value) => setState(() => usePrimaryAction = value)),
               },
             ),
           ],

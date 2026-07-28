@@ -8,40 +8,19 @@ import 'package:flutter/widgets.dart';
 
 const _kNativeViewType = 'CupertinoNativePicker2';
 
-/// Visual style for [CNPicker2].
-enum CNPickerStyle2 {
-  /// Automatic picker style.
-  automatic,
-
-  /// Inline picker (shows all items).
-  inline,
-
-  /// Menu picker (dropdown).
-  menu,
-
-  /// Segmented picker.
-  segmented,
-
-  /// Radio group picker.
-  radioGroup,
-
-  /// Palette picker.
-  palette,
-}
-
 /// A native SwiftUI Picker widget.
 ///
 /// Each item in [children] must be a [CNChildText], [CNChildImage], or
 /// [CNChildLabel]. The item's [CNChild.tag] determines the selection value.
-class CNPicker2 extends CNWidget {
-  CNPicker2({
+class CNPicker extends CNWidget {
+  CNPicker({
     super.key,
     super.debugLog,
     required this.children,
     required this.selection,
     this.label,
     this.onChanged,
-    this.pickerStyle = CNPickerStyle2.automatic,
+    this.pickerStyle = CNPickerStyle.automatic,
     this.controlSize,
     this.font,
     this.shrink = true,
@@ -71,7 +50,7 @@ class CNPicker2 extends CNWidget {
   final ValueChanged<String>? onChanged;
 
   /// Visual style for the picker.
-  final CNPickerStyle2 pickerStyle;
+  final CNPickerStyle pickerStyle;
 
   /// The currently selected tag value.
   final String selection;
@@ -95,7 +74,7 @@ class CNPicker2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNPicker2> createState() => _CNPicker2State();
+  State<CNPicker> createState() => _CNPickerState();
 
   @override
   String get nativeViewType => _kNativeViewType;
@@ -103,12 +82,33 @@ class CNPicker2 extends CNWidget {
   bool get enabled => onChanged != null;
 }
 
-class _CNPicker2State extends CNWidgetState<CNPicker2> {
+/// Visual style for [CNPicker].
+enum CNPickerStyle {
+  /// Automatic picker style.
+  automatic,
+
+  /// Inline picker (shows all items).
+  inline,
+
+  /// Menu picker (dropdown).
+  menu,
+
+  /// Segmented picker.
+  segmented,
+
+  /// Radio group picker.
+  radioGroup,
+
+  /// Palette picker.
+  palette,
+}
+
+class _CNPickerState extends CNWidgetState<CNPicker> {
   @override
   Size computeDefaultSize() {
     switch (widget.pickerStyle) {
-      case CNPickerStyle2.automatic:
-      case CNPickerStyle2.menu:
+      case CNPickerStyle.automatic:
+      case CNPickerStyle.menu:
         switch (widget.controlSize) {
           case CNControlSize.mini:
             return const Size(100, 16);
@@ -121,8 +121,8 @@ class _CNPicker2State extends CNWidgetState<CNPicker2> {
           default:
             return const Size(100, 36);
         }
-      case CNPickerStyle2.segmented:
-      case CNPickerStyle2.palette:
+      case CNPickerStyle.segmented:
+      case CNPickerStyle.palette:
         switch (widget.controlSize) {
           case CNControlSize.mini:
             return const Size(double.infinity, 16);
@@ -142,11 +142,7 @@ class _CNPicker2State extends CNWidgetState<CNPicker2> {
   }
 
   @override
-  double computeShrinkHeight({
-    required BoxConstraints constraints,
-    required double defaultHeight,
-    double? intrinsicHeight,
-  }) {
+  double computeShrinkHeight({required BoxConstraints constraints, required double defaultHeight, double? intrinsicHeight}) {
     double resolvedHeight;
     if (intrinsicHeight != null) {
       resolvedHeight = intrinsicHeight;

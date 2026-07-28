@@ -1,11 +1,9 @@
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, ThemeMode;
 import 'package:flutter/scheduler.dart';
 import 'package:macos_window_utils/macos_window_utils.dart';
 import 'package:provider/provider.dart';
-import 'package:system_theme/system_theme.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'demos/cn_alert_demo.dart';
@@ -23,6 +21,7 @@ import 'demos/cn_picker_demo.dart';
 import 'demos/cn_popover_demo.dart';
 import 'demos/cn_progressview_demo.dart';
 import 'demos/cn_search_field_demo.dart';
+import 'demos/cn_segmented_control_demo.dart';
 import 'demos/cn_secure_field_demo.dart';
 import 'demos/cn_slider_demo.dart';
 import 'demos/cn_stepper_demo.dart';
@@ -55,6 +54,7 @@ const _entries = <_DemoEntry>[
   _DemoEntry('CNPopover', 'rectangle.on.rectangle', PopoverDemoPage()),
   _DemoEntry('CNProgressView', 'progress.indicator', ProgressIndicatorsPageDemo()),
   _DemoEntry('CNSearchField', 'magnifyingglass', SearchFieldDemoPage()),
+  _DemoEntry('CNSegmentedControl', 'rectangle.split.3x1', SegmentedControlDemoPage()),
   _DemoEntry('CNSecureField', 'lock.shield', SecureTextFieldDemoPage()),
   _DemoEntry('CNSlider', 'slider.horizontal.3', SliderDemoPage()),
   _DemoEntry('CNStepper', 'plusminus', StepperDemoPage()),
@@ -130,6 +130,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
 
 class _MyAppState extends State<MyApp> {
   late Brightness brightness;
+  String? searchQuery;
   int selectedIndex = 0;
   bool sideBarClosed = false;
 
@@ -171,6 +172,7 @@ class _MyAppState extends State<MyApp> {
                   return _SideBar(
                     selectedIndex: selectedIndex,
                     scrollController: scrollController,
+                    searchQuery: searchQuery,
                     onItemSelected: (index) {
                       setState(() {
                         selectedIndex = index;
@@ -182,7 +184,7 @@ class _MyAppState extends State<MyApp> {
                 isResizable: true,
                 maxWidth: 400,
                 startWidth: 250,
-                dragClosed: false,
+                dragClosed: true,
                 material: NSVisualEffectViewMaterial.fullScreenUI,
                 backgroundColor: CNColors.transparent,
               ),
@@ -241,95 +243,152 @@ class _MyAppState extends State<MyApp> {
                   );
                 },
               ),
-              child: Builder(
-                builder: (context) {
-                  return CNToolbar(
-                    config: CNToolbarConfig(
-                      onSearchChanged: (value) {
-                        debugPrint('Search changed: $value');
-                      },
-                      onItemPressed: (value) {
-                        debugPrint('Toolbar item pressed: $value');
-                        final tags = value.split(':');
-                        if (tags.length == 2 && tags[0] == 'theme_picker') {
-                          final selectedTag = tags[1];
-                          if (selectedTag == ThemeMode.system.name) {
-                            appTheme.mode = ThemeMode.system;
-                          } else if (selectedTag == ThemeMode.light.name) {
-                            appTheme.mode = ThemeMode.light;
-                          } else {
-                            appTheme.mode = ThemeMode.dark;
-                          }
-                        } else if (tags.length == 2 && tags[0] == 'accent_color') {
-                          final selectedTag = tags[1];
-                          if (selectedTag == 'system') {
-                            context.read<CNTheme>().data.copyWith(primaryColor: SystemTheme.accentColor.accent);
-                          } else {
-                            final selectedColor = kSystemColors[selectedTag];
-                            if (selectedColor != null) {
-                              context.read<CNTheme>().data.copyWith(primaryColor: selectedColor);
-                            }
-                          }
-                          setState(() {});
-                        } else if (tags.length == 1 && tags[0] == 'toggle_navigation') {
-                          setState(() {
-                            CNWindowScope.of(context).toggleSidebar();
-                          });
-                        }
-                      },
-                      searchable: true,
-                      titleDisplayMode: CNToolbarTitleDisplayMode.automatic,
-                      toolbarBackground: accentColor.withAlpha(244),
-                      toolbarBlurEnabled: true,
-                      toolbarBlurMaterial: CNToolbarBlurMaterial.titlebar,
-                      title: CNChildText('Cupertino Native Demo'),
-                      groups: [
-                        CNToolbarItemGroup(
-                          placement: CNToolbarPlacement.navigation,
-                          children: [
-                            CNChildButton(
-                              tag: 'toggle_navigation',
-                              title: 'Toggle Navigation',
-                              systemImage: 'sidebar.left',
-                              labelStyle: CNLabel2Style.iconOnly,
-                              help: 'Toggle the navigation sidebar',
-                            ),
-                          ],
-                        ),
-                        CNToolbarItemGroup(
-                          placement: CNToolbarPlacement.automatic,
-                          children: [
-                            CNChildPicker(
-                              pickerStyle: CNPickerStyle2.menu.name,
-                              labelStyle: CNLabel2Style.titleAndIcon,
-                              tag: 'theme_picker',
-                              label: [
-                                CNChildLabel(
-                                  appTheme.mode.name,
-                                  labelStyle: CNLabel2Style.titleAndIcon,
-                                  tag: appTheme.mode.name,
-                                  systemImage: appTheme.mode == ThemeMode.system
-                                      ? 'sun.max'
-                                      : (appTheme.mode == ThemeMode.light ? 'sun.max' : 'moon.fill'),
-                                ),
-                              ],
-                              children: [
-                                CNChildLabel('System Theme', tag: ThemeMode.system.name, systemImage: 'sun.lefthalf.filled'),
-                                CNChildLabel('Light Theme', tag: ThemeMode.light.name, systemImage: 'sun.max'),
-                                CNChildLabel('Dark Theme', tag: ThemeMode.dark.name, systemImage: 'moon.fill'),
-                              ],
-                              selection: appTheme.mode.name,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    child: _DesktopDemoShell(selectedIndex: selectedIndex),
-                  );
+              toolbar: CNToolbarConfig(
+                onSearchChanged: (context, value) {
+                  debugPrint('Search changed: $value');
+                  setState(() {
+                    searchQuery = value;
+                  });
                 },
+                onItemPressed: (context, value) {
+                  final tags = value.split(':');
+                  debugPrint('Toolbar item pressed: $value, tags: $tags, tags.length: ${tags.length}');
+                  if (tags.length == 2 && tags[0] == 'theme_picker') {
+                    debugPrint('Theme picker selected: ${tags[1]}');
+                    final selectedTag = tags[1];
+                    if (selectedTag == ThemeMode.system.name) {
+                      appTheme.mode = ThemeMode.system;
+                    } else if (selectedTag == ThemeMode.light.name) {
+                      appTheme.mode = ThemeMode.light;
+                    } else {
+                      appTheme.mode = ThemeMode.dark;
+                    }
+                  } else if (tags.length == 1 && tags[0] == 'toggle_navigation') {
+                    debugPrint('Toggling sidebar');
+                    CNWindowScope.of(context).toggleSidebar();
+                  }
+                },
+                searchable: true,
+                searchText: searchQuery,
+                titleDisplayMode: CNToolbarTitleDisplayMode.automatic,
+                toolbarBackground: accentColor.withAlpha(244),
+                toolbarBlurEnabled: true,
+                toolbarBlurMaterial: CNToolbarBlurMaterial.titlebar,
+                title: CNChildText('Cupertino Native Demo'),
+                groups: [
+                  CNToolbarItemGroup(
+                    placement: CNToolbarPlacement.navigation,
+                    children: [
+                      CNChildButton(
+                        tag: 'toggle_navigation',
+                        title: 'Toggle Navigation',
+                        systemImage: 'sidebar.left',
+                        labelStyle: CNLabelStyle.iconOnly,
+                        help: 'Toggle the navigation sidebar',
+                      ),
+                    ],
+                  ),
+                  CNToolbarItemGroup(
+                    placement: CNToolbarPlacement.automatic,
+                    children: [
+                      CNChildPicker(
+                        pickerStyle: CNPickerStyle.menu.name,
+                        labelStyle: CNLabelStyle.titleAndIcon,
+                        tag: 'theme_picker',
+                        label: [
+                          CNChildLabel(
+                            appTheme.mode.name,
+                            labelStyle: CNLabelStyle.titleAndIcon,
+                            tag: appTheme.mode.name,
+                            systemImage: appTheme.mode == ThemeMode.system
+                                ? 'sun.max'
+                                : (appTheme.mode == ThemeMode.light ? 'sun.max' : 'moon.fill'),
+                          ),
+                        ],
+                        children: [
+                          CNChildLabel('System Theme', tag: ThemeMode.system.name, systemImage: 'sun.lefthalf.filled'),
+                          CNChildLabel('Light Theme', tag: ThemeMode.light.name, systemImage: 'sun.max'),
+                          CNChildLabel('Dark Theme', tag: ThemeMode.dark.name, systemImage: 'moon.fill'),
+                        ],
+                        selection: appTheme.mode.name,
+                      ),
+                    ],
+                  ),
+                ],
               ),
+              child: _DesktopDemoShell(selectedIndex: selectedIndex),
             );
           },
+        );
+      },
+    );
+  }
+}
+
+class _SideBar extends StatelessWidget {
+  const _SideBar({required this.onItemSelected, required this.selectedIndex, this.scrollController, this.searchQuery});
+
+  final void Function(int index) onItemSelected;
+  final ScrollController? scrollController;
+  final String? searchQuery;
+  final int selectedIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = CNTheme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accentColor = CNTheme.of(context).accentColor;
+    final isBright = accentColor.computeLuminance() > 0.5;
+    final labelColor = theme.labelColor;
+
+    return ListView.builder(
+      controller: scrollController,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: _entries.length,
+      itemBuilder: (context, index) {
+        final entry = _entries[index];
+        final isSelected = index == selectedIndex;
+        final isValidEntry =
+            searchQuery == null || searchQuery!.isEmpty || entry.title.toLowerCase().contains(searchQuery!.toLowerCase());
+
+        if (!isValidEntry) {
+          return const SizedBox.shrink();
+        }
+
+        return GestureDetector(
+          onTap: () => onItemSelected(index),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+            decoration: BoxDecoration(
+              color: isSelected ? accentColor.withValues(alpha: 1.0) : Colors.transparent,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Row(
+              children: [
+                CNImage(
+                  constraints: const BoxConstraints(maxWidth: 18, maxHeight: 18),
+                  systemSymbolName: entry.symbolName,
+                  foregroundColor: isSelected
+                      ? isBright
+                            ? CNColors.black
+                            : CNColors.white
+                      : (isDark ? CupertinoColors.label.darkColor : CupertinoColors.label.color),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    entry.title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isSelected ? (isBright ? CNColors.label.color : CNColors.label.darkColor) : labelColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
@@ -363,67 +422,6 @@ class _StatusBarButton extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _SideBar extends StatelessWidget {
-  const _SideBar({required this.onItemSelected, required this.selectedIndex, this.scrollController});
-
-  final void Function(int index) onItemSelected;
-  final ScrollController? scrollController;
-  final int selectedIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = CNTheme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final accentColor = CNTheme.of(context).accentColor;
-    final isBright = accentColor.computeLuminance() > 0.5;
-    final labelColor = theme.labelColor;
-    return ListView.builder(
-      controller: scrollController,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: _entries.length,
-      itemBuilder: (context, index) {
-        final entry = _entries[index];
-        final isSelected = index == selectedIndex;
-        return GestureDetector(
-          onTap: () => onItemSelected(index),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-            decoration: BoxDecoration(
-              color: isSelected ? accentColor.withValues(alpha: 1.0) : Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Row(
-              children: [
-                CNImage2(
-                  constraints: const BoxConstraints(maxWidth: 18, maxHeight: 18),
-                  systemSymbolName: entry.symbolName,
-                  foregroundColor: isSelected
-                      ? isBright
-                            ? CNColors.black
-                            : CNColors.white
-                      : (isDark ? CupertinoColors.label.darkColor : CupertinoColors.label.color),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    entry.title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: isSelected ? (isBright ? CNColors.label.color : CNColors.label.darkColor) : labelColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

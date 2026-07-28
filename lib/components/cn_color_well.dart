@@ -9,12 +9,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-const _kNativeViewType = 'CupertinoNativeColorWell2';
-const double _kDefaultWidth = 44.0;
 const double _kDefaultHeight = 24.0;
+const double _kDefaultWidth = 44.0;
+const _kNativeViewType = 'CupertinoNativeColorWell2';
 
-class CNColorWell2 extends CNWidget {
-  const CNColorWell2({
+class CNColorWell extends CNWidget {
+  const CNColorWell({
     super.key,
     super.debugLog,
     this.color,
@@ -60,13 +60,13 @@ class CNColorWell2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNColorWell2> createState() => _CNColorWell2State();
+  State<CNColorWell> createState() => _CNColorWellState();
 
   @override
   String get nativeViewType => _kNativeViewType;
 }
 
-class _CNColorWell2State extends CNWidgetState<CNColorWell2> {
+class _CNColorWellState extends CNWidgetState<CNColorWell> {
   @override
   Size computeDefaultSize() => const Size(_kDefaultWidth, _kDefaultHeight);
 

@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 
 const _kNativeViewType = 'CupertinoNativeImage2';
 
-class CNImage2 extends CNWidget {
-  const CNImage2({
+class CNImage extends CNWidget {
+  const CNImage({
     super.key,
     super.debugLog,
     required this.systemSymbolName,
@@ -59,13 +59,13 @@ class CNImage2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNImage2> createState() => _CNImage2State();
+  State<CNImage> createState() => _CNImageState();
 
   @override
   String get nativeViewType => _kNativeViewType;
 }
 
-class _CNImage2State extends CNWidgetState<CNImage2> {
+class _CNImageState extends CNWidgetState<CNImage> {
   @override
   Size computeDefaultSize() {
     final double fontSize;

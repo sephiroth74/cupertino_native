@@ -12,8 +12,6 @@ enum CNAlignment { leading, center, trailing, top, bottom }
 /// These are NOT platform views — they are pure data that the native side
 /// reconstructs as SwiftUI views inside a parent widget's content closure.
 sealed class CNChild {
-  const CNChild({this.constraints, this.paddings, this.tag, this.enabled, this.tint, this.foregroundColor, this.help});
-
   /// Optional layout constraints applied to this child.
   final BoxConstraints? constraints;
 
@@ -34,6 +32,8 @@ sealed class CNChild {
 
   /// Optional tint color applied to this child.
   final Color? tint;
+
+  const CNChild({this.constraints, this.paddings, this.tag, this.enabled, this.tint, this.foregroundColor, this.help});
 
   /// Serializes this child into a payload map for the native side.
   Map<String, dynamic> toChildPayload(BuildContext context);
@@ -57,46 +57,132 @@ sealed class CNChild {
   }
 }
 
-/// A text child.
-class CNChildText extends CNChild {
-  const CNChildText(
-    this.text, {
-    this.font,
-    super.foregroundColor,
-    this.lineLimit,
-    this.lineLimitReservesSpace,
-    this.textScale,
-    this.truncationMode,
+/// A Button child (for use inside menus or other containers).
+///
+/// Use [tag] to identify which button was pressed in the callback.
+class CNChildButton extends CNChild {
+  const CNChildButton({
+    required super.tag,
+    required this.title,
+    this.systemImage,
+    this.role,
+    this.badge,
+    this.labelStyle,
     super.enabled,
     super.tint,
+    super.foregroundColor,
+    super.constraints,
+    super.paddings,
+    super.help,
+  }) : assert(badge == null || badge is String || badge is int);
+
+  /// Optional badge value (String or int).
+  final Object? badge;
+
+  /// Label style (titleOnly, iconOnly, titleAndIcon).
+  final CNLabelStyle? labelStyle;
+
+  /// Semantic role.
+  final CNButtonRole? role;
+
+  /// Optional SF Symbol icon.
+  final String? systemImage;
+
+  /// Button title.
+  final String title;
+
+  @override
+  Map<String, dynamic> toChildPayload(BuildContext context) {
+    return {
+      'type': 'button',
+      'tag': tag,
+      'enabled': enabled,
+      'help': help,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
+      'title': title,
+      'systemImage': systemImage,
+      'role': role?.name,
+      'badge': badge,
+      'labelStyle': labelStyle?.name,
+      'constraints': CNChild.serializeConstraints(constraints),
+      'paddings': CNChild.serializePaddings(paddings),
+    };
+  }
+}
+
+/// A Divider child.
+class CNChildDivider extends CNChild {
+  const CNChildDivider();
+
+  @override
+  Map<String, dynamic> toChildPayload(BuildContext context) {
+    return {'type': 'divider'};
+  }
+}
+
+/// A Group container child (no layout, just grouping).
+class CNChildGroup extends CNChild {
+  const CNChildGroup({
+    required this.children,
+    super.enabled,
+    super.tint,
+    super.foregroundColor,
     super.constraints,
     super.paddings,
     super.tag,
     super.help,
   });
 
-  final CNFont? font;
-  final int? lineLimit;
-  final bool? lineLimitReservesSpace;
-  final String text;
-  final CNTextScale? textScale;
-  final CNTextTruncationMode? truncationMode;
+  final List<CNChild> children;
 
   @override
   Map<String, dynamic> toChildPayload(BuildContext context) {
     return {
-      'type': 'text',
+      'type': 'group',
       'tag': tag,
       'enabled': enabled,
       'help': help,
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
-      'text': text,
-      'font': font?.toMap(),
-      'lineLimit': lineLimit,
-      'lineLimitReservesSpace': lineLimitReservesSpace,
-      'textScale': textScale?.name,
-      'truncationMode': truncationMode?.name,
+      'children': children.map((c) => c.toChildPayload(context)).toList(),
+      'constraints': CNChild.serializeConstraints(constraints),
+      'paddings': CNChild.serializePaddings(paddings),
+    };
+  }
+}
+
+/// An HStack container child.
+class CNChildHStack extends CNChild {
+  const CNChildHStack({
+    required this.children,
+    this.alignment = CNAlignment.center,
+    this.spacing,
+    super.enabled,
+    super.tint,
+    super.foregroundColor,
+    super.constraints,
+    super.paddings,
+    super.tag,
+    super.help,
+  });
+
+  final CNAlignment alignment;
+  final List<CNChild> children;
+  final double? spacing;
+
+  @override
+  Map<String, dynamic> toChildPayload(BuildContext context) {
+    return {
+      'type': 'hstack',
+      'tag': tag,
+      'enabled': enabled,
+      'help': help,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
+      'alignment': alignment.name,
+      'spacing': spacing,
+      'children': children.map((c) => c.toChildPayload(context)).toList(),
       'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };
@@ -146,190 +232,41 @@ class CNChildImage extends CNChild {
   }
 }
 
-/// A VStack container child.
-class CNChildVStack extends CNChild {
-  const CNChildVStack({
-    required this.children,
-    this.alignment = CNAlignment.center,
-    this.spacing,
-    super.enabled,
-    super.tint,
-    super.foregroundColor,
-    super.constraints,
-    super.paddings,
-    super.tag,
-    super.help,
-  });
-
-  final CNAlignment alignment;
-  final List<CNChild> children;
-  final double? spacing;
-
-  @override
-  Map<String, dynamic> toChildPayload(BuildContext context) {
-    return {
-      'type': 'vstack',
-      'tag': tag,
-      'enabled': enabled,
-      'help': help,
-      'tint': resolveColorToArgb(tint, context),
-      'foregroundColor': resolveColorToArgb(foregroundColor, context),
-      'alignment': alignment.name,
-      'spacing': spacing,
-      'children': children.map((c) => c.toChildPayload(context)).toList(),
-      'constraints': CNChild.serializeConstraints(constraints),
-      'paddings': CNChild.serializePaddings(paddings),
-    };
-  }
-}
-
-/// An HStack container child.
-class CNChildHStack extends CNChild {
-  const CNChildHStack({
-    required this.children,
-    this.alignment = CNAlignment.center,
-    this.spacing,
-    super.enabled,
-    super.tint,
-    super.foregroundColor,
-    super.constraints,
-    super.paddings,
-    super.tag,
-    super.help,
-  });
-
-  final CNAlignment alignment;
-  final List<CNChild> children;
-  final double? spacing;
-
-  @override
-  Map<String, dynamic> toChildPayload(BuildContext context) {
-    return {
-      'type': 'hstack',
-      'tag': tag,
-      'enabled': enabled,
-      'help': help,
-      'tint': resolveColorToArgb(tint, context),
-      'foregroundColor': resolveColorToArgb(foregroundColor, context),
-      'alignment': alignment.name,
-      'spacing': spacing,
-      'children': children.map((c) => c.toChildPayload(context)).toList(),
-      'constraints': CNChild.serializeConstraints(constraints),
-      'paddings': CNChild.serializePaddings(paddings),
-    };
-  }
-}
-
-/// A Group container child (no layout, just grouping).
-class CNChildGroup extends CNChild {
-  const CNChildGroup({required this.children, super.enabled, super.tint, super.foregroundColor, super.constraints, super.paddings, super.tag, super.help});
-
-  final List<CNChild> children;
-
-  @override
-  Map<String, dynamic> toChildPayload(BuildContext context) {
-    return {
-      'type': 'group',
-      'tag': tag,
-      'enabled': enabled,
-      'help': help,
-      'tint': resolveColorToArgb(tint, context),
-      'foregroundColor': resolveColorToArgb(foregroundColor, context),
-      'children': children.map((c) => c.toChildPayload(context)).toList(),
-      'constraints': CNChild.serializeConstraints(constraints),
-      'paddings': CNChild.serializePaddings(paddings),
-    };
-  }
-}
-
-/// A ProgressView child.
-class CNChildProgressView extends CNChild {
-  const CNChildProgressView({
-    this.value,
-    this.total = 1.0,
-    this.style = CNProgressViewStyle.linear,
-    this.controlSize = CNControlSize.regular,
-    super.tint,
-    super.foregroundColor,
-    super.constraints,
-    super.enabled,
-    super.paddings,
-    super.tag,
-    super.help,
-  });
-
-  final CNControlSize controlSize;
-  final CNProgressViewStyle style;
-  final double total;
-  final double? value;
-
-  @override
-  Map<String, dynamic> toChildPayload(BuildContext context) {
-    return {
-      'type': 'progressView',
-      'tag': tag,
-      'enabled': enabled,
-      'help': help,
-      'tint': resolveColorToArgb(tint, context),
-      'foregroundColor': resolveColorToArgb(foregroundColor, context),
-      'value': value,
-      'total': total,
-      'style': style.name,
-      'controlSize': controlSize.name,
-      'constraints': CNChild.serializeConstraints(constraints),
-      'paddings': CNChild.serializePaddings(paddings),
-    };
-  }
-}
-
-/// A Divider child.
-class CNChildDivider extends CNChild {
-  const CNChildDivider();
-
-  @override
-  Map<String, dynamic> toChildPayload(BuildContext context) {
-    return {'type': 'divider'};
-  }
-}
-
-/// A Button child (for use inside menus or other containers).
-///
-/// Use [tag] to identify which button was pressed in the callback.
-class CNChildButton extends CNChild {
-  const CNChildButton({
-    required super.tag,
-    required this.title,
+/// A Label child — SwiftUI `Label("title", systemImage: "icon")`.
+class CNChildLabel extends CNChild {
+  const CNChildLabel(
+    this.title, {
     this.systemImage,
-    this.role,
-    this.badge,
-    this.labelStyle,
+    this.font,
+    super.foregroundColor,
+    this.symbolRenderingMode,
+    this.symbolColorRenderingMode,
+    this.foregroundStyleColors,
+    this.labelReservedIconWidth,
+    this.labelIconToTitleSpacing,
+    this.labelStyle = CNLabelStyle.automatic,
     super.enabled,
     super.tint,
-    super.foregroundColor,
     super.constraints,
     super.paddings,
+    super.tag,
     super.help,
-  }) : assert(badge == null || badge is String || badge is int);
+  });
 
-  /// Optional badge value (String or int).
-  final Object? badge;
-
-  /// Label style (titleOnly, iconOnly, titleAndIcon).
-  final CNLabel2Style? labelStyle;
-
-  /// Semantic role.
-  final CNButtonRole2? role;
-
-  /// Optional SF Symbol icon.
+  final CNFont? font;
+  final List<Color>? foregroundStyleColors;
+  final double? labelIconToTitleSpacing;
+  final double? labelReservedIconWidth;
+  final CNLabelStyle labelStyle;
+  final CNSymbolColorRenderingMode? symbolColorRenderingMode;
+  final CNSymbolRenderingMode? symbolRenderingMode;
   final String? systemImage;
-
-  /// Button title.
   final String title;
 
   @override
   Map<String, dynamic> toChildPayload(BuildContext context) {
     return {
-      'type': 'button',
+      'type': 'label',
       'tag': tag,
       'enabled': enabled,
       'help': help,
@@ -337,9 +274,13 @@ class CNChildButton extends CNChild {
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'title': title,
       'systemImage': systemImage,
-      'role': role?.name,
-      'badge': badge,
-      'labelStyle': labelStyle?.name,
+      'font': font?.toMap(),
+      'symbolRenderingMode': symbolRenderingMode?.name,
+      'symbolColorRenderingMode': symbolColorRenderingMode?.name,
+      'foregroundStyleColors': foregroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
+      'labelReservedIconWidth': labelReservedIconWidth,
+      'labelIconToTitleSpacing': labelIconToTitleSpacing,
+      'labelStyle': labelStyle.name,
       'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };
@@ -348,7 +289,17 @@ class CNChildButton extends CNChild {
 
 /// A sub-Menu child (for nesting menus).
 class CNChildMenu extends CNChild {
-  const CNChildMenu({required this.items, required this.label, super.enabled, super.tint, super.foregroundColor, super.constraints, super.paddings, super.tag, super.help});
+  const CNChildMenu({
+    required this.items,
+    required this.label,
+    super.enabled,
+    super.tint,
+    super.foregroundColor,
+    super.constraints,
+    super.paddings,
+    super.tag,
+    super.help,
+  });
 
   factory CNChildMenu.simple(
     String title, {
@@ -423,7 +374,7 @@ class CNChildPicker extends CNChild {
   final List<CNChild>? label;
 
   /// Label style (titleOnly, iconOnly, titleAndIcon).
-  final CNLabel2Style? labelStyle;
+  final CNLabelStyle? labelStyle;
 
   /// Picker style (menu, segmented, radioGroup, inline, palette).
   final String pickerStyle;
@@ -447,6 +398,139 @@ class CNChildPicker extends CNChild {
       'pickerStyle': pickerStyle,
       'controlSize': controlSize,
       'font': font?.toMap(),
+      'constraints': CNChild.serializeConstraints(constraints),
+      'paddings': CNChild.serializePaddings(paddings),
+    };
+  }
+}
+
+/// A ProgressView child.
+class CNChildProgressView extends CNChild {
+  const CNChildProgressView({
+    this.value,
+    this.total = 1.0,
+    this.style = CNProgressViewStyle.linear,
+    this.controlSize = CNControlSize.regular,
+    super.tint,
+    super.foregroundColor,
+    super.constraints,
+    super.enabled,
+    super.paddings,
+    super.tag,
+    super.help,
+  });
+
+  final CNControlSize controlSize;
+  final CNProgressViewStyle style;
+  final double total;
+  final double? value;
+
+  @override
+  Map<String, dynamic> toChildPayload(BuildContext context) {
+    return {
+      'type': 'progressView',
+      'tag': tag,
+      'enabled': enabled,
+      'help': help,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
+      'value': value,
+      'total': total,
+      'style': style.name,
+      'controlSize': controlSize.name,
+      'constraints': CNChild.serializeConstraints(constraints),
+      'paddings': CNChild.serializePaddings(paddings),
+    };
+  }
+}
+
+/// A text child.
+class CNChildText extends CNChild {
+  const CNChildText(
+    this.text, {
+    this.font,
+    super.foregroundColor,
+    this.lineLimit,
+    this.lineLimitReservesSpace,
+    this.textScale,
+    this.truncationMode,
+    super.enabled,
+    super.tint,
+    super.constraints,
+    super.paddings,
+    super.tag,
+    super.help,
+  });
+
+  final CNFont? font;
+  final int? lineLimit;
+  final bool? lineLimitReservesSpace;
+  final String text;
+  final CNTextScale? textScale;
+  final CNTextTruncationMode? truncationMode;
+
+  @override
+  Map<String, dynamic> toChildPayload(BuildContext context) {
+    return {
+      'type': 'text',
+      'tag': tag,
+      'enabled': enabled,
+      'help': help,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
+      'text': text,
+      'font': font?.toMap(),
+      'lineLimit': lineLimit,
+      'lineLimitReservesSpace': lineLimitReservesSpace,
+      'textScale': textScale?.name,
+      'truncationMode': truncationMode?.name,
+      'constraints': CNChild.serializeConstraints(constraints),
+      'paddings': CNChild.serializePaddings(paddings),
+    };
+  }
+}
+
+/// A TextField child for inline use in toolbars and other containers.
+class CNChildTextField extends CNChild {
+  const CNChildTextField({
+    required super.tag,
+    this.text = '',
+    this.placeholder,
+    this.font,
+    this.controlSize,
+    super.enabled,
+    super.tint,
+    super.foregroundColor,
+    super.constraints,
+    super.paddings,
+    super.help,
+  });
+
+  /// Control size.
+  final String? controlSize;
+
+  /// Font.
+  final CNFont? font;
+
+  /// Placeholder text.
+  final String? placeholder;
+
+  /// Current text value.
+  final String text;
+
+  @override
+  Map<String, dynamic> toChildPayload(BuildContext context) {
+    return {
+      'type': 'textField',
+      'tag': tag,
+      'enabled': enabled,
+      'help': help,
+      'tint': resolveColorToArgb(tint, context),
+      'foregroundColor': resolveColorToArgb(foregroundColor, context),
+      'text': text,
+      'placeholder': placeholder,
+      'font': font?.toMap(),
+      'controlSize': controlSize,
       'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };
@@ -505,102 +589,37 @@ class CNChildToggle extends CNChild {
   }
 }
 
-/// A TextField child for inline use in toolbars and other containers.
-class CNChildTextField extends CNChild {
-  const CNChildTextField({
-    required super.tag,
-    this.text = '',
-    this.placeholder,
-    this.font,
-    this.controlSize,
+/// A VStack container child.
+class CNChildVStack extends CNChild {
+  const CNChildVStack({
+    required this.children,
+    this.alignment = CNAlignment.center,
+    this.spacing,
     super.enabled,
     super.tint,
     super.foregroundColor,
-    super.constraints,
-    super.paddings,
-    super.help,
-  });
-
-  /// Control size.
-  final String? controlSize;
-
-  /// Font.
-  final CNFont? font;
-
-  /// Placeholder text.
-  final String? placeholder;
-
-  /// Current text value.
-  final String text;
-
-  @override
-  Map<String, dynamic> toChildPayload(BuildContext context) {
-    return {
-      'type': 'textField',
-      'tag': tag,
-      'enabled': enabled,
-      'help': help,
-      'tint': resolveColorToArgb(tint, context),
-      'foregroundColor': resolveColorToArgb(foregroundColor, context),
-      'text': text,
-      'placeholder': placeholder,
-      'font': font?.toMap(),
-      'controlSize': controlSize,
-      'constraints': CNChild.serializeConstraints(constraints),
-      'paddings': CNChild.serializePaddings(paddings),
-    };
-  }
-}
-
-/// A Label child — SwiftUI `Label("title", systemImage: "icon")`.
-class CNChildLabel extends CNChild {
-  const CNChildLabel(
-    this.title, {
-    this.systemImage,
-    this.font,
-    super.foregroundColor,
-    this.symbolRenderingMode,
-    this.symbolColorRenderingMode,
-    this.foregroundStyleColors,
-    this.labelReservedIconWidth,
-    this.labelIconToTitleSpacing,
-    this.labelStyle = CNLabel2Style.automatic,
-    super.enabled,
-    super.tint,
     super.constraints,
     super.paddings,
     super.tag,
     super.help,
   });
 
-  final CNFont? font;
-  final List<Color>? foregroundStyleColors;
-  final double? labelIconToTitleSpacing;
-  final double? labelReservedIconWidth;
-  final CNLabel2Style labelStyle;
-  final CNSymbolColorRenderingMode? symbolColorRenderingMode;
-  final CNSymbolRenderingMode? symbolRenderingMode;
-  final String? systemImage;
-  final String title;
+  final CNAlignment alignment;
+  final List<CNChild> children;
+  final double? spacing;
 
   @override
   Map<String, dynamic> toChildPayload(BuildContext context) {
     return {
-      'type': 'label',
+      'type': 'vstack',
       'tag': tag,
       'enabled': enabled,
       'help': help,
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
-      'title': title,
-      'systemImage': systemImage,
-      'font': font?.toMap(),
-      'symbolRenderingMode': symbolRenderingMode?.name,
-      'symbolColorRenderingMode': symbolColorRenderingMode?.name,
-      'foregroundStyleColors': foregroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
-      'labelReservedIconWidth': labelReservedIconWidth,
-      'labelIconToTitleSpacing': labelIconToTitleSpacing,
-      'labelStyle': labelStyle.name,
+      'alignment': alignment.name,
+      'spacing': spacing,
+      'children': children.map((c) => c.toChildPayload(context)).toList(),
       'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };

@@ -51,7 +51,7 @@ class _TextDemoPageState extends State<TextDemoPage> {
                         ),
                         child: Align(
                           alignment: Alignment.center,
-                          child: CNText2(
+                          child: CNText(
                             'Hello World.',
                             lineLimit: lineLimit,
                             lineLimitReservesSpace: true,
@@ -100,13 +100,13 @@ class _TextDemoPageState extends State<TextDemoPage> {
                   max: 10,
                   onChanged: (newValue) => setState(() => lineLimit = newValue.toInt()),
                 ),
-                'Text Scale': CNPicker2(
+                'Text Scale': CNPicker(
                   selection: textScale.name,
                   children: _kTextScales.entries.map((entry) => CNChildLabel(entry.key, tag: entry.value.name)).toList(),
                   onChanged: (tag) =>
                       setState(() => textScale = _kTextScales.entries.firstWhere((entry) => entry.value.name == tag).value),
                 ),
-                'Truncation Mode': CNPicker2(
+                'Truncation Mode': CNPicker(
                   selection: truncationMode.name,
                   children: CNTextTruncationMode.values.map((mode) => CNChildLabel(mode.name, tag: mode.name)).toList(),
                   onChanged: (tag) =>

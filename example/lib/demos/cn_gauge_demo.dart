@@ -15,14 +15,12 @@ class GaugeDemoPage extends StatefulWidget {
 class _GaugeDemoPageState extends State<GaugeDemoPage> {
   CNControlSize controlSize = CNControlSize.regular;
   CNGaugeStyle gaugeStyle = CNGaugeStyle.accessoryCircular;
-  CNShapeStyle? gradientTint = CNShapeStyle.gradient(
-    [
-      CNGradientStop(CNColors.green, 0.0),
-      CNGradientStop(CNColors.yellow, 0.33),
-      CNGradientStop(CNColors.orange, 0.66),
-      CNGradientStop(CNColors.red, 1.0),
-    ],
-  );
+  CNShapeStyle? gradientTint = CNShapeStyle.gradient([
+    CNGradientStop(CNColors.green, 0.0),
+    CNGradientStop(CNColors.yellow, 0.33),
+    CNGradientStop(CNColors.orange, 0.66),
+    CNGradientStop(CNColors.red, 1.0),
+  ]);
 
   bool showLabels = true;
   double sliderValue = 67.0;
@@ -47,7 +45,7 @@ class _GaugeDemoPageState extends State<GaugeDemoPage> {
                   const SizedBox(height: 16),
                   Text('Value: ${sliderValue.toStringAsFixed(2)}'),
                   const SizedBox(height: 16),
-                  CNGauge2(
+                  CNGauge(
                     controlSize: controlSize,
                     paddings: EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
                     debugLog: _kDebugLog,
@@ -74,13 +72,13 @@ class _GaugeDemoPageState extends State<GaugeDemoPage> {
                   value: controlSize,
                   onChanged: (newSize) => setState(() => controlSize = newSize),
                 ),
-                'Gauge Style': CNPicker2(
+                'Gauge Style': CNPicker(
                   selection: gaugeStyle.name,
                   onChanged: (newStyle) => setState(() => gaugeStyle = CNGaugeStyle.values.firstWhere((s) => s.name == newStyle)),
                   children: CNGaugeStyle.values.map((s) => CNChildText(s.name, tag: s.name)).toList(),
                 ),
-                'Show Labels': CNToggle2(isOn: showLabels, onChanged: (enabled) => setState(() => showLabels = enabled)),
-                'Gradient Tint': CNToggle2(
+                'Show Labels': CNToggle(isOn: showLabels, onChanged: (enabled) => setState(() => showLabels = enabled)),
+                'Gradient Tint': CNToggle(
                   isOn: useGrsdientTint,
                   onChanged: (enabled) => setState(() => useGrsdientTint = enabled),
                 ),

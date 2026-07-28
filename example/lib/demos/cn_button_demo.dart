@@ -6,14 +6,14 @@ import 'package:flutter/cupertino.dart';
 
 const _kDebugLog = false;
 
-enum ButtonType { titleOnly, titleAndIcon, titleAndProgressCircle, titleAndProgressLinear }
-
 class ButtonDemoPage extends StatefulWidget {
   const ButtonDemoPage({super.key});
 
   @override
   State<ButtonDemoPage> createState() => _ButtonDemoPageState();
 }
+
+enum ButtonType { titleOnly, titleAndIcon, titleAndProgressCircle, titleAndProgressLinear }
 
 class _ButtonDemoPageState extends State<ButtonDemoPage> {
   CNButtonStyle buttonStyle = CNButtonStyle.automatic;
@@ -37,7 +37,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
     isProgressRunning = true;
     Future.doWhile(() async {
       await Future.delayed(const Duration(milliseconds: 100));
-      if(!mounted) return false;
+      if (!mounted) return false;
       setState(() {
         if (!mounted) {
           return;
@@ -81,7 +81,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                       children: [
                         PixelPerfectProbe(
                           adjustPosition: true,
-                          child: CNButton2(
+                          child: CNButton(
                             onPressed: isEnabled ? () => _set('Default') : null,
                             buttonStyle: buttonStyle,
                             controlSize: controlSize,
@@ -93,7 +93,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                         const SizedBox(height: 16),
                         PixelPerfectProbe(
                           adjustPosition: true,
-                          child: CNButton2(
+                          child: CNButton(
                             onPressed: isEnabled ? () => _set('Default.2') : null,
                             buttonStyle: buttonStyle,
                             controlSize: controlSize,
@@ -117,7 +117,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                         const SizedBox(height: 16),
                         PixelPerfectProbe(
                           adjustPosition: true,
-                          child: CNButton2(
+                          child: CNButton(
                             onPressed: isEnabled ? () => _set('Default.3') : null,
                             buttonStyle: buttonStyle,
                             controlSize: controlSize,
@@ -142,7 +142,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                         const SizedBox(height: 16),
                         PixelPerfectProbe(
                           adjustPosition: true,
-                          child: CNButton2(
+                          child: CNButton(
                             onPressed: isEnabled ? () => _set('Default.4') : null,
                             buttonStyle: buttonStyle,
                             controlSize: controlSize,
@@ -179,7 +179,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                         const SizedBox(height: 16),
                         PixelPerfectProbe(
                           adjustPosition: true,
-                          child: CNButton2(
+                          child: CNButton(
                             onPressed: isEnabled
                                 ? () {
                                     _set('Default.5');
@@ -216,11 +216,11 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                   ),
                 ),
               ),
-                    
+
               RightSideOptionContainer(
                 options: {
                   'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
-                  'Button Style': CNPicker2(
+                  'Button Style': CNPicker(
                     selection: buttonStyle.name,
                     onChanged: (value) =>
                         setState(() => buttonStyle = CNButtonStyle.values.firstWhere((style) => style.name == value)),
@@ -231,7 +231,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                     value: tintColor,
                     onChanged: (color) => setState(() => tintColor = color),
                   ),
-                  'Enabled': CNToggle2(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value)),
+                  'Enabled': CNToggle(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value)),
                   'Font': FontPicker(
                     fonts: kAvailableFonts,
                     value: font,
@@ -264,7 +264,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
               ),
             ],
           );
-        }
+        },
       ),
     );
   }

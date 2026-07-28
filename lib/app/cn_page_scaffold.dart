@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../theme/cn_theme.dart';
-import 'navigation_bar.dart';
+import '../components/cn_navigation_bar.dart';
 
 /// Desktop-aware page scaffold for Cupertino Native apps.
 class CNPageScaffold extends StatelessWidget {

@@ -14,17 +14,15 @@ import 'package:flutter/widgets.dart';
 const _kNativeViewType = 'CupertinoNativeSearchField2';
 
 /// Callback invoked when the native search field needs suggestions.
-typedef CNSearchSuggestionsCallback = FutureOr<List<String>> Function(
-  String query,
-);
+typedef CNSearchSuggestionsCallback = FutureOr<List<String>> Function(String query);
 
 /// A native macOS search field backed by NSSearchField.
 ///
 /// Suggestions are provided via [onSuggestionsRequested]. When the user types,
 /// native code calls this callback and displays the returned strings as
 /// completion suggestions. If null, no suggestions are shown.
-class CNSearchField2 extends CNWidget {
-  const CNSearchField2({
+class CNSearchField extends CNWidget {
+  const CNSearchField({
     super.key,
     super.debugLog,
     required this.text,
@@ -100,7 +98,7 @@ class CNSearchField2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNSearchField2> createState() => _CNSearchField2State();
+  State<CNSearchField> createState() => _CNSearchFieldState();
 
   @override
   String get nativeViewType => _kNativeViewType;
@@ -109,7 +107,7 @@ class CNSearchField2 extends CNWidget {
   bool get enabled => onChanged != null || onSubmitted != null;
 }
 
-class _CNSearchField2State extends CNWidgetState<CNSearchField2> {
+class _CNSearchFieldState extends CNWidgetState<CNSearchField> {
   @override
   Size computeDefaultSize() => const Size(double.infinity, 24.0);
 
@@ -144,10 +142,7 @@ class _CNSearchField2State extends CNWidgetState<CNSearchField2> {
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(
-    BuildContext context, {
-    required BoxConstraints? constraints,
-  }) {
+  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
     final payload = <String, dynamic>{
       'text': widget.text,
       'placeholder': widget.placeholder,

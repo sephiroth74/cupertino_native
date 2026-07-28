@@ -8,34 +8,19 @@ import 'package:flutter/widgets.dart';
 
 const _kNativeViewType = 'CupertinoNativeMenu2';
 
-/// Visual style for [CNMenu2].
-enum CNMenuStyle2 {
-  /// Default menu style.
-  automatic,
-
-  /// Button-style menu.
-  button,
-
-  /// Bordered button menu style.
-  borderedButton,
-
-  /// Borderless button menu style.
-  borderlessButton,
-}
-
 /// A native SwiftUI Menu widget.
 ///
 /// The menu shows [items] (buttons, dividers, sub-menus) and is activated
 /// via a trigger [label].
-class CNMenu2 extends CNWidget {
-  const CNMenu2({
+class CNMenu extends CNWidget {
+  const CNMenu({
     super.key,
     super.debugLog,
     required this.items,
     required this.label,
     this.primaryActionTag,
     this.onItemPressed,
-    this.menuStyle = CNMenuStyle2.automatic,
+    this.menuStyle = CNMenuStyle.automatic,
     this.controlSize,
     this.font,
     this.shrink = true,
@@ -59,7 +44,7 @@ class CNMenu2 extends CNWidget {
   final List<CNChild> label;
 
   /// Visual style for the menu.
-  final CNMenuStyle2 menuStyle;
+  final CNMenuStyle menuStyle;
 
   /// Called when any button item (or primaryAction) is pressed.
   final ValueChanged<String>? onItemPressed;
@@ -86,7 +71,7 @@ class CNMenu2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNMenu2> createState() => _CNMenu2State();
+  State<CNMenu> createState() => _CNMenuState();
 
   @override
   String get nativeViewType => _kNativeViewType;
@@ -94,7 +79,22 @@ class CNMenu2 extends CNWidget {
   bool get enabled => onItemPressed != null;
 }
 
-class _CNMenu2State extends CNWidgetState<CNMenu2> {
+/// Visual style for [CNMenu].
+enum CNMenuStyle {
+  /// Default menu style.
+  automatic,
+
+  /// Button-style menu.
+  button,
+
+  /// Bordered button menu style.
+  borderedButton,
+
+  /// Borderless button menu style.
+  borderlessButton,
+}
+
+class _CNMenuState extends CNWidgetState<CNMenu> {
   @override
   Size computeDefaultSize() => const Size(80.0, 32.0);
 

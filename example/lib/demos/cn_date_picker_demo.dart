@@ -2,8 +2,6 @@ import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:flutter/cupertino.dart';
 
-enum _DatePickerComponents { date, time, dateAndTime }
-
 class DatePickerDemoPage extends StatefulWidget {
   const DatePickerDemoPage({super.key});
 
@@ -11,10 +9,12 @@ class DatePickerDemoPage extends StatefulWidget {
   State<DatePickerDemoPage> createState() => _DatePickerDemoPageState();
 }
 
+enum _DatePickerComponents { date, time, dateAndTime }
+
 class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
   CNControlSize controlSize = CNControlSize.regular;
-  CNDatePicker2Style datePickerStyle = CNDatePicker2Style.automatic;
-  List<CNDatePicker2Component> displayedComponents = [CNDatePicker2Component.date, CNDatePicker2Component.hourAndMinute];
+  CNDatePickerStyle datePickerStyle = CNDatePickerStyle.automatic;
+  List<CNDatePickerComponent> displayedComponents = [CNDatePickerComponent.date, CNDatePickerComponent.hourAndMinute];
   _DatePickerComponents displayedComponentsEnum = _DatePickerComponents.dateAndTime;
   bool enabled = true;
   DateTime selectedDate = DateTime.now();
@@ -38,7 +38,7 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(top: 24),
-                child: CNDatePicker2(
+                child: CNDatePicker(
                   selection: selectedDate,
                   controlSize: controlSize,
                   datePickerStyle: datePickerStyle,
@@ -63,26 +63,26 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
                   value: controlSize,
                   onChanged: (newSize) => setState(() => controlSize = newSize),
                 ),
-                'DatePicker Style': CNPicker2(
+                'DatePicker Style': CNPicker(
                   selection: datePickerStyle.name,
                   onChanged: (newStyle) =>
-                      setState(() => datePickerStyle = CNDatePicker2Style.values.firstWhere((style) => style.name == newStyle)),
-                  children: CNDatePicker2Style.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
+                      setState(() => datePickerStyle = CNDatePickerStyle.values.firstWhere((style) => style.name == newStyle)),
+                  children: CNDatePickerStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
                 ),
-                'Enabled': CNToggle2(isOn: enabled, onChanged: (value) => setState(() => enabled = value)),
-                'Components': CNPicker2(
+                'Enabled': CNToggle(isOn: enabled, onChanged: (value) => setState(() => enabled = value)),
+                'Components': CNPicker(
                   selection: displayedComponentsEnum.name,
                   onChanged: (newValue) => setState(() {
                     displayedComponentsEnum = _DatePickerComponents.values.firstWhere((component) => component.name == newValue);
                     switch (displayedComponentsEnum) {
                       case _DatePickerComponents.date:
-                        displayedComponents = [CNDatePicker2Component.date];
+                        displayedComponents = [CNDatePickerComponent.date];
                         break;
                       case _DatePickerComponents.time:
-                        displayedComponents = [CNDatePicker2Component.hourAndMinute];
+                        displayedComponents = [CNDatePickerComponent.hourAndMinute];
                         break;
                       case _DatePickerComponents.dateAndTime:
-                        displayedComponents = [CNDatePicker2Component.date, CNDatePicker2Component.hourAndMinute];
+                        displayedComponents = [CNDatePickerComponent.date, CNDatePickerComponent.hourAndMinute];
                         break;
                     }
                   }),

@@ -17,7 +17,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
   bool isEnabled = true;
   bool isOn = true;
   Color? tintColor;
-  CNToggle2Style toggleStyle = CNToggle2Style.switchStyle;
+  CNToggleStyle toggleStyle = CNToggleStyle.switchStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class _ToggleDemoState extends State<ToggleDemo> {
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-                  CNToggle2(
+                  CNToggle(
                     debugLog: _kDebugLog,
                     isOn: isOn,
                     toggleStyle: toggleStyle,
@@ -60,21 +60,18 @@ class _ToggleDemoState extends State<ToggleDemo> {
             RightSideOptionContainer(
               options: {
                 'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
-                'Toggle Style': CNPicker2(
+                'Toggle Style': CNPicker(
                   selection: toggleStyle.name,
                   onChanged: (value) =>
-                      setState(() => toggleStyle = CNToggle2Style.values.firstWhere((style) => style.name == value)),
-                  children: CNToggle2Style.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
+                      setState(() => toggleStyle = CNToggleStyle.values.firstWhere((style) => style.name == value)),
+                  children: CNToggleStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
                 ),
                 'Tint Color': ColorPicker(
                   colors: kSystemColors,
                   value: tintColor,
                   onChanged: (color) => setState(() => tintColor = color),
                 ),
-                'Enabled': CNToggle2(
-                  isOn: isEnabled,
-                  onChanged: (v) => setState(() => isEnabled = v),
-                ),
+                'Enabled': CNToggle(isOn: isEnabled, onChanged: (v) => setState(() => isEnabled = v)),
               },
             ),
           ],

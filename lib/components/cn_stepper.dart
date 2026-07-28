@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 
 const _kNativeViewType = 'CupertinoNativeStepper2';
 
-class CNStepper2 extends CNWidget {
-  const CNStepper2({
+class CNStepper extends CNWidget {
+  const CNStepper({
     super.key,
     super.debugLog,
     required this.value,
@@ -69,22 +69,18 @@ class CNStepper2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNStepper2> createState() => _CNStepper2State();
+  State<CNStepper> createState() => _CNStepperState();
 
   @override
   String get nativeViewType => _kNativeViewType;
 }
 
-class _CNStepper2State extends CNWidgetState<CNStepper2> {
+class _CNStepperState extends CNWidgetState<CNStepper> {
   @override
   Size computeDefaultSize() => Size(_defaultWidth(), _defaultHeight());
 
   @override
-  double computeShrinkHeight({
-    required BoxConstraints constraints,
-    required double defaultHeight,
-    double? intrinsicHeight,
-  }) {
+  double computeShrinkHeight({required BoxConstraints constraints, required double defaultHeight, double? intrinsicHeight}) {
     double resolvedHeight;
     if (intrinsicHeight != null) {
       resolvedHeight = intrinsicHeight;
@@ -131,21 +127,6 @@ class _CNStepper2State extends CNWidgetState<CNStepper2> {
     return payload;
   }
 
-  double _defaultWidth() {
-    switch (widget.controlSize) {
-      case CNControlSize.mini:
-        return 13.0;
-      case CNControlSize.small:
-        return 17.0;
-      case CNControlSize.regular:
-        return 20.0;
-      case CNControlSize.large:
-        return 23.0;
-      case CNControlSize.extraLarge:
-        return 30.0;
-    }
-  }
-
   double _defaultHeight() {
     switch (widget.controlSize) {
       case CNControlSize.mini:
@@ -158,6 +139,21 @@ class _CNStepper2State extends CNWidgetState<CNStepper2> {
         return 30.0;
       case CNControlSize.extraLarge:
         return 38.0;
+    }
+  }
+
+  double _defaultWidth() {
+    switch (widget.controlSize) {
+      case CNControlSize.mini:
+        return 13.0;
+      case CNControlSize.small:
+        return 17.0;
+      case CNControlSize.regular:
+        return 20.0;
+      case CNControlSize.large:
+        return 23.0;
+      case CNControlSize.extraLarge:
+        return 30.0;
     }
   }
 }

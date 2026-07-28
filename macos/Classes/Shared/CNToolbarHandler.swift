@@ -2,10 +2,16 @@ import Cocoa
 import FlutterMacOS
 import SwiftUI
 
+private class CNToolbarSearchState: ObservableObject {
+    @Published var text: String = ""
+    var isSuppressingCallback = false
+}
+
 final class CNToolbarHandler: NSObject {
     private weak var registrar: FlutterPluginRegistrar?
     private var channel: FlutterMethodChannel?
     private var hostingView: NSHostingView<CNToolbarView>?
+    private let searchState = CNToolbarSearchState()
 
     init(registrar: FlutterPluginRegistrar, channel: FlutterMethodChannel) {
         self.registrar = registrar
@@ -32,11 +38,16 @@ final class CNToolbarHandler: NSObject {
             titleDisplayMode: titleDisplayMode,
             groups: groups,
             searchable: searchable,
+            searchState: searchState,
             onItemPressed: { [weak self] tag in
                 self?.channel?.invokeMethod("toolbarItemPressed", arguments: tag)
             },
             onSearchChanged: { [weak self] query in
-                self?.channel?.invokeMethod("toolbarSearchChanged", arguments: query)
+                guard let self else { return }
+                if searchState.isSuppressingCallback {
+                    return
+                }
+                channel?.invokeMethod("toolbarSearchChanged", arguments: query)
             },
         )
 
@@ -64,9 +75,19 @@ final class CNToolbarHandler: NSObject {
         result(nil)
     }
 
+    func setToolbarSearchText(text: String, result: @escaping FlutterResult) {
+        searchState.isSuppressingCallback = true
+        searchState.text = text
+        DispatchQueue.main.async { [weak self] in
+            self?.searchState.isSuppressingCallback = false
+        }
+        result(nil)
+    }
+
     func clearToolbar(result: @escaping FlutterResult) {
         hostingView?.removeFromSuperview()
         hostingView = nil
+        searchState.text = ""
         result(nil)
     }
 
@@ -97,10 +118,9 @@ private struct CNToolbarView: View {
     let titleDisplayMode: String
     let groups: [[String: Any]]
     let searchable: Bool
+    @ObservedObject var searchState: CNToolbarSearchState
     let onItemPressed: (String) -> Void
     let onSearchChanged: (String) -> Void
-
-    @State private var searchText = ""
 
     private var titleText: String {
         guard let payload = titlePayload else { return "" }
@@ -122,7 +142,7 @@ private struct CNToolbarView: View {
             .modifier(TitleDisplayModeModifier(mode: titleDisplayMode))
             .modifier(SearchableModifier(
                 isSearchable: searchable,
-                searchText: $searchText,
+                searchText: $searchState.text,
                 onSearchChanged: onSearchChanged,
             ))
     }

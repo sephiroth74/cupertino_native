@@ -10,11 +10,11 @@ class BezelStylePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CNPicker2(
+    return CNPicker(
       selection: value.name,
       children: CNTextFieldBezelStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
       onChanged: (value) => onChanged(CNTextFieldBezelStyle.values.firstWhere((e) => e.name == value)),
-      pickerStyle: CNPickerStyle2.automatic,
+      pickerStyle: CNPickerStyle.automatic,
     );
   }
 }
@@ -29,7 +29,7 @@ class ColorPicker<T extends Color> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CNPicker2(
+    return CNPicker(
       selection: value == null ? colors.keys.first.toString() : colors.entries.firstWhere((entry) => entry.value == value).key,
       children: colors.entries.map((entry) {
         return CNChildLabel(
@@ -41,7 +41,7 @@ class ColorPicker<T extends Color> extends StatelessWidget {
         );
       }).toList(),
       onChanged: enabled ? (tag) => onChanged(colors[tag]) : null,
-      pickerStyle: CNPickerStyle2.menu,
+      pickerStyle: CNPickerStyle.menu,
     );
   }
 }
@@ -54,11 +54,11 @@ class ControlSizePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CNPicker2(
+    return CNPicker(
       selection: value.name,
       children: CNControlSize.values.map((size) => CNChildText(size.name, tag: size.name)).toList(),
       onChanged: (value) => onChanged(CNControlSize.values.firstWhere((e) => e.name == value)),
-      pickerStyle: CNPickerStyle2.automatic,
+      pickerStyle: CNPickerStyle.automatic,
     );
   }
 }
@@ -74,13 +74,13 @@ class FontPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CNPicker2(
+    return CNPicker(
       selection: value?.name ?? value?.kind.name ?? 'none',
       children: fonts.map((font) {
         return CNChildText(font?.name ?? font?.kind.name ?? 'None', tag: font?.name ?? font?.kind.name ?? 'none');
       }).toList(),
       onChanged: enabled ? (tag) => onChanged!(fonts.firstWhere((font) => (font?.name ?? font?.kind.name ?? 'none') == tag)) : null,
-      pickerStyle: CNPickerStyle2.automatic,
+      pickerStyle: CNPickerStyle.automatic,
     );
   }
 }
@@ -120,7 +120,7 @@ class RightSideOptionContainer extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
                   child: Row(
                     children: [
-                      Expanded(child: Text(entry.key, style: TextStyle(fontSize: 12),)),
+                      Expanded(child: Text(entry.key, style: TextStyle(fontSize: 12))),
                       SizedBox(
                         width: 175,
                         child: Align(alignment: Alignment.centerLeft, child: entry.value),
@@ -162,11 +162,14 @@ class SizeSliderPicker extends StatelessWidget {
       children: [
         SizedBox(
           width: 40,
-          child: Text(value.toStringAsFixed(0).padRight(2), style: TextStyle(color: enabled ? null : CupertinoColors.inactiveGray, fontSize: 12)),
+          child: Text(
+            value.toStringAsFixed(0).padRight(2),
+            style: TextStyle(color: enabled ? null : CupertinoColors.inactiveGray, fontSize: 12),
+          ),
         ),
         const SizedBox(width: 2),
         Expanded(
-          child: CNSlider2(value: value, min: min, max: max, onChanged: onChanged),
+          child: CNSlider(value: value, min: min, max: max, onChanged: onChanged),
         ),
       ],
     );

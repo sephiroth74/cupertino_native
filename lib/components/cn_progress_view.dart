@@ -7,8 +7,8 @@ import 'package:flutter/widgets.dart';
 
 const _kNativeViewType = 'CupertinoNativeProgressView2';
 
-class CNProgressView2 extends CNWidget {
-  const CNProgressView2({
+class CNProgressView extends CNWidget {
+  const CNProgressView({
     super.key,
     super.debugLog,
     this.value,
@@ -54,13 +54,13 @@ class CNProgressView2 extends CNWidget {
   final Object? tint;
 
   @override
-  State<CNProgressView2> createState() => _CNProgressView2State();
+  State<CNProgressView> createState() => _CNProgressViewState();
 
   @override
   String get nativeViewType => _kNativeViewType;
 }
 
-class _CNProgressView2State extends CNWidgetState<CNProgressView2> {
+class _CNProgressViewState extends CNWidgetState<CNProgressView> {
   @override
   Size computeDefaultSize() {
     if (widget.style == CNProgressViewStyle.circular) {
@@ -71,11 +71,7 @@ class _CNProgressView2State extends CNWidgetState<CNProgressView2> {
   }
 
   @override
-  double computeShrinkWidth({
-    required BoxConstraints constraints,
-    required double defaultWidth,
-    double? intrinsicWidth,
-  }) {
+  double computeShrinkWidth({required BoxConstraints constraints, required double defaultWidth, double? intrinsicWidth}) {
     double resolvedWidth;
     if (intrinsicWidth != null) {
       resolvedWidth = intrinsicWidth;

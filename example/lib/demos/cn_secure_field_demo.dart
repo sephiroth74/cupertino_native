@@ -70,13 +70,13 @@ class _SecureTextFieldDemoPageState extends State<SecureTextFieldDemoPage> {
               mainAxisSize: MainAxisSize.min,
               spacing: 8,
               children: [
-                CNButton2(
+                CNButton(
                   children: [const CNChildText('Set Value')],
                   onPressed: () {
                     _controller.text = 's3cr3t-passw0rd';
                   },
                 ),
-                CNButton2(
+                CNButton(
                   children: [const CNChildText('Clear')],
                   onPressed: () {
                     _controller.clear();
