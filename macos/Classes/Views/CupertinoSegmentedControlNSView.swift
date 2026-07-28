@@ -108,6 +108,10 @@ class CupertinoSegmentedControlNSView: NSView {
             segmentedControl.isEnabled = enabled
         }
 
+        if let tint = args["tint"] as? Int {
+            segmentedControl.selectedSegmentBezelColor = ColorUtils.colorFromARGB(tint)
+        }
+
         if trackingMode == .selectAny {
             if let indices = args["selectedIndices"] as? [Int] {
                 isUpdatingFromDart = true

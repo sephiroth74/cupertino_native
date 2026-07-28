@@ -214,6 +214,11 @@ abstract final class CNColors {
     darkColor: Color(0xFF323232),
   );  
 
+  static const CupertinoDynamicColor groupedBackgroundColor = CupertinoDynamicColor.withBrightness(
+    color: Color(0xFFF7F7F7),
+    darkColor: Color(0xFF292E31),
+  );
+
   /// Transparent color (fully transparent, no matter the brightness)
   static const Color transparent = Color(0x00000000);
 }

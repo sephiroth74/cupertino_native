@@ -20,6 +20,7 @@ export 'components/cn_popover.dart';
 export 'components/cn_progress_view.dart';
 export 'components/cn_search_field.dart';
 export 'components/cn_segmented_control.dart';
+export 'components/cn_tab_view.dart';
 export 'components/cn_secure_field.dart';
 export 'components/cn_slider.dart';
 export 'components/cn_stepper.dart';

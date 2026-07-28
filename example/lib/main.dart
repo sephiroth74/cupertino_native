@@ -22,6 +22,7 @@ import 'demos/cn_popover_demo.dart';
 import 'demos/cn_progressview_demo.dart';
 import 'demos/cn_search_field_demo.dart';
 import 'demos/cn_segmented_control_demo.dart';
+import 'demos/cn_tab_view_demo.dart';
 import 'demos/cn_secure_field_demo.dart';
 import 'demos/cn_slider_demo.dart';
 import 'demos/cn_stepper_demo.dart';
@@ -55,6 +56,7 @@ const _entries = <_DemoEntry>[
   _DemoEntry('CNProgressView', 'progress.indicator', ProgressIndicatorsPageDemo()),
   _DemoEntry('CNSearchField', 'magnifyingglass', SearchFieldDemoPage()),
   _DemoEntry('CNSegmentedControl', 'rectangle.split.3x1', SegmentedControlDemoPage()),
+  _DemoEntry('CNTabView', 'rectangle.split.3x1.fill', TabViewDemoPage()),
   _DemoEntry('CNSecureField', 'lock.shield', SecureTextFieldDemoPage()),
   _DemoEntry('CNSlider', 'slider.horizontal.3', SliderDemoPage()),
   _DemoEntry('CNStepper', 'plusminus', StepperDemoPage()),

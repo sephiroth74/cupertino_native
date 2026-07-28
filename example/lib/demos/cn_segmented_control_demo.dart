@@ -1,8 +1,9 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
+import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
-const _kDebugLog = false;
+const _kDebugLog = true;
 
 class SegmentedControlDemoPage extends StatefulWidget {
   const SegmentedControlDemoPage({super.key});
@@ -18,6 +19,7 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
   CNSegmentStyle segmentStyle = CNSegmentStyle.automatic;
   int selectedIndex = 0;
   Set<int> selectedIndices = {0};
+  Color? tint;
   CNSegmentTrackingMode trackingMode = CNSegmentTrackingMode.selectOne;
 
   @override
@@ -44,6 +46,7 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
                         builder: (context, constraints) {
                           return CNSegmentedControl(
                             debugLog: _kDebugLog,
+                            tint: tint,
                             segments: const [
                               CNSegment(label: 'Day', systemImage: 'sun.max'),
                               CNSegment(label: 'Week', systemImage: 'calendar'),
@@ -56,22 +59,21 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
                             trackingMode: trackingMode,
                             segmentDistribution: distribution,
                             controlSize: controlSize,
-                            enabled: isEnabled,
                             constraints: distribution != CNSegmentDistribution.fit
                                 ? BoxConstraints.expand(width: constraints.maxWidth)
                                 : null,
-                            onChanged: (index) {
+                            onChanged: isEnabled ? (index) {
                               setState(() {
                                 debugPrint('Segment selected: $index');
                                 selectedIndex = index;
                               });
-                            },
-                            onSelectAnyChanged: (indices) {
+                            } : null,
+                            onSelectAnyChanged: isEnabled ? (indices) {
                               setState(() {
                                 debugPrint('Segments selected: $indices');
                                 selectedIndices = indices;
                               });
-                            },
+                            } : null,
                           );
                         }
                       ),
@@ -92,6 +94,11 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
             ),
             RightSideOptionContainer(
               options: {
+                'Tint': ColorPicker(
+                  colors: kSystemColors,
+                  value: tint,
+                  onChanged: (color) => setState(() => tint = color),
+                ),
                 'Control Size': ControlSizePicker(
                   value: controlSize,
                   onChanged: (size) => setState(() => controlSize = size),

@@ -101,7 +101,6 @@ class CNSegmentedControl extends CNWidget {
     this.trackingMode = CNSegmentTrackingMode.selectOne,
     this.segmentDistribution = CNSegmentDistribution.fit,
     this.controlSize = CNControlSize.regular,
-    this.enabled = true,
     this.onChanged,
     this.onSelectAnyChanged,
     this.shrink = true,
@@ -114,9 +113,6 @@ class CNSegmentedControl extends CNWidget {
 
   /// The size of the native AppKit control.
   final CNControlSize controlSize;
-
-  /// Whether the control is enabled.
-  final bool enabled;
 
   /// Called when a segment is selected (for [CNSegmentTrackingMode.selectOne]
   /// and [CNSegmentTrackingMode.momentary] modes).
@@ -169,6 +165,9 @@ class CNSegmentedControl extends CNWidget {
 
   @override
   String get nativeViewType => _kNativeViewType;
+
+  /// Whether the control is enabled.
+  bool get enabled => onChanged != null || onSelectAnyChanged != null;
 }
 
 class _CNSegmentedControlState extends CNWidgetState<CNSegmentedControl> {
