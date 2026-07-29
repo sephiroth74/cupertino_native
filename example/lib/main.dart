@@ -167,7 +167,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
         return CNApp(
             themeMode: appTheme.mode,
-            accentColor: CNColors.cyan,
             debugShowCheckedModeBanner: false,
             home: (context) {
             final accentColor = CNTheme.of(context).accentColor;
@@ -280,7 +279,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 searchable: true,
                 searchText: searchQuery,
                 titleDisplayMode: CNToolbarTitleDisplayMode.automatic,
-                // toolbarBackground: accentColor.withAlpha(244),
+                // toolbarBackground: accentColor.withLuminance(0.3),
                 toolbarBlurEnabled: true,
                 toolbarBlurMaterial: CNToolbarBlurMaterial.titlebar,
                 title: CNChildText('Cupertino Native Demo'),

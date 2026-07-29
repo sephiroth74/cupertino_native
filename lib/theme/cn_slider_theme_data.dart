@@ -2,6 +2,27 @@ import 'package:cupertino_native/cupertino_native.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
+/// Applies [CNSliderThemeData] to descendant [CNSlider] widgets.
+class CNSliderTheme extends InheritedTheme {
+  /// Creates a slider theme scope.
+  const CNSliderTheme({super.key, required this.data, required super.child});
+
+  /// The slider theme override for descendants.
+  final CNSliderThemeData data;
+
+  /// Returns the nearest [CNSliderThemeData], falling back to [CNTheme].
+  static CNSliderThemeData of(BuildContext context) {
+    final CNSliderTheme? theme = context.dependOnInheritedWidgetOfExactType<CNSliderTheme>();
+    return theme?.data ?? CNTheme.of(context).sliderTheme;
+  }
+
+  @override
+  bool updateShouldNotify(CNSliderTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  Widget wrap(BuildContext context, Widget child) => CNSliderTheme(data: data, child: child);
+}
+
 /// Widget-specific visual overrides for [CNSlider].
 class CNSliderThemeData extends Equatable {
   /// Creates slider theme overrides.

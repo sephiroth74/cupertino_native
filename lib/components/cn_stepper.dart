@@ -123,7 +123,12 @@ class _CNStepperState extends CNWidgetState<CNStepper> {
       'enabled': widget.onChanged != null,
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+      tintFallback: CNStepperTheme.of(context).tintColor,
+    );
     return payload;
   }
 

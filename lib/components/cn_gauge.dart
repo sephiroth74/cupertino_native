@@ -123,7 +123,12 @@ class _CNGaugeState extends CNWidgetState<CNGauge> {
       'maximumValueLabel': widget.maximumValueLabel?.map((c) => c.toChildPayload(context)).toList(),
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+      tintFallback: CNGaugeTheme.of(context).tintColor,
+    );
     return payload;
   }
 

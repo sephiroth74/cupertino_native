@@ -205,7 +205,12 @@ class _CNSegmentedControlState extends CNWidgetState<CNSegmentedControl> {
       'enabled': widget.enabled,
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+      tintFallback: CNSegmentedControlTheme.of(context).tintColor,
+    );
     return payload;
   }
 }

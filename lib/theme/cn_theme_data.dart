@@ -1,11 +1,6 @@
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:cupertino_native/theme/cn_button_theme_data.dart';
 import 'package:cupertino_native/theme/cn_image_theme_data.dart';
-import 'package:cupertino_native/theme/cn_progress_theme_data.dart';
-import 'package:cupertino_native/theme/cn_scrollbar_theme.dart';
-import 'package:cupertino_native/theme/cn_slider_theme_data.dart';
 import 'package:cupertino_native/theme/cn_text_theme_data.dart';
-import 'package:cupertino_native/theme/cn_toggle_theme_data.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import '../style/text_utils.dart';
@@ -41,6 +36,13 @@ class CNThemeData extends Equatable {
     CNProgressThemeData? progressTheme,
     CNScrollbarThemeData? scrollbarTheme,
     CNButtonThemeData? buttonTheme,
+    CNPickerThemeData? pickerTheme,
+    CNSegmentedControlThemeData? segmentedControlTheme,
+    CNStepperThemeData? stepperTheme,
+    CNGaugeThemeData? gaugeTheme,
+    CNDatePickerThemeData? datePickerTheme,
+    CNTextFieldThemeData? textFieldTheme,
+    CNSecureFieldThemeData? secureFieldTheme,
     required bool isMainWindow,
   }) {
     final isDark = brightness == Brightness.dark;
@@ -82,6 +84,13 @@ class CNThemeData extends Equatable {
     }
     textTheme ??= CNTextThemeData(font: cnFontFromTextStyle(typography.body), labelColor: labelColor);
     buttonTheme ??= CNButtonThemeData(tintColor: accentColor);
+    pickerTheme ??= CNPickerThemeData(tintColor: accentColor);
+    segmentedControlTheme ??= CNSegmentedControlThemeData(tintColor: accentColor);
+    stepperTheme ??= CNStepperThemeData(tintColor: accentColor);
+    gaugeTheme ??= CNGaugeThemeData(tintColor: accentColor);
+    datePickerTheme ??= CNDatePickerThemeData(tintColor: accentColor);
+    textFieldTheme ??= CNTextFieldThemeData(tintColor: accentColor);
+    secureFieldTheme ??= CNSecureFieldThemeData(tintColor: accentColor);
     toggleTheme ??= CNToggleThemeData(tint: accentColor);
     sliderTheme ??= CNSliderThemeData(tintColor: accentColor);
     progressTheme ??= CNProgressThemeData(tintColor: accentColor);
@@ -116,6 +125,13 @@ class CNThemeData extends Equatable {
       progressTheme: progressTheme,
       scrollbarTheme: scrollbarTheme,
       buttonTheme: buttonTheme,
+      pickerTheme: pickerTheme,
+      segmentedControlTheme: segmentedControlTheme,
+      stepperTheme: stepperTheme,
+      gaugeTheme: gaugeTheme,
+      datePickerTheme: datePickerTheme,
+      textFieldTheme: textFieldTheme,
+      secureFieldTheme: secureFieldTheme,
       isMainWindow: isMainWindow,
     );
   }
@@ -159,6 +175,13 @@ class CNThemeData extends Equatable {
     required this.progressTheme,
     required this.scrollbarTheme,
     required this.buttonTheme,
+    required this.pickerTheme,
+    required this.segmentedControlTheme,
+    required this.stepperTheme,
+    required this.gaugeTheme,
+    required this.datePickerTheme,
+    required this.textFieldTheme,
+    required this.secureFieldTheme,
     required this.isMainWindow,
     required this.fillQuaternaryColor,
     required this.fillQuinaryColor,
@@ -175,6 +198,9 @@ class CNThemeData extends Equatable {
 
   /// Default surface background color.
   final Color canvasColor;
+
+  /// Widget-specific date picker theme overrides.
+  final CNDatePickerThemeData datePickerTheme;
 
   /// Destructive action color.
   final Color destructiveColor;
@@ -196,6 +222,9 @@ class CNThemeData extends Equatable {
 
   /// Grouped surface background color.
   final Color groupedBackgroundColor;
+
+  /// Widget-specific gauge theme overrides.
+  final CNGaugeThemeData gaugeTheme;
 
   /// Widget-specific image theme overrides.
   final CNImageThemeData imageTheme;
@@ -221,11 +250,20 @@ class CNThemeData extends Equatable {
   /// Lowest density glass material preset.
   final CNGlassMaterial materialUltraThin;
 
+  /// Widget-specific picker theme overrides.
+  final CNPickerThemeData pickerTheme;
+
   /// Widget-specific progress view theme overrides.
   final CNProgressThemeData progressTheme;
 
   /// Widget-specific scrollbar theme overrides.
   final CNScrollbarThemeData scrollbarTheme;
+
+  /// Widget-specific secure field theme overrides.
+  final CNSecureFieldThemeData secureFieldTheme;
+
+  /// Widget-specific segmented control theme overrides.
+  final CNSegmentedControlThemeData segmentedControlTheme;
 
   /// Secondary interactive color.
   final Color secondaryColor;
@@ -238,6 +276,12 @@ class CNThemeData extends Equatable {
 
   /// Widget-specific slider theme overrides.
   final CNSliderThemeData sliderTheme;
+
+  /// Widget-specific stepper theme overrides.
+  final CNStepperThemeData stepperTheme;
+
+  /// Widget-specific text field theme overrides.
+  final CNTextFieldThemeData textFieldTheme;
 
   /// Widget-specific text theme overrides.
   final CNTextThemeData textTheme;
@@ -276,6 +320,13 @@ class CNThemeData extends Equatable {
     sliderTheme,
     progressTheme,
     buttonTheme,
+    pickerTheme,
+    segmentedControlTheme,
+    stepperTheme,
+    gaugeTheme,
+    datePickerTheme,
+    textFieldTheme,
+    secureFieldTheme,
     isMainWindow,
     isDark,
   ];
@@ -312,6 +363,13 @@ class CNThemeData extends Equatable {
     CNProgressThemeData? progressTheme,
     CNScrollbarThemeData? scrollbarTheme,
     CNButtonThemeData? buttonTheme,
+    CNPickerThemeData? pickerTheme,
+    CNSegmentedControlThemeData? segmentedControlTheme,
+    CNStepperThemeData? stepperTheme,
+    CNGaugeThemeData? gaugeTheme,
+    CNDatePickerThemeData? datePickerTheme,
+    CNTextFieldThemeData? textFieldTheme,
+    CNSecureFieldThemeData? secureFieldTheme,
     bool? isMainWindow,
   }) {
     return CNThemeData.raw(
@@ -342,6 +400,13 @@ class CNThemeData extends Equatable {
       progressTheme: this.progressTheme.merge(progressTheme),
       scrollbarTheme: this.scrollbarTheme.merge(scrollbarTheme),
       buttonTheme: this.buttonTheme.merge(buttonTheme),
+      pickerTheme: this.pickerTheme.merge(pickerTheme),
+      segmentedControlTheme: this.segmentedControlTheme.merge(segmentedControlTheme),
+      stepperTheme: this.stepperTheme.merge(stepperTheme),
+      gaugeTheme: this.gaugeTheme.merge(gaugeTheme),
+      datePickerTheme: this.datePickerTheme.merge(datePickerTheme),
+      textFieldTheme: this.textFieldTheme.merge(textFieldTheme),
+      secureFieldTheme: this.secureFieldTheme.merge(secureFieldTheme),
       isMainWindow: isMainWindow ?? this.isMainWindow,
     );
   }
@@ -375,6 +440,13 @@ class CNThemeData extends Equatable {
       progressTheme: other.progressTheme,
       scrollbarTheme: other.scrollbarTheme,
       buttonTheme: other.buttonTheme,
+      pickerTheme: other.pickerTheme,
+      segmentedControlTheme: other.segmentedControlTheme,
+      stepperTheme: other.stepperTheme,
+      gaugeTheme: other.gaugeTheme,
+      datePickerTheme: other.datePickerTheme,
+      textFieldTheme: other.textFieldTheme,
+      secureFieldTheme: other.secureFieldTheme,
       isMainWindow: other.isMainWindow,
     );
   }
@@ -409,6 +481,13 @@ class CNThemeData extends Equatable {
       progressTheme: CNProgressThemeData.lerp(a.progressTheme, b.progressTheme, t),
       scrollbarTheme: CNScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
       buttonTheme: CNButtonThemeData.lerp(a.buttonTheme, b.buttonTheme, t),
+      pickerTheme: CNPickerThemeData.lerp(a.pickerTheme, b.pickerTheme, t),
+      segmentedControlTheme: CNSegmentedControlThemeData.lerp(a.segmentedControlTheme, b.segmentedControlTheme, t),
+      stepperTheme: CNStepperThemeData.lerp(a.stepperTheme, b.stepperTheme, t),
+      gaugeTheme: CNGaugeThemeData.lerp(a.gaugeTheme, b.gaugeTheme, t),
+      datePickerTheme: CNDatePickerThemeData.lerp(a.datePickerTheme, b.datePickerTheme, t),
+      textFieldTheme: CNTextFieldThemeData.lerp(a.textFieldTheme, b.textFieldTheme, t),
+      secureFieldTheme: CNSecureFieldThemeData.lerp(a.secureFieldTheme, b.secureFieldTheme, t),
       isMainWindow: t < 0.5 ? a.isMainWindow : b.isMainWindow,
     );
   }

@@ -197,7 +197,12 @@ class _CNTextFieldState extends CNWidgetState<CNTextField> {
       'autofocus': widget.autofocus,
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+      tintFallback: CNTextFieldTheme.of(context).tintColor,
+    );
     return payload;
   }
 

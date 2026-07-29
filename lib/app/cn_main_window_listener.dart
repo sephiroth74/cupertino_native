@@ -74,13 +74,10 @@ class _MainWindowStateListenerNSWindowDelegate extends NSWindowDelegate {
     onMainWindowChanged?.call(true);
   }
 
-
-
   @override
   void windowDidResignMain() {
     super.windowDidResignMain();
     debugPrint('MainWindowStreamBuilder: windowDidResignMain');
     onMainWindowChanged?.call(false);
   }
-
 }

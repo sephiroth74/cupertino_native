@@ -182,7 +182,12 @@ class _CNPickerState extends CNWidgetState<CNPicker> {
       'enabled': widget.enabled,
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+      tintFallback: CNPickerTheme.of(context).tintColor,
+    );
     return payload;
   }
 }

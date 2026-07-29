@@ -172,7 +172,12 @@ class _CNSecureFieldState extends CNWidgetState<CNSecureField> {
       'autofocus': widget.autofocus,
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+      tintFallback: CNSecureFieldTheme.of(context).tintColor,
+    );
     return payload;
   }
 

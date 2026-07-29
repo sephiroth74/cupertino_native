@@ -3,7 +3,7 @@ import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
-const _kDebugLog = true;
+const _kDebugLog = false;
 
 class SegmentedControlDemoPage extends StatefulWidget {
   const SegmentedControlDemoPage({super.key});

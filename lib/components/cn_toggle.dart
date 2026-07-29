@@ -128,7 +128,12 @@ class _CNToggleState extends CNWidgetState<CNToggle> {
       'content': widget.content?.toChildPayload(context),
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+      tintFallback: CNToggleTheme.of(context).tint,
+    );
     return payload;
   }
 

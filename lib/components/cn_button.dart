@@ -112,7 +112,7 @@ class _CNButton2State extends CNWidgetState<CNButton> {
       context,
       payload: payload,
       constraints: constraints,
-      tintFallback: CNTheme.of(context).buttonTheme.tintColor,
+      tintFallback: CNButtonTheme.of(context).tintColor,
     );
     return payload;
   }

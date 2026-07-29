@@ -98,7 +98,12 @@ class _CNProgressViewState extends CNWidgetState<CNProgressView> {
       'total': widget.total,
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+      tintFallback: CNProgressTheme.of(context).tintColor,
+    );
     return payload;
   }
 

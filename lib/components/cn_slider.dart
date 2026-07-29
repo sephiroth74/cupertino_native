@@ -152,7 +152,12 @@ class _CNSliderState extends CNWidgetState<CNSlider> {
       'ticks': widget.ticks?.map((t) => {'value': t.value, 'label': t.label}).toList(),
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+      tintFallback: CNSliderTheme.of(context).tintColor,
+    );
     return payload;
   }
 

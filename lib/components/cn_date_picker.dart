@@ -244,7 +244,12 @@ class _CNDatePicker2State extends CNWidgetState<CNDatePicker> {
       'enabled': widget.onChanged != null,
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+      tintFallback: CNDatePickerTheme.of(context).tintColor,
+    );
     return payload;
   }
 }
