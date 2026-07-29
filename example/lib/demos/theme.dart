@@ -54,8 +54,8 @@ class ThemeDemoPage extends StatelessWidget {
                     child: Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: CNColors.accents.map((c) {
-                        final resolved = c.resolveFrom(context);
+                      children: CNColors.accentColors.map((c) {
+                        final resolved = c.accent.resolveFrom(context);
                         return _Swatch(color: resolved);
                       }).toList(),
                     ),

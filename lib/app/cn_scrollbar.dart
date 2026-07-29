@@ -62,6 +62,7 @@ class CNScrollbar extends StatelessWidget {
       thumbVisibility: thumbVisibility ?? scrollbarTheme.thumbVisibility,
       thickness: thickness ?? scrollbarTheme.thickness,
       thicknessWhileHovering: thicknessWhileHovering ?? scrollbarTheme.thicknessWhileHovering!,
+      effectiveThumbColorWhileHovering: scrollbarTheme.thumbColorWhileHovering!,
       notificationPredicate: notificationPredicate,
       scrollbarOrientation: scrollbarOrientation,
       effectiveThumbColor: scrollbarTheme.thumbColor!,
@@ -78,6 +79,7 @@ class _RawMacosScrollBar extends RawScrollbar {
     bool? thumbVisibility,
     super.thickness,
     required this.thicknessWhileHovering,
+    required this.effectiveThumbColorWhileHovering,
     ScrollNotificationPredicate? notificationPredicate,
     super.scrollbarOrientation,
     required this.effectiveThumbColor,
@@ -92,6 +94,7 @@ class _RawMacosScrollBar extends RawScrollbar {
        );
 
   final Color effectiveThumbColor;
+  final Color effectiveThumbColorWhileHovering;
   final double thicknessWhileHovering;
 
   @override
@@ -153,7 +156,7 @@ class _RawMacosScrollBarState extends RawScrollbarState<_RawMacosScrollBar> {
   @override
   void updateScrollbarPainter() {
     scrollbarPainter
-      ..color = widget.effectiveThumbColor
+      ..color = _thumbColor
       ..trackColor = _trackColorTween.value
       ..textDirection = Directionality.of(context)
       ..thickness = _thickness
@@ -168,5 +171,9 @@ class _RawMacosScrollBarState extends RawScrollbarState<_RawMacosScrollBar> {
 
   double get _thickness {
     return widget.thickness! + _thumbThicknessAnimationController.value * (widget.thicknessWhileHovering - widget.thickness!);
+  }
+
+  Color get _thumbColor {
+    return _hoverIsActive ? widget.effectiveThumbColorWhileHovering : widget.effectiveThumbColor;
   }
 }

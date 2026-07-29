@@ -104,6 +104,9 @@ abstract final class CNColors {
 
   // ignore: public_member_api_docs
   static const label = CupertinoColors.label;
+  static const secondaryLabel = CupertinoColors.secondaryLabel;
+
+  static const separator = CupertinoColors.separator;
 
   // ignore: public_member_api_docs
   static const Color white = Color(0xFFFFFFFF);
@@ -146,28 +149,6 @@ abstract final class CNColors {
     darkColor: Color(0x05FFFFFF), // rgba(255,255,255,0.02)
   );
 
-  // -------------------------------------------------------------------------
-  // Convenience: all accent colors as a list (same order as Figma palette)
-  // -------------------------------------------------------------------------
-
-  /// All accent colors in palette order:
-  /// red, orange, yellow, green, mint, teal, cyan, blue, indigo, purple, pink, brown, gray.
-  static const List<CupertinoDynamicColor> accents = [
-    red,
-    orange,
-    yellow,
-    green,
-    mint,
-    teal,
-    cyan,
-    blue,
-    indigo,
-    purple,
-    pink,
-    brown,
-    gray,
-  ];
-
   /// All accent colors with their resolved names.
   static const List<CNAccentColor> accentColors = [
     CNAccentColor(accent: red, name: CNAccentColorName.red),
@@ -206,17 +187,16 @@ abstract final class CNColors {
     darkColor: CNColors.systemGray.darkColor.withValues(alpha: 0.8),
   );
 
-
   /// The color to use for the window background.
   /// https://developer.apple.com/documentation/appkit/nscolor/windowbackgroundcolor
   static const CupertinoDynamicColor windowBackgroundColor = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFECECEC),
     darkColor: Color(0xFF323232),
-  );  
+  );
 
   static const CupertinoDynamicColor groupedBackgroundColor = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFF7F7F7),
-    darkColor: Color(0xFF292E31),
+    darkColor: Color(0xFF292E32),
   );
 
   /// Transparent color (fully transparent, no matter the brightness)

@@ -134,7 +134,6 @@ class _CNToggleState extends CNWidgetState<CNToggle> {
 
   double _defaultHeight() {
     switch (widget.toggleStyle) {
-      case CNToggleStyle.automatic:
       case CNToggleStyle.switchStyle:
         switch (widget.controlSize) {
           case CNControlSize.mini:
@@ -148,6 +147,7 @@ class _CNToggleState extends CNWidgetState<CNToggle> {
           case CNControlSize.extraLarge:
             return 36.0;
         }
+      case CNToggleStyle.automatic:
       case CNToggleStyle.checkbox:
         switch (widget.controlSize) {
           case CNControlSize.mini:

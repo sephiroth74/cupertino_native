@@ -51,7 +51,7 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: CupertinoColors.tertiarySystemGroupedBackground,
+                  color: CNColors.fillTertiary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Column(

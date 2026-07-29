@@ -143,43 +143,6 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                         PixelPerfectProbe(
                           adjustPosition: true,
                           child: CNButton(
-                            onPressed: isEnabled ? () => _set('Default.4') : null,
-                            buttonStyle: buttonStyle,
-                            controlSize: controlSize,
-                            tint: tintColor,
-                            debugLog: false,
-                            children: [
-                              CNChildVStack(
-                                children: [
-                                  const CNChildProgressView(
-                                    style: CNProgressViewStyle.linear,
-                                    controlSize: CNControlSize.small,
-                                    constraints: BoxConstraints.tightFor(width: 150),
-                                  ),
-                                  CNChildHStack(
-                                    children: [
-                                      CNChildImage(
-                                        'square.and.arrow.down.badge.checkmark.fill',
-                                        font: font,
-                                        symbolRenderingMode: CNSymbolRenderingMode.hierarchical,
-                                        paddings: EdgeInsets.symmetric(horizontal: labelReservedIconWidth),
-                                      ),
-                                      CNChildText(
-                                        'Icon Progress and Text',
-                                        font: font,
-                                        paddings: EdgeInsets.only(left: labelIconToTitleSpacing),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        PixelPerfectProbe(
-                          adjustPosition: true,
-                          child: CNButton(
                             onPressed: isEnabled
                                 ? () {
                                     _set('Default.5');
@@ -231,7 +194,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                     value: tintColor,
                     onChanged: (color) => setState(() => tintColor = color),
                   ),
-                  'Enabled': CNToggle(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value)),
+                  'Enabled': CNToggle(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value), debugLog: false),
                   'Font': FontPicker(
                     fonts: kAvailableFonts,
                     value: font,

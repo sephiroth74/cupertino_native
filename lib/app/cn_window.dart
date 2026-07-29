@@ -368,7 +368,6 @@ class _CNWindowState extends State<CNWindow> {
     }
     final theme = CNTheme.of(context);
     late Color backgroundColor = widget.backgroundColor ?? theme.canvasColor;
-    late Color endSidebarBackgroundColor;
     Color dividerColor = theme.separatorColor;
     CNBrightnessOverrideHandler.ensureMatchingBrightness(theme.brightness);
     const curve = Curves.linearToEaseOut;

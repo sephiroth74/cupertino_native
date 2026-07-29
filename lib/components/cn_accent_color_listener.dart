@@ -2,28 +2,21 @@
 
 import 'dart:async';
 
+import 'package:cupertino_native/style/cn_colors.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 /// Known macOS system accent colors.
-enum CNAccentColorName {
-  blue,
-  purple,
-  pink,
-  red,
-  orange,
-  yellow,
-  green,
-  graphite,
-}
+enum CNAccentColorName { blue, purple, pink, red, orange, yellow, green, graphite }
 
 /// The current system accent color with its resolved name.
 class CNAccentColor {
   const CNAccentColor({required this.accent, required this.name});
 
   /// The accent color as a Flutter [Color].
-  final Color accent;
+  final CupertinoDynamicColor accent;
 
   /// The resolved accent color name.
   final CNAccentColorName name;
@@ -65,11 +58,7 @@ class CNAccentColor {
 class CNAccentColorListener {
   CNAccentColorListener._();
 
-  static CNAccentColor _accentColor = const CNAccentColor(
-    accent: Color(0xFF007AFF),
-    name: CNAccentColorName.blue,
-  );
-
+  static CNAccentColor _accentColor = const CNAccentColor(accent: CNColors.blue, name: CNAccentColorName.blue);
   static final StreamController<CNAccentColor> _controller = StreamController<CNAccentColor>.broadcast();
   static const EventChannel _eventChannel = EventChannel('cupertino_native/accent_color');
   static const MethodChannel _methodChannel = MethodChannel('cupertino_native');
@@ -129,14 +118,28 @@ class CNAccentColorListener {
   static CNAccentColor? _parse(dynamic event) {
     if (event is! Map) return null;
     final colorInt = event['color'] as int?;
-    final nameStr = event['name'] as String?;
+    final nameStr = (event['name'] as String?)?.toLowerCase();
     if (colorInt == null) return null;
     final color = Color(colorInt);
-    final name = CNAccentColorName.values.firstWhere(
-      (e) => e.name == nameStr,
-      orElse: () => CNAccentColorName.blue,
-    );
-    return CNAccentColor(accent: color, name: name);
+
+    final defaultValue = CNColors.accentColors.first;
+    final CNAccentColor value;
+    if (nameStr != null) {
+      value = CNColors.accentColors.firstWhere((color) => color.name.name.toLowerCase() == nameStr, orElse: () => defaultValue);
+    } else {
+      value = CNColors.accentColors.firstWhere(
+        (c) =>
+            c.accent.color == color ||
+            c.accent.darkColor == color ||
+            c.accent.darkElevatedColor == color ||
+            c.accent.elevatedColor == color ||
+            c.accent.darkHighContrastColor == color ||
+            c.accent.highContrastColor == color,
+        orElse: () => defaultValue,
+      );
+    }
+
+    return value;
   }
 }
 

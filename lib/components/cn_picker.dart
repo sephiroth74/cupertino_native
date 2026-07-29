@@ -21,7 +21,7 @@ class CNPicker extends CNWidget {
     this.label,
     this.onChanged,
     this.pickerStyle = CNPickerStyle.automatic,
-    this.controlSize,
+    this.controlSize = CNControlSize.regular,
     this.font,
     this.shrink = true,
     this.constraints,
@@ -38,7 +38,7 @@ class CNPicker extends CNWidget {
   final List<CNChild> children;
 
   /// Control size.
-  final CNControlSize? controlSize;
+  final CNControlSize controlSize;
 
   /// Font applied to the picker.
   final CNFont? font;
@@ -106,6 +106,7 @@ enum CNPickerStyle {
 class _CNPickerState extends CNWidgetState<CNPicker> {
   @override
   Size computeDefaultSize() {
+    logDebug('computeDefaultSize: pickerStyle=${widget.pickerStyle}, controlSize=${widget.controlSize}');
     switch (widget.pickerStyle) {
       case CNPickerStyle.automatic:
       case CNPickerStyle.menu:
@@ -176,7 +177,7 @@ class _CNPickerState extends CNWidgetState<CNPicker> {
       'selection': widget.selection,
       'label': widget.label?.map((c) => c.toChildPayload(context)).toList(),
       'pickerStyle': widget.pickerStyle.name,
-      'controlSize': widget.controlSize?.name,
+      'controlSize': widget.controlSize.name,
       'font': widget.font?.toMap(),
       'enabled': widget.enabled,
     };

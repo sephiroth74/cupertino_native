@@ -1,7 +1,6 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, ThemeMode;
-import 'package:flutter/scheduler.dart';
 import 'package:macos_window_utils/macos_window_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -10,7 +9,7 @@ import 'demos/cn_alert_demo.dart';
 import 'demos/cn_button_demo.dart';
 import 'demos/cn_color_well_demo.dart';
 import 'demos/cn_combo_box_demo.dart';
-import 'demos/cn_context_menu.dart';
+import 'demos/cn_context_menu_demo.dart';
 import 'demos/cn_date_picker_demo.dart';
 import 'demos/cn_gauge_demo.dart';
 import 'demos/cn_image_demo.dart';
@@ -130,19 +129,27 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
   }
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late Brightness brightness;
   String? searchQuery;
   int selectedIndex = 0;
   bool sideBarClosed = false;
 
   @override
+  void didChangePlatformBrightness() {
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
-    var dispatcher = SchedulerBinding.instance.platformDispatcher;
-    dispatcher.onPlatformBrightnessChanged = () {
-      setState(() {});
-    };
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override

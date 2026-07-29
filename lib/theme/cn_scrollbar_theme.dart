@@ -26,11 +26,12 @@ class CNScrollbarTheme extends InheritedWidget {
 class CNScrollbarThemeData with Diagnosticable {
   /// Creates a [CNScrollbarThemeData] that describes the visual properties of [CNScrollbar] widgets.
   const CNScrollbarThemeData({
-    this.thickness = 6.0,
+    this.thickness = 9.0,
     this.thicknessWhileHovering = 9.0,
     this.thumbVisibility = false,
     this.radius = const Radius.circular(25),
     this.thumbColor,
+    this.thumbColorWhileHovering
   });
 
   /// The radius of the scrollbar thumb.
@@ -45,6 +46,9 @@ class CNScrollbarThemeData with Diagnosticable {
   /// The color of the scrollbar thumb.
   final Color? thumbColor;
 
+  /// The color of the scrollbar thumb while hovering.
+  final Color? thumbColorWhileHovering;
+
   /// Whether the scrollbar thumb is always visible.
   final bool? thumbVisibility;
 
@@ -55,6 +59,7 @@ class CNScrollbarThemeData with Diagnosticable {
     return other is CNScrollbarThemeData &&
         other.thickness == thickness &&
         other.thicknessWhileHovering == thicknessWhileHovering &&
+        other.thumbColorWhileHovering == thumbColorWhileHovering &&
         other.thumbVisibility == thumbVisibility &&
         other.radius == radius &&
         other.thumbColor == thumbColor;
@@ -67,12 +72,13 @@ class CNScrollbarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<double?>('thicknessWhileHovering', thicknessWhileHovering, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('thumbVisibility', thumbVisibility, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('radius', radius, defaultValue: null));
+    properties.add(ColorProperty('thumbColorWhileHovering', thumbColorWhileHovering, defaultValue: null));
     properties.add(ColorProperty('thumbColor', thumbColor, defaultValue: null));
   }
 
   @override
   int get hashCode {
-    return Object.hash(thickness, thicknessWhileHovering, thumbVisibility, radius, thumbColor);
+    return Object.hash(thickness, thicknessWhileHovering, thumbVisibility, radius, thumbColorWhileHovering, thumbColor);
   }
 
   /// Creates a copy of this [CNScrollbarThemeData] but with the given fields replaced with the new values.
@@ -80,6 +86,7 @@ class CNScrollbarThemeData with Diagnosticable {
     double? thickness,
     double? thicknessWhileHovering,
     bool? showTrackOnHover,
+    Color? thumbColorWhileHovering,
     bool? thumbVisibility,
     Radius? radius,
     Color? thumbColor,
@@ -89,6 +96,7 @@ class CNScrollbarThemeData with Diagnosticable {
       thicknessWhileHovering: thicknessWhileHovering ?? this.thicknessWhileHovering,
       thumbVisibility: thumbVisibility ?? this.thumbVisibility,
       radius: radius ?? this.radius,
+      thumbColorWhileHovering: thumbColorWhileHovering ?? this.thumbColorWhileHovering,
       thumbColor: thumbColor ?? this.thumbColor,
     );
   }
@@ -100,6 +108,7 @@ class CNScrollbarThemeData with Diagnosticable {
       thicknessWhileHovering: lerpDouble(a?.thicknessWhileHovering, b?.thicknessWhileHovering, t),
       thumbVisibility: t < 0.5 ? a?.thumbVisibility : b?.thumbVisibility,
       radius: Radius.lerp(a?.radius, b?.radius, t),
+      thumbColorWhileHovering: Color.lerp(a?.thumbColorWhileHovering, b?.thumbColorWhileHovering, t),
       thumbColor: Color.lerp(a?.thumbColor, b?.thumbColor, t),
     );
   }
@@ -111,6 +120,7 @@ class CNScrollbarThemeData with Diagnosticable {
       thickness: other.thickness,
       thumbVisibility: other.thumbVisibility,
       radius: other.radius,
+      thumbColorWhileHovering: other.thumbColorWhileHovering,
       thumbColor: other.thumbColor,
     );
   }

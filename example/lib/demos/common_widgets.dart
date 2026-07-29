@@ -64,8 +64,9 @@ class ControlSizePicker extends StatelessWidget {
 }
 
 class FontPicker extends StatelessWidget {
-  const FontPicker({super.key, required this.fonts, this.value, this.onChanged});
+  const FontPicker({super.key, required this.fonts, this.value, this.onChanged, this.debugLog = false});
 
+  final bool debugLog;
   final List<CNFont?> fonts;
   final ValueChanged<CNFont?>? onChanged;
   final CNFont? value;
@@ -75,6 +76,7 @@ class FontPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CNPicker(
+      debugLog: debugLog,
       selection: value?.name ?? value?.kind.name ?? 'none',
       children: fonts.map((font) {
         return CNChildText(font?.name ?? font?.kind.name ?? 'None', tag: font?.name ?? font?.kind.name ?? 'none');
@@ -144,8 +146,10 @@ class SizeSliderPicker extends StatelessWidget {
     this.min = kFontSizeMin,
     this.max = kFontSizeMax,
     required this.onChanged,
+    this.debugLog = false,
   });
 
+  final bool debugLog;
   final double max;
   final double min;
   final ValueChanged<double>? onChanged;
@@ -169,7 +173,7 @@ class SizeSliderPicker extends StatelessWidget {
         ),
         const SizedBox(width: 2),
         Expanded(
-          child: CNSlider(value: value, min: min, max: max, onChanged: onChanged),
+          child: CNSlider(value: value, min: min, max: max, onChanged: onChanged, debugLog: debugLog),
         ),
       ],
     );

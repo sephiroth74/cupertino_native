@@ -206,6 +206,8 @@ class CNThemeData extends Equatable {
     Color? fillPrimaryColor,
     Color? fillSecondaryColor,
     Color? fillTertiaryColor,
+    Color? fillQuaternaryColor,
+    Color? fillQuinaryColor,
     CNTypography? typography,
     CNGlassMaterial? materialUltraThin,
     CNGlassMaterial? materialThin,
@@ -221,55 +223,76 @@ class CNThemeData extends Equatable {
     required bool isMainWindow,
   }) {
     final isDark = brightness == Brightness.dark;
+    final Color labelColor;
+    final Color thumbColor;
 
-    final resolvedLabelColor = labelColor ?? (isDark ? CupertinoColors.label.darkColor : CupertinoColors.label.color);
-    final resolvedPrimaryColor = primaryColor ?? (isDark ? CNColors.blue.darkColor : CNColors.blue.color);
-    final resolvedTypography =
-        typography ?? (isDark ? CNTypography.lightOpaque() : CNTypography.darkOpaque()).copyWith(color: resolvedLabelColor);
-    final resolvedTextTheme = (textTheme ?? const CNTextThemeData()).copyWith(
-      font: textTheme?.font ?? cnFontFromTextStyle(resolvedTypography.body),
-      labelColor: textTheme?.labelColor ?? resolvedLabelColor,
-    );
-    final resolvedToggleTheme = (toggleTheme ?? const CNToggleThemeData()).copyWith(
-      tint: toggleTheme?.tint ?? resolvedPrimaryColor,
-    );
-    final resolvedSliderTheme = (sliderTheme ?? const CNSliderThemeData()).copyWith(
-      tintColor: sliderTheme?.tintColor ?? resolvedPrimaryColor,
-    );
-    final resolvedProgressTheme = (progressTheme ?? const CNProgressThemeData()).copyWith(
-      tintColor: progressTheme?.tintColor ?? resolvedPrimaryColor,
-    );
+    if (isDark) {
+      labelColor = CupertinoColors.label.darkColor;
+      primaryColor ??= CNColors.blue.darkColor;
+      secondaryColor ??= CNColors.indigo.darkColor;
+      destructiveColor ??= CNColors.red.darkColor;
+      canvasColor ??= CNColors.canvasColor.darkColor;
+      groupedBackgroundColor ??= CNColors.groupedBackgroundColor.darkColor;
+      secondaryLabelColor ??= CNColors.secondaryLabel.darkColor;
+      separatorColor ??= CNColors.separator.darkColor;
+      fillPrimaryColor ??= CNColors.fillPrimary.darkColor;
+      fillSecondaryColor ??= CNColors.fillSecondary.darkColor;
+      fillTertiaryColor ??= CNColors.fillTertiary.darkColor;
+      fillQuaternaryColor ??= CNColors.fillQuaternary.darkColor;
+      fillQuinaryColor ??= CNColors.fillQuinary.darkColor;
+      thumbColor = CNColors.scrollbarColor.darkColor.withAlpha(101);
+      typography ??= CNTypography.lightOpaque().copyWith(color: labelColor);
+    } else {
+      labelColor = CupertinoColors.label.color;
+      primaryColor ??= CNColors.blue.color;
+      secondaryColor ??= CNColors.indigo.color;
+      destructiveColor ??= CNColors.red.color;
+      canvasColor ??= CNColors.canvasColor.color;
+      groupedBackgroundColor ??= CNColors.groupedBackgroundColor.color;
+      secondaryLabelColor ??= CNColors.secondaryLabel.color;
+      separatorColor ??= CNColors.separator.color;
+      fillPrimaryColor ??= CNColors.fillPrimary.color;
+      fillSecondaryColor ??= CNColors.fillSecondary.color;
+      fillTertiaryColor ??= CNColors.fillTertiary.color;
+      fillQuaternaryColor ??= CNColors.fillQuaternary.color;
+      fillQuinaryColor ??= CNColors.fillQuinary.color;
+      thumbColor = CNColors.scrollbarColor.color.withAlpha(101);
+      typography ??= CNTypography.darkOpaque().copyWith(color: labelColor);
+    }
+    textTheme ??= CNTextThemeData(font: cnFontFromTextStyle(typography.body), labelColor: labelColor);
+    toggleTheme ??= CNToggleThemeData(tint: primaryColor);
+    sliderTheme ??= CNSliderThemeData(tintColor: primaryColor);
+    progressTheme ??= CNProgressThemeData(tintColor: primaryColor);
+    scrollbarTheme ??= CNScrollbarThemeData(thumbColor: thumbColor, thumbColorWhileHovering: thumbColor.withAlpha(255));
+    imageTheme ??= const CNImageThemeData();
 
     return CNThemeData.raw(
       brightness: brightness,
-      primaryColor: resolvedPrimaryColor,
-      secondaryColor: secondaryColor ?? (isDark ? CNColors.indigo.darkColor : CNColors.indigo.color),
-      destructiveColor: destructiveColor ?? (isDark ? CNColors.red.darkColor : CNColors.red.color),
-      canvasColor: canvasColor ?? (isDark ? CNColors.canvasColor.darkColor : CNColors.canvasColor.color),
-      groupedBackgroundColor:
-          groupedBackgroundColor ??
-          (isDark ? CupertinoColors.systemGroupedBackground.darkColor : CupertinoColors.systemGroupedBackground.color),
-      labelColor: resolvedLabelColor,
-      secondaryLabelColor:
-          secondaryLabelColor ?? (isDark ? CupertinoColors.secondaryLabel.darkColor : CupertinoColors.secondaryLabel.color),
-      separatorColor: separatorColor ?? (isDark ? CupertinoColors.separator.darkColor : CupertinoColors.separator.color),
-      fillPrimaryColor: fillPrimaryColor ?? (isDark ? CNColors.fillPrimary.darkColor : CNColors.fillPrimary.color),
-      fillSecondaryColor: fillSecondaryColor ?? (isDark ? CNColors.fillSecondary.darkColor : CNColors.fillSecondary.color),
-      fillTertiaryColor: fillTertiaryColor ?? (isDark ? CNColors.fillTertiary.darkColor : CNColors.fillTertiary.color),
-      typography: resolvedTypography,
+      primaryColor: primaryColor,
+      secondaryColor: secondaryColor,
+      destructiveColor: destructiveColor,
+      canvasColor: canvasColor,
+      groupedBackgroundColor: groupedBackgroundColor,
+      labelColor: labelColor,
+      secondaryLabelColor: secondaryLabelColor,
+      separatorColor: separatorColor,
+      fillPrimaryColor: fillPrimaryColor,
+      fillSecondaryColor: fillSecondaryColor,
+      fillTertiaryColor: fillTertiaryColor,
+      fillQuaternaryColor: fillQuaternaryColor,
+      fillQuinaryColor: fillQuinaryColor,
+      typography: typography,
       materialUltraThin: materialUltraThin ?? CNGlassMaterial.ultraThin,
       materialThin: materialThin ?? CNGlassMaterial.thin,
       materialMedium: materialMedium ?? CNGlassMaterial.medium,
       materialThick: materialThick ?? CNGlassMaterial.thick,
       materialUltraThick: materialUltraThick ?? CNGlassMaterial.ultraThick,
-      toggleTheme: resolvedToggleTheme,
-      imageTheme: imageTheme ?? const CNImageThemeData(),
-      textTheme: resolvedTextTheme,
-      sliderTheme: resolvedSliderTheme,
-      progressTheme: resolvedProgressTheme,
-      scrollbarTheme:
-          scrollbarTheme ??
-          CNScrollbarThemeData(thumbColor: isDark ? CNColors.scrollbarColor.darkColor : CNColors.scrollbarColor.color),
+      toggleTheme: toggleTheme,
+      imageTheme: imageTheme,
+      textTheme: textTheme,
+      sliderTheme: sliderTheme,
+      progressTheme: progressTheme,
+      scrollbarTheme: scrollbarTheme,
       isMainWindow: isMainWindow,
     );
   }
@@ -313,6 +336,8 @@ class CNThemeData extends Equatable {
     required this.progressTheme,
     required this.scrollbarTheme,
     required this.isMainWindow,
+    required this.fillQuaternaryColor,
+    required this.fillQuinaryColor,
   });
 
   /// Overall brightness for descendant widgets.
@@ -326,6 +351,12 @@ class CNThemeData extends Equatable {
 
   /// Primary translucent fill color.
   final Color fillPrimaryColor;
+
+  /// Quaternary fill color.
+  final Color fillQuaternaryColor;
+
+  /// Quinary fill color.
+  final Color fillQuinaryColor;
 
   /// Secondary translucent fill color.
   final Color fillSecondaryColor;
@@ -404,6 +435,8 @@ class CNThemeData extends Equatable {
     fillPrimaryColor,
     fillSecondaryColor,
     fillTertiaryColor,
+    fillQuaternaryColor,
+    fillQuinaryColor,
     typography,
     materialUltraThin,
     materialThin,
@@ -415,6 +448,8 @@ class CNThemeData extends Equatable {
     textTheme,
     sliderTheme,
     progressTheme,
+    isMainWindow,
+    isDark,
   ];
 
   /// Alias of [primaryColor] for accent-driven controls.
@@ -437,6 +472,8 @@ class CNThemeData extends Equatable {
     Color? fillPrimaryColor,
     Color? fillSecondaryColor,
     Color? fillTertiaryColor,
+    Color? fillQuaternaryColor,
+    Color? fillQuinaryColor,
     CNTypography? typography,
     CNGlassMaterial? materialUltraThin,
     CNGlassMaterial? materialThin,
@@ -464,6 +501,8 @@ class CNThemeData extends Equatable {
       fillPrimaryColor: fillPrimaryColor ?? this.fillPrimaryColor,
       fillSecondaryColor: fillSecondaryColor ?? this.fillSecondaryColor,
       fillTertiaryColor: fillTertiaryColor ?? this.fillTertiaryColor,
+      fillQuaternaryColor: fillQuaternaryColor ?? this.fillQuaternaryColor,
+      fillQuinaryColor: fillQuinaryColor ?? this.fillQuinaryColor,
       typography: this.typography.merge(typography),
       materialUltraThin: materialUltraThin ?? this.materialUltraThin,
       materialThin: materialThin ?? this.materialThin,
@@ -527,6 +566,8 @@ class CNThemeData extends Equatable {
       fillPrimaryColor: Color.lerp(a.fillPrimaryColor, b.fillPrimaryColor, t)!,
       fillSecondaryColor: Color.lerp(a.fillSecondaryColor, b.fillSecondaryColor, t)!,
       fillTertiaryColor: Color.lerp(a.fillTertiaryColor, b.fillTertiaryColor, t)!,
+      fillQuaternaryColor: Color.lerp(a.fillQuaternaryColor, b.fillQuaternaryColor, t)!,
+      fillQuinaryColor: Color.lerp(a.fillQuinaryColor, b.fillQuinaryColor, t)!,
       typography: CNTypography.lerp(a.typography, b.typography, t),
       materialUltraThin: t < 0.5 ? a.materialUltraThin : b.materialUltraThin,
       materialThin: t < 0.5 ? a.materialThin : b.materialThin,
