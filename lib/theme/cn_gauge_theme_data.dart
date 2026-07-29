@@ -10,17 +10,17 @@ class CNGaugeTheme extends InheritedTheme {
   /// The gauge theme override for descendants.
   final CNGaugeThemeData data;
 
-  /// Returns the nearest [CNGaugeThemeData], falling back to [CNTheme].
-  static CNGaugeThemeData of(BuildContext context) {
-    final CNGaugeTheme? theme = context.dependOnInheritedWidgetOfExactType<CNGaugeTheme>();
-    return theme?.data ?? CNTheme.of(context).gaugeTheme;
-  }
-
   @override
   bool updateShouldNotify(CNGaugeTheme oldWidget) => data != oldWidget.data;
 
   @override
   Widget wrap(BuildContext context, Widget child) => CNGaugeTheme(data: data, child: child);
+
+  /// Returns the nearest [CNGaugeThemeData], falling back to [CNTheme].
+  static CNGaugeThemeData of(BuildContext context) {
+    final CNGaugeTheme? theme = context.dependOnInheritedWidgetOfExactType<CNGaugeTheme>();
+    return theme?.data ?? CNTheme.of(context).gaugeTheme;
+  }
 }
 
 /// Widget-specific visual overrides for [CNGauge].

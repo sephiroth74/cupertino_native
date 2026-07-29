@@ -33,7 +33,10 @@ class ThemeDemoPage extends StatelessWidget {
               CupertinoListSection.insetGrouped(
                 header: const Text('Semantic Colors'),
                 children: [
-                  _ColorRow(label: 'Primary', color: theme.accentColor),
+                  _ColorRow(
+                    label: 'Primary',
+                    color: theme.userAccentColor ?? theme.systemAccentColor ?? CupertinoColors.activeBlue,
+                  ),
                   _ColorRow(label: 'Secondary', color: theme.secondaryColor),
                   _ColorRow(label: 'Destructive', color: theme.destructiveColor),
                   _ColorRow(label: 'Canvas', color: theme.canvasColor),

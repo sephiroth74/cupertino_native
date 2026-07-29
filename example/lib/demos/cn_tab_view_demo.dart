@@ -67,10 +67,26 @@ class _TabViewDemoPageState extends State<TabViewDemoPage> {
                     tabPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                     contentPadding: const EdgeInsets.all(16),
                     children: [
-                      _TabContent(title: 'General', icon: CupertinoIcons.gear, description: 'General application settings and preferences.'),
-                      _TabContent(title: 'Appearance', icon: CupertinoIcons.paintbrush, description: 'Customize the look and feel of the application.'),
-                      _TabContent(title: 'Privacy', icon: CupertinoIcons.lock_shield, description: 'Manage your privacy and security settings.'),
-                      _TabContent(title: 'Advanced', icon: CupertinoIcons.wrench, description: 'Advanced configuration options for power users.'),
+                      _TabContent(
+                        title: 'General',
+                        icon: CupertinoIcons.gear,
+                        description: 'General application settings and preferences.',
+                      ),
+                      _TabContent(
+                        title: 'Appearance',
+                        icon: CupertinoIcons.paintbrush,
+                        description: 'Customize the look and feel of the application.',
+                      ),
+                      _TabContent(
+                        title: 'Privacy',
+                        icon: CupertinoIcons.lock_shield,
+                        description: 'Manage your privacy and security settings.',
+                      ),
+                      _TabContent(
+                        title: 'Advanced',
+                        icon: CupertinoIcons.wrench,
+                        description: 'Advanced configuration options for power users.',
+                      ),
                     ],
                   ),
                 ),
@@ -98,10 +114,7 @@ class _TabViewDemoPageState extends State<TabViewDemoPage> {
                     });
                   },
                 ),
-                'Control Size': ControlSizePicker(
-                  value: controlSize,
-                  onChanged: (size) => setState(() => controlSize = size),
-                ),
+                'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
                 'Style': CNPicker(
                   pickerStyle: CNPickerStyle.menu,
                   children: CNSegmentStyle.values.map((s) => CNChildText(s.name, tag: s.name)).toList(),
@@ -145,7 +158,7 @@ class _TabContent extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 48, color: CNTheme.of(context).accentColor),
+          Icon(icon, size: 48, color: CNTheme.of(context).userAccentColor),
           const SizedBox(height: 16),
           Text(title, style: CNTheme.of(context).typography.title1),
           const SizedBox(height: 8),

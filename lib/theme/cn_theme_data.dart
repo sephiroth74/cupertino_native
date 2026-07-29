@@ -3,6 +3,7 @@ import 'package:cupertino_native/theme/cn_image_theme_data.dart';
 import 'package:cupertino_native/theme/cn_text_theme_data.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
+
 import '../style/text_utils.dart';
 
 /// Defines the semantic color tokens used by [CNTheme].
@@ -10,7 +11,8 @@ class CNThemeData extends Equatable {
   /// Creates a theme configuration with semantic defaults for the given brightness.
   factory CNThemeData({
     Brightness brightness = Brightness.light,
-    Color? accentColor,
+    Color? userAccentColor,
+    Color? systemAccentColor,
     Color? secondaryColor,
     Color? destructiveColor,
     Color? canvasColor,
@@ -51,7 +53,6 @@ class CNThemeData extends Equatable {
 
     if (isDark) {
       labelColor = CupertinoColors.label.darkColor;
-      accentColor ??= CNColors.blue.darkColor;
       secondaryColor ??= CNColors.indigo.darkColor;
       destructiveColor ??= CNColors.red.darkColor;
       canvasColor ??= CNColors.canvasColor.darkColor;
@@ -67,7 +68,6 @@ class CNThemeData extends Equatable {
       typography ??= CNTypography.lightOpaque().copyWith(color: labelColor);
     } else {
       labelColor = CupertinoColors.label.color;
-      accentColor ??= CNColors.blue.color;
       secondaryColor ??= CNColors.indigo.color;
       destructiveColor ??= CNColors.red.color;
       canvasColor ??= CNColors.canvasColor.color;
@@ -83,23 +83,24 @@ class CNThemeData extends Equatable {
       typography ??= CNTypography.darkOpaque().copyWith(color: labelColor);
     }
     textTheme ??= CNTextThemeData(font: cnFontFromTextStyle(typography.body), labelColor: labelColor);
-    buttonTheme ??= CNButtonThemeData(tintColor: accentColor);
-    pickerTheme ??= CNPickerThemeData(tintColor: accentColor);
-    segmentedControlTheme ??= CNSegmentedControlThemeData(tintColor: accentColor);
-    stepperTheme ??= CNStepperThemeData(tintColor: accentColor);
-    gaugeTheme ??= CNGaugeThemeData(tintColor: accentColor);
-    datePickerTheme ??= CNDatePickerThemeData(tintColor: accentColor);
-    textFieldTheme ??= CNTextFieldThemeData(tintColor: accentColor);
-    secureFieldTheme ??= CNSecureFieldThemeData(tintColor: accentColor);
-    toggleTheme ??= CNToggleThemeData(tint: accentColor);
-    sliderTheme ??= CNSliderThemeData(tintColor: accentColor);
-    progressTheme ??= CNProgressThemeData(tintColor: accentColor);
+    buttonTheme ??= CNButtonThemeData(tintColor: userAccentColor);
+    pickerTheme ??= CNPickerThemeData(tintColor: userAccentColor);
+    segmentedControlTheme ??= CNSegmentedControlThemeData(tintColor: userAccentColor);
+    stepperTheme ??= CNStepperThemeData(tintColor: userAccentColor);
+    gaugeTheme ??= CNGaugeThemeData(tintColor: userAccentColor);
+    datePickerTheme ??= CNDatePickerThemeData(tintColor: userAccentColor);
+    textFieldTheme ??= CNTextFieldThemeData(tintColor: userAccentColor);
+    secureFieldTheme ??= CNSecureFieldThemeData(tintColor: userAccentColor);
+    toggleTheme ??= CNToggleThemeData(tint: userAccentColor);
+    sliderTheme ??= CNSliderThemeData(tintColor: userAccentColor);
+    progressTheme ??= CNProgressThemeData(tintColor: userAccentColor);
     scrollbarTheme ??= CNScrollbarThemeData(thumbColor: thumbColor, thumbColorWhileHovering: thumbColor.withAlpha(255));
     imageTheme ??= const CNImageThemeData();
 
     return CNThemeData.raw(
       brightness: brightness,
-      accentColor: accentColor,
+      userAccentColor: userAccentColor,
+      systemAccentColor: systemAccentColor,
       secondaryColor: secondaryColor,
       destructiveColor: destructiveColor,
       canvasColor: canvasColor,
@@ -137,21 +138,30 @@ class CNThemeData extends Equatable {
   }
 
   /// A default dark theme.
-  factory CNThemeData.dark({required Color? accentColor, required bool isMainWindow}) =>
-      CNThemeData(brightness: Brightness.dark, accentColor: accentColor, isMainWindow: isMainWindow);
+  factory CNThemeData.dark({Color? userAccentColor, required Color? systemAccentColor, required bool isMainWindow}) => CNThemeData(
+    brightness: Brightness.dark,
+    userAccentColor: userAccentColor,
+    systemAccentColor: systemAccentColor,
+    isMainWindow: isMainWindow,
+  );
 
   /// The default fallback theme used when no [CNTheme] is in scope.
   factory CNThemeData.fallback({Brightness brightness = Brightness.light, required bool isMainWindow}) =>
       CNThemeData(brightness: brightness, isMainWindow: isMainWindow);
 
   /// A default light theme.
-  factory CNThemeData.light({required Color? accentColor, required bool isMainWindow}) =>
-      CNThemeData(brightness: Brightness.light, accentColor: accentColor, isMainWindow: isMainWindow);
+  factory CNThemeData.light({Color? userAccentColor, required Color? systemAccentColor, required bool isMainWindow}) => CNThemeData(
+    brightness: Brightness.light,
+    userAccentColor: userAccentColor,
+    systemAccentColor: systemAccentColor,
+    isMainWindow: isMainWindow,
+  );
 
   /// Creates a theme from exact values.
   const CNThemeData.raw({
     required this.brightness,
-    required this.accentColor,
+    required this.userAccentColor,
+    required this.systemAccentColor,
     required this.secondaryColor,
     required this.destructiveColor,
     required this.canvasColor,
@@ -187,9 +197,6 @@ class CNThemeData extends Equatable {
     required this.fillQuinaryColor,
   });
 
-  /// Primary interactive color.
-  final Color accentColor;
-
   /// Overall brightness for descendant widgets.
   final Brightness brightness;
 
@@ -220,11 +227,11 @@ class CNThemeData extends Equatable {
   /// Tertiary translucent fill color.
   final Color fillTertiaryColor;
 
-  /// Grouped surface background color.
-  final Color groupedBackgroundColor;
-
   /// Widget-specific gauge theme overrides.
   final CNGaugeThemeData gaugeTheme;
+
+  /// Grouped surface background color.
+  final Color groupedBackgroundColor;
 
   /// Widget-specific image theme overrides.
   final CNImageThemeData imageTheme;
@@ -259,17 +266,17 @@ class CNThemeData extends Equatable {
   /// Widget-specific scrollbar theme overrides.
   final CNScrollbarThemeData scrollbarTheme;
 
-  /// Widget-specific secure field theme overrides.
-  final CNSecureFieldThemeData secureFieldTheme;
-
-  /// Widget-specific segmented control theme overrides.
-  final CNSegmentedControlThemeData segmentedControlTheme;
-
   /// Secondary interactive color.
   final Color secondaryColor;
 
   /// Secondary text color.
   final Color secondaryLabelColor;
+
+  /// Widget-specific secure field theme overrides.
+  final CNSecureFieldThemeData secureFieldTheme;
+
+  /// Widget-specific segmented control theme overrides.
+  final CNSegmentedControlThemeData segmentedControlTheme;
 
   /// Separator and stroke color.
   final Color separatorColor;
@@ -279,6 +286,9 @@ class CNThemeData extends Equatable {
 
   /// Widget-specific stepper theme overrides.
   final CNStepperThemeData stepperTheme;
+
+  /// System accent color, if available.
+  final Color? systemAccentColor;
 
   /// Widget-specific text field theme overrides.
   final CNTextFieldThemeData textFieldTheme;
@@ -292,10 +302,14 @@ class CNThemeData extends Equatable {
   /// HIG-aligned text styles.
   final CNTypography typography;
 
+  /// Primary interactive color.
+  final Color? userAccentColor;
+
   @override
   List<Object?> get props => [
     brightness,
-    accentColor,
+    userAccentColor,
+    systemAccentColor,
     secondaryColor,
     destructiveColor,
     canvasColor,
@@ -331,13 +345,17 @@ class CNThemeData extends Equatable {
     isDark,
   ];
 
+  /// The effective accent color, preferring the user-specified accent color over the system accent color.
+  Color? get accentColor => userAccentColor ?? systemAccentColor;
+
   /// Returns true when [brightness] is dark.
   bool get isDark => brightness == Brightness.dark;
 
   /// Returns a copy with selected values replaced.
   CNThemeData copyWith({
     Brightness? brightness,
-    Color? primaryColor,
+    Color? userAccentColor,
+    Color? systemAccentColor,
     Color? secondaryColor,
     Color? destructiveColor,
     Color? canvasColor,
@@ -374,7 +392,8 @@ class CNThemeData extends Equatable {
   }) {
     return CNThemeData.raw(
       brightness: brightness ?? this.brightness,
-      accentColor: primaryColor ?? accentColor,
+      userAccentColor: userAccentColor ?? this.userAccentColor,
+      systemAccentColor: systemAccentColor ?? this.systemAccentColor,
       secondaryColor: secondaryColor ?? this.secondaryColor,
       destructiveColor: destructiveColor ?? this.destructiveColor,
       canvasColor: canvasColor ?? this.canvasColor,
@@ -416,7 +435,8 @@ class CNThemeData extends Equatable {
     if (other == null) return this;
     return copyWith(
       brightness: other.brightness,
-      primaryColor: other.accentColor,
+      userAccentColor: other.userAccentColor,
+      systemAccentColor: other.systemAccentColor,
       secondaryColor: other.secondaryColor,
       destructiveColor: other.destructiveColor,
       canvasColor: other.canvasColor,
@@ -455,7 +475,8 @@ class CNThemeData extends Equatable {
   static CNThemeData lerp(CNThemeData a, CNThemeData b, double t) {
     return CNThemeData.raw(
       brightness: t < 0.5 ? a.brightness : b.brightness,
-      accentColor: Color.lerp(a.accentColor, b.accentColor, t)!,
+      userAccentColor: Color.lerp(a.userAccentColor, b.userAccentColor, t)!,
+      systemAccentColor: Color.lerp(a.systemAccentColor, b.systemAccentColor, t)!,
       secondaryColor: Color.lerp(a.secondaryColor, b.secondaryColor, t)!,
       destructiveColor: Color.lerp(a.destructiveColor, b.destructiveColor, t)!,
       canvasColor: Color.lerp(a.canvasColor, b.canvasColor, t)!,
@@ -492,4 +513,3 @@ class CNThemeData extends Equatable {
     );
   }
 }
-

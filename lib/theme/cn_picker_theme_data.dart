@@ -10,17 +10,17 @@ class CNPickerTheme extends InheritedTheme {
   /// The picker theme override for descendants.
   final CNPickerThemeData data;
 
-  /// Returns the nearest [CNPickerThemeData], falling back to [CNTheme].
-  static CNPickerThemeData of(BuildContext context) {
-    final CNPickerTheme? theme = context.dependOnInheritedWidgetOfExactType<CNPickerTheme>();
-    return theme?.data ?? CNTheme.of(context).pickerTheme;
-  }
-
   @override
   bool updateShouldNotify(CNPickerTheme oldWidget) => data != oldWidget.data;
 
   @override
   Widget wrap(BuildContext context, Widget child) => CNPickerTheme(data: data, child: child);
+
+  /// Returns the nearest [CNPickerThemeData], falling back to [CNTheme].
+  static CNPickerThemeData of(BuildContext context) {
+    final CNPickerTheme? theme = context.dependOnInheritedWidgetOfExactType<CNPickerTheme>();
+    return theme?.data ?? CNTheme.of(context).pickerTheme;
+  }
 }
 
 /// Widget-specific visual overrides for [CNPicker].

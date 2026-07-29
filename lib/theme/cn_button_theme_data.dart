@@ -10,17 +10,17 @@ class CNButtonTheme extends InheritedTheme {
   /// The button theme override for descendants.
   final CNButtonThemeData data;
 
-  /// Returns the nearest [CNButtonThemeData], falling back to [CNTheme].
-  static CNButtonThemeData of(BuildContext context) {
-    final CNButtonTheme? theme = context.dependOnInheritedWidgetOfExactType<CNButtonTheme>();
-    return theme?.data ?? CNTheme.of(context).buttonTheme;
-  }
-
   @override
   bool updateShouldNotify(CNButtonTheme oldWidget) => data != oldWidget.data;
 
   @override
   Widget wrap(BuildContext context, Widget child) => CNButtonTheme(data: data, child: child);
+
+  /// Returns the nearest [CNButtonThemeData], falling back to [CNTheme].
+  static CNButtonThemeData of(BuildContext context) {
+    final CNButtonTheme? theme = context.dependOnInheritedWidgetOfExactType<CNButtonTheme>();
+    return theme?.data ?? CNTheme.of(context).buttonTheme;
+  }
 }
 
 /// Widget-specific visual overrides for [CNButton].

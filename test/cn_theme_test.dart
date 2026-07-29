@@ -7,7 +7,7 @@ void main() {
     late CNThemeData resolved;
     final expected = CNThemeData(
       brightness: Brightness.dark,
-      accentColor: CupertinoColors.systemOrange.darkColor,
+      userAccentColor: CupertinoColors.systemOrange.darkColor,
       isMainWindow: true,
     );
 

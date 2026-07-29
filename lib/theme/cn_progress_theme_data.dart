@@ -10,17 +10,17 @@ class CNProgressTheme extends InheritedTheme {
   /// The progress view theme override for descendants.
   final CNProgressThemeData data;
 
-  /// Returns the nearest [CNProgressThemeData], falling back to [CNTheme].
-  static CNProgressThemeData of(BuildContext context) {
-    final CNProgressTheme? theme = context.dependOnInheritedWidgetOfExactType<CNProgressTheme>();
-    return theme?.data ?? CNTheme.of(context).progressTheme;
-  }
-
   @override
   bool updateShouldNotify(CNProgressTheme oldWidget) => data != oldWidget.data;
 
   @override
   Widget wrap(BuildContext context, Widget child) => CNProgressTheme(data: data, child: child);
+
+  /// Returns the nearest [CNProgressThemeData], falling back to [CNTheme].
+  static CNProgressThemeData of(BuildContext context) {
+    final CNProgressTheme? theme = context.dependOnInheritedWidgetOfExactType<CNProgressTheme>();
+    return theme?.data ?? CNTheme.of(context).progressTheme;
+  }
 }
 
 /// Widget-specific visual overrides for [CNProgressView].

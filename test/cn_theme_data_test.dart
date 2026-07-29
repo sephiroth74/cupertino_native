@@ -1,12 +1,15 @@
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:cupertino_native/theme/cn_toggle_theme_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('CNThemeData', () {
     test('light factory provides expected defaults', () {
-      final theme = CNThemeData.light(accentColor: CNColors.accentColors[0], isMainWindow: true);
+      final theme = CNThemeData.light(
+        userAccentColor: CNColors.accentColors[0].accent,
+        systemAccentColor: CNColors.accentColors[0].accent,
+        isMainWindow: true,
+      );
 
       expect(theme.brightness, Brightness.light);
       expect(theme.typography.body.fontSize, 13);
@@ -14,43 +17,67 @@ void main() {
       expect(theme.typography.caption2.fontWeight, FontWeight.w500);
       expect(theme.fillPrimaryColor, isNotNull);
       expect(theme.materialMedium.blurRadius, CNGlassMaterial.medium.blurRadius);
-      expect(theme.toggleTheme.tint, theme.accentColor);
+      expect(theme.toggleTheme.tint, theme.userAccentColor);
     });
 
     test('copyWith overrides selected fields', () {
-      final base = CNThemeData.light(accentColor: CNColors.accentColors[0], isMainWindow: true);
-      final updated = base.copyWith(primaryColor: CupertinoColors.systemGreen.color);
+      final base = CNThemeData.light(
+        userAccentColor: CNColors.accentColors[0].accent,
+        systemAccentColor: CNColors.accentColors[0].accent,
+        isMainWindow: true,
+      );
+      final updated = base.copyWith(accentColor: CupertinoColors.systemGreen.color);
 
-      expect(updated.accentColor, CupertinoColors.systemGreen.color);
+      expect(updated.userAccentColor, CupertinoColors.systemGreen.color);
       expect(updated.secondaryColor, base.secondaryColor);
       expect(updated.brightness, base.brightness);
       expect(updated.toggleTheme.tint, base.toggleTheme.tint);
     });
 
     test('toggle theme can override tint independently', () {
-      final base = CNThemeData.light(accentColor: CNColors.accentColors[0], isMainWindow: true);
+      final base = CNThemeData.light(
+        userAccentColor: CNColors.accentColors[0].accent,
+        systemAccentColor: CNColors.accentColors[0].accent,
+        isMainWindow: true,
+      );
       final updated = base.copyWith(toggleTheme: const CNToggleThemeData(tint: Color(0xFF123456)));
 
       expect(updated.toggleTheme.tint, const Color(0xFF123456));
-      expect(updated.accentColor, base.accentColor);
+      expect(updated.userAccentColor, base.userAccentColor);
     });
 
     test('merge overrides with other theme values', () {
-      final light = CNThemeData.light(accentColor: CNColors.accentColors[0], isMainWindow: true);
-      final dark = CNThemeData.dark(accentColor: CNColors.accentColors[0], isMainWindow: true);
+      final light = CNThemeData.light(
+        userAccentColor: CNColors.accentColors[0].accent,
+        systemAccentColor: CNColors.accentColors[0].accent,
+        isMainWindow: true,
+      );
+      final dark = CNThemeData.dark(
+        userAccentColor: CNColors.accentColors[0].accent,
+        systemAccentColor: CNColors.accentColors[0].accent,
+        isMainWindow: true,
+      );
       final merged = light.merge(dark);
 
       expect(merged.brightness, Brightness.dark);
-      expect(merged.accentColor, dark.accentColor);
+      expect(merged.userAccentColor, dark.userAccentColor);
       expect(merged.materialThick.opacity, dark.materialThick.opacity);
     });
 
     test('lerp interpolates colors and typography', () {
-      final a = CNThemeData.light(accentColor: CNColors.accentColors[0], isMainWindow: true);
-      final b = CNThemeData.dark(accentColor: CNColors.accentColors[0], isMainWindow: true);
+      final a = CNThemeData.light(
+        userAccentColor: CNColors.accentColors[0].accent,
+        systemAccentColor: CNColors.accentColors[0].accent,
+        isMainWindow: true,
+      );
+      final b = CNThemeData.dark(
+        userAccentColor: CNColors.accentColors[0].accent,
+        systemAccentColor: CNColors.accentColors[0].accent,
+        isMainWindow: true,
+      );
       final lerped = CNThemeData.lerp(a, b, 0.5);
 
-      expect(lerped.accentColor, Color.lerp(a.accentColor, b.accentColor, 0.5));
+      expect(lerped.userAccentColor, Color.lerp(a.userAccentColor, b.userAccentColor, 0.5));
       expect(lerped.typography.body.fontSize, closeTo(13, 0.001));
       expect(lerped.brightness, Brightness.dark);
     });

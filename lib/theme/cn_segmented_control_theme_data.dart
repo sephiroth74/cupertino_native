@@ -10,17 +10,17 @@ class CNSegmentedControlTheme extends InheritedTheme {
   /// The segmented control theme override for descendants.
   final CNSegmentedControlThemeData data;
 
-  /// Returns the nearest [CNSegmentedControlThemeData], falling back to [CNTheme].
-  static CNSegmentedControlThemeData of(BuildContext context) {
-    final CNSegmentedControlTheme? theme = context.dependOnInheritedWidgetOfExactType<CNSegmentedControlTheme>();
-    return theme?.data ?? CNTheme.of(context).segmentedControlTheme;
-  }
-
   @override
   bool updateShouldNotify(CNSegmentedControlTheme oldWidget) => data != oldWidget.data;
 
   @override
   Widget wrap(BuildContext context, Widget child) => CNSegmentedControlTheme(data: data, child: child);
+
+  /// Returns the nearest [CNSegmentedControlThemeData], falling back to [CNTheme].
+  static CNSegmentedControlThemeData of(BuildContext context) {
+    final CNSegmentedControlTheme? theme = context.dependOnInheritedWidgetOfExactType<CNSegmentedControlTheme>();
+    return theme?.data ?? CNTheme.of(context).segmentedControlTheme;
+  }
 }
 
 /// Widget-specific visual overrides for [CNSegmentedControl].

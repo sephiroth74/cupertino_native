@@ -198,7 +198,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               ),
               statusBar: CNStatusBar(
                 height: 32,
-                color: accentColor.withAlpha(127),
+                color: accentColor?.withAlpha(127),
                 expandedColor: CNTheme.of(context).canvasColor,
                 expansionMode: CNStatusBarExpansionMode.overAll,
                 presentationStyle: CNStatusBarPresentationStyle.push,
@@ -279,7 +279,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 searchable: true,
                 searchText: searchQuery,
                 titleDisplayMode: CNToolbarTitleDisplayMode.automatic,
-                // toolbarBackground: accentColor.withLuminance(0.3),
+                toolbarBackground: accentColor?.withLuminance(0.9),
                 toolbarBlurEnabled: true,
                 toolbarBlurMaterial: CNToolbarBlurMaterial.titlebar,
                 title: CNChildText('Cupertino Native Demo'),
@@ -346,7 +346,7 @@ class _SideBar extends StatelessWidget {
     final theme = CNTheme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final accentColor = CNTheme.of(context).accentColor;
-    final isBright = accentColor.computeLuminance() > 0.5;
+    final isBright = (accentColor?.computeLuminance() ?? 0) > 0.5;
     final labelColor = theme.labelColor;
 
     return ListView.builder(
@@ -369,7 +369,7 @@ class _SideBar extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
             decoration: BoxDecoration(
-              color: isSelected ? accentColor.withValues(alpha: 1.0) : Colors.transparent,
+              color: isSelected ? accentColor?.withValues(alpha: 1.0) : Colors.transparent,
               borderRadius: BorderRadius.circular(6),
             ),
             child: Row(

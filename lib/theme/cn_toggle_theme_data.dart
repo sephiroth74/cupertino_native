@@ -10,17 +10,17 @@ class CNToggleTheme extends InheritedTheme {
   /// The toggle theme override for descendants.
   final CNToggleThemeData data;
 
-  /// Returns the nearest [CNToggleThemeData], falling back to [CNTheme].
-  static CNToggleThemeData of(BuildContext context) {
-    final CNToggleTheme? theme = context.dependOnInheritedWidgetOfExactType<CNToggleTheme>();
-    return theme?.data ?? CNTheme.of(context).toggleTheme;
-  }
-
   @override
   bool updateShouldNotify(CNToggleTheme oldWidget) => data != oldWidget.data;
 
   @override
   Widget wrap(BuildContext context, Widget child) => CNToggleTheme(data: data, child: child);
+
+  /// Returns the nearest [CNToggleThemeData], falling back to [CNTheme].
+  static CNToggleThemeData of(BuildContext context) {
+    final CNToggleTheme? theme = context.dependOnInheritedWidgetOfExactType<CNToggleTheme>();
+    return theme?.data ?? CNTheme.of(context).toggleTheme;
+  }
 }
 
 /// Widget-specific visual overrides for [CNToggle].

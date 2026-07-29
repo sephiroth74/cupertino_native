@@ -10,17 +10,17 @@ class CNSecureFieldTheme extends InheritedTheme {
   /// The secure field theme override for descendants.
   final CNSecureFieldThemeData data;
 
-  /// Returns the nearest [CNSecureFieldThemeData], falling back to [CNTheme].
-  static CNSecureFieldThemeData of(BuildContext context) {
-    final CNSecureFieldTheme? theme = context.dependOnInheritedWidgetOfExactType<CNSecureFieldTheme>();
-    return theme?.data ?? CNTheme.of(context).secureFieldTheme;
-  }
-
   @override
   bool updateShouldNotify(CNSecureFieldTheme oldWidget) => data != oldWidget.data;
 
   @override
   Widget wrap(BuildContext context, Widget child) => CNSecureFieldTheme(data: data, child: child);
+
+  /// Returns the nearest [CNSecureFieldThemeData], falling back to [CNTheme].
+  static CNSecureFieldThemeData of(BuildContext context) {
+    final CNSecureFieldTheme? theme = context.dependOnInheritedWidgetOfExactType<CNSecureFieldTheme>();
+    return theme?.data ?? CNTheme.of(context).secureFieldTheme;
+  }
 }
 
 /// Widget-specific visual overrides for [CNSecureField].

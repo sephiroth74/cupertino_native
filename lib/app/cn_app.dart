@@ -308,6 +308,48 @@ class CNApp extends StatefulWidget {
   State<CNApp> createState() => _CNAppState();
 }
 
+/// Describes how [Scrollable] widgets behave for [CNApp]s.
+///
+/// {@macro flutter.widgets.scrollBehavior}
+///
+/// When using the desktop platform, if the [Scrollable] widget scrolls in the
+/// [Axis.vertical], a [MacosScrollbar] is applied.
+///
+/// See also:
+///
+///  * [ScrollBehavior], the default scrolling behavior extended by this class.
+class MacosScrollBehavior extends ScrollBehavior {
+  /// Creates a MacosScrollBehavior that decorates [Scrollable]s with
+  /// [MacosScrollbar]s based on the current platform and provided [ScrollableDetails].
+  const MacosScrollBehavior();
+
+  @override
+  Widget buildScrollbar(context, child, details) {
+    // When modifying this function, consider modifying the implementation in
+    // the base class as well.
+    switch (axisDirectionToAxis(details.direction)) {
+      case Axis.horizontal:
+        return child;
+      case Axis.vertical:
+        switch (getPlatform(context)) {
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            return CNScrollbar(controller: details.controller, child: child);
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+            return child;
+        }
+    }
+  }
+
+  /*@override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.mouse,
+  };*/
+}
+
 class _CNAppState extends State<CNApp> {
   WindowFrame _windowFrame = WindowFrame.zero;
   NSWindowDelegateHandle? _windowGeometryHandle;
@@ -322,9 +364,7 @@ class _CNAppState extends State<CNApp> {
   @override
   void initState() {
     super.initState();
-    _windowGeometryHandle = WindowManipulator.addNSWindowDelegate(
-      _WindowGeometryDelegate(onFrameChanged: _refreshWindowFrame),
-    );
+    _windowGeometryHandle = WindowManipulator.addNSWindowDelegate(_WindowGeometryDelegate(onFrameChanged: _refreshWindowFrame));
     Future.microtask(_refreshWindowFrame);
   }
 
@@ -337,61 +377,7 @@ class _CNAppState extends State<CNApp> {
     yield DefaultWidgetsLocalizations.delegate;
   }
 
-  Future<void> _refreshWindowFrame() async {
-    if (!mounted) return;
-    final rect = await WindowManipulator.getWindowFrame();
-    if (!mounted) return;
-    final newFrame = WindowFrame(x: rect.left, y: rect.top, width: rect.width, height: rect.height);
-    if (newFrame != _windowFrame) {
-      setState(() {
-        _windowFrame = newFrame;
-      });
-    }
-  }
-
   bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
-
-  Widget _macosBuilder(BuildContext context, Widget? child) {
-    return MainWindowStreamBuilder(
-      builder: (context, isMainWindow) {
-        debugPrint('CNApp: isMainWindow: $isMainWindow');
-        return CNAccentColorBuilder(
-          builder: (context, a) {
-            final accentColor = widget.accentColor ?? a.accent;
-            debugPrint('CNApp: accentColor: $accentColor');
-            final mode = widget.themeMode ?? ThemeMode.system;
-            final platformBrightness = MediaQuery.platformBrightnessOf(context);
-            final useDarkTheme = mode == ThemeMode.dark || (mode == ThemeMode.system && platformBrightness == Brightness.dark);
-
-            late CNThemeData theme;
-            if (useDarkTheme) {
-              theme = widget.darkTheme ?? CNThemeData.dark(accentColor: accentColor, isMainWindow: isMainWindow);
-            } else {
-              theme = widget.lightTheme ?? CNThemeData.light(accentColor: accentColor, isMainWindow: isMainWindow);
-            }
-
-            return CNTheme(
-              data: theme,
-              child: DefaultTextStyle(
-                style: TextStyle(color: theme.typography.body.color),
-                child: widget.builder != null
-                    // See the MaterialApp source code for the explanation for
-                    // wrapping a builder in a builder
-                    ? Builder(
-                        builder: (context) {
-                          // An Overlay is used here because MacosTooltip needs an
-                          // Overlay as an ancestor in the widget tree.
-                          return Overlay(initialEntries: [OverlayEntry(builder: (context) => widget.builder!(context, child))]);
-                        },
-                      )
-                    : child ?? const SizedBox.shrink(),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
 
   Widget _buildMacosApp(BuildContext context) {
     final defaultColor = widget.accentColor ?? CNColors.blue;
@@ -452,55 +438,66 @@ class _CNAppState extends State<CNApp> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return CNWindowGeometryScope(
-      frame: _windowFrame,
-      child: _buildMacosApp(context),
+  Widget _macosBuilder(BuildContext context, Widget? child) {
+    return MainWindowStreamBuilder(
+      builder: (context, isMainWindow) {
+        debugPrint('CNApp: isMainWindow: $isMainWindow');
+        return CNAccentColorBuilder(
+          builder: (context, a) {
+            final mode = widget.themeMode ?? ThemeMode.system;
+            final platformBrightness = MediaQuery.platformBrightnessOf(context);
+            final useDarkTheme = mode == ThemeMode.dark || (mode == ThemeMode.system && platformBrightness == Brightness.dark);
+
+            late CNThemeData theme;
+            if (useDarkTheme) {
+              theme =
+                  widget.darkTheme ??
+                  CNThemeData.dark(userAccentColor: widget.accentColor, systemAccentColor: a.accent, isMainWindow: isMainWindow);
+            } else {
+              theme =
+                  widget.lightTheme ??
+                  CNThemeData.light(userAccentColor: widget.accentColor, systemAccentColor: a.accent, isMainWindow: isMainWindow);
+            }
+
+            return CNTheme(
+              data: theme,
+              child: DefaultTextStyle(
+                style: TextStyle(color: theme.typography.body.color),
+                child: widget.builder != null
+                    // See the MaterialApp source code for the explanation for
+                    // wrapping a builder in a builder
+                    ? Builder(
+                        builder: (context) {
+                          // An Overlay is used here because MacosTooltip needs an
+                          // Overlay as an ancestor in the widget tree.
+                          return Overlay(initialEntries: [OverlayEntry(builder: (context) => widget.builder!(context, child))]);
+                        },
+                      )
+                    : child ?? const SizedBox.shrink(),
+              ),
+            );
+          },
+        );
+      },
     );
   }
-}
 
-/// Describes how [Scrollable] widgets behave for [CNApp]s.
-///
-/// {@macro flutter.widgets.scrollBehavior}
-///
-/// When using the desktop platform, if the [Scrollable] widget scrolls in the
-/// [Axis.vertical], a [MacosScrollbar] is applied.
-///
-/// See also:
-///
-///  * [ScrollBehavior], the default scrolling behavior extended by this class.
-class MacosScrollBehavior extends ScrollBehavior {
-  /// Creates a MacosScrollBehavior that decorates [Scrollable]s with
-  /// [MacosScrollbar]s based on the current platform and provided [ScrollableDetails].
-  const MacosScrollBehavior();
-
-  @override
-  Widget buildScrollbar(context, child, details) {
-    // When modifying this function, consider modifying the implementation in
-    // the base class as well.
-    switch (axisDirectionToAxis(details.direction)) {
-      case Axis.horizontal:
-        return child;
-      case Axis.vertical:
-        switch (getPlatform(context)) {
-          case TargetPlatform.linux:
-          case TargetPlatform.macOS:
-          case TargetPlatform.windows:
-            return CNScrollbar(controller: details.controller, child: child);
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.iOS:
-            return child;
-        }
+  Future<void> _refreshWindowFrame() async {
+    if (!mounted) return;
+    final rect = await WindowManipulator.getWindowFrame();
+    if (!mounted) return;
+    final newFrame = WindowFrame(x: rect.left, y: rect.top, width: rect.width, height: rect.height);
+    if (newFrame != _windowFrame) {
+      setState(() {
+        _windowFrame = newFrame;
+      });
     }
   }
 
-  /*@override
-  Set<PointerDeviceKind> get dragDevices => {
-    PointerDeviceKind.mouse,
-  };*/
+  @override
+  Widget build(BuildContext context) {
+    return CNWindowGeometryScope(frame: _windowFrame, child: _buildMacosApp(context));
+  }
 }
 
 class _WindowGeometryDelegate extends NSWindowDelegate {

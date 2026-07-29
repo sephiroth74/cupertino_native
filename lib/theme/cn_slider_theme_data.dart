@@ -10,17 +10,17 @@ class CNSliderTheme extends InheritedTheme {
   /// The slider theme override for descendants.
   final CNSliderThemeData data;
 
-  /// Returns the nearest [CNSliderThemeData], falling back to [CNTheme].
-  static CNSliderThemeData of(BuildContext context) {
-    final CNSliderTheme? theme = context.dependOnInheritedWidgetOfExactType<CNSliderTheme>();
-    return theme?.data ?? CNTheme.of(context).sliderTheme;
-  }
-
   @override
   bool updateShouldNotify(CNSliderTheme oldWidget) => data != oldWidget.data;
 
   @override
   Widget wrap(BuildContext context, Widget child) => CNSliderTheme(data: data, child: child);
+
+  /// Returns the nearest [CNSliderThemeData], falling back to [CNTheme].
+  static CNSliderThemeData of(BuildContext context) {
+    final CNSliderTheme? theme = context.dependOnInheritedWidgetOfExactType<CNSliderTheme>();
+    return theme?.data ?? CNTheme.of(context).sliderTheme;
+  }
 }
 
 /// Widget-specific visual overrides for [CNSlider].

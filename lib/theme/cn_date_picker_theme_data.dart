@@ -10,17 +10,17 @@ class CNDatePickerTheme extends InheritedTheme {
   /// The date picker theme override for descendants.
   final CNDatePickerThemeData data;
 
-  /// Returns the nearest [CNDatePickerThemeData], falling back to [CNTheme].
-  static CNDatePickerThemeData of(BuildContext context) {
-    final CNDatePickerTheme? theme = context.dependOnInheritedWidgetOfExactType<CNDatePickerTheme>();
-    return theme?.data ?? CNTheme.of(context).datePickerTheme;
-  }
-
   @override
   bool updateShouldNotify(CNDatePickerTheme oldWidget) => data != oldWidget.data;
 
   @override
   Widget wrap(BuildContext context, Widget child) => CNDatePickerTheme(data: data, child: child);
+
+  /// Returns the nearest [CNDatePickerThemeData], falling back to [CNTheme].
+  static CNDatePickerThemeData of(BuildContext context) {
+    final CNDatePickerTheme? theme = context.dependOnInheritedWidgetOfExactType<CNDatePickerTheme>();
+    return theme?.data ?? CNTheme.of(context).datePickerTheme;
+  }
 }
 
 /// Widget-specific visual overrides for [CNDatePicker].

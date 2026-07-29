@@ -10,17 +10,17 @@ class CNTextFieldTheme extends InheritedTheme {
   /// The text field theme override for descendants.
   final CNTextFieldThemeData data;
 
-  /// Returns the nearest [CNTextFieldThemeData], falling back to [CNTheme].
-  static CNTextFieldThemeData of(BuildContext context) {
-    final CNTextFieldTheme? theme = context.dependOnInheritedWidgetOfExactType<CNTextFieldTheme>();
-    return theme?.data ?? CNTheme.of(context).textFieldTheme;
-  }
-
   @override
   bool updateShouldNotify(CNTextFieldTheme oldWidget) => data != oldWidget.data;
 
   @override
   Widget wrap(BuildContext context, Widget child) => CNTextFieldTheme(data: data, child: child);
+
+  /// Returns the nearest [CNTextFieldThemeData], falling back to [CNTheme].
+  static CNTextFieldThemeData of(BuildContext context) {
+    final CNTextFieldTheme? theme = context.dependOnInheritedWidgetOfExactType<CNTextFieldTheme>();
+    return theme?.data ?? CNTheme.of(context).textFieldTheme;
+  }
 }
 
 /// Widget-specific visual overrides for [CNTextField].
