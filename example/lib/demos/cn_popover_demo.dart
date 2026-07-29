@@ -1,5 +1,4 @@
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:flutter/cupertino.dart';
 
 class PopoverDemoPage extends StatefulWidget {
@@ -64,7 +63,7 @@ class _PopoverDemoPageState extends State<PopoverDemoPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Builder(
-                builder: (ctx) => PixelPerfectProbe(
+                builder: (ctx) => CNPixelPerfectContainer(
                   adjustPosition: true,
                   child: CNButton(
                     onPressed: () => _showBasicPopover(ctx),
@@ -76,7 +75,7 @@ class _PopoverDemoPageState extends State<PopoverDemoPage> {
               ),
               const SizedBox(height: 12),
               Builder(
-                builder: (ctx) => PixelPerfectProbe(
+                builder: (ctx) => CNPixelPerfectContainer(
                   adjustPosition: true,
                   child: CNButton(
                     onPressed: () => _showTopPopover(ctx),
@@ -88,7 +87,7 @@ class _PopoverDemoPageState extends State<PopoverDemoPage> {
               ),
               const SizedBox(height: 12),
               Builder(
-                builder: (ctx) => PixelPerfectProbe(
+                builder: (ctx) => CNPixelPerfectContainer(
                   adjustPosition: true,
                   child: CNButton(
                     onPressed: () => _showTrailingPopover(ctx),

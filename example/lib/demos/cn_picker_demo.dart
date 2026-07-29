@@ -1,5 +1,4 @@
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
@@ -40,7 +39,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                 children: [
                   const SizedBox(height: 16),
                   Center(
-                    child: PixelPerfectProbe(
+                    child: CNPixelPerfectContainer(
                       adjustPosition: true,
                       child: CNPicker(
                         debugLog: _kDebugLog,

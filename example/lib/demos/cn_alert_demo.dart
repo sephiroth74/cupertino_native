@@ -1,4 +1,3 @@
-import 'package:cupertino_native/components/cn_navigation_bar.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -10,6 +9,8 @@ class AlertDemoPage extends StatefulWidget {
 }
 
 class _AlertDemoPageState extends State<AlertDemoPage> {
+  FlutterPixelGeometry? lastGeometry;
+
   CNAlertResult? _lastResult;
 
   Future<void> _showConfirmAlert() async {
@@ -60,13 +61,21 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
             controller: scrollController,
             padding: const EdgeInsets.all(16),
             children: [
-              CNButton(
-                onPressed: _showInfoAlert,
-                shrink: true,
-                controlSize: CNControlSize.large,
-                children: [
-                  CNChildLabel('Show Info Alert', systemImage: 'info.triangle', constraints: BoxConstraints.tightFor(width: 250)),
-                ],
+              CNPixelPerfectContainer(
+                adjustPosition: true,
+                onGeometryChanged: (value) {
+                  setState(() {
+                    lastGeometry = value;
+                  });
+                },
+                child: CNButton(
+                  onPressed: _showInfoAlert,
+                  shrink: true,
+                  controlSize: CNControlSize.large,
+                  children: [
+                    CNChildLabel('Show Info Alert', systemImage: 'info.triangle', constraints: BoxConstraints.tightFor(width: 250)),
+                  ],
+                ),
               ),
               const SizedBox(height: 12),
               CNButton(
@@ -95,6 +104,21 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
+              if (lastGeometry != null) ...[
+                Text('Last geometry: ${lastGeometry!.x}, ${lastGeometry!.y}, ${lastGeometry!.width}, ${lastGeometry!.height}'),
+                const SizedBox(height: 4),
+                Text(
+                  'Physical geometry: ${lastGeometry!.physicalX}, ${lastGeometry!.physicalY}, ${lastGeometry!.physicalWidth}, ${lastGeometry!.physicalHeight}',
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Window geometry: ${lastGeometry!.windowX}, ${lastGeometry!.windowY}, ${lastGeometry!.windowWidth}, ${lastGeometry!.windowHeight}',
+                ),
+                const SizedBox(height: 4),
+                Text('Device pixel ratio: ${lastGeometry!.devicePixelRatio}'),
+              ],
+
               const SizedBox(height: 16),
               if (_lastResult != null) ...[
                 Text('Selected index: ${_lastResult!.selectedIndex}'),

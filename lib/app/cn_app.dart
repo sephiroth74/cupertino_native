@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart' as c;
 import 'package:flutter/material.dart';
+import 'package:macos_window_utils/macos/ns_window_delegate.dart';
+import 'package:macos_window_utils/ns_window_delegate_handler/ns_window_delegate_handler.dart';
+import 'package:macos_window_utils/window_manipulator.dart';
 
 /// An application that uses macOS design.
 ///
@@ -304,6 +309,25 @@ class CNApp extends StatefulWidget {
 }
 
 class _CNAppState extends State<CNApp> {
+  WindowFrame _windowFrame = WindowFrame.zero;
+  NSWindowDelegateHandle? _windowGeometryHandle;
+
+  @override
+  void dispose() {
+    _windowGeometryHandle?.removeFromHandler();
+    _windowGeometryHandle = null;
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _windowGeometryHandle = WindowManipulator.addNSWindowDelegate(
+      _WindowGeometryDelegate(onFrameChanged: _refreshWindowFrame),
+    );
+    Future.microtask(_refreshWindowFrame);
+  }
+
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
     if (widget.localizationsDelegates != null) {
       yield* widget.localizationsDelegates!;
@@ -311,6 +335,18 @@ class _CNAppState extends State<CNApp> {
     yield DefaultMaterialLocalizations.delegate;
     yield c.DefaultCupertinoLocalizations.delegate;
     yield DefaultWidgetsLocalizations.delegate;
+  }
+
+  Future<void> _refreshWindowFrame() async {
+    if (!mounted) return;
+    final rect = await WindowManipulator.getWindowFrame();
+    if (!mounted) return;
+    final newFrame = WindowFrame(x: rect.left, y: rect.top, width: rect.width, height: rect.height);
+    if (newFrame != _windowFrame) {
+      setState(() {
+        _windowFrame = newFrame;
+      });
+    }
   }
 
   bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
@@ -417,8 +453,10 @@ class _CNAppState extends State<CNApp> {
 
   @override
   Widget build(BuildContext context) {
-    // leaves room for assertions, etc
-    return _buildMacosApp(context);
+    return CNWindowGeometryScope(
+      frame: _windowFrame,
+      child: _buildMacosApp(context),
+    );
   }
 }
 
@@ -462,4 +500,22 @@ class MacosScrollBehavior extends ScrollBehavior {
   Set<PointerDeviceKind> get dragDevices => {
     PointerDeviceKind.mouse,
   };*/
+}
+
+class _WindowGeometryDelegate extends NSWindowDelegate {
+  _WindowGeometryDelegate({required this.onFrameChanged});
+
+  final VoidCallback onFrameChanged;
+
+  @override
+  void windowDidMove() {
+    super.windowDidMove();
+    onFrameChanged();
+  }
+
+  @override
+  void windowDidResize() {
+    super.windowDidResize();
+    onFrameChanged();
+  }
 }

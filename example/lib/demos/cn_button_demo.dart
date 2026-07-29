@@ -1,5 +1,4 @@
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:cupertino_native/widgets/pixel_perfect_probe.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
@@ -79,7 +78,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                     padding: const EdgeInsets.all(8),
                     child: Column(
                       children: [
-                        PixelPerfectProbe(
+                        CNPixelPerfectContainer(
                           adjustPosition: true,
                           child: CNButton(
                             onPressed: isEnabled ? () => _set('Default') : null,
@@ -91,7 +90,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        PixelPerfectProbe(
+                        CNPixelPerfectContainer(
                           adjustPosition: true,
                           child: CNButton(
                             onPressed: isEnabled ? () => _set('Default.2') : null,
@@ -115,7 +114,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        PixelPerfectProbe(
+                        CNPixelPerfectContainer(
                           adjustPosition: true,
                           child: CNButton(
                             onPressed: isEnabled ? () => _set('Default.3') : null,
@@ -140,7 +139,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        PixelPerfectProbe(
+                        CNPixelPerfectContainer(
                           adjustPosition: true,
                           child: CNButton(
                             onPressed: isEnabled

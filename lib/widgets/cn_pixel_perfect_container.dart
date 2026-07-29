@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import 'cn_window_geometry.dart';
+
 /// Flutter-only geometry snapshot used for pixel-perfect diagnostics.
 class FlutterPixelGeometry {
   /// Creates an immutable Flutter geometry snapshot.
@@ -17,6 +19,10 @@ class FlutterPixelGeometry {
     required this.pixelAlignedY,
     required this.pixelAlignedWidth,
     required this.pixelAlignedHeight,
+    required this.windowX,
+    required this.windowY,
+    required this.windowWidth,
+    required this.windowHeight,
   });
 
   /// Device pixel ratio used for the conversion.
@@ -52,6 +58,18 @@ class FlutterPixelGeometry {
   /// Logical width.
   final double width;
 
+  /// Logical height of the window in the global Flutter coordinate space.
+  final double windowHeight;
+
+  /// Logical width of the window in the global Flutter coordinate space.
+  final double windowWidth;
+
+  /// Logical x in the global Flutter coordinate space.
+  final double windowX;
+
+  /// Logical y in the global Flutter coordinate space.
+  final double windowY;
+
   /// Logical x in the global Flutter coordinate space.
   final double x;
 
@@ -72,9 +90,9 @@ class FlutterPixelGeometry {
 }
 
 /// Wrap any widget to measure its global geometry using only Flutter APIs.
-class PixelPerfectProbe extends StatefulWidget {
+class CNPixelPerfectContainer extends StatefulWidget {
   /// Creates a pixel-geometry probe around [child].
-  const PixelPerfectProbe({super.key, required this.child, this.onGeometryChanged, this.adjustPosition = false});
+  const CNPixelPerfectContainer({super.key, required this.child, this.onGeometryChanged, this.adjustPosition = false});
 
   /// If true, applies a local translation to keep x/y aligned to physical pixels.
   final bool adjustPosition;
@@ -86,13 +104,13 @@ class PixelPerfectProbe extends StatefulWidget {
   final ValueChanged<FlutterPixelGeometry>? onGeometryChanged;
 
   @override
-  State<PixelPerfectProbe> createState() => _PixelPerfectProbeState();
+  State<CNPixelPerfectContainer> createState() => _CNPixelPerfectContainerState();
 
   /// Whether the probe is enabled. If false, no geometry will be reported.
   bool get enabled => adjustPosition;
 }
 
-class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindingObserver {
+class _CNPixelPerfectContainerState extends State<CNPixelPerfectContainer> with WidgetsBindingObserver {
   String? _lastSignature;
   final GlobalKey _probeKey = GlobalKey();
   bool _probeQueued = false;
@@ -105,7 +123,7 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
   }
 
   @override
-  void didUpdateWidget(covariant PixelPerfectProbe oldWidget) {
+  void didUpdateWidget(covariant CNPixelPerfectContainer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.enabled != widget.enabled) {
       _queueProbe();
@@ -150,8 +168,9 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
     final size = renderObject.size;
     final dpr = View.maybeOf(ctx)?.devicePixelRatio ?? MediaQuery.maybeDevicePixelRatioOf(ctx) ?? 1.0;
 
-    final rawPhysicalX = origin.dx * dpr;
-    final rawPhysicalY = origin.dy * dpr;
+    final windowFrame = CNWindowGeometryScope.of(context);
+    final rawPhysicalX = (origin.dx + windowFrame.x) * dpr;
+    final rawPhysicalY = (origin.dy + windowFrame.y) * dpr;
 
     // debugPrint('origin: $origin, size: $size, dpr: $dpr, rawPhysicalX: $rawPhysicalX, rawPhysicalY: $rawPhysicalY');
 
@@ -181,8 +200,8 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
 
     final snappedX = origin.dx;
     final snappedY = origin.dy;
-    final physicalX = snappedX * dpr;
-    final physicalY = snappedY * dpr;
+    final physicalX = (snappedX + windowFrame.x) * dpr;
+    final physicalY = (snappedY + windowFrame.y) * dpr;
     final physicalWidth = size.width * dpr;
     final physicalHeight = size.height * dpr;
 
@@ -200,9 +219,13 @@ class _PixelPerfectProbeState extends State<PixelPerfectProbe> with WidgetsBindi
       pixelAlignedY: _isAligned(physicalY),
       pixelAlignedWidth: _isAligned(physicalWidth),
       pixelAlignedHeight: _isAligned(physicalHeight),
+      windowX: windowFrame.x,
+      windowY: windowFrame.y,
+      windowWidth: windowFrame.width,
+      windowHeight: windowFrame.height,
     );
 
-    final signature = [geometry.x, geometry.y, geometry.width, geometry.height, geometry.devicePixelRatio].join('|');
+    final signature = [geometry.x, geometry.y, geometry.width, geometry.height, geometry.devicePixelRatio, windowFrame.x, windowFrame.y].join('|');
 
     if (signature == _lastSignature) {
       // debugPrint('[PixelPerfectProbe]: skipping probe because geometry has not changed');

@@ -70,12 +70,29 @@ class _MainWindowStateListenerNSWindowDelegate extends NSWindowDelegate {
   @override
   void windowDidBecomeMain() {
     super.windowDidBecomeMain();
+    debugPrint('MainWindowStreamBuilder: windowDidBecomeMain');
     onMainWindowChanged?.call(true);
+  }
+
+  @override
+  void windowDidEndLiveResize() {
+    super.windowDidEndLiveResize();
+  }
+
+  @override
+  void windowDidMove() {
+    super.windowDidMove();
   }
 
   @override
   void windowDidResignMain() {
     super.windowDidResignMain();
+    debugPrint('MainWindowStreamBuilder: windowDidResignMain');
     onMainWindowChanged?.call(false);
+  }
+
+  @override
+  void windowDidResize() {
+    super.windowDidResize();
   }
 }

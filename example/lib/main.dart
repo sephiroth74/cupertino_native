@@ -34,7 +34,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await CNAccentColorListener.load();
   await WindowManipulator.initialize(enableWindowDelegate: true);
-  await initializeWindowManager();
+  // await initializeWindowManager();
   runApp(const MyApp());
 }
 
@@ -166,10 +166,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         debugPrint('Building MyApp with brightness: $brightness, appTheme.mode: ${appTheme.mode}');
 
         return CNApp(
-          themeMode: appTheme.mode,
-          color: null,
-          debugShowCheckedModeBanner: false,
-          home: (context) {
+            themeMode: appTheme.mode,
+            color: null,
+            debugShowCheckedModeBanner: false,
+            home: (context) {
             final accentColor = CNTheme.of(context).accentColor;
             debugPrint('Building home with accentColor: $accentColor, brightness: $brightness, appTheme.mode: ${appTheme.mode}');
 
@@ -327,7 +327,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               ),
               child: _DesktopDemoShell(selectedIndex: selectedIndex),
             );
-          },
+            },
         );
       },
     );
