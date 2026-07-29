@@ -40,23 +40,34 @@ abstract class CNWidget extends StatefulWidget {
 
   /// Serializes the shared modifier fields into a payload map.
   /// Subclasses should call this from [toPayload] to include the common fields.
+  ///
+  /// When the widget's [tint] is null, [tintFallback] (typically a theme
+  /// value such as `CNTheme.of(context).accentColor`) is used so the native
+  /// control reflects the current [CNTheme] instead of the OS accent color.
   Map<String, dynamic> writeSharedFields(
     BuildContext context, {
     required Map<String, dynamic> payload,
     required BoxConstraints? constraints,
+    Object? tintFallback,
   }) {
     assert(
       tint == null || tint is Color || tint is CNShapeStyle,
       'tint must be a Color or a CNShapeStyle',
     );
+    assert(
+      tintFallback == null || tintFallback is Color || tintFallback is CNShapeStyle,
+      'tintFallback must be a Color or a CNShapeStyle',
+    );
+
+    final Object? effectiveTint = tint ?? tintFallback;
 
     payload['debugLog'] = debugLog;
     payload['help'] = help;
     payload['foregroundColor'] = resolveColorToArgb(foregroundColor, context);
-    if (tint is CNShapeStyle) {
-      payload['tint'] = (tint! as CNShapeStyle).toMap(context);
+    if (effectiveTint is CNShapeStyle) {
+      payload['tint'] = effectiveTint.toMap(context);
     } else {
-      payload['tint'] = resolveColorToArgb(tint as Color?, context);
+      payload['tint'] = resolveColorToArgb(effectiveTint as Color?, context);
     }
     payload['shrink'] = shrink;
 

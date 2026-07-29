@@ -1,201 +1,21 @@
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native/theme/cn_button_theme_data.dart';
+import 'package:cupertino_native/theme/cn_image_theme_data.dart';
+import 'package:cupertino_native/theme/cn_progress_theme_data.dart';
 import 'package:cupertino_native/theme/cn_scrollbar_theme.dart';
+import 'package:cupertino_native/theme/cn_slider_theme_data.dart';
+import 'package:cupertino_native/theme/cn_text_theme_data.dart';
+import 'package:cupertino_native/theme/cn_toggle_theme_data.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
-
 import '../style/text_utils.dart';
-
-/// Widget-specific visual overrides for [CNToggle].
-class CNToggleThemeData extends Equatable {
-  /// Creates toggle theme overrides.
-  const CNToggleThemeData({this.tint});
-
-  /// Toggle tint override.
-  final Color? tint;
-
-  @override
-  List<Object?> get props => [tint];
-
-  /// Returns a copy with selected values replaced.
-  CNToggleThemeData copyWith({Color? tint}) {
-    return CNToggleThemeData(tint: tint ?? this.tint);
-  }
-
-  /// Returns a new object where non-null values from [other] override this one.
-  CNToggleThemeData merge(CNToggleThemeData? other) {
-    if (other == null) return this;
-    return copyWith(tint: other.tint);
-  }
-
-  /// Linearly interpolates between two toggle themes.
-  static CNToggleThemeData lerp(CNToggleThemeData a, CNToggleThemeData b, double t) {
-    return CNToggleThemeData(tint: Color.lerp(a.tint, b.tint, t));
-  }
-}
-
-/// Widget-specific visual overrides for [CNImage].
-class CNImageThemeData extends Equatable {
-  /// Creates image theme overrides.
-  const CNImageThemeData({
-    this.symbolRenderingMode,
-    this.symbolColorRenderingMode,
-    this.foregroundStyleColors,
-    this.tint,
-    this.font,
-  });
-
-  /// Default symbol font.
-  final CNFont? font;
-
-  /// Default per-symbol foreground colors.
-  final List<Color>? foregroundStyleColors;
-
-  /// Default color rendering mode.
-  final CNSymbolColorRenderingMode? symbolColorRenderingMode;
-
-  /// Default rendering mode.
-  final CNSymbolRenderingMode? symbolRenderingMode;
-
-  /// Default tint color.
-  final Color? tint;
-
-  @override
-  List<Object?> get props => [symbolRenderingMode, symbolColorRenderingMode, foregroundStyleColors, tint, font];
-
-  /// Returns a copy with selected values replaced.
-  CNImageThemeData copyWith({
-    CNSymbolRenderingMode? symbolRenderingMode,
-    CNSymbolColorRenderingMode? symbolColorRenderingMode,
-    List<Color>? foregroundStyleColors,
-    Color? tint,
-    CNFont? font,
-  }) {
-    return CNImageThemeData(
-      symbolRenderingMode: symbolRenderingMode ?? this.symbolRenderingMode,
-      symbolColorRenderingMode: symbolColorRenderingMode ?? this.symbolColorRenderingMode,
-      foregroundStyleColors: foregroundStyleColors ?? this.foregroundStyleColors,
-      tint: tint ?? this.tint,
-      font: font ?? this.font,
-    );
-  }
-
-  /// Returns a new object where non-null values from [other] override this one.
-  CNImageThemeData merge(CNImageThemeData? other) {
-    if (other == null) return this;
-    return copyWith(
-      symbolRenderingMode: other.symbolRenderingMode,
-      symbolColorRenderingMode: other.symbolColorRenderingMode,
-      foregroundStyleColors: other.foregroundStyleColors,
-      tint: other.tint,
-      font: other.font,
-    );
-  }
-
-  /// Linearly interpolates between two image themes.
-  static CNImageThemeData lerp(CNImageThemeData a, CNImageThemeData b, double t) {
-    return CNImageThemeData(
-      symbolRenderingMode: t < 0.5 ? a.symbolRenderingMode : b.symbolRenderingMode,
-      symbolColorRenderingMode: t < 0.5 ? a.symbolColorRenderingMode : b.symbolColorRenderingMode,
-      foregroundStyleColors: t < 0.5 ? a.foregroundStyleColors : b.foregroundStyleColors,
-      tint: Color.lerp(a.tint, b.tint, t),
-      font: t < 0.5 ? a.font : b.font,
-    );
-  }
-}
-
-/// Widget-specific visual overrides for [CNText].
-class CNTextThemeData extends Equatable {
-  /// Creates text theme overrides.
-  const CNTextThemeData({this.font, this.labelColor});
-
-  /// Default text font.
-  final CNFont? font;
-
-  /// Default text foreground color.
-  final Color? labelColor;
-
-  @override
-  List<Object?> get props => [font, labelColor];
-
-  /// Returns a copy with selected values replaced.
-  CNTextThemeData copyWith({CNFont? font, Color? labelColor}) {
-    return CNTextThemeData(font: font ?? this.font, labelColor: labelColor ?? this.labelColor);
-  }
-
-  /// Returns a new object where non-null values from [other] override this one.
-  CNTextThemeData merge(CNTextThemeData? other) {
-    if (other == null) return this;
-    return copyWith(font: other.font, labelColor: other.labelColor);
-  }
-
-  /// Linearly interpolates between two text themes.
-  static CNTextThemeData lerp(CNTextThemeData a, CNTextThemeData b, double t) {
-    return CNTextThemeData(font: t < 0.5 ? a.font : b.font, labelColor: Color.lerp(a.labelColor, b.labelColor, t));
-  }
-}
-
-/// Widget-specific visual overrides for [CNSlider].
-class CNSliderThemeData extends Equatable {
-  /// Creates slider theme overrides.
-  const CNSliderThemeData({this.tintColor});
-
-  /// Default tint color for slider track and thumb.
-  final Color? tintColor;
-
-  @override
-  List<Object?> get props => [tintColor];
-
-  /// Returns a copy with selected values replaced.
-  CNSliderThemeData copyWith({Color? tintColor}) {
-    return CNSliderThemeData(tintColor: tintColor ?? this.tintColor);
-  }
-
-  /// Returns a new object where non-null values from [other] override this one.
-  CNSliderThemeData merge(CNSliderThemeData? other) {
-    if (other == null) return this;
-    return copyWith(tintColor: other.tintColor);
-  }
-
-  /// Linearly interpolates between two slider themes.
-  static CNSliderThemeData lerp(CNSliderThemeData a, CNSliderThemeData b, double t) {
-    return CNSliderThemeData(tintColor: Color.lerp(a.tintColor, b.tintColor, t));
-  }
-}
-
-/// Widget-specific visual overrides for [CNProgressView].
-class CNProgressThemeData extends Equatable {
-  /// Creates progress view theme overrides.
-  const CNProgressThemeData({this.tintColor});
-
-  /// Default tint color for progress view.
-  final Color? tintColor;
-
-  @override
-  List<Object?> get props => [tintColor];
-
-  /// Returns a copy with selected values replaced.
-  CNProgressThemeData copyWith({Color? tintColor}) {
-    return CNProgressThemeData(tintColor: tintColor ?? this.tintColor);
-  }
-
-  /// Returns a new object where non-null values from [other] override this one.
-  CNProgressThemeData merge(CNProgressThemeData? other) {
-    if (other == null) return this;
-    return copyWith(tintColor: other.tintColor);
-  }
-
-  /// Linearly interpolates between two progress view themes.
-  static CNProgressThemeData lerp(CNProgressThemeData a, CNProgressThemeData b, double t) {
-    return CNProgressThemeData(tintColor: Color.lerp(a.tintColor, b.tintColor, t));
-  }
-}
 
 /// Defines the semantic color tokens used by [CNTheme].
 class CNThemeData extends Equatable {
   /// Creates a theme configuration with semantic defaults for the given brightness.
   factory CNThemeData({
     Brightness brightness = Brightness.light,
-    Color? primaryColor,
+    Color? accentColor,
     Color? secondaryColor,
     Color? destructiveColor,
     Color? canvasColor,
@@ -220,6 +40,7 @@ class CNThemeData extends Equatable {
     CNSliderThemeData? sliderTheme,
     CNProgressThemeData? progressTheme,
     CNScrollbarThemeData? scrollbarTheme,
+    CNButtonThemeData? buttonTheme,
     required bool isMainWindow,
   }) {
     final isDark = brightness == Brightness.dark;
@@ -228,7 +49,7 @@ class CNThemeData extends Equatable {
 
     if (isDark) {
       labelColor = CupertinoColors.label.darkColor;
-      primaryColor ??= CNColors.blue.darkColor;
+      accentColor ??= CNColors.blue.darkColor;
       secondaryColor ??= CNColors.indigo.darkColor;
       destructiveColor ??= CNColors.red.darkColor;
       canvasColor ??= CNColors.canvasColor.darkColor;
@@ -244,7 +65,7 @@ class CNThemeData extends Equatable {
       typography ??= CNTypography.lightOpaque().copyWith(color: labelColor);
     } else {
       labelColor = CupertinoColors.label.color;
-      primaryColor ??= CNColors.blue.color;
+      accentColor ??= CNColors.blue.color;
       secondaryColor ??= CNColors.indigo.color;
       destructiveColor ??= CNColors.red.color;
       canvasColor ??= CNColors.canvasColor.color;
@@ -260,15 +81,16 @@ class CNThemeData extends Equatable {
       typography ??= CNTypography.darkOpaque().copyWith(color: labelColor);
     }
     textTheme ??= CNTextThemeData(font: cnFontFromTextStyle(typography.body), labelColor: labelColor);
-    toggleTheme ??= CNToggleThemeData(tint: primaryColor);
-    sliderTheme ??= CNSliderThemeData(tintColor: primaryColor);
-    progressTheme ??= CNProgressThemeData(tintColor: primaryColor);
+    buttonTheme ??= CNButtonThemeData(tintColor: accentColor);
+    toggleTheme ??= CNToggleThemeData(tint: accentColor);
+    sliderTheme ??= CNSliderThemeData(tintColor: accentColor);
+    progressTheme ??= CNProgressThemeData(tintColor: accentColor);
     scrollbarTheme ??= CNScrollbarThemeData(thumbColor: thumbColor, thumbColorWhileHovering: thumbColor.withAlpha(255));
     imageTheme ??= const CNImageThemeData();
 
     return CNThemeData.raw(
       brightness: brightness,
-      primaryColor: primaryColor,
+      accentColor: accentColor,
       secondaryColor: secondaryColor,
       destructiveColor: destructiveColor,
       canvasColor: canvasColor,
@@ -293,26 +115,27 @@ class CNThemeData extends Equatable {
       sliderTheme: sliderTheme,
       progressTheme: progressTheme,
       scrollbarTheme: scrollbarTheme,
+      buttonTheme: buttonTheme,
       isMainWindow: isMainWindow,
     );
   }
 
   /// A default dark theme.
-  factory CNThemeData.dark({required CNAccentColor accentColor, required bool isMainWindow}) =>
-      CNThemeData(brightness: Brightness.dark, primaryColor: accentColor.accent, isMainWindow: isMainWindow);
+  factory CNThemeData.dark({required Color? accentColor, required bool isMainWindow}) =>
+      CNThemeData(brightness: Brightness.dark, accentColor: accentColor, isMainWindow: isMainWindow);
 
   /// The default fallback theme used when no [CNTheme] is in scope.
   factory CNThemeData.fallback({Brightness brightness = Brightness.light, required bool isMainWindow}) =>
       CNThemeData(brightness: brightness, isMainWindow: isMainWindow);
 
   /// A default light theme.
-  factory CNThemeData.light({required CNAccentColor accentColor, required bool isMainWindow}) =>
-      CNThemeData(brightness: Brightness.light, primaryColor: accentColor.accent, isMainWindow: isMainWindow);
+  factory CNThemeData.light({required Color? accentColor, required bool isMainWindow}) =>
+      CNThemeData(brightness: Brightness.light, accentColor: accentColor, isMainWindow: isMainWindow);
 
   /// Creates a theme from exact values.
   const CNThemeData.raw({
     required this.brightness,
-    required this.primaryColor,
+    required this.accentColor,
     required this.secondaryColor,
     required this.destructiveColor,
     required this.canvasColor,
@@ -335,13 +158,20 @@ class CNThemeData extends Equatable {
     required this.sliderTheme,
     required this.progressTheme,
     required this.scrollbarTheme,
+    required this.buttonTheme,
     required this.isMainWindow,
     required this.fillQuaternaryColor,
     required this.fillQuinaryColor,
   });
 
+  /// Primary interactive color.
+  final Color accentColor;
+
   /// Overall brightness for descendant widgets.
   final Brightness brightness;
+
+  /// Widget-specific button theme overrides.
+  final CNButtonThemeData buttonTheme;
 
   /// Default surface background color.
   final Color canvasColor;
@@ -391,9 +221,6 @@ class CNThemeData extends Equatable {
   /// Lowest density glass material preset.
   final CNGlassMaterial materialUltraThin;
 
-  /// Primary interactive color.
-  final Color primaryColor;
-
   /// Widget-specific progress view theme overrides.
   final CNProgressThemeData progressTheme;
 
@@ -424,7 +251,7 @@ class CNThemeData extends Equatable {
   @override
   List<Object?> get props => [
     brightness,
-    primaryColor,
+    accentColor,
     secondaryColor,
     destructiveColor,
     canvasColor,
@@ -448,12 +275,10 @@ class CNThemeData extends Equatable {
     textTheme,
     sliderTheme,
     progressTheme,
+    buttonTheme,
     isMainWindow,
     isDark,
   ];
-
-  /// Alias of [primaryColor] for accent-driven controls.
-  Color get accentColor => primaryColor;
 
   /// Returns true when [brightness] is dark.
   bool get isDark => brightness == Brightness.dark;
@@ -486,11 +311,12 @@ class CNThemeData extends Equatable {
     CNSliderThemeData? sliderTheme,
     CNProgressThemeData? progressTheme,
     CNScrollbarThemeData? scrollbarTheme,
+    CNButtonThemeData? buttonTheme,
     bool? isMainWindow,
   }) {
     return CNThemeData.raw(
       brightness: brightness ?? this.brightness,
-      primaryColor: primaryColor ?? this.primaryColor,
+      accentColor: primaryColor ?? accentColor,
       secondaryColor: secondaryColor ?? this.secondaryColor,
       destructiveColor: destructiveColor ?? this.destructiveColor,
       canvasColor: canvasColor ?? this.canvasColor,
@@ -515,6 +341,7 @@ class CNThemeData extends Equatable {
       sliderTheme: this.sliderTheme.merge(sliderTheme),
       progressTheme: this.progressTheme.merge(progressTheme),
       scrollbarTheme: this.scrollbarTheme.merge(scrollbarTheme),
+      buttonTheme: this.buttonTheme.merge(buttonTheme),
       isMainWindow: isMainWindow ?? this.isMainWindow,
     );
   }
@@ -524,7 +351,7 @@ class CNThemeData extends Equatable {
     if (other == null) return this;
     return copyWith(
       brightness: other.brightness,
-      primaryColor: other.primaryColor,
+      primaryColor: other.accentColor,
       secondaryColor: other.secondaryColor,
       destructiveColor: other.destructiveColor,
       canvasColor: other.canvasColor,
@@ -547,6 +374,7 @@ class CNThemeData extends Equatable {
       sliderTheme: other.sliderTheme,
       progressTheme: other.progressTheme,
       scrollbarTheme: other.scrollbarTheme,
+      buttonTheme: other.buttonTheme,
       isMainWindow: other.isMainWindow,
     );
   }
@@ -555,7 +383,7 @@ class CNThemeData extends Equatable {
   static CNThemeData lerp(CNThemeData a, CNThemeData b, double t) {
     return CNThemeData.raw(
       brightness: t < 0.5 ? a.brightness : b.brightness,
-      primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t)!,
+      accentColor: Color.lerp(a.accentColor, b.accentColor, t)!,
       secondaryColor: Color.lerp(a.secondaryColor, b.secondaryColor, t)!,
       destructiveColor: Color.lerp(a.destructiveColor, b.destructiveColor, t)!,
       canvasColor: Color.lerp(a.canvasColor, b.canvasColor, t)!,
@@ -580,7 +408,9 @@ class CNThemeData extends Equatable {
       sliderTheme: CNSliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       progressTheme: CNProgressThemeData.lerp(a.progressTheme, b.progressTheme, t),
       scrollbarTheme: CNScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
+      buttonTheme: CNButtonThemeData.lerp(a.buttonTheme, b.buttonTheme, t),
       isMainWindow: t < 0.5 ? a.isMainWindow : b.isMainWindow,
     );
   }
 }
+

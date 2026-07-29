@@ -56,7 +56,7 @@ class CNApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
-    this.color,
+    this.accentColor,
     this.locale,
     this.localizationsDelegates,
     this.localeListResolutionCallback,
@@ -91,7 +91,7 @@ class CNApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
-    this.color,
+    this.accentColor,
     this.locale,
     this.localizationsDelegates,
     this.localeListResolutionCallback,
@@ -119,6 +119,9 @@ class CNApp extends StatefulWidget {
        onUnknownRoute = null,
        routes = null,
        initialRoute = null;
+
+  /// The accent color to be used throughout the app.
+  final c.CupertinoDynamicColor? accentColor;
 
   /// {@macro flutter.widgets.widgetsApp.actions}
   /// {@tool snippet}
@@ -164,9 +167,6 @@ class CNApp extends StatefulWidget {
 
   /// Turns on checkerboarding of raster cache images.
   final bool checkerboardRasterCacheImages;
-
-  /// {@macro flutter.widgets.widgetsApp.color}
-  final Color? color;
 
   /// The style used if [themeMode] is [ThemeMode.dark]
   final CNThemeData? darkTheme;
@@ -356,7 +356,8 @@ class _CNAppState extends State<CNApp> {
       builder: (context, isMainWindow) {
         debugPrint('CNApp: isMainWindow: $isMainWindow');
         return CNAccentColorBuilder(
-          builder: (context, accentColor) {
+          builder: (context, a) {
+            final accentColor = widget.accentColor ?? a.accent;
             debugPrint('CNApp: accentColor: $accentColor');
             final mode = widget.themeMode ?? ThemeMode.system;
             final platformBrightness = MediaQuery.platformBrightnessOf(context);
@@ -393,7 +394,7 @@ class _CNAppState extends State<CNApp> {
   }
 
   Widget _buildMacosApp(BuildContext context) {
-    final defaultColor = widget.color ?? c.CupertinoColors.systemBlue;
+    final defaultColor = widget.accentColor ?? CNColors.blue;
     if (_usesRouter) {
       return c.CupertinoApp.router(
         key: GlobalObjectKey(this),

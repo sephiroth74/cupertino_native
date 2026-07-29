@@ -74,15 +74,7 @@ class _MainWindowStateListenerNSWindowDelegate extends NSWindowDelegate {
     onMainWindowChanged?.call(true);
   }
 
-  @override
-  void windowDidEndLiveResize() {
-    super.windowDidEndLiveResize();
-  }
 
-  @override
-  void windowDidMove() {
-    super.windowDidMove();
-  }
 
   @override
   void windowDidResignMain() {
@@ -91,8 +83,4 @@ class _MainWindowStateListenerNSWindowDelegate extends NSWindowDelegate {
     onMainWindowChanged?.call(false);
   }
 
-  @override
-  void windowDidResize() {
-    super.windowDidResize();
-  }
 }

@@ -108,7 +108,12 @@ class _CNButton2State extends CNWidgetState<CNButton> {
       'enabled': enabled,
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+      tintFallback: CNTheme.of(context).buttonTheme.tintColor,
+    );
     return payload;
   }
 

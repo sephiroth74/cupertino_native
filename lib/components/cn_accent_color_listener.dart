@@ -6,7 +6,6 @@ import 'package:cupertino_native/style/cn_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 /// Known macOS system accent colors.
 enum CNAccentColorName { blue, purple, pink, red, orange, yellow, green, graphite }

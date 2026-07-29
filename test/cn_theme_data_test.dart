@@ -1,4 +1,5 @@
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native/theme/cn_toggle_theme_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,7 +21,7 @@ void main() {
       final base = CNThemeData.light(accentColor: CNColors.accentColors[0], isMainWindow: true);
       final updated = base.copyWith(primaryColor: CupertinoColors.systemGreen.color);
 
-      expect(updated.primaryColor, CupertinoColors.systemGreen.color);
+      expect(updated.accentColor, CupertinoColors.systemGreen.color);
       expect(updated.secondaryColor, base.secondaryColor);
       expect(updated.brightness, base.brightness);
       expect(updated.toggleTheme.tint, base.toggleTheme.tint);
@@ -40,7 +41,7 @@ void main() {
       final merged = light.merge(dark);
 
       expect(merged.brightness, Brightness.dark);
-      expect(merged.primaryColor, dark.primaryColor);
+      expect(merged.accentColor, dark.accentColor);
       expect(merged.materialThick.opacity, dark.materialThick.opacity);
     });
 
@@ -49,7 +50,7 @@ void main() {
       final b = CNThemeData.dark(accentColor: CNColors.accentColors[0], isMainWindow: true);
       final lerped = CNThemeData.lerp(a, b, 0.5);
 
-      expect(lerped.primaryColor, Color.lerp(a.primaryColor, b.primaryColor, 0.5));
+      expect(lerped.accentColor, Color.lerp(a.accentColor, b.accentColor, 0.5));
       expect(lerped.typography.body.fontSize, closeTo(13, 0.001));
       expect(lerped.brightness, Brightness.dark);
     });

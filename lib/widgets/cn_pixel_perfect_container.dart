@@ -118,17 +118,17 @@ class _CNPixelPerfectContainerState extends State<CNPixelPerfectContainer> with 
   double _snapDy = 0;
 
   @override
-  void didChangeMetrics() {
-    _queueProbe();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // The window frame is measured asynchronously by CNApp, so it arrives
     // after the first layout. Re-probe whenever it (or any other dependency)
     // changes so the snap re-converges to the real window origin instead of
     // staying aligned to the initial WindowFrame.zero.
+    _queueProbe();
+  }
+
+  @override
+  void didChangeMetrics() {
     _queueProbe();
   }
 

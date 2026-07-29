@@ -4,12 +4,6 @@ import 'package:flutter/widgets.dart';
 
 import '../theme/cn_theme.dart';
 
-/// A preferred-size widget that can tell whether it fully obstructs content.
-abstract class CNObstructingPreferredSizeWidget implements PreferredSizeWidget {
-  /// Whether this widget fully obstructs content behind it.
-  bool shouldFullyObstruct(BuildContext context);
-}
-
 /// A Cupertino-Native navigation bar replacement.
 class CNNavigationBar extends StatelessWidget implements CNObstructingPreferredSizeWidget {
   /// Creates a navigation bar.
@@ -129,12 +123,18 @@ class CNNavigationBarBackButton extends StatelessWidget {
         children: [
           Text(
             '‹',
-            style: TextStyle(color: theme.primaryColor, fontSize: 22, fontWeight: FontWeight.w500),
+            style: TextStyle(color: theme.accentColor, fontSize: 22, fontWeight: FontWeight.w500),
           ),
           const SizedBox(width: 4),
-          Text(label, style: TextStyle(color: theme.primaryColor, fontSize: 15)),
+          Text(label, style: TextStyle(color: theme.accentColor, fontSize: 15)),
         ],
       ),
     );
   }
+}
+
+/// A preferred-size widget that can tell whether it fully obstructs content.
+abstract class CNObstructingPreferredSizeWidget implements PreferredSizeWidget {
+  /// Whether this widget fully obstructs content behind it.
+  bool shouldFullyObstruct(BuildContext context);
 }

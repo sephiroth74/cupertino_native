@@ -33,7 +33,7 @@ class ThemeDemoPage extends StatelessWidget {
               CupertinoListSection.insetGrouped(
                 header: const Text('Semantic Colors'),
                 children: [
-                  _ColorRow(label: 'Primary', color: theme.primaryColor),
+                  _ColorRow(label: 'Primary', color: theme.accentColor),
                   _ColorRow(label: 'Secondary', color: theme.secondaryColor),
                   _ColorRow(label: 'Destructive', color: theme.destructiveColor),
                   _ColorRow(label: 'Canvas', color: theme.canvasColor),
@@ -74,23 +74,8 @@ class ThemeDemoPage extends StatelessWidget {
               ),
             ],
           );
-        }
+        },
       ),
-    );
-  }
-}
-
-class _StyleRow extends StatelessWidget {
-  const _StyleRow({required this.label, required this.style});
-
-  final String label;
-  final TextStyle style;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Text(label, style: style),
     );
   }
 }
@@ -135,6 +120,21 @@ class _MaterialRow extends StatelessWidget {
           Text('opacity ${material.opacity.toStringAsFixed(2)}'),
         ],
       ),
+    );
+  }
+}
+
+class _StyleRow extends StatelessWidget {
+  const _StyleRow({required this.label, required this.style});
+
+  final String label;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Text(label, style: style),
     );
   }
 }

@@ -1,5 +1,4 @@
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ContextMenuDemoPage extends StatefulWidget {

@@ -23,6 +23,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
   bool isProgressRunning = false;
   double labelIconToTitleSpacing = 8;
   double labelReservedIconWidth = 2;
+  FlutterPixelGeometry? lastGeometry;
   int progressMax = 100;
   int progressValue = 0;
   CNProgressViewStyle progressViewStyle = CNProgressViewStyle.linear;
@@ -30,7 +31,6 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
 
   // ignore: unused_field
   String _last = 'None';
-  FlutterPixelGeometry? lastGeometry;
 
   void startProgress() {
     progressValue = 0;
