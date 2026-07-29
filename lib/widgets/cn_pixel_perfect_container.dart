@@ -123,6 +123,16 @@ class _CNPixelPerfectContainerState extends State<CNPixelPerfectContainer> with 
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // The window frame is measured asynchronously by CNApp, so it arrives
+    // after the first layout. Re-probe whenever it (or any other dependency)
+    // changes so the snap re-converges to the real window origin instead of
+    // staying aligned to the initial WindowFrame.zero.
+    _queueProbe();
+  }
+
+  @override
   void didUpdateWidget(covariant CNPixelPerfectContainer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.enabled != widget.enabled) {
@@ -256,6 +266,11 @@ class _CNPixelPerfectContainerState extends State<CNPixelPerfectContainer> with 
 
   @override
   Widget build(BuildContext context) {
+    // Register a dependency on the window frame so this widget rebuilds (and
+    // re-probes) when CNApp reports a new frame. Without this the async first
+    // frame measurement never reaches the snap logic and the child stays
+    // misaligned (blurry) until an unrelated rebuild happens.
+    CNWindowGeometryScope.of(context);
     _queueProbe();
     return Transform.translate(
       offset: Offset(_snapDx, _snapDy),

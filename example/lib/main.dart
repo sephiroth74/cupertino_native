@@ -32,9 +32,9 @@ import 'demos/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await CNAccentColorListener.load();
+  await initializeWindowManager();
   await WindowManipulator.initialize(enableWindowDelegate: true);
-  // await initializeWindowManager();
+  await CNAccentColorListener.load();
   runApp(const MyApp());
 }
 

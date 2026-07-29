@@ -1,3 +1,5 @@
+import Foundation
+
 enum DeserializerUtils {
     static func deepMerge(_ base: [String: Any], with patch: [String: Any]) -> [String: Any] {
         var result = base

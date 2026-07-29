@@ -30,6 +30,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
 
   // ignore: unused_field
   String _last = 'None';
+  FlutterPixelGeometry? lastGeometry;
 
   void startProgress() {
     progressValue = 0;
@@ -80,6 +81,12 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                       children: [
                         CNPixelPerfectContainer(
                           adjustPosition: true,
+                          onGeometryChanged: (geometry) {
+                            debugPrint('PixelPerfectContainer geometry changed: $geometry');
+                            setState(() {
+                              lastGeometry = geometry;
+                            });
+                          },
                           child: CNButton(
                             onPressed: isEnabled ? () => _set('Default') : null,
                             buttonStyle: buttonStyle,
@@ -173,6 +180,30 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                             ],
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        if (lastGeometry != null) ...[
+                          DefaultTextStyle(
+                            style: CNTheme.of(context).typography.caption1,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Last geometry: ${lastGeometry!.x}, ${lastGeometry!.y}, ${lastGeometry!.width}, ${lastGeometry!.height}',
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Physical geometry: ${lastGeometry!.physicalX}, ${lastGeometry!.physicalY}, ${lastGeometry!.physicalWidth}, ${lastGeometry!.physicalHeight}',
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Window geometry: ${lastGeometry!.windowX}, ${lastGeometry!.windowY}, ${lastGeometry!.windowWidth}, ${lastGeometry!.windowHeight}',
+                                ),
+                                const SizedBox(height: 4),
+                                Text('Device pixel ratio: ${lastGeometry!.devicePixelRatio}'),
+                              ],
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

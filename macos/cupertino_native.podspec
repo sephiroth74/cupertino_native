@@ -14,13 +14,13 @@ A new Flutter plugin project.
   s.author           = { 'Alessandro Crugnola' => 'alessandro.crugnola@gmail.com' }
 
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'cupertino_native/Sources/cupertino_native/**/*.swift'
 
-  # If your plugin requires a privacy manifest, for example if it collects user
-  # data, update the PrivacyInfo.xcprivacy file to describe your plugin's
-  # privacy impact, and then uncomment this line. For more information,
-  # see https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
-  # s.resource_bundles = {'cupertino_native_privacy' => ['Resources/PrivacyInfo.xcprivacy']}
+  # Privacy manifest. Shared with the Swift Package Manager layout under
+  # cupertino_native/Sources/cupertino_native/Resources.
+  # For more information, see
+  # https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
+  s.resource_bundles = {'cupertino_native_privacy' => ['cupertino_native/Sources/cupertino_native/Resources/PrivacyInfo.xcprivacy']}
 
   s.dependency 'FlutterMacOS'
 
