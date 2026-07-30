@@ -42,6 +42,7 @@ export 'components/group_box.dart';
 export 'cupertino_native_method_channel.dart';
 export 'cupertino_native_platform_interface.dart';
 export 'extensions/box_constraints.dart';
+export 'extensions/cn_dynamic_color.dart';
 export 'extensions/color_ext.dart';
 export 'model/control_size.dart';
 export 'style/button_style.dart';
