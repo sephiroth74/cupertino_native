@@ -452,11 +452,11 @@ class _CNAppState extends State<CNApp> {
             if (useDarkTheme) {
               theme =
                   widget.darkTheme ??
-                  CNThemeData.dark(userAccentColor: widget.accentColor, systemAccentColor: a.accent, isMainWindow: isMainWindow);
+                  CNThemeData.dark(userAccentColor: widget.accentColor, systemAccentColor: a.color, isMainWindow: isMainWindow);
             } else {
               theme =
                   widget.lightTheme ??
-                  CNThemeData.light(userAccentColor: widget.accentColor, systemAccentColor: a.accent, isMainWindow: isMainWindow);
+                  CNThemeData.light(userAccentColor: widget.accentColor, systemAccentColor: a.color, isMainWindow: isMainWindow);
             }
 
             return CNTheme(

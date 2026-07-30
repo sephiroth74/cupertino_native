@@ -151,19 +151,14 @@ abstract final class CNColors {
 
   /// All accent colors with their resolved names.
   static const List<CNAccentColor> accentColors = [
-    CNAccentColor(accent: red, name: CNAccentColorName.red),
-    CNAccentColor(accent: orange, name: CNAccentColorName.orange),
-    CNAccentColor(accent: yellow, name: CNAccentColorName.yellow),
-    CNAccentColor(accent: green, name: CNAccentColorName.green),
-    CNAccentColor(accent: mint, name: CNAccentColorName.green),
-    CNAccentColor(accent: teal, name: CNAccentColorName.green),
-    CNAccentColor(accent: cyan, name: CNAccentColorName.blue),
-    CNAccentColor(accent: blue, name: CNAccentColorName.blue),
-    CNAccentColor(accent: indigo, name: CNAccentColorName.blue),
-    CNAccentColor(accent: purple, name: CNAccentColorName.purple),
-    CNAccentColor(accent: pink, name: CNAccentColorName.pink),
-    CNAccentColor(accent: brown, name: CNAccentColorName.graphite),
-    CNAccentColor(accent: gray, name: CNAccentColorName.graphite),
+    CNAccentColor.red,
+    CNAccentColor.orange,
+    CNAccentColor.yellow,
+    CNAccentColor.green,
+    CNAccentColor.graphite,
+    CNAccentColor.blue,
+    CNAccentColor.purple,
+    CNAccentColor.pink,
   ];
 
   /// All fill levels in order from most opaque to least opaque.

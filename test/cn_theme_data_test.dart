@@ -6,8 +6,8 @@ void main() {
   group('CNThemeData', () {
     test('light factory provides expected defaults', () {
       final theme = CNThemeData.light(
-        userAccentColor: CNColors.accentColors[0].accent,
-        systemAccentColor: CNColors.accentColors[0].accent,
+        userAccentColor: CNColors.accentColors[0].color,
+        systemAccentColor: CNColors.accentColors[0].color,
         isMainWindow: true,
       );
 
@@ -22,11 +22,11 @@ void main() {
 
     test('copyWith overrides selected fields', () {
       final base = CNThemeData.light(
-        userAccentColor: CNColors.accentColors[0].accent,
-        systemAccentColor: CNColors.accentColors[0].accent,
+        userAccentColor: CNColors.accentColors[0].color,
+        systemAccentColor: CNColors.accentColors[0].color,
         isMainWindow: true,
       );
-      final updated = base.copyWith(accentColor: CupertinoColors.systemGreen.color);
+      final updated = base.copyWith(userAccentColor: CupertinoColors.systemGreen.color);
 
       expect(updated.userAccentColor, CupertinoColors.systemGreen.color);
       expect(updated.secondaryColor, base.secondaryColor);
@@ -36,8 +36,8 @@ void main() {
 
     test('toggle theme can override tint independently', () {
       final base = CNThemeData.light(
-        userAccentColor: CNColors.accentColors[0].accent,
-        systemAccentColor: CNColors.accentColors[0].accent,
+        userAccentColor: CNColors.accentColors[0].color,
+        systemAccentColor: CNColors.accentColors[0].color,
         isMainWindow: true,
       );
       final updated = base.copyWith(toggleTheme: const CNToggleThemeData(tint: Color(0xFF123456)));
@@ -48,13 +48,13 @@ void main() {
 
     test('merge overrides with other theme values', () {
       final light = CNThemeData.light(
-        userAccentColor: CNColors.accentColors[0].accent,
-        systemAccentColor: CNColors.accentColors[0].accent,
+        userAccentColor: CNColors.accentColors[0].color,
+        systemAccentColor: CNColors.accentColors[0].color,
         isMainWindow: true,
       );
       final dark = CNThemeData.dark(
-        userAccentColor: CNColors.accentColors[0].accent,
-        systemAccentColor: CNColors.accentColors[0].accent,
+        userAccentColor: CNColors.accentColors[0].color,
+        systemAccentColor: CNColors.accentColors[0].color,
         isMainWindow: true,
       );
       final merged = light.merge(dark);
@@ -66,13 +66,13 @@ void main() {
 
     test('lerp interpolates colors and typography', () {
       final a = CNThemeData.light(
-        userAccentColor: CNColors.accentColors[0].accent,
-        systemAccentColor: CNColors.accentColors[0].accent,
+        userAccentColor: CNColors.accentColors[0].color,
+        systemAccentColor: CNColors.accentColors[0].color,
         isMainWindow: true,
       );
       final b = CNThemeData.dark(
-        userAccentColor: CNColors.accentColors[0].accent,
-        systemAccentColor: CNColors.accentColors[0].accent,
+        userAccentColor: CNColors.accentColors[0].color,
+        systemAccentColor: CNColors.accentColors[0].color,
         isMainWindow: true,
       );
       final lerped = CNThemeData.lerp(a, b, 0.5);
