@@ -26,6 +26,7 @@ import 'demos/cn_secure_field_demo.dart';
 import 'demos/cn_slider_demo.dart';
 import 'demos/cn_stepper_demo.dart';
 import 'demos/cn_text_demo.dart';
+import 'demos/cn_text_editor_demo.dart';
 import 'demos/cn_text_field_demo.dart';
 import 'demos/cn_toggle_demo.dart';
 import 'demos/theme.dart';
@@ -61,6 +62,7 @@ const _entries = <_DemoEntry>[
   _DemoEntry('CNStepper', 'plusminus', StepperDemoPage()),
   _DemoEntry('CNText', 'text.viewfinder', TextDemoPage()),
   _DemoEntry('CNTextField', 'character.cursor.ibeam', TextFieldDemoPage()),
+  _DemoEntry('CNTextEditor', 'text.alignleft', TextEditorDemoPage()),
   _DemoEntry('CNToggle', 'switch.2', ToggleDemo()),
   _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
 ];

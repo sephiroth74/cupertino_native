@@ -34,6 +34,7 @@ export 'components/cn_segmented_control.dart';
 export 'components/cn_slider.dart';
 export 'components/cn_stepper.dart';
 export 'components/cn_tab_view.dart';
+export 'components/cn_text_editor.dart';
 export 'components/cn_text_field.dart';
 export 'components/cn_text.dart';
 export 'components/cn_toggle.dart';
