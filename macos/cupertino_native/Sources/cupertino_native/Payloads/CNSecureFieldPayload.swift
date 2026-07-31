@@ -19,6 +19,7 @@ struct CNSecureFieldPayload: CNSharedPayloadFields {
     var borderColor: Int?
     var borderWidth: Double?
     var autofocus: Bool
+    var maxLength: Int?
 
     init(viewId: String) {
         viewDebugId = viewId
@@ -38,6 +39,7 @@ struct CNSecureFieldPayload: CNSharedPayloadFields {
         borderColor = nil
         borderWidth = nil
         autofocus = false
+        maxLength = nil
     }
 
     init?(channel: [String: Any], viewId: Int64) {
@@ -83,6 +85,10 @@ struct CNSecureFieldPayload: CNSharedPayloadFields {
 
         if let value = channel["autofocus"] as? Bool {
             autofocus = value
+        }
+
+        if channel.keys.contains("maxLength") {
+            maxLength = CNChannelDeserialization.decodeInt(channel["maxLength"])
         }
     }
 

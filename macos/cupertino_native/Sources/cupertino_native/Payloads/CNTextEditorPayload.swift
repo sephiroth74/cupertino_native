@@ -20,6 +20,7 @@ struct CNTextEditorPayload: CNSharedPayloadFields {
     var borderWidth: Double?
     var autofocus: Bool
     var editable: Bool
+    var maxLength: Int?
 
     init(viewId: String) {
         viewDebugId = viewId
@@ -38,6 +39,7 @@ struct CNTextEditorPayload: CNSharedPayloadFields {
         borderWidth = nil
         autofocus = false
         editable = true
+        maxLength = nil
     }
 
     init?(channel: [String: Any], viewId: Int64) {
@@ -79,6 +81,10 @@ struct CNTextEditorPayload: CNSharedPayloadFields {
 
         if let value = channel["editable"] as? Bool {
             editable = value
+        }
+
+        if channel.keys.contains("maxLength") {
+            maxLength = CNChannelDeserialization.decodeInt(channel["maxLength"])
         }
     }
 

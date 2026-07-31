@@ -30,7 +30,8 @@ enum CNTextField2Deserializer {
 
             let textBinding = Binding<String>(
                 get: { model.payload.text },
-                set: { newValue in
+                set: { rawValue in
+                    let newValue = CNTextTruncation.truncate(rawValue, maxLength: model.payload.maxLength)
                     guard newValue != model.payload.text else { return }
                     model.payload.text = newValue
                     onTextChanged?(newValue)
@@ -148,6 +149,11 @@ enum CNTextField2Deserializer {
             let combinedTextBinding = Binding<String>(
                 get: { localText },
                 set: { newValue in
+                    // Store the raw value so the state genuinely transitions.
+                    // Truncation happens in onChange below: an NSTextField-backed
+                    // TextField only reverts its visible buffer on a real state
+                    // change, so truncating here (20 -> 20) would leave the extra
+                    // character on screen until the next edit/submit.
                     localText = newValue
                 },
             )
@@ -163,9 +169,16 @@ enum CNTextField2Deserializer {
             }
             .focused($isFocused)
             .onChange(of: localText) { _, newText in
-                guard newText != model.payload.text else { return }
+                let truncated = CNTextTruncation.truncate(newText, maxLength: model.payload.maxLength)
+                if truncated != newText {
+                    // Reject the overflow. This truncated -> localText transition
+                    // forces SwiftUI to re-render the field with the capped value.
+                    localText = truncated
+                    return
+                }
+                guard truncated != model.payload.text else { return }
                 // textBinding setter updates model.payload.text AND calls onTextChanged
-                textBinding.wrappedValue = newText
+                textBinding.wrappedValue = truncated
             }
             .onChange(of: selection) { _, newSelection in
                 reportSelection(newSelection)

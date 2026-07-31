@@ -21,16 +21,18 @@ enum CNSecureFieldDeserializer {
         let onSubmitted: ((String) -> Void)?
         let onSizeChanged: ((CGSize) -> Void)?
         @FocusState private var isFocused: Bool
+        @State private var localText: String = ""
 
         var body: some View {
             let payload = model.payload
 
             let textBinding = Binding<String>(
-                get: { model.payload.text },
+                get: { localText },
                 set: { newValue in
-                    guard newValue != model.payload.text else { return }
-                    model.payload.text = newValue
-                    onTextChanged?(newValue)
+                    // Store raw; truncation is enforced in onChange so the state
+                    // genuinely transitions and the NSSecureTextField re-renders
+                    // the capped value (it does not revert on a no-op setter).
+                    localText = newValue
                 },
             )
 
@@ -40,16 +42,39 @@ enum CNSecureFieldDeserializer {
             var view = if let promptView {
                 AnyView(
                     SecureField(placeholder, text: textBinding, prompt: promptView)
-                        .onSubmit { onSubmitted?(model.payload.text) }
+                        .onSubmit { onSubmitted?(localText) }
                         .focused($isFocused),
                 )
             } else {
                 AnyView(
                     SecureField(placeholder, text: textBinding)
-                        .onSubmit { onSubmitted?(model.payload.text) }
+                        .onSubmit { onSubmitted?(localText) }
                         .focused($isFocused),
                 )
             }
+
+            view = AnyView(
+                view
+                    .onChange(of: localText) { _, newText in
+                        let truncated = CNTextTruncation.truncate(newText, maxLength: model.payload.maxLength)
+                        if truncated != newText {
+                            localText = truncated
+                            return
+                        }
+                        guard truncated != model.payload.text else { return }
+                        model.payload.text = truncated
+                        onTextChanged?(truncated)
+                    }
+                    .onChange(of: model.payload.text) { _, newText in
+                        // Dart pushed new text via applyPatch.
+                        if newText != localText {
+                            localText = newText
+                        }
+                    }
+                    .onAppear {
+                        localText = model.payload.text
+                    },
+            )
 
             view = CNViewModifierApplicator.applyFont(payload.font, to: view)
 

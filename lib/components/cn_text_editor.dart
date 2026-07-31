@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:cupertino_native/channel/params.dart';
+import 'package:cupertino_native/components/cn_text_input_formatting.dart';
 import 'package:cupertino_native/components/cn_widget.dart';
 import 'package:cupertino_native/components/cn_widget_state.dart';
 import 'package:cupertino_native/cupertino_native.dart';
@@ -28,6 +29,8 @@ class CNTextEditor extends CNWidget {
     this.borderWidth,
     this.autofocus = false,
     this.editable = true,
+    this.maxLength,
+    this.inputFormatters,
     this.onChanged,
     this.constraints,
     this.tint,
@@ -55,6 +58,16 @@ class CNTextEditor extends CNWidget {
 
   /// Font descriptor applied to the editor's text.
   final CNFont? font;
+
+  /// Optional formatters applied to text reported by the native editor,
+  /// mirroring [EditableText.inputFormatters]. Applied on the Dart side after
+  /// the native [maxLength] hard cap.
+  final List<TextInputFormatter>? inputFormatters;
+
+  /// Hard limit on the number of characters, enforced natively (by grapheme
+  /// cluster). Prefer this over a [LengthLimitingTextInputFormatter] as it
+  /// avoids a Dart round-trip. When null, no native limit is applied.
+  final int? maxLength;
 
   /// Called when the text changes from user input.
   final ValueChanged<String>? onChanged;
@@ -137,12 +150,24 @@ class _CNTextEditorState extends CNWidgetState<CNTextEditor> {
   Future<void> onNativeMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'textChanged':
-        final text = call.arguments as String? ?? '';
-        logDebug('textChanged: "$text" (len=${text.length})');
+        final rawText = call.arguments as String? ?? '';
+        final formatted = applyCNInputFormatters(
+          newText: rawText,
+          oldValue: _controller.value,
+          formatters: widget.inputFormatters,
+        );
+        logDebug('textChanged: raw="$rawText" formatted="${formatted.text}" (len=${formatted.text.length})');
         _isUpdatingFromNative = true;
-        _controller.text = text;
+        // When the formatter did not alter the text, preserve the native
+        // selection (a separate selectionChanged follows); only override the
+        // caret when the text actually changed.
+        if (formatted.text == rawText) {
+          _controller.text = rawText;
+        } else {
+          _controller.value = formatted;
+        }
         _isUpdatingFromNative = false;
-        widget.onChanged?.call(text);
+        widget.onChanged?.call(_controller.text);
       case 'selectionChanged':
         final args = call.arguments as Map?;
         final base = (args?['base'] as num?)?.toInt();
@@ -169,6 +194,7 @@ class _CNTextEditorState extends CNWidgetState<CNTextEditor> {
       'borderWidth': widget.borderWidth,
       'autofocus': widget.autofocus,
       'editable': widget.editable,
+      'maxLength': widget.maxLength,
     };
 
     widget.writeSharedFields(

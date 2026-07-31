@@ -27,7 +27,8 @@ enum CNTextEditorDeserializer {
 
             let textBinding = Binding<String>(
                 get: { model.payload.text },
-                set: { newValue in
+                set: { rawValue in
+                    let newValue = CNTextTruncation.truncate(rawValue, maxLength: model.payload.maxLength)
                     guard newValue != model.payload.text else { return }
                     model.payload.text = newValue
                     onTextChanged?(newValue)
@@ -114,6 +115,8 @@ enum CNTextEditorDeserializer {
             let combinedTextBinding = Binding<String>(
                 get: { localText },
                 set: { newValue in
+                    // Store raw; truncation is enforced in onChange so the state
+                    // genuinely transitions and SwiftUI re-renders the capped value.
                     localText = newValue
                 },
             )
@@ -121,9 +124,14 @@ enum CNTextEditorDeserializer {
             TextEditor(text: combinedTextBinding, selection: $selection)
                 .focused($isFocused)
                 .onChange(of: localText) { _, newText in
-                    guard newText != model.payload.text else { return }
+                    let truncated = CNTextTruncation.truncate(newText, maxLength: model.payload.maxLength)
+                    if truncated != newText {
+                        localText = truncated
+                        return
+                    }
+                    guard truncated != model.payload.text else { return }
                     // textBinding setter updates model.payload.text AND calls onTextChanged
-                    textBinding.wrappedValue = newText
+                    textBinding.wrappedValue = truncated
                 }
                 .onChange(of: selection) { _, newSelection in
                     reportSelection(newSelection)

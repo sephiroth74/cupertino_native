@@ -21,6 +21,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
   CNFont? font = CNFont.system(CNFontSize.points(_kFontSize));
   double fontSize = _kFontSize;
   Color? foregroundColor;
+  bool limitLength = false;
   String selectionInfo = '';
   CNTextFieldStyle textFieldStyle = CNTextFieldStyle.automatic;
   Color? tintColor;
@@ -76,6 +77,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                       debugLog: _kDebugLog,
                       textFieldStyle: textFieldStyle,
                       controller: controller,
+                      maxLength: limitLength ? 10 : null,
                       borderColor: borderColor,
                       borderWidth: borderWidth,
                       foregroundColor: foregroundColor,
@@ -99,6 +101,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
             RightSideOptionContainer(
               title: 'Options',
               options: {
+                'Max 10 chars': CNToggle(isOn: limitLength, onChanged: (value) => setState(() => limitLength = value)),
                 'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
                 'Style': CNPicker(
                   selection: textFieldStyle.name,

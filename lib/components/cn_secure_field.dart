@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:cupertino_native/channel/params.dart';
+import 'package:cupertino_native/components/cn_text_input_formatting.dart';
 import 'package:cupertino_native/components/cn_widget.dart';
 import 'package:cupertino_native/components/cn_widget_state.dart';
 import 'package:cupertino_native/cupertino_native.dart';
@@ -27,6 +28,8 @@ class CNSecureField extends CNWidget {
     this.borderColor,
     this.borderWidth,
     this.autofocus = false,
+    this.maxLength,
+    this.inputFormatters,
     this.onChanged,
     this.onSubmitted,
     this.shrink = true,
@@ -55,6 +58,16 @@ class CNSecureField extends CNWidget {
 
   /// Font descriptor.
   final CNFont? font;
+
+  /// Optional formatters applied to text reported by the native field,
+  /// mirroring [EditableText.inputFormatters]. Applied on the Dart side after
+  /// the native [maxLength] hard cap.
+  final List<TextInputFormatter>? inputFormatters;
+
+  /// Hard limit on the number of characters, enforced natively (by grapheme
+  /// cluster). Prefer this over a [LengthLimitingTextInputFormatter] as it
+  /// avoids a Dart round-trip. When null, no native limit is applied.
+  final int? maxLength;
 
   /// Called when the text changes from user input.
   final ValueChanged<String>? onChanged;
@@ -147,11 +160,20 @@ class _CNSecureFieldState extends CNWidgetState<CNSecureField> {
   Future<void> onNativeMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'textChanged':
-        final text = call.arguments as String? ?? '';
+        final rawText = call.arguments as String? ?? '';
+        final formatted = applyCNInputFormatters(
+          newText: rawText,
+          oldValue: _controller.value,
+          formatters: widget.inputFormatters,
+        );
         _isUpdatingFromNative = true;
-        _controller.text = text;
+        if (formatted.text == rawText) {
+          _controller.text = rawText;
+        } else {
+          _controller.value = formatted;
+        }
         _isUpdatingFromNative = false;
-        widget.onChanged?.call(text);
+        widget.onChanged?.call(_controller.text);
       case 'submitted':
         final text = call.arguments as String? ?? _controller.text;
         widget.onSubmitted?.call(text);
@@ -170,6 +192,7 @@ class _CNSecureFieldState extends CNWidgetState<CNSecureField> {
       'borderColor': resolveColorToArgb(widget.borderColor, context),
       'borderWidth': widget.borderWidth,
       'autofocus': widget.autofocus,
+      'maxLength': widget.maxLength,
     };
 
     widget.writeSharedFields(

@@ -2,6 +2,7 @@ import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 const _kDebugLog = false;
 const _kFontSize = 16.0;
@@ -24,6 +25,8 @@ class _TextEditorDemoPageState extends State<TextEditorDemoPage> {
   CNFont? font = CNFont.system(CNFontSize.points(_kFontSize));
   double fontSize = _kFontSize;
   Color? foregroundColor;
+  bool limitLength = false;
+  bool lowercaseOnly = false;
   String selectionInfo = '';
   Color? tintColor;
 
@@ -72,6 +75,14 @@ class _TextEditorDemoPageState extends State<TextEditorDemoPage> {
                         debugLog: _kDebugLog,
                         controller: controller,
                         editable: editable,
+                        maxLength: limitLength ? 20 : null,
+                        inputFormatters: lowercaseOnly
+                            ? [
+                                TextInputFormatter.withFunction(
+                                  (oldValue, newValue) => newValue.copyWith(text: newValue.text.toLowerCase()),
+                                ),
+                              ]
+                            : null,
                         borderColor: borderColor,
                         borderWidth: borderWidth,
                         foregroundColor: foregroundColor,
@@ -92,6 +103,8 @@ class _TextEditorDemoPageState extends State<TextEditorDemoPage> {
               title: 'Options',
               options: {
                 'Editable': CNToggle(isOn: editable, onChanged: (value) => setState(() => editable = value)),
+                'Max 20 chars': CNToggle(isOn: limitLength, onChanged: (value) => setState(() => limitLength = value)),
+                'Lowercase only': CNToggle(isOn: lowercaseOnly, onChanged: (value) => setState(() => lowercaseOnly = value)),
                 'Font': FontPicker(
                   value: font,
                   fonts: kAvailableFonts,
