@@ -173,6 +173,9 @@ class CNSegmentedControl extends CNWidget {
 }
 
 class _CNSegmentedControlState extends CNWidgetState<CNSegmentedControl> {
+  @override
+  Size computeDefaultSize() => const Size(200, 24);
+
   // Il segmented control è interattivo: senza questi recognizer i tap non
   // raggiungono la view AppKit quando il widget è dentro uno scrollable (la
   // drag dello scroll vince l'arena dei gesti).
@@ -180,9 +183,6 @@ class _CNSegmentedControlState extends CNWidgetState<CNSegmentedControl> {
   Set<Factory<OneSequenceGestureRecognizer>>? get gestureRecognizers => {
     Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
   };
-
-  @override
-  Size computeDefaultSize() => const Size(200, 24);
 
   @override
   Future<dynamic> onNativeMethodCall(MethodCall call) async {

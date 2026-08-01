@@ -18,6 +18,7 @@ class CNSidebar {
     this.padding = EdgeInsets.zero,
     this.windowBreakpoint = 556.0,
     this.shownByDefault = true,
+    this.separatorColor,
     this.material = NSVisualEffectViewMaterial.sidebar,
   }) : dragClosedBuffer = dragClosedBuffer ?? minWidth / 2;
 
@@ -25,7 +26,7 @@ class CNSidebar {
   final Color? backgroundColor;
 
   /// The builder function that constructs the sidebar content.
-  final ScrollableWidgetBuilder builder;
+  final WidgetBuilder builder;
 
   /// Whether dragging the sidebar below its minimum width closes it.
   final bool dragClosed;
@@ -50,6 +51,9 @@ class CNSidebar {
 
   /// Padding applied inside the sidebar.
   final EdgeInsets padding;
+
+  /// Optional color for the separator line between the sidebar and the main content.
+  final Color? separatorColor;
 
   /// Whether the sidebar is shown by default when the window opens.
   final bool shownByDefault;

@@ -35,16 +35,19 @@ class _BackObserver extends NavigatorObserver {
 
   final ValueChanged<bool> onChanged;
 
-  void _sync() => onChanged(navigator?.canPop() ?? false);
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => _sync();
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => _sync();
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => _sync();
+
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) => _sync();
+
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) => _sync();
+
+  void _sync() => onChanged(navigator?.canPop() ?? false);
 }
 
 /// Demonstrates route-based navigation with [CNPageRoute].
@@ -69,8 +72,8 @@ class NavigationDemoPage extends StatefulWidget {
 }
 
 class _NavigationDemoPageState extends State<NavigationDemoPage> {
-  late final _BackObserver _observer = _BackObserver(_onStackChanged);
   NavigationController? _controller;
+  late final _BackObserver _observer = _BackObserver(_onStackChanged);
 
   @override
   void didChangeDependencies() {

@@ -78,14 +78,6 @@ class CNStepper extends CNWidget {
 }
 
 class _CNStepperState extends CNWidgetState<CNStepper> {
-  // Lo stepper è interattivo: senza questi recognizer i tap non raggiungono la
-  // view AppKit quando il widget è dentro uno scrollable (la drag dello scroll
-  // vince l'arena dei gesti).
-  @override
-  Set<Factory<OneSequenceGestureRecognizer>>? get gestureRecognizers => {
-    Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-  };
-
   @override
   Size computeDefaultSize() => Size(_defaultWidth(), _defaultHeight());
 
@@ -105,6 +97,14 @@ class _CNStepperState extends CNWidgetState<CNStepper> {
     // resolvedHeight = parentConstraints.constrainHeight(resolvedHeight);
     return resolvedHeight;
   }
+
+  // Lo stepper è interattivo: senza questi recognizer i tap non raggiungono la
+  // view AppKit quando il widget è dentro uno scrollable (la drag dello scroll
+  // vince l'arena dei gesti).
+  @override
+  Set<Factory<OneSequenceGestureRecognizer>>? get gestureRecognizers => {
+    Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+  };
 
   @override
   Future<void> onNativeMethodCall(MethodCall call) async {

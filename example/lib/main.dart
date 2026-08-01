@@ -186,10 +186,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               state: NSVisualEffectViewState.followsWindowActiveState,
               backgroundColor: CNTheme.of(context).canvasColor.withAlpha(1),
               sidebar: CNSidebar(
-                builder: (context, scrollController) {
+                builder: (context) {
                   return _SideBar(
                     selectedIndex: selectedIndex,
-                    scrollController: scrollController,
                     searchQuery: searchQuery,
                     onItemSelected: (index) {
                       setState(() {
@@ -245,9 +244,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     ],
                   );
                 },
-                expandedBuilder: (context, scrollController) {
+                expandedBuilder: (context) {
                   return ListView.builder(
-                    controller: scrollController,
                     padding: const EdgeInsets.all(8),
                     itemCount: 50,
                     itemBuilder: (context, index) {
@@ -360,10 +358,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 }
 
 class _SideBar extends StatelessWidget {
-  const _SideBar({required this.onItemSelected, required this.selectedIndex, this.scrollController, this.searchQuery});
+  const _SideBar({required this.onItemSelected, required this.selectedIndex, this.searchQuery});
 
   final void Function(int index) onItemSelected;
-  final ScrollController? scrollController;
   final String? searchQuery;
   final int selectedIndex;
 
@@ -376,7 +373,6 @@ class _SideBar extends StatelessWidget {
     final labelColor = theme.labelColor;
 
     return ListView.builder(
-      controller: scrollController,
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: _entries.length,
       itemBuilder: (context, index) {

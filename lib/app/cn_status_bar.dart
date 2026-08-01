@@ -66,7 +66,7 @@ class CNStatusBar {
   final double dragClosedBuffer;
 
   /// The builder for the expanded panel content.
-  final ScrollableWidgetBuilder? expandedBuilder;
+  final WidgetBuilder? expandedBuilder;
 
   /// Background color of the expanded panel. If null, uses [color] or the theme's canvas color.
   final Color? expandedColor;

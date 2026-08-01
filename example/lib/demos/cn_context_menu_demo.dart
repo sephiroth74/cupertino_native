@@ -49,26 +49,19 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: CNColors.fillTertiary,
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                decoration: BoxDecoration(color: CNColors.fillTertiary, borderRadius: BorderRadius.circular(12)),
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Editor Area', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     SizedBox(height: 8),
                     Text('Right-click to test a multi-level context menu without icons.'),
-
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            TextButton(
-              onPressed: () => setState(() => _lastSelection = 'None'),
-              child: const Text('Reset Last Selection'),
-            ),
+            TextButton(onPressed: () => setState(() => _lastSelection = 'None'), child: const Text('Reset Last Selection')),
             Text('Last selection: $_lastSelection'),
           ],
         ),

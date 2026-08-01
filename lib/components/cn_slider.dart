@@ -104,15 +104,6 @@ class CNSliderTick {
 }
 
 class _CNSliderState extends CNWidgetState<CNSlider> {
-  // Lo slider è interattivo: senza questi recognizer tap/drag non raggiungono
-  // la view AppKit quando il widget è dentro uno scrollable (la drag dello
-  // scroll vince l'arena dei gesti).
-  @override
-  Set<Factory<OneSequenceGestureRecognizer>>? get gestureRecognizers => {
-    Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-    Factory<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer()),
-  };
-
   @override
   Size computeDefaultSize() => Size(_kDefaultSliderWidth, _defaultHeight());
 
@@ -132,6 +123,15 @@ class _CNSliderState extends CNWidgetState<CNSlider> {
     resolvedWidth = constraints.constrainWidth(resolvedWidth);
     return resolvedWidth;
   }
+
+  // Lo slider è interattivo: senza questi recognizer tap/drag non raggiungono
+  // la view AppKit quando il widget è dentro uno scrollable (la drag dello
+  // scroll vince l'arena dei gesti).
+  @override
+  Set<Factory<OneSequenceGestureRecognizer>>? get gestureRecognizers => {
+    Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+    Factory<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer()),
+  };
 
   @override
   Future<void> onNativeMethodCall(MethodCall call) async {

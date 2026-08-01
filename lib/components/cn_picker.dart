@@ -106,14 +106,6 @@ enum CNPickerStyle {
 }
 
 class _CNPickerState extends CNWidgetState<CNPicker> {
-  // Il picker è interattivo: senza questi recognizer i tap non raggiungono la
-  // view AppKit quando il widget è dentro uno scrollable (la drag dello scroll
-  // vince l'arena dei gesti).
-  @override
-  Set<Factory<OneSequenceGestureRecognizer>>? get gestureRecognizers => {
-    Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-  };
-
   @override
   Size computeDefaultSize() {
     logDebug('computeDefaultSize: pickerStyle=${widget.pickerStyle}, controlSize=${widget.controlSize}');
@@ -168,6 +160,14 @@ class _CNPickerState extends CNWidgetState<CNPicker> {
     // resolvedHeight = parentConstraints.constrainHeight(resolvedHeight);
     return resolvedHeight;
   }
+
+  // Il picker è interattivo: senza questi recognizer i tap non raggiungono la
+  // view AppKit quando il widget è dentro uno scrollable (la drag dello scroll
+  // vince l'arena dei gesti).
+  @override
+  Set<Factory<OneSequenceGestureRecognizer>>? get gestureRecognizers => {
+    Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+  };
 
   @override
   Future<dynamic> onNativeMethodCall(MethodCall call) async {

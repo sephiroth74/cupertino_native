@@ -97,6 +97,9 @@ enum CNMenuStyle {
 }
 
 class _CNMenuState extends CNWidgetState<CNMenu> {
+  @override
+  Size computeDefaultSize() => const Size(80.0, 32.0);
+
   // Il menu è interattivo: senza questi recognizer i tap non raggiungono la
   // view AppKit quando il widget è dentro uno scrollable (la drag dello scroll
   // vince l'arena dei gesti).
@@ -104,9 +107,6 @@ class _CNMenuState extends CNWidgetState<CNMenu> {
   Set<Factory<OneSequenceGestureRecognizer>>? get gestureRecognizers => {
     Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
   };
-
-  @override
-  Size computeDefaultSize() => const Size(80.0, 32.0);
 
   @override
   Future<dynamic> onNativeMethodCall(MethodCall call) async {
