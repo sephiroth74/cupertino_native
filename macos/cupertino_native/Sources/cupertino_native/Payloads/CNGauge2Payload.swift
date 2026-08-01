@@ -9,6 +9,7 @@ struct CNGauge2Payload: CNSharedPayloadFields {
     var tint: Any?
     var foregroundColor: Int?
     var help: String?
+    var overlay: [String: Any]?
 
     var value: Double
     var min: Double
@@ -29,6 +30,7 @@ struct CNGauge2Payload: CNSharedPayloadFields {
         tint = nil
         foregroundColor = nil
         help = nil
+        overlay = nil
         value = 0
         min = 0
         max = 1

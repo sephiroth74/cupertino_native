@@ -9,6 +9,7 @@ struct CNPicker2Payload: CNSharedPayloadFields {
     var tint: Any?
     var foregroundColor: Int?
     var help: String?
+    var overlay: [String: Any]?
     var enabled: Bool?
 
     var children: [[String: Any]]
@@ -27,6 +28,7 @@ struct CNPicker2Payload: CNSharedPayloadFields {
         tint = nil
         foregroundColor = nil
         help = nil
+        overlay = nil
         children = []
         selection = ""
         label = nil

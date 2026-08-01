@@ -72,14 +72,15 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                     padding: const EdgeInsets.all(8.0),
                     child: CNTextField(
                       autofocus: true,
-                      paddings: EdgeInsets.all(1.0),
+                      paddings: EdgeInsets.all(borderWidth ?? 0),
                       controlSize: controlSize,
                       debugLog: _kDebugLog,
                       textFieldStyle: textFieldStyle,
                       controller: controller,
                       maxLength: limitLength ? 10 : null,
-                      borderColor: borderColor,
-                      borderWidth: borderWidth,
+                      overlay: borderWidth != null && borderColor != null
+                          ? CNOverlay.stroke(CNRoundedRectangle(cornerRadius: 8.0), color: borderColor, lineWidth: borderWidth!)
+                          : null,
                       foregroundColor: foregroundColor,
                       font: font,
                       tint: tintColor,

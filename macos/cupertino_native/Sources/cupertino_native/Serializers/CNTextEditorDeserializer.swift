@@ -81,6 +81,7 @@ enum CNTextEditorDeserializer {
             }
 
             view = CNViewModifierApplicator.applyHelp(payload.help, to: view)
+            view = CNViewModifierApplicator.applyOverlay(payload.overlay, to: view)
 
             if let onSizeChanged {
                 view = AnyView(

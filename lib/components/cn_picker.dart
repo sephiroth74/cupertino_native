@@ -31,6 +31,7 @@ class CNPicker extends CNWidget {
     this.foregroundColor,
     this.paddings,
     this.help,
+    this.overlay,
   }) : assert(
          children.every((c) => c is CNChildText || c is CNChildImage || c is CNChildLabel || c is CNChildDivider),
          'CNPicker2 children must be CNChildText, CNChildImage, CNChildLabel, or CNChildDivider',
@@ -65,6 +66,9 @@ class CNPicker extends CNWidget {
 
   @override
   final String? help;
+
+  @override
+  final CNOverlay? overlay;
 
   @override
   final EdgeInsetsGeometry? paddings;

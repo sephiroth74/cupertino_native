@@ -10,6 +10,7 @@ struct CNStepper2Payload: CNSharedPayloadFields {
     var tint: Any?
     var foregroundColor: Int?
     var help: String?
+    var overlay: [String: Any]?
 
     // Stepper-specific fields
     var value: Double
@@ -28,6 +29,7 @@ struct CNStepper2Payload: CNSharedPayloadFields {
         tint = nil
         foregroundColor = nil
         help = nil
+        overlay = nil
         value = 0.0
         min = 0.0
         max = 100.0

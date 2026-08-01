@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:cupertino_native/channel/params.dart';
+import 'package:cupertino_native/style/cn_overlay.dart';
 import 'package:cupertino_native/style/cn_shape_style.dart';
 import 'package:flutter/widgets.dart';
 
@@ -38,6 +39,10 @@ abstract class CNWidget extends StatefulWidget {
   /// Optional tooltip text shown on hover (SwiftUI `.help()`).
   String? get help;
 
+  /// Optional decorative layer drawn on top of the native view
+  /// (SwiftUI `.overlay(alignment:content:)`), e.g. a stroked border.
+  CNOverlay? get overlay => null;
+
   /// Serializes the shared modifier fields into a payload map.
   /// Subclasses should call this from [toPayload] to include the common fields.
   ///
@@ -63,6 +68,7 @@ abstract class CNWidget extends StatefulWidget {
 
     payload['debugLog'] = debugLog;
     payload['help'] = help;
+    payload['overlay'] = overlay?.toMap(context);
     payload['foregroundColor'] = resolveColorToArgb(foregroundColor, context);
     if (effectiveTint is CNShapeStyle) {
       payload['tint'] = effectiveTint.toMap(context);

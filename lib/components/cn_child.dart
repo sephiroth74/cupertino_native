@@ -24,6 +24,10 @@ sealed class CNChild {
   /// Optional tooltip text shown on hover (SwiftUI `.help()`).
   final String? help;
 
+  /// Optional decorative layer drawn on top of this child
+  /// (SwiftUI `.overlay(alignment:content:)`), e.g. a stroked border.
+  final CNOverlay? overlay;
+
   /// Optional padding applied around this child.
   final EdgeInsetsGeometry? paddings;
 
@@ -33,7 +37,16 @@ sealed class CNChild {
   /// Optional tint color applied to this child.
   final Color? tint;
 
-  const CNChild({this.constraints, this.paddings, this.tag, this.enabled, this.tint, this.foregroundColor, this.help});
+  const CNChild({
+    this.constraints,
+    this.paddings,
+    this.tag,
+    this.enabled,
+    this.tint,
+    this.foregroundColor,
+    this.help,
+    this.overlay,
+  });
 
   /// Serializes this child into a payload map for the native side.
   Map<String, dynamic> toChildPayload(BuildContext context);
@@ -74,6 +87,7 @@ class CNChildButton extends CNChild {
     super.constraints,
     super.paddings,
     super.help,
+    super.overlay,
   }) : assert(badge == null || badge is String || badge is int);
 
   /// Optional badge value (String or int).
@@ -98,6 +112,7 @@ class CNChildButton extends CNChild {
       'tag': tag,
       'enabled': enabled,
       'help': help,
+      'overlay': overlay?.toMap(context),
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'title': title,
@@ -132,6 +147,7 @@ class CNChildGroup extends CNChild {
     super.paddings,
     super.tag,
     super.help,
+    super.overlay,
   });
 
   final List<CNChild> children;
@@ -143,6 +159,7 @@ class CNChildGroup extends CNChild {
       'tag': tag,
       'enabled': enabled,
       'help': help,
+      'overlay': overlay?.toMap(context),
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'children': children.map((c) => c.toChildPayload(context)).toList(),
@@ -165,6 +182,7 @@ class CNChildHStack extends CNChild {
     super.paddings,
     super.tag,
     super.help,
+    super.overlay,
   });
 
   final CNAlignment alignment;
@@ -178,6 +196,7 @@ class CNChildHStack extends CNChild {
       'tag': tag,
       'enabled': enabled,
       'help': help,
+      'overlay': overlay?.toMap(context),
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'alignment': alignment.name,
@@ -204,6 +223,7 @@ class CNChildImage extends CNChild {
     super.paddings,
     super.tag,
     super.help,
+    super.overlay,
   });
 
   final CNFont? font;
@@ -219,6 +239,7 @@ class CNChildImage extends CNChild {
       'tag': tag,
       'enabled': enabled,
       'help': help,
+      'overlay': overlay?.toMap(context),
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'systemSymbolName': systemSymbolName,
@@ -251,6 +272,7 @@ class CNChildLabel extends CNChild {
     super.paddings,
     super.tag,
     super.help,
+    super.overlay,
   });
 
   final CNFont? font;
@@ -270,6 +292,7 @@ class CNChildLabel extends CNChild {
       'tag': tag,
       'enabled': enabled,
       'help': help,
+      'overlay': overlay?.toMap(context),
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'title': title,
@@ -299,6 +322,7 @@ class CNChildMenu extends CNChild {
     super.paddings,
     super.tag,
     super.help,
+    super.overlay,
   });
 
   factory CNChildMenu.simple(
@@ -332,6 +356,7 @@ class CNChildMenu extends CNChild {
       'tag': tag,
       'enabled': enabled,
       'help': help,
+      'overlay': overlay?.toMap(context),
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'items': items.map((c) => c.toChildPayload(context)).toList(),
@@ -359,6 +384,7 @@ class CNChildPicker extends CNChild {
     super.constraints,
     super.paddings,
     super.help,
+    super.overlay,
   });
 
   /// Picker items (should be CNChildText, CNChildImage, or CNChildLabel with tags).
@@ -389,6 +415,7 @@ class CNChildPicker extends CNChild {
       'tag': tag,
       'enabled': enabled,
       'help': help,
+      'overlay': overlay?.toMap(context),
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'children': children.map((c) => c.toChildPayload(context)).toList(),
@@ -418,6 +445,7 @@ class CNChildProgressView extends CNChild {
     super.paddings,
     super.tag,
     super.help,
+    super.overlay,
   });
 
   final CNControlSize controlSize;
@@ -432,6 +460,7 @@ class CNChildProgressView extends CNChild {
       'tag': tag,
       'enabled': enabled,
       'help': help,
+      'overlay': overlay?.toMap(context),
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'value': value,
@@ -460,6 +489,7 @@ class CNChildText extends CNChild {
     super.paddings,
     super.tag,
     super.help,
+    super.overlay,
   });
 
   final CNFont? font;
@@ -476,6 +506,7 @@ class CNChildText extends CNChild {
       'tag': tag,
       'enabled': enabled,
       'help': help,
+      'overlay': overlay?.toMap(context),
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'text': text,
@@ -504,6 +535,7 @@ class CNChildTextField extends CNChild {
     super.constraints,
     super.paddings,
     super.help,
+    super.overlay,
   });
 
   /// Control size.
@@ -525,6 +557,7 @@ class CNChildTextField extends CNChild {
       'tag': tag,
       'enabled': enabled,
       'help': help,
+      'overlay': overlay?.toMap(context),
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'text': text,
@@ -552,6 +585,7 @@ class CNChildToggle extends CNChild {
     super.constraints,
     super.paddings,
     super.help,
+    super.overlay,
   });
 
   /// Control size.
@@ -576,6 +610,7 @@ class CNChildToggle extends CNChild {
       'tag': tag,
       'enabled': enabled,
       'help': help,
+      'overlay': overlay?.toMap(context),
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'isOn': isOn,
@@ -602,6 +637,7 @@ class CNChildVStack extends CNChild {
     super.paddings,
     super.tag,
     super.help,
+    super.overlay,
   });
 
   final CNAlignment alignment;
@@ -615,6 +651,7 @@ class CNChildVStack extends CNChild {
       'tag': tag,
       'enabled': enabled,
       'help': help,
+      'overlay': overlay?.toMap(context),
       'tint': resolveColorToArgb(tint, context),
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'alignment': alignment.name,

@@ -21,6 +21,7 @@ class CNProgressView extends CNWidget {
     this.foregroundColor,
     this.paddings,
     this.help,
+    this.overlay,
   }) : assert(total > 0);
 
   /// Control size for the progress view.
@@ -43,6 +44,9 @@ class CNProgressView extends CNWidget {
 
   @override
   final String? help;
+
+  @override
+  final CNOverlay? overlay;
 
   @override
   final EdgeInsetsGeometry? paddings;

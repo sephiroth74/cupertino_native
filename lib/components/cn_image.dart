@@ -23,6 +23,7 @@ class CNImage extends CNWidget {
     this.foregroundStyleColors,
     this.paddings,
     this.help,
+    this.overlay,
   });
 
   /// Optional font to apply to the image.
@@ -48,6 +49,9 @@ class CNImage extends CNWidget {
 
   @override
   final String? help;
+
+  @override
+  final CNOverlay? overlay;
 
   @override
   final EdgeInsetsGeometry? paddings;

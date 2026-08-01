@@ -48,6 +48,8 @@ export 'extensions/color_ext.dart';
 export 'model/control_size.dart';
 export 'style/button_style.dart';
 export 'style/cn_colors.dart';
+export 'style/cn_overlay.dart';
+export 'style/cn_shape.dart';
 export 'style/cn_shape_style.dart';
 export 'style/cn_typography.dart';
 export 'style/color_well_style.dart';

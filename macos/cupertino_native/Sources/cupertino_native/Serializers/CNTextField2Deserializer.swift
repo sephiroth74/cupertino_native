@@ -71,9 +71,6 @@ enum CNTextField2Deserializer {
             view = CNViewModifierApplicator.applyForegroundColor(payload.foregroundColor, to: view)
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
 
-            // Paddings
-            view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
-
             // Constraints last (outermost)
             view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
 
@@ -86,6 +83,9 @@ enum CNTextField2Deserializer {
             }
 
             view = CNViewModifierApplicator.applyHelp(payload.help, to: view)
+            view = CNViewModifierApplicator.applyOverlay(payload.overlay, to: view)
+            // Paddings
+            view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
 
             if let onSizeChanged {
                 view = AnyView(

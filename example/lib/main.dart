@@ -16,6 +16,7 @@ import 'demos/cn_image_demo.dart';
 import 'demos/cn_label_demo.dart';
 import 'demos/cn_menu_demo.dart';
 import 'demos/cn_navigation_demo.dart';
+import 'demos/cn_overlay_demo.dart';
 import 'demos/cn_path_control_demo.dart';
 import 'demos/cn_picker_demo.dart';
 import 'demos/cn_popover_demo.dart';
@@ -52,6 +53,7 @@ const _entries = <_DemoEntry>[
   _DemoEntry('CNLabel', 'textformat', LabelDemoPage()),
   _DemoEntry('CNMenu', 'ellipsis.circle', MenuButtonDemoPage()),
   _DemoEntry('Navigation', 'arrow.forward.square', NavigationDemoPage()),
+  _DemoEntry('Overlay', 'square.on.circle', OverlayDemoPage()),
   _DemoEntry('CNPathControl', 'folder', PathControlDemoPage()),
   _DemoEntry('CNPicker', 'rectangle.split.3x1.fill', PickerDemoPage()),
   _DemoEntry('CNPopover', 'rectangle.on.rectangle', PopoverDemoPage()),
@@ -176,9 +178,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         debugPrint('Building MyApp with brightness: $brightness, appTheme.mode: ${appTheme.mode}');
 
         return CNApp(
-            themeMode: appTheme.mode,
-            debugShowCheckedModeBanner: false,
-            home: (context) {
+          themeMode: appTheme.mode,
+          debugShowCheckedModeBanner: false,
+          home: (context) {
             final accentColor = CNTheme.of(context).accentColor;
             debugPrint('Building home with accentColor: $accentColor, brightness: $brightness, appTheme.mode: ${appTheme.mode}');
 
@@ -230,13 +232,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _StatusBarButton(
-                        icon: CupertinoIcons.text_alignleft,
-                        label: 'Terminal',
-                        isActive: isExpanded,
-                        onPressed: () {
-                          CNWindowScope.of(context).toggleStatusBar();
-                        },
+                      CNPixelPerfectContainer(
+                        adjustPosition: true,
+                        child: CNToggle(
+                          toggleStyle: CNToggleStyle.button,
+                          isOn: isExpanded,
+                          content: CNChildLabel('Terminal', labelStyle: CNLabelStyle.titleAndIcon, systemImage: 'apple.terminal'),
+                          onChanged: (value) {
+                            CNWindowScope.of(context).toggleStatusBar();
+                          },
+                        ),
                       ),
                       _StatusBarButton(icon: CupertinoIcons.doc_text, label: 'Dart', onPressed: () {}),
                       _StatusBarButton(icon: CupertinoIcons.checkmark_circle, label: 'UTF-8', onPressed: () {}),
@@ -309,16 +314,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     ],
                   ),
 
-                  CNToolbarItemGroup(placement: CNToolbarPlacement.navigation, children: [
-                    CNChildButton(
-                      tag: 'navigation.back',
-                      title: 'Back',
-                      systemImage: 'arrow.backward',
-                      labelStyle: CNLabelStyle.iconOnly,
-                      enabled: navigation.canGoBack,
-                      help: 'Go back',
-                    ),
-                  ]),
+                  CNToolbarItemGroup(
+                    placement: CNToolbarPlacement.navigation,
+                    children: [
+                      CNChildButton(
+                        tag: 'navigation.back',
+                        title: 'Back',
+                        systemImage: 'arrow.backward',
+                        labelStyle: CNLabelStyle.iconOnly,
+                        enabled: navigation.canGoBack,
+                        help: 'Go back',
+                      ),
+                    ],
+                  ),
 
                   CNToolbarItemGroup(
                     placement: CNToolbarPlacement.automatic,
@@ -350,7 +358,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               ),
               child: _DesktopDemoShell(selectedIndex: selectedIndex),
             );
-            },
+          },
         );
       },
     );

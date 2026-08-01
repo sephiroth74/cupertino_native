@@ -224,6 +224,32 @@ enum CNViewModifierApplicator {
         return AnyView(view.help(help))
     }
 
+    /// Applies a decorative `.overlay(alignment:content:)` built from a shape
+    /// payload (see `CNShapeBuilder`). No-op when `overlay` is nil/invalid.
+    static func applyOverlay(_ overlay: [String: Any]?, to view: AnyView) -> AnyView {
+        guard let overlay,
+              let content = CNShapeBuilder.makeOverlay(overlay)
+        else {
+            return view
+        }
+        let alignment = resolveAlignment(overlay["alignment"] as? String)
+        return AnyView(view.overlay(alignment: alignment) { content })
+    }
+
+    private static func resolveAlignment(_ value: String?) -> Alignment {
+        switch value {
+        case "leading": .leading
+        case "trailing": .trailing
+        case "top": .top
+        case "bottom": .bottom
+        case "topLeading": .topLeading
+        case "topTrailing": .topTrailing
+        case "bottomLeading": .bottomLeading
+        case "bottomTrailing": .bottomTrailing
+        default: .center
+        }
+    }
+
     static func applyButtonStyle(_ style: String?, to view: AnyView) -> AnyView {
         switch style {
         case "plain":

@@ -10,6 +10,7 @@ struct CNDatePicker2Payload: CNSharedPayloadFields {
     var tint: Any?
     var foregroundColor: Int?
     var help: String?
+    var overlay: [String: Any]?
 
     // DatePicker-specific fields
     var selection: Double?
@@ -30,6 +31,7 @@ struct CNDatePicker2Payload: CNSharedPayloadFields {
         tint = nil
         foregroundColor = nil
         help = nil
+        overlay = nil
         selection = nil
         displayedComponents = ["date"]
         datePickerStyle = "automatic"

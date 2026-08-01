@@ -234,10 +234,12 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
     final normalizedWidth = width > 0 ? width : null;
     final normalizedHeight = height > 0 ? height : null;
     if (normalizedWidth == _intrinsicWidth && normalizedHeight == _intrinsicHeight) {
+      logDebug('intrinsic size unchanged, skipping setState');
       return;
     }
 
     setState(() {
+      logDebug('updating intrinsic size: width=$normalizedWidth, height=$normalizedHeight');
       _intrinsicWidth = normalizedWidth;
       _intrinsicHeight = normalizedHeight;
     });
