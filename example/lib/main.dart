@@ -15,6 +15,7 @@ import 'demos/cn_gauge_demo.dart';
 import 'demos/cn_image_demo.dart';
 import 'demos/cn_label_demo.dart';
 import 'demos/cn_menu_demo.dart';
+import 'demos/cn_navigation_demo.dart';
 import 'demos/cn_path_control_demo.dart';
 import 'demos/cn_picker_demo.dart';
 import 'demos/cn_popover_demo.dart';
@@ -50,6 +51,7 @@ const _entries = <_DemoEntry>[
   _DemoEntry('CNImage', 'testtube.2', CNImage2DemoPage()),
   _DemoEntry('CNLabel', 'textformat', LabelDemoPage()),
   _DemoEntry('CNMenu', 'ellipsis.circle', MenuButtonDemoPage()),
+  _DemoEntry('Navigation', 'arrow.forward.square', NavigationDemoPage()),
   _DemoEntry('CNPathControl', 'folder', PathControlDemoPage()),
   _DemoEntry('CNPicker', 'rectangle.split.3x1.fill', PickerDemoPage()),
   _DemoEntry('CNPopover', 'rectangle.on.rectangle', PopoverDemoPage()),
@@ -73,7 +75,7 @@ Future<void> initializeWindowManager() async {
   WindowOptions windowOptions = const WindowOptions(
     skipTaskbar: false,
     size: Size(1280, 1024),
-    minimumSize: Size(1024, 800),
+    minimumSize: Size(1024, 300),
     maximumSize: Size(1920, 1080),
     fullScreen: false,
     center: true,
@@ -156,10 +158,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AppTheme(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AppTheme()),
+        ChangeNotifierProvider(create: (_) => NavigationController()),
+      ],
       builder: (context, child) {
         final appTheme = context.watch<AppTheme>();
+        // Watched so the toolbar back button re-syncs when the content-area
+        // navigator's ability to pop changes.
+        final navigation = context.watch<NavigationController>();
 
         brightness = appTheme.mode == ThemeMode.system
             ? WidgetsBinding.instance.platformDispatcher.platformBrightness
@@ -196,11 +204,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 startWidth: 250,
                 dragClosed: true,
                 material: NSVisualEffectViewMaterial.fullScreenUI,
-                backgroundColor: CNColors.transparent,
+                backgroundColor: CNColors.canvasColor.withAlpha(127),
               ),
               statusBar: CNStatusBar(
                 height: 32,
                 color: accentColor?.withAlpha(127),
+                dividerColor: CNTheme.of(context).separatorColor.withAlpha(51),
                 expandedColor: CNTheme.of(context).canvasColor,
                 expansionMode: CNStatusBarExpansionMode.overAll,
                 presentationStyle: CNStatusBarPresentationStyle.push,
@@ -276,6 +285,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   } else if (tags.length == 1 && tags[0] == 'toggle_navigation') {
                     debugPrint('Toggling sidebar');
                     CNWindowScope.of(context).toggleSidebar();
+                  } else if (tags.length == 1 && tags[0] == 'navigation.back') {
+                    debugPrint('Navigating back');
+                    context.read<NavigationController>().goBack();
                   }
                 },
                 searchable: true,
@@ -298,6 +310,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       ),
                     ],
                   ),
+
+                  CNToolbarItemGroup(placement: CNToolbarPlacement.navigation, children: [
+                    CNChildButton(
+                      tag: 'navigation.back',
+                      title: 'Back',
+                      systemImage: 'arrow.backward',
+                      labelStyle: CNLabelStyle.iconOnly,
+                      enabled: navigation.canGoBack,
+                      help: 'Go back',
+                    ),
+                  ]),
+
                   CNToolbarItemGroup(
                     placement: CNToolbarPlacement.automatic,
                     children: [

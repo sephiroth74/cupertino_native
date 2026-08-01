@@ -89,6 +89,7 @@ enum CNMenu2Deserializer {
             let title = dict["title"] as? String ?? ""
             let systemImage = dict["systemImage"] as? String
             let role = CNChannelDeserialization.resolveButtonRole(dict["role"] as? String)
+            let tint = dict["tint"] as? String
             let badge = dict["badge"]
 
             var view = if let systemImage, !systemImage.isEmpty {
@@ -106,6 +107,7 @@ enum CNMenu2Deserializer {
             }
 
             view = CNViewModifierApplicator.applyBadge(badge, to: view)
+            view = CNViewModifierApplicator.applyTint(tint, to: view)
 
             if let enabled = dict["enabled"] as? Bool {
                 view = AnyView(view.disabled(!enabled))

@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 
 /// Base state for all CN widgets that render a native SwiftUI view via platform channels.
 ///
@@ -301,6 +302,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
         Widget platformView = AppKitView(
           viewType: widget.nativeViewType,
+          hitTestBehavior: PlatformViewHitTestBehavior.opaque,
           creationParams: payload,
           creationParamsCodec: const StandardMessageCodec(),
           onPlatformViewCreated: _onPlatformViewCreated,

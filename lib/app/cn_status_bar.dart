@@ -35,6 +35,7 @@ class CNStatusBar {
     this.leftItems,
     this.rightItems,
     this.color,
+    this.dividerColor,
     this.expandedColor,
     this.height = 22.0,
     this.expandedBuilder,
@@ -54,6 +55,9 @@ class CNStatusBar {
 
   /// Background color of the status bar. If null, uses the theme's canvas color.
   final Color? color;
+
+  /// Color of the divider line above the status bar. If null, uses the theme's separator color.
+  final Color? dividerColor;
 
   /// Whether dragging the expanded panel below its minimum size closes it.
   final bool dragClosed;

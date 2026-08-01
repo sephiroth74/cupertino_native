@@ -733,8 +733,11 @@ class _CNWindowState extends State<CNWindow> {
             if (hasStatusBar)
               SizedBox(
                 height: statusBarHeight,
-                child: ColoredBox(
-                  color: statusBar.color ?? theme.canvasColor,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: statusBar.color ?? theme.canvasColor,
+                    border: Border(top: BorderSide(color: statusBar.dividerColor ?? dividerColor, width: 1)),
+                  ),
                   child: _StatusBarContent(
                     leftItems: statusBar.leftItems,
                     rightItems: statusBar.rightItems,

@@ -163,6 +163,14 @@ class _TabContent extends StatelessWidget {
           Text(title, style: CNTheme.of(context).typography.title1),
           const SizedBox(height: 8),
           Text(description, style: CNTheme.of(context).typography.body),
+          const SizedBox(height: 8),
+          CNButton(
+            onPressed: () {
+              debugPrint('Button pressed in $title tab');
+            },
+            buttonStyle: CNButtonStyle.borderedProminent,
+            children: const [CNChildText('Perform Action')],
+          ),
         ],
       ),
     );

@@ -3,6 +3,8 @@
 import 'package:cupertino_native/components/cn_widget.dart';
 import 'package:cupertino_native/components/cn_widget_state.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -102,6 +104,15 @@ class CNSliderTick {
 }
 
 class _CNSliderState extends CNWidgetState<CNSlider> {
+  // Lo slider è interattivo: senza questi recognizer tap/drag non raggiungono
+  // la view AppKit quando il widget è dentro uno scrollable (la drag dello
+  // scroll vince l'arena dei gesti).
+  @override
+  Set<Factory<OneSequenceGestureRecognizer>>? get gestureRecognizers => {
+    Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+    Factory<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer()),
+  };
+
   @override
   Size computeDefaultSize() => Size(_kDefaultSliderWidth, _defaultHeight());
 

@@ -3,6 +3,8 @@
 import 'package:cupertino_native/components/cn_widget.dart';
 import 'package:cupertino_native/components/cn_widget_state.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -86,6 +88,14 @@ enum CNButtonRole {
 }
 
 class _CNButton2State extends CNWidgetState<CNButton> {
+  // Il pulsante è interattivo: senza questi recognizer i tap non raggiungono la
+  // view AppKit quando il widget è dentro uno scrollable (la drag dello scroll
+  // vince l'arena dei gesti).
+  @override
+  Set<Factory<OneSequenceGestureRecognizer>>? get gestureRecognizers => {
+    Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+  };
+
   @override
   Size computeDefaultSize() => const Size(80.0, 32.0);
 
