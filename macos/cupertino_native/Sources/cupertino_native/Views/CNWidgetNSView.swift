@@ -15,9 +15,17 @@ import SwiftUI
 /// - `makeRootView(model:)`: the SwiftUI view bound to the model
 class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
     let channel: FlutterMethodChannel
-    let hostingView: NSHostingView<AnyView>
+    let hostingView: CNMeasuringHostingView<AnyView>
     let model: CNViewModel<P>
     var payload: P
+
+    /// The last intrinsic size pushed to (or pulled by) Flutter.
+    /// Used to avoid redundant `intrinsicSizeChanged` notifications and to
+    /// detect when a deferred re-measurement produced a corrected size.
+    private var lastReportedSize: CGSize?
+
+    /// Coalesces multiple size-report requests within a single runloop turn.
+    private var reportPending = false
 
     var logPrefix: String {
         "[\(type(of: self))][\(payload.viewDebugId)][Swift]"
@@ -32,7 +40,7 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         let channelName = Self.channelName
         channel = FlutterMethodChannel(name: "\(channelName)_\(viewId)", binaryMessenger: messenger)
-        hostingView = NSHostingView(rootView: AnyView(EmptyView()))
+        hostingView = CNMeasuringHostingView(rootView: AnyView(EmptyView()))
 
         payload = CNChannelDeserialization.decode(args, viewId: viewId) ?? Self.defaultPayload(viewId)
         model = CNViewModel<P>(payload: payload)
@@ -44,6 +52,15 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
 
         hostingView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(hostingView)
+
+        // SwiftUI recomputes the hosting view's ideal size asynchronously (e.g. once
+        // text metrics for a Label settle). When that happens the hosting view
+        // invalidates its intrinsic content size; re-measure on the next runloop turn
+        // and push any corrected size to Flutter. This fixes shrink-mode widgets that
+        // report a too-small size on their very first (pre-layout) measurement.
+        hostingView.onIntrinsicSizeInvalidated = { [weak self] in
+            self?.scheduleIntrinsicSizeReport()
+        }
 
         NSLayoutConstraint.activate([
             hostingView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -61,6 +78,16 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
     @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        // Once attached to a window, SwiftUI has an environment to resolve fonts and
+        // symbols; re-measure so shrink-mode widgets pick up their settled size even
+        // if the intrinsic-size invalidation fired before the callback was wired.
+        if window != nil {
+            scheduleIntrinsicSizeReport()
+        }
     }
 
     // MARK: - Subclass requirements
@@ -88,13 +115,37 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
     }
 
     private func installRootView() {
-        hostingView.rootView = makeRootView(model: model, onSizeChanged: { [weak self] size in
-            guard let self else { return }
-            let currentSize = currentIntrinsicSize(originalSize: size)
-            guard currentSize != size else { return }
-            log("onSizeChanged: current: \(currentSize), size: \(size)")
-            channel.invokeMethod("intrinsicSizeChanged", arguments: ["width": currentSize.width, "height": currentSize.height])
+        hostingView.rootView = makeRootView(model: model, onSizeChanged: { [weak self] _ in
+            // The SwiftUI content geometry changed. Re-measure and push a corrected
+            // size if it differs from what Flutter last saw. Routed through the
+            // coalesced reporter so it can't race with intrinsic-size invalidations.
+            self?.scheduleIntrinsicSizeReport()
         })
+    }
+
+    /// Schedules a coalesced intrinsic-size measurement on the next runloop turn and,
+    /// if the measured size differs from the last one Flutter saw, notifies Flutter.
+    ///
+    /// Deferring to the next turn lets SwiftUI finish the layout pass that triggered
+    /// the invalidation (text metrics, symbol sizing, …) before we measure, so the
+    /// first report already carries the settled size rather than a pre-layout one.
+    private func scheduleIntrinsicSizeReport() {
+        guard !reportPending else { return }
+        reportPending = true
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            reportPending = false
+            reportIntrinsicSizeIfChanged()
+        }
+    }
+
+    private func reportIntrinsicSizeIfChanged() {
+        let size = currentIntrinsicSize(originalSize: nil)
+        guard size.width > 0, size.height > 0 else { return }
+        guard size != lastReportedSize else { return }
+        log("reportIntrinsicSizeIfChanged: \(lastReportedSize.map(String.init(describing:)) ?? "nil") -> \(size)")
+        lastReportedSize = size
+        channel.invokeMethod("intrinsicSizeChanged", arguments: ["width": size.width, "height": size.height])
     }
 
     private func configureMethodChannel(viewId: Int64) {
@@ -125,6 +176,7 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
                 }
             case "getIntrinsicSize":
                 let size = currentIntrinsicSize(originalSize: nil)
+                lastReportedSize = size
                 log("getIntrinsicSize -> \(size)")
                 result(["width": size.width, "height": size.height])
             default:
@@ -153,5 +205,23 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
         )
 
         return CGSize(width: width, height: height)
+    }
+}
+
+/// An `NSHostingView` that reports when SwiftUI invalidates its intrinsic content size.
+///
+/// SwiftUI recomputes a hosting view's ideal size asynchronously — for example once a
+/// `Label`'s text metrics or an `Image`'s symbol dimensions settle after the first
+/// layout pass. Each such recomputation calls `invalidateIntrinsicContentSize()`.
+/// `onGeometryChange` alone can't detect this: once Flutter pins the platform view to
+/// the (too-small) first measurement, the SwiftUI frame stops changing, so no further
+/// geometry callbacks fire. Hooking the invalidation gives us a reliable signal to
+/// re-measure and push the corrected size back to Flutter.
+final class CNMeasuringHostingView<Content: View>: NSHostingView<Content> {
+    var onIntrinsicSizeInvalidated: (() -> Void)?
+
+    override func invalidateIntrinsicContentSize() {
+        super.invalidateIntrinsicContentSize()
+        onIntrinsicSizeInvalidated?()
     }
 }

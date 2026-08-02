@@ -235,6 +235,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       CNPixelPerfectContainer(
                         adjustPosition: true,
                         child: CNToggle(
+                          controlSize: CNControlSize.regular,
                           toggleStyle: CNToggleStyle.button,
                           isOn: isExpanded,
                           content: CNChildLabel('Terminal', labelStyle: CNLabelStyle.titleAndIcon, systemImage: 'apple.terminal'),

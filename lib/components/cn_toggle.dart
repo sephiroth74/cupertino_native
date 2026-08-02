@@ -173,15 +173,15 @@ class _CNToggleState extends CNWidgetState<CNToggle> {
       case CNToggleStyle.button:
         switch (widget.controlSize) {
           case CNControlSize.mini:
-            return 2.0;
+            return 14.0;
           case CNControlSize.small:
-            return 6.0;
-          case CNControlSize.regular:
-            return 8.0;
-          case CNControlSize.large:
-            return 12.0;
-          case CNControlSize.extraLarge:
             return 20.0;
+          case CNControlSize.regular:
+            return 24.0;
+          case CNControlSize.large:
+            return 28.0;
+          case CNControlSize.extraLarge:
+            return 31.0;
         }
     }
   }
