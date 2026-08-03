@@ -80,9 +80,6 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
         let pathControl2Factory = CupertinoPathControl2Factory(messenger: registrar.messenger)
         registrar.register(pathControl2Factory, withId: "CupertinoNativePathControl2")
 
-        let comboBoxFactory = CupertinoComboBoxFactory(messenger: registrar.messenger)
-        registrar.register(comboBoxFactory, withId: "CupertinoNativeComboBox")
-
         let segmentedControlFactory = CupertinoSegmentedControlFactory(messenger: registrar.messenger)
         registrar.register(segmentedControlFactory, withId: "CupertinoNativeSegmentedControl")
     }

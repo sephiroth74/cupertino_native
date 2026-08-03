@@ -109,6 +109,8 @@ class CNTextField extends CNWidget {
 
   @override
   String get nativeViewType => _kNativeViewType;
+
+  bool get enabled => onChanged != null || onSubmitted != null;
 }
 
 /// Style for CNTextField2.
@@ -222,6 +224,7 @@ class _CNTextFieldState extends CNWidgetState<CNTextField> {
       'borderWidth': widget.borderWidth,
       'autofocus': widget.autofocus,
       'maxLength': widget.maxLength,
+      'enabled': widget.enabled,
     };
 
     widget.writeSharedFields(

@@ -51,6 +51,8 @@ enum CNTextField2Deserializer {
                 makeTextFieldLegacy(textBinding: textBinding, payload: payload)
             }
 
+            view = CNViewModifierApplicator.applyEnabled(payload.enabled, to: view)
+
             // Apply font
             view = CNViewModifierApplicator.applyFont(payload.font, to: view)
 

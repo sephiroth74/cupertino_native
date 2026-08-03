@@ -4,7 +4,7 @@ import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
 const _kDebugLog = false;
-const _kFontSize = 24.0;
+const _kFontSize = 12.0;
 
 class TextFieldDemoPage extends StatefulWidget {
   const TextFieldDemoPage({super.key});
@@ -18,6 +18,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
   double? borderWidth;
   CNControlSize controlSize = CNControlSize.regular;
   final TextEditingController controller = TextEditingController(text: '');
+  bool enabled = true;
   CNFont? font = CNFont.system(CNFontSize.points(_kFontSize));
   double fontSize = _kFontSize;
   Color? foregroundColor;
@@ -83,12 +84,12 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                     font: font,
                     tint: tintColor,
                     placeholder: 'Enter something...',
-                    onChanged: (value) {
+                    onChanged: enabled ? (value) {
                       debugPrint('onChanged: $value');
-                    },
-                    onSubmitted: (value) {
+                    } : null,
+                    onSubmitted: enabled ? (value) {
                       debugPrint('onSubmitted: $value');
-                    },
+                    } : null,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -98,8 +99,8 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
             ),
           ),
           RightSideOptionContainer(
-            title: 'Options',
             options: {
+              'Enabled': CNToggle(isOn: enabled, onChanged: (value) => setState(() => enabled = value)),
               'Max 10 chars': CNToggle(isOn: limitLength, onChanged: (value) => setState(() => limitLength = value)),
               'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
               'Style': CNPicker(
