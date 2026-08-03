@@ -125,6 +125,11 @@ class _CNComboBoxState extends State<CNComboBox> {
   bool _isUpdatingText = false;
   bool _menuOpen = false;
 
+  /// Length of the text last reported by the native field. Used to tell an
+  /// insertion (net growth of the typed prefix) from a deletion (backspace /
+  /// forward-delete), so autocomplete only extends on real insertions.
+  late int _lastLength = widget.text.length;
+
   @override
   void didUpdateWidget(CNComboBox oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -134,6 +139,7 @@ class _CNComboBoxState extends State<CNComboBox> {
       _isUpdatingText = true;
       _controller.text = widget.text;
       _isUpdatingText = false;
+      _lastLength = widget.text.length;
     }
   }
 
@@ -150,11 +156,18 @@ class _CNComboBoxState extends State<CNComboBox> {
 
   void _handleTextChanged(String value) {
     if (_isUpdatingText) return;
-    _log('textChanged: "$value"');
+    _log('textChanged: "$value" (lastLen=$_lastLength)');
 
-    // Autocomplete: extend the typed prefix to the first matching item and
-    // select the added suffix, matching NSComboBox's `completes` behavior.
-    if (widget.completes && value.isNotEmpty) {
+    // Only extend on a real insertion. A backspace / forward-delete shrinks (or,
+    // when it clears a selected suffix, does not grow) the typed prefix, so it
+    // must not re-trigger autocomplete — the native field has no Flutter key
+    // events to intercept, hence the length heuristic. `_lastLength` tracks the
+    // length of the typed prefix the user has committed (never the completed
+    // value), so typing over the highlighted suffix still reads as growth.
+    final isInsertion = value.length > _lastLength;
+    _lastLength = value.length;
+
+    if (widget.completes && isInsertion && value.isNotEmpty) {
       final match = widget.items.firstWhere(
         (e) => e.toLowerCase().startsWith(value.toLowerCase()),
         orElse: () => '',
@@ -163,6 +176,11 @@ class _CNComboBoxState extends State<CNComboBox> {
         _isUpdatingText = true;
         _controller.value = TextEditingValue(
           text: match,
+          // Highlight the completed suffix. Stored ascending (anchor at the
+          // typed-prefix boundary, extent at the match end) so it matches the
+          // order the native field reports selections in — otherwise the native
+          // round-trip would flip it and jitter. Typing always replaces from the
+          // range start, i.e. the insertion point, regardless of stored order.
           selection: TextSelection(baseOffset: value.length, extentOffset: match.length),
         );
         _isUpdatingText = false;
@@ -220,6 +238,7 @@ class _CNComboBoxState extends State<CNComboBox> {
       _isUpdatingText = true;
       _controller.text = selected;
       _isUpdatingText = false;
+      _lastLength = selected.length;
       widget.onSelectionChanged?.call(index);
       widget.onChanged?.call(selected);
     }
@@ -344,12 +363,12 @@ class _ComboBoxCaretState extends State<_ComboBoxCaret> {
   bool _hovered = false;
 
   Widget _buildBordered(BuildContext context, double side) {
-    final accent = CupertinoDynamicColor.resolve(widget.accentColor ?? CupertinoColors.activeBlue, context);
+    final accent = widget.accentColor ?? CNColors.blue.resolveFromContext(context);
     final isDark = CNTheme.of(context).isDark;
     // Darken slightly while the menu is open, echoing the pressed push button.
-    final background = widget.menuOpen ? Color.lerp(accent, const Color(0xFF000000), 0.12)! : accent;
+    final background = widget.menuOpen ? Color.lerp(accent, CNColors.black, 0.12)! : accent;
     // Contrast the chevron against the (accent) fill.
-    final arrows = background.computeLuminance() > 0.5 ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
+    final arrows = background.computeLuminance() > 0.5 ? CNColors.black : CNColors.white;
     final radius = _caretRadius(side);
 
     return Padding(
@@ -359,7 +378,7 @@ class _ComboBoxCaretState extends State<_ComboBoxCaret> {
           color: background,
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(
-            color: (isDark ? const Color(0xFFFFFFFF) : const Color(0xFF000000)).withValues(alpha: 0.12),
+            color: (isDark ? CNColors.white : CNColors.black).withValues(alpha: 0.12),
             width: 0.5,
           ),
           boxShadow: [
@@ -378,7 +397,7 @@ class _ComboBoxCaretState extends State<_ComboBoxCaret> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                const Color(0xFFFFFFFF).withValues(alpha: isDark ? 0.05 : 0.17),
+                CNColors.white.withValues(alpha: isDark ? 0.05 : 0.17),
                 const Color(0x00FFFFFF),
               ],
             ),
@@ -396,9 +415,9 @@ class _ComboBoxCaretState extends State<_ComboBoxCaret> {
     // Keep a non-transparent fill in every state so the full button area stays
     // clickable over the underlying platform view; strengthen on hover/open.
     final background = (_hovered || widget.menuOpen)
-        ? CupertinoColors.tertiarySystemFill.resolveFrom(context)
-        : CupertinoColors.quaternarySystemFill.resolveFrom(context);
-    final arrows = CupertinoColors.label.resolveFrom(context);
+        ? CNColors.fillTertiary.resolveFrom(context)
+        : CNColors.fillQuaternary.resolveFrom(context);
+    final arrows = CNColors.label.resolveFrom(context);
     final radius = _caretRadius(side);
 
     return Padding(

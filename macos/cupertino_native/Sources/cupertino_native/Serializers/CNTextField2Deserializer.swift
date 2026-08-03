@@ -151,6 +151,11 @@ enum CNTextField2Deserializer {
             let placeholder = payload.placeholder ?? ""
             let promptView: Text? = payload.prompt.flatMap { $0.isEmpty ? nil : Text($0) }
 
+            // Key that changes whenever Dart pushes a new selection, so an
+            // inbound selection (e.g. a combo box autocomplete highlighting the
+            // completed suffix) can be applied to the field.
+            let incomingSelectionKey = "\(model.payload.selectionBase ?? -1):\(model.payload.selectionExtent ?? -1)"
+
             let combinedTextBinding = Binding<String>(
                 get: { localText },
                 set: { newValue in
@@ -189,17 +194,52 @@ enum CNTextField2Deserializer {
                 reportSelection(newSelection)
             }
             .onChange(of: model.payload.text) { _, newText in
-                // Dart pushed new text via applyPatch
+                // Dart pushed new text via applyPatch. Update the buffer first,
+                // then re-apply the incoming selection against the new text so
+                // its indices are valid (Dart sends text + selection together).
                 if newText != localText {
                     localText = newText
                 }
+                applyIncomingSelection(in: newText)
+            }
+            .onChange(of: incomingSelectionKey) { _, _ in
+                // Selection-only change from Dart (text unchanged).
+                applyIncomingSelection(in: localText)
             }
             .onAppear {
                 localText = model.payload.text
+                applyIncomingSelection(in: localText)
                 if autofocus {
                     isFocused = true
                 }
             }
+        }
+
+        /// Applies a selection pushed from Dart to the field, mapping integer
+        /// offsets to `String.Index` against `text`. No-ops when the payload has
+        /// no selection or the offsets fall outside `text` (e.g. a stale index
+        /// arriving before the matching text change).
+        private func applyIncomingSelection(in text: String) {
+            guard let rawBase = model.payload.selectionBase,
+                  let rawExtent = model.payload.selectionExtent
+            else { return }
+            // TextSelection ranges are direction-agnostic; normalize to ascending.
+            let lower = min(rawBase, rawExtent)
+            let upper = max(rawBase, rawExtent)
+            guard lower >= 0, upper <= text.count else {
+                log("applyIncomingSelection out of bounds: (\(lower), \(upper)) for count=\(text.count)")
+                return
+            }
+            let startIndex = text.index(text.startIndex, offsetBy: lower)
+            let newSelection: TextSelection = if lower == upper {
+                TextSelection(insertionPoint: startIndex)
+            } else {
+                TextSelection(range: startIndex ..< text.index(text.startIndex, offsetBy: upper))
+            }
+            // Skip if already applied — avoids a redundant re-render and keeps
+            // reportSelection's equality guard from bouncing the value back.
+            guard selection != newSelection else { return }
+            selection = newSelection
         }
 
         private func log(_ message: String) {
