@@ -26,6 +26,7 @@ class CNPicker extends CNWidget {
     this.controlSize = CNControlSize.regular,
     this.font,
     this.shrink = true,
+    this.fixedSize = false,
     this.constraints,
     this.tint,
     this.foregroundColor,
@@ -42,6 +43,14 @@ class CNPicker extends CNWidget {
 
   /// Control size.
   final CNControlSize controlSize;
+
+  /// When true, the native control adopts its natural (ideal) size and ignores
+  /// the size proposed by its container (SwiftUI `.fixedSize()`).
+  ///
+  /// Use this to place the control in a fixed band (e.g. a toolbar) without it
+  /// stretching to fill the band; the parent can then center the naturally-sized
+  /// control. Leave false for normal in-flow sizing.
+  final bool fixedSize;
 
   /// Font applied to the picker.
   final CNFont? font;
@@ -194,6 +203,7 @@ class _CNPickerState extends CNWidgetState<CNPicker> {
       'controlSize': widget.controlSize.name,
       'font': widget.font?.toMap(),
       'enabled': widget.enabled,
+      'fixedSize': widget.fixedSize,
     };
 
     widget.writeSharedFields(

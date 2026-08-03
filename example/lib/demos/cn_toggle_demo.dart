@@ -21,61 +21,58 @@ class _ToggleDemoState extends State<ToggleDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return CNPageScaffold(
-      navigationBar: const CNNavigationBar(middle: Text('Toggle Demo')),
-      child: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  CNToggle(
-                    debugLog: _kDebugLog,
-                    isOn: isOn,
-                    toggleStyle: toggleStyle,
-                    controlSize: controlSize,
-                    tint: tintColor,
-                    onChanged: isEnabled ? (v) => setState(() => isOn = v) : null,
-                    content: CNChildVStack(
-                      alignment: CNAlignment.leading,
-                      children: [
-                        CNChildText('Vibrate on Ring'),
-                        CNChildText(
-                          "Enable vibration when the phone rings",
-                          font: CNFont.label(CNFontSize.preset(CNFontSizePreset.system)),
-                          foregroundColor: CupertinoColors.secondaryLabel,
-                        ),
-                      ],
-                    ),
+    return SafeArea(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                CNToggle(
+                  debugLog: _kDebugLog,
+                  isOn: isOn,
+                  toggleStyle: toggleStyle,
+                  controlSize: controlSize,
+                  tint: tintColor,
+                  onChanged: isEnabled ? (v) => setState(() => isOn = v) : null,
+                  content: CNChildVStack(
+                    alignment: CNAlignment.leading,
+                    children: [
+                      CNChildText('Vibrate on Ring'),
+                      CNChildText(
+                        "Enable vibration when the phone rings",
+                        font: CNFont.label(CNFontSize.preset(CNFontSizePreset.system)),
+                        foregroundColor: CupertinoColors.secondaryLabel,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  Text('Toggle is ${isOn ? "ON" : "OFF"}', style: const TextStyle(fontSize: 18)),
-                ],
+                ),
+                const SizedBox(height: 20),
+                Text('Toggle is ${isOn ? "ON" : "OFF"}', style: const TextStyle(fontSize: 18)),
+              ],
+            ),
+          ),
+          RightSideOptionContainer(
+            options: {
+              'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
+              'Toggle Style': CNPicker(
+                selection: toggleStyle.name,
+                onChanged: (value) =>
+                    setState(() => toggleStyle = CNToggleStyle.values.firstWhere((style) => style.name == value)),
+                children: CNToggleStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
               ),
-            ),
-            RightSideOptionContainer(
-              options: {
-                'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
-                'Toggle Style': CNPicker(
-                  selection: toggleStyle.name,
-                  onChanged: (value) =>
-                      setState(() => toggleStyle = CNToggleStyle.values.firstWhere((style) => style.name == value)),
-                  children: CNToggleStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
-                ),
-                'Tint Color': ColorPicker(
-                  colors: kSystemColors,
-                  value: tintColor,
-                  onChanged: (color) => setState(() => tintColor = color),
-                ),
-                'Enabled': CNToggle(isOn: isEnabled, onChanged: (v) => setState(() => isEnabled = v)),
-              },
-            ),
-          ],
-        ),
+              'Tint Color': ColorPicker(
+                colors: kSystemColors,
+                value: tintColor,
+                onChanged: (color) => setState(() => tintColor = color),
+              ),
+              'Enabled': CNToggle(isOn: isEnabled, onChanged: (v) => setState(() => isEnabled = v)),
+            },
+          ),
+        ],
       ),
     );
   }

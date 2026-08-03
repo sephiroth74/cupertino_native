@@ -1,6 +1,6 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, ThemeMode;
+import 'package:flutter/material.dart' show ButtonStyle, Colors, IconButton, Icons, MaterialStateProperty, NoSplash, ThemeMode;
 import 'package:macos_window_utils/macos_window_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -37,6 +37,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeWindowManager();
   await WindowManipulator.initialize(enableWindowDelegate: true);
+  // Reshape the window chrome once so the Flutter toolbar can draw over a
+  // transparent, full-size-content-view titlebar (no native NSToolbar).
+  await WindowManipulator.makeTitlebarTransparent();
+  await WindowManipulator.enableFullSizeContentView();
+  await WindowManipulator.hideTitle();
   await CNAccentColorListener.load();
   runApp(const MyApp());
 }
@@ -116,21 +121,82 @@ class _DemoEntry {
   final String title;
 }
 
-class _DesktopDemoShell extends StatefulWidget {
-  const _DesktopDemoShell({required this.selectedIndex});
+class _DesktopDemoShell extends StatelessWidget {
+  const _DesktopDemoShell({required this.selectedIndex, required this.searchQuery, required this.onSearchChanged});
 
+  final ValueChanged<String> onSearchChanged;
+  final String? searchQuery;
   final int selectedIndex;
 
   @override
-  State<_DesktopDemoShell> createState() => _DesktopDemoShellState();
-}
-
-class _DesktopDemoShellState extends State<_DesktopDemoShell> {
-  @override
   Widget build(BuildContext context) {
-    return KeyedSubtree(
-      key: ValueKey(widget.selectedIndex),
-      child: Container(color: CNTheme.of(context).canvasColor.withAlpha(127), child: _entries[widget.selectedIndex].page),
+    // This context sits below CNWindowScope (the shell is CNWindow.child), so
+    // the toolbar's sidebar-toggle can reach the scope here.
+    final appTheme = context.watch<AppTheme>();
+    final theme = CNTheme.of(context);
+    final accentColor = theme.accentColor;
+    final entry = _entries[selectedIndex];
+
+    return CNPageScaffold(
+      toolBar: CNToolbar(
+        automaticallyImplyLeading: true,
+        leading: CNToolbarIconButton(
+          'sidebar.left',
+          tooltip: 'Toggle the navigation sidebar',
+          onPressed: () => CNWindowScope.of(context).toggleSidebar(),
+        ),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(entry.title),
+            const SizedBox(
+              height: 2.0,
+            ),
+            Text('Cupertino Native Demo', style: TextStyle(fontSize: theme.typography.caption1.fontSize)),
+          ],
+        ),
+        backgroundColor: accentColor?.withLuminance(0.9),
+        enableBlur: true,
+        actions: [
+          // CNToolbarCustomItem(
+          //   overflowLabel: 'Toggle Sidebar',
+          //   builder: (context) {
+          //     return CnIconButton(size: 32, systemSymbolName: 'sidebar.left', onPressed: () => CNWindowScope.of(context).toggleSidebar());
+          //   },
+          // ),
+          // CNToolbarDivider(),
+          // CNToolbarCustomItem(
+          //   builder: (context) {
+          //     return CNButton(
+          //       controlSize: CNControlSize.regular,
+          //       labelStyle: CNLabelStyle.iconOnly,
+          //       children: [CNChildLabel('New', systemImage: 'plus')],
+          //       onPressed: () {
+          //         debugPrint('New button pressed');
+          //       },
+          //     );
+          //   },
+          // ),
+          // CNToolbarDivider(),
+          CNToolbarPicker(
+            pickerStyle: CNPickerStyle.menu,
+            selection: appTheme.mode.name,
+            children: [
+              CNChildLabel('System Theme', tag: ThemeMode.system.name, systemImage: 'sun.lefthalf.filled'),
+              CNChildLabel('Light Theme', tag: ThemeMode.light.name, systemImage: 'sun.max'),
+              CNChildLabel('Dark Theme', tag: ThemeMode.dark.name, systemImage: 'moon.fill'),
+            ],
+            onChanged: (tag) => appTheme.mode = ThemeMode.values.byName(tag),
+          ),
+          const CNToolbarSpacer(spacerUnits: 0.25),
+          const CNToolbarDivider(),
+          const CNToolbarSpacer(spacerUnits: 0.25),
+        ],
+        search: CNSearchField(text: searchQuery ?? '', placeholder: 'Search', onChanged: onSearchChanged),
+      ),
+      child: KeyedSubtree(key: ValueKey(selectedIndex), child: entry.page),
     );
   }
 }
@@ -160,16 +226,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AppTheme()),
-        ChangeNotifierProvider(create: (_) => NavigationController()),
-      ],
+    return ChangeNotifierProvider(
+      create: (_) => AppTheme(),
       builder: (context, child) {
         final appTheme = context.watch<AppTheme>();
-        // Watched so the toolbar back button re-syncs when the content-area
-        // navigator's ability to pop changes.
-        final navigation = context.watch<NavigationController>();
 
         brightness = appTheme.mode == ThemeMode.system
             ? WidgetsBinding.instance.platformDispatcher.platformBrightness
@@ -204,6 +264,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 maxWidth: 400,
                 startWidth: 250,
                 dragClosed: true,
+                // Clear the traffic lights: sidebar content starts below the
+                // toolbar strip while its background runs full-height.
+                padding: const EdgeInsets.only(top: kCNToolbarHeight),
                 material: NSVisualEffectViewMaterial.fullScreenUI,
                 backgroundColor: CNColors.canvasColor.withAlpha(127),
               ),
@@ -266,98 +329,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   );
                 },
               ),
-              toolbar: CNToolbarConfig(
-                onSearchChanged: (context, value) {
+              child: _DesktopDemoShell(
+                selectedIndex: selectedIndex,
+                searchQuery: searchQuery,
+                onSearchChanged: (value) {
                   debugPrint('Search changed: $value');
                   setState(() {
                     searchQuery = value;
                   });
                 },
-                onItemPressed: (context, value) {
-                  final tags = value.split(':');
-                  debugPrint('Toolbar item pressed: $value, tags: $tags, tags.length: ${tags.length}');
-                  if (tags.length == 2 && tags[0] == 'theme_picker') {
-                    debugPrint('Theme picker selected: ${tags[1]}');
-                    final selectedTag = tags[1];
-                    if (selectedTag == ThemeMode.system.name) {
-                      appTheme.mode = ThemeMode.system;
-                    } else if (selectedTag == ThemeMode.light.name) {
-                      appTheme.mode = ThemeMode.light;
-                    } else {
-                      appTheme.mode = ThemeMode.dark;
-                    }
-                  } else if (tags.length == 1 && tags[0] == 'toggle_navigation') {
-                    debugPrint('Toggling sidebar');
-                    CNWindowScope.of(context).toggleSidebar();
-                  } else if (tags.length == 1 && tags[0] == 'navigation.back') {
-                    debugPrint('Navigating back');
-                    context.read<NavigationController>().goBack();
-                  }
-                },
-                searchable: true,
-                searchText: searchQuery,
-                titleDisplayMode: CNToolbarTitleDisplayMode.automatic,
-                toolbarBackground: accentColor?.withLuminance(0.9),
-                toolbarBlurEnabled: true,
-                toolbarBlurMaterial: CNToolbarBlurMaterial.titlebar,
-                title: CNChildText('Cupertino Native Demo'),
-                groups: [
-                  CNToolbarItemGroup(
-                    placement: CNToolbarPlacement.navigation,
-                    children: [
-                      CNChildButton(
-                        tag: 'toggle_navigation',
-                        title: 'Toggle Navigation',
-                        systemImage: 'sidebar.left',
-                        labelStyle: CNLabelStyle.iconOnly,
-                        help: 'Toggle the navigation sidebar',
-                      ),
-                    ],
-                  ),
-
-                  CNToolbarItemGroup(
-                    placement: CNToolbarPlacement.navigation,
-                    children: [
-                      CNChildButton(
-                        tag: 'navigation.back',
-                        title: 'Back',
-                        systemImage: 'arrow.backward',
-                        labelStyle: CNLabelStyle.iconOnly,
-                        enabled: navigation.canGoBack,
-                        help: 'Go back',
-                      ),
-                    ],
-                  ),
-
-                  CNToolbarItemGroup(
-                    placement: CNToolbarPlacement.automatic,
-                    children: [
-                      CNChildPicker(
-                        pickerStyle: CNPickerStyle.menu.name,
-                        labelStyle: CNLabelStyle.titleAndIcon,
-                        tag: 'theme_picker',
-                        label: [
-                          CNChildLabel(
-                            appTheme.mode.name,
-                            labelStyle: CNLabelStyle.titleAndIcon,
-                            tag: appTheme.mode.name,
-                            systemImage: appTheme.mode == ThemeMode.system
-                                ? 'sun.max'
-                                : (appTheme.mode == ThemeMode.light ? 'sun.max' : 'moon.fill'),
-                          ),
-                        ],
-                        children: [
-                          CNChildLabel('System Theme', tag: ThemeMode.system.name, systemImage: 'sun.lefthalf.filled'),
-                          CNChildLabel('Light Theme', tag: ThemeMode.light.name, systemImage: 'sun.max'),
-                          CNChildLabel('Dark Theme', tag: ThemeMode.dark.name, systemImage: 'moon.fill'),
-                        ],
-                        selection: appTheme.mode.name,
-                      ),
-                    ],
-                  ),
-                ],
               ),
-              child: _DesktopDemoShell(selectedIndex: selectedIndex),
             );
           },
         );
@@ -435,7 +416,7 @@ class _SideBar extends StatelessWidget {
 }
 
 class _StatusBarButton extends StatelessWidget {
-  const _StatusBarButton({required this.icon, required this.label, required this.onPressed, this.isActive = false});
+  const _StatusBarButton({required this.icon, required this.label, required this.onPressed}) : isActive = false;
 
   final IconData icon;
   final bool isActive;

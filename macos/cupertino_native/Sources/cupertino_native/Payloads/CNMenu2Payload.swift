@@ -1,6 +1,6 @@
 import Foundation
 
-struct CNMenu2Payload: CNSharedPayloadFields {
+struct CNMenu2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
     var viewDebugId: String
     var debugLog: Bool
     var shrink: Bool
@@ -18,6 +18,7 @@ struct CNMenu2Payload: CNSharedPayloadFields {
     var menuStyle: String?
     var controlSize: String?
     var font: [String: Any]?
+    var fixedSize: Bool
 
     init(viewId _: Int64) {
         viewDebugId = ""
@@ -36,6 +37,7 @@ struct CNMenu2Payload: CNSharedPayloadFields {
         menuStyle = nil
         controlSize = nil
         font = nil
+        fixedSize = false
     }
 
     init?(channel: [String: Any], viewId: Int64) {
@@ -89,6 +91,10 @@ struct CNMenu2Payload: CNSharedPayloadFields {
                 font = channel["font"] as? [String: Any]
             }
         }
+
+        if channel.keys.contains("fixedSize") {
+            fixedSize = CNChannelDeserialization.decodeBool(channel["fixedSize"]) ?? false
+        }
     }
 
     func identityKey() -> String {
@@ -99,6 +105,7 @@ struct CNMenu2Payload: CNSharedPayloadFields {
         parts.append(menuStyle ?? "automatic")
         parts.append(controlSize ?? "nil")
         parts.append(font.map { String(describing: $0) } ?? "nil")
+        parts.append(String(fixedSize))
         return parts.joined(separator: "|")
     }
 }

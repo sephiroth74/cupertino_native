@@ -33,10 +33,12 @@ enum CNButton2Deserializer {
             view = CNViewModifierApplicator.applyForegroundColor(payload.foregroundColor, to: view)
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
+            view = CNViewModifierApplicator.applyFixedSize(payload.fixedSize, to: view)
             view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
             view = CNViewModifierApplicator.applyEnabled(payload.enabled, to: view)
             view = CNViewModifierApplicator.applyHelp(payload.help, to: view)
             view = CNViewModifierApplicator.applyOverlay(payload.overlay, to: view)
+            view = CNViewModifierApplicator.applyDebugLogRectangle(payload.debugLog, to: view)
 
             if let onSizeChanged {
                 view = AnyView(

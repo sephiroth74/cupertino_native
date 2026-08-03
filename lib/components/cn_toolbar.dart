@@ -1,220 +1,456 @@
-// ignore_for_file: public_member_api_docs
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native/widgets/cn_layout_bounds.dart';
 import 'package:flutter/widgets.dart';
+import 'package:macos_window_utils/macos/ns_visual_effect_view_material.dart';
+import 'package:macos_window_utils/widgets/visual_effect_subview_container/visual_effect_subview_container.dart';
+import 'package:window_manager/window_manager.dart' show DragToMoveArea;
 
-import '../channel/params.dart';
-import 'cn_child.dart';
+/// Default overall toolbar height (mirrors AppKit's 52pt titlebar+toolbar strip).
+const double kCNToolbarHeight = 52.0;
 
-/// Placement of a toolbar item group.
-enum CNToolbarPlacement {
-  automatic,
-  principal,
-  navigation,
-  status,
-  primaryAction,
-  secondaryAction,
-  confirmationAction,
-  destructiveAction,
-  cancellationAction,
-}
+/// Default width allotted to the [CNToolbar.title] slot.
+const double _kTitleWidth = 150.0;
 
-/// Title display mode for the toolbar.
-enum CNToolbarTitleDisplayMode {
-  automatic,
-  inline,
-  large,
-}
+/// Width of a single [CNToolbarSpacer] unit.
+const double _kToolbarItemWidth = 32.0;
 
-/// A toolbar item group containing children.
-class CNToolbarItemGroup {
-  const CNToolbarItemGroup({
-    required this.placement,
-    required this.children,
-    this.label,
-  });
+/// Left inset that clears the window traffic-light buttons when the sidebar is
+/// hidden (the sidebar itself sits under the lights when shown).
+const double _kTrafficLightInset = 70.0;
 
-  /// The child views within this group.
-  final List<CNChild> children;
-
-  /// Optional label for the group.
-  final CNChild? label;
-
-  /// Where this group is placed in the toolbar.
-  final CNToolbarPlacement placement;
-
-  Map<String, dynamic> toPayload(BuildContext context) {
-    return {
-      'placement': placement.name,
-      'children': children.map((c) => c.toChildPayload(context)).toList(),
-      if (label != null) 'label': label!.toChildPayload(context),
-    };
-  }
-}
-
-/// Blur material for the toolbar background.
-enum CNToolbarBlurMaterial {
-  titlebar,
-  menu,
-  popover,
-  sidebar,
-  headerView,
-  sheet,
-  windowBackground,
-  hudWindow,
-  fullScreenUI,
-  toolTip,
-  contentBackground,
-  underWindowBackground,
-  underPageBackground,
-}
-
-/// Configuration for the native toolbar.
-class CNToolbarConfig {
-  const CNToolbarConfig({
-    this.title,
-    this.titleDisplayMode = CNToolbarTitleDisplayMode.automatic,
-    this.groups = const [],
-    this.searchable = false,
-    this.searchText,
-    this.toolbarBackground,
-    this.toolbarBlurEnabled = false,
-    this.toolbarBlurMaterial,
-    this.onSearchChanged,
-    this.onItemPressed,
-  });
-
-  /// Callback when a toolbar button is pressed (identified by tag).
-  ///
-  /// The [BuildContext] parameter provides a context that is guaranteed to be
-  /// below [CNWindowScope] when used via [CNWindow.toolbar], allowing
-  /// `CNWindowScope.of(context)` to work correctly.
-  final void Function(BuildContext context, String tag)? onItemPressed;
-
-  /// Callback when search text changes.
-  ///
-  /// The [BuildContext] parameter provides a context that is guaranteed to be
-  /// below [CNWindowScope] when used via [CNWindow.toolbar].
-  final void Function(BuildContext context, String text)? onSearchChanged;
-
-  /// The toolbar item groups.
-  final List<CNToolbarItemGroup> groups;
-
-  /// The current text in the search field.
-  ///
-  /// Set this to programmatically update the search field text.
-  /// When native reports a change via [onSearchChanged], avoid setting this
-  /// to the same value in the same frame to prevent sync loops.
-  final String? searchText;
-
-  /// Whether to show the search field.
-  final bool searchable;
-
-  /// Navigation title (rendered as a CNChild).
-  final CNChild? title;
-
-  /// Title display mode.
-  final CNToolbarTitleDisplayMode titleDisplayMode;
-
-  /// Background color for the toolbar.
-  ///
-  /// When [toolbarBlurEnabled] is true, this color is used as a tint overlay
-  /// on top of the blur effect (use semi-transparent colors for best results).
-  /// When [toolbarBlurEnabled] is false, this is a solid background color.
-  final Color? toolbarBackground;
-
-  /// Whether to enable the blur (vibrancy) effect behind the toolbar.
-  ///
-  /// When true, a [NSVisualEffectView] is placed behind the toolbar area,
-  /// providing the native macOS blur. Use [toolbarBackground] with a
-  /// semi-transparent color to tint the blur.
-  final bool toolbarBlurEnabled;
-
-  /// The blur material to use when [toolbarBlurEnabled] is true.
-  ///
-  /// Defaults to [CNToolbarBlurMaterial.titlebar] if not specified.
-  final CNToolbarBlurMaterial? toolbarBlurMaterial;
-}
-
-/// A standalone widget that configures the native macOS toolbar for the window.
+/// A preferred-size widget that can tell whether it fully obstructs content.
 ///
-/// Prefer using [CNWindow.toolbar] instead of this widget directly.
-/// This widget is retained for cases where the toolbar needs to be managed
-/// independently of [CNWindow].
-@Deprecated('Use CNWindow.toolbar instead')
-class CNToolbar extends StatefulWidget {
-  /// Creates a toolbar widget.
+/// Implemented by [CNToolbar] and consumed by `CNPageScaffold` to decide how to
+/// reserve top padding for the bar.
+abstract class CNObstructingPreferredSizeWidget implements PreferredSizeWidget {
+  /// Whether this widget fully obstructs content behind it.
+  bool shouldFullyObstruct(BuildContext context);
+}
+
+/// A pure-Flutter toolbar rendered over a transparent, full-size-content-view
+/// titlebar — the macOS-idiomatic replacement for a native `NSToolbar`.
+///
+/// Place it in the `toolBar` slot of `CNPageScaffold`; the scaffold reserves
+/// [height] of top padding for the page content and overlays the bar on top.
+///
+/// The host application must reshape the window chrome once at startup so the
+/// titlebar is transparent and the content view spans the full window:
+///
+/// ```dart
+/// await WindowManipulator.makeTitlebarTransparent();
+/// await WindowManipulator.enableFullSizeContentView();
+/// await WindowManipulator.hideTitle();
+/// ```
+///
+/// Items ([actions] / [leading]) may be native platform-view controls
+/// ([CNToolbarIconButton], [CNToolbarPullDownButton], [CNToolbarPicker]) or pure
+/// Flutter widgets ([CNToolbarDivider], [CNToolbarSpacer], [CNToolbarCustomItem]).
+class CNToolbar extends StatefulWidget implements CNObstructingPreferredSizeWidget {
+  /// Creates a Flutter toolbar.
   const CNToolbar({
     super.key,
-    required this.config,
+    this.height = kCNToolbarHeight,
+    this.leading,
+    this.automaticallyImplyLeading = true,
+    this.title,
+    this.titleWidth = _kTitleWidth,
+    this.centerTitle = false,
+    this.actions = const [],
+    this.search,
+    this.padding = const EdgeInsets.all(8),
+    this.backgroundColor,
+    this.dividerColor,
+    this.enableBlur = false,
+    this.material = NSVisualEffectViewMaterial.headerView,
   });
 
-  /// Toolbar configuration.
-  final CNToolbarConfig config;
+  /// Trailing action items (native controls or pure-Flutter items).
+  final List<CNToolbarItem> actions;
+
+  /// Whether to synthesize a back button when [leading] is null and the
+  /// enclosing route can be popped.
+  final bool automaticallyImplyLeading;
+
+  /// Solid background color when [enableBlur] is false, or the tint over the
+  /// blur when [enableBlur] is true. Defaults to the theme canvas color.
+  final Color? backgroundColor;
+
+  /// Whether to center the [title] within the available space.
+  final bool centerTitle;
+
+  /// Color of the 1px bottom divider. Defaults to the theme separator color.
+  final Color? dividerColor;
+
+  /// Whether to render a native vibrancy (blur) background.
+  final bool enableBlur;
+
+  /// Overall bar height (reserved by the scaffold as top padding).
+  final double height;
+
+  /// Leading item (usually a [CNToolbarIconButton]). Overrides the
+  /// synthesized back button.
+  final CNToolbarItem? leading;
+
+  /// The visual-effect material used when [enableBlur] is true.
+  final NSVisualEffectViewMaterial material;
+
+  /// Inner padding around the bar content.
+  final EdgeInsets padding;
+
+  /// Optional native search field placed before the [actions].
+  final CNSearchField? search;
+
+  /// Title slot — a plain Flutter widget (typically `Text`); no platform view.
+  final Widget? title;
+
+  /// Width allotted to the [title] slot.
+  final double titleWidth;
 
   @override
   State<CNToolbar> createState() => _CNToolbarState();
+
+  @override
+  Size get preferredSize => Size.fromHeight(height);
+
+  @override
+  bool shouldFullyObstruct(BuildContext context) => false;
+}
+
+/// An escape hatch that renders an arbitrary Flutter widget as a toolbar item.
+class CNToolbarCustomItem extends CNToolbarItem {
+  /// Creates a custom item from a [builder].
+  const CNToolbarCustomItem({required this.builder, this.overflowLabel});
+
+  /// Builds the item's widget.
+  final WidgetBuilder builder;
+
+  /// Optional label used in the overflow menu (no overflow entry if null).
+  final String? overflowLabel;
+
+  @override
+  CNChild? toOverflowChild(BuildContext context) {
+    if (overflowLabel == null) return null;
+    return CNChildButton(tag: overflowLabel!, title: overflowLabel!);
+  }
+
+  @override
+  Widget build(BuildContext context) => builder(context);
+}
+
+/// A thin vertical divider between toolbar items (pure Flutter).
+class CNToolbarDivider extends CNToolbarItem {
+  /// Creates a toolbar divider.
+  const CNToolbarDivider({this.padding = const EdgeInsets.all(6.0), this.color});
+
+  /// Optional divider color.
+  final Color? color;
+
+  /// Padding around the 1px rule.
+  final EdgeInsets padding;
+
+  @override
+  CNChild? toOverflowChild(BuildContext context) => const CNChildDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    final dividerColor = color ?? CNTheme.of(context).separatorColor;
+    return SizedBox(
+      width: padding.horizontal + 1,
+      height: 28,
+      child: Padding(
+        padding: padding,
+        child: ColoredBox(color: dividerColor),
+      ),
+    );
+  }
+}
+
+/// A borderless icon button backed by a native `CNButton`.
+class CNToolbarIconButton extends CNToolbarItem {
+  /// Creates a toolbar icon button from an SF Symbol [systemImage].
+  const CNToolbarIconButton(this.systemImage, {this.onPressed, this.label, this.showLabel = false, this.tooltip, this.tint});
+
+  /// Optional text label (shown beneath the icon when [showLabel] is true, and
+  /// used as the overflow-menu title).
+  final String? label;
+
+  /// Called when tapped. When null, the button is disabled.
+  final VoidCallback? onPressed;
+
+  /// Whether to render [label] beneath the icon.
+  final bool showLabel;
+
+  /// SF Symbol name for the icon.
+  final String systemImage;
+
+  /// Optional tint color.
+  final Color? tint;
+
+  /// Tooltip shown on hover (SwiftUI `.help()`).
+  final String? tooltip;
+
+  @override
+  bool get managesOwnHeight => true;
+
+  @override
+  CNChild? toOverflowChild(BuildContext context) {
+    return CNChildButton(tag: label ?? systemImage, title: label ?? '', systemImage: systemImage, enabled: onPressed != null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Pin the button to a square sized off the toolbar's content band, read
+    // live from the layout (no magic constant). With shrink:false the native
+    // side receives a tight `.frame(width:height:)`, SwiftUI centers the symbol
+    // inside that fixed frame, and — because intrinsic sizing only runs in
+    // shrink mode — there is no measurement feedback loop to run away. This is
+    // the same approach as `CnIconButton` (a fixed frame + centered CNImage).
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final side = constraints.hasBoundedHeight ? constraints.maxHeight : 28.0;
+        // Size the symbol to fit within the square frame (≈45% of the side) so
+        // SwiftUI can center it inside the fixed frame instead of drawing it at
+        // its default size and overflowing — mirrors `CnIconButton`'s font sizing.
+        final iconFont = CNFont.system(CNFontSize.points(side * 0.45));
+        return CNButton(
+          onPressed: onPressed,
+          buttonStyle: CNButtonStyle.accessoryBarAction,
+          shrink: false,
+          debugLog: false,
+          constraints: BoxConstraints.tightFor(width: side, height: side),
+          tint: tint,
+          help: tooltip,
+          children: [
+            if (showLabel && label != null)
+              CNChildLabel(label!, systemImage: systemImage, font: iconFont)
+            else
+              CNChildImage(systemImage, font: iconFont),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Base class for items placed in a [CNToolbar]'s `leading`/`actions` slots.
+abstract class CNToolbarItem {
+  /// Const base constructor.
+  const CNToolbarItem();
+
+  /// Whether this item sizes itself to the toolbar's content band (e.g. a native
+  /// control pinned to a fixed frame) and therefore must NOT be wrapped in the
+  /// toolbar's vertical-centering helper — which would strip the height bound the
+  /// item needs to read. Pure-Flutter items (dividers, spacers, custom widgets)
+  /// leave this false and get centered by the toolbar.
+  bool get managesOwnHeight => false;
+
+  /// Builds the item's Flutter representation for the toolbar row.
+  Widget build(BuildContext context);
+
+  /// Serializes the item for the overflow menu, or null if it can't overflow
+  /// (e.g. spacers).
+  CNChild? toOverflowChild(BuildContext context);
+}
+
+/// A picker backed by a native `CNPicker`.
+class CNToolbarPicker extends CNToolbarItem {
+  /// Creates a toolbar picker.
+  const CNToolbarPicker({
+    required this.children,
+    required this.selection,
+    this.label,
+    this.onChanged,
+    this.pickerStyle = CNPickerStyle.menu,
+    this.tint,
+  });
+
+  /// Picker items (each with a tag).
+  final List<CNChild> children;
+
+  /// Optional label content shown alongside the picker.
+  final List<CNChild>? label;
+
+  /// Called with the newly selected tag.
+  final ValueChanged<String>? onChanged;
+
+  /// Visual style for the picker.
+  final CNPickerStyle pickerStyle;
+
+  /// Currently selected tag.
+  final String selection;
+
+  /// Optional tint color.
+  final Color? tint;
+
+  @override
+  CNChild? toOverflowChild(BuildContext context) {
+    return CNChildPicker(tag: 'picker', children: children, selection: selection, label: label, pickerStyle: pickerStyle.name);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CNPicker(
+      children: children,
+      selection: selection,
+      label: label,
+      onChanged: onChanged,
+      pickerStyle: pickerStyle,
+      tint: tint,
+      shrink: true,
+    );
+  }
+}
+
+/// A pull-down menu button backed by a native `CNMenu`.
+class CNToolbarPullDownButton extends CNToolbarItem {
+  /// Creates a pull-down button.
+  const CNToolbarPullDownButton({required this.items, required this.label, this.onItemPressed, this.tint});
+
+  /// The menu items.
+  final List<CNChild> items;
+
+  /// The trigger label content (e.g. an icon).
+  final List<CNChild> label;
+
+  /// Called with the pressed item's tag.
+  final ValueChanged<String>? onItemPressed;
+
+  /// Optional tint color.
+  final Color? tint;
+
+  @override
+  CNChild? toOverflowChild(BuildContext context) {
+    return CNChildMenu(label: label, items: items);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CNMenu(label: label, items: items, onItemPressed: onItemPressed, tint: tint, shrink: true);
+  }
+}
+
+/// A fixed-width spacer between toolbar items (pure Flutter).
+class CNToolbarSpacer extends CNToolbarItem {
+  /// Creates a spacer of [spacerUnits] × [_kToolbarItemWidth] width.
+  const CNToolbarSpacer({this.spacerUnits = 1.0});
+
+  /// Number of spacer units.
+  final double spacerUnits;
+
+  @override
+  CNChild? toOverflowChild(BuildContext context) => null;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(width: spacerUnits * _kToolbarItemWidth);
 }
 
 class _CNToolbarState extends State<CNToolbar> {
-  static const MethodChannel _channel = MethodChannel('cupertino_native');
+  /// Centers a toolbar [child] vertically without imposing a height on it.
+  ///
+  /// A native control must NOT be given a bounded height. In shrink mode a height
+  /// constraint becomes a SwiftUI `.frame(maxHeight:)`, which (a) stretches the
+  /// control's bezel to fill that height and (b) destabilises its `fittingSize`
+  /// measurement — the reported intrinsic height then oscillates (e.g. 21→45→38→45)
+  /// and never settles, so no Flutter-side sizing can converge. Left unbounded, the
+  /// control reports its stable natural height instead.
+  ///
+  /// `UnconstrainedBox` with `constrainedAxis: horizontal` removes only the
+  /// vertical bound (so no `maxHeight` reaches the native side) while keeping the
+  /// width bound. In the leading slot — which `NavigationToolbar` hands a *tight*
+  /// full-band height — the box is forced to the band height and centers the
+  /// shorter natural child within it; in the trailing `Row` it shrink-wraps to the
+  /// child, which the row then centers. The bar [padding] gives the 8pt inset that
+  /// keeps the natural-height controls off the bar edges.
+  Widget _centerItem(Widget child) {
+    return UnconstrainedBox(constrainedAxis: Axis.horizontal, alignment: Alignment.center, child: child);
+  }
 
-  @override
-  void didUpdateWidget(covariant CNToolbar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _syncToolbar();
+  /// Places a toolbar [item] in the row.
+  ///
+  /// Items that manage their own height (native controls that pin themselves to
+  /// a fixed frame sized off the band — see [CNToolbarItem.managesOwnHeight])
+  /// are handed through untouched: they need the incoming height bound to read
+  /// the band via a `LayoutBuilder`, which [_centerItem]'s `UnconstrainedBox`
+  /// would strip. Everything else (dividers, spacers, custom widgets) is
+  /// vertically centered by [_centerItem].
+  Widget _wrapItem(CNToolbarItem item, BuildContext context) {
+    final child = item.build(context);
+    return item.managesOwnHeight ? CNLayoutBounds(enabled: false, child: child) : _centerItem(child);
   }
 
   @override
-  void dispose() {
-    _clearToolbar();
-    _channel.setMethodCallHandler(null);
-    super.dispose();
-  }
+  Widget build(BuildContext context) {
+    final theme = CNTheme.of(context);
+    final scope = CNWindowScope.maybeOf(context);
+    final dividerColor = widget.dividerColor ?? theme.separatorColor;
 
-  @override
-  void initState() {
-    super.initState();
-    _channel.setMethodCallHandler(_handleNativeCall);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _syncToolbar());
-  }
-
-  Future<void> _handleNativeCall(MethodCall call) async {
-    switch (call.method) {
-      case 'toolbarItemPressed':
-        final tag = call.arguments as String?;
-        if (tag != null) {
-          widget.config.onItemPressed?.call(context, tag);
-        }
-      case 'toolbarSearchChanged':
-        final text = call.arguments as String? ?? '';
-        widget.config.onSearchChanged?.call(context, text);
+    // Leading: explicit, or a synthesized back button when the route can pop.
+    CNToolbarItem? leadingItem = widget.leading;
+    if (leadingItem == null && widget.automaticallyImplyLeading) {
+      final canPop = ModalRoute.of(context)?.canPop ?? false;
+      if (canPop) {
+        leadingItem = CNToolbarIconButton('chevron.backward', onPressed: () => Navigator.maybePop(context));
+      }
     }
+    final Widget? leading = leadingItem == null ? null : _wrapItem(leadingItem, context);
+
+    // Title, sized and styled like AppKit's toolbar title.
+    Widget? title = widget.title;
+    if (title != null) {
+      title = SizedBox(
+        width: widget.titleWidth,
+        child: DefaultTextStyle(
+          style: theme.typography.title3.copyWith(color: theme.labelColor, fontWeight: FontWeight.w600),
+          child: title,
+        ),
+      );
+    }
+
+    // Trailing: actions, then the optional search field. Items that manage
+    // their own height keep the band's height bound; the rest are centered.
+    final trailingChildren = <Widget>[
+      for (final action in widget.actions) _wrapItem(action, context),
+      if (widget.search != null) _centerItem(SizedBox(width: 180, child: widget.search)),
+    ];
+    final trailing = Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: trailingChildren);
+
+    Widget bar = Container(
+      alignment: Alignment.center,
+      padding: widget.padding,
+      decoration: BoxDecoration(
+        color: widget.enableBlur ? null : (widget.backgroundColor ?? theme.canvasColor),
+        border: Border(bottom: BorderSide(color: dividerColor)),
+      ),
+      child: NavigationToolbar(
+        leading: SafeArea(
+          top: false,
+          right: false,
+          bottom: false,
+          left: !(scope?.isSidebarShown ?? false),
+          child: leading ?? const SizedBox.shrink(),
+        ),
+        middle: title,
+        centerMiddle: widget.centerTitle,
+        trailing: trailing,
+        middleSpacing: 8,
+      ),
+    );
+
+    if (widget.enableBlur) {
+      bar = VisualEffectSubviewContainer(
+        material: widget.material,
+        child: DecoratedBox(
+          decoration: BoxDecoration(color: widget.backgroundColor),
+          child: bar,
+        ),
+      );
+    }
+
+    // Reserve the traffic-light inset via MediaQuery so the leading SafeArea can
+    // consume it only when the sidebar is hidden. Empty regions drag the window.
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(left: _kTrafficLightInset)),
+      child: DragToMoveArea(child: bar),
+    );
   }
-
-  void _syncToolbar() {
-    if (defaultTargetPlatform != TargetPlatform.macOS) return;
-
-    final config = widget.config;
-    _channel.invokeMethod<void>('makeToolbar', {
-      if (config.title != null) 'title': config.title!.toChildPayload(context),
-      'titleDisplayMode': config.titleDisplayMode.name,
-      'searchable': config.searchable,
-      'groups': config.groups.map((g) => g.toPayload(context)).toList(),
-      if (config.toolbarBackground != null)
-        'toolbarBackground': resolveColorToArgb(config.toolbarBackground, context),
-      'toolbarBlurEnabled': config.toolbarBlurEnabled,
-      if (config.toolbarBlurMaterial != null)
-        'toolbarBlurMaterial': config.toolbarBlurMaterial!.name,
-    });
-  }
-
-  void _clearToolbar() {
-    if (defaultTargetPlatform != TargetPlatform.macOS) return;
-    _channel.invokeMethod<void>('clearToolbar');
-  }
-
-  @override
-  Widget build(BuildContext context) => const SizedBox.shrink();
 }

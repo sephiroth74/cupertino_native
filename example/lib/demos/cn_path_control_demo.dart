@@ -34,48 +34,45 @@ class _PathControlDemoPageState extends State<PathControlDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CNPageScaffold(
-      navigationBar: const CNNavigationBar(middle: Text('Path Control')),
-      child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            const Text('Path control styles'),
-            const SizedBox(height: 12),
-            FutureBuilder<void>(
-              future: _fetchInitialDirectory(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const SizedBox(height: 48);
-                }
+    return SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          const Text('Path control styles'),
+          const SizedBox(height: 12),
+          FutureBuilder<void>(
+            future: _fetchInitialDirectory(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const SizedBox(height: 48);
+              }
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CNPathControl(
-                      editable: true,
-                      controlStyle: CNPathControlStyle.popup,
-                      controlSize: CNControlSize.large,
-                      url: Uri.parse(_pathControlPath),
-                      isDirectory: _pathControlIsDirectory,
-                      onPressed: _handlePressed,
-                    ),
-                    const SizedBox(height: 12),
-                    CNPathControl(
-                      controlStyle: CNPathControlStyle.standard,
-                      controlSize: CNControlSize.large,
-                      url: Uri.parse(_pathControlPath),
-                      isDirectory: _pathControlIsDirectory,
-                      onPressed: _handlePressed,
-                    ),
-                    const SizedBox(height: 16),
-                    Text('Selected path: $_pathControlPath'),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CNPathControl(
+                    editable: true,
+                    controlStyle: CNPathControlStyle.popup,
+                    controlSize: CNControlSize.large,
+                    url: Uri.parse(_pathControlPath),
+                    isDirectory: _pathControlIsDirectory,
+                    onPressed: _handlePressed,
+                  ),
+                  const SizedBox(height: 12),
+                  CNPathControl(
+                    controlStyle: CNPathControlStyle.standard,
+                    controlSize: CNControlSize.large,
+                    url: Uri.parse(_pathControlPath),
+                    isDirectory: _pathControlIsDirectory,
+                    onPressed: _handlePressed,
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Selected path: $_pathControlPath'),
+                ],
+              );
+            },
+          ),
+        ],
       ),
     );
   }

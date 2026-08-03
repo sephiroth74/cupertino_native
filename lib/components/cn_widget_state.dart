@@ -43,6 +43,8 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
       intrinsicHeight: intrinsicHeight,
     );
 
+    logDebug('shrink mode: resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight');
+
     return (resolvedWidth, resolvedHeight);
   }
 
@@ -60,13 +62,11 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
   @override
   void didChangeDependencies() {
-    logDebug('didChangeDependencies');
     super.didChangeDependencies();
   }
 
   @override
   void didUpdateWidget(covariant T oldWidget) {
-    logDebug('didUpdateWidget');
     super.didUpdateWidget(oldWidget);
     _syncPropsToNativeIfNeeded(oldWidget: oldWidget);
   }
@@ -112,24 +112,16 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
       resolvedWidth = intrinsicWidth;
     } else if (constraints.tightWidth != null) {
       resolvedWidth = constraints.tightWidth!;
-      logDebug('shrink mode: using tightWidth from constraints: $resolvedWidth');
     } else {
       resolvedWidth = defaultWidth;
-      logDebug('shrink mode: using defaultSize.width: $defaultWidth');
     }
     // resolvedWidth = constraints.constrainWidth(resolvedWidth);
 
     if (resolvedWidth > constraints.maxWidth) {
-      logDebug('shrink mode: resolvedWidth ($resolvedWidth) exceeds maxWidth (${constraints.maxWidth}), constraining to maxWidth');
       resolvedWidth = constraints.maxWidth;
     } else if (resolvedWidth < constraints.minWidth) {
-      logDebug(
-        'shrink mode: resolvedWidth ($resolvedWidth) is less than minWidth (${constraints.minWidth}), constraining to minWidth',
-      );
       resolvedWidth = constraints.minWidth;
     }
-
-    logDebug('shrink mode: resolvedWidth after constraints: $resolvedWidth');
     return resolvedWidth;
   }
 
@@ -137,27 +129,17 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
     double resolvedHeight;
     if (intrinsicHeight != null) {
       resolvedHeight = intrinsicHeight;
-      logDebug('shrink mode: using intrinsicHeight');
     } else if (constraints.tightHeight != null) {
       resolvedHeight = constraints.tightHeight!;
-      logDebug('shrink mode: using tightHeight from constraints');
     } else if (constraints.hasBoundedHeight) {
       resolvedHeight = constraints.maxHeight;
-      logDebug('shrink mode: using maxHeight from constraints');
     } else {
       resolvedHeight = defaultHeight;
-      logDebug('shrink mode: using defaultSize.height: $defaultHeight');
     }
 
     if (resolvedHeight > constraints.maxHeight) {
-      logDebug(
-        'shrink mode: resolvedHeight ($resolvedHeight) exceeds maxHeight (${constraints.maxHeight}), constraining to maxHeight',
-      );
       resolvedHeight = constraints.maxHeight;
     } else if (resolvedHeight < constraints.minHeight) {
-      logDebug(
-        'shrink mode: resolvedHeight ($resolvedHeight) is less than minHeight (${constraints.minHeight}), constraining to minHeight',
-      );
       resolvedHeight = constraints.minHeight;
     }
 
@@ -187,7 +169,6 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
   }
 
   Future<void> _onPlatformViewCreated(int id) async {
-    logDebug('onPlatformViewCreated id=$id');
     _channel = MethodChannel('${widget.nativeViewType}_$id');
     _channel?.setMethodCallHandler(_handleMethodCall);
 
@@ -216,7 +197,6 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
   }
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
-    logDebug('onMethodCall ${call.method} args=${call.arguments}');
     if (call.method == 'intrinsicSizeChanged') {
       final args = call.arguments as Map?;
       final width = (args?['width'] as num?)?.toDouble();
@@ -228,7 +208,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
   }
 
   void _onIntrinsicSizeChanged(double? width, double? height) {
-    logDebug('received intrinsic size change: width=$width, height=$height');
+    logDebug('_onIntrinsicSizeChanged: width=$width, height=$height');
     if (!mounted || width == null || height == null) return;
 
     final normalizedWidth = width > 0 ? width : null;
@@ -246,8 +226,6 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
   }
 
   Future<void> _syncPropsToNativeIfNeeded({required T oldWidget}) async {
-    logDebug('syncPropsToNativeIfNeeded');
-
     if (_channel == null) return;
     if (_lastSentPayload == null) return;
 
@@ -286,8 +264,6 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
         final payload = _buildPayload(constraints: _lastConstraints);
 
-        logDebug('build: payload=$payload');
-
         // Detect constraint changes from LayoutBuilder (e.g. window resize).
         // didUpdateWidget won't fire for these since the widget instance hasn't changed.
         if (_lastSentPayload != null && _channel != null) {
@@ -312,9 +288,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
         );
 
         logDebug('*** build ***');
-        logDebug('parentConstraints=$parentConstraints');
-        logDebug('widget.constraints=${widget.constraints}');
-        logDebug('_lastConstraints=$_lastConstraints');
+        logDebug('parentConstraints=$parentConstraints, widget.constraints=${widget.constraints}, _lastConstraints=$_lastConstraints');
         logDebug('shrink=${widget.shrink}, intrinsicWidth=$_intrinsicWidth, intrinsicHeight=$_intrinsicHeight');
 
         final (width, height) = computeFinalSize(
@@ -334,8 +308,8 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
             platformView = Stack(
               fit: StackFit.passthrough,
               children: [
-                Container(
-                  decoration: BoxDecoration(border: Border.all(color: CNColors.red.withValues(alpha: 0.5), width: 1.0)),
+                SizedBox(
+                  // decoration: BoxDecoration(border: Border.all(color: CNColors.red.withValues(alpha: 0.5), width: 1.0)),
                   width: resolvedWidth,
                   height: resolvedHeight,
                 ),

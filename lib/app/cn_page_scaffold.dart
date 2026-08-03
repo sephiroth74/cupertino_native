@@ -1,14 +1,16 @@
 import 'package:flutter/widgets.dart';
 
-import '../theme/cn_theme.dart';
-import '../components/cn_navigation_bar.dart';
+import '../components/cn_toolbar.dart';
 
 /// Desktop-aware page scaffold for Cupertino Native apps.
+///
+/// Reserves top padding for an optional [toolBar] and overlays the bar on top of
+/// the [child], mirroring `appkit_ui_elements`' `AppKitScaffold`.
 class CNPageScaffold extends StatelessWidget {
-  /// Creates a page scaffold with optional navigation bar.
+  /// Creates a page scaffold with an optional Flutter toolbar.
   const CNPageScaffold({
     super.key,
-    this.navigationBar,
+    this.toolBar,
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
     required this.child,
@@ -16,51 +18,38 @@ class CNPageScaffold extends StatelessWidget {
 
   /// Background color for the page.
   ///
-  /// If null, this resolves to [CNTheme.of] `canvasColor`.
+  /// If null, the page is transparent (the enclosing window paints the background).
   final Color? backgroundColor;
 
   /// Main content area.
   final Widget child;
 
-  /// Optional top navigation bar.
-  final CNObstructingPreferredSizeWidget? navigationBar;
-
-  /// Whether the body should avoid bottom insets like keyboard.
+  /// Whether the body should avoid bottom insets like the keyboard.
   final bool resizeToAvoidBottomInset;
+
+  /// Optional Flutter toolbar overlaid at the top of the page.
+  final CNToolbar? toolBar;
 
   @override
   Widget build(BuildContext context) {
-    final resolvedBackground = backgroundColor;
     final mediaQuery = MediaQuery.of(context);
 
     Widget paddedContent = child;
 
-    if (navigationBar != null) {
-      final topPadding = navigationBar!.preferredSize.height + mediaQuery.padding.top;
+    if (toolBar != null) {
+      final topPadding = toolBar!.preferredSize.height + mediaQuery.padding.top;
       final bottomPadding = resizeToAvoidBottomInset ? mediaQuery.viewInsets.bottom : 0.0;
 
-      if (navigationBar!.shouldFullyObstruct(context)) {
-        paddedContent = MediaQuery(
-          data: mediaQuery
-              .removePadding(removeTop: true)
-              .copyWith(viewInsets: resizeToAvoidBottomInset ? mediaQuery.viewInsets.copyWith(bottom: 0.0) : mediaQuery.viewInsets),
-          child: Padding(
-            padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-            child: paddedContent,
-          ),
-        );
-      } else {
-        paddedContent = MediaQuery(
-          data: mediaQuery.copyWith(
-            padding: mediaQuery.padding.copyWith(top: topPadding),
-            viewInsets: resizeToAvoidBottomInset ? mediaQuery.viewInsets.copyWith(bottom: 0.0) : mediaQuery.viewInsets,
-          ),
-          child: Padding(
-            padding: EdgeInsets.only(bottom: bottomPadding),
-            child: paddedContent,
-          ),
-        );
-      }
+      paddedContent = MediaQuery(
+        data: mediaQuery.copyWith(
+          padding: mediaQuery.padding.copyWith(top: topPadding),
+          viewInsets: resizeToAvoidBottomInset ? mediaQuery.viewInsets.copyWith(bottom: 0.0) : mediaQuery.viewInsets,
+        ),
+        child: Padding(
+          padding: EdgeInsets.only(bottom: bottomPadding),
+          child: paddedContent,
+        ),
+      );
     } else if (resizeToAvoidBottomInset) {
       paddedContent = MediaQuery(
         data: mediaQuery.copyWith(viewInsets: mediaQuery.viewInsets.copyWith(bottom: 0)),
@@ -73,11 +62,18 @@ class CNPageScaffold extends StatelessWidget {
 
     return SizedBox.expand(
       child: DecoratedBox(
-        decoration: BoxDecoration(color: resolvedBackground),
+        decoration: BoxDecoration(color: backgroundColor),
         child: Stack(
           children: [
             paddedContent,
-            if (navigationBar != null) Positioned(top: 0, left: 0, right: 0, child: navigationBar!),
+            if (toolBar != null)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: toolBar!.preferredSize.height,
+                child: toolBar!,
+              ),
           ],
         ),
       ),

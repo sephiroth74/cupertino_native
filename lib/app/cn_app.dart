@@ -441,7 +441,6 @@ class _CNAppState extends State<CNApp> {
   Widget _macosBuilder(BuildContext context, Widget? child) {
     return MainWindowStreamBuilder(
       builder: (context, isMainWindow) {
-        debugPrint('CNApp: isMainWindow: $isMainWindow');
         return CNAccentColorBuilder(
           builder: (context, a) {
             final mode = widget.themeMode ?? ThemeMode.system;
@@ -452,11 +451,11 @@ class _CNAppState extends State<CNApp> {
             if (useDarkTheme) {
               theme =
                   widget.darkTheme ??
-                  CNThemeData.dark(userAccentColor: widget.accentColor, systemAccentColor: a.color, isMainWindow: isMainWindow);
+                  CNThemeData.dark(userAccentColor: widget.accentColor, systemAccentColor: a.color.darkColor, isMainWindow: isMainWindow);
             } else {
               theme =
                   widget.lightTheme ??
-                  CNThemeData.light(userAccentColor: widget.accentColor, systemAccentColor: a.color, isMainWindow: isMainWindow);
+                  CNThemeData.light(userAccentColor: widget.accentColor, systemAccentColor: a.color.color, isMainWindow: isMainWindow);
             }
 
             return CNTheme(

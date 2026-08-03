@@ -1,6 +1,6 @@
 import Foundation
 
-struct CNButton2Payload: CNSharedPayloadFields {
+struct CNButton2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
     var viewDebugId: String
     var debugLog: Bool
     var shrink: Bool
@@ -17,6 +17,7 @@ struct CNButton2Payload: CNSharedPayloadFields {
     var role: String?
     var controlSize: String?
     var labelStyle: String?
+    var fixedSize: Bool
 
     init(viewId _: Int64) {
         viewDebugId = ""
@@ -34,6 +35,7 @@ struct CNButton2Payload: CNSharedPayloadFields {
         controlSize = nil
         labelStyle = nil
         enabled = nil
+        fixedSize = false
     }
 
     init?(channel: [String: Any], viewId: Int64) {
@@ -69,6 +71,10 @@ struct CNButton2Payload: CNSharedPayloadFields {
         if channel.keys.contains("enabled") {
             enabled = channel["enabled"] as? Bool
         }
+
+        if channel.keys.contains("fixedSize") {
+            fixedSize = CNChannelDeserialization.decodeBool(channel["fixedSize"]) ?? false
+        }
     }
 
     func identityKey() -> String {
@@ -79,6 +85,7 @@ struct CNButton2Payload: CNSharedPayloadFields {
         parts.append(controlSize ?? "nil")
         parts.append(labelStyle ?? "nil")
         parts.append(enabled.map { String($0) } ?? "nil")
+        parts.append(String(fixedSize))
         return parts.joined(separator: "|")
     }
 }

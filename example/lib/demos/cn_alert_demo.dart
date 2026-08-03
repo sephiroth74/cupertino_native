@@ -1,5 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native/widgets/cn_layout_bounds.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class AlertDemoPage extends StatefulWidget {
   const AlertDemoPage({super.key});
@@ -53,84 +55,81 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CNPageScaffold(
-      navigationBar: const CNNavigationBar(middle: Text('Alert')),
-      child: CNContentArea(
-        builder: (context, scrollController) {
-          return ListView(
-            controller: scrollController,
-            padding: const EdgeInsets.all(16),
-            children: [
-              CNPixelPerfectContainer(
+    return CNContentArea(
+      builder: (context, scrollController) {
+        return ListView(
+          controller: scrollController,
+          padding: const EdgeInsets.all(16),
+          children: [
+            Center(
+              child: CNPixelPerfectContainer(
                 adjustPosition: true,
                 onGeometryChanged: (value) {
                   setState(() {
                     lastGeometry = value;
                   });
                 },
-                child: CNButton(
-                  onPressed: _showInfoAlert,
-                  shrink: true,
-                  controlSize: CNControlSize.large,
-                  children: [
-                    CNChildLabel('Show Info Alert', systemImage: 'info.triangle', constraints: BoxConstraints.tightFor(width: 250)),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              CNButton(
-                shrink: true,
-                controlSize: CNControlSize.large,
-                onPressed: _showConfirmAlert,
-                children: [
-                  CNChildLabel(
-                    'Show Confirm Alert',
-                    systemImage: 'questionmark.circle',
-                    constraints: BoxConstraints.tightFor(width: 250),
+                child: CNLayoutBounds(
+                  enabled: false,
+                  child: CNButton(
+                    debugLog: false,
+                    onPressed: _showInfoAlert,
+                    shrink: true,
+                    controlSize: CNControlSize.large,
+                    children: [
+                      CNChildLabel('Show Info Alert', systemImage: 'info.triangle', constraints: BoxConstraints.tightFor(width: 250)),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              CNButton(
-                debugLog: false,
-                shrink: true,
-                controlSize: CNControlSize.large,
-                onPressed: _showCriticalAlert,
-                children: [
-                  CNChildLabel(
-                    'Show Critical Alert',
-                    systemImage: 'exclamationmark.triangle',
-                    constraints: BoxConstraints.tightFor(width: 250),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              if (lastGeometry != null) ...[
-                Text('Last geometry: ${lastGeometry!.x}, ${lastGeometry!.y}, ${lastGeometry!.width}, ${lastGeometry!.height}'),
-                const SizedBox(height: 4),
-                Text(
-                  'Physical geometry: ${lastGeometry!.physicalX}, ${lastGeometry!.physicalY}, ${lastGeometry!.physicalWidth}, ${lastGeometry!.physicalHeight}',
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Window geometry: ${lastGeometry!.windowX}, ${lastGeometry!.windowY}, ${lastGeometry!.windowWidth}, ${lastGeometry!.windowHeight}',
+              ),
+            ),
+            const SizedBox(height: 12),
+            CNButton(
+              shrink: true,
+              controlSize: CNControlSize.large,
+              onPressed: _showConfirmAlert,
+              children: [
+                CNChildLabel(
+                  'Show Confirm Alert',
+                  systemImage: 'questionmark.circle',
+                  constraints: BoxConstraints.tightFor(width: 250),
                 ),
-                const SizedBox(height: 4),
-                Text('Device pixel ratio: ${lastGeometry!.devicePixelRatio}'),
               ],
+            ),
+            const SizedBox(height: 12),
+            CNButton(
+              debugLog: false,
+              shrink: true,
+              controlSize: CNControlSize.large,
+              onPressed: _showCriticalAlert,
+              children: [
+                CNChildLabel(
+                  'Show Critical Alert',
+                  systemImage: 'exclamationmark.triangle',
+                  constraints: BoxConstraints.tightFor(width: 250),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
 
-              const SizedBox(height: 16),
-              if (_lastResult != null) ...[
-                Text('Selected index: ${_lastResult!.selectedIndex}'),
-                const SizedBox(height: 4),
-                Text('Selected tag: ${_lastResult!.selectedTag ?? '-'}'),
-                const SizedBox(height: 4),
-                Text('Suppression selected: ${_lastResult!.suppressionSelected}'),
-              ],
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: CnIconButton(size: 48, icon: null, systemSymbolName: 'square.and.arrow.up', onPressed: () {}),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+            if (_lastResult != null) ...[
+              Text('Selected index: ${_lastResult!.selectedIndex}'),
+              const SizedBox(height: 4),
+              Text('Selected tag: ${_lastResult!.selectedTag ?? '-'}'),
+              const SizedBox(height: 4),
+              Text('Suppression selected: ${_lastResult!.suppressionSelected}'),
             ],
-          );
-        },
-      ),
+          ],
+        );
+      },
     );
   }
 }

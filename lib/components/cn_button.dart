@@ -25,6 +25,7 @@ class CNButton extends CNWidget {
     this.controlSize,
     this.labelStyle,
     this.shrink = true,
+    this.fixedSize = false,
     this.constraints,
     this.tint,
     this.foregroundColor,
@@ -41,6 +42,14 @@ class CNButton extends CNWidget {
 
   /// Control size.
   final CNControlSize? controlSize;
+
+  /// When true, the native control adopts its natural (ideal) size and ignores
+  /// the size proposed by its container (SwiftUI `.fixedSize()`).
+  ///
+  /// Use this to place the control in a fixed band (e.g. a toolbar) without it
+  /// stretching to fill the band; the parent can then center the naturally-sized
+  /// control. Leave false for normal in-flow sizing.
+  final bool fixedSize;
 
   /// Label style applied inside the button.
   final CNLabelStyle? labelStyle;
@@ -120,6 +129,7 @@ class _CNButton2State extends CNWidgetState<CNButton> {
       'controlSize': widget.controlSize?.name,
       'labelStyle': widget.labelStyle?.name,
       'enabled': enabled,
+      'fixedSize': widget.fixedSize,
     };
 
     widget.writeSharedFields(

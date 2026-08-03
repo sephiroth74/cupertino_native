@@ -1,5 +1,19 @@
 import SwiftUI
 
+/// Payloads that expose a `fixedSize` flag.
+///
+/// When `fixedSize` is true the widget's SwiftUI content is drawn at its natural
+/// (ideal) size — see `CNViewModifierApplicator.applyFixedSize` — and, crucially,
+/// its size is *reported* to Flutter from `intrinsicContentSize` rather than
+/// `fittingSize`. The hosting view is pinned to the platform view's four edges, so
+/// `fittingSize` echoes the frame Flutter imposes; maxing with it would feed a
+/// runaway measurement loop (the frame grows → fittingSize grows → Flutter grows
+/// the frame …). Reading the natural intrinsic size instead keeps the report
+/// stable so the parent can center the naturally-sized control in a fixed band.
+protocol CNFixedSizablePayload {
+    var fixedSize: Bool { get }
+}
+
 /// Protocol for payloads that carry the standard shared fields
 /// (shrink, constraints, paddings, tint, foregroundColor, viewDebugId).
 ///

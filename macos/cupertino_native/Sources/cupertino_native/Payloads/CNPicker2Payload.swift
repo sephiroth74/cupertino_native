@@ -1,6 +1,6 @@
 import Foundation
 
-struct CNPicker2Payload: CNSharedPayloadFields {
+struct CNPicker2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
     var viewDebugId: String
     var debugLog: Bool
     var shrink: Bool
@@ -18,6 +18,7 @@ struct CNPicker2Payload: CNSharedPayloadFields {
     var pickerStyle: String?
     var controlSize: String?
     var font: [String: Any]?
+    var fixedSize: Bool
 
     init(viewId _: Int64) {
         viewDebugId = ""
@@ -36,6 +37,7 @@ struct CNPicker2Payload: CNSharedPayloadFields {
         controlSize = nil
         font = nil
         enabled = nil
+        fixedSize = false
     }
 
     init?(channel: [String: Any], viewId: Int64) {
@@ -83,6 +85,10 @@ struct CNPicker2Payload: CNSharedPayloadFields {
         if channel.keys.contains("enabled") {
             enabled = channel["enabled"] as? Bool
         }
+
+        if channel.keys.contains("fixedSize") {
+            fixedSize = CNChannelDeserialization.decodeBool(channel["fixedSize"]) ?? false
+        }
     }
 
     func identityKey() -> String {
@@ -94,6 +100,7 @@ struct CNPicker2Payload: CNSharedPayloadFields {
         parts.append(controlSize ?? "nil")
         parts.append(font.map { String(describing: $0) } ?? "nil")
         parts.append(enabled.map { String(describing: $0) } ?? "nil")
+        parts.append(String(fixedSize))
         return parts.joined(separator: "|")
     }
 }

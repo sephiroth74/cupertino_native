@@ -56,6 +56,23 @@ enum CNViewModifierApplicator {
         )
     }
 
+    /// Applies SwiftUI `.fixedSize()` when `fixedSize` is true.
+    ///
+    /// This makes the control adopt its natural (ideal) size and ignore the size
+    /// proposed by its container. It is the key to embedding a control in a fixed
+    /// band (e.g. the toolbar) without the control stretching to fill the band: a
+    /// flexible `.frame(maxHeight:)` would make a bordered control fill the band and
+    /// would make `NSHostingView.fittingSize` track the imposed frame, producing a
+    /// runaway measurement loop with Flutter's platform-view sizing. `.fixedSize()`
+    /// pins the reported size to the content's ideal, so the parent can center the
+    /// naturally-sized control instead.
+    static func applyFixedSize(_ fixedSize: Bool, to view: AnyView) -> AnyView {
+        guard fixedSize else {
+            return view
+        }
+        return AnyView(view.fixedSize())
+    }
+
     static func applyFont(_ fontDict: [String: Any]?, to view: AnyView) -> AnyView {
         guard let fontDict else {
             return view
@@ -234,6 +251,14 @@ enum CNViewModifierApplicator {
         }
         let alignment = resolveAlignment(overlay["alignment"] as? String)
         return AnyView(view.overlay(alignment: alignment) { content })
+    }
+
+    /// Applies a decorative rectangle border when `debugLog` is true. This is used for debugging layout issues.
+    static func applyDebugLogRectangle(_ debugLog: Bool, to view: AnyView) -> AnyView {
+        guard debugLog else {
+            return view
+        }
+        return AnyView(view.background(Rectangle().strokeBorder(style: StrokeStyle(lineWidth: CGFloat(0.5))).foregroundColor(Color.red)))
     }
 
     private static func resolveAlignment(_ value: String?) -> Alignment {

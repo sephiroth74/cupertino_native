@@ -37,57 +37,54 @@ class _SecureTextFieldDemoPageState extends State<SecureTextFieldDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CNPageScaffold(
-      navigationBar: const CNNavigationBar(middle: Text('Secure Text Field')),
-      child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            const SizedBox(height: 12),
-            CNSecureField(
-              prompt: 'Enter password...',
-              autofocus: true,
-              controller: _controller,
-              textFieldStyle: CNTextFieldStyle.roundedBorder,
-              constraints: BoxConstraints(maxWidth: 400),
-              controlSize: CNControlSize.large,
-              onSubmitted: (value) {
-                debugPrint('Submitted value: $value');
-                _controller.text = value;
-              },
-              onChanged: (value) {
-                debugPrint('Changed value: $value');
-                _controller.text = value;
-              },
-              debugLog: _kDebugLog,
-            ),
-            const SizedBox(height: 16),
-            Text(_valueInfo),
-            const SizedBox(height: 24),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              spacing: 8,
-              children: [
-                CNButton(
-                  children: [const CNChildText('Set Value')],
-                  onPressed: () {
-                    _controller.text = 's3cr3t-passw0rd';
-                  },
-                ),
-                CNButton(
-                  children: [const CNChildText('Clear')],
-                  onPressed: () {
-                    _controller.clear();
-                  },
-                  buttonStyle: CNButtonStyle.borderedProminent,
-                  tint: CNColors.red,
-                ),
-              ],
-            ),
-          ],
-        ),
+    return SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          const SizedBox(height: 12),
+          CNSecureField(
+            prompt: 'Enter password...',
+            autofocus: true,
+            controller: _controller,
+            textFieldStyle: CNTextFieldStyle.roundedBorder,
+            constraints: BoxConstraints(maxWidth: 400),
+            controlSize: CNControlSize.large,
+            onSubmitted: (value) {
+              debugPrint('Submitted value: $value');
+              _controller.text = value;
+            },
+            onChanged: (value) {
+              debugPrint('Changed value: $value');
+              _controller.text = value;
+            },
+            debugLog: _kDebugLog,
+          ),
+          const SizedBox(height: 16),
+          Text(_valueInfo),
+          const SizedBox(height: 24),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            spacing: 8,
+            children: [
+              CNButton(
+                children: [const CNChildText('Set Value')],
+                onPressed: () {
+                  _controller.text = 's3cr3t-passw0rd';
+                },
+              ),
+              CNButton(
+                children: [const CNChildText('Clear')],
+                onPressed: () {
+                  _controller.clear();
+                },
+                buttonStyle: CNButtonStyle.borderedProminent,
+                tint: CNColors.red,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

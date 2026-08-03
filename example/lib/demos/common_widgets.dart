@@ -81,7 +81,9 @@ class FontPicker extends StatelessWidget {
       children: fonts.map((font) {
         return CNChildText(font?.name ?? font?.kind.name ?? 'None', tag: font?.name ?? font?.kind.name ?? 'none');
       }).toList(),
-      onChanged: enabled ? (tag) => onChanged!(fonts.firstWhere((font) => (font?.name ?? font?.kind.name ?? 'none') == tag)) : null,
+      onChanged: enabled
+          ? (tag) => onChanged!(fonts.firstWhere((font) => (font?.name ?? font?.kind.name ?? 'none') == tag))
+          : null,
       pickerStyle: CNPickerStyle.automatic,
     );
   }

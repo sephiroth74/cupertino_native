@@ -55,95 +55,92 @@ class _TextEditorDemoPageState extends State<TextEditorDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CNPageScaffold(
-      navigationBar: const CNNavigationBar(middle: Text('Text Editor')),
-      child: SafeArea(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: CNTextEditor(
-                        autofocus: true,
-                        debugLog: _kDebugLog,
-                        controller: controller,
-                        editable: editable,
-                        maxLength: limitLength ? 20 : null,
-                        inputFormatters: lowercaseOnly
-                            ? [
-                                TextInputFormatter.withFunction(
-                                  (oldValue, newValue) => newValue.copyWith(text: newValue.text.toLowerCase()),
-                                ),
-                              ]
-                            : null,
-                        borderColor: borderColor,
-                        borderWidth: borderWidth,
-                        foregroundColor: foregroundColor,
-                        font: font,
-                        tint: tintColor,
-                        onChanged: (value) {
-                          debugPrint('onChanged (len=${value.length})');
-                        },
-                      ),
+    return SafeArea(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: CNTextEditor(
+                      autofocus: true,
+                      debugLog: _kDebugLog,
+                      controller: controller,
+                      editable: editable,
+                      maxLength: limitLength ? 20 : null,
+                      inputFormatters: lowercaseOnly
+                          ? [
+                              TextInputFormatter.withFunction(
+                                (oldValue, newValue) => newValue.copyWith(text: newValue.text.toLowerCase()),
+                              ),
+                            ]
+                          : null,
+                      borderColor: borderColor,
+                      borderWidth: borderWidth,
+                      foregroundColor: foregroundColor,
+                      font: font,
+                      tint: tintColor,
+                      onChanged: (value) {
+                        debugPrint('onChanged (len=${value.length})');
+                      },
                     ),
-                    const SizedBox(height: 12),
-                    Text(selectionInfo),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(selectionInfo),
+                ],
               ),
             ),
-            RightSideOptionContainer(
-              title: 'Options',
-              options: {
-                'Editable': CNToggle(isOn: editable, onChanged: (value) => setState(() => editable = value)),
-                'Max 20 chars': CNToggle(isOn: limitLength, onChanged: (value) => setState(() => limitLength = value)),
-                'Lowercase only': CNToggle(isOn: lowercaseOnly, onChanged: (value) => setState(() => lowercaseOnly = value)),
-                'Font': FontPicker(
-                  value: font,
-                  fonts: kAvailableFonts,
-                  onChanged: (newFont) => setState(() {
-                    font = newFont?.copyWith(size: CNFontSize.points(fontSize));
-                  }),
-                ),
-                'Font Size': SizeSliderPicker(
-                  value: fontSize,
-                  onChanged: (newSize) => setState(() {
-                    fontSize = newSize;
-                    font = CNFont.system(CNFontSize.points(fontSize));
-                  }),
-                ),
-                'Tint Color': ColorPicker(
-                  colors: kSystemColors,
-                  value: tintColor,
-                  onChanged: (color) => setState(() => tintColor = color),
-                ),
-                'Foreground Color': ColorPicker(
-                  colors: kSystemColors,
-                  value: foregroundColor,
-                  onChanged: (color) => setState(() => foregroundColor = color),
-                ),
-                'Border Color': ColorPicker(
-                  colors: kSystemColors,
-                  value: borderColor,
-                  onChanged: (color) => setState(() => borderColor = color),
-                ),
-                'Border Width': SizeSliderPicker(
-                  value: borderWidth ?? 0,
-                  min: 0.0,
-                  max: 10.0,
-                  onChanged: borderColor != null ? (newWidth) => setState(() => borderWidth = newWidth) : null,
-                ),
-              },
-            ),
-          ],
-        ),
+          ),
+          RightSideOptionContainer(
+            title: 'Options',
+            options: {
+              'Editable': CNToggle(isOn: editable, onChanged: (value) => setState(() => editable = value)),
+              'Max 20 chars': CNToggle(isOn: limitLength, onChanged: (value) => setState(() => limitLength = value)),
+              'Lowercase only': CNToggle(isOn: lowercaseOnly, onChanged: (value) => setState(() => lowercaseOnly = value)),
+              'Font': FontPicker(
+                value: font,
+                fonts: kAvailableFonts,
+                onChanged: (newFont) => setState(() {
+                  font = newFont?.copyWith(size: CNFontSize.points(fontSize));
+                }),
+              ),
+              'Font Size': SizeSliderPicker(
+                value: fontSize,
+                onChanged: (newSize) => setState(() {
+                  fontSize = newSize;
+                  font = CNFont.system(CNFontSize.points(fontSize));
+                }),
+              ),
+              'Tint Color': ColorPicker(
+                colors: kSystemColors,
+                value: tintColor,
+                onChanged: (color) => setState(() => tintColor = color),
+              ),
+              'Foreground Color': ColorPicker(
+                colors: kSystemColors,
+                value: foregroundColor,
+                onChanged: (color) => setState(() => foregroundColor = color),
+              ),
+              'Border Color': ColorPicker(
+                colors: kSystemColors,
+                value: borderColor,
+                onChanged: (color) => setState(() => borderColor = color),
+              ),
+              'Border Width': SizeSliderPicker(
+                value: borderWidth ?? 0,
+                min: 0.0,
+                max: 10.0,
+                onChanged: borderColor != null ? (newWidth) => setState(() => borderWidth = newWidth) : null,
+              ),
+            },
+          ),
+        ],
       ),
     );
   }

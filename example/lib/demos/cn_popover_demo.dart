@@ -52,58 +52,55 @@ class _PopoverDemoPageState extends State<PopoverDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CNPageScaffold(
-      navigationBar: const CNNavigationBar(middle: Text('Popover')),
-      child: SafeArea(
-        child: Center(
-          child: Column(
-            spacing: 16,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Builder(
-                builder: (ctx) => CNPixelPerfectContainer(
-                  adjustPosition: true,
-                  child: CNButton(
-                    onPressed: () => _showBasicPopover(ctx),
-                    children: [CNChildLabel('Basic Popover', systemImage: 'rectangle.on.rectangle')],
-                    controlSize: CNControlSize.large,
-                    buttonStyle: CNButtonStyle.borderedProminent,
-                  ),
+    return SafeArea(
+      child: Center(
+        child: Column(
+          spacing: 16,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Builder(
+              builder: (ctx) => CNPixelPerfectContainer(
+                adjustPosition: true,
+                child: CNButton(
+                  onPressed: () => _showBasicPopover(ctx),
+                  children: [CNChildLabel('Basic Popover', systemImage: 'rectangle.on.rectangle')],
+                  controlSize: CNControlSize.large,
+                  buttonStyle: CNButtonStyle.borderedProminent,
                 ),
               ),
-              const SizedBox(height: 12),
-              Builder(
-                builder: (ctx) => CNPixelPerfectContainer(
-                  adjustPosition: true,
-                  child: CNButton(
-                    onPressed: () => _showTopPopover(ctx),
-                    children: [CNChildLabel('Top Edge Popover', systemImage: 'arrow.up.square')],
-                    controlSize: CNControlSize.large,
-                    buttonStyle: CNButtonStyle.borderedProminent,
-                  ),
+            ),
+            const SizedBox(height: 12),
+            Builder(
+              builder: (ctx) => CNPixelPerfectContainer(
+                adjustPosition: true,
+                child: CNButton(
+                  onPressed: () => _showTopPopover(ctx),
+                  children: [CNChildLabel('Top Edge Popover', systemImage: 'arrow.up.square')],
+                  controlSize: CNControlSize.large,
+                  buttonStyle: CNButtonStyle.borderedProminent,
                 ),
               ),
-              const SizedBox(height: 12),
-              Builder(
-                builder: (ctx) => CNPixelPerfectContainer(
-                  adjustPosition: true,
-                  child: CNButton(
-                    onPressed: () => _showTrailingPopover(ctx),
-                    children: [CNChildLabel('Trailing Edge Popover', systemImage: 'arrow.right.square')],
-                    controlSize: CNControlSize.large,
-                    buttonStyle: CNButtonStyle.borderedProminent,
-                  ),
+            ),
+            const SizedBox(height: 12),
+            Builder(
+              builder: (ctx) => CNPixelPerfectContainer(
+                adjustPosition: true,
+                child: CNButton(
+                  onPressed: () => _showTrailingPopover(ctx),
+                  children: [CNChildLabel('Trailing Edge Popover', systemImage: 'arrow.right.square')],
+                  controlSize: CNControlSize.large,
+                  buttonStyle: CNButtonStyle.borderedProminent,
                 ),
               ),
-              const SizedBox(height: 16),
-              if (_lastResult != null) ...[
-                Text('Selected index: ${_lastResult!.selectedIndex}'),
-                Text('Selected tag: ${_lastResult!.selectedTag ?? '-'}'),
-              ],
+            ),
+            const SizedBox(height: 16),
+            if (_lastResult != null) ...[
+              Text('Selected index: ${_lastResult!.selectedIndex}'),
+              Text('Selected tag: ${_lastResult!.selectedTag ?? '-'}'),
             ],
-          ),
+          ],
         ),
       ),
     );

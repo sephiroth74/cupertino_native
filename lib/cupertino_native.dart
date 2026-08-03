@@ -23,7 +23,6 @@ export 'components/cn_gauge.dart';
 export 'components/cn_image.dart';
 export 'components/cn_label.dart';
 export 'components/cn_menu.dart';
-export 'components/cn_navigation_bar.dart';
 export 'components/cn_path_control.dart';
 export 'components/cn_picker.dart';
 export 'components/cn_popover.dart';
@@ -75,6 +74,7 @@ export 'theme/cn_theme.dart';
 export 'theme/cn_toggle_theme_data.dart';
 export 'widgets/cn_pixel_perfect_container.dart';
 export 'widgets/cn_window_geometry.dart';
+export 'components/cn_icon_button.dart';
 
 /// Top-level facade for simple plugin interactions.
 class CupertinoNative {

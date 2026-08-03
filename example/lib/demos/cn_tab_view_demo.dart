@@ -33,113 +33,110 @@ class _TabViewDemoPageState extends State<TabViewDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CNPageScaffold(
-      navigationBar: const CNNavigationBar(middle: Text('TabView')),
-      child: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: CNColors.groupedBackgroundColor,
-                    border: Border.all(color: CNTheme.of(context).separatorColor),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: CNTabView(
-                    controller: _controller,
-                    tabs: const [
-                      CNSegment(label: 'General', systemImage: 'gear'),
-                      CNSegment(label: 'Appearance', systemImage: 'paintbrush'),
-                      CNSegment(label: 'Privacy', systemImage: 'lock.shield'),
-                      CNSegment(label: 'Advanced', systemImage: 'wrench.and.screwdriver'),
-                    ],
-                    tabPosition: tabPosition,
-                    contentMode: contentMode,
-                    segmentStyle: segmentStyle,
-                    segmentDistribution: distribution,
-                    controlSize: controlSize,
-                    enabled: isEnabled,
-                    tabPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                    contentPadding: const EdgeInsets.all(16),
-                    children: [
-                      _TabContent(
-                        title: 'General',
-                        icon: CupertinoIcons.gear,
-                        description: 'General application settings and preferences.',
-                      ),
-                      _TabContent(
-                        title: 'Appearance',
-                        icon: CupertinoIcons.paintbrush,
-                        description: 'Customize the look and feel of the application.',
-                      ),
-                      _TabContent(
-                        title: 'Privacy',
-                        icon: CupertinoIcons.lock_shield,
-                        description: 'Manage your privacy and security settings.',
-                      ),
-                      _TabContent(
-                        title: 'Advanced',
-                        icon: CupertinoIcons.wrench,
-                        description: 'Advanced configuration options for power users.',
-                      ),
-                    ],
-                  ),
+    return SafeArea(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: CNColors.groupedBackgroundColor,
+                  border: Border.all(color: CNTheme.of(context).separatorColor),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: CNTabView(
+                  controller: _controller,
+                  tabs: const [
+                    CNSegment(label: 'General', systemImage: 'gear'),
+                    CNSegment(label: 'Appearance', systemImage: 'paintbrush'),
+                    CNSegment(label: 'Privacy', systemImage: 'lock.shield'),
+                    CNSegment(label: 'Advanced', systemImage: 'wrench.and.screwdriver'),
+                  ],
+                  tabPosition: tabPosition,
+                  contentMode: contentMode,
+                  segmentStyle: segmentStyle,
+                  segmentDistribution: distribution,
+                  controlSize: controlSize,
+                  enabled: isEnabled,
+                  tabPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  contentPadding: const EdgeInsets.all(16),
+                  children: [
+                    _TabContent(
+                      title: 'General',
+                      icon: CupertinoIcons.gear,
+                      description: 'General application settings and preferences.',
+                    ),
+                    _TabContent(
+                      title: 'Appearance',
+                      icon: CupertinoIcons.paintbrush,
+                      description: 'Customize the look and feel of the application.',
+                    ),
+                    _TabContent(
+                      title: 'Privacy',
+                      icon: CupertinoIcons.lock_shield,
+                      description: 'Manage your privacy and security settings.',
+                    ),
+                    _TabContent(
+                      title: 'Advanced',
+                      icon: CupertinoIcons.wrench,
+                      description: 'Advanced configuration options for power users.',
+                    ),
+                  ],
                 ),
               ),
             ),
-            RightSideOptionContainer(
-              options: {
-                'Tab Position': CNPicker(
-                  pickerStyle: CNPickerStyle.menu,
-                  children: CNTabPosition.values.map((p) => CNChildText(p.name, tag: p.name)).toList(),
-                  selection: tabPosition.name,
-                  onChanged: (value) {
-                    setState(() {
-                      tabPosition = CNTabPosition.values.firstWhere((e) => e.name == value);
-                    });
-                  },
-                ),
-                'Content Mode': CNPicker(
-                  pickerStyle: CNPickerStyle.menu,
-                  children: CNTabContentMode.values.map((m) => CNChildText(m.name, tag: m.name)).toList(),
-                  selection: contentMode.name,
-                  onChanged: (value) {
-                    setState(() {
-                      contentMode = CNTabContentMode.values.firstWhere((e) => e.name == value);
-                    });
-                  },
-                ),
-                'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
-                'Style': CNPicker(
-                  pickerStyle: CNPickerStyle.menu,
-                  children: CNSegmentStyle.values.map((s) => CNChildText(s.name, tag: s.name)).toList(),
-                  selection: segmentStyle.name,
-                  onChanged: (value) {
-                    setState(() {
-                      segmentStyle = CNSegmentStyle.values.firstWhere((e) => e.name == value);
-                    });
-                  },
-                ),
-                'Distribution': CNPicker(
-                  pickerStyle: CNPickerStyle.menu,
-                  children: CNSegmentDistribution.values.map((d) => CNChildText(d.name, tag: d.name)).toList(),
-                  selection: distribution.name,
-                  onChanged: (value) {
-                    setState(() {
-                      distribution = CNSegmentDistribution.values.firstWhere((e) => e.name == value);
-                    });
-                  },
-                ),
-                'Enabled': CNToggle(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value)),
-              },
-            ),
-          ],
-        ),
+          ),
+          RightSideOptionContainer(
+            options: {
+              'Tab Position': CNPicker(
+                pickerStyle: CNPickerStyle.menu,
+                children: CNTabPosition.values.map((p) => CNChildText(p.name, tag: p.name)).toList(),
+                selection: tabPosition.name,
+                onChanged: (value) {
+                  setState(() {
+                    tabPosition = CNTabPosition.values.firstWhere((e) => e.name == value);
+                  });
+                },
+              ),
+              'Content Mode': CNPicker(
+                pickerStyle: CNPickerStyle.menu,
+                children: CNTabContentMode.values.map((m) => CNChildText(m.name, tag: m.name)).toList(),
+                selection: contentMode.name,
+                onChanged: (value) {
+                  setState(() {
+                    contentMode = CNTabContentMode.values.firstWhere((e) => e.name == value);
+                  });
+                },
+              ),
+              'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
+              'Style': CNPicker(
+                pickerStyle: CNPickerStyle.menu,
+                children: CNSegmentStyle.values.map((s) => CNChildText(s.name, tag: s.name)).toList(),
+                selection: segmentStyle.name,
+                onChanged: (value) {
+                  setState(() {
+                    segmentStyle = CNSegmentStyle.values.firstWhere((e) => e.name == value);
+                  });
+                },
+              ),
+              'Distribution': CNPicker(
+                pickerStyle: CNPickerStyle.menu,
+                children: CNSegmentDistribution.values.map((d) => CNChildText(d.name, tag: d.name)).toList(),
+                selection: distribution.name,
+                onChanged: (value) {
+                  setState(() {
+                    distribution = CNSegmentDistribution.values.firstWhere((e) => e.name == value);
+                  });
+                },
+              ),
+              'Enabled': CNToggle(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value)),
+            },
+          ),
+        ],
       ),
     );
   }

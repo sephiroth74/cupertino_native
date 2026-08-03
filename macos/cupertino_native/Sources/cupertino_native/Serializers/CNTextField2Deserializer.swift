@@ -87,6 +87,9 @@ enum CNTextField2Deserializer {
             // Paddings
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
 
+            // Debug log rectangle
+            view = CNViewModifierApplicator.applyDebugLogRectangle(payload.debugLog, to: view)
+
             if let onSizeChanged {
                 view = AnyView(
                     view.onGeometryChange(for: CGSize.self) { proxy in

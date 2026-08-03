@@ -51,9 +51,11 @@ class _MainWindowStreamBuilderState extends State<MainWindowStreamBuilder> {
   }
 
   void _onMainWindowChanged(bool isMainWindow) {
-    setState(() {
-      this.isMainWindow = isMainWindow;
-    });
+    if (isMainWindow != this.isMainWindow) {
+      setState(() {
+        this.isMainWindow = isMainWindow;
+      });
+    }
   }
 
   @override
@@ -70,14 +72,12 @@ class _MainWindowStateListenerNSWindowDelegate extends NSWindowDelegate {
   @override
   void windowDidBecomeMain() {
     super.windowDidBecomeMain();
-    debugPrint('MainWindowStreamBuilder: windowDidBecomeMain');
     onMainWindowChanged?.call(true);
   }
 
   @override
   void windowDidResignMain() {
     super.windowDidResignMain();
-    debugPrint('MainWindowStreamBuilder: windowDidResignMain');
     onMainWindowChanged?.call(false);
   }
 }

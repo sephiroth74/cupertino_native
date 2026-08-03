@@ -38,6 +38,9 @@ enum CNProgressView2Deserializer {
             view = CNViewModifierApplicator.applyHelp(payload.help, to: view)
             view = CNViewModifierApplicator.applyOverlay(payload.overlay, to: view)
 
+            // Debug log rectangle
+            view = CNViewModifierApplicator.applyDebugLogRectangle(payload.debugLog, to: view)
+
             if let onSizeChanged {
                 view = AnyView(
                     view.onGeometryChange(for: CGSize.self) { proxy in

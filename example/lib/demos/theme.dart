@@ -8,77 +8,75 @@ class ThemeDemoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = CNTheme.of(context);
 
-    return CNPageScaffold(
-      child: CNContentArea(
-        builder: (context, scrollController) {
-          return ListView(
-            controller: scrollController,
-            children: [
-              CupertinoListSection.insetGrouped(
-                header: const Text('Typography'),
-                children: [
-                  _StyleRow(label: 'Large Title', style: theme.typography.largeTitle),
-                  _StyleRow(label: 'Title 1', style: theme.typography.title1),
-                  _StyleRow(label: 'Title 2', style: theme.typography.title2),
-                  _StyleRow(label: 'Title 3', style: theme.typography.title3),
-                  _StyleRow(label: 'Headline', style: theme.typography.headline),
-                  _StyleRow(label: 'Body', style: theme.typography.body),
-                  _StyleRow(label: 'Callout', style: theme.typography.callout),
-                  _StyleRow(label: 'Subheadline', style: theme.typography.subheadline),
-                  _StyleRow(label: 'Footnote', style: theme.typography.footnote),
-                  _StyleRow(label: 'Caption 1', style: theme.typography.caption1),
-                  _StyleRow(label: 'Caption 2', style: theme.typography.caption2),
-                ],
-              ),
-              CupertinoListSection.insetGrouped(
-                header: const Text('Semantic Colors'),
-                children: [
-                  _ColorRow(
-                    label: 'Primary',
-                    color: theme.userAccentColor ?? theme.systemAccentColor ?? CupertinoColors.activeBlue,
+    return CNContentArea(
+      builder: (context, scrollController) {
+        return ListView(
+          controller: scrollController,
+          children: [
+            CupertinoListSection.insetGrouped(
+              header: const Text('Typography'),
+              children: [
+                _StyleRow(label: 'Large Title', style: theme.typography.largeTitle),
+                _StyleRow(label: 'Title 1', style: theme.typography.title1),
+                _StyleRow(label: 'Title 2', style: theme.typography.title2),
+                _StyleRow(label: 'Title 3', style: theme.typography.title3),
+                _StyleRow(label: 'Headline', style: theme.typography.headline),
+                _StyleRow(label: 'Body', style: theme.typography.body),
+                _StyleRow(label: 'Callout', style: theme.typography.callout),
+                _StyleRow(label: 'Subheadline', style: theme.typography.subheadline),
+                _StyleRow(label: 'Footnote', style: theme.typography.footnote),
+                _StyleRow(label: 'Caption 1', style: theme.typography.caption1),
+                _StyleRow(label: 'Caption 2', style: theme.typography.caption2),
+              ],
+            ),
+            CupertinoListSection.insetGrouped(
+              header: const Text('Semantic Colors'),
+              children: [
+                _ColorRow(
+                  label: 'Primary',
+                  color: theme.userAccentColor ?? theme.systemAccentColor ?? CupertinoColors.activeBlue,
+                ),
+                _ColorRow(label: 'Secondary', color: theme.secondaryColor),
+                _ColorRow(label: 'Destructive', color: theme.destructiveColor),
+                _ColorRow(label: 'Canvas', color: theme.canvasColor),
+                _ColorRow(label: 'Grouped Background', color: theme.groupedBackgroundColor),
+                _ColorRow(label: 'Label', color: theme.labelColor),
+                _ColorRow(label: 'Secondary Label', color: theme.secondaryLabelColor),
+                _ColorRow(label: 'Separator', color: theme.separatorColor),
+                _ColorRow(label: 'Fill Primary', color: theme.fillPrimaryColor),
+                _ColorRow(label: 'Fill Secondary', color: theme.fillSecondaryColor),
+                _ColorRow(label: 'Fill Tertiary', color: theme.fillTertiaryColor),
+              ],
+            ),
+            CupertinoListSection.insetGrouped(
+              header: const Text('Palette'),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: CNColors.accentColors.map((c) {
+                      final resolved = c.color.resolveFrom(context);
+                      return _Swatch(color: resolved);
+                    }).toList(),
                   ),
-                  _ColorRow(label: 'Secondary', color: theme.secondaryColor),
-                  _ColorRow(label: 'Destructive', color: theme.destructiveColor),
-                  _ColorRow(label: 'Canvas', color: theme.canvasColor),
-                  _ColorRow(label: 'Grouped Background', color: theme.groupedBackgroundColor),
-                  _ColorRow(label: 'Label', color: theme.labelColor),
-                  _ColorRow(label: 'Secondary Label', color: theme.secondaryLabelColor),
-                  _ColorRow(label: 'Separator', color: theme.separatorColor),
-                  _ColorRow(label: 'Fill Primary', color: theme.fillPrimaryColor),
-                  _ColorRow(label: 'Fill Secondary', color: theme.fillSecondaryColor),
-                  _ColorRow(label: 'Fill Tertiary', color: theme.fillTertiaryColor),
-                ],
-              ),
-              CupertinoListSection.insetGrouped(
-                header: const Text('Palette'),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: CNColors.accentColors.map((c) {
-                        final resolved = c.color.resolveFrom(context);
-                        return _Swatch(color: resolved);
-                      }).toList(),
-                    ),
-                  ),
-                ],
-              ),
-              CupertinoListSection.insetGrouped(
-                header: const Text('Materials'),
-                children: [
-                  _MaterialRow(label: 'Ultra Thin', material: theme.materialUltraThin),
-                  _MaterialRow(label: 'Thin', material: theme.materialThin),
-                  _MaterialRow(label: 'Medium', material: theme.materialMedium),
-                  _MaterialRow(label: 'Thick', material: theme.materialThick),
-                  _MaterialRow(label: 'Ultra Thick', material: theme.materialUltraThick),
-                ],
-              ),
-            ],
-          );
-        },
-      ),
+                ),
+              ],
+            ),
+            CupertinoListSection.insetGrouped(
+              header: const Text('Materials'),
+              children: [
+                _MaterialRow(label: 'Ultra Thin', material: theme.materialUltraThin),
+                _MaterialRow(label: 'Thin', material: theme.materialThin),
+                _MaterialRow(label: 'Medium', material: theme.materialMedium),
+                _MaterialRow(label: 'Thick', material: theme.materialThick),
+                _MaterialRow(label: 'Ultra Thick', material: theme.materialUltraThick),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 }

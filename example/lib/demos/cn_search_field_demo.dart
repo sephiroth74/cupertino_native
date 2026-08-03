@@ -38,99 +38,96 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CNPageScaffold(
-      navigationBar: const CNNavigationBar(middle: Text('Search Field')),
-      child: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(28.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    CNSearchField(
-                      debugLog: _kDebugLog,
-                      text: text,
-                      font: font,
-                      controlSize: controlSize,
-                      bezelStyle: bezelStyle,
-                      placeholderColor: placeholderColor,
-                      textColor: textColor,
-                      onChanged: isEnabled
-                          ? (value) {
-                              debugPrint('Search field text changed: $value');
-                              setState(() {
-                                text = value;
-                              });
-                            }
-                          : null,
-                      onSubmitted: isEnabled
-                          ? (value) {
-                              debugPrint('Search field text submitted: $value');
-                            }
-                          : null,
-                      placeholder: 'Search for a file...',
-                      onSuggestionsRequested: (query) {
-                        debugPrint('onSuggestionsRequested for query: "$query"');
-                        if (query.isEmpty) {
-                          debugPrint('Returning all suggestions');
-                          return Future.value(_kDemoSuggestions);
-                        } else {
-                          debugPrint('Filtering suggestions for query: "$query"');
-                          return Future.value(
-                            _kDemoSuggestions.where((s) => s.toLowerCase().contains(query.toLowerCase())).toList(),
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                ),
+    return SafeArea(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(28.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  CNSearchField(
+                    debugLog: _kDebugLog,
+                    text: text,
+                    font: font,
+                    controlSize: controlSize,
+                    bezelStyle: bezelStyle,
+                    placeholderColor: placeholderColor,
+                    textColor: textColor,
+                    onChanged: isEnabled
+                        ? (value) {
+                            debugPrint('Search field text changed: $value');
+                            setState(() {
+                              text = value;
+                            });
+                          }
+                        : null,
+                    onSubmitted: isEnabled
+                        ? (value) {
+                            debugPrint('Search field text submitted: $value');
+                          }
+                        : null,
+                    placeholder: 'Search for a file...',
+                    onSuggestionsRequested: (query) {
+                      debugPrint('onSuggestionsRequested for query: "$query"');
+                      if (query.isEmpty) {
+                        debugPrint('Returning all suggestions');
+                        return Future.value(_kDemoSuggestions);
+                      } else {
+                        debugPrint('Filtering suggestions for query: "$query"');
+                        return Future.value(
+                          _kDemoSuggestions.where((s) => s.toLowerCase().contains(query.toLowerCase())).toList(),
+                        );
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
-            RightSideOptionContainer(
-              title: 'Options',
-              options: {
-                'Control Size': ControlSizePicker(value: controlSize, onChanged: (v) => setState(() => controlSize = v)),
-                'Bezel Style': BezelStylePicker(value: bezelStyle, onChanged: (v) => setState(() => bezelStyle = v)),
-                'Text Color': ColorPicker(
-                  colors: kSystemColors,
-                  value: textColor,
-                  onChanged: (color) => setState(() => textColor = color),
-                ),
-                'Placeholder Color': ColorPicker(
-                  colors: kSystemColors,
-                  value: placeholderColor,
-                  onChanged: (color) => setState(() => placeholderColor = color),
-                ),
-                'Font': FontPicker(
-                  fonts: kAvailableFonts,
-                  value: font,
-                  onChanged: (f) => setState(() => font = f?.copyWith(size: CNFontSize.points(fontSize))),
-                ),
-                'Font Size': SizeSliderPicker(
-                  value: fontSize,
-                  min: 8.0,
-                  max: 72.0,
-                  onChanged: (newSize) => setState(() {
-                    fontSize = newSize;
-                    if (font != null) {
-                      font = font!.copyWith(size: CNFontSize.points(fontSize));
-                    }
-                  }),
-                ),
-                'Enabled': CNToggle(
-                  isOn: isEnabled,
-                  controlSize: CNControlSize.regular,
-                  onChanged: (v) => setState(() => isEnabled = v),
-                ),
-              },
-            ),
-          ],
-        ),
+          ),
+          RightSideOptionContainer(
+            title: 'Options',
+            options: {
+              'Control Size': ControlSizePicker(value: controlSize, onChanged: (v) => setState(() => controlSize = v)),
+              'Bezel Style': BezelStylePicker(value: bezelStyle, onChanged: (v) => setState(() => bezelStyle = v)),
+              'Text Color': ColorPicker(
+                colors: kSystemColors,
+                value: textColor,
+                onChanged: (color) => setState(() => textColor = color),
+              ),
+              'Placeholder Color': ColorPicker(
+                colors: kSystemColors,
+                value: placeholderColor,
+                onChanged: (color) => setState(() => placeholderColor = color),
+              ),
+              'Font': FontPicker(
+                fonts: kAvailableFonts,
+                value: font,
+                onChanged: (f) => setState(() => font = f?.copyWith(size: CNFontSize.points(fontSize))),
+              ),
+              'Font Size': SizeSliderPicker(
+                value: fontSize,
+                min: 8.0,
+                max: 72.0,
+                onChanged: (newSize) => setState(() {
+                  fontSize = newSize;
+                  if (font != null) {
+                    font = font!.copyWith(size: CNFontSize.points(fontSize));
+                  }
+                }),
+              ),
+              'Enabled': CNToggle(
+                isOn: isEnabled,
+                controlSize: CNControlSize.regular,
+                onChanged: (v) => setState(() => isEnabled = v),
+              ),
+            },
+          ),
+        ],
       ),
     );
   }

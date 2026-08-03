@@ -574,160 +574,157 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
     final paletteColors = renderingMode == CNSymbolRenderingMode.palette;
     final theme = CNTheme.of(context);
 
-    return CNPageScaffold(
-      navigationBar: const CNNavigationBar(middle: Text('Image')),
-      child: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Wrap(
-                  clipBehavior: Clip.hardEdge,
-                  alignment: WrapAlignment.start,
-                  spacing: 16.0,
-                  runSpacing: 16.0,
-                  children: _kImageNames.getRange(0, min(_kMaxImages, _kImageNames.length)).map((name) {
-                    return _symbolRow(
-                      systemSymbolName: name,
-                      shrink: _kShrink,
-                      font: font,
-                      symbolRenderingMode: renderingMode,
-                      symbolColorRenderingMode: colorMode,
-                      foregroundStyleColors: colors,
-                      foregroundColor: foregroundColor,
-                      backgroundColor: backgroundColor,
-                      isDark: isDark,
-                    );
-                  }).toList(),
-                ),
+    return SafeArea(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Wrap(
+                clipBehavior: Clip.hardEdge,
+                alignment: WrapAlignment.start,
+                spacing: 16.0,
+                runSpacing: 16.0,
+                children: _kImageNames.getRange(0, min(_kMaxImages, _kImageNames.length)).map((name) {
+                  return _symbolRow(
+                    systemSymbolName: name,
+                    shrink: _kShrink,
+                    font: font,
+                    symbolRenderingMode: renderingMode,
+                    symbolColorRenderingMode: colorMode,
+                    foregroundStyleColors: colors,
+                    foregroundColor: foregroundColor,
+                    backgroundColor: backgroundColor,
+                    isDark: isDark,
+                  );
+                }).toList(),
               ),
             ),
-            RightSideOptionContainer(
-              title: 'Options',
-              options: {
-                'Rendering Mode': CNPicker(
-                  selection: renderingMode.name,
-                  onChanged: (value) {
-                    setState(() {
-                      renderingMode = CNSymbolRenderingMode.values.firstWhere((e) => e.name == value);
-                      if (renderingMode == CNSymbolRenderingMode.palette) {
-                        color1 = color1 ?? kNonNullColors.values.elementAt(0);
-                        color2 = color2 ?? kNonNullColors.values.elementAt(1);
-                        color3 = color3 ?? kNonNullColors.values.elementAt(2);
-                        colors = [color1!, color2!, color3!];
-                      } else {
-                        color2 = null;
-                        color3 = null;
-                        colors = color1 != null ? [color1!] : [];
-                      }
-                    });
-                  },
-                  children: CNSymbolRenderingMode.values.map((mode) => CNChildText(mode.name, tag: mode.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
-                ),
-                'Gradient': CNToggle(
-                  toggleStyle: CNToggleStyle.switchStyle,
-                  isOn: colorMode == CNSymbolColorRenderingMode.gradient,
-                  onChanged: (value) {
-                    setState(() {
-                      colorMode = value ? CNSymbolColorRenderingMode.gradient : CNSymbolColorRenderingMode.flat;
-                    });
-                  },
-                ),
-                'Colors': Column(
-                  children: [
-                    ColorPicker(
-                      colors: kSystemColors,
-                      value: color1,
-                      onChanged: (color) => setState(() {
-                        color1 = color;
-                        colors = [?color1, ?color2, ?color3];
-                      }),
-                    ),
-                    const SizedBox(height: 8),
-                    ColorPicker(
-                      colors: kSystemColors,
-                      value: color2,
-                      enabled: paletteColors,
-                      onChanged: (color) => setState(() {
-                        if (paletteColors) {
-                          color2 = color;
-                          colors = [?color1, ?color2, ?color3];
-                        }
-                      }),
-                    ),
-                    const SizedBox(height: 8),
-                    ColorPicker(
-                      colors: kSystemColors,
-                      value: color3,
-                      enabled: paletteColors,
-                      onChanged: (color) => setState(() {
-                        if (paletteColors) {
-                          color3 = color;
-                          colors = [?color1, ?color2, ?color3];
-                        }
-                      }),
-                    ),
-                  ],
-                ),
-                'Foreground': ColorPicker(
-                  colors: kSystemColors,
-                  value: foregroundColor,
-                  onChanged: (color) => setState(() {
-                    foregroundColor = color;
-                  }),
-                ),
-                'Background': ColorPicker(
-                  colors: _kBackgroundColors,
-                  value: selectedBackgroundColor,
-                  onChanged: (c) => setState(() {
-                    selectedBackgroundColor = c;
-                    final key = _kBackgroundColors.entries.firstWhere((entry) => entry.value == c).key;
-
-                    switch (key) {
-                      case 'Default':
-                        backgroundColor = theme.canvasColor;
-                        isDark = theme.brightness == Brightness.dark;
-                        break;
-                      case 'Light':
-                        backgroundColor = CupertinoColors.systemBackground.color;
-                        isDark = false;
-                        break;
-                      case 'Dark':
-                        backgroundColor = CupertinoColors.systemBackground.darkColor;
-                        isDark = true;
-                        break;
-                      default:
-                        backgroundColor = null;
+          ),
+          RightSideOptionContainer(
+            title: 'Options',
+            options: {
+              'Rendering Mode': CNPicker(
+                selection: renderingMode.name,
+                onChanged: (value) {
+                  setState(() {
+                    renderingMode = CNSymbolRenderingMode.values.firstWhere((e) => e.name == value);
+                    if (renderingMode == CNSymbolRenderingMode.palette) {
+                      color1 = color1 ?? kNonNullColors.values.elementAt(0);
+                      color2 = color2 ?? kNonNullColors.values.elementAt(1);
+                      color3 = color3 ?? kNonNullColors.values.elementAt(2);
+                      colors = [color1!, color2!, color3!];
+                    } else {
+                      color2 = null;
+                      color3 = null;
+                      colors = color1 != null ? [color1!] : [];
                     }
-                  }),
-                ),
-                'Font Weight': CNPicker(
-                  selection: font.weight?.name ?? CNFontWeight.regular.name,
-                  onChanged: (value) {
-                    setState(() {
-                      font = font.copyWith(
-                        weight: CNFontWeight.values.firstWhere((e) => e.name == value),
-                        size: CNFontSize.points(fontSize),
-                      );
-                    });
-                  },
-                  children: CNFontWeight.values.map((weight) => CNChildText(weight.name, tag: weight.name)).toList(),
-                  pickerStyle: CNPickerStyle.automatic,
-                ),
-                'Font Size': SizeSliderPicker(
-                  value: fontSize,
-                  onChanged: (value) => setState(() {
-                    fontSize = value;
-                    font = font.copyWith(size: CNFontSize.points(fontSize));
-                  }),
-                ),
-              },
-            ),
-          ],
-        ),
+                  });
+                },
+                children: CNSymbolRenderingMode.values.map((mode) => CNChildText(mode.name, tag: mode.name)).toList(),
+                pickerStyle: CNPickerStyle.automatic,
+              ),
+              'Gradient': CNToggle(
+                toggleStyle: CNToggleStyle.switchStyle,
+                isOn: colorMode == CNSymbolColorRenderingMode.gradient,
+                onChanged: (value) {
+                  setState(() {
+                    colorMode = value ? CNSymbolColorRenderingMode.gradient : CNSymbolColorRenderingMode.flat;
+                  });
+                },
+              ),
+              'Colors': Column(
+                children: [
+                  ColorPicker(
+                    colors: kSystemColors,
+                    value: color1,
+                    onChanged: (color) => setState(() {
+                      color1 = color;
+                      colors = [?color1, ?color2, ?color3];
+                    }),
+                  ),
+                  const SizedBox(height: 8),
+                  ColorPicker(
+                    colors: kSystemColors,
+                    value: color2,
+                    enabled: paletteColors,
+                    onChanged: (color) => setState(() {
+                      if (paletteColors) {
+                        color2 = color;
+                        colors = [?color1, ?color2, ?color3];
+                      }
+                    }),
+                  ),
+                  const SizedBox(height: 8),
+                  ColorPicker(
+                    colors: kSystemColors,
+                    value: color3,
+                    enabled: paletteColors,
+                    onChanged: (color) => setState(() {
+                      if (paletteColors) {
+                        color3 = color;
+                        colors = [?color1, ?color2, ?color3];
+                      }
+                    }),
+                  ),
+                ],
+              ),
+              'Foreground': ColorPicker(
+                colors: kSystemColors,
+                value: foregroundColor,
+                onChanged: (color) => setState(() {
+                  foregroundColor = color;
+                }),
+              ),
+              'Background': ColorPicker(
+                colors: _kBackgroundColors,
+                value: selectedBackgroundColor,
+                onChanged: (c) => setState(() {
+                  selectedBackgroundColor = c;
+                  final key = _kBackgroundColors.entries.firstWhere((entry) => entry.value == c).key;
+
+                  switch (key) {
+                    case 'Default':
+                      backgroundColor = theme.canvasColor;
+                      isDark = theme.brightness == Brightness.dark;
+                      break;
+                    case 'Light':
+                      backgroundColor = CupertinoColors.systemBackground.color;
+                      isDark = false;
+                      break;
+                    case 'Dark':
+                      backgroundColor = CupertinoColors.systemBackground.darkColor;
+                      isDark = true;
+                      break;
+                    default:
+                      backgroundColor = null;
+                  }
+                }),
+              ),
+              'Font Weight': CNPicker(
+                selection: font.weight?.name ?? CNFontWeight.regular.name,
+                onChanged: (value) {
+                  setState(() {
+                    font = font.copyWith(
+                      weight: CNFontWeight.values.firstWhere((e) => e.name == value),
+                      size: CNFontSize.points(fontSize),
+                    );
+                  });
+                },
+                children: CNFontWeight.values.map((weight) => CNChildText(weight.name, tag: weight.name)).toList(),
+                pickerStyle: CNPickerStyle.automatic,
+              ),
+              'Font Size': SizeSliderPicker(
+                value: fontSize,
+                onChanged: (value) => setState(() {
+                  fontSize = value;
+                  font = font.copyWith(size: CNFontSize.points(fontSize));
+                }),
+              ),
+            },
+          ),
+        ],
       ),
     );
   }
