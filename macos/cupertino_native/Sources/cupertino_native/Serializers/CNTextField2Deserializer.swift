@@ -231,7 +231,7 @@ enum CNTextField2Deserializer {
                 return
             }
             let startIndex = text.index(text.startIndex, offsetBy: lower)
-            let newSelection: TextSelection = if lower == upper {
+            let newSelection = if lower == upper {
                 TextSelection(insertionPoint: startIndex)
             } else {
                 TextSelection(range: startIndex ..< text.index(text.startIndex, offsetBy: upper))

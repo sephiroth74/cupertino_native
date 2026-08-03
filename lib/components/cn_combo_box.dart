@@ -123,12 +123,12 @@ class _CNComboBoxState extends State<CNComboBox> {
   late final TextEditingController _controller = TextEditingController(text: widget.text);
   final GlobalKey _fieldKey = GlobalKey();
   bool _isUpdatingText = false;
-  bool _menuOpen = false;
-
   /// Length of the text last reported by the native field. Used to tell an
   /// insertion (net growth of the typed prefix) from a deletion (backspace /
   /// forward-delete), so autocomplete only extends on real insertions.
   late int _lastLength = widget.text.length;
+
+  bool _menuOpen = false;
 
   @override
   void didUpdateWidget(CNComboBox oldWidget) {

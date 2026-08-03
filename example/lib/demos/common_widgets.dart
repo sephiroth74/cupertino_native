@@ -149,12 +149,14 @@ class SizeSliderPicker extends StatelessWidget {
     this.max = kFontSizeMax,
     required this.onChanged,
     this.debugLog = false,
+    this.step,
   });
 
   final bool debugLog;
   final double max;
   final double min;
   final ValueChanged<double>? onChanged;
+  final double? step;
   final double value;
 
   bool get enabled => onChanged != null;
@@ -175,7 +177,7 @@ class SizeSliderPicker extends StatelessWidget {
         ),
         const SizedBox(width: 2),
         Expanded(
-          child: CNSlider(value: value, min: min, max: max, onChanged: onChanged, debugLog: debugLog),
+          child: CNSlider(value: value, min: min, max: max, onChanged: onChanged, debugLog: debugLog, step: step),
         ),
       ],
     );

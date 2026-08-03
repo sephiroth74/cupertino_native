@@ -46,6 +46,36 @@ void main() {
       expect(updated.userAccentColor, base.userAccentColor);
     });
 
+    test('icon button theme defaults to empty overrides and can be overridden', () {
+      final base = CNThemeData.light(
+        userAccentColor: CNColors.accentColors[0].color,
+        systemAccentColor: CNColors.accentColors[0].color,
+        isMainWindow: true,
+      );
+
+      expect(base.iconButtonTheme, const CNIconButtonThemeData());
+
+      final updated = base.copyWith(
+        iconButtonTheme: const CNIconButtonThemeData(
+          shape: CNIconButtonShape.circle,
+          foregroundColor: Color(0xFF112233),
+        ),
+      );
+
+      expect(updated.iconButtonTheme.shape, CNIconButtonShape.circle);
+      expect(updated.iconButtonTheme.foregroundColor, const Color(0xFF112233));
+      expect(updated.userAccentColor, base.userAccentColor);
+    });
+
+    test('icon button theme merge keeps existing values for null fields', () {
+      const a = CNIconButtonThemeData(foregroundColor: Color(0xFF111111), borderWidth: 2);
+      const b = CNIconButtonThemeData(borderWidth: 4);
+      final merged = a.merge(b);
+
+      expect(merged.borderWidth, 4);
+      expect(merged.foregroundColor, const Color(0xFF111111));
+    });
+
     test('merge overrides with other theme values', () {
       final light = CNThemeData.light(
         userAccentColor: CNColors.accentColors[0].color,

@@ -12,6 +12,7 @@ import 'demos/cn_combo_box_demo.dart';
 import 'demos/cn_context_menu_demo.dart';
 import 'demos/cn_date_picker_demo.dart';
 import 'demos/cn_gauge_demo.dart';
+import 'demos/cn_icon_button_demo.dart';
 import 'demos/cn_image_demo.dart';
 import 'demos/cn_label_demo.dart';
 import 'demos/cn_menu_demo.dart';
@@ -54,6 +55,7 @@ const _entries = <_DemoEntry>[
   _DemoEntry('CNContextMenu', 'ellipsis.rectangle', ContextMenuDemoPage()),
   _DemoEntry('CNDatePicker', 'calendar', DatePickerDemoPage()),
   _DemoEntry('CNGauge', 'gauge.chart.lefthalf.righthalf', GaugeDemoPage()),
+  _DemoEntry('CNIconButton', 'square.grid.2x2', IconButtonDemoPage()),
   _DemoEntry('CNImage', 'testtube.2', CNImage2DemoPage()),
   _DemoEntry('CNLabel', 'textformat', LabelDemoPage()),
   _DemoEntry('CNMenu', 'ellipsis.circle', MenuButtonDemoPage()),

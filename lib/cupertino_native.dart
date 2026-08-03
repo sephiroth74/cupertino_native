@@ -61,6 +61,7 @@ export 'style/text.dart';
 export 'theme/cn_button_theme_data.dart';
 export 'theme/cn_date_picker_theme_data.dart';
 export 'theme/cn_gauge_theme_data.dart';
+export 'theme/cn_icon_button_theme_data.dart';
 export 'theme/cn_picker_theme_data.dart';
 export 'theme/cn_progress_theme_data.dart';
 export 'theme/cn_scrollbar_theme.dart';

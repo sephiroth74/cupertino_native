@@ -77,7 +77,11 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
                     shrink: true,
                     controlSize: CNControlSize.large,
                     children: [
-                      CNChildLabel('Show Info Alert', systemImage: 'info.triangle', constraints: BoxConstraints.tightFor(width: 250)),
+                      CNChildLabel(
+                        'Show Info Alert',
+                        systemImage: 'info.triangle',
+                        constraints: BoxConstraints.tightFor(width: 250),
+                      ),
                     ],
                   ),
                 ),
@@ -111,14 +115,6 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
               ],
             ),
             const SizedBox(height: 16),
-
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Center(
-                child: CnIconButton(size: 48, icon: null, systemSymbolName: 'square.and.arrow.up', onPressed: () {}),
-              ),
-            ),
-
             const SizedBox(height: 16),
             if (_lastResult != null) ...[
               Text('Selected index: ${_lastResult!.selectedIndex}'),

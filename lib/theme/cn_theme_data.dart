@@ -45,6 +45,7 @@ class CNThemeData extends Equatable {
     CNDatePickerThemeData? datePickerTheme,
     CNTextFieldThemeData? textFieldTheme,
     CNSecureFieldThemeData? secureFieldTheme,
+    CNIconButtonThemeData? iconButtonTheme,
     required bool isMainWindow,
   }) {
     final isDark = brightness == Brightness.dark;
@@ -95,6 +96,7 @@ class CNThemeData extends Equatable {
     sliderTheme ??= CNSliderThemeData(tintColor: userAccentColor);
     progressTheme ??= CNProgressThemeData(tintColor: userAccentColor);
     scrollbarTheme ??= CNScrollbarThemeData(thumbColor: thumbColor, thumbColorWhileHovering: thumbColor.withAlpha(255));
+    iconButtonTheme ??= const CNIconButtonThemeData();
     imageTheme ??= const CNImageThemeData();
 
     return CNThemeData.raw(
@@ -133,6 +135,7 @@ class CNThemeData extends Equatable {
       datePickerTheme: datePickerTheme,
       textFieldTheme: textFieldTheme,
       secureFieldTheme: secureFieldTheme,
+      iconButtonTheme: iconButtonTheme,
       isMainWindow: isMainWindow,
     );
   }
@@ -192,6 +195,7 @@ class CNThemeData extends Equatable {
     required this.datePickerTheme,
     required this.textFieldTheme,
     required this.secureFieldTheme,
+    required this.iconButtonTheme,
     required this.isMainWindow,
     required this.fillQuaternaryColor,
     required this.fillQuinaryColor,
@@ -232,6 +236,9 @@ class CNThemeData extends Equatable {
 
   /// Grouped surface background color.
   final Color groupedBackgroundColor;
+
+  /// Widget-specific icon button theme overrides.
+  final CNIconButtonThemeData iconButtonTheme;
 
   /// Widget-specific image theme overrides.
   final CNImageThemeData imageTheme;
@@ -341,6 +348,7 @@ class CNThemeData extends Equatable {
     datePickerTheme,
     textFieldTheme,
     secureFieldTheme,
+    iconButtonTheme,
     isMainWindow,
     isDark,
   ];
@@ -388,6 +396,7 @@ class CNThemeData extends Equatable {
     CNDatePickerThemeData? datePickerTheme,
     CNTextFieldThemeData? textFieldTheme,
     CNSecureFieldThemeData? secureFieldTheme,
+    CNIconButtonThemeData? iconButtonTheme,
     bool? isMainWindow,
   }) {
     return CNThemeData.raw(
@@ -426,6 +435,7 @@ class CNThemeData extends Equatable {
       datePickerTheme: this.datePickerTheme.merge(datePickerTheme),
       textFieldTheme: this.textFieldTheme.merge(textFieldTheme),
       secureFieldTheme: this.secureFieldTheme.merge(secureFieldTheme),
+      iconButtonTheme: this.iconButtonTheme.merge(iconButtonTheme),
       isMainWindow: isMainWindow ?? this.isMainWindow,
     );
   }
@@ -467,6 +477,7 @@ class CNThemeData extends Equatable {
       datePickerTheme: other.datePickerTheme,
       textFieldTheme: other.textFieldTheme,
       secureFieldTheme: other.secureFieldTheme,
+      iconButtonTheme: other.iconButtonTheme,
       isMainWindow: other.isMainWindow,
     );
   }
@@ -509,6 +520,7 @@ class CNThemeData extends Equatable {
       datePickerTheme: CNDatePickerThemeData.lerp(a.datePickerTheme, b.datePickerTheme, t),
       textFieldTheme: CNTextFieldThemeData.lerp(a.textFieldTheme, b.textFieldTheme, t),
       secureFieldTheme: CNSecureFieldThemeData.lerp(a.secureFieldTheme, b.secureFieldTheme, t),
+      iconButtonTheme: CNIconButtonThemeData.lerp(a.iconButtonTheme, b.iconButtonTheme, t),
       isMainWindow: t < 0.5 ? a.isMainWindow : b.isMainWindow,
     );
   }
