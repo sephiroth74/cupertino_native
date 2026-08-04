@@ -133,7 +133,10 @@ class _CNMenuState extends CNWidgetState<CNMenu> {
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
       'items': widget.items.map((c) => c.toChildPayload(context)).toList(),
       'label': widget.label.map((c) => c.toChildPayload(context)).toList(),
@@ -145,7 +148,11 @@ class _CNMenuState extends CNWidgetState<CNMenu> {
       'fixedSize': widget.fixedSize,
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+    );
     return payload;
   }
 }

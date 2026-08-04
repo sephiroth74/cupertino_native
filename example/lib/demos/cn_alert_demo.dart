@@ -22,8 +22,16 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
       message: 'This action cannot be undone.',
       actions: const [
         CNChildButton(tag: 'ok', title: 'Ok'),
-        CNChildButton(tag: 'cancel', title: 'Cancel', role: CNButtonRole.cancel),
-        CNChildButton(tag: 'delete', title: 'Delete', role: CNButtonRole.destructive),
+        CNChildButton(
+          tag: 'cancel',
+          title: 'Cancel',
+          role: CNButtonRole.cancel,
+        ),
+        CNChildButton(
+          tag: 'delete',
+          title: 'Delete',
+          role: CNButtonRole.destructive,
+        ),
       ],
       style: CNAlertStyle2.warning,
     );

@@ -120,9 +120,12 @@ class CNComboBox extends StatefulWidget {
 class _CNComboBoxState extends State<CNComboBox> {
   static const MethodChannel _channel = MethodChannel('cupertino_native');
 
-  late final TextEditingController _controller = TextEditingController(text: widget.text);
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.text,
+  );
   final GlobalKey _fieldKey = GlobalKey();
   bool _isUpdatingText = false;
+
   /// Length of the text last reported by the native field. Used to tell an
   /// insertion (net growth of the typed prefix) from a deletion (backspace /
   /// forward-delete), so autocomplete only extends on real insertions.
@@ -181,7 +184,10 @@ class _CNComboBoxState extends State<CNComboBox> {
           // order the native field reports selections in — otherwise the native
           // round-trip would flip it and jitter. Typing always replaces from the
           // range start, i.e. the insertion point, regardless of stored order.
-          selection: TextSelection(baseOffset: value.length, extentOffset: match.length),
+          selection: TextSelection(
+            baseOffset: value.length,
+            extentOffset: match.length,
+          ),
         );
         _isUpdatingText = false;
         widget.onChanged?.call(match);
@@ -211,7 +217,8 @@ class _CNComboBoxState extends State<CNComboBox> {
     final anchorY = origin.dy + box.size.height;
 
     final items = <CNChild>[
-      for (var i = 0; i < widget.items.length; i++) CNChildButton(tag: '$i', title: widget.items[i]),
+      for (var i = 0; i < widget.items.length; i++)
+        CNChildButton(tag: '$i', title: widget.items[i]),
     ];
 
     setState(() => _menuOpen = true);
@@ -302,7 +309,9 @@ class _CNComboBoxState extends State<CNComboBox> {
                 style: widget.style,
                 menuOpen: _menuOpen,
                 enabled: widget.enabled,
-                accentColor: widget.tint is Color ? widget.tint as Color : CNTheme.of(context).accentColor,
+                accentColor: widget.tint is Color
+                    ? widget.tint as Color
+                    : CNTheme.of(context).accentColor,
                 onTap: _openMenu,
               ),
             ),
@@ -310,10 +319,7 @@ class _CNComboBoxState extends State<CNComboBox> {
         );
 
         if (!widget.enabled) {
-          content = Opacity(
-            opacity: 0.5,
-            child: AbsorbPointer(child: content),
-          );
+          content = Opacity(opacity: 0.5, child: AbsorbPointer(child: content));
         }
 
         return content;
@@ -363,12 +369,17 @@ class _ComboBoxCaretState extends State<_ComboBoxCaret> {
   bool _hovered = false;
 
   Widget _buildBordered(BuildContext context, double side) {
-    final accent = widget.accentColor ?? CNColors.blue.resolveFromContext(context);
+    final accent =
+        widget.accentColor ?? CNColors.blue.resolveFromContext(context);
     final isDark = CNTheme.of(context).isDark;
     // Darken slightly while the menu is open, echoing the pressed push button.
-    final background = widget.menuOpen ? Color.lerp(accent, CNColors.black, 0.12)! : accent;
+    final background = widget.menuOpen
+        ? Color.lerp(accent, CNColors.black, 0.12)!
+        : accent;
     // Contrast the chevron against the (accent) fill.
-    final arrows = background.computeLuminance() > 0.5 ? CNColors.black : CNColors.white;
+    final arrows = background.computeLuminance() > 0.5
+        ? CNColors.black
+        : CNColors.white;
     final radius = _caretRadius(side);
 
     return Padding(
@@ -378,7 +389,9 @@ class _ComboBoxCaretState extends State<_ComboBoxCaret> {
           color: background,
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(
-            color: (isDark ? CNColors.white : CNColors.black).withValues(alpha: 0.12),
+            color: (isDark ? CNColors.white : CNColors.black).withValues(
+              alpha: 0.12,
+            ),
             width: 0.5,
           ),
           boxShadow: [
@@ -403,7 +416,10 @@ class _ComboBoxCaretState extends State<_ComboBoxCaret> {
             ),
           ),
           child: CustomPaint(
-            painter: _CaretPainter(color: arrows, icon: _CaretIcon.disclosureDown),
+            painter: _CaretPainter(
+              color: arrows,
+              icon: _CaretIcon.disclosureDown,
+            ),
             child: const SizedBox.expand(),
           ),
         ),
@@ -441,15 +457,21 @@ class _ComboBoxCaretState extends State<_ComboBoxCaret> {
       builder: (context, constraints) {
         // The Positioned parent forces a tight height equal to the field's; the
         // caret is a square of that height so it fills the trailing edge.
-        final side = constraints.maxHeight.isFinite ? constraints.maxHeight : 20.0;
+        final side = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : 20.0;
         final button = widget.style == CNComboBoxStyle.bordered
             ? _buildBordered(context, side)
             : _buildPlain(context, side);
 
         return MouseRegion(
           cursor: widget.enabled ? SystemMouseCursors.click : MouseCursor.defer,
-          onEnter: widget.enabled ? (_) => setState(() => _hovered = true) : null,
-          onExit: widget.enabled ? (_) => setState(() => _hovered = false) : null,
+          onEnter: widget.enabled
+              ? (_) => setState(() => _hovered = true)
+              : null,
+          onExit: widget.enabled
+              ? (_) => setState(() => _hovered = false)
+              : null,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: widget.enabled ? widget.onTap : null,
@@ -516,5 +538,6 @@ class _CaretPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_CaretPainter oldDelegate) => oldDelegate.color != color || oldDelegate.icon != icon;
+  bool shouldRepaint(_CaretPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.icon != icon;
 }

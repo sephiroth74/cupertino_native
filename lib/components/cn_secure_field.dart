@@ -185,7 +185,10 @@ class _CNSecureFieldState extends CNWidgetState<CNSecureField> {
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
       'text': _controller.text,
       'placeholder': widget.placeholder,
@@ -208,7 +211,8 @@ class _CNSecureFieldState extends CNWidgetState<CNSecureField> {
     return payload;
   }
 
-  TextEditingController get _controller => widget.controller ?? _internalController!;
+  TextEditingController get _controller =>
+      widget.controller ?? _internalController!;
 
   double _defaultHeight() {
     double resolvedHeight = 26.0;

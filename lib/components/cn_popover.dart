@@ -49,11 +49,16 @@ class CNPopover {
         'anchorHeight': size.height,
       });
 
-      final resultMap = response is Map ? Map<Object?, Object?>.from(response) : const <Object?, Object?>{};
+      final resultMap = response is Map
+          ? Map<Object?, Object?>.from(response)
+          : const <Object?, Object?>{};
       final selectedIndex = (resultMap['selectedIndex'] as num?)?.toInt();
       if (selectedIndex == null) return null;
 
-      return CNPopoverResult(selectedIndex: selectedIndex, selectedTag: resultMap['selectedTag'] as String?);
+      return CNPopoverResult(
+        selectedIndex: selectedIndex,
+        selectedTag: resultMap['selectedTag'] as String?,
+      );
     }
 
     // Non-macOS fallback
@@ -71,12 +76,18 @@ class CNPopover {
               child: Text(actions[i].title),
             ),
         ],
-        cancelButton: CupertinoActionSheetAction(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(ctx).pop(),
+          child: const Text('Cancel'),
+        ),
       ),
     );
     if (selected == null) return null;
 
-    return CNPopoverResult(selectedIndex: selected, selectedTag: actions[selected].tag);
+    return CNPopoverResult(
+      selectedIndex: selected,
+      selectedTag: actions[selected].tag,
+    );
   }
 }
 

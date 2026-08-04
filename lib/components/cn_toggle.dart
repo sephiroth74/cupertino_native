@@ -94,7 +94,11 @@ class _CNToggleState extends CNWidgetState<CNToggle> {
   Size computeDefaultSize() => Size(_defaultWidth(), _defaultHeight());
 
   @override
-  double computeShrinkHeight({required BoxConstraints constraints, required double defaultHeight, double? intrinsicHeight}) {
+  double computeShrinkHeight({
+    required BoxConstraints constraints,
+    required double defaultHeight,
+    double? intrinsicHeight,
+  }) {
     double resolvedHeight;
     if (intrinsicHeight != null) {
       resolvedHeight = intrinsicHeight;
@@ -123,7 +127,10 @@ class _CNToggleState extends CNWidgetState<CNToggle> {
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
       'isOn': widget.isOn,
       'enabled': widget.onChanged != null,

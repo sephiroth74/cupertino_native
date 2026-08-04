@@ -48,7 +48,8 @@ class _TextEditorDemoPageState extends State<TextEditorDemoPage> {
     final selection = controller.selection;
     if (selection.isValid && mounted) {
       setState(() {
-        selectionInfo = 'Selection: [${selection.baseOffset}, ${selection.extentOffset}]\nLength: ${controller.text.length}';
+        selectionInfo =
+            'Selection: [${selection.baseOffset}, ${selection.extentOffset}]\nLength: ${controller.text.length}';
       });
     }
   }
@@ -77,7 +78,9 @@ class _TextEditorDemoPageState extends State<TextEditorDemoPage> {
                       inputFormatters: lowercaseOnly
                           ? [
                               TextInputFormatter.withFunction(
-                                (oldValue, newValue) => newValue.copyWith(text: newValue.text.toLowerCase()),
+                                (oldValue, newValue) => newValue.copyWith(
+                                  text: newValue.text.toLowerCase(),
+                                ),
                               ),
                             ]
                           : null,
@@ -100,9 +103,18 @@ class _TextEditorDemoPageState extends State<TextEditorDemoPage> {
           RightSideOptionContainer(
             title: 'Options',
             options: {
-              'Editable': CNToggle(isOn: editable, onChanged: (value) => setState(() => editable = value)),
-              'Max 20 chars': CNToggle(isOn: limitLength, onChanged: (value) => setState(() => limitLength = value)),
-              'Lowercase only': CNToggle(isOn: lowercaseOnly, onChanged: (value) => setState(() => lowercaseOnly = value)),
+              'Editable': CNToggle(
+                isOn: editable,
+                onChanged: (value) => setState(() => editable = value),
+              ),
+              'Max 20 chars': CNToggle(
+                isOn: limitLength,
+                onChanged: (value) => setState(() => limitLength = value),
+              ),
+              'Lowercase only': CNToggle(
+                isOn: lowercaseOnly,
+                onChanged: (value) => setState(() => lowercaseOnly = value),
+              ),
               'Font': FontPicker(
                 value: font,
                 fonts: kAvailableFonts,
@@ -136,7 +148,9 @@ class _TextEditorDemoPageState extends State<TextEditorDemoPage> {
                 value: borderWidth ?? 0,
                 min: 0.0,
                 max: 10.0,
-                onChanged: borderColor != null ? (newWidth) => setState(() => borderWidth = newWidth) : null,
+                onChanged: borderColor != null
+                    ? (newWidth) => setState(() => borderWidth = newWidth)
+                    : null,
               ),
             },
           ),

@@ -7,7 +7,10 @@ const _kDebugLog = false;
 const _kFontSize = 32.0;
 const _kShrink = true;
 
-const _kTextScales = {'default': CNTextScale.defaultScale, 'secondary': CNTextScale.secondary};
+const _kTextScales = {
+  'default': CNTextScale.defaultScale,
+  'secondary': CNTextScale.secondary,
+};
 
 class TextDemoPage extends StatefulWidget {
   const TextDemoPage({super.key});
@@ -44,7 +47,10 @@ class _TextDemoPageState extends State<TextDemoPage> {
                     child: Container(
                       padding: EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        border: Border.all(color: CupertinoColors.systemGrey, width: 1),
+                        border: Border.all(
+                          color: CupertinoColors.systemGrey,
+                          width: 1,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Align(
@@ -74,7 +80,9 @@ class _TextDemoPageState extends State<TextDemoPage> {
                 value: font,
                 fonts: kAvailableFonts,
                 onChanged: (newFont) => setState(() {
-                  debugPrint('Font changed: ${newFont?.name ?? newFont?.kind.name}');
+                  debugPrint(
+                    'Font changed: ${newFont?.name ?? newFont?.kind.name}',
+                  );
                   font = newFont?.copyWith(size: CNFontSize.points(fontSize));
                 }),
               ),
@@ -88,7 +96,9 @@ class _TextDemoPageState extends State<TextDemoPage> {
                 onChanged: font != null
                     ? (newSize) => setState(() {
                         fontSize = newSize;
-                        font = font?.copyWith(size: CNFontSize.points(fontSize));
+                        font = font?.copyWith(
+                          size: CNFontSize.points(fontSize),
+                        );
                       })
                     : null,
               ),
@@ -96,19 +106,32 @@ class _TextDemoPageState extends State<TextDemoPage> {
                 value: lineLimit.toDouble(),
                 min: 1,
                 max: 10,
-                onChanged: (newValue) => setState(() => lineLimit = newValue.toInt()),
+                onChanged: (newValue) =>
+                    setState(() => lineLimit = newValue.toInt()),
               ),
               'Text Scale': CNPicker(
                 selection: textScale.name,
-                children: _kTextScales.entries.map((entry) => CNChildLabel(entry.key, tag: entry.value.name)).toList(),
-                onChanged: (tag) =>
-                    setState(() => textScale = _kTextScales.entries.firstWhere((entry) => entry.value.name == tag).value),
+                children: _kTextScales.entries
+                    .map(
+                      (entry) => CNChildLabel(entry.key, tag: entry.value.name),
+                    )
+                    .toList(),
+                onChanged: (tag) => setState(
+                  () => textScale = _kTextScales.entries
+                      .firstWhere((entry) => entry.value.name == tag)
+                      .value,
+                ),
               ),
               'Truncation Mode': CNPicker(
                 selection: truncationMode.name,
-                children: CNTextTruncationMode.values.map((mode) => CNChildLabel(mode.name, tag: mode.name)).toList(),
-                onChanged: (tag) =>
-                    setState(() => truncationMode = CNTextTruncationMode.values.firstWhere((mode) => mode.name == tag)),
+                children: CNTextTruncationMode.values
+                    .map((mode) => CNChildLabel(mode.name, tag: mode.name))
+                    .toList(),
+                onChanged: (tag) => setState(
+                  () => truncationMode = CNTextTruncationMode.values.firstWhere(
+                    (mode) => mode.name == tag,
+                  ),
+                ),
               ),
             },
           ),

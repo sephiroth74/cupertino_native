@@ -86,7 +86,11 @@ class _CNStepperState extends CNWidgetState<CNStepper> {
   Size computeDefaultSize() => Size(_defaultWidth(), _defaultHeight());
 
   @override
-  double computeShrinkHeight({required BoxConstraints constraints, required double defaultHeight, double? intrinsicHeight}) {
+  double computeShrinkHeight({
+    required BoxConstraints constraints,
+    required double defaultHeight,
+    double? intrinsicHeight,
+  }) {
     double resolvedHeight;
     if (intrinsicHeight != null) {
       resolvedHeight = intrinsicHeight;
@@ -121,13 +125,18 @@ class _CNStepperState extends CNWidgetState<CNStepper> {
         }
       case 'editingChanged':
         final args = call.arguments as Map?;
-        final editing = (args?['editing'] as bool?) ?? (args?['editing'] as num?)?.toInt() == 1;
+        final editing =
+            (args?['editing'] as bool?) ??
+            (args?['editing'] as num?)?.toInt() == 1;
         widget.onEditingChanged?.call(editing);
     }
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
       'value': widget.value,
       'min': widget.min,

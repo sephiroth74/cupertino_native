@@ -14,11 +14,13 @@ class CNProgressTheme extends InheritedTheme {
   bool updateShouldNotify(CNProgressTheme oldWidget) => data != oldWidget.data;
 
   @override
-  Widget wrap(BuildContext context, Widget child) => CNProgressTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) =>
+      CNProgressTheme(data: data, child: child);
 
   /// Returns the nearest [CNProgressThemeData], falling back to [CNTheme].
   static CNProgressThemeData of(BuildContext context) {
-    final CNProgressTheme? theme = context.dependOnInheritedWidgetOfExactType<CNProgressTheme>();
+    final CNProgressTheme? theme = context
+        .dependOnInheritedWidgetOfExactType<CNProgressTheme>();
     return theme?.data ?? CNTheme.of(context).progressTheme;
   }
 }
@@ -46,7 +48,13 @@ class CNProgressThemeData extends Equatable {
   }
 
   /// Linearly interpolates between two progress view themes.
-  static CNProgressThemeData lerp(CNProgressThemeData a, CNProgressThemeData b, double t) {
-    return CNProgressThemeData(tintColor: Color.lerp(a.tintColor, b.tintColor, t));
+  static CNProgressThemeData lerp(
+    CNProgressThemeData a,
+    CNProgressThemeData b,
+    double t,
+  ) {
+    return CNProgressThemeData(
+      tintColor: Color.lerp(a.tintColor, b.tintColor, t),
+    );
   }
 }

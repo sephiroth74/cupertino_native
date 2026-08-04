@@ -51,9 +51,18 @@ class _ComboBoxDemoPageState extends State<ComboBoxDemoPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('CNComboBox', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      const Text(
+                        'CNComboBox',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 20),
-                      const Text('Bordered', style: TextStyle(fontWeight: FontWeight.w600)),
+                      const Text(
+                        'Bordered',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                       const SizedBox(height: 8),
                       CNComboBox(
                         text: _selectedValue,
@@ -73,7 +82,10 @@ class _ComboBoxDemoPageState extends State<ComboBoxDemoPage> {
                             : null,
                       ),
                       const SizedBox(height: 20),
-                      const Text('Plain', style: TextStyle(fontWeight: FontWeight.w600)),
+                      const Text(
+                        'Plain',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                       const SizedBox(height: 8),
                       CNComboBox(
                         text: _selectedValue,
@@ -102,9 +114,15 @@ class _ComboBoxDemoPageState extends State<ComboBoxDemoPage> {
 
               RightSideOptionContainer(
                 options: {
-                  'Enabled': CNToggle(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value)),
-                  'Completes': CNToggle(isOn: completes, onChanged: (value) => setState(() => completes = value)),
-                  },
+                  'Enabled': CNToggle(
+                    isOn: isEnabled,
+                    onChanged: (value) => setState(() => isEnabled = value),
+                  ),
+                  'Completes': CNToggle(
+                    isOn: completes,
+                    onChanged: (value) => setState(() => completes = value),
+                  ),
+                },
               ),
             ],
           ),

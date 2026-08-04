@@ -80,7 +80,13 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
                       } else {
                         debugPrint('Filtering suggestions for query: "$query"');
                         return Future.value(
-                          _kDemoSuggestions.where((s) => s.toLowerCase().contains(query.toLowerCase())).toList(),
+                          _kDemoSuggestions
+                              .where(
+                                (s) => s.toLowerCase().contains(
+                                  query.toLowerCase(),
+                                ),
+                              )
+                              .toList(),
                         );
                       }
                     },
@@ -92,8 +98,14 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
           RightSideOptionContainer(
             title: 'Options',
             options: {
-              'Control Size': ControlSizePicker(value: controlSize, onChanged: (v) => setState(() => controlSize = v)),
-              'Bezel Style': BezelStylePicker(value: bezelStyle, onChanged: (v) => setState(() => bezelStyle = v)),
+              'Control Size': ControlSizePicker(
+                value: controlSize,
+                onChanged: (v) => setState(() => controlSize = v),
+              ),
+              'Bezel Style': BezelStylePicker(
+                value: bezelStyle,
+                onChanged: (v) => setState(() => bezelStyle = v),
+              ),
               'Text Color': ColorPicker(
                 colors: kSystemColors,
                 value: textColor,
@@ -107,7 +119,9 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
               'Font': FontPicker(
                 fonts: kAvailableFonts,
                 value: font,
-                onChanged: (f) => setState(() => font = f?.copyWith(size: CNFontSize.points(fontSize))),
+                onChanged: (f) => setState(
+                  () => font = f?.copyWith(size: CNFontSize.points(fontSize)),
+                ),
               ),
               'Font Size': SizeSliderPicker(
                 value: fontSize,

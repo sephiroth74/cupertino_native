@@ -4,10 +4,20 @@ import 'package:flutter/cupertino.dart';
 /// Designed for Liquid Glass aesthetic in macOS 26
 class CNGlassMaterial {
   /// Creates a glass material with specified blur radius, base color, and opacity.
-  const CNGlassMaterial({required this.blurRadius, required this.baseColor, required this.opacity});
+  const CNGlassMaterial({
+    required this.blurRadius,
+    required this.baseColor,
+    required this.opacity,
+  });
 
   /// List of all glass materials, ordered from thinnest to thickest
-  static const List<CNGlassMaterial> all = [ultraThin, thin, medium, thick, ultraThick];
+  static const List<CNGlassMaterial> all = [
+    ultraThin,
+    thin,
+    medium,
+    thick,
+    ultraThick,
+  ];
 
   /// Medium material: 15px blur, 60% opacity
   static const CNGlassMaterial medium = CNGlassMaterial(

@@ -14,11 +14,13 @@ class CNButtonTheme extends InheritedTheme {
   bool updateShouldNotify(CNButtonTheme oldWidget) => data != oldWidget.data;
 
   @override
-  Widget wrap(BuildContext context, Widget child) => CNButtonTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) =>
+      CNButtonTheme(data: data, child: child);
 
   /// Returns the nearest [CNButtonThemeData], falling back to [CNTheme].
   static CNButtonThemeData of(BuildContext context) {
-    final CNButtonTheme? theme = context.dependOnInheritedWidgetOfExactType<CNButtonTheme>();
+    final CNButtonTheme? theme = context
+        .dependOnInheritedWidgetOfExactType<CNButtonTheme>();
     return theme?.data ?? CNTheme.of(context).buttonTheme;
   }
 }
@@ -46,7 +48,13 @@ class CNButtonThemeData extends Equatable {
   }
 
   /// Linearly interpolates between two button themes.
-  static CNButtonThemeData lerp(CNButtonThemeData a, CNButtonThemeData b, double t) {
-    return CNButtonThemeData(tintColor: Color.lerp(a.tintColor, b.tintColor, t));
+  static CNButtonThemeData lerp(
+    CNButtonThemeData a,
+    CNButtonThemeData b,
+    double t,
+  ) {
+    return CNButtonThemeData(
+      tintColor: Color.lerp(a.tintColor, b.tintColor, t),
+    );
   }
 }

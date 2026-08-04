@@ -53,14 +53,20 @@ class _IconButtonDemoPageState extends State<IconButtonDemoPage> {
                           selectedSystemSymbolName: 'checkmark',
                           isSelected: isSelected,
                           shape: shape,
-                          iconSizeRatio: iconSizeRatio > 0 ? iconSizeRatio : null,
+                          iconSizeRatio: iconSizeRatio > 0
+                              ? iconSizeRatio
+                              : null,
                           foregroundColor: foregroundColor,
                           backgroundColor: backgroundColor,
                           borderColor: borderColor,
                           borderWidth: borderWidth,
                           animationDuration: animationDuration,
-                          onTap: isEnabled ? () => setState(() => tapCount++) : null,
-                          onLongPress: isEnabled ? () => setState(() => isSelected = !isSelected) : null,
+                          onTap: isEnabled
+                              ? () => setState(() => tapCount++)
+                              : null,
+                          onLongPress: isEnabled
+                              ? () => setState(() => isSelected = !isSelected)
+                              : null,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -82,12 +88,19 @@ class _IconButtonDemoPageState extends State<IconButtonDemoPage> {
                                   size: 44,
                                   systemSymbolName: 'star.fill',
                                   shape: s,
-                                  borderColor: CNTheme.of(context).separatorColor,
+                                  borderColor: CNTheme.of(
+                                    context,
+                                  ).separatorColor,
                                   borderWidth: 1,
                                   onTap: () {},
                                 ),
                                 const SizedBox(height: 6),
-                                Text(s.name, style: CNTheme.of(context).typography.caption2),
+                                Text(
+                                  s.name,
+                                  style: CNTheme.of(
+                                    context,
+                                  ).typography.caption2,
+                                ),
                               ],
                             ),
                             const SizedBox(width: 20),
@@ -99,13 +112,27 @@ class _IconButtonDemoPageState extends State<IconButtonDemoPage> {
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          CNIconButton(size: 44, icon: CupertinoIcons.heart_fill, onTap: () {}, iconSizeRatio: iconSizeRatio > 0 ? iconSizeRatio : null),
+                          CNIconButton(
+                            size: 44,
+                            icon: CupertinoIcons.heart_fill,
+                            onTap: () {},
+                            iconSizeRatio: iconSizeRatio > 0
+                                ? iconSizeRatio
+                                : null,
+                          ),
                           const SizedBox(width: 20),
-                          CNIconButton(size: 44, systemSymbolName: 'heart.fill', onTap: () {}),
+                          CNIconButton(
+                            size: 44,
+                            systemSymbolName: 'heart.fill',
+                            onTap: () {},
+                          ),
                         ],
                       ),
                       const SizedBox(height: 32),
-                      _sectionTitle(context, 'Scoped CNIconButtonTheme (accent-tinted, capsule)'),
+                      _sectionTitle(
+                        context,
+                        'Scoped CNIconButtonTheme (accent-tinted, capsule)',
+                      ),
                       const SizedBox(height: 12),
                       CNIconButtonTheme(
                         data: const CNIconButtonThemeData(
@@ -118,11 +145,23 @@ class _IconButtonDemoPageState extends State<IconButtonDemoPage> {
                         ),
                         child: Row(
                           children: [
-                            CNIconButton(size: 44, systemSymbolName: 'bold', onTap: () {}),
+                            CNIconButton(
+                              size: 44,
+                              systemSymbolName: 'bold',
+                              onTap: () {},
+                            ),
                             const SizedBox(width: 12),
-                            CNIconButton(size: 44, systemSymbolName: 'italic', onTap: () {}),
+                            CNIconButton(
+                              size: 44,
+                              systemSymbolName: 'italic',
+                              onTap: () {},
+                            ),
                             const SizedBox(width: 12),
-                            CNIconButton(size: 44, systemSymbolName: 'underline', onTap: () {}),
+                            CNIconButton(
+                              size: 44,
+                              systemSymbolName: 'underline',
+                              onTap: () {},
+                            ),
                           ],
                         ),
                       ),
@@ -132,13 +171,19 @@ class _IconButtonDemoPageState extends State<IconButtonDemoPage> {
               ),
               RightSideOptionContainer(
                 options: {
-                  'Size': SizeSliderPicker(min: 24, max: 96, value: size, onChanged: (value) => setState(() => size = value)),
+                  'Size': SizeSliderPicker(
+                    min: 24,
+                    max: 96,
+                    value: size,
+                    onChanged: (value) => setState(() => size = value),
+                  ),
                   'Icon Ratio': SizeSliderPicker(
                     min: 0,
                     max: 100,
                     step: 5,
                     value: (iconSizeRatio * 100),
-                    onChanged: (value) => setState(() => iconSizeRatio = value / 100.0),
+                    onChanged: (value) =>
+                        setState(() => iconSizeRatio = value / 100.0),
                   ),
                   'Border Width': SizeSliderPicker(
                     min: 0,
@@ -148,26 +193,40 @@ class _IconButtonDemoPageState extends State<IconButtonDemoPage> {
                   ),
                   'Shape': CNPicker(
                     selection: shape.name,
-                    onChanged: (value) => setState(() => shape = CNIconButtonShape.values.firstWhere((s) => s.name == value)),
-                    children: CNIconButtonShape.values.map((s) => CNChildText(s.name, tag: s.name)).toList(),
+                    onChanged: (value) => setState(
+                      () => shape = CNIconButtonShape.values.firstWhere(
+                        (s) => s.name == value,
+                      ),
+                    ),
+                    children: CNIconButtonShape.values
+                        .map((s) => CNChildText(s.name, tag: s.name))
+                        .toList(),
                   ),
                   'Foreground': ColorPicker(
                     colors: kSystemColors,
                     value: foregroundColor,
-                    onChanged: (color) => setState(() => foregroundColor = color),
+                    onChanged: (color) =>
+                        setState(() => foregroundColor = color),
                   ),
                   'Background': ColorPicker(
                     colors: kSystemColors,
                     value: backgroundColor,
-                    onChanged: (color) => setState(() => backgroundColor = color),
+                    onChanged: (color) =>
+                        setState(() => backgroundColor = color),
                   ),
                   'Border Color': ColorPicker(
                     colors: kSystemColors,
                     value: borderColor,
                     onChanged: (color) => setState(() => borderColor = color),
                   ),
-                  'Selected': CNToggle(isOn: isSelected, onChanged: (v) => setState(() => isSelected = v)),
-                  'Enabled': CNToggle(isOn: isEnabled, onChanged: (v) => setState(() => isEnabled = v)),
+                  'Selected': CNToggle(
+                    isOn: isSelected,
+                    onChanged: (v) => setState(() => isSelected = v),
+                  ),
+                  'Enabled': CNToggle(
+                    isOn: isEnabled,
+                    onChanged: (v) => setState(() => isEnabled = v),
+                  ),
                 },
               ),
             ],

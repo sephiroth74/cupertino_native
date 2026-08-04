@@ -17,7 +17,9 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('Right-click inside the card to open the native context menu.'),
+          const Text(
+            'Right-click inside the card to open the native context menu.',
+          ),
           const SizedBox(height: 16),
           CNContextMenuRegion(
             onItemPressed: (value) {
@@ -25,7 +27,11 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
             },
             items: [
               CNChildButton(title: 'Open', tag: 'Open', systemImage: 'folder'),
-              CNChildButton(title: 'Rename', tag: 'Rename', systemImage: 'square.and.pencil'),
+              CNChildButton(
+                title: 'Rename',
+                tag: 'Rename',
+                systemImage: 'square.and.pencil',
+              ),
               CNChildDivider(),
               CNChildMenu.simple(
                 'Share',
@@ -34,7 +40,11 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
                   CNChildButton(title: 'Copy Link', tag: 'Copy Link'),
                   CNChildButton(title: 'Send via Mail', tag: 'Send via Mail'),
                   CNChildDivider(),
-                  CNChildButton(title: 'Export…', tag: 'Export…', enabled: false),
+                  CNChildButton(
+                    title: 'Export…',
+                    tag: 'Export…',
+                    enabled: false,
+                  ),
                 ],
               ),
               CNChildDivider(),
@@ -47,19 +57,30 @@ class _ContextMenuDemoPageState extends State<ContextMenuDemoPage> {
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(color: CNColors.fillTertiary, borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(
+                color: CNColors.fillTertiary,
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Editor Area', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text(
+                    'Editor Area',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
                   SizedBox(height: 8),
-                  Text('Right-click to test a multi-level context menu without icons.'),
+                  Text(
+                    'Right-click to test a multi-level context menu without icons.',
+                  ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 16),
-          TextButton(onPressed: () => setState(() => _lastSelection = 'None'), child: const Text('Reset Last Selection')),
+          TextButton(
+            onPressed: () => setState(() => _lastSelection = 'None'),
+            child: const Text('Reset Last Selection'),
+          ),
           Text('Last selection: $_lastSelection'),
         ],
       ),

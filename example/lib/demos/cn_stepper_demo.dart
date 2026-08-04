@@ -31,7 +31,11 @@ class _StepperDemoPageState extends State<StepperDemoPage> {
                 children: [
                   CNText(
                     'Value: ${value.toStringAsFixed(0)}',
-                    constraints: BoxConstraints(minWidth: 100, maxWidth: 100, maxHeight: 32),
+                    constraints: BoxConstraints(
+                      minWidth: 100,
+                      maxWidth: 100,
+                      maxHeight: 32,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   CNStepper(
@@ -41,7 +45,9 @@ class _StepperDemoPageState extends State<StepperDemoPage> {
                     max: 100,
                     step: 1,
                     controlSize: controlSize,
-                    onChanged: enabled ? (v) => setState(() => value = v) : null,
+                    onChanged: enabled
+                        ? (v) => setState(() => value = v)
+                        : null,
                   ),
                 ],
               ),
@@ -55,7 +61,10 @@ class _StepperDemoPageState extends State<StepperDemoPage> {
                 value: controlSize,
                 onChanged: (newSize) => setState(() => controlSize = newSize),
               ),
-              'Enabled': CNToggle(isOn: enabled, onChanged: (v) => setState(() => enabled = v)),
+              'Enabled': CNToggle(
+                isOn: enabled,
+                onChanged: (v) => setState(() => enabled = v),
+              ),
             },
           ),
         ],

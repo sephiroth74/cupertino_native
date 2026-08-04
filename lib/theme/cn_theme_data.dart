@@ -83,10 +83,15 @@ class CNThemeData extends Equatable {
       thumbColor = CNColors.scrollbarColor.color.withAlpha(101);
       typography ??= CNTypography.darkOpaque().copyWith(color: labelColor);
     }
-    textTheme ??= CNTextThemeData(font: cnFontFromTextStyle(typography.body), labelColor: labelColor);
+    textTheme ??= CNTextThemeData(
+      font: cnFontFromTextStyle(typography.body),
+      labelColor: labelColor,
+    );
     buttonTheme ??= CNButtonThemeData(tintColor: userAccentColor);
     pickerTheme ??= CNPickerThemeData(tintColor: userAccentColor);
-    segmentedControlTheme ??= CNSegmentedControlThemeData(tintColor: userAccentColor);
+    segmentedControlTheme ??= CNSegmentedControlThemeData(
+      tintColor: userAccentColor,
+    );
     stepperTheme ??= CNStepperThemeData(tintColor: userAccentColor);
     gaugeTheme ??= CNGaugeThemeData(tintColor: userAccentColor);
     datePickerTheme ??= CNDatePickerThemeData(tintColor: userAccentColor);
@@ -95,7 +100,10 @@ class CNThemeData extends Equatable {
     toggleTheme ??= CNToggleThemeData(tint: userAccentColor);
     sliderTheme ??= CNSliderThemeData(tintColor: userAccentColor);
     progressTheme ??= CNProgressThemeData(tintColor: userAccentColor);
-    scrollbarTheme ??= CNScrollbarThemeData(thumbColor: thumbColor, thumbColorWhileHovering: thumbColor.withAlpha(255));
+    scrollbarTheme ??= CNScrollbarThemeData(
+      thumbColor: thumbColor,
+      thumbColorWhileHovering: thumbColor.withAlpha(255),
+    );
     iconButtonTheme ??= const CNIconButtonThemeData();
     imageTheme ??= const CNImageThemeData();
 
@@ -141,7 +149,11 @@ class CNThemeData extends Equatable {
   }
 
   /// A default dark theme.
-  factory CNThemeData.dark({Color? userAccentColor, required Color? systemAccentColor, required bool isMainWindow}) => CNThemeData(
+  factory CNThemeData.dark({
+    Color? userAccentColor,
+    required Color? systemAccentColor,
+    required bool isMainWindow,
+  }) => CNThemeData(
     brightness: Brightness.dark,
     userAccentColor: userAccentColor,
     systemAccentColor: systemAccentColor,
@@ -149,11 +161,17 @@ class CNThemeData extends Equatable {
   );
 
   /// The default fallback theme used when no [CNTheme] is in scope.
-  factory CNThemeData.fallback({Brightness brightness = Brightness.light, required bool isMainWindow}) =>
-      CNThemeData(brightness: brightness, isMainWindow: isMainWindow);
+  factory CNThemeData.fallback({
+    Brightness brightness = Brightness.light,
+    required bool isMainWindow,
+  }) => CNThemeData(brightness: brightness, isMainWindow: isMainWindow);
 
   /// A default light theme.
-  factory CNThemeData.light({Color? userAccentColor, required Color? systemAccentColor, required bool isMainWindow}) => CNThemeData(
+  factory CNThemeData.light({
+    Color? userAccentColor,
+    required Color? systemAccentColor,
+    required bool isMainWindow,
+  }) => CNThemeData(
     brightness: Brightness.light,
     userAccentColor: userAccentColor,
     systemAccentColor: systemAccentColor,
@@ -406,7 +424,8 @@ class CNThemeData extends Equatable {
       secondaryColor: secondaryColor ?? this.secondaryColor,
       destructiveColor: destructiveColor ?? this.destructiveColor,
       canvasColor: canvasColor ?? this.canvasColor,
-      groupedBackgroundColor: groupedBackgroundColor ?? this.groupedBackgroundColor,
+      groupedBackgroundColor:
+          groupedBackgroundColor ?? this.groupedBackgroundColor,
       labelColor: labelColor ?? this.labelColor,
       secondaryLabelColor: secondaryLabelColor ?? this.secondaryLabelColor,
       separatorColor: separatorColor ?? this.separatorColor,
@@ -429,7 +448,9 @@ class CNThemeData extends Equatable {
       scrollbarTheme: this.scrollbarTheme.merge(scrollbarTheme),
       buttonTheme: this.buttonTheme.merge(buttonTheme),
       pickerTheme: this.pickerTheme.merge(pickerTheme),
-      segmentedControlTheme: this.segmentedControlTheme.merge(segmentedControlTheme),
+      segmentedControlTheme: this.segmentedControlTheme.merge(
+        segmentedControlTheme,
+      ),
       stepperTheme: this.stepperTheme.merge(stepperTheme),
       gaugeTheme: this.gaugeTheme.merge(gaugeTheme),
       datePickerTheme: this.datePickerTheme.merge(datePickerTheme),
@@ -487,18 +508,42 @@ class CNThemeData extends Equatable {
     return CNThemeData.raw(
       brightness: t < 0.5 ? a.brightness : b.brightness,
       userAccentColor: Color.lerp(a.userAccentColor, b.userAccentColor, t)!,
-      systemAccentColor: Color.lerp(a.systemAccentColor, b.systemAccentColor, t)!,
+      systemAccentColor: Color.lerp(
+        a.systemAccentColor,
+        b.systemAccentColor,
+        t,
+      )!,
       secondaryColor: Color.lerp(a.secondaryColor, b.secondaryColor, t)!,
       destructiveColor: Color.lerp(a.destructiveColor, b.destructiveColor, t)!,
       canvasColor: Color.lerp(a.canvasColor, b.canvasColor, t)!,
-      groupedBackgroundColor: Color.lerp(a.groupedBackgroundColor, b.groupedBackgroundColor, t)!,
+      groupedBackgroundColor: Color.lerp(
+        a.groupedBackgroundColor,
+        b.groupedBackgroundColor,
+        t,
+      )!,
       labelColor: Color.lerp(a.labelColor, b.labelColor, t)!,
-      secondaryLabelColor: Color.lerp(a.secondaryLabelColor, b.secondaryLabelColor, t)!,
+      secondaryLabelColor: Color.lerp(
+        a.secondaryLabelColor,
+        b.secondaryLabelColor,
+        t,
+      )!,
       separatorColor: Color.lerp(a.separatorColor, b.separatorColor, t)!,
       fillPrimaryColor: Color.lerp(a.fillPrimaryColor, b.fillPrimaryColor, t)!,
-      fillSecondaryColor: Color.lerp(a.fillSecondaryColor, b.fillSecondaryColor, t)!,
-      fillTertiaryColor: Color.lerp(a.fillTertiaryColor, b.fillTertiaryColor, t)!,
-      fillQuaternaryColor: Color.lerp(a.fillQuaternaryColor, b.fillQuaternaryColor, t)!,
+      fillSecondaryColor: Color.lerp(
+        a.fillSecondaryColor,
+        b.fillSecondaryColor,
+        t,
+      )!,
+      fillTertiaryColor: Color.lerp(
+        a.fillTertiaryColor,
+        b.fillTertiaryColor,
+        t,
+      )!,
+      fillQuaternaryColor: Color.lerp(
+        a.fillQuaternaryColor,
+        b.fillQuaternaryColor,
+        t,
+      )!,
       fillQuinaryColor: Color.lerp(a.fillQuinaryColor, b.fillQuinaryColor, t)!,
       typography: CNTypography.lerp(a.typography, b.typography, t),
       materialUltraThin: t < 0.5 ? a.materialUltraThin : b.materialUltraThin,
@@ -510,17 +555,45 @@ class CNThemeData extends Equatable {
       imageTheme: CNImageThemeData.lerp(a.imageTheme, b.imageTheme, t),
       textTheme: CNTextThemeData.lerp(a.textTheme, b.textTheme, t),
       sliderTheme: CNSliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
-      progressTheme: CNProgressThemeData.lerp(a.progressTheme, b.progressTheme, t),
-      scrollbarTheme: CNScrollbarThemeData.lerp(a.scrollbarTheme, b.scrollbarTheme, t),
+      progressTheme: CNProgressThemeData.lerp(
+        a.progressTheme,
+        b.progressTheme,
+        t,
+      ),
+      scrollbarTheme: CNScrollbarThemeData.lerp(
+        a.scrollbarTheme,
+        b.scrollbarTheme,
+        t,
+      ),
       buttonTheme: CNButtonThemeData.lerp(a.buttonTheme, b.buttonTheme, t),
       pickerTheme: CNPickerThemeData.lerp(a.pickerTheme, b.pickerTheme, t),
-      segmentedControlTheme: CNSegmentedControlThemeData.lerp(a.segmentedControlTheme, b.segmentedControlTheme, t),
+      segmentedControlTheme: CNSegmentedControlThemeData.lerp(
+        a.segmentedControlTheme,
+        b.segmentedControlTheme,
+        t,
+      ),
       stepperTheme: CNStepperThemeData.lerp(a.stepperTheme, b.stepperTheme, t),
       gaugeTheme: CNGaugeThemeData.lerp(a.gaugeTheme, b.gaugeTheme, t),
-      datePickerTheme: CNDatePickerThemeData.lerp(a.datePickerTheme, b.datePickerTheme, t),
-      textFieldTheme: CNTextFieldThemeData.lerp(a.textFieldTheme, b.textFieldTheme, t),
-      secureFieldTheme: CNSecureFieldThemeData.lerp(a.secureFieldTheme, b.secureFieldTheme, t),
-      iconButtonTheme: CNIconButtonThemeData.lerp(a.iconButtonTheme, b.iconButtonTheme, t),
+      datePickerTheme: CNDatePickerThemeData.lerp(
+        a.datePickerTheme,
+        b.datePickerTheme,
+        t,
+      ),
+      textFieldTheme: CNTextFieldThemeData.lerp(
+        a.textFieldTheme,
+        b.textFieldTheme,
+        t,
+      ),
+      secureFieldTheme: CNSecureFieldThemeData.lerp(
+        a.secureFieldTheme,
+        b.secureFieldTheme,
+        t,
+      ),
+      iconButtonTheme: CNIconButtonThemeData.lerp(
+        a.iconButtonTheme,
+        b.iconButtonTheme,
+        t,
+      ),
       isMainWindow: t < 0.5 ? a.isMainWindow : b.isMainWindow,
     );
   }

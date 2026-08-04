@@ -47,13 +47,22 @@ class CNIconButton extends StatefulWidget {
     this.iconSizeRatio,
     this.padding,
     this.animationDuration,
-  }) : assert(icon != null || systemSymbolName != null, 'Either icon or systemSymbolName must be provided.'),
-       assert(!(icon != null && systemSymbolName != null), 'Only one of icon or systemSymbolName can be provided.'),
+  }) : assert(
+         icon != null || systemSymbolName != null,
+         'Either icon or systemSymbolName must be provided.',
+       ),
+       assert(
+         !(icon != null && systemSymbolName != null),
+         'Only one of icon or systemSymbolName can be provided.',
+       ),
        assert(
          !(selectedIcon != null && selectedSystemSymbolName != null),
          'Only one of selectedIcon or selectedSystemSymbolName can be provided.',
        ),
-       assert(iconSizeRatio == null || (iconSizeRatio > 0 && iconSizeRatio <= 1), 'iconSizeRatio must be in the (0, 1] range.');
+       assert(
+         iconSizeRatio == null || (iconSizeRatio > 0 && iconSizeRatio <= 1),
+         'iconSizeRatio must be in the (0, 1] range.',
+       );
 
   /// Transition duration for state (hover/press/selection) changes.
   final Duration? animationDuration;
@@ -151,9 +160,14 @@ class _CNIconButtonState extends State<CNIconButton> {
 
   bool get _interactive => widget.enabled;
 
-  Widget _buildGlyph({required BuildContext context, required double iconSize, required Color foreground}) {
+  Widget _buildGlyph({
+    required BuildContext context,
+    required double iconSize,
+    required Color foreground,
+  }) {
     if (widget.icon != null) {
-      final IconData effectiveIcon = (widget.isSelected ? widget.selectedIcon : null) ?? widget.icon!;
+      final IconData effectiveIcon =
+          (widget.isSelected ? widget.selectedIcon : null) ?? widget.icon!;
       return Icon(effectiveIcon, size: iconSize, color: foreground);
     }
 
@@ -193,10 +207,15 @@ class _CNIconButtonState extends State<CNIconButton> {
         radius = widget.size / 2;
         break;
       case CNIconButtonShape.roundedRectangle:
-        radius = widget.borderRadius ?? buttonTheme.borderRadius ?? widget.size / 8;
+        radius =
+            widget.borderRadius ?? buttonTheme.borderRadius ?? widget.size / 8;
         break;
     }
-    return BoxDecoration(color: background, border: border, borderRadius: BorderRadius.circular(radius));
+    return BoxDecoration(
+      color: background,
+      border: border,
+      borderRadius: BorderRadius.circular(radius),
+    );
   }
 
   Color? _resolveBackground({
@@ -209,13 +228,18 @@ class _CNIconButtonState extends State<CNIconButton> {
     required bool hovered,
   }) {
     if (disabled) {
-      return widget.disabledBackgroundColor ?? buttonTheme.disabledBackgroundColor;
+      return widget.disabledBackgroundColor ??
+          buttonTheme.disabledBackgroundColor;
     }
     if (pressed) {
-      return widget.pressedBackgroundColor ?? buttonTheme.pressedBackgroundColor ?? theme.fillPrimaryColor;
+      return widget.pressedBackgroundColor ??
+          buttonTheme.pressedBackgroundColor ??
+          theme.fillPrimaryColor;
     }
     if (hovered) {
-      return widget.hoveredBackgroundColor ?? buttonTheme.hoveredBackgroundColor ?? theme.fillSecondaryColor;
+      return widget.hoveredBackgroundColor ??
+          buttonTheme.hoveredBackgroundColor ??
+          theme.fillSecondaryColor;
     }
     if (widget.isSelected) {
       return widget.selectedBackgroundColor ??
@@ -237,16 +261,27 @@ class _CNIconButtonState extends State<CNIconButton> {
   }) {
     final Color idle = CNColors.label.resolveFromContext(context);
     if (disabled) {
-      return widget.disabledForegroundColor ?? buttonTheme.disabledForegroundColor ?? idle.withValues(alpha: 0.3);
+      return widget.disabledForegroundColor ??
+          buttonTheme.disabledForegroundColor ??
+          idle.withValues(alpha: 0.3);
     }
     if (pressed) {
-      return widget.pressedForegroundColor ?? buttonTheme.pressedForegroundColor ?? accent?.withLuminance(0.4) ?? idle;
+      return widget.pressedForegroundColor ??
+          buttonTheme.pressedForegroundColor ??
+          accent?.withLuminance(0.4) ??
+          idle;
     }
     if (hovered) {
-      return widget.hoveredForegroundColor ?? buttonTheme.hoveredForegroundColor ?? accent?.withLuminance(0.3) ?? idle;
+      return widget.hoveredForegroundColor ??
+          buttonTheme.hoveredForegroundColor ??
+          accent?.withLuminance(0.3) ??
+          idle;
     }
     if (widget.isSelected) {
-      return widget.selectedForegroundColor ?? buttonTheme.selectedForegroundColor ?? accent ?? idle;
+      return widget.selectedForegroundColor ??
+          buttonTheme.selectedForegroundColor ??
+          accent ??
+          idle;
     }
     return widget.foregroundColor ?? buttonTheme.foregroundColor ?? idle;
   }
@@ -292,19 +327,37 @@ class _CNIconButtonState extends State<CNIconButton> {
       hovered: hovered,
     );
 
-    final double iconSizeRatio = widget.iconSizeRatio ?? buttonTheme.iconSizeRatio ?? 0.75;
+    final double iconSizeRatio =
+        widget.iconSizeRatio ?? buttonTheme.iconSizeRatio ?? 0.75;
     final double iconSize = widget.size * iconSizeRatio;
-    final EdgeInsetsGeometry padding = widget.padding ?? buttonTheme.padding ?? EdgeInsets.zero;
-    final Duration duration = widget.animationDuration ?? buttonTheme.animationDuration ?? const Duration(milliseconds: 100);
-    final CNIconButtonShape shape = widget.shape ?? buttonTheme.shape ?? CNIconButtonShape.roundedRectangle;
+    final EdgeInsetsGeometry padding =
+        widget.padding ?? buttonTheme.padding ?? EdgeInsets.zero;
+    final Duration duration =
+        widget.animationDuration ??
+        buttonTheme.animationDuration ??
+        const Duration(milliseconds: 100);
+    final CNIconButtonShape shape =
+        widget.shape ?? buttonTheme.shape ?? CNIconButtonShape.roundedRectangle;
 
     final Color? borderColor = widget.borderColor ?? buttonTheme.borderColor;
-    final double borderWidth = widget.borderWidth ?? buttonTheme.borderWidth ?? 0.0;
-    final Border? border = (borderColor != null && borderWidth > 0) ? Border.all(color: borderColor, width: borderWidth) : null;
+    final double borderWidth =
+        widget.borderWidth ?? buttonTheme.borderWidth ?? 0.0;
+    final Border? border = (borderColor != null && borderWidth > 0)
+        ? Border.all(color: borderColor, width: borderWidth)
+        : null;
 
-    final BoxDecoration decoration = _decoration(shape: shape, background: background, border: border, buttonTheme: buttonTheme);
+    final BoxDecoration decoration = _decoration(
+      shape: shape,
+      background: background,
+      border: border,
+      buttonTheme: buttonTheme,
+    );
 
-    final Widget glyph = _buildGlyph(context: context, iconSize: iconSize, foreground: foreground);
+    final Widget glyph = _buildGlyph(
+      context: context,
+      iconSize: iconSize,
+      foreground: foreground,
+    );
 
     final Widget content = AnimatedContainer(
       duration: duration,
@@ -345,7 +398,10 @@ class _CNIconButtonState extends State<CNIconButton> {
         child: SizedBox(
           width: widget.size,
           height: widget.size,
-          child: Stack(fit: StackFit.passthrough, children: [content, interactionLayer]),
+          child: Stack(
+            fit: StackFit.passthrough,
+            children: [content, interactionLayer],
+          ),
         ),
       ),
     );

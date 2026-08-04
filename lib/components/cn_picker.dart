@@ -34,7 +34,13 @@ class CNPicker extends CNWidget {
     this.help,
     this.overlay,
   }) : assert(
-         children.every((c) => c is CNChildText || c is CNChildImage || c is CNChildLabel || c is CNChildDivider),
+         children.every(
+           (c) =>
+               c is CNChildText ||
+               c is CNChildImage ||
+               c is CNChildLabel ||
+               c is CNChildDivider,
+         ),
          'CNPicker2 children must be CNChildText, CNChildImage, CNChildLabel, or CNChildDivider',
        );
 
@@ -121,7 +127,9 @@ enum CNPickerStyle {
 class _CNPickerState extends CNWidgetState<CNPicker> {
   @override
   Size computeDefaultSize() {
-    logDebug('computeDefaultSize: pickerStyle=${widget.pickerStyle}, controlSize=${widget.controlSize}');
+    logDebug(
+      'computeDefaultSize: pickerStyle=${widget.pickerStyle}, controlSize=${widget.controlSize}',
+    );
     switch (widget.pickerStyle) {
       case CNPickerStyle.automatic:
       case CNPickerStyle.menu:
@@ -158,7 +166,11 @@ class _CNPickerState extends CNWidgetState<CNPicker> {
   }
 
   @override
-  double computeShrinkHeight({required BoxConstraints constraints, required double defaultHeight, double? intrinsicHeight}) {
+  double computeShrinkHeight({
+    required BoxConstraints constraints,
+    required double defaultHeight,
+    double? intrinsicHeight,
+  }) {
     double resolvedHeight;
     if (intrinsicHeight != null) {
       resolvedHeight = intrinsicHeight;
@@ -194,9 +206,14 @@ class _CNPickerState extends CNWidgetState<CNPicker> {
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
-      'children': widget.children.map((c) => c.toChildPayload(context)).toList(),
+      'children': widget.children
+          .map((c) => c.toChildPayload(context))
+          .toList(),
       'selection': widget.selection,
       'label': widget.label?.map((c) => c.toChildPayload(context)).toList(),
       'pickerStyle': widget.pickerStyle.name,

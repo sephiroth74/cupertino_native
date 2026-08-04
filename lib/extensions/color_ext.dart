@@ -18,7 +18,9 @@ extension ColorExtension on Color {
   /// Returns a new color with the luminance multiplied by [factor].
   Color multiplyLuminance(double factor) {
     final hslColor = HSLColor.fromColor(this);
-    return (hslColor.withLightness((hslColor.lightness * factor).clamp(0.0, 1.0))).toColor();
+    return (hslColor.withLightness(
+      (hslColor.lightness * factor).clamp(0.0, 1.0),
+    )).toColor();
   }
 
   /// Returns a new color with the luminance set to [luminance].

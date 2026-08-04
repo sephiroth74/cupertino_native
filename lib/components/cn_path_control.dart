@@ -109,7 +109,10 @@ class _CNPathControlState extends CNWidgetState<CNPathControl> {
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
       'path': widget.url.toFilePath(),
       'isDirectory': widget.isDirectory,
@@ -120,7 +123,11 @@ class _CNPathControlState extends CNWidgetState<CNPathControl> {
       'enabled': widget.onPressed != null,
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+    );
     return payload;
   }
 }

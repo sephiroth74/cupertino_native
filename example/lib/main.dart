@@ -65,9 +65,17 @@ const _entries = <_DemoEntry>[
   _DemoEntry('CNPathControl', 'folder', PathControlDemoPage()),
   _DemoEntry('CNPicker', 'rectangle.split.3x1.fill', PickerDemoPage()),
   _DemoEntry('CNPopover', 'rectangle.on.rectangle', PopoverDemoPage()),
-  _DemoEntry('CNProgressView', 'progress.indicator', ProgressIndicatorsPageDemo()),
+  _DemoEntry(
+    'CNProgressView',
+    'progress.indicator',
+    ProgressIndicatorsPageDemo(),
+  ),
   _DemoEntry('CNSearchField', 'magnifyingglass', SearchFieldDemoPage()),
-  _DemoEntry('CNSegmentedControl', 'rectangle.split.3x1', SegmentedControlDemoPage()),
+  _DemoEntry(
+    'CNSegmentedControl',
+    'rectangle.split.3x1',
+    SegmentedControlDemoPage(),
+  ),
   _DemoEntry('CNTabView', 'rectangle.split.3x1.fill', TabViewDemoPage()),
   _DemoEntry('CNSecureField', 'lock.shield', SecureTextFieldDemoPage()),
   _DemoEntry('CNSlider', 'slider.horizontal.3', SliderDemoPage()),
@@ -126,7 +134,11 @@ class _DemoEntry {
 }
 
 class _DesktopDemoShell extends StatefulWidget {
-  const _DesktopDemoShell({required this.selectedIndex, required this.searchQuery, required this.onSearchChanged});
+  const _DesktopDemoShell({
+    required this.selectedIndex,
+    required this.searchQuery,
+    required this.onSearchChanged,
+  });
 
   final ValueChanged<String> onSearchChanged;
   final String? searchQuery;
@@ -145,6 +157,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     final theme = CNTheme.of(context);
     final accentColor = theme.accentColor;
     final entry = _entries[widget.selectedIndex];
+    final isDark = theme.brightness == Brightness.dark;
 
     return CNPageScaffold(
       toolBar: CNToolbar(
@@ -163,38 +176,32 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
           children: [
             Text(entry.title),
             const SizedBox(height: 2.0),
-            Text('Cupertino Native Demo', style: TextStyle(fontSize: theme.typography.caption1.fontSize)),
+            Text(
+              'Cupertino Native Demo',
+              style: TextStyle(fontSize: theme.typography.caption1.fontSize),
+            ),
           ],
         ),
-        backgroundColor: accentColor?.withLuminance(0.9),
+        backgroundColor: isDark
+            ? accentColor?.withLuminance(0.3)
+            : accentColor?.withLuminance(0.9),
         enableBlur: true,
         actions: [
-          // CNToolbarButton(
-          //   'star',
-          //   selectedSystemImage: 'star.fill',
-          //   isSelected: _starred,
-          //   onPressed: () => setState(() => _starred = !_starred),
-          //   label: 'Favorite',
-          // ),
-          // CNToolbarComboBox(
-          //   items: _fontFamilies,
-          //   text: _fontFamily,
-          //   placeholder: 'Font',
-          //   completes: true,
-          //   width: 150,
-          //   onChanged: (value) => setState(() => _fontFamily = value),
-          // ),
-          // const CNToolbarSpacer(spacerUnits: 0.25),
-          // const CNToolbarDivider(),
-          // const CNToolbarSpacer(spacerUnits: 0.25),
           createToolbarThemePicker(context),
           const CNToolbarSpacer(spacerUnits: 0.25),
           const CNToolbarDivider(),
           const CNToolbarSpacer(spacerUnits: 0.25),
         ],
-        search: CNSearchField(text: widget.searchQuery ?? '', placeholder: 'Search', onChanged: widget.onSearchChanged),
+        search: CNSearchField(
+          text: widget.searchQuery ?? '',
+          placeholder: 'Search',
+          onChanged: widget.onSearchChanged,
+        ),
       ),
-      child: KeyedSubtree(key: ValueKey(widget.selectedIndex), child: entry.page),
+      child: KeyedSubtree(
+        key: ValueKey(widget.selectedIndex),
+        child: entry.page,
+      ),
     );
   }
 }
@@ -231,20 +238,30 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
         brightness = appTheme.mode == ThemeMode.system
             ? WidgetsBinding.instance.platformDispatcher.platformBrightness
-            : (appTheme.mode == ThemeMode.dark ? Brightness.dark : Brightness.light);
+            : (appTheme.mode == ThemeMode.dark
+                  ? Brightness.dark
+                  : Brightness.light);
 
-        debugPrint('Building MyApp with brightness: $brightness, appTheme.mode: ${appTheme.mode}');
+        debugPrint(
+          'Building MyApp with brightness: $brightness, appTheme.mode: ${appTheme.mode}',
+        );
 
         return CNApp(
           themeMode: appTheme.mode,
           debugShowCheckedModeBanner: false,
           home: (context) {
             final accentColor = CNTheme.of(context).accentColor;
-            debugPrint('Building home with accentColor: $accentColor, brightness: $brightness, appTheme.mode: ${appTheme.mode}');
+            final accentColorHex = accentColor != null
+                ? '#${accentColor.value.toRadixString(16).padLeft(8, '0')}'
+                : 'null';
+            debugPrint(
+              'Building home with accentColorHex: $accentColorHex, brightness: $brightness, appTheme.mode: ${appTheme.mode}',
+            );
 
             return CNWindow(
               state: NSVisualEffectViewState.followsWindowActiveState,
               backgroundColor: CNTheme.of(context).canvasColor.withAlpha(1),
+              toolbarSpansFullWidth: true,
               sidebar: CNSidebar(
                 builder: (context) {
                   return _SideBar(
@@ -262,9 +279,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 maxWidth: 400,
                 startWidth: 250,
                 dragClosed: true,
-                // Clear the traffic lights: sidebar content starts below the
-                // toolbar strip while its background runs full-height.
-                padding: const EdgeInsets.only(top: kCNToolbarHeight),
+                // In full-width toolbar mode the window already drops the sidebar
+                // below the toolbar strip, so no extra top padding is needed here.
                 material: NSVisualEffectViewMaterial.fullScreenUI,
                 backgroundColor: CNColors.canvasColor.withAlpha(127),
               ),
@@ -284,8 +300,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(width: 8),
-                      _StatusBarButton(icon: CupertinoIcons.exclamationmark_triangle, label: '0', onPressed: () {}),
-                      _StatusBarButton(icon: CupertinoIcons.info_circle, label: '2', onPressed: () {}),
+                      _StatusBarButton(
+                        icon: CupertinoIcons.exclamationmark_triangle,
+                        label: '0',
+                        onPressed: () {},
+                      ),
+                      _StatusBarButton(
+                        icon: CupertinoIcons.info_circle,
+                        label: '2',
+                        onPressed: () {},
+                      ),
                     ],
                   );
                 },
@@ -299,14 +323,26 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           controlSize: CNControlSize.regular,
                           toggleStyle: CNToggleStyle.button,
                           isOn: isExpanded,
-                          content: CNChildLabel('Terminal', labelStyle: CNLabelStyle.titleAndIcon, systemImage: 'apple.terminal'),
+                          content: CNChildLabel(
+                            'Terminal',
+                            labelStyle: CNLabelStyle.titleAndIcon,
+                            systemImage: 'apple.terminal',
+                          ),
                           onChanged: (value) {
                             CNWindowScope.of(context).toggleStatusBar();
                           },
                         ),
                       ),
-                      _StatusBarButton(icon: CupertinoIcons.doc_text, label: 'Dart', onPressed: () {}),
-                      _StatusBarButton(icon: CupertinoIcons.checkmark_circle, label: 'UTF-8', onPressed: () {}),
+                      _StatusBarButton(
+                        icon: CupertinoIcons.doc_text,
+                        label: 'Dart',
+                        onPressed: () {},
+                      ),
+                      _StatusBarButton(
+                        icon: CupertinoIcons.checkmark_circle,
+                        label: 'UTF-8',
+                        onPressed: () {},
+                      ),
                       const SizedBox(width: 8),
                     ],
                   );
@@ -320,7 +356,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         padding: const EdgeInsets.symmetric(vertical: 1),
                         child: Text(
                           '[\$ flutter run] Line $index: Application output...',
-                          style: TextStyle(fontSize: 12, fontFamily: 'Menlo', color: CNTheme.of(context).labelColor),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'Menlo',
+                            color: CNTheme.of(context).labelColor,
+                          ),
                         ),
                       );
                     },
@@ -346,7 +386,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 }
 
 class _SideBar extends StatelessWidget {
-  const _SideBar({required this.onItemSelected, required this.selectedIndex, this.searchQuery});
+  const _SideBar({
+    required this.onItemSelected,
+    required this.selectedIndex,
+    this.searchQuery,
+  });
 
   final void Function(int index) onItemSelected;
   final String? searchQuery;
@@ -367,7 +411,9 @@ class _SideBar extends StatelessWidget {
         final entry = _entries[index];
         final isSelected = index == selectedIndex;
         final isValidEntry =
-            searchQuery == null || searchQuery!.isEmpty || entry.title.toLowerCase().contains(searchQuery!.toLowerCase());
+            searchQuery == null ||
+            searchQuery!.isEmpty ||
+            entry.title.toLowerCase().contains(searchQuery!.toLowerCase());
 
         if (!isValidEntry) {
           return const SizedBox.shrink();
@@ -379,19 +425,26 @@ class _SideBar extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
             decoration: BoxDecoration(
-              color: isSelected ? accentColor?.withValues(alpha: 1.0) : Colors.transparent,
+              color: isSelected
+                  ? accentColor?.withValues(alpha: 1.0)
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(6),
             ),
             child: Row(
               children: [
                 CNImage(
-                  constraints: const BoxConstraints(maxWidth: 18, maxHeight: 18),
+                  constraints: const BoxConstraints(
+                    maxWidth: 18,
+                    maxHeight: 18,
+                  ),
                   systemSymbolName: entry.symbolName,
                   foregroundColor: isSelected
                       ? isBright
                             ? CNColors.black
                             : CNColors.white
-                      : (isDark ? CupertinoColors.label.darkColor : CupertinoColors.label.color),
+                      : (isDark
+                            ? CupertinoColors.label.darkColor
+                            : CupertinoColors.label.color),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -399,7 +452,11 @@ class _SideBar extends StatelessWidget {
                     entry.title,
                     style: TextStyle(
                       fontSize: 14,
-                      color: isSelected ? (isBright ? CNColors.label.color : CNColors.label.darkColor) : labelColor,
+                      color: isSelected
+                          ? (isBright
+                                ? CNColors.label.color
+                                : CNColors.label.darkColor)
+                          : labelColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -414,7 +471,11 @@ class _SideBar extends StatelessWidget {
 }
 
 class _StatusBarButton extends StatelessWidget {
-  const _StatusBarButton({required this.icon, required this.label, required this.onPressed}) : isActive = false;
+  const _StatusBarButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  }) : isActive = false;
 
   final IconData icon;
   final bool isActive;
@@ -428,7 +489,9 @@ class _StatusBarButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
-          color: isActive ? CNColors.fillPrimary.withAlpha(40) : Colors.transparent,
+          color: isActive
+              ? CNColors.fillPrimary.withAlpha(40)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(3),
         ),
         child: Row(
@@ -436,14 +499,16 @@ class _StatusBarButton extends StatelessWidget {
           children: [
             Icon(icon, size: 12, color: CNColors.label),
             const SizedBox(width: 4),
-            Text(label, style: const TextStyle(fontSize: 11, color: CNColors.label)),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 11, color: CNColors.label),
+            ),
           ],
         ),
       ),
     );
   }
 }
-
 
 CNToolbarItem createToolbarThemePicker(BuildContext context) {
   final appTheme = context.watch<AppTheme>();
@@ -452,11 +517,22 @@ CNToolbarItem createToolbarThemePicker(BuildContext context) {
     pickerStyle: CNPickerStyle.menu,
     selection: appTheme.mode.name,
     children: [
-      CNChildLabel('System Theme', tag: ThemeMode.system.name, systemImage: 'sun.lefthalf.filled'),
-      CNChildLabel('Light Theme', tag: ThemeMode.light.name, systemImage: 'sun.max'),
-      CNChildLabel('Dark Theme', tag: ThemeMode.dark.name, systemImage: 'moon.fill'),
+      CNChildLabel(
+        'System Theme',
+        tag: ThemeMode.system.name,
+        systemImage: 'sun.lefthalf.filled',
+      ),
+      CNChildLabel(
+        'Light Theme',
+        tag: ThemeMode.light.name,
+        systemImage: 'sun.max',
+      ),
+      CNChildLabel(
+        'Dark Theme',
+        tag: ThemeMode.dark.name,
+        systemImage: 'moon.fill',
+      ),
     ],
     onChanged: (tag) => appTheme.mode = ThemeMode.values.byName(tag),
   );
-
 }

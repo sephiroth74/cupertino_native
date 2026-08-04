@@ -32,7 +32,10 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
         children: [
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
                 const SizedBox(height: 16),
@@ -47,7 +50,8 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                           _defaultSliderValue = v;
                         })
                       : null,
-                  onEditingChanged: (editing) => setState(() => _isEditing = editing),
+                  onEditingChanged: (editing) =>
+                      setState(() => _isEditing = editing),
                   minimumValueLabel: _showLabels ? "0.0" : null,
                   maximumValueLabel: _showLabels ? "1.0" : null,
                   step: _isStepped ? 0.05 : null,
@@ -69,15 +73,24 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                   paddings: EdgeInsets.only(bottom: 6, top: 2),
                 ),
                 const SizedBox(height: 16),
-                Text('Editing: ${_isEditing ? 'true' : 'false'}', style: CNTheme.of(context).typography.body),
+                Text(
+                  'Editing: ${_isEditing ? 'true' : 'false'}',
+                  style: CNTheme.of(context).typography.body,
+                ),
               ],
             ),
           ),
           const SizedBox(width: 8),
           RightSideOptionContainer(
             options: {
-              'Control Size': ControlSizePicker(value: _size, onChanged: (newSize) => setState(() => _size = newSize)),
-              'Enabled': CNToggle(isOn: _isEnabled, onChanged: (enabled) => setState(() => _isEnabled = enabled)),
+              'Control Size': ControlSizePicker(
+                value: _size,
+                onChanged: (newSize) => setState(() => _size = newSize),
+              ),
+              'Enabled': CNToggle(
+                isOn: _isEnabled,
+                onChanged: (enabled) => setState(() => _isEnabled = enabled),
+              ),
               'Stepped': CNToggle(
                 isOn: _isStepped,
                 onChanged: (enabled) => setState(() {
@@ -92,7 +105,10 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                   _hasTicks = enabled;
                 }),
               ),
-              'Labels': CNToggle(isOn: _showLabels, onChanged: (enabled) => setState(() => _showLabels = enabled)),
+              'Labels': CNToggle(
+                isOn: _showLabels,
+                onChanged: (enabled) => setState(() => _showLabels = enabled),
+              ),
               'Tint Color': ColorPicker(
                 colors: kSystemColors,
                 value: _tintColor,

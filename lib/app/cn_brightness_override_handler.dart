@@ -8,7 +8,9 @@ class CNBrightnessOverrideHandler {
   /// Overrides the macOS window brightness if it differs from [currentBrightness].
   static void ensureMatchingBrightness(Brightness currentBrightness) {
     if (currentBrightness == _lastBrightness) return;
-    WindowManipulator.overrideMacOSBrightness(dark: currentBrightness == Brightness.dark);
+    WindowManipulator.overrideMacOSBrightness(
+      dark: currentBrightness == Brightness.dark,
+    );
     _lastBrightness = currentBrightness;
   }
 }

@@ -6,7 +6,12 @@ import 'package:flutter/widgets.dart';
 /// the absolute window position (e.g. for pixel-alignment calculations).
 class WindowFrame {
   /// Creates an immutable window frame snapshot.
-  const WindowFrame({required this.x, required this.y, required this.width, required this.height});
+  const WindowFrame({
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+  });
 
   /// Zero frame used before the first measurement.
   static const zero = WindowFrame(x: 0, y: 0, width: 0, height: 0);
@@ -25,13 +30,19 @@ class WindowFrame {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is WindowFrame && x == other.x && y == other.y && width == other.width && height == other.height;
+      identical(this, other) ||
+      other is WindowFrame &&
+          x == other.x &&
+          y == other.y &&
+          width == other.width &&
+          height == other.height;
 
   @override
   int get hashCode => Object.hash(x, y, width, height);
 
   @override
-  String toString() => 'WindowFrame(x: $x, y: $y, width: $width, height: $height)';
+  String toString() =>
+      'WindowFrame(x: $x, y: $y, width: $width, height: $height)';
 }
 
 /// An [InheritedWidget] that provides the current [WindowFrame] to descendants.
@@ -40,18 +51,24 @@ class WindowFrame {
 /// the scope automatically.
 class CNWindowGeometryScope extends InheritedWidget {
   /// Creates a window geometry scope with the given [frame].
-  const CNWindowGeometryScope({super.key, required this.frame, required super.child});
+  const CNWindowGeometryScope({
+    super.key,
+    required this.frame,
+    required super.child,
+  });
 
   /// The current window frame in screen coordinates.
   final WindowFrame frame;
 
   @override
-  bool updateShouldNotify(CNWindowGeometryScope oldWidget) => frame != oldWidget.frame;
+  bool updateShouldNotify(CNWindowGeometryScope oldWidget) =>
+      frame != oldWidget.frame;
 
   /// Returns the current [WindowFrame] from the nearest ancestor, or
   /// [WindowFrame.zero] if none is found.
   static WindowFrame of(BuildContext context) {
-    final data = context.dependOnInheritedWidgetOfExactType<CNWindowGeometryScope>();
+    final data = context
+        .dependOnInheritedWidgetOfExactType<CNWindowGeometryScope>();
     return data?.frame ?? WindowFrame.zero;
   }
 

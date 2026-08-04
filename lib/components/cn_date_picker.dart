@@ -112,10 +112,14 @@ class _CNDatePicker2State extends CNWidgetState<CNDatePicker> {
   Size computeDefaultSize() {
     final showFull =
         (widget.displayedComponents.contains(CNDatePickerComponent.date) &&
-            widget.displayedComponents.contains(CNDatePickerComponent.hourAndMinute)) ||
+            widget.displayedComponents.contains(
+              CNDatePickerComponent.hourAndMinute,
+            )) ||
         widget.displayedComponents.isEmpty;
 
-    final showDateOnly = !showFull && widget.displayedComponents.contains(CNDatePickerComponent.date);
+    final showDateOnly =
+        !showFull &&
+        widget.displayedComponents.contains(CNDatePickerComponent.date);
 
     switch (widget.datePickerStyle) {
       case CNDatePickerStyle.field:
@@ -230,16 +234,23 @@ class _CNDatePicker2State extends CNWidgetState<CNDatePicker> {
         final args = call.arguments as Map?;
         final timestamp = (args?['timestamp'] as num?)?.toInt();
         if (timestamp != null) {
-          widget.onChanged?.call(DateTime.fromMillisecondsSinceEpoch(timestamp));
+          widget.onChanged?.call(
+            DateTime.fromMillisecondsSinceEpoch(timestamp),
+          );
         }
     }
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
       'selection': widget.selection.millisecondsSinceEpoch,
-      'displayedComponents': widget.displayedComponents.map((c) => c.name).toList(),
+      'displayedComponents': widget.displayedComponents
+          .map((c) => c.name)
+          .toList(),
       'datePickerStyle': widget.datePickerStyle.name,
       'controlSize': widget.controlSize.name,
       'label': widget.label,

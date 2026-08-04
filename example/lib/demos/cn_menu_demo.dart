@@ -39,21 +39,42 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
             child: Column(
               children: [
                 const SizedBox(height: 16),
-                Text('Last Action: $lastAction', style: CNTheme.of(context).typography.title2),
+                Text(
+                  'Last Action: $lastAction',
+                  style: CNTheme.of(context).typography.title2,
+                ),
                 const SizedBox(height: 16),
                 CNMenu(
                   debugLog: _kDebugLog,
                   items: [
-                    CNChildButton(tag: 'open', title: 'Open in Preview', systemImage: 'star', badge: 2),
+                    CNChildButton(
+                      tag: 'open',
+                      title: 'Open in Preview',
+                      systemImage: 'star',
+                      badge: 2,
+                    ),
                     CNChildDivider(),
                     CNChildButton(tag: 'save', title: 'Save as PDF'),
                     CNChildMenu(
                       tag: 'editPrimary',
                       items: [
-                        CNChildButton(tag: 'cut', title: 'Cut', systemImage: 'scissors'),
-                        CNChildButton(tag: 'copy', title: 'Copy', systemImage: 'doc.on.doc'),
+                        CNChildButton(
+                          tag: 'cut',
+                          title: 'Cut',
+                          systemImage: 'scissors',
+                        ),
+                        CNChildButton(
+                          tag: 'copy',
+                          title: 'Copy',
+                          systemImage: 'doc.on.doc',
+                        ),
                         CNChildDivider(),
-                        CNChildButton(tag: 'paste', title: 'Paste', systemImage: 'list.bullet.clipboard.fill', enabled: false),
+                        CNChildButton(
+                          tag: 'paste',
+                          title: 'Paste',
+                          systemImage: 'list.bullet.clipboard.fill',
+                          enabled: false,
+                        ),
                       ],
                       label: [CNChildLabel('Edit', systemImage: 'highlighter')],
                     ),
@@ -70,15 +91,34 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
           ),
           RightSideOptionContainer(
             options: {
-              'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
+              'Control Size': ControlSizePicker(
+                value: controlSize,
+                onChanged: (size) => setState(() => controlSize = size),
+              ),
               'Menu Style': CNPicker(
                 selection: menuStyle.name,
-                onChanged: (value) => setState(() => menuStyle = CNMenuStyle.values.firstWhere((style) => style.name == value)),
-                children: CNMenuStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
+                onChanged: (value) => setState(
+                  () => menuStyle = CNMenuStyle.values.firstWhere(
+                    (style) => style.name == value,
+                  ),
+                ),
+                children: CNMenuStyle.values
+                    .map((style) => CNChildText(style.name, tag: style.name))
+                    .toList(),
               ),
-              'Tint Color': ColorPicker(colors: kSystemColors, value: tintColor, onChanged: (c) => setState(() => tintColor = c)),
-              'Enabled': CNToggle(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value)),
-              'Primary Action': CNToggle(isOn: usePrimaryAction, onChanged: (value) => setState(() => usePrimaryAction = value)),
+              'Tint Color': ColorPicker(
+                colors: kSystemColors,
+                value: tintColor,
+                onChanged: (c) => setState(() => tintColor = c),
+              ),
+              'Enabled': CNToggle(
+                isOn: isEnabled,
+                onChanged: (value) => setState(() => isEnabled = value),
+              ),
+              'Primary Action': CNToggle(
+                isOn: usePrimaryAction,
+                onChanged: (value) => setState(() => usePrimaryAction = value),
+              ),
             },
           ),
         ],

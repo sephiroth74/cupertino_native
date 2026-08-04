@@ -53,7 +53,10 @@ class CNResizablePane extends StatefulWidget {
   }) : child = null,
        useScrollBar = true,
        assert(maxSize >= minSize, 'minSize should not be more than maxSize.'),
-       assert((startSize >= minSize) && (startSize <= maxSize), 'startSize must not be less than minSize or more than maxWidth');
+       assert(
+         (startSize >= minSize) && (startSize <= maxSize),
+         'startSize must not be less than minSize or more than maxWidth',
+       );
 
   /// Creates a resizable pane without a scroll bar.
   const CNResizablePane.noScrollBar({
@@ -69,7 +72,10 @@ class CNResizablePane extends StatefulWidget {
   }) : builder = null,
        useScrollBar = false,
        assert(maxSize >= minSize, 'minSize should not be more than maxSize.'),
-       assert((startSize >= minSize) && (startSize <= maxSize), 'startSize must not be less than minSize or more than maxWidth');
+       assert(
+         (startSize >= minSize) && (startSize <= maxSize),
+         'startSize must not be less than minSize or more than maxWidth',
+       );
 
   /// The builder function for the content of the resizable pane.
   final ScrollableWidgetBuilder? builder;
@@ -133,7 +139,9 @@ class _CNResizablePaneState extends State<CNResizablePane> {
   @override
   void initState() {
     super.initState();
-    _cursor = _resizeOnTop ? SystemMouseCursors.resizeRow : SystemMouseCursors.resizeColumn;
+    _cursor = _resizeOnTop
+        ? SystemMouseCursors.resizeRow
+        : SystemMouseCursors.resizeColumn;
     _size = widget.startSize;
     _scrollController.addListener(() => setState(() {}));
   }
@@ -149,7 +157,9 @@ class _CNResizablePaneState extends State<CNResizablePane> {
     final right = Border(right: borderSide);
     final left = Border(left: borderSide);
     final top = Border(top: borderSide);
-    return BoxDecoration(border: _resizeOnTop ? top : (_resizeOnRight ? right : left)).copyWith(
+    return BoxDecoration(
+      border: _resizeOnTop ? top : (_resizeOnRight ? right : left),
+    ).copyWith(
       color: widget.decoration?.color,
       border: widget.decoration?.border,
       borderRadius: widget.decoration?.borderRadius,
@@ -163,9 +173,15 @@ class _CNResizablePaneState extends State<CNResizablePane> {
 
   BoxConstraints get _boxConstraint {
     if (_resizeOnTop) {
-      return BoxConstraints(maxHeight: widget.maxSize, minHeight: widget.minSize).normalize();
+      return BoxConstraints(
+        maxHeight: widget.maxSize,
+        minHeight: widget.minSize,
+      ).normalize();
     }
-    return BoxConstraints(maxWidth: widget.maxSize, minWidth: widget.minSize).normalize();
+    return BoxConstraints(
+      maxWidth: widget.maxSize,
+      minWidth: widget.minSize,
+    ).normalize();
   }
 
   Widget get _resizeArea {
@@ -182,8 +198,13 @@ class _CNResizablePaneState extends State<CNResizablePane> {
             },
             onVerticalDragUpdate: (details) {
               setState(() {
-                final newHeight = _dragStartSize + (_dragStartPosition - details.globalPosition.dy);
-                _size = math.max(widget.minSize, math.min(widget.maxSize, newHeight));
+                final newHeight =
+                    _dragStartSize +
+                    (_dragStartPosition - details.globalPosition.dy);
+                _size = math.max(
+                  widget.minSize,
+                  math.min(widget.maxSize, newHeight),
+                );
                 if (_size == widget.minSize) {
                   _cursor = SystemMouseCursors.resizeUp;
                 } else if (_size == widget.maxSize) {
@@ -207,13 +228,22 @@ class _CNResizablePaneState extends State<CNResizablePane> {
             onHorizontalDragUpdate: (details) {
               setState(() {
                 final newWidth = _resizeOnRight
-                    ? _dragStartSize - (_dragStartPosition - details.globalPosition.dx)
-                    : _dragStartSize + (_dragStartPosition - details.globalPosition.dx);
-                _size = math.max(widget.minSize, math.min(widget.maxSize, newWidth));
+                    ? _dragStartSize -
+                          (_dragStartPosition - details.globalPosition.dx)
+                    : _dragStartSize +
+                          (_dragStartPosition - details.globalPosition.dx);
+                _size = math.max(
+                  widget.minSize,
+                  math.min(widget.maxSize, newWidth),
+                );
                 if (_size == widget.minSize) {
-                  _cursor = _resizeOnRight ? SystemMouseCursors.resizeRight : SystemMouseCursors.resizeLeft;
+                  _cursor = _resizeOnRight
+                      ? SystemMouseCursors.resizeRight
+                      : SystemMouseCursors.resizeLeft;
                 } else if (_size == widget.maxSize) {
-                  _cursor = _resizeOnRight ? SystemMouseCursors.resizeLeft : SystemMouseCursors.resizeRight;
+                  _cursor = _resizeOnRight
+                      ? SystemMouseCursors.resizeLeft
+                      : SystemMouseCursors.resizeRight;
                 } else {
                   _cursor = SystemMouseCursors.resizeColumn;
                 }
@@ -229,11 +259,13 @@ class _CNResizablePaneState extends State<CNResizablePane> {
     final maxWidth = media.size.width;
 
     if (_resizeOnTop) {
-      if (widget.windowBreakpoint != null && maxHeight <= widget.windowBreakpoint!) {
+      if (widget.windowBreakpoint != null &&
+          maxHeight <= widget.windowBreakpoint!) {
         return const SizedBox.shrink();
       }
     } else {
-      if (widget.windowBreakpoint != null && maxWidth <= widget.windowBreakpoint!) {
+      if (widget.windowBreakpoint != null &&
+          maxWidth <= widget.windowBreakpoint!) {
         return const SizedBox.shrink();
       }
     }
@@ -249,15 +281,33 @@ class _CNResizablePaneState extends State<CNResizablePane> {
             left: false,
             right: false,
             child: widget.useScrollBar
-                ? CNScrollbar(controller: _scrollController, child: widget.builder!(context, _scrollController))
+                ? CNScrollbar(
+                    controller: _scrollController,
+                    child: widget.builder!(context, _scrollController),
+                  )
                 : widget.child!,
           ),
           if (widget.isResizable && !_resizeOnRight && !_resizeOnTop)
-            Positioned(left: 0, width: _kResizeThresholdSize, height: maxHeight, child: _resizeArea),
+            Positioned(
+              left: 0,
+              width: _kResizeThresholdSize,
+              height: maxHeight,
+              child: _resizeArea,
+            ),
           if (widget.isResizable && _resizeOnRight)
-            Positioned(right: 0, width: _kResizeThresholdSize, height: maxHeight, child: _resizeArea),
+            Positioned(
+              right: 0,
+              width: _kResizeThresholdSize,
+              height: maxHeight,
+              child: _resizeArea,
+            ),
           if (widget.isResizable && _resizeOnTop)
-            Positioned(top: 0, width: maxWidth, height: _kResizeThresholdSize, child: _resizeArea),
+            Positioned(
+              top: 0,
+              width: maxWidth,
+              height: _kResizeThresholdSize,
+              child: _resizeArea,
+            ),
         ],
       ),
     );

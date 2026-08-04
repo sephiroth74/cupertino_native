@@ -33,10 +33,26 @@ class _Item {
 }
 
 const _items = <_Item>[
-  _Item('Overview', 'square.grid.2x2', 'A summary page pushed onto the content-area navigator.'),
-  _Item('Documents', 'doc.text', 'Push detail pages while the sidebar and app toolbar stay put.'),
-  _Item('Downloads', 'arrow.down.circle', 'The synthesized back button calls Navigator.of(context).maybePop().'),
-  _Item('Settings', 'gearshape', 'Every level uses CNPageScaffold + CNToolbar.'),
+  _Item(
+    'Overview',
+    'square.grid.2x2',
+    'A summary page pushed onto the content-area navigator.',
+  ),
+  _Item(
+    'Documents',
+    'doc.text',
+    'Push detail pages while the sidebar and app toolbar stay put.',
+  ),
+  _Item(
+    'Downloads',
+    'arrow.down.circle',
+    'The synthesized back button calls Navigator.of(context).maybePop().',
+  ),
+  _Item(
+    'Settings',
+    'gearshape',
+    'Every level uses CNPageScaffold + CNToolbar.',
+  ),
 ];
 
 // ============================================================================
@@ -62,7 +78,9 @@ class _MasterPage extends StatelessWidget {
               'Tapping a row pushes a detail page on the root navigator. Its '
               "CNPageScaffold owns the whole toolbar strip, so the detail page's "
               'toolbar (with a synthesized back button) replaces the app toolbar.',
-              style: theme.typography.subheadline.copyWith(color: theme.secondaryLabelColor),
+              style: theme.typography.subheadline.copyWith(
+                color: theme.secondaryLabelColor,
+              ),
             ),
             const SizedBox(height: 16),
             for (final item in _items)
@@ -70,7 +88,11 @@ class _MasterPage extends StatelessWidget {
                 item: item,
                 onTap: () {
                   debugPrint('Pushing detail page for ${item.title}');
-                  Navigator.of(context, rootNavigator: true).push(CNPageRoute(builder: (_) => _DetailPage(item: item, depth: 1)));
+                  Navigator.of(context, rootNavigator: true).push(
+                    CNPageRoute(
+                      builder: (_) => _DetailPage(item: item, depth: 1),
+                    ),
+                  );
                 },
               ),
             const SizedBox(height: 32),
@@ -79,12 +101,16 @@ class _MasterPage extends StatelessWidget {
             Text(
               'Pushing on the root navigator presents a page over the whole Flutter '
               'content view, covering the shared app toolbar; the page supplies its own.',
-              style: theme.typography.subheadline.copyWith(color: theme.secondaryLabelColor),
+              style: theme.typography.subheadline.copyWith(
+                color: theme.secondaryLabelColor,
+              ),
             ),
             const SizedBox(height: 16),
             CNButton(
-              onPressed: () =>
-                  Navigator.of(context, rootNavigator: true).push(CNPageRoute(builder: (_) => const _WindowLevelPage())),
+              onPressed: () => Navigator.of(
+                context,
+                rootNavigator: true,
+              ).push(CNPageRoute(builder: (_) => const _WindowLevelPage())),
               buttonStyle: CNButtonStyle.borderedProminent,
               children: const [CNChildText('Present a window-level page')],
             ),
@@ -112,7 +138,10 @@ class _DetailPage extends StatelessWidget {
         title: Text(item.title),
         automaticallyImplyLeading: true,
         actions: [
-          CNToolbarButton('gearshape', onPressed: () => debugPrint('Settings tapped')),
+          CNToolbarButton(
+            'gearshape',
+            onPressed: () => debugPrint('Settings tapped'),
+          ),
         ],
       ),
       child: CNContentArea(
@@ -124,12 +153,20 @@ class _DetailPage extends StatelessWidget {
               Row(
                 children: [
                   CNImage(
-                    constraints: const BoxConstraints(maxWidth: 28, maxHeight: 28),
+                    constraints: const BoxConstraints(
+                      maxWidth: 28,
+                      maxHeight: 28,
+                    ),
                     systemSymbolName: item.symbol,
                     foregroundColor: theme.accentColor,
                   ),
                   const SizedBox(width: 12),
-                  Expanded(child: Text('${item.title} — level $depth', style: theme.typography.title1)),
+                  Expanded(
+                    child: Text(
+                      '${item.title} — level $depth',
+                      style: theme.typography.title1,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -145,7 +182,8 @@ class _DetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               CNButton(
-                onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+                onPressed: () =>
+                    Navigator.of(context).popUntil((route) => route.isFirst),
                 buttonStyle: CNButtonStyle.borderless,
                 children: const [CNChildText('Back to root')],
               ),
@@ -174,7 +212,13 @@ class _WindowLevelPage extends StatelessWidget {
       // and the close button pops the whole page off the window.
       toolBar: CNToolbar(
         automaticallyImplyLeading: false,
-        leading: [CNToolbarIconButton('xmark', tooltip: 'Close', onPressed: () => Navigator.of(context).maybePop())],
+        leading: [
+          CNToolbarIconButton(
+            'xmark',
+            tooltip: 'Close',
+            onPressed: () => Navigator.of(context).maybePop(),
+          ),
+        ],
         title: const Text('Window-level page'),
       ),
       child: CNContentArea(
@@ -184,18 +228,26 @@ class _WindowLevelPage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 CNImage(
-                  constraints: const BoxConstraints(maxWidth: 48, maxHeight: 48),
+                  constraints: const BoxConstraints(
+                    maxWidth: 48,
+                    maxHeight: 48,
+                  ),
                   systemSymbolName: 'macwindow',
                   foregroundColor: theme.accentColor,
                 ),
                 const SizedBox(height: 16),
-                Text('This page covers the whole content view', style: theme.typography.title2),
+                Text(
+                  'This page covers the whole content view',
+                  style: theme.typography.title2,
+                ),
                 const SizedBox(height: 8),
                 Text(
                   'The sidebar, status bar and shared app toolbar are all hidden\n'
                   'behind it, so the page supplies its own toolbar.',
                   textAlign: TextAlign.center,
-                  style: theme.typography.body.copyWith(color: theme.secondaryLabelColor),
+                  style: theme.typography.body.copyWith(
+                    color: theme.secondaryLabelColor,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 CNButton(
@@ -232,7 +284,10 @@ class _NavRow extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 3),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        decoration: BoxDecoration(color: theme.fillPrimaryColor, borderRadius: BorderRadius.circular(8)),
+        decoration: BoxDecoration(
+          color: theme.fillPrimaryColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Row(
           children: [
             CNImage(
@@ -242,9 +297,17 @@ class _NavRow extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(item.title, style: theme.typography.body.copyWith(fontWeight: FontWeight.w600)),
+              child: Text(
+                item.title,
+                style: theme.typography.body.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
-            Text('›', style: TextStyle(color: theme.secondaryLabelColor, fontSize: 20)),
+            Text(
+              '›',
+              style: TextStyle(color: theme.secondaryLabelColor, fontSize: 20),
+            ),
           ],
         ),
       ),

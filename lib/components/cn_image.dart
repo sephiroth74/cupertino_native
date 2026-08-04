@@ -102,16 +102,25 @@ class _CNImageState extends CNWidgetState<CNImage> {
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
       'systemSymbolName': widget.systemSymbolName,
       'font': widget.font?.toMap(),
       'symbolRenderingMode': widget.symbolRenderingMode?.name,
       'symbolColorRenderingMode': widget.symbolColorRenderingMode?.name,
-      'foregroundStyleColors': widget.foregroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
+      'foregroundStyleColors': widget.foregroundStyleColors
+          ?.map((c) => resolveColorToArgb(c, context))
+          .toList(),
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+    );
     return payload;
   }
 }

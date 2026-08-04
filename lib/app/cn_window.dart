@@ -26,6 +26,9 @@ class CNWindowScope extends InheritedWidget {
     required this.isSidebarShown,
     required this.isEndSidebarShown,
     required this.isStatusBarExpanded,
+    required this.visibleSidebarWidth,
+    required this.visibleEndSidebarWidth,
+    required this.toolbarSpansFullWidth,
     required VoidCallback sidebarToggler,
     required VoidCallback endSidebarToggler,
     required VoidCallback statusBarToggler,
@@ -45,6 +48,20 @@ class CNWindowScope extends InheritedWidget {
   /// Whether the status bar expanded panel is currently shown.
   final bool isStatusBarExpanded;
 
+  /// Whether the page toolbar spans the full window width (see
+  /// [CNWindow.toolbarSpansFullWidth]). When true, `CNPageScaffold` insets its
+  /// body by the visible sidebar widths so content clears the sidebars while the
+  /// toolbar strip still runs edge to edge.
+  final bool toolbarSpansFullWidth;
+
+  /// Current on-screen width of the end sidebar (0 when hidden). Used by
+  /// `CNPageScaffold` to inset its body in [toolbarSpansFullWidth] mode.
+  final double visibleEndSidebarWidth;
+
+  /// Current on-screen width of the leading sidebar (0 when hidden). Used by
+  /// `CNPageScaffold` to inset its body in [toolbarSpansFullWidth] mode.
+  final double visibleSidebarWidth;
+
   final Function _endSidebarToggler;
   final Function _sidebarToggler;
   final Function _statusBarToggler;
@@ -54,7 +71,10 @@ class CNWindowScope extends InheritedWidget {
     return constraints != oldWidget.constraints ||
         isSidebarShown != oldWidget.isSidebarShown ||
         isEndSidebarShown != oldWidget.isEndSidebarShown ||
-        isStatusBarExpanded != oldWidget.isStatusBarExpanded;
+        isStatusBarExpanded != oldWidget.isStatusBarExpanded ||
+        visibleSidebarWidth != oldWidget.visibleSidebarWidth ||
+        visibleEndSidebarWidth != oldWidget.visibleEndSidebarWidth ||
+        toolbarSpansFullWidth != oldWidget.toolbarSpansFullWidth;
   }
 
   /// Toggles the [endSidebar] of the [CNWindow].
@@ -82,7 +102,8 @@ class CNWindowScope extends InheritedWidget {
   /// Returns the [CNWindowScope] of the [CNWindow] that most tightly encloses
   /// the given [context].
   static CNWindowScope of(BuildContext context) {
-    final CNWindowScope? result = context.dependOnInheritedWidgetOfExactType<CNWindowScope>();
+    final CNWindowScope? result = context
+        .dependOnInheritedWidgetOfExactType<CNWindowScope>();
     assert(result != null, 'No CNWindowScope found in context');
     return result!;
   }
@@ -99,6 +120,7 @@ class CNWindow extends StatefulWidget {
     this.endSidebar,
     this.statusBar,
     this.state = NSVisualEffectViewState.followsWindowActiveState,
+    this.toolbarSpansFullWidth = false,
   });
 
   /// The background color of the window. If null, the default canvas color from the current [CNTheme] is used.
@@ -119,11 +141,31 @@ class CNWindow extends StatefulWidget {
   /// The status bar configuration (bottom).
   final CNStatusBar? statusBar;
 
+  /// Whether the page toolbar should span the full window width instead of
+  /// being confined to the content area (i.e. "split" by the sidebar).
+  ///
+  /// When true, the content area — which carries the toolbar via
+  /// `CNPageScaffold` — extends across the whole window, so its toolbar strip
+  /// runs edge to edge over the sidebar. The sidebars are dropped below the
+  /// toolbar strip (offset down by [kCNToolbarHeight]) and painted on top of
+  /// the content, mirroring macOS's unified-titlebar layout.
+  ///
+  /// When false (the default), the toolbar starts at the sidebar's trailing
+  /// edge, preserving the classic split-titlebar look.
+  final bool toolbarSpansFullWidth;
+
   @override
   State<CNWindow> createState() => _CNWindowState();
 }
 
 class _CNWindowState extends State<CNWindow> {
+  /// While a resize drag is in progress, holds the cursor to force across the
+  /// whole window. A fast drag moves the pointer outside the thin resizer's
+  /// [MouseRegion], which would otherwise revert the cursor to the default;
+  /// a full-window overlay keeps this cursor until the drag ends or is
+  /// cancelled. Null when no resize is active.
+  SystemMouseCursor? _activeResizeCursor;
+
   SystemMouseCursor _endSidebarCursor = SystemMouseCursors.resizeLeft;
   double _endSidebarDragStartPosition = 0.0;
   double _endSidebarDragStartWidth = 0.0;
@@ -147,7 +189,8 @@ class _CNWindowState extends State<CNWindow> {
     final sidebar = widget.sidebar;
     if (sidebar == null) {
       _sidebarWidth = 0.0;
-    } else if (sidebar.minWidth != old.sidebar!.minWidth || sidebar.maxWidth != old.sidebar!.maxWidth) {
+    } else if (sidebar.minWidth != old.sidebar!.minWidth ||
+        sidebar.maxWidth != old.sidebar!.maxWidth) {
       if (sidebar.minWidth > _sidebarWidth) {
         _sidebarWidth = sidebar.minWidth;
       }
@@ -158,7 +201,8 @@ class _CNWindowState extends State<CNWindow> {
     final endSidebar = widget.endSidebar;
     if (endSidebar == null) {
       _endSidebarWidth = 0.0;
-    } else if (endSidebar.minWidth != old.endSidebar!.minWidth || endSidebar.maxWidth != old.endSidebar!.maxWidth) {
+    } else if (endSidebar.minWidth != old.endSidebar!.minWidth ||
+        endSidebar.maxWidth != old.endSidebar!.maxWidth) {
       if (endSidebar.minWidth > _endSidebarWidth) {
         _endSidebarWidth = endSidebar.minWidth;
       }
@@ -171,10 +215,16 @@ class _CNWindowState extends State<CNWindow> {
   @override
   void initState() {
     super.initState();
-    _sidebarWidth = (widget.sidebar?.startWidth ?? widget.sidebar?.minWidth) ?? _sidebarWidth;
-    _endSidebarWidth = (widget.endSidebar?.startWidth ?? widget.endSidebar?.minWidth) ?? _endSidebarWidth;
+    _sidebarWidth =
+        (widget.sidebar?.startWidth ?? widget.sidebar?.minWidth) ??
+        _sidebarWidth;
+    _endSidebarWidth =
+        (widget.endSidebar?.startWidth ?? widget.endSidebar?.minWidth) ??
+        _endSidebarWidth;
     _statusBarPanelHeight =
-        (widget.statusBar?.expandedStartHeight ?? widget.statusBar?.expandedMinHeight) ?? _statusBarPanelHeight;
+        (widget.statusBar?.expandedStartHeight ??
+            widget.statusBar?.expandedMinHeight) ??
+        _statusBarPanelHeight;
   }
 
   @override
@@ -185,10 +235,16 @@ class _CNWindowState extends State<CNWindow> {
     final endSidebar = widget.endSidebar;
     final statusBar = widget.statusBar;
     if (sidebar?.startWidth != null) {
-      assert((sidebar!.startWidth! >= sidebar.minWidth) && (sidebar.startWidth! <= sidebar.maxWidth!));
+      assert(
+        (sidebar!.startWidth! >= sidebar.minWidth) &&
+            (sidebar.startWidth! <= sidebar.maxWidth!),
+      );
     }
     if (endSidebar?.startWidth != null) {
-      assert((endSidebar!.startWidth! >= endSidebar.minWidth) && (endSidebar.startWidth! <= endSidebar.maxWidth!));
+      assert(
+        (endSidebar!.startWidth! >= endSidebar.minWidth) &&
+            (endSidebar.startWidth! <= endSidebar.maxWidth!),
+      );
     }
     final theme = CNTheme.of(context);
     late Color backgroundColor = widget.backgroundColor ?? theme.canvasColor;
@@ -203,23 +259,33 @@ class _CNWindowState extends State<CNWindow> {
         final height = constraints.maxHeight;
         final isAtBreakpoint = width <= (sidebar?.windowBreakpoint ?? 0);
         final isAtEndBreakpoint = width <= (endSidebar?.windowBreakpoint ?? 0);
-        final canShowSidebar = _showSidebar && !isAtBreakpoint && sidebar != null;
-        final canShowEndSidebar = _showEndSidebar && !isAtEndBreakpoint && endSidebar != null;
+        final canShowSidebar =
+            _showSidebar && !isAtBreakpoint && sidebar != null;
+        final canShowEndSidebar =
+            _showEndSidebar && !isAtEndBreakpoint && endSidebar != null;
         final visibleSidebarWidth = canShowSidebar ? _sidebarWidth : 0.0;
-        final visibleEndSidebarWidth = canShowEndSidebar ? _endSidebarWidth : 0.0;
+        final visibleEndSidebarWidth = canShowEndSidebar
+            ? _endSidebarWidth
+            : 0.0;
         final state = widget.state;
 
         final statusBarHeight = statusBar?.height ?? 0.0;
         final hasStatusBar = statusBar != null;
-        final expansionMode = statusBar?.expansionMode ?? CNStatusBarExpansionMode.overContent;
-        final presentationStyle = statusBar?.presentationStyle ?? CNStatusBarPresentationStyle.push;
-        final isFloating = presentationStyle == CNStatusBarPresentationStyle.floating;
+        final expansionMode =
+            statusBar?.expansionMode ?? CNStatusBarExpansionMode.overContent;
+        final presentationStyle =
+            statusBar?.presentationStyle ?? CNStatusBarPresentationStyle.push;
+        final isFloating =
+            presentationStyle == CNStatusBarPresentationStyle.floating;
 
         // In push mode, panel height reduces the content area. In floating mode, it doesn't.
-        final visiblePanelHeight = (_showStatusBarPanel && !isFloating) ? _statusBarPanelHeight : 0.0;
+        final visiblePanelHeight = (_showStatusBarPanel && !isFloating)
+            ? _statusBarPanelHeight
+            : 0.0;
 
         // Horizontal bounds for the panel based on expansion mode
-        final panelIsOverAll = expansionMode == CNStatusBarExpansionMode.overAll;
+        final panelIsOverAll =
+            expansionMode == CNStatusBarExpansionMode.overAll;
         final panelLeft = panelIsOverAll ? 0.0 : visibleSidebarWidth;
         final panelRight = panelIsOverAll ? 0.0 : visibleEndSidebarWidth;
 
@@ -231,7 +297,56 @@ class _CNWindowState extends State<CNWindow> {
         // bottom too (otherwise their full-height native subviews overlap the
         // panel). In overContent mode the panel is inset to the content area,
         // so sidebars keep their full height.
-        final sidebarHeight = stackHeight - (panelIsOverAll ? visiblePanelHeight : 0.0);
+        final sidebarHeight =
+            stackHeight - (panelIsOverAll ? visiblePanelHeight : 0.0);
+
+        // Full-width toolbar mode: the content area (which carries the toolbar
+        // via CNPageScaffold) spans the whole window, so the toolbar strip runs
+        // edge to edge. The sidebars drop below that strip and are painted on
+        // top of the content's blurred gutters; CNPageScaffold insets its body
+        // by the sidebar widths (via CNWindowScope) so content clears them.
+        final toolbarSpans = widget.toolbarSpansFullWidth;
+        final toolbarStripHeight = toolbarSpans ? kCNToolbarHeight : 0.0;
+        final effectiveSidebarHeight = sidebarHeight - toolbarStripHeight;
+        final contentLeft = toolbarSpans ? 0.0 : visibleSidebarWidth;
+        final contentWidth = toolbarSpans
+            ? width
+            : width - visibleSidebarWidth - visibleEndSidebarWidth;
+        final backgroundLeft = toolbarSpans ? 0.0 : visibleSidebarWidth;
+
+        // The leading sidebar. In full-width mode it drops below the toolbar
+        // strip and paints on top of the content area's left gutter, so it is
+        // added to the stack AFTER the content area; in split mode it sits
+        // beside the content and is added before it (so the content slides over
+        // it when the sidebar is dismissed).
+        final Widget? leadingSidebar = sidebar == null
+            ? null
+            : AnimatedPositioned(
+                key: sidebar.key,
+                curve: curve,
+                duration: duration,
+                top: toolbarStripHeight,
+                height: effectiveSidebarHeight,
+                left: canShowSidebar ? 0.0 : -_sidebarWidth,
+                width: _sidebarWidth,
+                child: VisualEffectSubviewContainer(
+                  state: state,
+                  material: sidebar.material,
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      color: Color.fromRGBO(0, 0, 0, 1.0),
+                      backgroundBlendMode: BlendMode.clear,
+                    ),
+                    child: Container(
+                      color: sidebar.backgroundColor ?? theme.canvasColor,
+                      child: Padding(
+                        padding: sidebar.padding,
+                        child: sidebar.builder(context),
+                      ),
+                    ),
+                  ),
+                ),
+              );
 
         final mainStack = Stack(
           clipBehavior: Clip.hardEdge,
@@ -241,42 +356,25 @@ class _CNWindowState extends State<CNWindow> {
               curve: curve,
               duration: duration,
               height: stackHeight,
-              left: visibleSidebarWidth,
+              left: backgroundLeft,
               width: width,
               child: ColoredBox(color: backgroundColor),
             ),
 
-            // Sidebar (slides in/out, width stays fixed)
-            if (sidebar != null)
-              AnimatedPositioned(
-                key: sidebar.key,
-                curve: curve,
-                duration: duration,
-                height: sidebarHeight,
-                left: canShowSidebar ? 0.0 : -_sidebarWidth,
-                width: _sidebarWidth,
-                child: VisualEffectSubviewContainer(
-                  state: state,
-                  material: sidebar.material,
-                  child: DecoratedBox(
-                    decoration: const BoxDecoration(color: Color.fromRGBO(0, 0, 0, 1.0), backgroundBlendMode: BlendMode.clear),
-                    child: Container(
-                      color: sidebar.backgroundColor ?? theme.canvasColor,
-                      child: Padding(padding: sidebar.padding, child: sidebar.builder(context)),
-                    ),
-                  ),
-                ),
-              ),
+            // Leading sidebar (beside the content in split mode).
+            if (!toolbarSpans && leadingSidebar != null) leadingSidebar,
 
             // Content Area (reduced by expanded panel height in push mode).
             // Anchored with explicit top/bottom so the panel space is truly
             // reserved below the content (a height-only Positioned is only
             // aligned, which lets the native content subview overlap the panel).
+            // In full-width mode it spans the whole window so its toolbar strip
+            // runs edge to edge; the sidebars are overlaid on its gutters below.
             AnimatedPositioned(
               curve: curve,
               duration: duration,
-              left: visibleSidebarWidth,
-              width: width - visibleSidebarWidth - visibleEndSidebarWidth,
+              left: contentLeft,
+              width: contentWidth,
               top: 0,
               bottom: visiblePanelHeight,
               child: ClipRect(
@@ -288,44 +386,67 @@ class _CNWindowState extends State<CNWindow> {
               ),
             ),
 
+            // Leading sidebar (overlaid on the content's left gutter, below the
+            // toolbar strip) in full-width mode.
+            if (toolbarSpans && leadingSidebar != null) leadingSidebar,
+
             // Sidebar resizer
             if (sidebar?.isResizable ?? false)
               AnimatedPositioned(
                 curve: curve,
                 duration: duration,
+                top: toolbarStripHeight,
                 left: visibleSidebarWidth - 4,
                 width: 7,
-                height: sidebarHeight,
+                height: effectiveSidebarHeight,
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onHorizontalDragStart: (details) {
                     _sidebarDragStartWidth = _sidebarWidth;
                     _sidebarDragStartPosition = details.globalPosition.dx;
+                    setState(() => _activeResizeCursor = _sidebarCursor);
                   },
                   onHorizontalDragUpdate: (details) {
                     setState(() {
-                      var newWidth = _sidebarDragStartWidth + details.globalPosition.dx - _sidebarDragStartPosition;
+                      var newWidth =
+                          _sidebarDragStartWidth +
+                          details.globalPosition.dx -
+                          _sidebarDragStartPosition;
 
                       if (sidebar!.startWidth != null &&
                           sidebar.snapToStartBuffer != null &&
-                          (newWidth - sidebar.startWidth!).abs() <= sidebar.snapToStartBuffer!) {
+                          (newWidth - sidebar.startWidth!).abs() <=
+                              sidebar.snapToStartBuffer!) {
                         newWidth = sidebar.startWidth!;
                       }
 
                       if (sidebar.dragClosed) {
-                        final closeBelow = sidebar.minWidth - sidebar.dragClosedBuffer;
+                        final closeBelow =
+                            sidebar.minWidth - sidebar.dragClosedBuffer;
                         _showSidebar = newWidth >= closeBelow;
                       }
 
-                      _sidebarWidth = math.max(sidebar.minWidth, math.min(sidebar.maxWidth!, newWidth));
+                      _sidebarWidth = math.max(
+                        sidebar.minWidth,
+                        math.min(sidebar.maxWidth!, newWidth),
+                      );
                       _sidebarCursor = SystemMouseCursors.resizeColumn;
+                      _activeResizeCursor = _sidebarCursor;
                     });
                   },
+                  onHorizontalDragEnd: (_) =>
+                      setState(() => _activeResizeCursor = null),
+                  onHorizontalDragCancel: () =>
+                      setState(() => _activeResizeCursor = null),
                   child: MouseRegion(
                     cursor: _sidebarCursor,
                     child: Align(
                       alignment: Alignment.center,
-                      child: VerticalDivider(thickness: 1, width: 1, color: sidebar?.separatorColor ?? dividerColor),
+                      child: VerticalDivider(
+                        thickness: 1,
+                        width: 1,
+                        color: sidebar?.separatorColor ?? dividerColor,
+                      ),
                     ),
                   ),
                 ),
@@ -338,23 +459,30 @@ class _CNWindowState extends State<CNWindow> {
                 left: canShowEndSidebar ? width - _endSidebarWidth : width,
                 curve: curve,
                 duration: duration,
-                height: sidebarHeight,
+                top: toolbarStripHeight,
+                height: effectiveSidebarHeight,
                 width: _endSidebarWidth,
                 child: Container(
                   constraints: BoxConstraints(
                     minWidth: endSidebar.minWidth,
                     maxWidth: endSidebar.maxWidth!,
-                    minHeight: sidebarHeight,
-                    maxHeight: sidebarHeight,
+                    minHeight: effectiveSidebarHeight,
+                    maxHeight: effectiveSidebarHeight,
                   ).normalize(),
                   child: VisualEffectSubviewContainer(
                     state: state,
                     material: endSidebar.material,
                     child: DecoratedBox(
-                      decoration: const BoxDecoration(color: Color.fromRGBO(0, 0, 0, 1.0), backgroundBlendMode: BlendMode.clear),
+                      decoration: const BoxDecoration(
+                        color: Color.fromRGBO(0, 0, 0, 1.0),
+                        backgroundBlendMode: BlendMode.clear,
+                      ),
                       child: Container(
                         color: endSidebar.backgroundColor ?? theme.canvasColor,
-                        child: Padding(padding: endSidebar.padding, child: endSidebar.builder(context)),
+                        child: Padding(
+                          padding: endSidebar.padding,
+                          child: endSidebar.builder(context),
+                        ),
                       ),
                     ),
                   ),
@@ -366,31 +494,41 @@ class _CNWindowState extends State<CNWindow> {
               AnimatedPositioned(
                 curve: curve,
                 duration: duration,
+                top: toolbarStripHeight,
                 right: visibleEndSidebarWidth - 4,
                 width: 7,
-                height: sidebarHeight,
+                height: effectiveSidebarHeight,
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onHorizontalDragStart: (details) {
                     _endSidebarDragStartWidth = _endSidebarWidth;
                     _endSidebarDragStartPosition = details.globalPosition.dx;
+                    setState(() => _activeResizeCursor = _endSidebarCursor);
                   },
                   onHorizontalDragUpdate: (details) {
                     setState(() {
-                      var newWidth = _endSidebarDragStartWidth - details.globalPosition.dx + _endSidebarDragStartPosition;
+                      var newWidth =
+                          _endSidebarDragStartWidth -
+                          details.globalPosition.dx +
+                          _endSidebarDragStartPosition;
 
                       if (endSidebar!.startWidth != null &&
                           endSidebar.snapToStartBuffer != null &&
-                          (newWidth + endSidebar.startWidth!).abs() <= endSidebar.snapToStartBuffer!) {
+                          (newWidth + endSidebar.startWidth!).abs() <=
+                              endSidebar.snapToStartBuffer!) {
                         newWidth = endSidebar.startWidth!;
                       }
 
                       if (endSidebar.dragClosed) {
-                        final closeBelow = endSidebar.minWidth - endSidebar.dragClosedBuffer;
+                        final closeBelow =
+                            endSidebar.minWidth - endSidebar.dragClosedBuffer;
                         _showEndSidebar = newWidth >= closeBelow;
                       }
 
-                      _endSidebarWidth = math.max(endSidebar.minWidth, math.min(endSidebar.maxWidth!, newWidth));
+                      _endSidebarWidth = math.max(
+                        endSidebar.minWidth,
+                        math.min(endSidebar.maxWidth!, newWidth),
+                      );
 
                       if (_endSidebarWidth == endSidebar.minWidth) {
                         _endSidebarCursor = SystemMouseCursors.resizeLeft;
@@ -399,13 +537,22 @@ class _CNWindowState extends State<CNWindow> {
                       } else {
                         _endSidebarCursor = SystemMouseCursors.resizeColumn;
                       }
+                      _activeResizeCursor = _endSidebarCursor;
                     });
                   },
+                  onHorizontalDragEnd: (_) =>
+                      setState(() => _activeResizeCursor = null),
+                  onHorizontalDragCancel: () =>
+                      setState(() => _activeResizeCursor = null),
                   child: MouseRegion(
                     cursor: _endSidebarCursor,
                     child: Align(
                       alignment: Alignment.center,
-                      child: VerticalDivider(thickness: 1, width: 1, color: dividerColor),
+                      child: VerticalDivider(
+                        thickness: 1,
+                        width: 1,
+                        color: dividerColor,
+                      ),
                     ),
                   ),
                 ),
@@ -426,12 +573,21 @@ class _CNWindowState extends State<CNWindow> {
                 height: _showStatusBarPanel ? _statusBarPanelHeight : 0.0,
                 child: ClipRect(
                   child: ColoredBox(
-                    color: statusBar.expandedColor ?? statusBar.color ?? theme.canvasColor,
+                    color:
+                        statusBar.expandedColor ??
+                        statusBar.color ??
+                        theme.canvasColor,
                     child: _showStatusBarPanel
                         ? Column(
                             children: [
-                              Divider(height: 1, thickness: 1, color: dividerColor),
-                              Expanded(child: statusBar.expandedBuilder!(context)),
+                              Divider(
+                                height: 1,
+                                thickness: 1,
+                                color: dividerColor,
+                              ),
+                              Expanded(
+                                child: statusBar.expandedBuilder!(context),
+                              ),
                             ],
                           )
                         : const SizedBox.shrink(),
@@ -441,7 +597,10 @@ class _CNWindowState extends State<CNWindow> {
 
             // Status bar panel resizer (shared by push and floating: the panel
             // is bottom-anchored in both, so the drag handle sits on its top edge).
-            if (hasStatusBar && statusBar.isResizable && statusBar.expandedBuilder != null && _showStatusBarPanel)
+            if (hasStatusBar &&
+                statusBar.isResizable &&
+                statusBar.expandedBuilder != null &&
+                _showStatusBarPanel)
               AnimatedPositioned(
                 curve: curve,
                 duration: duration,
@@ -454,13 +613,19 @@ class _CNWindowState extends State<CNWindow> {
                   onVerticalDragStart: (details) {
                     _statusBarDragStartSize = _statusBarPanelHeight;
                     _statusBarDragStartPosition = details.globalPosition.dy;
+                    setState(() => _activeResizeCursor = _statusBarCursor);
                   },
                   onVerticalDragUpdate: (details) {
                     setState(() {
-                      var newHeight = _statusBarDragStartSize - (details.globalPosition.dy - _statusBarDragStartPosition);
+                      var newHeight =
+                          _statusBarDragStartSize -
+                          (details.globalPosition.dy -
+                              _statusBarDragStartPosition);
 
                       if (statusBar.dragClosed) {
-                        final closeBelow = statusBar.expandedMinHeight - statusBar.dragClosedBuffer;
+                        final closeBelow =
+                            statusBar.expandedMinHeight -
+                            statusBar.dragClosedBuffer;
                         _showStatusBarPanel = newHeight >= closeBelow;
                       }
 
@@ -469,20 +634,31 @@ class _CNWindowState extends State<CNWindow> {
                         math.min(statusBar.expandedMaxHeight, newHeight),
                       );
 
-                      if (_statusBarPanelHeight == statusBar.expandedMinHeight) {
+                      if (_statusBarPanelHeight ==
+                          statusBar.expandedMinHeight) {
                         _statusBarCursor = SystemMouseCursors.resizeUp;
-                      } else if (_statusBarPanelHeight == statusBar.expandedMaxHeight) {
+                      } else if (_statusBarPanelHeight ==
+                          statusBar.expandedMaxHeight) {
                         _statusBarCursor = SystemMouseCursors.resizeDown;
                       } else {
                         _statusBarCursor = SystemMouseCursors.resizeRow;
                       }
+                      _activeResizeCursor = _statusBarCursor;
                     });
                   },
+                  onVerticalDragEnd: (_) =>
+                      setState(() => _activeResizeCursor = null),
+                  onVerticalDragCancel: () =>
+                      setState(() => _activeResizeCursor = null),
                   child: MouseRegion(
                     cursor: _statusBarCursor,
                     child: Align(
                       alignment: Alignment.center,
-                      child: Divider(height: 1, thickness: 1, color: dividerColor),
+                      child: Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: dividerColor,
+                      ),
                     ),
                   ),
                 ),
@@ -499,7 +675,12 @@ class _CNWindowState extends State<CNWindow> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: statusBar.color ?? theme.canvasColor,
-                    border: Border(top: BorderSide(color: statusBar.dividerColor ?? dividerColor, width: 1)),
+                    border: Border(
+                      top: BorderSide(
+                        color: statusBar.dividerColor ?? dividerColor,
+                        width: 1,
+                      ),
+                    ),
                   ),
                   child: _StatusBarContent(
                     leftItems: statusBar.leftItems,
@@ -513,11 +694,34 @@ class _CNWindowState extends State<CNWindow> {
           ],
         );
 
+        // While a resize drag is in progress, overlay a full-window MouseRegion
+        // that pins the resize cursor. A fast drag can move the pointer outside
+        // the thin resizer's own MouseRegion; because the drag is owned by the
+        // GestureDetector's recognizer (which keeps receiving pointer moves via
+        // pointer capture), this opaque top-most region keeps the cursor stable
+        // until the drag ends or is cancelled, without stealing the drag.
+        //
+        // The Stack is ALWAYS present (the overlay is only added/removed as a
+        // trailing child) so `layout`'s element — and the active drag recognizer
+        // inside it — is never torn down mid-drag by a change of the subtree's
+        // widget type.
+        final resizeCursor = _activeResizeCursor;
+        final windowContent = Stack(
+          children: [
+            layout,
+            if (resizeCursor != null)
+              Positioned.fill(child: MouseRegion(cursor: resizeCursor)),
+          ],
+        );
+
         return CNWindowScope(
           constraints: constraints,
           isSidebarShown: canShowSidebar,
           isEndSidebarShown: canShowEndSidebar,
           isStatusBarExpanded: _showStatusBarPanel,
+          visibleSidebarWidth: visibleSidebarWidth,
+          visibleEndSidebarWidth: visibleEndSidebarWidth,
+          toolbarSpansFullWidth: widget.toolbarSpansFullWidth,
           sidebarToggler: () async {
             debugPrint('toggleSidebar: $_showSidebar -> ${!_showSidebar}');
             setState(() => _sidebarSlideDuration = 300);
@@ -543,7 +747,7 @@ class _CNWindowState extends State<CNWindow> {
               setState(() => _sidebarSlideDuration = 0);
             }
           },
-          child: layout,
+          child: windowContent,
         );
       },
     );

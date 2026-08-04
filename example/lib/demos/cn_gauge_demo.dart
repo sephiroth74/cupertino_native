@@ -37,7 +37,10 @@ class _GaugeDemoPageState extends State<GaugeDemoPage> {
         children: [
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
                 const SizedBox(height: 16),
@@ -45,19 +48,38 @@ class _GaugeDemoPageState extends State<GaugeDemoPage> {
                 const SizedBox(height: 16),
                 CNGauge(
                   controlSize: controlSize,
-                  paddings: EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
+                  paddings: EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 18.0,
+                  ),
                   debugLog: _kDebugLog,
                   value: sliderValue,
                   tint: useGrsdientTint ? gradientTint : tint,
                   gaugeStyle: gaugeStyle,
                   min: 0.0,
                   max: 100.0,
-                  label: showLabels ? [CNChildImage('heart.fill', foregroundColor: CNColors.red)] : null,
-                  currentValueLabel: showLabels
-                      ? [CNChildText(sliderValue.toInt().toString(), foregroundColor: CNColors.green)]
+                  label: showLabels
+                      ? [
+                          CNChildImage(
+                            'heart.fill',
+                            foregroundColor: CNColors.red,
+                          ),
+                        ]
                       : null,
-                  minimumValueLabel: showLabels ? [CNChildText('0', foregroundColor: CNColors.green)] : null,
-                  maximumValueLabel: showLabels ? [CNChildText('100', foregroundColor: CNColors.red)] : null,
+                  currentValueLabel: showLabels
+                      ? [
+                          CNChildText(
+                            sliderValue.toInt().toString(),
+                            foregroundColor: CNColors.green,
+                          ),
+                        ]
+                      : null,
+                  minimumValueLabel: showLabels
+                      ? [CNChildText('0', foregroundColor: CNColors.green)]
+                      : null,
+                  maximumValueLabel: showLabels
+                      ? [CNChildText('100', foregroundColor: CNColors.red)]
+                      : null,
                 ),
                 const SizedBox(height: 16),
               ],
@@ -72,11 +94,24 @@ class _GaugeDemoPageState extends State<GaugeDemoPage> {
               ),
               'Gauge Style': CNPicker(
                 selection: gaugeStyle.name,
-                onChanged: (newStyle) => setState(() => gaugeStyle = CNGaugeStyle.values.firstWhere((s) => s.name == newStyle)),
-                children: CNGaugeStyle.values.map((s) => CNChildText(s.name, tag: s.name)).toList(),
+                onChanged: (newStyle) => setState(
+                  () => gaugeStyle = CNGaugeStyle.values.firstWhere(
+                    (s) => s.name == newStyle,
+                  ),
+                ),
+                children: CNGaugeStyle.values
+                    .map((s) => CNChildText(s.name, tag: s.name))
+                    .toList(),
               ),
-              'Show Labels': CNToggle(isOn: showLabels, onChanged: (enabled) => setState(() => showLabels = enabled)),
-              'Gradient Tint': CNToggle(isOn: useGrsdientTint, onChanged: (enabled) => setState(() => useGrsdientTint = enabled)),
+              'Show Labels': CNToggle(
+                isOn: showLabels,
+                onChanged: (enabled) => setState(() => showLabels = enabled),
+              ),
+              'Gradient Tint': CNToggle(
+                isOn: useGrsdientTint,
+                onChanged: (enabled) =>
+                    setState(() => useGrsdientTint = enabled),
+              ),
               'Tint Color': ColorPicker(
                 colors: kSystemColors,
                 value: tint,

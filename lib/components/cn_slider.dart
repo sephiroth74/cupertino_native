@@ -35,7 +35,10 @@ class CNSlider extends CNWidget {
   }) : assert(min < max),
        assert(value >= min && value <= max),
        assert(step == null || step > 0),
-       assert(step == null || ticks == null, 'step and ticks cannot be used together');
+       assert(
+         step == null || ticks == null,
+         'step and ticks cannot be used together',
+       );
 
   /// Control size for the slider.
   final CNControlSize controlSize;
@@ -112,7 +115,11 @@ class _CNSliderState extends CNWidgetState<CNSlider> {
   Size computeDefaultSize() => Size(_kDefaultSliderWidth, _defaultHeight());
 
   @override
-  double computeShrinkWidth({required BoxConstraints constraints, required double defaultWidth, double? intrinsicWidth}) {
+  double computeShrinkWidth({
+    required BoxConstraints constraints,
+    required double defaultWidth,
+    double? intrinsicWidth,
+  }) {
     double resolvedWidth;
     if (intrinsicWidth != null) {
       resolvedWidth = intrinsicWidth;
@@ -134,7 +141,9 @@ class _CNSliderState extends CNWidgetState<CNSlider> {
   @override
   Set<Factory<OneSequenceGestureRecognizer>>? get gestureRecognizers => {
     Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-    Factory<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer()),
+    Factory<HorizontalDragGestureRecognizer>(
+      () => HorizontalDragGestureRecognizer(),
+    ),
   };
 
   @override
@@ -148,13 +157,18 @@ class _CNSliderState extends CNWidgetState<CNSlider> {
         }
       case 'editingChanged':
         final args = call.arguments as Map?;
-        final editing = (args?['editing'] as bool?) ?? (args?['editing'] as num?)?.toInt() == 1;
+        final editing =
+            (args?['editing'] as bool?) ??
+            (args?['editing'] as num?)?.toInt() == 1;
         widget.onEditingChanged?.call(editing);
     }
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
       'value': widget.value,
       'min': widget.min,
@@ -164,7 +178,9 @@ class _CNSliderState extends CNWidgetState<CNSlider> {
       'minimumValueLabel': widget.minimumValueLabel,
       'maximumValueLabel': widget.maximumValueLabel,
       'enabled': widget.onChanged != null,
-      'ticks': widget.ticks?.map((t) => {'value': t.value, 'label': t.label}).toList(),
+      'ticks': widget.ticks
+          ?.map((t) => {'value': t.value, 'label': t.label})
+          .toList(),
     };
 
     widget.writeSharedFields(

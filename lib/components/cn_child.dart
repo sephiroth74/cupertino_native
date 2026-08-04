@@ -66,7 +66,12 @@ sealed class CNChild {
   static Map<String, double>? serializePaddings(EdgeInsetsGeometry? p) {
     if (p == null) return null;
     final resolved = p.resolve(TextDirection.ltr);
-    return {'top': resolved.top, 'bottom': resolved.bottom, 'leading': resolved.left, 'trailing': resolved.right};
+    return {
+      'top': resolved.top,
+      'bottom': resolved.bottom,
+      'leading': resolved.left,
+      'trailing': resolved.right,
+    };
   }
 }
 
@@ -246,7 +251,9 @@ class CNChildImage extends CNChild {
       'font': font?.toMap(),
       'symbolRenderingMode': symbolRenderingMode?.name,
       'symbolColorRenderingMode': symbolColorRenderingMode?.name,
-      'foregroundStyleColors': foregroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
+      'foregroundStyleColors': foregroundStyleColors
+          ?.map((c) => resolveColorToArgb(c, context))
+          .toList(),
       'constraints': CNChild.serializeConstraints(constraints),
       'paddings': CNChild.serializePaddings(paddings),
     };
@@ -300,7 +307,9 @@ class CNChildLabel extends CNChild {
       'font': font?.toMap(),
       'symbolRenderingMode': symbolRenderingMode?.name,
       'symbolColorRenderingMode': symbolColorRenderingMode?.name,
-      'foregroundStyleColors': foregroundStyleColors?.map((c) => resolveColorToArgb(c, context)).toList(),
+      'foregroundStyleColors': foregroundStyleColors
+          ?.map((c) => resolveColorToArgb(c, context))
+          .toList(),
       'labelReservedIconWidth': labelReservedIconWidth,
       'labelIconToTitleSpacing': labelIconToTitleSpacing,
       'labelStyle': labelStyle.name,
@@ -420,7 +429,8 @@ class CNChildPicker extends CNChild {
       'foregroundColor': resolveColorToArgb(foregroundColor, context),
       'children': children.map((c) => c.toChildPayload(context)).toList(),
       'selection': selection,
-      if (label != null) 'label': label!.map((c) => c.toChildPayload(context)).toList(),
+      if (label != null)
+        'label': label!.map((c) => c.toChildPayload(context)).toList(),
       'labelStyle': labelStyle?.name,
       'pickerStyle': pickerStyle,
       'controlSize': controlSize,

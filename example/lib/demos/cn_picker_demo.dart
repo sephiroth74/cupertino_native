@@ -51,18 +51,49 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                       controlSize: controlSize,
                       pickerStyle: pickerStyle,
                       children: [
-                        CNChildLabel('Walk', systemImage: 'figure.walk', tag: 'walk'),
-                        if (pickerStyle == CNPickerStyle.menu || pickerStyle == CNPickerStyle.automatic) CNChildDivider(),
-                        CNChildLabel('Airplane', systemImage: 'airplane', tag: 'airplane'),
+                        CNChildLabel(
+                          'Walk',
+                          systemImage: 'figure.walk',
+                          tag: 'walk',
+                        ),
+                        if (pickerStyle == CNPickerStyle.menu ||
+                            pickerStyle == CNPickerStyle.automatic)
+                          CNChildDivider(),
+                        CNChildLabel(
+                          'Airplane',
+                          systemImage: 'airplane',
+                          tag: 'airplane',
+                        ),
                         CNChildLabel('Car', systemImage: 'car', tag: 'car'),
                         CNChildLabel('Bus', systemImage: 'bus', tag: 'bus'),
                         CNChildLabel('Tram', systemImage: 'tram', tag: 'tram'),
-                        CNChildLabel('Train', systemImage: 'train.side.front.car', tag: 'train.side.front.car'),
-                        CNChildLabel('Ferry', systemImage: 'ferry', tag: 'ferry'),
-                        CNChildLabel('Sailboat', systemImage: 'sailboat', tag: 'sailboat'),
-                        CNChildLabel('Bicycle', systemImage: 'bicycle', tag: 'bicycle'),
+                        CNChildLabel(
+                          'Train',
+                          systemImage: 'train.side.front.car',
+                          tag: 'train.side.front.car',
+                        ),
+                        CNChildLabel(
+                          'Ferry',
+                          systemImage: 'ferry',
+                          tag: 'ferry',
+                        ),
+                        CNChildLabel(
+                          'Sailboat',
+                          systemImage: 'sailboat',
+                          tag: 'sailboat',
+                        ),
+                        CNChildLabel(
+                          'Bicycle',
+                          systemImage: 'bicycle',
+                          tag: 'bicycle',
+                        ),
                       ],
-                      label: withLabels ? [CNChildText('Picker Style'), CNChildText('Make a selection')] : null,
+                      label: withLabels
+                          ? [
+                              CNChildText('Picker Style'),
+                              CNChildText('Make a selection'),
+                            ]
+                          : null,
                       tint: tintColor,
                       foregroundColor: foregroundColor,
                       selection: value,
@@ -84,25 +115,37 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Window Position: ${geometry!.windowX}, ${geometry!.windowY}'),
+                        Text(
+                          'Window Position: ${geometry!.windowX}, ${geometry!.windowY}',
+                        ),
                         const SizedBox(height: 4),
-                        Text('Window Size: ${geometry!.windowWidth} x ${geometry!.windowHeight}'),
+                        Text(
+                          'Window Size: ${geometry!.windowWidth} x ${geometry!.windowHeight}',
+                        ),
                         const SizedBox(height: 4),
                         Text('Widget Position: ${geometry!.x}, ${geometry!.y}'),
                         const SizedBox(height: 4),
-                        Text('Widget Size: ${geometry!.width} x ${geometry!.height}'),
+                        Text(
+                          'Widget Size: ${geometry!.width} x ${geometry!.height}',
+                        ),
                         const SizedBox(height: 4),
-                        Text('Widget Physical Position: ${geometry!.physicalX} x ${geometry!.physicalY}'),
+                        Text(
+                          'Widget Physical Position: ${geometry!.physicalX} x ${geometry!.physicalY}',
+                        ),
                         const SizedBox(height: 4),
-                        Text('Widget Physical Size: ${geometry!.physicalWidth} x ${geometry!.physicalHeight}'),
+                        Text(
+                          'Widget Physical Size: ${geometry!.physicalWidth} x ${geometry!.physicalHeight}',
+                        ),
                         const SizedBox(height: 4),
-                        Text('Widget Pixel Aligned Position: ${geometry!.pixelAlignedX} x ${geometry!.pixelAlignedY}'),
+                        Text(
+                          'Widget Pixel Aligned Position: ${geometry!.pixelAlignedX} x ${geometry!.pixelAlignedY}',
+                        ),
                         const SizedBox(height: 4),
-                        Text('Widget Pixel Aligned Size: ${geometry!.pixelAlignedWidth} x ${geometry!.pixelAlignedHeight}'),
-
+                        Text(
+                          'Widget Pixel Aligned Size: ${geometry!.pixelAlignedWidth} x ${geometry!.pixelAlignedHeight}',
+                        ),
                       ],
                     ),
-                    
                   ),
               ],
             ),
@@ -110,33 +153,72 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
 
           RightSideOptionContainer(
             options: {
-              'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
+              'Control Size': ControlSizePicker(
+                value: controlSize,
+                onChanged: (size) => setState(() => controlSize = size),
+              ),
               'Picker Style': CNPicker(
                 pickerStyle: CNPickerStyle.menu,
                 children: [
-                  CNChildLabel('automatic', systemImage: 'automatic.brakesignal', tag: CNPickerStyle.automatic.name),
+                  CNChildLabel(
+                    'automatic',
+                    systemImage: 'automatic.brakesignal',
+                    tag: CNPickerStyle.automatic.name,
+                  ),
                   CNChildDivider(),
-                  CNChildLabel('inline', systemImage: 'lines.measurement.vertical', tag: CNPickerStyle.inline.name),
-                  CNChildLabel('menu', systemImage: 'filemenu.and.pointer.arrow', tag: CNPickerStyle.menu.name),
-                  CNChildLabel('palette', systemImage: 'swatchpalette', tag: CNPickerStyle.palette.name),
-                  CNChildLabel('radioGroup', systemImage: 'radio', tag: CNPickerStyle.radioGroup.name),
-                  CNChildLabel('segmented', systemImage: 'tablecells', tag: CNPickerStyle.segmented.name),
+                  CNChildLabel(
+                    'inline',
+                    systemImage: 'lines.measurement.vertical',
+                    tag: CNPickerStyle.inline.name,
+                  ),
+                  CNChildLabel(
+                    'menu',
+                    systemImage: 'filemenu.and.pointer.arrow',
+                    tag: CNPickerStyle.menu.name,
+                  ),
+                  CNChildLabel(
+                    'palette',
+                    systemImage: 'swatchpalette',
+                    tag: CNPickerStyle.palette.name,
+                  ),
+                  CNChildLabel(
+                    'radioGroup',
+                    systemImage: 'radio',
+                    tag: CNPickerStyle.radioGroup.name,
+                  ),
+                  CNChildLabel(
+                    'segmented',
+                    systemImage: 'tablecells',
+                    tag: CNPickerStyle.segmented.name,
+                  ),
                 ],
                 selection: pickerStyle.name,
                 onChanged: (value) {
                   setState(() {
-                    pickerStyle = CNPickerStyle.values.firstWhere((e) => e.name == value);
+                    pickerStyle = CNPickerStyle.values.firstWhere(
+                      (e) => e.name == value,
+                    );
                   });
                 },
               ),
-              'Tint Color': ColorPicker(colors: kSystemColors, value: tintColor, onChanged: (c) => setState(() => tintColor = c)),
+              'Tint Color': ColorPicker(
+                colors: kSystemColors,
+                value: tintColor,
+                onChanged: (c) => setState(() => tintColor = c),
+              ),
               'Foreground Color': ColorPicker(
                 colors: kSystemColors,
                 value: foregroundColor,
                 onChanged: (c) => setState(() => foregroundColor = c),
               ),
-              'Labels': CNToggle(isOn: withLabels, onChanged: (value) => setState(() => withLabels = value)),
-              'Enabled': CNToggle(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value)),
+              'Labels': CNToggle(
+                isOn: withLabels,
+                onChanged: (value) => setState(() => withLabels = value),
+              ),
+              'Enabled': CNToggle(
+                isOn: isEnabled,
+                onChanged: (value) => setState(() => isEnabled = value),
+              ),
             },
           ),
         ],

@@ -14,11 +14,13 @@ class CNSliderTheme extends InheritedTheme {
   bool updateShouldNotify(CNSliderTheme oldWidget) => data != oldWidget.data;
 
   @override
-  Widget wrap(BuildContext context, Widget child) => CNSliderTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) =>
+      CNSliderTheme(data: data, child: child);
 
   /// Returns the nearest [CNSliderThemeData], falling back to [CNTheme].
   static CNSliderThemeData of(BuildContext context) {
-    final CNSliderTheme? theme = context.dependOnInheritedWidgetOfExactType<CNSliderTheme>();
+    final CNSliderTheme? theme = context
+        .dependOnInheritedWidgetOfExactType<CNSliderTheme>();
     return theme?.data ?? CNTheme.of(context).sliderTheme;
   }
 }
@@ -46,7 +48,13 @@ class CNSliderThemeData extends Equatable {
   }
 
   /// Linearly interpolates between two slider themes.
-  static CNSliderThemeData lerp(CNSliderThemeData a, CNSliderThemeData b, double t) {
-    return CNSliderThemeData(tintColor: Color.lerp(a.tintColor, b.tintColor, t));
+  static CNSliderThemeData lerp(
+    CNSliderThemeData a,
+    CNSliderThemeData b,
+    double t,
+  ) {
+    return CNSliderThemeData(
+      tintColor: Color.lerp(a.tintColor, b.tintColor, t),
+    );
   }
 }

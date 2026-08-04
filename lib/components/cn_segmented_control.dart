@@ -60,12 +60,11 @@ enum CNSegmentDistribution {
 
 /// A segment item within a [CNSegmentedControl].
 class CNSegment {
-  const CNSegment({
-    this.label,
-    this.systemImage,
-    this.tag,
-    this.enabled = true,
-  }) : assert(label != null || systemImage != null, 'A segment must have a label or a systemImage');
+  const CNSegment({this.label, this.systemImage, this.tag, this.enabled = true})
+    : assert(
+        label != null || systemImage != null,
+        'A segment must have a label or a systemImage',
+      );
 
   /// Whether this segment is individually enabled.
   final bool enabled;
@@ -80,11 +79,11 @@ class CNSegment {
   final String? tag;
 
   Map<String, dynamic> toMap() => {
-        'label': label,
-        'systemImage': systemImage,
-        'tag': tag,
-        'enabled': enabled,
-      };
+    'label': label,
+    'systemImage': systemImage,
+    'tag': tag,
+    'enabled': enabled,
+  };
 }
 
 /// A native macOS segmented control backed by NSSegmentedControl.
@@ -192,7 +191,8 @@ class _CNSegmentedControlState extends CNWidgetState<CNSegmentedControl> {
         logDebug('selectionChanged: $index');
         widget.onChanged?.call(index);
       case 'selectAnyChanged':
-        final indices = (call.arguments as List<dynamic>?)?.cast<int>().toSet() ?? <int>{};
+        final indices =
+            (call.arguments as List<dynamic>?)?.cast<int>().toSet() ?? <int>{};
         logDebug('selectAnyChanged: $indices');
         widget.onSelectAnyChanged?.call(indices);
     }

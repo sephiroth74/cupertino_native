@@ -48,7 +48,9 @@ class _CNContextMenuRegionState extends State<CNContextMenuRegion> {
       return;
     }
 
-    final itemsPayload = widget.items.map((c) => c.toChildPayload(context)).toList();
+    final itemsPayload = widget.items
+        .map((c) => c.toChildPayload(context))
+        .toList();
 
     final response = await _channel.invokeMethod<Object>('showContextMenu2', {
       'items': itemsPayload,
@@ -67,7 +69,9 @@ class _CNContextMenuRegionState extends State<CNContextMenuRegion> {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.deferToChild,
-      onSecondaryTapDown: widget.enabled ? (details) => _openContextMenu(details.globalPosition) : null,
+      onSecondaryTapDown: widget.enabled
+          ? (details) => _openContextMenu(details.globalPosition)
+          : null,
       child: widget.child,
     );
   }

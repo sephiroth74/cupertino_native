@@ -3,7 +3,11 @@ import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
 class BezelStylePicker extends StatelessWidget {
-  const BezelStylePicker({super.key, required this.value, required this.onChanged});
+  const BezelStylePicker({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
 
   final ValueChanged<CNTextFieldBezelStyle> onChanged;
   final CNTextFieldBezelStyle value;
@@ -12,15 +16,25 @@ class BezelStylePicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return CNPicker(
       selection: value.name,
-      children: CNTextFieldBezelStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
-      onChanged: (value) => onChanged(CNTextFieldBezelStyle.values.firstWhere((e) => e.name == value)),
+      children: CNTextFieldBezelStyle.values
+          .map((style) => CNChildText(style.name, tag: style.name))
+          .toList(),
+      onChanged: (value) => onChanged(
+        CNTextFieldBezelStyle.values.firstWhere((e) => e.name == value),
+      ),
       pickerStyle: CNPickerStyle.automatic,
     );
   }
 }
 
 class ColorPicker<T extends Color> extends StatelessWidget {
-  const ColorPicker({super.key, required this.colors, required this.value, required this.onChanged, this.enabled = true});
+  const ColorPicker({
+    super.key,
+    required this.colors,
+    required this.value,
+    required this.onChanged,
+    this.enabled = true,
+  });
 
   final Map<String, T?> colors;
   final bool enabled;
@@ -30,7 +44,9 @@ class ColorPicker<T extends Color> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CNPicker(
-      selection: value == null ? colors.keys.first.toString() : colors.entries.firstWhere((entry) => entry.value == value).key,
+      selection: value == null
+          ? colors.keys.first.toString()
+          : colors.entries.firstWhere((entry) => entry.value == value).key,
       children: colors.entries.map((entry) {
         return CNChildLabel(
           entry.key,
@@ -47,7 +63,11 @@ class ColorPicker<T extends Color> extends StatelessWidget {
 }
 
 class ControlSizePicker extends StatelessWidget {
-  const ControlSizePicker({super.key, required this.value, required this.onChanged});
+  const ControlSizePicker({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
 
   final ValueChanged<CNControlSize> onChanged;
   final CNControlSize value;
@@ -56,15 +76,24 @@ class ControlSizePicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return CNPicker(
       selection: value.name,
-      children: CNControlSize.values.map((size) => CNChildText(size.name, tag: size.name)).toList(),
-      onChanged: (value) => onChanged(CNControlSize.values.firstWhere((e) => e.name == value)),
+      children: CNControlSize.values
+          .map((size) => CNChildText(size.name, tag: size.name))
+          .toList(),
+      onChanged: (value) =>
+          onChanged(CNControlSize.values.firstWhere((e) => e.name == value)),
       pickerStyle: CNPickerStyle.automatic,
     );
   }
 }
 
 class FontPicker extends StatelessWidget {
-  const FontPicker({super.key, required this.fonts, this.value, this.onChanged, this.debugLog = false});
+  const FontPicker({
+    super.key,
+    required this.fonts,
+    this.value,
+    this.onChanged,
+    this.debugLog = false,
+  });
 
   final bool debugLog;
   final List<CNFont?> fonts;
@@ -79,10 +108,17 @@ class FontPicker extends StatelessWidget {
       debugLog: debugLog,
       selection: value?.name ?? value?.kind.name ?? 'none',
       children: fonts.map((font) {
-        return CNChildText(font?.name ?? font?.kind.name ?? 'None', tag: font?.name ?? font?.kind.name ?? 'none');
+        return CNChildText(
+          font?.name ?? font?.kind.name ?? 'None',
+          tag: font?.name ?? font?.kind.name ?? 'none',
+        );
       }).toList(),
       onChanged: enabled
-          ? (tag) => onChanged!(fonts.firstWhere((font) => (font?.name ?? font?.kind.name ?? 'none') == tag))
+          ? (tag) => onChanged!(
+              fonts.firstWhere(
+                (font) => (font?.name ?? font?.kind.name ?? 'none') == tag,
+              ),
+            )
           : null,
       pickerStyle: CNPickerStyle.automatic,
     );
@@ -90,7 +126,11 @@ class FontPicker extends StatelessWidget {
 }
 
 class RightSideOptionContainer extends StatelessWidget {
-  const RightSideOptionContainer({super.key, this.title = 'Options', required this.options});
+  const RightSideOptionContainer({
+    super.key,
+    this.title = 'Options',
+    required this.options,
+  });
 
   final Map<String, Widget> options;
   final String? title;
@@ -115,7 +155,10 @@ class RightSideOptionContainer extends StatelessWidget {
             if (title != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
-                child: Text(title!, style: CNTheme.of(context).typography.title2),
+                child: Text(
+                  title!,
+                  style: CNTheme.of(context).typography.title2,
+                ),
               ),
             if (options.isNotEmpty) ...[
               const SizedBox(height: 16),
@@ -124,10 +167,15 @@ class RightSideOptionContainer extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
                   child: Row(
                     children: [
-                      Expanded(child: Text(entry.key, style: TextStyle(fontSize: 12))),
+                      Expanded(
+                        child: Text(entry.key, style: TextStyle(fontSize: 12)),
+                      ),
                       SizedBox(
                         width: 175,
-                        child: Align(alignment: Alignment.centerLeft, child: entry.value),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: entry.value,
+                        ),
                       ),
                     ],
                   ),
@@ -172,12 +220,22 @@ class SizeSliderPicker extends StatelessWidget {
           width: 40,
           child: Text(
             value.toStringAsFixed(0).padRight(2),
-            style: TextStyle(color: enabled ? null : CupertinoColors.inactiveGray, fontSize: 12),
+            style: TextStyle(
+              color: enabled ? null : CupertinoColors.inactiveGray,
+              fontSize: 12,
+            ),
           ),
         ),
         const SizedBox(width: 2),
         Expanded(
-          child: CNSlider(value: value, min: min, max: max, onChanged: onChanged, debugLog: debugLog, step: step),
+          child: CNSlider(
+            value: value,
+            min: min,
+            max: max,
+            onChanged: onChanged,
+            debugLog: debugLog,
+            step: step,
+          ),
         ),
       ],
     );

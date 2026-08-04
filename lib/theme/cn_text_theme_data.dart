@@ -18,7 +18,10 @@ class CNTextThemeData extends Equatable {
 
   /// Returns a copy with selected values replaced.
   CNTextThemeData copyWith({CNFont? font, Color? labelColor}) {
-    return CNTextThemeData(font: font ?? this.font, labelColor: labelColor ?? this.labelColor);
+    return CNTextThemeData(
+      font: font ?? this.font,
+      labelColor: labelColor ?? this.labelColor,
+    );
   }
 
   /// Returns a new object where non-null values from [other] override this one.
@@ -29,6 +32,9 @@ class CNTextThemeData extends Equatable {
 
   /// Linearly interpolates between two text themes.
   static CNTextThemeData lerp(CNTextThemeData a, CNTextThemeData b, double t) {
-    return CNTextThemeData(font: t < 0.5 ? a.font : b.font, labelColor: Color.lerp(a.labelColor, b.labelColor, t));
+    return CNTextThemeData(
+      font: t < 0.5 ? a.font : b.font,
+      labelColor: Color.lerp(a.labelColor, b.labelColor, t),
+    );
   }
 }

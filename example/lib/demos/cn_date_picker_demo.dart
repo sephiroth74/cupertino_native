@@ -14,8 +14,12 @@ enum _DatePickerComponents { date, time, dateAndTime }
 class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
   CNControlSize controlSize = CNControlSize.regular;
   CNDatePickerStyle datePickerStyle = CNDatePickerStyle.automatic;
-  List<CNDatePickerComponent> displayedComponents = [CNDatePickerComponent.date, CNDatePickerComponent.hourAndMinute];
-  _DatePickerComponents displayedComponentsEnum = _DatePickerComponents.dateAndTime;
+  List<CNDatePickerComponent> displayedComponents = [
+    CNDatePickerComponent.date,
+    CNDatePickerComponent.hourAndMinute,
+  ];
+  _DatePickerComponents displayedComponentsEnum =
+      _DatePickerComponents.dateAndTime;
   bool enabled = true;
   DateTime selectedDate = DateTime.now();
   CupertinoDynamicColor? tintColor;
@@ -63,29 +67,46 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
               ),
               'DatePicker Style': CNPicker(
                 selection: datePickerStyle.name,
-                onChanged: (newStyle) =>
-                    setState(() => datePickerStyle = CNDatePickerStyle.values.firstWhere((style) => style.name == newStyle)),
-                children: CNDatePickerStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
+                onChanged: (newStyle) => setState(
+                  () => datePickerStyle = CNDatePickerStyle.values.firstWhere(
+                    (style) => style.name == newStyle,
+                  ),
+                ),
+                children: CNDatePickerStyle.values
+                    .map((style) => CNChildText(style.name, tag: style.name))
+                    .toList(),
               ),
-              'Enabled': CNToggle(isOn: enabled, onChanged: (value) => setState(() => enabled = value)),
+              'Enabled': CNToggle(
+                isOn: enabled,
+                onChanged: (value) => setState(() => enabled = value),
+              ),
               'Components': CNPicker(
                 selection: displayedComponentsEnum.name,
                 onChanged: (newValue) => setState(() {
-                  displayedComponentsEnum = _DatePickerComponents.values.firstWhere((component) => component.name == newValue);
+                  displayedComponentsEnum = _DatePickerComponents.values
+                      .firstWhere((component) => component.name == newValue);
                   switch (displayedComponentsEnum) {
                     case _DatePickerComponents.date:
                       displayedComponents = [CNDatePickerComponent.date];
                       break;
                     case _DatePickerComponents.time:
-                      displayedComponents = [CNDatePickerComponent.hourAndMinute];
+                      displayedComponents = [
+                        CNDatePickerComponent.hourAndMinute,
+                      ];
                       break;
                     case _DatePickerComponents.dateAndTime:
-                      displayedComponents = [CNDatePickerComponent.date, CNDatePickerComponent.hourAndMinute];
+                      displayedComponents = [
+                        CNDatePickerComponent.date,
+                        CNDatePickerComponent.hourAndMinute,
+                      ];
                       break;
                   }
                 }),
                 children: _DatePickerComponents.values
-                    .map((component) => CNChildText(component.name, tag: component.name))
+                    .map(
+                      (component) =>
+                          CNChildText(component.name, tag: component.name),
+                    )
                     .toList(),
               ),
             },

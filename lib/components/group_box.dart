@@ -58,7 +58,10 @@ class GroupBox extends StatelessWidget {
         final theme = CNTheme.of(context);
         return BoxDecoration(
           color: color ?? theme.fillTertiaryColor,
-          border: Border.all(color: theme.separatorColor.withAlpha(51), width: 1),
+          border: Border.all(
+            color: theme.separatorColor.withAlpha(51),
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(borderRadius ?? 8),
         );
       case GroupBoxStyle.borderless:

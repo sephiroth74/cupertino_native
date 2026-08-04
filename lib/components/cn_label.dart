@@ -135,10 +135,12 @@ class _CNLabelSimple extends CNLabel {
   final String _titleText;
 
   @override
-  CNChildImage? get image => _systemImage != null ? CNChildImage(_systemImage) : null;
+  CNChildImage? get image =>
+      _systemImage != null ? CNChildImage(_systemImage) : null;
 
   @override
-  CNChildText get title => CNChildText(_titleText, font: _font, foregroundColor: _foregroundColor2);
+  CNChildText get title =>
+      CNChildText(_titleText, font: _font, foregroundColor: _foregroundColor2);
 }
 
 class _CNLabelState extends CNWidgetState<CNLabel> {
@@ -146,7 +148,10 @@ class _CNLabelState extends CNWidgetState<CNLabel> {
   Size computeDefaultSize() => const Size(80.0, 20.0);
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
       'title': widget.title.toChildPayload(context),
       'image': widget.image?.toChildPayload(context),
@@ -156,7 +161,11 @@ class _CNLabelState extends CNWidgetState<CNLabel> {
       'labelIconToTitleSpacing': widget.labelIconToTitleSpacing,
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+    );
     return payload;
   }
 }

@@ -13,7 +13,14 @@ class OverlayDemoPage extends StatefulWidget {
   State<OverlayDemoPage> createState() => _OverlayDemoPageState();
 }
 
-enum _ShapeKind { roundedRectangle, rectangle, capsule, circle, ellipse, uneven }
+enum _ShapeKind {
+  roundedRectangle,
+  rectangle,
+  capsule,
+  circle,
+  ellipse,
+  uneven,
+}
 
 enum _PaintKind { stroke, strokeBorder, fill }
 
@@ -47,21 +54,33 @@ class _OverlayDemoPageState extends State<OverlayDemoPage> {
 
   CNShapeStyle? get _gradient => useGradient
       ? CNShapeStyle.linearGradient(
-          [CNGradientStop(CNColors.blue, 0), CNGradientStop(CNColors.purple, 1)],
+          [
+            CNGradientStop(CNColors.blue, 0),
+            CNGradientStop(CNColors.purple, 1),
+          ],
           startPoint: CNUnitPoint.topLeading,
           endPoint: CNUnitPoint.bottomTrailing,
         )
       : null;
 
   CNOverlay get _overlay => switch (paint) {
-    _PaintKind.stroke => CNOverlay.stroke(_shape, color: useGradient ? null : tint, shapeStyle: _gradient, lineWidth: lineWidth),
+    _PaintKind.stroke => CNOverlay.stroke(
+      _shape,
+      color: useGradient ? null : tint,
+      shapeStyle: _gradient,
+      lineWidth: lineWidth,
+    ),
     _PaintKind.strokeBorder => CNOverlay.strokeBorder(
       _shape,
       color: useGradient ? null : tint,
       shapeStyle: _gradient,
       lineWidth: lineWidth,
     ),
-    _PaintKind.fill => CNOverlay.fill(_shape, color: useGradient ? null : tint.withAlpha(60), shapeStyle: _gradient),
+    _PaintKind.fill => CNOverlay.fill(
+      _shape,
+      color: useGradient ? null : tint.withAlpha(60),
+      shapeStyle: _gradient,
+    ),
   };
 
   @override
@@ -83,7 +102,9 @@ class _OverlayDemoPageState extends State<OverlayDemoPage> {
                   Text(
                     'The same overlay is applied to a native button, text field and image. '
                     'It is drawn by SwiftUI on the native view — not by Flutter.',
-                    style: theme.typography.subheadline.copyWith(color: theme.secondaryLabelColor),
+                    style: theme.typography.subheadline.copyWith(
+                      color: theme.secondaryLabelColor,
+                    ),
                   ),
                   const SizedBox(height: 24),
 
@@ -100,12 +121,19 @@ class _OverlayDemoPageState extends State<OverlayDemoPage> {
 
                   SizedBox(
                     width: 260,
-                    child: CNTextField(placeholder: 'Overlaid text field', overlay: _overlay, paddings: EdgeInsets.all(paddings)),
+                    child: CNTextField(
+                      placeholder: 'Overlaid text field',
+                      overlay: _overlay,
+                      paddings: EdgeInsets.all(paddings),
+                    ),
                   ),
                   const SizedBox(height: 24),
 
                   CNImage(
-                    constraints: const BoxConstraints(maxWidth: 64, maxHeight: 64),
+                    constraints: const BoxConstraints(
+                      maxWidth: 64,
+                      maxHeight: 64,
+                    ),
                     systemSymbolName: 'photo',
                     foregroundColor: theme.accentColor,
                     overlay: _overlay,
@@ -113,7 +141,10 @@ class _OverlayDemoPageState extends State<OverlayDemoPage> {
                   ),
                   const SizedBox(height: 32),
 
-                  Text('On a CNChild (menu label)', style: theme.typography.title2),
+                  Text(
+                    'On a CNChild (menu label)',
+                    style: theme.typography.title2,
+                  ),
                   const SizedBox(height: 12),
                   // The overlay also works on CNChild* content, here the label
                   // inside a native menu button.
@@ -126,7 +157,11 @@ class _OverlayDemoPageState extends State<OverlayDemoPage> {
                         'Menu with overlaid label',
                         systemImage: 'ellipsis.circle',
                         paddings: EdgeInsets.all(paddings),
-                        overlay: CNOverlay.stroke(const CNCapsule(), color: tint, lineWidth: lineWidth),
+                        overlay: CNOverlay.stroke(
+                          const CNCapsule(),
+                          color: tint,
+                          lineWidth: lineWidth,
+                        ),
                       ),
                     ],
                     items: const [
@@ -141,17 +176,26 @@ class _OverlayDemoPageState extends State<OverlayDemoPage> {
               options: {
                 'Shape': CNPicker(
                   selection: shape.name,
-                  children: _ShapeKind.values.map((s) => CNChildText(s.name, tag: s.name)).toList(),
-                  onChanged: (tag) => setState(() => shape = _ShapeKind.values.byName(tag)),
+                  children: _ShapeKind.values
+                      .map((s) => CNChildText(s.name, tag: s.name))
+                      .toList(),
+                  onChanged: (tag) =>
+                      setState(() => shape = _ShapeKind.values.byName(tag)),
                   pickerStyle: CNPickerStyle.menu,
                 ),
                 'Paint': CNPicker(
                   selection: paint.name,
-                  children: _PaintKind.values.map((p) => CNChildText(p.name, tag: p.name)).toList(),
-                  onChanged: (tag) => setState(() => paint = _PaintKind.values.byName(tag)),
+                  children: _PaintKind.values
+                      .map((p) => CNChildText(p.name, tag: p.name))
+                      .toList(),
+                  onChanged: (tag) =>
+                      setState(() => paint = _PaintKind.values.byName(tag)),
                   pickerStyle: CNPickerStyle.menu,
                 ),
-                'Gradient': CNToggle(isOn: useGradient, onChanged: (v) => setState(() => useGradient = v)),
+                'Gradient': CNToggle(
+                  isOn: useGradient,
+                  onChanged: (v) => setState(() => useGradient = v),
+                ),
                 'Color': ColorPicker(
                   colors: kNonNullColors,
                   value: tint,
@@ -172,8 +216,18 @@ class _OverlayDemoPageState extends State<OverlayDemoPage> {
                 ),
                 // Negative inset expands the shape outside the control's
                 // bounds — e.g. a border drawn just outside a text field.
-                'Inset': SizeSliderPicker(value: inset, min: -8, max: 8, onChanged: (v) => setState(() => inset = v)),
-                'Paddings': SizeSliderPicker(value: paddings, min: 0, max: 10, onChanged: (v) => setState(() => paddings = v)),
+                'Inset': SizeSliderPicker(
+                  value: inset,
+                  min: -8,
+                  max: 8,
+                  onChanged: (v) => setState(() => inset = v),
+                ),
+                'Paddings': SizeSliderPicker(
+                  value: paddings,
+                  min: 0,
+                  max: 10,
+                  onChanged: (v) => setState(() => paddings = v),
+                ),
               },
             ),
           ],

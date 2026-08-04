@@ -20,20 +20,27 @@ enum CNIconButtonShape {
 /// Applies [CNIconButtonThemeData] to descendant [CNIconButton] widgets.
 class CNIconButtonTheme extends InheritedTheme {
   /// Creates an icon button theme scope.
-  const CNIconButtonTheme({super.key, required this.data, required super.child});
+  const CNIconButtonTheme({
+    super.key,
+    required this.data,
+    required super.child,
+  });
 
   /// The icon button theme override for descendants.
   final CNIconButtonThemeData data;
 
   @override
-  bool updateShouldNotify(CNIconButtonTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(CNIconButtonTheme oldWidget) =>
+      data != oldWidget.data;
 
   @override
-  Widget wrap(BuildContext context, Widget child) => CNIconButtonTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) =>
+      CNIconButtonTheme(data: data, child: child);
 
   /// Returns the nearest [CNIconButtonThemeData], falling back to [CNTheme].
   static CNIconButtonThemeData of(BuildContext context) {
-    final CNIconButtonTheme? theme = context.dependOnInheritedWidgetOfExactType<CNIconButtonTheme>();
+    final CNIconButtonTheme? theme = context
+        .dependOnInheritedWidgetOfExactType<CNIconButtonTheme>();
     return theme?.data ?? CNTheme.of(context).iconButtonTheme;
   }
 }
@@ -159,7 +166,8 @@ class CNIconButtonThemeData extends Equatable {
       padding: EdgeInsets.zero,
       hoveredBackgroundColor: theme.fillQuaternaryColor,
       pressedBackgroundColor: theme.fillTertiaryColor,
-      selectedBackgroundColor: accent?.withValues(alpha: 0.15) ?? theme.fillSecondaryColor,
+      selectedBackgroundColor:
+          accent?.withValues(alpha: 0.15) ?? theme.fillSecondaryColor,
       selectedForegroundColor: accent,
       animationDuration: const Duration(milliseconds: 120),
     );
@@ -187,15 +195,23 @@ class CNIconButtonThemeData extends Equatable {
   }) {
     return CNIconButtonThemeData(
       foregroundColor: foregroundColor ?? this.foregroundColor,
-      hoveredForegroundColor: hoveredForegroundColor ?? this.hoveredForegroundColor,
-      selectedForegroundColor: selectedForegroundColor ?? this.selectedForegroundColor,
-      pressedForegroundColor: pressedForegroundColor ?? this.pressedForegroundColor,
-      disabledForegroundColor: disabledForegroundColor ?? this.disabledForegroundColor,
+      hoveredForegroundColor:
+          hoveredForegroundColor ?? this.hoveredForegroundColor,
+      selectedForegroundColor:
+          selectedForegroundColor ?? this.selectedForegroundColor,
+      pressedForegroundColor:
+          pressedForegroundColor ?? this.pressedForegroundColor,
+      disabledForegroundColor:
+          disabledForegroundColor ?? this.disabledForegroundColor,
       backgroundColor: backgroundColor ?? this.backgroundColor,
-      hoveredBackgroundColor: hoveredBackgroundColor ?? this.hoveredBackgroundColor,
-      selectedBackgroundColor: selectedBackgroundColor ?? this.selectedBackgroundColor,
-      pressedBackgroundColor: pressedBackgroundColor ?? this.pressedBackgroundColor,
-      disabledBackgroundColor: disabledBackgroundColor ?? this.disabledBackgroundColor,
+      hoveredBackgroundColor:
+          hoveredBackgroundColor ?? this.hoveredBackgroundColor,
+      selectedBackgroundColor:
+          selectedBackgroundColor ?? this.selectedBackgroundColor,
+      pressedBackgroundColor:
+          pressedBackgroundColor ?? this.pressedBackgroundColor,
+      disabledBackgroundColor:
+          disabledBackgroundColor ?? this.disabledBackgroundColor,
       borderColor: borderColor ?? this.borderColor,
       borderWidth: borderWidth ?? this.borderWidth,
       shape: shape ?? this.shape,
@@ -231,18 +247,54 @@ class CNIconButtonThemeData extends Equatable {
   }
 
   /// Linearly interpolates between two icon button themes.
-  static CNIconButtonThemeData lerp(CNIconButtonThemeData a, CNIconButtonThemeData b, double t) {
+  static CNIconButtonThemeData lerp(
+    CNIconButtonThemeData a,
+    CNIconButtonThemeData b,
+    double t,
+  ) {
     return CNIconButtonThemeData(
       foregroundColor: Color.lerp(a.foregroundColor, b.foregroundColor, t),
-      hoveredForegroundColor: Color.lerp(a.hoveredForegroundColor, b.hoveredForegroundColor, t),
-      selectedForegroundColor: Color.lerp(a.selectedForegroundColor, b.selectedForegroundColor, t),
-      pressedForegroundColor: Color.lerp(a.pressedForegroundColor, b.pressedForegroundColor, t),
-      disabledForegroundColor: Color.lerp(a.disabledForegroundColor, b.disabledForegroundColor, t),
+      hoveredForegroundColor: Color.lerp(
+        a.hoveredForegroundColor,
+        b.hoveredForegroundColor,
+        t,
+      ),
+      selectedForegroundColor: Color.lerp(
+        a.selectedForegroundColor,
+        b.selectedForegroundColor,
+        t,
+      ),
+      pressedForegroundColor: Color.lerp(
+        a.pressedForegroundColor,
+        b.pressedForegroundColor,
+        t,
+      ),
+      disabledForegroundColor: Color.lerp(
+        a.disabledForegroundColor,
+        b.disabledForegroundColor,
+        t,
+      ),
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      hoveredBackgroundColor: Color.lerp(a.hoveredBackgroundColor, b.hoveredBackgroundColor, t),
-      selectedBackgroundColor: Color.lerp(a.selectedBackgroundColor, b.selectedBackgroundColor, t),
-      pressedBackgroundColor: Color.lerp(a.pressedBackgroundColor, b.pressedBackgroundColor, t),
-      disabledBackgroundColor: Color.lerp(a.disabledBackgroundColor, b.disabledBackgroundColor, t),
+      hoveredBackgroundColor: Color.lerp(
+        a.hoveredBackgroundColor,
+        b.hoveredBackgroundColor,
+        t,
+      ),
+      selectedBackgroundColor: Color.lerp(
+        a.selectedBackgroundColor,
+        b.selectedBackgroundColor,
+        t,
+      ),
+      pressedBackgroundColor: Color.lerp(
+        a.pressedBackgroundColor,
+        b.pressedBackgroundColor,
+        t,
+      ),
+      disabledBackgroundColor: Color.lerp(
+        a.disabledBackgroundColor,
+        b.disabledBackgroundColor,
+        t,
+      ),
       borderColor: Color.lerp(a.borderColor, b.borderColor, t),
       borderWidth: lerpDouble(a.borderWidth, b.borderWidth, t),
       shape: t < 0.5 ? a.shape : b.shape,

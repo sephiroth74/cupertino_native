@@ -14,11 +14,13 @@ class CNToggleTheme extends InheritedTheme {
   bool updateShouldNotify(CNToggleTheme oldWidget) => data != oldWidget.data;
 
   @override
-  Widget wrap(BuildContext context, Widget child) => CNToggleTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) =>
+      CNToggleTheme(data: data, child: child);
 
   /// Returns the nearest [CNToggleThemeData], falling back to [CNTheme].
   static CNToggleThemeData of(BuildContext context) {
-    final CNToggleTheme? theme = context.dependOnInheritedWidgetOfExactType<CNToggleTheme>();
+    final CNToggleTheme? theme = context
+        .dependOnInheritedWidgetOfExactType<CNToggleTheme>();
     return theme?.data ?? CNTheme.of(context).toggleTheme;
   }
 }
@@ -46,7 +48,11 @@ class CNToggleThemeData extends Equatable {
   }
 
   /// Linearly interpolates between two toggle themes.
-  static CNToggleThemeData lerp(CNToggleThemeData a, CNToggleThemeData b, double t) {
+  static CNToggleThemeData lerp(
+    CNToggleThemeData a,
+    CNToggleThemeData b,
+    double t,
+  ) {
     return CNToggleThemeData(tint: Color.lerp(a.tint, b.tint, t));
   }
 }

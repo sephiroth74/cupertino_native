@@ -104,7 +104,10 @@ class _CNTextState extends CNWidgetState<CNText> {
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
       'text': widget.text,
       'font': widget.font?.toMap(),
@@ -114,7 +117,11 @@ class _CNTextState extends CNWidgetState<CNText> {
       'truncationMode': widget.truncationMode?.name,
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+    );
     return payload;
   }
 }

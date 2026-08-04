@@ -27,7 +27,14 @@ enum CNSymbolColorRenderingMode {
 /// Describes an SF Symbol to render natively.
 class CNSymbol {
   /// Creates a symbol description for native rendering.
-  const CNSymbol(this.name, {this.size = 24.0, this.color, this.paletteColors, this.mode, this.gradient});
+  const CNSymbol(
+    this.name, {
+    this.size = 24.0,
+    this.color,
+    this.paletteColors,
+    this.mode,
+    this.gradient,
+  });
 
   /// Preferred icon color (for monochrome/hierarchical modes).
   final Color? color; // preferred icon color (monochrome/hierarchical)

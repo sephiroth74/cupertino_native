@@ -182,7 +182,9 @@ class _CNTextFieldState extends CNWidgetState<CNTextField> {
           oldValue: _controller.value,
           formatters: widget.inputFormatters,
         );
-        logDebug('textChanged: raw="$rawText" formatted="${formatted.text}" (len=${formatted.text.length})');
+        logDebug(
+          'textChanged: raw="$rawText" formatted="${formatted.text}" (len=${formatted.text.length})',
+        );
         _isUpdatingFromNative = true;
         if (formatted.text == rawText) {
           _controller.text = rawText;
@@ -195,11 +197,16 @@ class _CNTextFieldState extends CNWidgetState<CNTextField> {
         final args = call.arguments as Map?;
         final base = (args?['base'] as num?)?.toInt();
         final extent = (args?['extent'] as num?)?.toInt();
-        logDebug('selectionChanged: base=$base, extent=$extent, textLen=${_controller.text.length}');
+        logDebug(
+          'selectionChanged: base=$base, extent=$extent, textLen=${_controller.text.length}',
+        );
         if (base != null && extent != null) {
           _isUpdatingFromNative = true;
           final textLength = _controller.text.length;
-          _controller.selection = TextSelection(baseOffset: base.clamp(0, textLength), extentOffset: extent.clamp(0, textLength));
+          _controller.selection = TextSelection(
+            baseOffset: base.clamp(0, textLength),
+            extentOffset: extent.clamp(0, textLength),
+          );
           _isUpdatingFromNative = false;
         }
       case 'submitted':
@@ -209,7 +216,10 @@ class _CNTextFieldState extends CNWidgetState<CNTextField> {
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final selection = _controller.selection;
     final payload = <String, dynamic>{
       'text': _controller.text,
@@ -236,7 +246,8 @@ class _CNTextFieldState extends CNWidgetState<CNTextField> {
     return payload;
   }
 
-  TextEditingController get _controller => widget.controller ?? _internalController!;
+  TextEditingController get _controller =>
+      widget.controller ?? _internalController!;
 
   double _defaultHeight() {
     double resolvedHeight = 26.0; // default height for regular control size

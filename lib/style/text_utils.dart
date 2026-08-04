@@ -4,7 +4,10 @@ import 'package:flutter/cupertino.dart';
 
 /// Creates a declarative `CNFont` from a Flutter `TextStyle`.
 CNFont cnFontFromTextStyle(TextStyle style) {
-  return CNFont.system(CNFontSize.points(style.fontSize ?? 13.0), weight: cnFontWeightFromFlutter(style.fontWeight));
+  return CNFont.system(
+    CNFontSize.points(style.fontSize ?? 13.0),
+    weight: cnFontWeightFromFlutter(style.fontWeight),
+  );
 }
 
 /// Converts a Flutter `FontWeight` to the matching `CNFontWeight`.

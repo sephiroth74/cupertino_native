@@ -15,7 +15,8 @@ import 'package:flutter/rendering.dart';
 /// Subclasses must implement [toWidgetPayload] and [computeDefaultSize].
 /// The [build] method, layout resolution, patch diffing, and channel lifecycle
 /// are handled entirely by this base class.
-abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetDebugIdMixin<T> {
+abstract class CNWidgetState<T extends CNWidget> extends State<T>
+    with CNWidgetDebugIdMixin<T> {
   (double, double) computeFinalSize({
     required bool shrink,
     required BoxConstraints constraints,
@@ -23,13 +24,21 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
     double? intrinsicHeight,
   }) {
     if (shrink) {
-      return computeShrinkSize(constraints: constraints, intrinsicWidth: intrinsicWidth, intrinsicHeight: intrinsicHeight);
+      return computeShrinkSize(
+        constraints: constraints,
+        intrinsicWidth: intrinsicWidth,
+        intrinsicHeight: intrinsicHeight,
+      );
     } else {
       return computeExpandSize(constraints: constraints);
     }
   }
 
-  (double, double) computeShrinkSize({required BoxConstraints constraints, double? intrinsicWidth, double? intrinsicHeight}) {
+  (double, double) computeShrinkSize({
+    required BoxConstraints constraints,
+    double? intrinsicWidth,
+    double? intrinsicHeight,
+  }) {
     final defaultSize = computeDefaultSize();
     double? resolvedWidth = computeShrinkWidth(
       constraints: constraints,
@@ -43,7 +52,9 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
       intrinsicHeight: intrinsicHeight,
     );
 
-    logDebug('shrink mode: resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight');
+    logDebug(
+      'shrink mode: resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight',
+    );
 
     return (resolvedWidth, resolvedHeight);
   }
@@ -93,7 +104,10 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
   /// Produces the widget-specific payload map for the native side.
   /// Called on every build and for patch computation.
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints});
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  });
 
   /// Override to handle additional method calls from native besides `intrinsicSizeChanged`.
   @protected
@@ -104,7 +118,11 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
     debugPrint('$debugLogPrefix $message');
   }
 
-  double computeShrinkWidth({required BoxConstraints constraints, required double defaultWidth, double? intrinsicWidth}) {
+  double computeShrinkWidth({
+    required BoxConstraints constraints,
+    required double defaultWidth,
+    double? intrinsicWidth,
+  }) {
     double resolvedWidth;
     if (intrinsicWidth != null) {
       // check also for tightWidth in constraints, since the widget may have been given a tight width by its parent (e.g. a SizedBox).
@@ -125,7 +143,11 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
     return resolvedWidth;
   }
 
-  double computeShrinkHeight({required BoxConstraints constraints, required double defaultHeight, double? intrinsicHeight}) {
+  double computeShrinkHeight({
+    required BoxConstraints constraints,
+    required double defaultHeight,
+    double? intrinsicHeight,
+  }) {
     double resolvedHeight;
     if (intrinsicHeight != null) {
       resolvedHeight = intrinsicHeight;
@@ -153,11 +175,24 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
     final explicit = widget.constraints;
     if ( /*!widget.shrink && */ explicit != null) {
       // We should return the smallest constraints that satisfy both the explicit constraints and the parent constraints.
-      final minWidth = explicit.minWidth.isFinite ? explicit.minWidth : parentConstraints.minWidth;
-      final maxWidth = explicit.maxWidth.isFinite ? explicit.maxWidth : parentConstraints.maxWidth;
-      final minHeight = explicit.minHeight.isFinite ? explicit.minHeight : parentConstraints.minHeight;
-      final maxHeight = explicit.maxHeight.isFinite ? explicit.maxHeight : parentConstraints.maxHeight;
-      return BoxConstraints(minWidth: minWidth, maxWidth: maxWidth, minHeight: minHeight, maxHeight: maxHeight);
+      final minWidth = explicit.minWidth.isFinite
+          ? explicit.minWidth
+          : parentConstraints.minWidth;
+      final maxWidth = explicit.maxWidth.isFinite
+          ? explicit.maxWidth
+          : parentConstraints.maxWidth;
+      final minHeight = explicit.minHeight.isFinite
+          ? explicit.minHeight
+          : parentConstraints.minHeight;
+      final maxHeight = explicit.maxHeight.isFinite
+          ? explicit.maxHeight
+          : parentConstraints.maxHeight;
+      return BoxConstraints(
+        minWidth: minWidth,
+        maxWidth: maxWidth,
+        minHeight: minHeight,
+        maxHeight: maxHeight,
+      );
     }
     return parentConstraints;
   }
@@ -185,7 +220,10 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
     try {
       final size = await channel.invokeMethod<Map>('getIntrinsicSize');
-      _onIntrinsicSizeChanged((size?['width'] as num?)?.toDouble(), (size?['height'] as num?)?.toDouble());
+      _onIntrinsicSizeChanged(
+        (size?['width'] as num?)?.toDouble(),
+        (size?['height'] as num?)?.toDouble(),
+      );
     } catch (_) {}
   }
 
@@ -213,13 +251,16 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 
     final normalizedWidth = width > 0 ? width : null;
     final normalizedHeight = height > 0 ? height : null;
-    if (normalizedWidth == _intrinsicWidth && normalizedHeight == _intrinsicHeight) {
+    if (normalizedWidth == _intrinsicWidth &&
+        normalizedHeight == _intrinsicHeight) {
       logDebug('intrinsic size unchanged, skipping setState');
       return;
     }
 
     setState(() {
-      logDebug('updating intrinsic size: width=$normalizedWidth, height=$normalizedHeight');
+      logDebug(
+        'updating intrinsic size: width=$normalizedWidth, height=$normalizedHeight',
+      );
       _intrinsicWidth = normalizedWidth;
       _intrinsicHeight = normalizedHeight;
     });
@@ -288,8 +329,12 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
         );
 
         logDebug('*** build ***');
-        logDebug('parentConstraints=$parentConstraints, widget.constraints=${widget.constraints}, _lastConstraints=$_lastConstraints');
-        logDebug('shrink=${widget.shrink}, intrinsicWidth=$_intrinsicWidth, intrinsicHeight=$_intrinsicHeight');
+        logDebug(
+          'parentConstraints=$parentConstraints, widget.constraints=${widget.constraints}, _lastConstraints=$_lastConstraints',
+        );
+        logDebug(
+          'shrink=${widget.shrink}, intrinsicWidth=$_intrinsicWidth, intrinsicHeight=$_intrinsicHeight',
+        );
 
         final (width, height) = computeFinalSize(
           shrink: widget.shrink,
@@ -302,7 +347,9 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
           final resolvedWidth = width;
           final resolvedHeight = height;
 
-          logDebug('shrink mode: resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight');
+          logDebug(
+            'shrink mode: resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight',
+          );
 
           if (widget.debugLog) {
             platformView = Stack(
@@ -317,12 +364,18 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
               ],
             );
           }
-          return SizedBox(width: resolvedWidth, height: resolvedHeight, child: platformView);
+          return SizedBox(
+            width: resolvedWidth,
+            height: resolvedHeight,
+            child: platformView,
+          );
         } else {
           final resolvedWidth = width;
           final resolvedHeight = height;
 
-          logDebug('expand mode: resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight');
+          logDebug(
+            'expand mode: resolvedWidth=$resolvedWidth, resolvedHeight=$resolvedHeight',
+          );
 
           assert(
             resolvedWidth.isFinite && resolvedHeight.isFinite,
@@ -345,7 +398,10 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
           }
 
           return ConstrainedBox(
-            constraints: BoxConstraints.tightFor(width: resolvedWidth, height: resolvedHeight),
+            constraints: BoxConstraints.tightFor(
+              width: resolvedWidth,
+              height: resolvedHeight,
+            ),
             child: platformView,
           );
         }
@@ -363,7 +419,10 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T> with CNWidgetD
 /// - Key absent in old → included with new value
 ///
 /// Maps are compared recursively, lists use deep equality.
-Map<String, dynamic> computePayloadPatch(Map<String, dynamic> oldPayload, Map<String, dynamic> newPayload) {
+Map<String, dynamic> computePayloadPatch(
+  Map<String, dynamic> oldPayload,
+  Map<String, dynamic> newPayload,
+) {
   final patch = <String, dynamic>{};
   final allKeys = <String>{...oldPayload.keys, ...newPayload.keys};
 

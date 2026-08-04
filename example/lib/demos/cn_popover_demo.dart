@@ -19,7 +19,11 @@ class _PopoverDemoPageState extends State<PopoverDemoPage> {
       actions: const [
         CNChildButton(tag: 'open', title: 'Open'),
         CNChildButton(tag: 'duplicate', title: 'Duplicate'),
-        CNChildButton(tag: 'delete', title: 'Delete', role: CNButtonRole.destructive),
+        CNChildButton(
+          tag: 'delete',
+          title: 'Delete',
+          role: CNButtonRole.destructive,
+        ),
       ],
     );
     if (result != null) setState(() => _lastResult = result);
@@ -65,7 +69,12 @@ class _PopoverDemoPageState extends State<PopoverDemoPage> {
                 adjustPosition: true,
                 child: CNButton(
                   onPressed: () => _showBasicPopover(ctx),
-                  children: [CNChildLabel('Basic Popover', systemImage: 'rectangle.on.rectangle')],
+                  children: [
+                    CNChildLabel(
+                      'Basic Popover',
+                      systemImage: 'rectangle.on.rectangle',
+                    ),
+                  ],
                   controlSize: CNControlSize.large,
                   buttonStyle: CNButtonStyle.borderedProminent,
                 ),
@@ -77,7 +86,12 @@ class _PopoverDemoPageState extends State<PopoverDemoPage> {
                 adjustPosition: true,
                 child: CNButton(
                   onPressed: () => _showTopPopover(ctx),
-                  children: [CNChildLabel('Top Edge Popover', systemImage: 'arrow.up.square')],
+                  children: [
+                    CNChildLabel(
+                      'Top Edge Popover',
+                      systemImage: 'arrow.up.square',
+                    ),
+                  ],
                   controlSize: CNControlSize.large,
                   buttonStyle: CNButtonStyle.borderedProminent,
                 ),
@@ -89,7 +103,12 @@ class _PopoverDemoPageState extends State<PopoverDemoPage> {
                 adjustPosition: true,
                 child: CNButton(
                   onPressed: () => _showTrailingPopover(ctx),
-                  children: [CNChildLabel('Trailing Edge Popover', systemImage: 'arrow.right.square')],
+                  children: [
+                    CNChildLabel(
+                      'Trailing Edge Popover',
+                      systemImage: 'arrow.right.square',
+                    ),
+                  ],
                   controlSize: CNControlSize.large,
                   buttonStyle: CNButtonStyle.borderedProminent,
                 ),

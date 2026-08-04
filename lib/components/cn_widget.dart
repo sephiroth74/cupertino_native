@@ -60,7 +60,9 @@ abstract class CNWidget extends StatefulWidget {
       'tint must be a Color or a CNShapeStyle',
     );
     assert(
-      tintFallback == null || tintFallback is Color || tintFallback is CNShapeStyle,
+      tintFallback == null ||
+          tintFallback is Color ||
+          tintFallback is CNShapeStyle,
       'tintFallback must be a Color or a CNShapeStyle',
     );
 
@@ -90,15 +92,35 @@ abstract class CNWidget extends StatefulWidget {
     if (constraints != null) {
       if (shrink) {
         payload['constraints'] = {
-          'maxWidth': constraints.maxWidth.isNaN ? null : (constraints.maxWidth.isFinite ? constraints.maxWidth : null),
-          'maxHeight': constraints.maxHeight.isNaN ? null : (constraints.maxHeight.isFinite ? constraints.maxHeight : null),
+          'maxWidth': constraints.maxWidth.isNaN
+              ? null
+              : (constraints.maxWidth.isFinite ? constraints.maxWidth : null),
+          'maxHeight': constraints.maxHeight.isNaN
+              ? null
+              : (constraints.maxHeight.isFinite ? constraints.maxHeight : null),
         };
       } else {
         payload['constraints'] = {
-          'minWidth': constraints.minWidth.isNaN ? null : (constraints.minWidth.isFinite ? constraints.minWidth : "infinity"),
-          'maxWidth': constraints.maxWidth.isNaN ? null : (constraints.maxWidth.isFinite ? constraints.maxWidth : "infinity"),
-          'minHeight': constraints.minHeight.isNaN ? null : (constraints.minHeight.isFinite ? constraints.minHeight : "infinity"),
-          'maxHeight': constraints.maxHeight.isNaN ? null : (constraints.maxHeight.isFinite ? constraints.maxHeight : "infinity"),
+          'minWidth': constraints.minWidth.isNaN
+              ? null
+              : (constraints.minWidth.isFinite
+                    ? constraints.minWidth
+                    : "infinity"),
+          'maxWidth': constraints.maxWidth.isNaN
+              ? null
+              : (constraints.maxWidth.isFinite
+                    ? constraints.maxWidth
+                    : "infinity"),
+          'minHeight': constraints.minHeight.isNaN
+              ? null
+              : (constraints.minHeight.isFinite
+                    ? constraints.minHeight
+                    : "infinity"),
+          'maxHeight': constraints.maxHeight.isNaN
+              ? null
+              : (constraints.maxHeight.isFinite
+                    ? constraints.maxHeight
+                    : "infinity"),
         };
       }
     }

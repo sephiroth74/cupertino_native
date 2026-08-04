@@ -7,19 +7,56 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-/// The current system accent color with its resolved name.
-enum CNAccentColor {
-  red(CNColors.red),
-  orange(CNColors.orange),
-  yellow(CNColors.yellow),
-  green(CNColors.green),
-  graphite(CNColors.gray),
-  blue(CNColors.blue),
-  purple(CNColors.purple),
-  pink(CNColors.pink);
+enum CNAccentColorName {
+  red,
+  orange,
+  yellow,
+  green,
+  graphite,
+  blue,
+  purple,
+  pink,
+}
 
-  const CNAccentColor(this.color);
-  final CupertinoDynamicColor color;
+/// The current system accent color with its resolved name.
+class CNAccentColor {
+  const CNAccentColor._(this.color, this.name);
+
+  static const CNAccentColor blue = CNAccentColor._(
+    CNColors.blue,
+    CNAccentColorName.blue,
+  );
+  static const CNAccentColor graphite = CNAccentColor._(
+    CNColors.gray,
+    CNAccentColorName.graphite,
+  );
+  static const CNAccentColor green = CNAccentColor._(
+    CNColors.green,
+    CNAccentColorName.green,
+  );
+  static const CNAccentColor orange = CNAccentColor._(
+    CNColors.orange,
+    CNAccentColorName.orange,
+  );
+  static const CNAccentColor pink = CNAccentColor._(
+    CNColors.pink,
+    CNAccentColorName.pink,
+  );
+  static const CNAccentColor purple = CNAccentColor._(
+    CNColors.purple,
+    CNAccentColorName.purple,
+  );
+  static const CNAccentColor red = CNAccentColor._(
+    CNColors.red,
+    CNAccentColorName.red,
+  );
+  static const CNAccentColor yellow = CNAccentColor._(
+    CNColors.yellow,
+    CNAccentColorName.yellow,
+  );
+
+  final Color color;
+  final CNAccentColorName name;
 }
 
 /// Provides synchronous access to the current macOS accent color and a stream
@@ -49,8 +86,11 @@ class CNAccentColorListener {
   CNAccentColorListener._();
 
   static CNAccentColor _accentColor = CNAccentColor.blue;
-  static final StreamController<CNAccentColor> _controller = StreamController<CNAccentColor>.broadcast();
-  static const EventChannel _eventChannel = EventChannel('cupertino_native/accent_color');
+  static final StreamController<CNAccentColor> _controller =
+      StreamController<CNAccentColor>.broadcast();
+  static const EventChannel _eventChannel = EventChannel(
+    'cupertino_native/accent_color',
+  );
   static const MethodChannel _methodChannel = MethodChannel('cupertino_native');
   static StreamSubscription<dynamic>? _subscription;
 
@@ -74,6 +114,7 @@ class CNAccentColorListener {
 
     // Start event channel subscription (sends initial value immediately)
     _subscription ??= _eventChannel.receiveBroadcastStream().listen((event) {
+      debugPrint('Accent color event: $event');
       final parsed = _parse(event);
       if (parsed != null && parsed != _accentColor) {
         _accentColor = parsed;
@@ -88,7 +129,10 @@ class CNAccentColorListener {
     } on TimeoutException {
       // Fallback: try method channel
       try {
-        final result = await _methodChannel.invokeMethod<Map<dynamic, dynamic>>('getAccentColor');
+        final result = await _methodChannel.invokeMethod<Map<dynamic, dynamic>>(
+          'getAccentColor',
+        );
+        debugPrint('Accent color method channel result: $result');
         final parsed = _parse(result);
         if (parsed != null) {
           _accentColor = parsed;
@@ -115,16 +159,22 @@ class CNAccentColorListener {
     final defaultValue = CNColors.accentColors.first;
     final CNAccentColor value;
     if (nameStr != null) {
-      value = CNColors.accentColors.firstWhere((color) => color.name.toLowerCase() == nameStr, orElse: () => defaultValue);
+      value = CNColors.accentColors.firstWhere(
+        (color) => color.name.name.toLowerCase() == nameStr,
+        orElse: () => defaultValue,
+      );
     } else {
       value = CNColors.accentColors.firstWhere(
-        (c) =>
-            c.color.color == color ||
-            c.color.darkColor == color ||
-            c.color.darkElevatedColor == color ||
-            c.color.elevatedColor == color ||
-            c.color.darkHighContrastColor == color ||
-            c.color.highContrastColor == color,
+        (c) => c.color is CupertinoDynamicColor
+            ? (c.color as CupertinoDynamicColor).color == color ||
+                  (c.color as CupertinoDynamicColor).darkColor == color ||
+                  (c.color as CupertinoDynamicColor).darkElevatedColor ==
+                      color ||
+                  (c.color as CupertinoDynamicColor).elevatedColor == color ||
+                  (c.color as CupertinoDynamicColor).darkHighContrastColor ==
+                      color ||
+                  (c.color as CupertinoDynamicColor).highContrastColor == color
+            : c.color == color,
         orElse: () => defaultValue,
       );
     }
@@ -146,7 +196,8 @@ class CNAccentColorBuilder extends StatelessWidget {
   const CNAccentColorBuilder({super.key, required this.builder});
 
   /// Builder called with the current accent color.
-  final Widget Function(BuildContext context, CNAccentColor accentColor) builder;
+  final Widget Function(BuildContext context, CNAccentColor accentColor)
+  builder;
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +205,10 @@ class CNAccentColorBuilder extends StatelessWidget {
       initialData: CNAccentColorListener.accentColor,
       stream: CNAccentColorListener.onChange,
       builder: (context, snapshot) {
-        return builder(context, snapshot.data ?? CNAccentColorListener.accentColor);
+        return builder(
+          context,
+          snapshot.data ?? CNAccentColorListener.accentColor,
+        );
       },
     );
   }

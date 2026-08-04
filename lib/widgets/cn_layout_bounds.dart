@@ -4,7 +4,12 @@ import 'package:flutter/widgets.dart';
 /// A widget that measures its child's layout bounds and reports it via callbacks.
 class CNLayoutBounds extends StatefulWidget {
   /// Creates a [CNLayoutBounds] widget.
-  const CNLayoutBounds({super.key, required this.child, this.enabled = true, this.color = const Color(0xFF009900)});
+  const CNLayoutBounds({
+    super.key,
+    required this.child,
+    this.enabled = true,
+    this.color = const Color(0xFF009900),
+  });
 
   /// The child widget to measure and layout.
   final Widget child;
@@ -44,7 +49,9 @@ class _CNLayoutBoundsState extends State<CNLayoutBounds> {
 
       /// draw a simple text on top-right corner of the rectangle with the size of the child widget
       child: DecoratedBox(
-        decoration: BoxDecoration(border: Border.all(color: widget.color, width: 1.0)),
+        decoration: BoxDecoration(
+          border: Border.all(color: widget.color, width: 1.0),
+        ),
         child: Stack(
           fit: StackFit.passthrough,
           children: [
@@ -53,8 +60,14 @@ class _CNLayoutBoundsState extends State<CNLayoutBounds> {
               top: 1,
               right: 0,
               child: Text(
-                childSize != null ? '${childSize!.width.toInt()}x${childSize!.height.toInt()}' : '',
-                style: TextStyle(color: widget.color, fontSize: 6, fontWeight: FontWeight.bold),
+                childSize != null
+                    ? '${childSize!.width.toInt()}x${childSize!.height.toInt()}'
+                    : '',
+                style: TextStyle(
+                  color: widget.color,
+                  fontSize: 6,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],

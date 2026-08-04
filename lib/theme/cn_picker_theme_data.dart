@@ -14,11 +14,13 @@ class CNPickerTheme extends InheritedTheme {
   bool updateShouldNotify(CNPickerTheme oldWidget) => data != oldWidget.data;
 
   @override
-  Widget wrap(BuildContext context, Widget child) => CNPickerTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) =>
+      CNPickerTheme(data: data, child: child);
 
   /// Returns the nearest [CNPickerThemeData], falling back to [CNTheme].
   static CNPickerThemeData of(BuildContext context) {
-    final CNPickerTheme? theme = context.dependOnInheritedWidgetOfExactType<CNPickerTheme>();
+    final CNPickerTheme? theme = context
+        .dependOnInheritedWidgetOfExactType<CNPickerTheme>();
     return theme?.data ?? CNTheme.of(context).pickerTheme;
   }
 }
@@ -46,7 +48,13 @@ class CNPickerThemeData extends Equatable {
   }
 
   /// Linearly interpolates between two picker themes.
-  static CNPickerThemeData lerp(CNPickerThemeData a, CNPickerThemeData b, double t) {
-    return CNPickerThemeData(tintColor: Color.lerp(a.tintColor, b.tintColor, t));
+  static CNPickerThemeData lerp(
+    CNPickerThemeData a,
+    CNPickerThemeData b,
+    double t,
+  ) {
+    return CNPickerThemeData(
+      tintColor: Color.lerp(a.tintColor, b.tintColor, t),
+    );
   }
 }

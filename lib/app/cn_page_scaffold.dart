@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 
 import '../app/cn_content_area.dart';
 import '../components/cn_toolbar.dart';
+import 'cn_window.dart';
 
 /// Key marking the single [CNContentArea] among a scaffold's [CNPageScaffold.children].
 const Key kCNScaffoldContentAreaKey = Key('cn_scaffold_content_area');
@@ -53,9 +54,25 @@ class CNPageScaffold extends StatelessWidget {
   /// Optional Flutter toolbar overlaid at the top of the page.
   final CNToolbar? toolBar;
 
+  /// Horizontal inset that keeps the body clear of the sidebars when the
+  /// enclosing [CNWindow] runs its toolbar full width (see
+  /// [CNWindow.toolbarSpansFullWidth]). In split mode the window already confines
+  /// the content beside the sidebars, so this is zero. `CNContentArea` disables
+  /// left/right `SafeArea`, so this must be a real `Padding`, not a MediaQuery
+  /// inset, to take effect.
+  EdgeInsets _fullWidthBodyInset(BuildContext context) {
+    final scope = CNWindowScope.maybeOf(context);
+    if (scope == null || !scope.toolbarSpansFullWidth) return EdgeInsets.zero;
+    return EdgeInsets.only(
+      left: scope.visibleSidebarWidth,
+      right: scope.visibleEndSidebarWidth,
+    );
+  }
+
   /// Single-child body: the [child] fills the content area beneath the toolbar.
   Widget _buildSingleChild(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
+    final bodyInset = _fullWidthBodyInset(context);
 
     Widget paddedContent = child!;
 
@@ -65,36 +82,42 @@ class CNPageScaffold extends StatelessWidget {
       // pushed page owns the whole toolbar strip rather than stacking beneath a
       // parent's bar. The toolbar itself is drawn flush at the window top below.
       final topPadding = toolBar!.preferredSize.height;
-      final bottomPadding = resizeToAvoidBottomInset ? mediaQuery.viewInsets.bottom : 0.0;
+      final bottomPadding = resizeToAvoidBottomInset
+          ? mediaQuery.viewInsets.bottom
+          : 0.0;
 
       paddedContent = MediaQuery(
         data: mediaQuery.copyWith(
           padding: mediaQuery.padding.copyWith(top: topPadding),
-          viewInsets: resizeToAvoidBottomInset ? mediaQuery.viewInsets.copyWith(bottom: 0.0) : mediaQuery.viewInsets,
+          viewInsets: resizeToAvoidBottomInset
+              ? mediaQuery.viewInsets.copyWith(bottom: 0.0)
+              : mediaQuery.viewInsets,
         ),
         child: Padding(
-          padding: EdgeInsets.only(bottom: bottomPadding),
+          padding: EdgeInsets.only(bottom: bottomPadding) + bodyInset,
           child: paddedContent,
         ),
       );
     } else if (resizeToAvoidBottomInset) {
       paddedContent = MediaQuery(
-        data: mediaQuery.copyWith(viewInsets: mediaQuery.viewInsets.copyWith(bottom: 0)),
+        data: mediaQuery.copyWith(
+          viewInsets: mediaQuery.viewInsets.copyWith(bottom: 0),
+        ),
         child: Padding(
-          padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
+          padding:
+              EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom) + bodyInset,
           child: paddedContent,
         ),
       );
+    } else if (bodyInset != EdgeInsets.zero) {
+      paddedContent = Padding(padding: bodyInset, child: paddedContent);
     }
 
     return SizedBox.expand(
       child: DecoratedBox(
         decoration: BoxDecoration(color: backgroundColor),
         child: Stack(
-          children: [
-            paddedContent,
-            if (toolBar != null) _positionedToolBar(),
-          ],
+          children: [paddedContent, if (toolBar != null) _positionedToolBar()],
         ),
       ),
     );
@@ -104,6 +127,7 @@ class CNPageScaffold extends StatelessWidget {
   Widget _buildSplitView(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final topPadding = toolBar?.preferredSize.height ?? 0.0;
+    final bodyInset = _fullWidthBodyInset(context);
 
     return SizedBox.expand(
       child: DecoratedBox(
@@ -112,11 +136,18 @@ class CNPageScaffold extends StatelessWidget {
           children: [
             // Reserve the toolbar strip by overriding the top inset (mirrors
             // AppKitScaffold). Panes read this via SafeArea so their content
-            // clears the bar while their frames still span the full height.
+            // clears the bar while their frames still span the full height. In
+            // full-width mode the panes are also inset horizontally so the split
+            // view clears the sidebars overlaid by the window.
             Positioned.fill(
-              child: MediaQuery(
-                data: mediaQuery.copyWith(padding: EdgeInsets.only(top: topPadding)),
-                child: _CNScaffoldBody(children: children!),
+              child: Padding(
+                padding: bodyInset,
+                child: MediaQuery(
+                  data: mediaQuery.copyWith(
+                    padding: EdgeInsets.only(top: topPadding),
+                  ),
+                  child: _CNScaffoldBody(children: children!),
+                ),
               ),
             ),
             if (toolBar != null) _positionedToolBar(),
@@ -142,7 +173,9 @@ class CNPageScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return children != null ? _buildSplitView(context) : _buildSingleChild(context);
+    return children != null
+        ? _buildSplitView(context)
+        : _buildSingleChild(context);
   }
 }
 
@@ -159,12 +192,17 @@ class _CNScaffoldBody extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderCNScaffoldBody renderObject) {
+  void updateRenderObject(
+    BuildContext context,
+    _RenderCNScaffoldBody renderObject,
+  ) {
     renderObject.contentAreaIndex = _contentAreaIndex();
   }
 
   int? _contentAreaIndex() {
-    final index = children.indexWhere((e) => e.key == kCNScaffoldContentAreaKey);
+    final index = children.indexWhere(
+      (e) => e.key == kCNScaffoldContentAreaKey,
+    );
     return index > -1 ? index : null;
   }
 }
@@ -174,7 +212,9 @@ class _CNScaffoldParentData extends ContainerBoxParentData<RenderBox> {
 }
 
 class _RenderCNScaffoldBody extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, _CNScaffoldParentData>, RenderBoxContainerDefaultsMixin<RenderBox, _CNScaffoldParentData> {
+    with
+        ContainerRenderObjectMixin<RenderBox, _CNScaffoldParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, _CNScaffoldParentData> {
   _RenderCNScaffoldBody({this.contentAreaIndex});
 
   /// Index of the [CNContentArea] child (fills remaining width), or null.
@@ -214,7 +254,11 @@ class _RenderCNScaffoldBody extends RenderBox
       if (index == contentAreaIndex) {
         final contentWidth = math.max(300.0, fullWidth - panesWidth);
         child.layout(
-          BoxConstraints(maxWidth: contentWidth, minHeight: fullHeight, maxHeight: fullHeight).normalize(),
+          BoxConstraints(
+            maxWidth: contentWidth,
+            minHeight: fullHeight,
+            maxHeight: fullHeight,
+          ).normalize(),
           parentUsesSize: true,
         );
       } else {
@@ -232,6 +276,7 @@ class _RenderCNScaffoldBody extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _CNScaffoldParentData) child.parentData = _CNScaffoldParentData();
+    if (child.parentData is! _CNScaffoldParentData)
+      child.parentData = _CNScaffoldParentData();
   }
 }

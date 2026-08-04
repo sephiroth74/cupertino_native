@@ -78,18 +78,26 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                     controller: controller,
                     maxLength: limitLength ? 10 : null,
                     overlay: borderWidth != null && borderColor != null
-                        ? CNOverlay.stroke(CNRoundedRectangle(cornerRadius: 8.0), color: borderColor, lineWidth: borderWidth!)
+                        ? CNOverlay.stroke(
+                            CNRoundedRectangle(cornerRadius: 8.0),
+                            color: borderColor,
+                            lineWidth: borderWidth!,
+                          )
                         : null,
                     foregroundColor: foregroundColor,
                     font: font,
                     tint: tintColor,
                     placeholder: 'Enter something...',
-                    onChanged: enabled ? (value) {
-                      debugPrint('onChanged: $value');
-                    } : null,
-                    onSubmitted: enabled ? (value) {
-                      debugPrint('onSubmitted: $value');
-                    } : null,
+                    onChanged: enabled
+                        ? (value) {
+                            debugPrint('onChanged: $value');
+                          }
+                        : null,
+                    onSubmitted: enabled
+                        ? (value) {
+                            debugPrint('onSubmitted: $value');
+                          }
+                        : null,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -100,17 +108,38 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
           ),
           RightSideOptionContainer(
             options: {
-              'Enabled': CNToggle(isOn: enabled, onChanged: (value) => setState(() => enabled = value)),
-              'Max 10 chars': CNToggle(isOn: limitLength, onChanged: (value) => setState(() => limitLength = value)),
-              'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
+              'Enabled': CNToggle(
+                isOn: enabled,
+                onChanged: (value) => setState(() => enabled = value),
+              ),
+              'Max 10 chars': CNToggle(
+                isOn: limitLength,
+                onChanged: (value) => setState(() => limitLength = value),
+              ),
+              'Control Size': ControlSizePicker(
+                value: controlSize,
+                onChanged: (size) => setState(() => controlSize = size),
+              ),
               'Style': CNPicker(
                 selection: textFieldStyle.name,
-                onChanged: (value) =>
-                    setState(() => textFieldStyle = CNTextFieldStyle.values.firstWhere((style) => style.name == value)),
-                children: CNTextFieldStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
+                onChanged: (value) => setState(
+                  () => textFieldStyle = CNTextFieldStyle.values.firstWhere(
+                    (style) => style.name == value,
+                  ),
+                ),
+                children: CNTextFieldStyle.values
+                    .map((style) => CNChildText(style.name, tag: style.name))
+                    .toList(),
               ),
-              'Font': FontPicker(value: font, fonts: kAvailableFonts, onChanged: (newFont) => setState(() => font = newFont)),
-              'Font Size': SizeSliderPicker(value: fontSize, onChanged: (newSize) => setState(() => fontSize = newSize)),
+              'Font': FontPicker(
+                value: font,
+                fonts: kAvailableFonts,
+                onChanged: (newFont) => setState(() => font = newFont),
+              ),
+              'Font Size': SizeSliderPicker(
+                value: fontSize,
+                onChanged: (newSize) => setState(() => fontSize = newSize),
+              ),
               'Tint Color': ColorPicker(
                 colors: kSystemColors,
                 value: tintColor,
@@ -130,7 +159,9 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                 value: borderWidth ?? 0,
                 min: 0.0,
                 max: 10.0,
-                onChanged: borderColor != null ? (newWidth) => setState(() => borderWidth = newWidth) : null,
+                onChanged: borderColor != null
+                    ? (newWidth) => setState(() => borderWidth = newWidth)
+                    : null,
               ),
             },
           ),

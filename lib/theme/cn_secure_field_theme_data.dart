@@ -5,20 +5,27 @@ import 'package:flutter/cupertino.dart';
 /// Applies [CNSecureFieldThemeData] to descendant [CNSecureField] widgets.
 class CNSecureFieldTheme extends InheritedTheme {
   /// Creates a secure field theme scope.
-  const CNSecureFieldTheme({super.key, required this.data, required super.child});
+  const CNSecureFieldTheme({
+    super.key,
+    required this.data,
+    required super.child,
+  });
 
   /// The secure field theme override for descendants.
   final CNSecureFieldThemeData data;
 
   @override
-  bool updateShouldNotify(CNSecureFieldTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(CNSecureFieldTheme oldWidget) =>
+      data != oldWidget.data;
 
   @override
-  Widget wrap(BuildContext context, Widget child) => CNSecureFieldTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) =>
+      CNSecureFieldTheme(data: data, child: child);
 
   /// Returns the nearest [CNSecureFieldThemeData], falling back to [CNTheme].
   static CNSecureFieldThemeData of(BuildContext context) {
-    final CNSecureFieldTheme? theme = context.dependOnInheritedWidgetOfExactType<CNSecureFieldTheme>();
+    final CNSecureFieldTheme? theme = context
+        .dependOnInheritedWidgetOfExactType<CNSecureFieldTheme>();
     return theme?.data ?? CNTheme.of(context).secureFieldTheme;
   }
 }
@@ -46,7 +53,13 @@ class CNSecureFieldThemeData extends Equatable {
   }
 
   /// Linearly interpolates between two secure field themes.
-  static CNSecureFieldThemeData lerp(CNSecureFieldThemeData a, CNSecureFieldThemeData b, double t) {
-    return CNSecureFieldThemeData(tintColor: Color.lerp(a.tintColor, b.tintColor, t));
+  static CNSecureFieldThemeData lerp(
+    CNSecureFieldThemeData a,
+    CNSecureFieldThemeData b,
+    double t,
+  ) {
+    return CNSecureFieldThemeData(
+      tintColor: Color.lerp(a.tintColor, b.tintColor, t),
+    );
   }
 }

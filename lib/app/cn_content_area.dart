@@ -5,7 +5,8 @@ import 'cn_page_scaffold.dart';
 /// A content area that fills the remaining space in a [CNPageScaffold].
 class CNContentArea extends StatelessWidget {
   /// Creates a content area with an optional builder and constraints.
-  const CNContentArea({required this.builder, this.constraints}) : super(key: kCNScaffoldContentAreaKey);
+  const CNContentArea({required this.builder, this.constraints})
+    : super(key: kCNScaffoldContentAreaKey);
 
   /// The builder function that is called to build the content area.
   final ScrollableWidgetBuilder? builder;
@@ -17,7 +18,11 @@ class CNContentArea extends StatelessWidget {
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: constraints ?? const BoxConstraints.expand(),
-      child: SafeArea(left: false, right: false, child: builder!(context, ScrollController())),
+      child: SafeArea(
+        left: false,
+        right: false,
+        child: builder!(context, ScrollController()),
+      ),
     );
   }
 }

@@ -9,10 +9,12 @@ class ProgressIndicatorsPageDemo extends StatefulWidget {
   const ProgressIndicatorsPageDemo({super.key});
 
   @override
-  State<ProgressIndicatorsPageDemo> createState() => _ProgressIndicatorsPageDemoState();
+  State<ProgressIndicatorsPageDemo> createState() =>
+      _ProgressIndicatorsPageDemoState();
 }
 
-class _ProgressIndicatorsPageDemoState extends State<ProgressIndicatorsPageDemo> {
+class _ProgressIndicatorsPageDemoState
+    extends State<ProgressIndicatorsPageDemo> {
   CNControlSize controlSize = CNControlSize.regular;
   bool isDetermininate = true;
   double progressValue = 0.75;
@@ -29,7 +31,10 @@ class _ProgressIndicatorsPageDemoState extends State<ProgressIndicatorsPageDemo>
         children: [
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
                 Center(
@@ -57,12 +62,19 @@ class _ProgressIndicatorsPageDemoState extends State<ProgressIndicatorsPageDemo>
               ),
               'Progress Style': CNPicker(
                 selection: progressViewStyle.name,
-                onChanged: (newStyle) =>
-                    setState(() => progressViewStyle = CNProgressViewStyle.values.firstWhere((style) => style.name == newStyle)),
-                children: CNProgressViewStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
+                onChanged: (newStyle) => setState(
+                  () => progressViewStyle = CNProgressViewStyle.values
+                      .firstWhere((style) => style.name == newStyle),
+                ),
+                children: CNProgressViewStyle.values
+                    .map((style) => CNChildText(style.name, tag: style.name))
+                    .toList(),
                 pickerStyle: CNPickerStyle.automatic,
               ),
-              'Determinate': CNToggle(isOn: isDetermininate, onChanged: (value) => setState(() => isDetermininate = value)),
+              'Determinate': CNToggle(
+                isOn: isDetermininate,
+                onChanged: (value) => setState(() => isDetermininate = value),
+              ),
               'Value': CNSlider(
                 value: progressValue,
                 onChanged: isDetermininate

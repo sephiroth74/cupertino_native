@@ -4,7 +4,12 @@ import 'package:flutter/widgets.dart';
 /// A widget that measures its child's size and layout position and reports it via callbacks.
 class CNMeasureChild extends SingleChildRenderObjectWidget {
   /// Creates a [CNMeasureChild] widget.
-  const CNMeasureChild({super.key, super.child, this.onSizeChanged, this.onLayout});
+  const CNMeasureChild({
+    super.key,
+    super.child,
+    this.onSizeChanged,
+    this.onLayout,
+  });
 
   /// Callback that is called when the child's layout position changes.
   final ValueChanged<Rect>? onLayout;
@@ -26,7 +31,8 @@ class CNMeasureChild extends SingleChildRenderObjectWidget {
 }
 
 class _RenderItem extends RenderProxyBox {
-  _RenderItem(this.onLayout, this.onSizeChanged, [RenderBox? child]) : super(child);
+  _RenderItem(this.onLayout, this.onSizeChanged, [RenderBox? child])
+    : super(child);
 
   ValueChanged<Rect>? onLayout;
   ValueChanged<Size>? onSizeChanged;

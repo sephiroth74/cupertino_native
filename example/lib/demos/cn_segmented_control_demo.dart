@@ -9,7 +9,8 @@ class SegmentedControlDemoPage extends StatefulWidget {
   const SegmentedControlDemoPage({super.key});
 
   @override
-  State<SegmentedControlDemoPage> createState() => _SegmentedControlDemoPageState();
+  State<SegmentedControlDemoPage> createState() =>
+      _SegmentedControlDemoPageState();
 }
 
 class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
@@ -48,7 +49,10 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
                           segments: const [
                             CNSegment(label: 'Day', systemImage: 'sun.max'),
                             CNSegment(label: 'Week', systemImage: 'calendar'),
-                            CNSegment(label: 'Month', systemImage: 'calendar.badge.clock'),
+                            CNSegment(
+                              label: 'Month',
+                              systemImage: 'calendar.badge.clock',
+                            ),
                             CNSegment(label: 'Year', systemImage: 'chart.bar'),
                           ],
                           selectedIndex: selectedIndex,
@@ -58,7 +62,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
                           segmentDistribution: distribution,
                           controlSize: controlSize,
                           constraints: distribution != CNSegmentDistribution.fit
-                              ? BoxConstraints.expand(width: constraints.maxWidth)
+                              ? BoxConstraints.expand(
+                                  width: constraints.maxWidth,
+                                )
                               : null,
                           onChanged: isEnabled
                               ? (index) {
@@ -96,39 +102,61 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
           ),
           RightSideOptionContainer(
             options: {
-              'Tint': ColorPicker(colors: kSystemColors, value: tint, onChanged: (color) => setState(() => tint = color)),
-              'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
+              'Tint': ColorPicker(
+                colors: kSystemColors,
+                value: tint,
+                onChanged: (color) => setState(() => tint = color),
+              ),
+              'Control Size': ControlSizePicker(
+                value: controlSize,
+                onChanged: (size) => setState(() => controlSize = size),
+              ),
               'Style': CNPicker(
                 pickerStyle: CNPickerStyle.menu,
-                children: CNSegmentStyle.values.map((s) => CNChildText(s.name, tag: s.name)).toList(),
+                children: CNSegmentStyle.values
+                    .map((s) => CNChildText(s.name, tag: s.name))
+                    .toList(),
                 selection: segmentStyle.name,
                 onChanged: (value) {
                   setState(() {
-                    segmentStyle = CNSegmentStyle.values.firstWhere((e) => e.name == value);
+                    segmentStyle = CNSegmentStyle.values.firstWhere(
+                      (e) => e.name == value,
+                    );
                   });
                 },
               ),
               'Tracking Mode': CNPicker(
                 pickerStyle: CNPickerStyle.menu,
-                children: CNSegmentTrackingMode.values.map((m) => CNChildText(m.name, tag: m.name)).toList(),
+                children: CNSegmentTrackingMode.values
+                    .map((m) => CNChildText(m.name, tag: m.name))
+                    .toList(),
                 selection: trackingMode.name,
                 onChanged: (value) {
                   setState(() {
-                    trackingMode = CNSegmentTrackingMode.values.firstWhere((e) => e.name == value);
+                    trackingMode = CNSegmentTrackingMode.values.firstWhere(
+                      (e) => e.name == value,
+                    );
                   });
                 },
               ),
               'Distribution': CNPicker(
                 pickerStyle: CNPickerStyle.menu,
-                children: CNSegmentDistribution.values.map((d) => CNChildText(d.name, tag: d.name)).toList(),
+                children: CNSegmentDistribution.values
+                    .map((d) => CNChildText(d.name, tag: d.name))
+                    .toList(),
                 selection: distribution.name,
                 onChanged: (value) {
                   setState(() {
-                    distribution = CNSegmentDistribution.values.firstWhere((e) => e.name == value);
+                    distribution = CNSegmentDistribution.values.firstWhere(
+                      (e) => e.name == value,
+                    );
                   });
                 },
               ),
-              'Enabled': CNToggle(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value)),
+              'Enabled': CNToggle(
+                isOn: isEnabled,
+                onChanged: (value) => setState(() => isEnabled = value),
+              ),
             },
           ),
         ],

@@ -2,6 +2,23 @@ import 'package:flutter/cupertino.dart';
 
 import '../theme/cn_theme.dart';
 
+/// Extension methods for context-aware resolution of [Color] and [CupertinoDynamicColor] against the nearest [CNTheme].
+extension CNColor on Color {
+  /// Resolves [this] against [context] when it is a [CupertinoDynamicColor]; otherwise returns it unchanged.
+  Color resolveFromContext(BuildContext context) =>
+      this is CupertinoDynamicColor
+      ? (this as CupertinoDynamicColor).resolveWithContext(context)
+      : this;
+
+  Color get darkColor => this is CupertinoDynamicColor
+      ? (this as CupertinoDynamicColor).darkColor
+      : this;
+
+  Color get color => this is CupertinoDynamicColor
+      ? (this as CupertinoDynamicColor).color
+      : this;
+}
+
 /// Context-aware resolution for [CupertinoDynamicColor], mirroring AppKit's
 /// `resolveFromContext` semantics but sourcing the brightness from [CNTheme]
 /// instead of an AppKit theme.
@@ -63,7 +80,8 @@ extension CNDynamicColor on CupertinoDynamicColor {
               CupertinoUserInterfaceLevelData.base
         : CupertinoUserInterfaceLevelData.base;
 
-    final bool highContrast = isHighContrastDependent &&
+    final bool highContrast =
+        isHighContrastDependent &&
         (MediaQuery.maybeHighContrastOf(context) ?? false);
 
     final Color resolved = switch ((brightness, level, highContrast)) {

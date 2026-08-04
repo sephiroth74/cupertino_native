@@ -114,7 +114,10 @@ class _CNGaugeState extends CNWidgetState<CNGauge> {
   Size computeDefaultSize() => _defaultSize();
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
       'value': widget.value,
       'min': widget.min,
@@ -122,9 +125,15 @@ class _CNGaugeState extends CNWidgetState<CNGauge> {
       'gaugeStyle': widget.gaugeStyle.name,
       'controlSize': widget.controlSize.name,
       'label': widget.label?.map((c) => c.toChildPayload(context)).toList(),
-      'currentValueLabel': widget.currentValueLabel?.map((c) => c.toChildPayload(context)).toList(),
-      'minimumValueLabel': widget.minimumValueLabel?.map((c) => c.toChildPayload(context)).toList(),
-      'maximumValueLabel': widget.maximumValueLabel?.map((c) => c.toChildPayload(context)).toList(),
+      'currentValueLabel': widget.currentValueLabel
+          ?.map((c) => c.toChildPayload(context))
+          .toList(),
+      'minimumValueLabel': widget.minimumValueLabel
+          ?.map((c) => c.toChildPayload(context))
+          .toList(),
+      'maximumValueLabel': widget.maximumValueLabel
+          ?.map((c) => c.toChildPayload(context))
+          .toList(),
     };
 
     widget.writeSharedFields(

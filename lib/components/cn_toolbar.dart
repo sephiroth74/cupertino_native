@@ -47,7 +47,8 @@ abstract class CNObstructingPreferredSizeWidget implements PreferredSizeWidget {
 /// Items ([actions] / [leading]) may be native platform-view controls
 /// ([CNToolbarIconButton], [CNToolbarPullDownButton], [CNToolbarPicker]) or pure
 /// Flutter widgets ([CNToolbarDivider], [CNToolbarSpacer], [CNToolbarCustomItem]).
-class CNToolbar extends StatefulWidget implements CNObstructingPreferredSizeWidget {
+class CNToolbar extends StatefulWidget
+    implements CNObstructingPreferredSizeWidget {
   /// Creates a Flutter toolbar.
   const CNToolbar({
     super.key,
@@ -171,7 +172,12 @@ class CNToolbarButton extends CNToolbarItem {
 
   @override
   CNChild? toOverflowChild(BuildContext context) {
-    return CNChildButton(tag: label ?? systemImage, title: label ?? '', systemImage: systemImage, enabled: onPressed != null);
+    return CNChildButton(
+      tag: label ?? systemImage,
+      title: label ?? '',
+      systemImage: systemImage,
+      enabled: onPressed != null,
+    );
   }
 
   @override
@@ -179,13 +185,17 @@ class CNToolbarButton extends CNToolbarItem {
     // Layer the toolbar defaults under any ambient icon-button theme and the
     // per-item override, then expose the result to the inner CNIconButton via a
     // scoped CNIconButtonTheme (the button resolves its look from the nearest one).
-    final resolved = CNIconButtonThemeData.toolbarDefaults(CNTheme.of(context)).merge(CNIconButtonTheme.of(context)).merge(theme);
+    final resolved = CNIconButtonThemeData.toolbarDefaults(
+      CNTheme.of(context),
+    ).merge(CNIconButtonTheme.of(context)).merge(theme);
 
     // Pin the button to a square sized off the toolbar's content band, read live
     // from the layout — same approach as the native [CNToolbarIconButton].
     return LayoutBuilder(
       builder: (context, constraints) {
-        final side = constraints.hasBoundedHeight ? constraints.maxHeight : _kToolbarItemDefaultHeight;
+        final side = constraints.hasBoundedHeight
+            ? constraints.maxHeight
+            : _kToolbarItemDefaultHeight;
         return CNIconButtonTheme(
           data: resolved,
           child: CNIconButton(
@@ -293,7 +303,10 @@ class CNToolbarCustomItem extends CNToolbarItem {
 /// A thin vertical divider between toolbar items (pure Flutter).
 class CNToolbarDivider extends CNToolbarItem {
   /// Creates a toolbar divider.
-  const CNToolbarDivider({this.padding = const EdgeInsets.all(6.0), this.color});
+  const CNToolbarDivider({
+    this.padding = const EdgeInsets.all(6.0),
+    this.color,
+  });
 
   /// Optional divider color.
   final Color? color;
@@ -321,7 +334,14 @@ class CNToolbarDivider extends CNToolbarItem {
 /// A borderless icon button backed by a native `CNButton`.
 class CNToolbarIconButton extends CNToolbarItem {
   /// Creates a toolbar icon button from an SF Symbol [systemImage].
-  const CNToolbarIconButton(this.systemImage, {this.onPressed, this.label, this.showLabel = false, this.tooltip, this.tint});
+  const CNToolbarIconButton(
+    this.systemImage, {
+    this.onPressed,
+    this.label,
+    this.showLabel = false,
+    this.tooltip,
+    this.tint,
+  });
 
   /// Optional text label (shown beneath the icon when [showLabel] is true, and
   /// used as the overflow-menu title).
@@ -347,7 +367,12 @@ class CNToolbarIconButton extends CNToolbarItem {
 
   @override
   CNChild? toOverflowChild(BuildContext context) {
-    return CNChildButton(tag: label ?? systemImage, title: label ?? '', systemImage: systemImage, enabled: onPressed != null);
+    return CNChildButton(
+      tag: label ?? systemImage,
+      title: label ?? '',
+      systemImage: systemImage,
+      enabled: onPressed != null,
+    );
   }
 
   @override
@@ -360,7 +385,9 @@ class CNToolbarIconButton extends CNToolbarItem {
     // the same approach as `CnIconButton` (a fixed frame + centered CNImage).
     return LayoutBuilder(
       builder: (context, constraints) {
-        final side = constraints.hasBoundedHeight ? constraints.maxHeight : _kToolbarItemDefaultHeight;
+        final side = constraints.hasBoundedHeight
+            ? constraints.maxHeight
+            : _kToolbarItemDefaultHeight;
         // Size the symbol to fit within the square frame (≈45% of the side) so
         // SwiftUI can center it inside the fixed frame instead of drawing it at
         // its default size and overflowing — mirrors `CnIconButton`'s font sizing.
@@ -437,7 +464,13 @@ class CNToolbarPicker extends CNToolbarItem {
 
   @override
   CNChild? toOverflowChild(BuildContext context) {
-    return CNChildPicker(tag: 'picker', children: children, selection: selection, label: label, pickerStyle: pickerStyle.name);
+    return CNChildPicker(
+      tag: 'picker',
+      children: children,
+      selection: selection,
+      label: label,
+      pickerStyle: pickerStyle.name,
+    );
   }
 
   @override
@@ -457,7 +490,12 @@ class CNToolbarPicker extends CNToolbarItem {
 /// A pull-down menu button backed by a native `CNMenu`.
 class CNToolbarPullDownButton extends CNToolbarItem {
   /// Creates a pull-down button.
-  const CNToolbarPullDownButton({required this.items, required this.label, this.onItemPressed, this.tint});
+  const CNToolbarPullDownButton({
+    required this.items,
+    required this.label,
+    this.onItemPressed,
+    this.tint,
+  });
 
   /// The menu items.
   final List<CNChild> items;
@@ -478,7 +516,13 @@ class CNToolbarPullDownButton extends CNToolbarItem {
 
   @override
   Widget build(BuildContext context) {
-    return CNMenu(label: label, items: items, onItemPressed: onItemPressed, tint: tint, shrink: true);
+    return CNMenu(
+      label: label,
+      items: items,
+      onItemPressed: onItemPressed,
+      tint: tint,
+      shrink: true,
+    );
   }
 }
 
@@ -494,13 +538,15 @@ class CNToolbarSpacer extends CNToolbarItem {
   CNChild? toOverflowChild(BuildContext context) => null;
 
   @override
-  Widget build(BuildContext context) => SizedBox(width: spacerUnits * _kToolbarItemWidth);
+  Widget build(BuildContext context) =>
+      SizedBox(width: spacerUnits * _kToolbarItemWidth);
 }
 
-class _CNToolbarState extends State<CNToolbar> with CNWidgetDebugIdMixin<CNToolbar> {
+class _CNToolbarState extends State<CNToolbar>
+    with CNWidgetDebugIdMixin<CNToolbar> {
   void logDebug(String message) {
     debugPrint('$debugLogPrefix $message');
-  }  
+  }
 
   /// Centers a toolbar [child] vertically without imposing a height on it.
   ///
@@ -522,10 +568,7 @@ class _CNToolbarState extends State<CNToolbar> with CNWidgetDebugIdMixin<CNToolb
     return UnconstrainedBox(
       constrainedAxis: Axis.horizontal,
       alignment: Alignment.center,
-      child: CNPixelPerfectContainer(
-        adjustPosition: true,
-        child: child,
-      ),
+      child: CNPixelPerfectContainer(adjustPosition: true, child: child),
     );
   }
 
@@ -542,7 +585,9 @@ class _CNToolbarState extends State<CNToolbar> with CNWidgetDebugIdMixin<CNToolb
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: item.build(context),
     );
-    return item.managesOwnHeight ? CNPixelPerfectContainer(child: child) : _centerItem(child);
+    return item.managesOwnHeight
+        ? CNPixelPerfectContainer(child: child)
+        : _centerItem(child);
   }
 
   @override
@@ -556,9 +601,14 @@ class _CNToolbarState extends State<CNToolbar> with CNWidgetDebugIdMixin<CNToolb
     List<CNToolbarItem> leadingItems = widget.leading;
     if (widget.automaticallyImplyLeading) {
       final canPop = ModalRoute.of(context)?.canPop ?? false;
-      logDebug('canPop=$canPop');
       if (canPop) {
-        leadingItems = [CNToolbarIconButton('chevron.backward', onPressed: () => Navigator.maybePop(context)), ...leadingItems];
+        leadingItems = [
+          CNToolbarIconButton(
+            'chevron.backward',
+            onPressed: () => Navigator.maybePop(context),
+          ),
+          ...leadingItems,
+        ];
       }
     }
     final Widget? leading = leadingItems.isEmpty
@@ -566,7 +616,9 @@ class _CNToolbarState extends State<CNToolbar> with CNWidgetDebugIdMixin<CNToolb
         : Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: [for (final item in leadingItems) _wrapItem(item, context)],
+            children: [
+              for (final item in leadingItems) _wrapItem(item, context),
+            ],
           );
 
     // Title, sized and styled like AppKit's toolbar title.
@@ -575,7 +627,10 @@ class _CNToolbarState extends State<CNToolbar> with CNWidgetDebugIdMixin<CNToolb
       title = SizedBox(
         width: widget.titleWidth,
         child: DefaultTextStyle(
-          style: theme.typography.title3.copyWith(color: theme.labelColor, fontWeight: FontWeight.w600),
+          style: theme.typography.title3.copyWith(
+            color: theme.labelColor,
+            fontWeight: FontWeight.w600,
+          ),
           child: title,
         ),
       );
@@ -585,23 +640,36 @@ class _CNToolbarState extends State<CNToolbar> with CNWidgetDebugIdMixin<CNToolb
     // their own height keep the band's height bound; the rest are centered.
     final trailingChildren = <Widget>[
       for (final action in widget.actions) _wrapItem(action, context),
-      if (widget.search != null) _centerItem(SizedBox(width: 180, child: widget.search)),
+      if (widget.search != null)
+        _centerItem(SizedBox(width: 180, child: widget.search)),
     ];
-    final trailing = Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: trailingChildren);
+    final trailing = Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: trailingChildren,
+    );
 
     Widget bar = Container(
       alignment: Alignment.center,
       padding: widget.padding,
       decoration: BoxDecoration(
-        color: widget.enableBlur ? null : (widget.backgroundColor ?? theme.canvasColor),
+        color: widget.enableBlur
+            ? null
+            : (widget.backgroundColor ?? theme.canvasColor),
         border: Border(bottom: BorderSide(color: dividerColor)),
       ),
       child: NavigationToolbar(
+        // Clear the traffic lights when the bar starts at the window's left
+        // edge: always in full-width mode (the sidebar now sits below the bar),
+        // and in split mode only when the sidebar is hidden (otherwise the
+        // sidebar itself sits under the lights and the bar starts past them).
         leading: SafeArea(
           top: false,
           right: false,
           bottom: false,
-          left: !(scope?.isSidebarShown ?? false),
+          left:
+              (scope?.toolbarSpansFullWidth ?? false) ||
+              !(scope?.isSidebarShown ?? false),
           child: leading ?? const SizedBox.shrink(),
         ),
         middle: title,
@@ -624,7 +692,9 @@ class _CNToolbarState extends State<CNToolbar> with CNWidgetDebugIdMixin<CNToolb
     // Reserve the traffic-light inset via MediaQuery so the leading SafeArea can
     // consume it only when the sidebar is hidden. Empty regions drag the window.
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(left: _kTrafficLightInset)),
+      data: MediaQuery.of(
+        context,
+      ).copyWith(padding: const EdgeInsets.only(left: _kTrafficLightInset)),
       child: DragToMoveArea(child: bar),
     );
   }

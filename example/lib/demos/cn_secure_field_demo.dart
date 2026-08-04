@@ -7,7 +7,8 @@ class SecureTextFieldDemoPage extends StatefulWidget {
   const SecureTextFieldDemoPage({super.key});
 
   @override
-  State<SecureTextFieldDemoPage> createState() => _SecureTextFieldDemoPageState();
+  State<SecureTextFieldDemoPage> createState() =>
+      _SecureTextFieldDemoPageState();
 }
 
 class _SecureTextFieldDemoPageState extends State<SecureTextFieldDemoPage> {

@@ -29,7 +29,13 @@ class CNImageThemeData extends Equatable {
   final Color? tint;
 
   @override
-  List<Object?> get props => [symbolRenderingMode, symbolColorRenderingMode, foregroundStyleColors, tint, font];
+  List<Object?> get props => [
+    symbolRenderingMode,
+    symbolColorRenderingMode,
+    foregroundStyleColors,
+    tint,
+    font,
+  ];
 
   /// Returns a copy with selected values replaced.
   CNImageThemeData copyWith({
@@ -41,8 +47,10 @@ class CNImageThemeData extends Equatable {
   }) {
     return CNImageThemeData(
       symbolRenderingMode: symbolRenderingMode ?? this.symbolRenderingMode,
-      symbolColorRenderingMode: symbolColorRenderingMode ?? this.symbolColorRenderingMode,
-      foregroundStyleColors: foregroundStyleColors ?? this.foregroundStyleColors,
+      symbolColorRenderingMode:
+          symbolColorRenderingMode ?? this.symbolColorRenderingMode,
+      foregroundStyleColors:
+          foregroundStyleColors ?? this.foregroundStyleColors,
       tint: tint ?? this.tint,
       font: font ?? this.font,
     );
@@ -61,11 +69,21 @@ class CNImageThemeData extends Equatable {
   }
 
   /// Linearly interpolates between two image themes.
-  static CNImageThemeData lerp(CNImageThemeData a, CNImageThemeData b, double t) {
+  static CNImageThemeData lerp(
+    CNImageThemeData a,
+    CNImageThemeData b,
+    double t,
+  ) {
     return CNImageThemeData(
-      symbolRenderingMode: t < 0.5 ? a.symbolRenderingMode : b.symbolRenderingMode,
-      symbolColorRenderingMode: t < 0.5 ? a.symbolColorRenderingMode : b.symbolColorRenderingMode,
-      foregroundStyleColors: t < 0.5 ? a.foregroundStyleColors : b.foregroundStyleColors,
+      symbolRenderingMode: t < 0.5
+          ? a.symbolRenderingMode
+          : b.symbolRenderingMode,
+      symbolColorRenderingMode: t < 0.5
+          ? a.symbolColorRenderingMode
+          : b.symbolColorRenderingMode,
+      foregroundStyleColors: t < 0.5
+          ? a.foregroundStyleColors
+          : b.foregroundStyleColors,
       tint: Color.lerp(a.tint, b.tint, t),
       font: t < 0.5 ? a.font : b.font,
     );

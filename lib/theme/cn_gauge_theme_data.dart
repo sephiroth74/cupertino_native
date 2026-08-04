@@ -14,11 +14,13 @@ class CNGaugeTheme extends InheritedTheme {
   bool updateShouldNotify(CNGaugeTheme oldWidget) => data != oldWidget.data;
 
   @override
-  Widget wrap(BuildContext context, Widget child) => CNGaugeTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) =>
+      CNGaugeTheme(data: data, child: child);
 
   /// Returns the nearest [CNGaugeThemeData], falling back to [CNTheme].
   static CNGaugeThemeData of(BuildContext context) {
-    final CNGaugeTheme? theme = context.dependOnInheritedWidgetOfExactType<CNGaugeTheme>();
+    final CNGaugeTheme? theme = context
+        .dependOnInheritedWidgetOfExactType<CNGaugeTheme>();
     return theme?.data ?? CNTheme.of(context).gaugeTheme;
   }
 }
@@ -46,7 +48,11 @@ class CNGaugeThemeData extends Equatable {
   }
 
   /// Linearly interpolates between two gauge themes.
-  static CNGaugeThemeData lerp(CNGaugeThemeData a, CNGaugeThemeData b, double t) {
+  static CNGaugeThemeData lerp(
+    CNGaugeThemeData a,
+    CNGaugeThemeData b,
+    double t,
+  ) {
     return CNGaugeThemeData(tintColor: Color.lerp(a.tintColor, b.tintColor, t));
   }
 }

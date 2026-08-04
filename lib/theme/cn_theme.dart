@@ -15,17 +15,22 @@ class CNTheme extends StatelessWidget {
 
   /// Returns nearest [CNThemeData], or fallback when absent.
   static CNThemeData of(BuildContext context) {
-    final inherited = context.dependOnInheritedWidgetOfExactType<_InheritedCNTheme>();
+    final inherited = context
+        .dependOnInheritedWidgetOfExactType<_InheritedCNTheme>();
     if (inherited != null) {
       return inherited.theme.data;
     }
 
-    return CNThemeData.fallback(brightness: maybeBrightnessOf(context) ?? Brightness.light, isMainWindow: true);
+    return CNThemeData.fallback(
+      brightness: maybeBrightnessOf(context) ?? Brightness.light,
+      isMainWindow: true,
+    );
   }
 
   /// Returns nearest [CNThemeData], or null if absent.
   static CNThemeData? maybeOf(BuildContext context) {
-    final inherited = context.dependOnInheritedWidgetOfExactType<_InheritedCNTheme>();
+    final inherited = context
+        .dependOnInheritedWidgetOfExactType<_InheritedCNTheme>();
     return inherited?.theme.data;
   }
 
@@ -36,8 +41,10 @@ class CNTheme extends StatelessWidget {
 
   /// Returns brightness from [CNTheme] or [MediaQuery], nullable variant.
   static Brightness? maybeBrightnessOf(BuildContext context) {
-    final inherited = context.dependOnInheritedWidgetOfExactType<_InheritedCNTheme>();
-    return inherited?.theme.data.brightness ?? MediaQuery.maybeOf(context)?.platformBrightness;
+    final inherited = context
+        .dependOnInheritedWidgetOfExactType<_InheritedCNTheme>();
+    return inherited?.theme.data.brightness ??
+        MediaQuery.maybeOf(context)?.platformBrightness;
   }
 
   @override

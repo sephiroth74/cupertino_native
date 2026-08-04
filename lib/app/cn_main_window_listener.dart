@@ -6,7 +6,8 @@ import 'package:macos_window_utils/ns_window_delegate_handler/ns_window_delegate
 import 'package:macos_window_utils/window_manipulator.dart';
 
 // ignore: public_member_api_docs
-typedef MainWindowWidgetBuilder = Widget Function(BuildContext context, bool isMainWindow);
+typedef MainWindowWidgetBuilder =
+    Widget Function(BuildContext context, bool isMainWindow);
 
 /// A widget that listens to the main window state and rebuilds when it changes.
 class MainWindowStreamBuilder extends StatefulWidget {
@@ -17,7 +18,8 @@ class MainWindowStreamBuilder extends StatefulWidget {
   final MainWindowWidgetBuilder builder;
 
   @override
-  State<MainWindowStreamBuilder> createState() => _MainWindowStreamBuilderState();
+  State<MainWindowStreamBuilder> createState() =>
+      _MainWindowStreamBuilderState();
 }
 
 class _MainWindowStreamBuilderState extends State<MainWindowStreamBuilder> {
@@ -35,7 +37,9 @@ class _MainWindowStreamBuilderState extends State<MainWindowStreamBuilder> {
   void initState() {
     super.initState();
     handle = WindowManipulator.addNSWindowDelegate(
-      _MainWindowStateListenerNSWindowDelegate(onMainWindowChanged: _onMainWindowChanged),
+      _MainWindowStateListenerNSWindowDelegate(
+        onMainWindowChanged: _onMainWindowChanged,
+      ),
     );
 
     Future.microtask(() async {

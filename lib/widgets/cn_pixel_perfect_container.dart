@@ -96,15 +96,25 @@ class FlutterPixelGeometry {
     debugPrint('Widget Size: $width x $height');
     debugPrint('Widget Physical Position: $physicalX x $physicalY');
     debugPrint('Widget Physical Size: $physicalWidth x $physicalHeight');
-    debugPrint('Widget Pixel Aligned Position: $pixelAlignedX x $pixelAlignedY');
-    debugPrint('Widget Pixel Aligned Size: $pixelAlignedWidth x $pixelAlignedHeight');
+    debugPrint(
+      'Widget Pixel Aligned Position: $pixelAlignedX x $pixelAlignedY',
+    );
+    debugPrint(
+      'Widget Pixel Aligned Size: $pixelAlignedWidth x $pixelAlignedHeight',
+    );
   }
 }
 
 /// Wrap any widget to measure its global geometry using only Flutter APIs.
 class CNPixelPerfectContainer extends StatefulWidget {
   /// Creates a pixel-geometry probe around [child].
-  const CNPixelPerfectContainer({super.key, required this.child, this.onGeometryChanged, this.adjustPosition = true, this.debugLog = false});
+  const CNPixelPerfectContainer({
+    super.key,
+    required this.child,
+    this.onGeometryChanged,
+    this.adjustPosition = true,
+    this.debugLog = false,
+  });
 
   /// If true, applies a local translation to keep x/y aligned to physical pixels.
   final bool adjustPosition;
@@ -119,13 +129,15 @@ class CNPixelPerfectContainer extends StatefulWidget {
   final ValueChanged<FlutterPixelGeometry>? onGeometryChanged;
 
   @override
-  State<CNPixelPerfectContainer> createState() => _CNPixelPerfectContainerState();
+  State<CNPixelPerfectContainer> createState() =>
+      _CNPixelPerfectContainerState();
 
   /// Whether the probe is enabled. If false, no geometry will be reported.
   bool get enabled => adjustPosition;
 }
 
-class _CNPixelPerfectContainerState extends State<CNPixelPerfectContainer> with WidgetsBindingObserver {
+class _CNPixelPerfectContainerState extends State<CNPixelPerfectContainer>
+    with WidgetsBindingObserver {
   String? _lastSignature;
   final GlobalKey _probeKey = GlobalKey();
   bool _probeQueued = false;
@@ -191,7 +203,10 @@ class _CNPixelPerfectContainerState extends State<CNPixelPerfectContainer> with 
 
     final origin = renderObject.localToGlobal(Offset.zero);
     final size = renderObject.size;
-    final dpr = View.maybeOf(ctx)?.devicePixelRatio ?? MediaQuery.maybeDevicePixelRatioOf(ctx) ?? 1.0;
+    final dpr =
+        View.maybeOf(ctx)?.devicePixelRatio ??
+        MediaQuery.maybeDevicePixelRatioOf(ctx) ??
+        1.0;
 
     final windowFrame = CNWindowGeometryScope.of(context);
     final rawPhysicalX = (origin.dx + windowFrame.x) * dpr;
@@ -204,7 +219,8 @@ class _CNPixelPerfectContainerState extends State<CNPixelPerfectContainer> with 
       final desiredDy = _snapDy + _snapDelta(rawPhysicalY, dpr);
 
       // Avoid setState churn for tiny floating point noise.
-      if ((desiredDx - _snapDx).abs() > 0.0001 || (desiredDy - _snapDy).abs() > 0.0001) {
+      if ((desiredDx - _snapDx).abs() > 0.0001 ||
+          (desiredDy - _snapDy).abs() > 0.0001) {
         // debugPrint('[PixelPerfectProbe]: updating snap delta');
         setState(() {
           _snapDx = desiredDx;
@@ -268,7 +284,7 @@ class _CNPixelPerfectContainerState extends State<CNPixelPerfectContainer> with 
     _lastSignature = signature;
     widget.onGeometryChanged?.call(geometry);
 
-    if(widget.debugLog) {
+    if (widget.debugLog) {
       geometry.debugLog();
     }
   }

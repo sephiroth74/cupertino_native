@@ -16,12 +16,22 @@ extension BoxConstraintsX on BoxConstraints {
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{};
 
-    map['minWidth'] = minWidth.isNaN ? null : (minWidth.isFinite ? minWidth : "infinity");
-    map['maxWidth'] = maxWidth.isNaN ? null : (maxWidth.isFinite ? maxWidth : "infinity");
-    map['minHeight'] = minHeight.isNaN ? null : (minHeight.isFinite ? minHeight : "infinity");
-    map['maxHeight'] = maxHeight.isNaN ? null : (maxHeight.isFinite ? maxHeight : "infinity");
-    if (tightWidth != null && tightWidth!.isFinite) map['idealWidth'] = tightWidth;
-    if (tightHeight != null && tightHeight!.isFinite) map['idealHeight'] = tightHeight;
+    map['minWidth'] = minWidth.isNaN
+        ? null
+        : (minWidth.isFinite ? minWidth : "infinity");
+    map['maxWidth'] = maxWidth.isNaN
+        ? null
+        : (maxWidth.isFinite ? maxWidth : "infinity");
+    map['minHeight'] = minHeight.isNaN
+        ? null
+        : (minHeight.isFinite ? minHeight : "infinity");
+    map['maxHeight'] = maxHeight.isNaN
+        ? null
+        : (maxHeight.isFinite ? maxHeight : "infinity");
+    if (tightWidth != null && tightWidth!.isFinite)
+      map['idealWidth'] = tightWidth;
+    if (tightHeight != null && tightHeight!.isFinite)
+      map['idealHeight'] = tightHeight;
 
     return map;
   }

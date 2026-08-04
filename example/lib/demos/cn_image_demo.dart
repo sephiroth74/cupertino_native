@@ -6,7 +6,11 @@ import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
-const _kBackgroundColors = {'Default': null, 'Light': CNColors.white, 'Dark': CNColors.black};
+const _kBackgroundColors = {
+  'Default': null,
+  'Light': CNColors.white,
+  'Dark': CNColors.black,
+};
 
 const _kDebugLog = false;
 const _kImageNames = [
@@ -481,7 +485,10 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
   CupertinoDynamicColor? color3;
   CNSymbolColorRenderingMode colorMode = CNSymbolColorRenderingMode.flat;
   List<Color> colors = [];
-  CNFont font = CNFont.system(CNFontSize.points(32), weight: CNFontWeight.regular);
+  CNFont font = CNFont.system(
+    CNFontSize.points(32),
+    weight: CNFontWeight.regular,
+  );
   double fontSize = 32;
   Color? foregroundColor;
   bool isDark = false;
@@ -509,7 +516,10 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
     final containerSize = (font.size.points ?? 24) * 4;
     final imageSize = (font.size.points ?? 24) * 3;
 
-    final realForegroundColor = isDark && foregroundColor is CupertinoDynamicColor ? foregroundColor.darkColor : foregroundColor;
+    final realForegroundColor =
+        isDark && foregroundColor is CupertinoDynamicColor
+        ? foregroundColor.darkColor
+        : foregroundColor;
     final realForegroundStyleColors = foregroundStyleColors.map((color) {
       if (isDark && color is CupertinoDynamicColor) {
         return color.darkColor;
@@ -529,11 +539,16 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
         children: [
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: foregroundColor ?? theme.separatorColor, width: 2),
+              border: Border.all(
+                color: foregroundColor ?? theme.separatorColor,
+                width: 2,
+              ),
               borderRadius: BorderRadius.circular(16),
               color: backgroundColor,
             ),
-            padding: shrink ? const EdgeInsets.all(16) : const EdgeInsets.all(0),
+            padding: shrink
+                ? const EdgeInsets.all(16)
+                : const EdgeInsets.all(0),
             child: CNImage(
               debugLog: _kDebugLog,
               systemSymbolName: systemSymbolName,
@@ -543,7 +558,12 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
               symbolColorRenderingMode: symbolColorRenderingMode,
               foregroundStyleColors: realForegroundStyleColors,
               foregroundColor: realForegroundColor,
-              constraints: shrink ? null : BoxConstraints.tightFor(width: imageSize, height: imageSize),
+              constraints: shrink
+                  ? null
+                  : BoxConstraints.tightFor(
+                      width: imageSize,
+                      height: imageSize,
+                    ),
               paddings: EdgeInsets.all(8.0),
             ),
           ),
@@ -586,19 +606,22 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                 alignment: WrapAlignment.start,
                 spacing: 16.0,
                 runSpacing: 16.0,
-                children: _kImageNames.getRange(0, min(_kMaxImages, _kImageNames.length)).map((name) {
-                  return _symbolRow(
-                    systemSymbolName: name,
-                    shrink: _kShrink,
-                    font: font,
-                    symbolRenderingMode: renderingMode,
-                    symbolColorRenderingMode: colorMode,
-                    foregroundStyleColors: colors,
-                    foregroundColor: foregroundColor,
-                    backgroundColor: backgroundColor,
-                    isDark: isDark,
-                  );
-                }).toList(),
+                children: _kImageNames
+                    .getRange(0, min(_kMaxImages, _kImageNames.length))
+                    .map((name) {
+                      return _symbolRow(
+                        systemSymbolName: name,
+                        shrink: _kShrink,
+                        font: font,
+                        symbolRenderingMode: renderingMode,
+                        symbolColorRenderingMode: colorMode,
+                        foregroundStyleColors: colors,
+                        foregroundColor: foregroundColor,
+                        backgroundColor: backgroundColor,
+                        isDark: isDark,
+                      );
+                    })
+                    .toList(),
               ),
             ),
           ),
@@ -609,7 +632,9 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                 selection: renderingMode.name,
                 onChanged: (value) {
                   setState(() {
-                    renderingMode = CNSymbolRenderingMode.values.firstWhere((e) => e.name == value);
+                    renderingMode = CNSymbolRenderingMode.values.firstWhere(
+                      (e) => e.name == value,
+                    );
                     if (renderingMode == CNSymbolRenderingMode.palette) {
                       color1 = color1 ?? kNonNullColors.values.elementAt(0);
                       color2 = color2 ?? kNonNullColors.values.elementAt(1);
@@ -622,7 +647,9 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                     }
                   });
                 },
-                children: CNSymbolRenderingMode.values.map((mode) => CNChildText(mode.name, tag: mode.name)).toList(),
+                children: CNSymbolRenderingMode.values
+                    .map((mode) => CNChildText(mode.name, tag: mode.name))
+                    .toList(),
                 pickerStyle: CNPickerStyle.automatic,
               ),
               'Gradient': CNToggle(
@@ -630,7 +657,9 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                 isOn: colorMode == CNSymbolColorRenderingMode.gradient,
                 onChanged: (value) {
                   setState(() {
-                    colorMode = value ? CNSymbolColorRenderingMode.gradient : CNSymbolColorRenderingMode.flat;
+                    colorMode = value
+                        ? CNSymbolColorRenderingMode.gradient
+                        : CNSymbolColorRenderingMode.flat;
                   });
                 },
               ),
@@ -682,7 +711,9 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                 value: selectedBackgroundColor,
                 onChanged: (c) => setState(() {
                   selectedBackgroundColor = c;
-                  final key = _kBackgroundColors.entries.firstWhere((entry) => entry.value == c).key;
+                  final key = _kBackgroundColors.entries
+                      .firstWhere((entry) => entry.value == c)
+                      .key;
 
                   switch (key) {
                     case 'Default':
@@ -694,7 +725,8 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                       isDark = false;
                       break;
                     case 'Dark':
-                      backgroundColor = CupertinoColors.systemBackground.darkColor;
+                      backgroundColor =
+                          CupertinoColors.systemBackground.darkColor;
                       isDark = true;
                       break;
                     default:
@@ -707,12 +739,16 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                 onChanged: (value) {
                   setState(() {
                     font = font.copyWith(
-                      weight: CNFontWeight.values.firstWhere((e) => e.name == value),
+                      weight: CNFontWeight.values.firstWhere(
+                        (e) => e.name == value,
+                      ),
                       size: CNFontSize.points(fontSize),
                     );
                   });
                 },
-                children: CNFontWeight.values.map((weight) => CNChildText(weight.name, tag: weight.name)).toList(),
+                children: CNFontWeight.values
+                    .map((weight) => CNChildText(weight.name, tag: weight.name))
+                    .toList(),
                 pickerStyle: CNPickerStyle.automatic,
               ),
               'Font Size': SizeSliderPicker(

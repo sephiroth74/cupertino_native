@@ -47,12 +47,14 @@ class CNApp extends StatefulWidget {
     super.key,
     this.navigatorKey,
     this.home,
-    Map<String, Widget Function(BuildContext)> this.routes = const <String, WidgetBuilder>{},
+    Map<String, Widget Function(BuildContext)> this.routes =
+        const <String, WidgetBuilder>{},
     this.initialRoute,
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
-    List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
+    List<NavigatorObserver> this.navigatorObservers =
+        const <NavigatorObserver>[],
     this.builder,
     this.title = '',
     this.onGenerateTitle,
@@ -364,7 +366,9 @@ class _CNAppState extends State<CNApp> {
   @override
   void initState() {
     super.initState();
-    _windowGeometryHandle = WindowManipulator.addNSWindowDelegate(_WindowGeometryDelegate(onFrameChanged: _refreshWindowFrame));
+    _windowGeometryHandle = WindowManipulator.addNSWindowDelegate(
+      _WindowGeometryDelegate(onFrameChanged: _refreshWindowFrame),
+    );
     Future.microtask(_refreshWindowFrame);
   }
 
@@ -377,7 +381,8 @@ class _CNAppState extends State<CNApp> {
     yield DefaultWidgetsLocalizations.delegate;
   }
 
-  bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
+  bool get _usesRouter =>
+      widget.routerDelegate != null || widget.routerConfig != null;
 
   Widget _buildMacosApp(BuildContext context) {
     final defaultColor = widget.accentColor ?? CNColors.blue;
@@ -443,19 +448,34 @@ class _CNAppState extends State<CNApp> {
       builder: (context, isMainWindow) {
         return CNAccentColorBuilder(
           builder: (context, a) {
+            final accentColorHex = a.color.value
+                .toRadixString(16)
+                .padLeft(8, '0')
+                .toUpperCase();
             final mode = widget.themeMode ?? ThemeMode.system;
             final platformBrightness = MediaQuery.platformBrightnessOf(context);
-            final useDarkTheme = mode == ThemeMode.dark || (mode == ThemeMode.system && platformBrightness == Brightness.dark);
+            final useDarkTheme =
+                mode == ThemeMode.dark ||
+                (mode == ThemeMode.system &&
+                    platformBrightness == Brightness.dark);
 
             late CNThemeData theme;
             if (useDarkTheme) {
               theme =
                   widget.darkTheme ??
-                  CNThemeData.dark(userAccentColor: widget.accentColor, systemAccentColor: a.color.darkColor, isMainWindow: isMainWindow);
+                  CNThemeData.dark(
+                    userAccentColor: widget.accentColor,
+                    systemAccentColor: a.color,
+                    isMainWindow: isMainWindow,
+                  );
             } else {
               theme =
                   widget.lightTheme ??
-                  CNThemeData.light(userAccentColor: widget.accentColor, systemAccentColor: a.color.color, isMainWindow: isMainWindow);
+                  CNThemeData.light(
+                    userAccentColor: widget.accentColor,
+                    systemAccentColor: a.color,
+                    isMainWindow: isMainWindow,
+                  );
             }
 
             return CNTheme(
@@ -469,7 +489,14 @@ class _CNAppState extends State<CNApp> {
                         builder: (context) {
                           // An Overlay is used here because MacosTooltip needs an
                           // Overlay as an ancestor in the widget tree.
-                          return Overlay(initialEntries: [OverlayEntry(builder: (context) => widget.builder!(context, child))]);
+                          return Overlay(
+                            initialEntries: [
+                              OverlayEntry(
+                                builder: (context) =>
+                                    widget.builder!(context, child),
+                              ),
+                            ],
+                          );
                         },
                       )
                     : child ?? const SizedBox.shrink(),
@@ -485,7 +512,12 @@ class _CNAppState extends State<CNApp> {
     if (!mounted) return;
     final rect = await WindowManipulator.getWindowFrame();
     if (!mounted) return;
-    final newFrame = WindowFrame(x: rect.left, y: rect.top, width: rect.width, height: rect.height);
+    final newFrame = WindowFrame(
+      x: rect.left,
+      y: rect.top,
+      width: rect.width,
+      height: rect.height,
+    );
     if (newFrame != _windowFrame) {
       setState(() {
         _windowFrame = newFrame;
@@ -495,7 +527,10 @@ class _CNAppState extends State<CNApp> {
 
   @override
   Widget build(BuildContext context) {
-    return CNWindowGeometryScope(frame: _windowFrame, child: _buildMacosApp(context));
+    return CNWindowGeometryScope(
+      frame: _windowFrame,
+      child: _buildMacosApp(context),
+    );
   }
 }
 

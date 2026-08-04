@@ -12,7 +12,12 @@ class ButtonDemoPage extends StatefulWidget {
   State<ButtonDemoPage> createState() => _ButtonDemoPageState();
 }
 
-enum ButtonType { titleOnly, titleAndIcon, titleAndProgressCircle, titleAndProgressLinear }
+enum ButtonType {
+  titleOnly,
+  titleAndIcon,
+  titleAndProgressCircle,
+  titleAndProgressLinear,
+}
 
 class _ButtonDemoPageState extends State<ButtonDemoPage> {
   CNButtonStyle buttonStyle = CNButtonStyle.automatic;
@@ -81,7 +86,9 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                         CNPixelPerfectContainer(
                           adjustPosition: true,
                           onGeometryChanged: (geometry) {
-                            debugPrint('PixelPerfectContainer geometry changed: $geometry');
+                            debugPrint(
+                              'PixelPerfectContainer geometry changed: $geometry',
+                            );
                             setState(() {
                               lastGeometry = geometry;
                             });
@@ -99,7 +106,9 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                         CNPixelPerfectContainer(
                           adjustPosition: true,
                           child: CNButton(
-                            onPressed: isEnabled ? () => _set('Default.2') : null,
+                            onPressed: isEnabled
+                                ? () => _set('Default.2')
+                                : null,
                             buttonStyle: buttonStyle,
                             controlSize: controlSize,
                             tint: tintColor,
@@ -108,12 +117,17 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                               CNChildImage(
                                 'square.and.arrow.up',
                                 font: font,
-                                symbolRenderingMode: CNSymbolRenderingMode.hierarchical,
-                                paddings: EdgeInsets.symmetric(horizontal: labelReservedIconWidth),
+                                symbolRenderingMode:
+                                    CNSymbolRenderingMode.hierarchical,
+                                paddings: EdgeInsets.symmetric(
+                                  horizontal: labelReservedIconWidth,
+                                ),
                               ),
                               CNChildText(
                                 'Icon and Text',
-                                paddings: EdgeInsets.only(left: labelIconToTitleSpacing),
+                                paddings: EdgeInsets.only(
+                                  left: labelIconToTitleSpacing,
+                                ),
                                 font: font,
                               ),
                             ],
@@ -123,22 +137,32 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                         CNPixelPerfectContainer(
                           adjustPosition: true,
                           child: CNButton(
-                            onPressed: isEnabled ? () => _set('Default.3') : null,
+                            onPressed: isEnabled
+                                ? () => _set('Default.3')
+                                : null,
                             buttonStyle: buttonStyle,
                             controlSize: controlSize,
                             tint: tintColor,
                             debugLog: false,
                             children: [
-                              const CNChildProgressView(style: CNProgressViewStyle.circular, controlSize: CNControlSize.small),
+                              const CNChildProgressView(
+                                style: CNProgressViewStyle.circular,
+                                controlSize: CNControlSize.small,
+                              ),
                               CNChildImage(
                                 'square.and.arrow.down.badge.checkmark.fill',
                                 font: font,
-                                symbolRenderingMode: CNSymbolRenderingMode.hierarchical,
-                                paddings: EdgeInsets.symmetric(horizontal: labelReservedIconWidth),
+                                symbolRenderingMode:
+                                    CNSymbolRenderingMode.hierarchical,
+                                paddings: EdgeInsets.symmetric(
+                                  horizontal: labelReservedIconWidth,
+                                ),
                               ),
                               CNChildText(
                                 'Icon and Text',
-                                paddings: EdgeInsets.only(left: labelIconToTitleSpacing),
+                                paddings: EdgeInsets.only(
+                                  left: labelIconToTitleSpacing,
+                                ),
                                 font: font,
                               ),
                             ],
@@ -174,7 +198,9 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                               CNChildText(
                                 'Icon and Progress',
                                 font: font,
-                                paddings: EdgeInsets.only(left: labelIconToTitleSpacing),
+                                paddings: EdgeInsets.only(
+                                  left: labelIconToTitleSpacing,
+                                ),
                               ),
                             ],
                           ),
@@ -198,7 +224,9 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                                   'Window geometry: ${lastGeometry!.windowX}, ${lastGeometry!.windowY}, ${lastGeometry!.windowWidth}, ${lastGeometry!.windowHeight}',
                                 ),
                                 const SizedBox(height: 4),
-                                Text('Device pixel ratio: ${lastGeometry!.devicePixelRatio}'),
+                                Text(
+                                  'Device pixel ratio: ${lastGeometry!.devicePixelRatio}',
+                                ),
                               ],
                             ),
                           ),
@@ -211,23 +239,41 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
 
               RightSideOptionContainer(
                 options: {
-                  'Control Size': ControlSizePicker(value: controlSize, onChanged: (size) => setState(() => controlSize = size)),
+                  'Control Size': ControlSizePicker(
+                    value: controlSize,
+                    onChanged: (size) => setState(() => controlSize = size),
+                  ),
                   'Button Style': CNPicker(
                     selection: buttonStyle.name,
-                    onChanged: (value) =>
-                        setState(() => buttonStyle = CNButtonStyle.values.firstWhere((style) => style.name == value)),
-                    children: CNButtonStyle.values.map((style) => CNChildText(style.name, tag: style.name)).toList(),
+                    onChanged: (value) => setState(
+                      () => buttonStyle = CNButtonStyle.values.firstWhere(
+                        (style) => style.name == value,
+                      ),
+                    ),
+                    children: CNButtonStyle.values
+                        .map(
+                          (style) => CNChildText(style.name, tag: style.name),
+                        )
+                        .toList(),
                   ),
                   'Tint Color': ColorPicker(
                     colors: kSystemColors,
                     value: tintColor,
                     onChanged: (color) => setState(() => tintColor = color),
                   ),
-                  'Enabled': CNToggle(isOn: isEnabled, onChanged: (value) => setState(() => isEnabled = value), debugLog: false),
+                  'Enabled': CNToggle(
+                    isOn: isEnabled,
+                    onChanged: (value) => setState(() => isEnabled = value),
+                    debugLog: false,
+                  ),
                   'Font': FontPicker(
                     fonts: kAvailableFonts,
                     value: font,
-                    onChanged: (font) => setState(() => this.font = font?.copyWith(size: CNFontSize.points(fontSize))),
+                    onChanged: (font) => setState(
+                      () => this.font = font?.copyWith(
+                        size: CNFontSize.points(fontSize),
+                      ),
+                    ),
                   ),
                   'Font Size': SizeSliderPicker(
                     min: kFontSizeMin,
@@ -236,7 +282,9 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                     onChanged: font != null
                         ? (value) => setState(() {
                             fontSize = value;
-                            font = font?.copyWith(size: CNFontSize.points(fontSize));
+                            font = font?.copyWith(
+                              size: CNFontSize.points(fontSize),
+                            );
                           })
                         : null,
                   ),
@@ -244,13 +292,15 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                     min: 0,
                     max: 32,
                     value: labelReservedIconWidth,
-                    onChanged: (value) => setState(() => labelReservedIconWidth = value),
+                    onChanged: (value) =>
+                        setState(() => labelReservedIconWidth = value),
                   ),
                   'Icon Spacing': SizeSliderPicker(
                     min: 0,
                     max: 32,
                     value: labelIconToTitleSpacing,
-                    onChanged: (value) => setState(() => labelIconToTitleSpacing = value),
+                    onChanged: (value) =>
+                        setState(() => labelIconToTitleSpacing = value),
                   ),
                 },
               ),

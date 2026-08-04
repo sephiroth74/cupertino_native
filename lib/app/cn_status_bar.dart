@@ -26,7 +26,8 @@ enum CNStatusBarPresentationStyle {
 }
 
 /// Builder for status bar items that receives the current expansion state.
-typedef CNStatusBarItemsBuilder = Widget Function(BuildContext context, bool isExpanded);
+typedef CNStatusBarItemsBuilder =
+    Widget Function(BuildContext context, bool isExpanded);
 
 /// Configuration for a status bar at the bottom of a [CNWindow].
 class CNStatusBar {

@@ -121,9 +121,14 @@ class _CNButton2State extends CNWidgetState<CNButton> {
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
-      'children': widget.children.map((c) => c.toChildPayload(context)).toList(),
+      'children': widget.children
+          .map((c) => c.toChildPayload(context))
+          .toList(),
       'buttonStyle': widget.buttonStyle.name,
       'role': widget.role.name,
       'controlSize': widget.controlSize?.name,

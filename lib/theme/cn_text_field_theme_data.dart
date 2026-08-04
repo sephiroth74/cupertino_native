@@ -14,11 +14,13 @@ class CNTextFieldTheme extends InheritedTheme {
   bool updateShouldNotify(CNTextFieldTheme oldWidget) => data != oldWidget.data;
 
   @override
-  Widget wrap(BuildContext context, Widget child) => CNTextFieldTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) =>
+      CNTextFieldTheme(data: data, child: child);
 
   /// Returns the nearest [CNTextFieldThemeData], falling back to [CNTheme].
   static CNTextFieldThemeData of(BuildContext context) {
-    final CNTextFieldTheme? theme = context.dependOnInheritedWidgetOfExactType<CNTextFieldTheme>();
+    final CNTextFieldTheme? theme = context
+        .dependOnInheritedWidgetOfExactType<CNTextFieldTheme>();
     return theme?.data ?? CNTheme.of(context).textFieldTheme;
   }
 }
@@ -46,7 +48,13 @@ class CNTextFieldThemeData extends Equatable {
   }
 
   /// Linearly interpolates between two text field themes.
-  static CNTextFieldThemeData lerp(CNTextFieldThemeData a, CNTextFieldThemeData b, double t) {
-    return CNTextFieldThemeData(tintColor: Color.lerp(a.tintColor, b.tintColor, t));
+  static CNTextFieldThemeData lerp(
+    CNTextFieldThemeData a,
+    CNTextFieldThemeData b,
+    double t,
+  ) {
+    return CNTextFieldThemeData(
+      tintColor: Color.lerp(a.tintColor, b.tintColor, t),
+    );
   }
 }

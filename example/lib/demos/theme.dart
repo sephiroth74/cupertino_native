@@ -16,14 +16,20 @@ class ThemeDemoPage extends StatelessWidget {
             CupertinoListSection.insetGrouped(
               header: const Text('Typography'),
               children: [
-                _StyleRow(label: 'Large Title', style: theme.typography.largeTitle),
+                _StyleRow(
+                  label: 'Large Title',
+                  style: theme.typography.largeTitle,
+                ),
                 _StyleRow(label: 'Title 1', style: theme.typography.title1),
                 _StyleRow(label: 'Title 2', style: theme.typography.title2),
                 _StyleRow(label: 'Title 3', style: theme.typography.title3),
                 _StyleRow(label: 'Headline', style: theme.typography.headline),
                 _StyleRow(label: 'Body', style: theme.typography.body),
                 _StyleRow(label: 'Callout', style: theme.typography.callout),
-                _StyleRow(label: 'Subheadline', style: theme.typography.subheadline),
+                _StyleRow(
+                  label: 'Subheadline',
+                  style: theme.typography.subheadline,
+                ),
                 _StyleRow(label: 'Footnote', style: theme.typography.footnote),
                 _StyleRow(label: 'Caption 1', style: theme.typography.caption1),
                 _StyleRow(label: 'Caption 2', style: theme.typography.caption2),
@@ -34,30 +40,48 @@ class ThemeDemoPage extends StatelessWidget {
               children: [
                 _ColorRow(
                   label: 'Primary',
-                  color: theme.userAccentColor ?? theme.systemAccentColor ?? CupertinoColors.activeBlue,
+                  color:
+                      theme.userAccentColor ??
+                      theme.systemAccentColor ??
+                      CupertinoColors.activeBlue,
                 ),
                 _ColorRow(label: 'Secondary', color: theme.secondaryColor),
                 _ColorRow(label: 'Destructive', color: theme.destructiveColor),
                 _ColorRow(label: 'Canvas', color: theme.canvasColor),
-                _ColorRow(label: 'Grouped Background', color: theme.groupedBackgroundColor),
+                _ColorRow(
+                  label: 'Grouped Background',
+                  color: theme.groupedBackgroundColor,
+                ),
                 _ColorRow(label: 'Label', color: theme.labelColor),
-                _ColorRow(label: 'Secondary Label', color: theme.secondaryLabelColor),
+                _ColorRow(
+                  label: 'Secondary Label',
+                  color: theme.secondaryLabelColor,
+                ),
                 _ColorRow(label: 'Separator', color: theme.separatorColor),
                 _ColorRow(label: 'Fill Primary', color: theme.fillPrimaryColor),
-                _ColorRow(label: 'Fill Secondary', color: theme.fillSecondaryColor),
-                _ColorRow(label: 'Fill Tertiary', color: theme.fillTertiaryColor),
+                _ColorRow(
+                  label: 'Fill Secondary',
+                  color: theme.fillSecondaryColor,
+                ),
+                _ColorRow(
+                  label: 'Fill Tertiary',
+                  color: theme.fillTertiaryColor,
+                ),
               ],
             ),
             CupertinoListSection.insetGrouped(
               header: const Text('Palette'),
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: CNColors.accentColors.map((c) {
-                      final resolved = c.color.resolveFrom(context);
+                      final resolved = c.color.resolveFromContext(context);
                       return _Swatch(color: resolved);
                     }).toList(),
                   ),
@@ -67,11 +91,17 @@ class ThemeDemoPage extends StatelessWidget {
             CupertinoListSection.insetGrouped(
               header: const Text('Materials'),
               children: [
-                _MaterialRow(label: 'Ultra Thin', material: theme.materialUltraThin),
+                _MaterialRow(
+                  label: 'Ultra Thin',
+                  material: theme.materialUltraThin,
+                ),
                 _MaterialRow(label: 'Thin', material: theme.materialThin),
                 _MaterialRow(label: 'Medium', material: theme.materialMedium),
                 _MaterialRow(label: 'Thick', material: theme.materialThick),
-                _MaterialRow(label: 'Ultra Thick', material: theme.materialUltraThick),
+                _MaterialRow(
+                  label: 'Ultra Thick',
+                  material: theme.materialUltraThick,
+                ),
               ],
             ),
           ],
@@ -96,7 +126,9 @@ class _ColorRow extends StatelessWidget {
           _Swatch(color: color),
           const SizedBox(width: 10),
           Expanded(child: Text(label)),
-          Text('#${color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}'),
+          Text(
+            '#${color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}',
+          ),
         ],
       ),
     );
@@ -153,7 +185,9 @@ class _Swatch extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: CupertinoColors.separator.resolveFrom(context)),
+        border: Border.all(
+          color: CupertinoColors.separator.resolveFrom(context),
+        ),
       ),
     );
   }

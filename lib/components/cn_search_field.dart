@@ -14,7 +14,8 @@ import 'package:flutter/widgets.dart';
 const _kNativeViewType = 'CupertinoNativeSearchField2';
 
 /// Callback invoked when the native search field needs suggestions.
-typedef CNSearchSuggestionsCallback = FutureOr<List<String>> Function(String query);
+typedef CNSearchSuggestionsCallback =
+    FutureOr<List<String>> Function(String query);
 
 /// A native macOS search field backed by NSSearchField.
 ///
@@ -133,7 +134,9 @@ class _CNSearchFieldState extends CNWidgetState<CNSearchField> {
         logDebug('requestSuggestions: query="$query"');
         if (widget.onSuggestionsRequested != null) {
           final results = await widget.onSuggestionsRequested!(query);
-          logDebug('requestSuggestions: returning ${results.length} suggestions');
+          logDebug(
+            'requestSuggestions: returning ${results.length} suggestions',
+          );
           return results;
         }
         return <String>[];
@@ -142,7 +145,10 @@ class _CNSearchFieldState extends CNWidgetState<CNSearchField> {
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
       'text': widget.text,
       'placeholder': widget.placeholder,
@@ -156,7 +162,11 @@ class _CNSearchFieldState extends CNWidgetState<CNSearchField> {
       'hasSuggestions': widget.onSuggestionsRequested != null,
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+    );
     return payload;
   }
 }

@@ -56,17 +56,83 @@ class CNTypography extends Equatable {
     TextStyle? caption1,
     TextStyle? caption2,
   }) {
-    largeTitle ??= _style(color: color, size: 26, leading: 32, weight: FontWeight.w400, tracking: 0.22);
-    title1 ??= _style(color: color, size: 22, leading: 26, weight: FontWeight.w400, tracking: -0.26);
-    title2 ??= _style(color: color, size: 17, leading: 22, weight: FontWeight.w400, tracking: -0.43);
-    title3 ??= _style(color: color, size: 15, leading: 20, weight: FontWeight.w400, tracking: -0.23);
-    headline ??= _style(color: color, size: 13, leading: 16, weight: FontWeight.w700, tracking: -0.08);
-    body ??= _style(color: color, size: 13, leading: 16, weight: FontWeight.w400, tracking: 0.06);
-    callout ??= _style(color: color, size: 12, leading: 15, weight: FontWeight.w400, tracking: 0.0);
-    subheadline ??= _style(color: color, size: 11, leading: 14, weight: FontWeight.w400, tracking: 0.06);
-    footnote ??= _style(color: color, size: 10, leading: 13, weight: FontWeight.w400, tracking: 0.12);
-    caption1 ??= _style(color: color, size: 10, leading: 13, weight: FontWeight.w400, tracking: 0.12);
-    caption2 ??= _style(color: color, size: 10, leading: 13, weight: FontWeight.w500, tracking: 0.12);
+    largeTitle ??= _style(
+      color: color,
+      size: 26,
+      leading: 32,
+      weight: FontWeight.w400,
+      tracking: 0.22,
+    );
+    title1 ??= _style(
+      color: color,
+      size: 22,
+      leading: 26,
+      weight: FontWeight.w400,
+      tracking: -0.26,
+    );
+    title2 ??= _style(
+      color: color,
+      size: 17,
+      leading: 22,
+      weight: FontWeight.w400,
+      tracking: -0.43,
+    );
+    title3 ??= _style(
+      color: color,
+      size: 15,
+      leading: 20,
+      weight: FontWeight.w400,
+      tracking: -0.23,
+    );
+    headline ??= _style(
+      color: color,
+      size: 13,
+      leading: 16,
+      weight: FontWeight.w700,
+      tracking: -0.08,
+    );
+    body ??= _style(
+      color: color,
+      size: 13,
+      leading: 16,
+      weight: FontWeight.w400,
+      tracking: 0.06,
+    );
+    callout ??= _style(
+      color: color,
+      size: 12,
+      leading: 15,
+      weight: FontWeight.w400,
+      tracking: 0.0,
+    );
+    subheadline ??= _style(
+      color: color,
+      size: 11,
+      leading: 14,
+      weight: FontWeight.w400,
+      tracking: 0.06,
+    );
+    footnote ??= _style(
+      color: color,
+      size: 10,
+      leading: 13,
+      weight: FontWeight.w400,
+      tracking: 0.12,
+    );
+    caption1 ??= _style(
+      color: color,
+      size: 10,
+      leading: 13,
+      weight: FontWeight.w400,
+      tracking: 0.12,
+    );
+    caption2 ??= _style(
+      color: color,
+      size: 10,
+      leading: 13,
+      weight: FontWeight.w500,
+      tracking: 0.12,
+    );
 
     return CNTypography.raw(
       color: color,
@@ -85,10 +151,12 @@ class CNTypography extends Equatable {
   }
 
   /// Default dark-on-light typography.
-  factory CNTypography.darkOpaque() => CNTypography(color: CupertinoColors.label.color);
+  factory CNTypography.darkOpaque() =>
+      CNTypography(color: CupertinoColors.label.color);
 
   /// Default light-on-dark typography.
-  factory CNTypography.lightOpaque() => CNTypography(color: CupertinoColors.label.darkColor);
+  factory CNTypography.lightOpaque() =>
+      CNTypography(color: CupertinoColors.label.darkColor);
 
   /// Creates a typography token set from exact styles.
   const CNTypography.raw({

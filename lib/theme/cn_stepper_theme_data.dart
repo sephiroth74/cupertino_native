@@ -14,11 +14,13 @@ class CNStepperTheme extends InheritedTheme {
   bool updateShouldNotify(CNStepperTheme oldWidget) => data != oldWidget.data;
 
   @override
-  Widget wrap(BuildContext context, Widget child) => CNStepperTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) =>
+      CNStepperTheme(data: data, child: child);
 
   /// Returns the nearest [CNStepperThemeData], falling back to [CNTheme].
   static CNStepperThemeData of(BuildContext context) {
-    final CNStepperTheme? theme = context.dependOnInheritedWidgetOfExactType<CNStepperTheme>();
+    final CNStepperTheme? theme = context
+        .dependOnInheritedWidgetOfExactType<CNStepperTheme>();
     return theme?.data ?? CNTheme.of(context).stepperTheme;
   }
 }
@@ -46,7 +48,13 @@ class CNStepperThemeData extends Equatable {
   }
 
   /// Linearly interpolates between two stepper themes.
-  static CNStepperThemeData lerp(CNStepperThemeData a, CNStepperThemeData b, double t) {
-    return CNStepperThemeData(tintColor: Color.lerp(a.tintColor, b.tintColor, t));
+  static CNStepperThemeData lerp(
+    CNStepperThemeData a,
+    CNStepperThemeData b,
+    double t,
+  ) {
+    return CNStepperThemeData(
+      tintColor: Color.lerp(a.tintColor, b.tintColor, t),
+    );
   }
 }

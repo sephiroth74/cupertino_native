@@ -87,7 +87,10 @@ class _CNColorWellState extends CNWidgetState<CNColorWell> {
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
       'color': resolveColorToArgb(widget.color, context),
       'style': widget.style.name,
@@ -95,7 +98,11 @@ class _CNColorWellState extends CNWidgetState<CNColorWell> {
       'supportsAlpha': widget.supportsAlpha,
     };
 
-    widget.writeSharedFields(context, payload: payload, constraints: constraints);
+    widget.writeSharedFields(
+      context,
+      payload: payload,
+      constraints: constraints,
+    );
     return payload;
   }
 }

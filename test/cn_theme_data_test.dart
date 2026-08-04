@@ -16,7 +16,10 @@ void main() {
       expect(theme.typography.largeTitle.fontSize, 26);
       expect(theme.typography.caption2.fontWeight, FontWeight.w500);
       expect(theme.fillPrimaryColor, isNotNull);
-      expect(theme.materialMedium.blurRadius, CNGlassMaterial.medium.blurRadius);
+      expect(
+        theme.materialMedium.blurRadius,
+        CNGlassMaterial.medium.blurRadius,
+      );
       expect(theme.toggleTheme.tint, theme.userAccentColor);
     });
 
@@ -26,7 +29,9 @@ void main() {
         systemAccentColor: CNColors.accentColors[0].color,
         isMainWindow: true,
       );
-      final updated = base.copyWith(userAccentColor: CupertinoColors.systemGreen.color);
+      final updated = base.copyWith(
+        userAccentColor: CupertinoColors.systemGreen.color,
+      );
 
       expect(updated.userAccentColor, CupertinoColors.systemGreen.color);
       expect(updated.secondaryColor, base.secondaryColor);
@@ -40,35 +45,46 @@ void main() {
         systemAccentColor: CNColors.accentColors[0].color,
         isMainWindow: true,
       );
-      final updated = base.copyWith(toggleTheme: const CNToggleThemeData(tint: Color(0xFF123456)));
+      final updated = base.copyWith(
+        toggleTheme: const CNToggleThemeData(tint: Color(0xFF123456)),
+      );
 
       expect(updated.toggleTheme.tint, const Color(0xFF123456));
       expect(updated.userAccentColor, base.userAccentColor);
     });
 
-    test('icon button theme defaults to empty overrides and can be overridden', () {
-      final base = CNThemeData.light(
-        userAccentColor: CNColors.accentColors[0].color,
-        systemAccentColor: CNColors.accentColors[0].color,
-        isMainWindow: true,
-      );
+    test(
+      'icon button theme defaults to empty overrides and can be overridden',
+      () {
+        final base = CNThemeData.light(
+          userAccentColor: CNColors.accentColors[0].color,
+          systemAccentColor: CNColors.accentColors[0].color,
+          isMainWindow: true,
+        );
 
-      expect(base.iconButtonTheme, const CNIconButtonThemeData());
+        expect(base.iconButtonTheme, const CNIconButtonThemeData());
 
-      final updated = base.copyWith(
-        iconButtonTheme: const CNIconButtonThemeData(
-          shape: CNIconButtonShape.circle,
-          foregroundColor: Color(0xFF112233),
-        ),
-      );
+        final updated = base.copyWith(
+          iconButtonTheme: const CNIconButtonThemeData(
+            shape: CNIconButtonShape.circle,
+            foregroundColor: Color(0xFF112233),
+          ),
+        );
 
-      expect(updated.iconButtonTheme.shape, CNIconButtonShape.circle);
-      expect(updated.iconButtonTheme.foregroundColor, const Color(0xFF112233));
-      expect(updated.userAccentColor, base.userAccentColor);
-    });
+        expect(updated.iconButtonTheme.shape, CNIconButtonShape.circle);
+        expect(
+          updated.iconButtonTheme.foregroundColor,
+          const Color(0xFF112233),
+        );
+        expect(updated.userAccentColor, base.userAccentColor);
+      },
+    );
 
     test('icon button theme merge keeps existing values for null fields', () {
-      const a = CNIconButtonThemeData(foregroundColor: Color(0xFF111111), borderWidth: 2);
+      const a = CNIconButtonThemeData(
+        foregroundColor: Color(0xFF111111),
+        borderWidth: 2,
+      );
       const b = CNIconButtonThemeData(borderWidth: 4);
       final merged = a.merge(b);
 
@@ -107,7 +123,10 @@ void main() {
       );
       final lerped = CNThemeData.lerp(a, b, 0.5);
 
-      expect(lerped.userAccentColor, Color.lerp(a.userAccentColor, b.userAccentColor, 0.5));
+      expect(
+        lerped.userAccentColor,
+        Color.lerp(a.userAccentColor, b.userAccentColor, 0.5),
+      );
       expect(lerped.typography.body.fontSize, closeTo(13, 0.001));
       expect(lerped.brightness, Brightness.dark);
     });
@@ -118,17 +137,35 @@ void main() {
       final typography = CNTypography.darkOpaque();
 
       expect(typography.styleFor(CNTypographyRole.body), typography.body);
-      expect(typography.styleFor(CNTypographyRole.headline), typography.headline);
-      expect(typography.styleFor(CNTypographyRole.caption2), typography.caption2);
+      expect(
+        typography.styleFor(CNTypographyRole.headline),
+        typography.headline,
+      );
+      expect(
+        typography.styleFor(CNTypographyRole.caption2),
+        typography.caption2,
+      );
     });
 
     test('emphasizedFor maps to expected weight', () {
       final typography = CNTypography.darkOpaque();
 
-      expect(typography.emphasizedFor(CNTypographyRole.largeTitle).fontWeight, FontWeight.w700);
-      expect(typography.emphasizedFor(CNTypographyRole.title3).fontWeight, FontWeight.w600);
-      expect(typography.emphasizedFor(CNTypographyRole.caption1).fontWeight, FontWeight.w500);
-      expect(typography.emphasizedFor(CNTypographyRole.headline).fontWeight, FontWeight.w800);
+      expect(
+        typography.emphasizedFor(CNTypographyRole.largeTitle).fontWeight,
+        FontWeight.w700,
+      );
+      expect(
+        typography.emphasizedFor(CNTypographyRole.title3).fontWeight,
+        FontWeight.w600,
+      );
+      expect(
+        typography.emphasizedFor(CNTypographyRole.caption1).fontWeight,
+        FontWeight.w500,
+      );
+      expect(
+        typography.emphasizedFor(CNTypographyRole.headline).fontWeight,
+        FontWeight.w800,
+      );
     });
 
     test('lerp interpolates color', () {

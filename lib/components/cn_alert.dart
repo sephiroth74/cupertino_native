@@ -53,7 +53,8 @@ class CNAlert {
             for (var i = 0; i < actions.length; i++)
               CupertinoDialogAction(
                 isDefaultAction: i == 0,
-                isDestructiveAction: actions[i].role == CNButtonRole.destructive,
+                isDestructiveAction:
+                    actions[i].role == CNButtonRole.destructive,
                 onPressed: () => Navigator.of(ctx).pop(i),
                 child: Text(actions[i].title),
               ),
@@ -63,7 +64,11 @@ class CNAlert {
     );
     if (selected == null) return null;
 
-    return CNAlertResult(selectedIndex: selected, selectedTag: actions[selected].tag, suppressionSelected: false);
+    return CNAlertResult(
+      selectedIndex: selected,
+      selectedTag: actions[selected].tag,
+      suppressionSelected: false,
+    );
   }
 
   /// Shows a sheet alert attached to the current window.
@@ -110,16 +115,25 @@ class CNAlert {
               child: Text(actions[i].title),
             ),
         ],
-        cancelButton: CupertinoActionSheetAction(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(ctx).pop(),
+          child: const Text('Cancel'),
+        ),
       ),
     );
     if (selected == null) return null;
 
-    return CNAlertResult(selectedIndex: selected, selectedTag: actions[selected].tag, suppressionSelected: false);
+    return CNAlertResult(
+      selectedIndex: selected,
+      selectedTag: actions[selected].tag,
+      suppressionSelected: false,
+    );
   }
 
   static CNAlertResult? _parseResult(Object? response) {
-    final resultMap = response is Map ? Map<Object?, Object?>.from(response) : const <Object?, Object?>{};
+    final resultMap = response is Map
+        ? Map<Object?, Object?>.from(response)
+        : const <Object?, Object?>{};
     final selectedIndex = (resultMap['selectedIndex'] as num?)?.toInt();
     if (selectedIndex == null) return null;
 
@@ -133,7 +147,11 @@ class CNAlert {
 
 /// Result returned by [CNAlert.show].
 class CNAlertResult {
-  const CNAlertResult({required this.selectedIndex, this.selectedTag, this.suppressionSelected = false});
+  const CNAlertResult({
+    required this.selectedIndex,
+    this.selectedTag,
+    this.suppressionSelected = false,
+  });
 
   final int selectedIndex;
   final String? selectedTag;

@@ -53,11 +53,18 @@ class _LabelDemoPageState extends State<LabelDemoPage> {
 
                 CNLabel(
                   debugLog: _kDebugLog,
-                  title: CNChildText('Custom Label', font: font, foregroundColor: foregroundColor),
+                  title: CNChildText(
+                    'Custom Label',
+                    font: font,
+                    foregroundColor: foregroundColor,
+                  ),
                   image: CNChildImage(
                     'sparkle.text.clipboard.fill',
                     symbolRenderingMode: CNSymbolRenderingMode.palette,
-                    foregroundStyleColors: [CNColors.cyan, foregroundColor ?? CNColors.black],
+                    foregroundStyleColors: [
+                      CNColors.cyan,
+                      foregroundColor ?? CNColors.black,
+                    ],
                   ),
                   labelIconToTitleSpacing: labelIconToTitleSpacing,
                   labelStyle: CNLabelStyle.automatic,
@@ -85,7 +92,8 @@ class _LabelDemoPageState extends State<LabelDemoPage> {
                 min: 0,
                 max: 48,
                 value: labelIconToTitleSpacing,
-                onChanged: (value) => setState(() => labelIconToTitleSpacing = value),
+                onChanged: (value) =>
+                    setState(() => labelIconToTitleSpacing = value),
               ),
               'Font Size': SizeSliderPicker(
                 value: fontSize,
@@ -93,7 +101,9 @@ class _LabelDemoPageState extends State<LabelDemoPage> {
                     ? (value) => setState(() {
                         fontSize = value;
                         if (font != null) {
-                          font = font!.copyWith(size: CNFontSize.points(fontSize));
+                          font = font!.copyWith(
+                            size: CNFontSize.points(fontSize),
+                          );
                         }
                       })
                     : null,

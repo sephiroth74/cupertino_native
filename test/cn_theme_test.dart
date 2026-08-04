@@ -24,7 +24,10 @@ void main() {
     );
 
     expect(resolved, expected);
-    expect(CNTheme.brightnessOf(tester.element(find.byType(SizedBox))), Brightness.dark);
+    expect(
+      CNTheme.brightnessOf(tester.element(find.byType(SizedBox))),
+      Brightness.dark,
+    );
   });
 
   testWidgets('of falls back when no CNTheme is provided', (tester) async {

@@ -75,7 +75,11 @@ class _CNProgressViewState extends CNWidgetState<CNProgressView> {
   }
 
   @override
-  double computeShrinkWidth({required BoxConstraints constraints, required double defaultWidth, double? intrinsicWidth}) {
+  double computeShrinkWidth({
+    required BoxConstraints constraints,
+    required double defaultWidth,
+    double? intrinsicWidth,
+  }) {
     double resolvedWidth;
     if (intrinsicWidth != null) {
       resolvedWidth = intrinsicWidth;
@@ -94,7 +98,10 @@ class _CNProgressViewState extends CNWidgetState<CNProgressView> {
   }
 
   @override
-  Map<String, dynamic> toWidgetPayload(BuildContext context, {required BoxConstraints? constraints}) {
+  Map<String, dynamic> toWidgetPayload(
+    BuildContext context, {
+    required BoxConstraints? constraints,
+  }) {
     final payload = <String, dynamic>{
       'style': widget.style.name,
       'controlSize': widget.controlSize.name,

@@ -28,9 +28,9 @@ enum CNTabContentMode {
 /// listeners on changes, and provides programmatic tab switching.
 class CNTabController extends ChangeNotifier {
   CNTabController({required this.length, int initialIndex = 0})
-      : assert(length > 0),
-        assert(initialIndex >= 0 && initialIndex < length),
-        _index = initialIndex;
+    : assert(length > 0),
+      assert(initialIndex >= 0 && initialIndex < length),
+      _index = initialIndex;
 
   /// The total number of tabs.
   final int length;
@@ -77,7 +77,8 @@ class DefaultCNTabController extends StatefulWidget {
   State<DefaultCNTabController> createState() => _DefaultCNTabControllerState();
 
   static CNTabController of(BuildContext context) {
-    final scope = context.dependOnInheritedWidgetOfExactType<_CNTabControllerScope>();
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<_CNTabControllerScope>();
     assert(scope != null, 'No DefaultCNTabController found in the widget tree');
     return scope!.controller;
   }
@@ -95,7 +96,10 @@ class _DefaultCNTabControllerState extends State<DefaultCNTabController> {
   @override
   void initState() {
     super.initState();
-    _controller = CNTabController(length: widget.length, initialIndex: widget.initialIndex);
+    _controller = CNTabController(
+      length: widget.length,
+      initialIndex: widget.initialIndex,
+    );
   }
 
   @override
@@ -110,7 +114,8 @@ class _CNTabControllerScope extends InheritedWidget {
   final CNTabController controller;
 
   @override
-  bool updateShouldNotify(_CNTabControllerScope oldWidget) => controller != oldWidget.controller;
+  bool updateShouldNotify(_CNTabControllerScope oldWidget) =>
+      controller != oldWidget.controller;
 }
 
 /// A tabbed container that uses [CNSegmentedControl] for tab switching.
@@ -221,7 +226,8 @@ class _CNTabViewState extends State<CNTabView> {
       widget.segmentDistribution == CNSegmentDistribution.fillProportionally;
 
   void _subscribeToController() {
-    final newController = widget.controller ?? DefaultCNTabController.of(context);
+    final newController =
+        widget.controller ?? DefaultCNTabController.of(context);
     if (newController != _controller) {
       _controller?.removeListener(_onControllerChanged);
       _controller = newController;
@@ -239,7 +245,10 @@ class _CNTabViewState extends State<CNTabView> {
       case CNTabContentMode.indexedStack:
         return IndexedStack(index: index, children: widget.children);
       case CNTabContentMode.keyedSubtree:
-        return KeyedSubtree(key: ValueKey(index), child: widget.children[index]);
+        return KeyedSubtree(
+          key: ValueKey(index),
+          child: widget.children[index],
+        );
     }
   }
 
@@ -262,7 +271,9 @@ class _CNTabViewState extends State<CNTabView> {
             foregroundColor: widget.foregroundColor,
             shrink: true,
             constraints: BoxConstraints.tightFor(width: constraints.maxWidth),
-            onChanged: widget.enabled ? (index) => controller.index = index : null,
+            onChanged: widget.enabled
+                ? (index) => controller.index = index
+                : null,
           );
         },
       );
