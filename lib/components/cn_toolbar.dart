@@ -1,3 +1,4 @@
+import 'package:cupertino_native/components/cn_widget_debug_id_mixin.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native/widgets/cn_layout_bounds.dart';
 import 'package:flutter/widgets.dart';
@@ -50,7 +51,7 @@ class CNToolbar extends StatefulWidget implements CNObstructingPreferredSizeWidg
   const CNToolbar({
     super.key,
     this.height = kCNToolbarHeight,
-    this.leading,
+    this.leading = const [],
     this.automaticallyImplyLeading = true,
     this.title,
     this.titleWidth = _kTitleWidth,
@@ -87,9 +88,9 @@ class CNToolbar extends StatefulWidget implements CNObstructingPreferredSizeWidg
   /// Overall bar height (reserved by the scaffold as top padding).
   final double height;
 
-  /// Leading item (usually a [CNToolbarIconButton]). Overrides the
-  /// synthesized back button.
-  final CNToolbarItem? leading;
+  /// Leading items (usually a [CNToolbarIconButton]). When non-empty, overrides
+  /// the synthesized back button.
+  final List<CNToolbarItem> leading;
 
   /// The visual-effect material used when [enableBlur] is true.
   final NSVisualEffectViewMaterial material;
@@ -114,6 +115,157 @@ class CNToolbar extends StatefulWidget implements CNObstructingPreferredSizeWidg
 
   @override
   bool shouldFullyObstruct(BuildContext context) => false;
+}
+
+/// A borderless toolbar button backed by the pure-Flutter [CNIconButton].
+///
+/// Unlike [CNToolbarIconButton] (a native `CNButton`), this item renders an SF
+/// Symbol through [CNIconButton], so it supports the full [CNIconButtonThemeData]
+/// styling surface — per-state foreground/background colors, border, shape,
+/// corner radius, icon ratio and a `selected` state.
+///
+/// Styling is layered, lowest priority first:
+/// 1. [CNIconButtonThemeData.toolbarDefaults] — the toolbar look (borderless,
+///    transparent idle, subtle hover/pressed fill, accent-tinted selection);
+/// 2. any ambient [CNIconButtonTheme] in scope (app-wide overrides);
+/// 3. the per-item [theme] override passed here.
+class CNToolbarButton extends CNToolbarItem {
+  /// Creates a toolbar button from an SF Symbol [systemImage].
+  const CNToolbarButton(
+    this.systemImage, {
+    this.selectedSystemImage,
+    this.onPressed,
+    this.onLongPress,
+    this.label,
+    this.isSelected = false,
+    this.theme,
+  });
+
+  /// Whether the button renders its selected appearance (and swaps to
+  /// [selectedSystemImage] when provided).
+  final bool isSelected;
+
+  /// Optional text label, used as the overflow-menu title.
+  final String? label;
+
+  /// Called when long-pressed.
+  final VoidCallback? onLongPress;
+
+  /// Called when tapped. When both this and [onLongPress] are null the button
+  /// is disabled.
+  final VoidCallback? onPressed;
+
+  /// SF Symbol shown while [isSelected] is true. Falls back to [systemImage].
+  final String? selectedSystemImage;
+
+  /// SF Symbol name for the icon.
+  final String systemImage;
+
+  /// Optional per-item overrides layered on top of the toolbar defaults and any
+  /// ambient [CNIconButtonTheme].
+  final CNIconButtonThemeData? theme;
+
+  @override
+  bool get managesOwnHeight => true;
+
+  @override
+  CNChild? toOverflowChild(BuildContext context) {
+    return CNChildButton(tag: label ?? systemImage, title: label ?? '', systemImage: systemImage, enabled: onPressed != null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Layer the toolbar defaults under any ambient icon-button theme and the
+    // per-item override, then expose the result to the inner CNIconButton via a
+    // scoped CNIconButtonTheme (the button resolves its look from the nearest one).
+    final resolved = CNIconButtonThemeData.toolbarDefaults(CNTheme.of(context)).merge(CNIconButtonTheme.of(context)).merge(theme);
+
+    // Pin the button to a square sized off the toolbar's content band, read live
+    // from the layout — same approach as the native [CNToolbarIconButton].
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final side = constraints.hasBoundedHeight ? constraints.maxHeight : 28.0;
+        return CNIconButtonTheme(
+          data: resolved,
+          child: CNIconButton(
+            size: side,
+            systemSymbolName: systemImage,
+            selectedSystemSymbolName: selectedSystemImage,
+            isSelected: isSelected,
+            onTap: onPressed,
+            onLongPress: onLongPress,
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// A native macOS combo box ([CNComboBox]) placed as a toolbar item.
+///
+/// Rendered inline and vertically centered in the bar (it does not manage its
+/// own height). Because a combo box is a compound data-entry control it has no
+/// meaningful overflow-menu representation, so it does not appear in the
+/// overflow menu.
+class CNToolbarComboBox extends CNToolbarItem {
+  /// Creates a toolbar combo box.
+  const CNToolbarComboBox({
+    required this.items,
+    this.text = '',
+    this.placeholder,
+    this.style = CNComboBoxStyle.bordered,
+    this.completes = false,
+    this.onChanged,
+    this.onSelectionChanged,
+    this.width = 160.0,
+    this.tint,
+  });
+
+  /// Whether the field auto-completes against [items] as the user types.
+  final bool completes;
+
+  /// The items in the pop-up list.
+  final List<String> items;
+
+  /// Called whenever the text changes.
+  final ValueChanged<String>? onChanged;
+
+  /// Called with the index of the item chosen from the pop-up list.
+  final ValueChanged<int>? onSelectionChanged;
+
+  /// Placeholder shown when the field is empty.
+  final String? placeholder;
+
+  /// The disclosure-caret style.
+  final CNComboBoxStyle style;
+
+  /// The current text value.
+  final String text;
+
+  /// Optional tint applied to the field.
+  final Color? tint;
+
+  /// Fixed field width within the toolbar.
+  final double width;
+
+  @override
+  CNChild? toOverflowChild(BuildContext context) => null;
+
+  @override
+  Widget build(BuildContext context) {
+    return CNComboBox(
+      text: text,
+      items: items,
+      placeholder: placeholder,
+      style: style,
+      completes: completes,
+      onChanged: onChanged,
+      onSelectionChanged: onSelectionChanged,
+      tint: tint,
+      shrink: true,
+      constraints: BoxConstraints.tightFor(width: width),
+    );
+  }
 }
 
 /// An escape hatch that renders an arbitrary Flutter widget as a toolbar item.
@@ -344,7 +496,11 @@ class CNToolbarSpacer extends CNToolbarItem {
   Widget build(BuildContext context) => SizedBox(width: spacerUnits * _kToolbarItemWidth);
 }
 
-class _CNToolbarState extends State<CNToolbar> {
+class _CNToolbarState extends State<CNToolbar> with CNWidgetDebugIdMixin<CNToolbar> {
+  void logDebug(String message) {
+    debugPrint('$debugLogPrefix $message');
+  }  
+
   /// Centers a toolbar [child] vertically without imposing a height on it.
   ///
   /// A native control must NOT be given a bounded height. In shrink mode a height
@@ -362,7 +518,13 @@ class _CNToolbarState extends State<CNToolbar> {
   /// child, which the row then centers. The bar [padding] gives the 8pt inset that
   /// keeps the natural-height controls off the bar edges.
   Widget _centerItem(Widget child) {
-    return UnconstrainedBox(constrainedAxis: Axis.horizontal, alignment: Alignment.center, child: child);
+    return UnconstrainedBox(
+      constrainedAxis: Axis.horizontal,
+      alignment: Alignment.center,
+      child: CNPixelPerfectContainer(
+        child: child,
+      ),
+    );
   }
 
   /// Places a toolbar [item] in the row.
@@ -375,7 +537,7 @@ class _CNToolbarState extends State<CNToolbar> {
   /// vertically centered by [_centerItem].
   Widget _wrapItem(CNToolbarItem item, BuildContext context) {
     final child = item.build(context);
-    return item.managesOwnHeight ? CNLayoutBounds(enabled: false, child: child) : _centerItem(child);
+    return item.managesOwnHeight ? CNPixelPerfectContainer(child: CNLayoutBounds(enabled: false, child: child)) : _centerItem(child);
   }
 
   @override
@@ -384,15 +546,23 @@ class _CNToolbarState extends State<CNToolbar> {
     final scope = CNWindowScope.maybeOf(context);
     final dividerColor = widget.dividerColor ?? theme.separatorColor;
 
-    // Leading: explicit, or a synthesized back button when the route can pop.
-    CNToolbarItem? leadingItem = widget.leading;
-    if (leadingItem == null && widget.automaticallyImplyLeading) {
+    // Leading: explicit items, or a synthesized back button when the route can
+    // pop and no explicit leading items were provided.
+    List<CNToolbarItem> leadingItems = widget.leading;
+    if (widget.automaticallyImplyLeading) {
       final canPop = ModalRoute.of(context)?.canPop ?? false;
+      logDebug('canPop=$canPop');
       if (canPop) {
-        leadingItem = CNToolbarIconButton('chevron.backward', onPressed: () => Navigator.maybePop(context));
+        leadingItems = [CNToolbarIconButton('chevron.backward', onPressed: () => Navigator.maybePop(context)), ...leadingItems];
       }
     }
-    final Widget? leading = leadingItem == null ? null : _wrapItem(leadingItem, context);
+    final Widget? leading = leadingItems.isEmpty
+        ? null
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [for (final item in leadingItems) _wrapItem(item, context)],
+          );
 
     // Title, sized and styled like AppKit's toolbar title.
     Widget? title = widget.title;

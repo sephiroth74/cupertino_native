@@ -139,6 +139,32 @@ class CNIconButtonThemeData extends Equatable {
     animationDuration,
   ];
 
+  /// The toolbar-specific overrides applied to a [CNIconButton] rendered inside
+  /// a [CNToolbar] via `CNToolbarButton`.
+  ///
+  /// Toolbar buttons are borderless with a transparent idle background, a subtle
+  /// hover/pressed fill and a smaller icon than the standalone default — matching
+  /// AppKit's accessory-bar (toolbar) buttons. Only structural fields and the
+  /// subtle state fills are set here; the idle foreground color is left null so
+  /// it tracks the ambient [CNTheme] label color.
+  ///
+  /// This is layered *under* any ambient [CNIconButtonTheme] and an optional
+  /// per-item override, so an app can still restyle toolbar buttons app-wide or
+  /// individually.
+  static CNIconButtonThemeData toolbarDefaults(CNThemeData theme) {
+    final Color? accent = theme.accentColor;
+    return CNIconButtonThemeData(
+      shape: CNIconButtonShape.roundedRectangle,
+      iconSizeRatio: 0.5,
+      padding: EdgeInsets.zero,
+      hoveredBackgroundColor: theme.fillQuaternaryColor,
+      pressedBackgroundColor: theme.fillTertiaryColor,
+      selectedBackgroundColor: accent?.withValues(alpha: 0.15) ?? theme.fillSecondaryColor,
+      selectedForegroundColor: accent,
+      animationDuration: const Duration(milliseconds: 120),
+    );
+  }
+
   /// Returns a copy with selected values replaced.
   CNIconButtonThemeData copyWith({
     Color? foregroundColor,

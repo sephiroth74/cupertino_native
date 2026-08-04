@@ -3,30 +3,23 @@ import 'package:flutter/cupertino.dart';
 
 /// Demonstrates route-based navigation with [CNPageRoute].
 ///
-/// Two distinct patterns are shown side by side:
+/// Both patterns push on the **root navigator** (`rootNavigator: true`): a
+/// pushed page's [CNPageScaffold] owns the whole toolbar strip and replaces the
+/// shared app toolbar (see [CNPageScaffold], which reserves and draws the bar
+/// flush at the window top — it does not stack beneath a parent bar).
 ///
-///  1. **Content-area navigation** — a nested [Navigator] scopes pushes to the
-///     content area, so the sidebar, the shared app toolbar and the status bar
-///     stay fixed while master → detail pages slide in. Each pushed page carries
-///     its own [CNToolbar] (with a back button), stacked just below the shared
-///     app toolbar. This is the idiomatic macOS pattern.
+///  1. **Master → detail** — the master list is a bare [CNContentArea] under the
+///     app toolbar; tapping a row pushes a detail page whose own [CNToolbar]
+///     (with a synthesized back button) replaces the app toolbar.
 ///
-///  2. **Window-level navigation** — pushing on the root navigator
-///     (`rootNavigator: true`) presents a page that covers the whole Flutter
-///     content view. Because the toolbar now lives inside the Flutter view (not a
-///     native `NSToolbar` in the titlebar), the pushed page covers the shared app
-///     toolbar too and supplies its own.
+///  2. **Window-level page** — a page presented the same way, supplying its own
+///     toolbar with an explicit close button.
 class NavigationDemoPage extends StatelessWidget {
   const NavigationDemoPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // A nested Navigator keeps every push inside the content area. Its initial
-    // ('/') route is the master list; detail pages are pushed onto it via
-    // Navigator.of(context) (which resolves to this nearest navigator).
-    return Navigator(
-      onGenerateRoute: (settings) => CNPageRoute(builder: (_) => const _MasterPage(), settings: settings),
-    );
+    return const _MasterPage();
   }
 }
 
@@ -57,47 +50,47 @@ class _MasterPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = CNTheme.of(context);
 
-    return CNPageScaffold(
-      toolBar: const CNToolbar(title: Text('Navigation')),
-      child: CNContentArea(
-        builder: (context, scrollController) {
-          return ListView(
-            controller: scrollController,
-            padding: const EdgeInsets.all(16),
-            children: [
-              Text('Content-area navigation', style: theme.typography.title2),
-              const SizedBox(height: 4),
-              Text(
-                'Tapping a row pushes a detail page onto a nested Navigator, so the '
-                'sidebar, shared app toolbar and status bar remain fixed. The detail '
-                "page's own toolbar stacks just below the app toolbar.",
-                style: theme.typography.subheadline.copyWith(color: theme.secondaryLabelColor),
+    return CNContentArea(
+      builder: (context, scrollController) {
+        return ListView(
+          controller: scrollController,
+          padding: const EdgeInsets.all(16),
+          children: [
+            Text('Content-area navigation', style: theme.typography.title2),
+            const SizedBox(height: 4),
+            Text(
+              'Tapping a row pushes a detail page on the root navigator. Its '
+              "CNPageScaffold owns the whole toolbar strip, so the detail page's "
+              'toolbar (with a synthesized back button) replaces the app toolbar.',
+              style: theme.typography.subheadline.copyWith(color: theme.secondaryLabelColor),
+            ),
+            const SizedBox(height: 16),
+            for (final item in _items)
+              _NavRow(
+                item: item,
+                onTap: () {
+                  debugPrint('Pushing detail page for ${item.title}');
+                  Navigator.of(context, rootNavigator: true).push(CNPageRoute(builder: (_) => _DetailPage(item: item, depth: 1)));
+                },
               ),
-              const SizedBox(height: 16),
-              for (final item in _items)
-                _NavRow(
-                  item: item,
-                  onTap: () => Navigator.of(context).push(CNPageRoute(builder: (_) => _DetailPage(item: item, depth: 1))),
-                ),
-              const SizedBox(height: 32),
-              Text('Window-level navigation', style: theme.typography.title2),
-              const SizedBox(height: 4),
-              Text(
-                'Pushing on the root navigator presents a page over the whole Flutter '
-                'content view, covering the shared app toolbar; the page supplies its own.',
-                style: theme.typography.subheadline.copyWith(color: theme.secondaryLabelColor),
-              ),
-              const SizedBox(height: 16),
-              CNButton(
-                onPressed: () =>
-                    Navigator.of(context, rootNavigator: true).push(CNPageRoute(builder: (_) => const _WindowLevelPage())),
-                buttonStyle: CNButtonStyle.borderedProminent,
-                children: const [CNChildText('Present a window-level page')],
-              ),
-            ],
-          );
-        },
-      ),
+            const SizedBox(height: 32),
+            Text('Window-level navigation', style: theme.typography.title2),
+            const SizedBox(height: 4),
+            Text(
+              'Pushing on the root navigator presents a page over the whole Flutter '
+              'content view, covering the shared app toolbar; the page supplies its own.',
+              style: theme.typography.subheadline.copyWith(color: theme.secondaryLabelColor),
+            ),
+            const SizedBox(height: 16),
+            CNButton(
+              onPressed: () =>
+                  Navigator.of(context, rootNavigator: true).push(CNPageRoute(builder: (_) => const _WindowLevelPage())),
+              buttonStyle: CNButtonStyle.borderedProminent,
+              children: const [CNChildText('Present a window-level page')],
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -114,8 +107,14 @@ class _DetailPage extends StatelessWidget {
 
     return CNPageScaffold(
       backgroundColor: theme.canvasColor,
-      // The nested route can pop, so CNToolbar synthesizes a leading back button.
-      toolBar: CNToolbar(title: Text(item.title)),
+      // The route can pop, so CNToolbar synthesizes a leading back button.
+      toolBar: CNToolbar(
+        title: Text(item.title),
+        automaticallyImplyLeading: true,
+        actions: [
+          CNToolbarButton('gearshape', onPressed: () => debugPrint('Settings tapped')),
+        ],
+      ),
       child: CNContentArea(
         builder: (context, scrollController) {
           return ListView(
@@ -175,7 +174,7 @@ class _WindowLevelPage extends StatelessWidget {
       // and the close button pops the whole page off the window.
       toolBar: CNToolbar(
         automaticallyImplyLeading: false,
-        leading: CNToolbarIconButton('xmark', tooltip: 'Close', onPressed: () => Navigator.of(context).maybePop()),
+        leading: [CNToolbarIconButton('xmark', tooltip: 'Close', onPressed: () => Navigator.of(context).maybePop())],
         title: const Text('Window-level page'),
       ),
       child: CNContentArea(

@@ -1,6 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:cupertino_native_example/demos/cn_resizable_panel_demo.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show ButtonStyle, Colors, IconButton, Icons, MaterialStateProperty, NoSplash, ThemeMode;
+import 'package:flutter/material.dart' show Colors, ThemeMode;
 import 'package:macos_window_utils/macos_window_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -23,11 +24,11 @@ import 'demos/cn_picker_demo.dart';
 import 'demos/cn_popover_demo.dart';
 import 'demos/cn_progressview_demo.dart';
 import 'demos/cn_search_field_demo.dart';
-import 'demos/cn_segmented_control_demo.dart';
-import 'demos/cn_tab_view_demo.dart';
 import 'demos/cn_secure_field_demo.dart';
+import 'demos/cn_segmented_control_demo.dart';
 import 'demos/cn_slider_demo.dart';
 import 'demos/cn_stepper_demo.dart';
+import 'demos/cn_tab_view_demo.dart';
 import 'demos/cn_text_demo.dart';
 import 'demos/cn_text_editor_demo.dart';
 import 'demos/cn_text_field_demo.dart';
@@ -75,6 +76,7 @@ const _entries = <_DemoEntry>[
   _DemoEntry('CNTextField', 'character.cursor.ibeam', TextFieldDemoPage()),
   _DemoEntry('CNTextEditor', 'text.alignleft', TextEditorDemoPage()),
   _DemoEntry('CNToggle', 'switch.2', ToggleDemo()),
+  _DemoEntry('Resizable Panel', 'square.split.2x2', ResizablePanelDemoPage()),
   _DemoEntry('Theme Tokens', 'paintbrush.pointed', ThemeDemoPage()),
 ];
 
@@ -123,7 +125,7 @@ class _DemoEntry {
   final String title;
 }
 
-class _DesktopDemoShell extends StatelessWidget {
+class _DesktopDemoShell extends StatefulWidget {
   const _DesktopDemoShell({required this.selectedIndex, required this.searchQuery, required this.onSearchChanged});
 
   final ValueChanged<String> onSearchChanged;
@@ -131,74 +133,68 @@ class _DesktopDemoShell extends StatelessWidget {
   final int selectedIndex;
 
   @override
+  State<_DesktopDemoShell> createState() => _DesktopDemoShellState();
+}
+
+class _DesktopDemoShellState extends State<_DesktopDemoShell> {
+  @override
   Widget build(BuildContext context) {
     // This context sits below CNWindowScope (the shell is CNWindow.child), so
     // the toolbar's sidebar-toggle can reach the scope here.
-    final appTheme = context.watch<AppTheme>();
+    context.watch<AppTheme>();
     final theme = CNTheme.of(context);
     final accentColor = theme.accentColor;
-    final entry = _entries[selectedIndex];
+    final entry = _entries[widget.selectedIndex];
 
     return CNPageScaffold(
       toolBar: CNToolbar(
         automaticallyImplyLeading: true,
-        leading: CNToolbarIconButton(
-          'sidebar.left',
-          tooltip: 'Toggle the navigation sidebar',
-          onPressed: () => CNWindowScope.of(context).toggleSidebar(),
-        ),
+        leading: [
+          CNToolbarIconButton(
+            'sidebar.left',
+            tooltip: 'Toggle the navigation sidebar',
+            onPressed: () => CNWindowScope.of(context).toggleSidebar(),
+          ),
+        ],
         title: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(entry.title),
-            const SizedBox(
-              height: 2.0,
-            ),
+            const SizedBox(height: 2.0),
             Text('Cupertino Native Demo', style: TextStyle(fontSize: theme.typography.caption1.fontSize)),
           ],
         ),
         backgroundColor: accentColor?.withLuminance(0.9),
         enableBlur: true,
         actions: [
-          // CNToolbarCustomItem(
-          //   overflowLabel: 'Toggle Sidebar',
-          //   builder: (context) {
-          //     return CnIconButton(size: 32, systemSymbolName: 'sidebar.left', onPressed: () => CNWindowScope.of(context).toggleSidebar());
-          //   },
+          // CNToolbarButton(
+          //   'star',
+          //   selectedSystemImage: 'star.fill',
+          //   isSelected: _starred,
+          //   onPressed: () => setState(() => _starred = !_starred),
+          //   label: 'Favorite',
           // ),
-          // CNToolbarDivider(),
-          // CNToolbarCustomItem(
-          //   builder: (context) {
-          //     return CNButton(
-          //       controlSize: CNControlSize.regular,
-          //       labelStyle: CNLabelStyle.iconOnly,
-          //       children: [CNChildLabel('New', systemImage: 'plus')],
-          //       onPressed: () {
-          //         debugPrint('New button pressed');
-          //       },
-          //     );
-          //   },
+          // CNToolbarComboBox(
+          //   items: _fontFamilies,
+          //   text: _fontFamily,
+          //   placeholder: 'Font',
+          //   completes: true,
+          //   width: 150,
+          //   onChanged: (value) => setState(() => _fontFamily = value),
           // ),
-          // CNToolbarDivider(),
-          CNToolbarPicker(
-            pickerStyle: CNPickerStyle.menu,
-            selection: appTheme.mode.name,
-            children: [
-              CNChildLabel('System Theme', tag: ThemeMode.system.name, systemImage: 'sun.lefthalf.filled'),
-              CNChildLabel('Light Theme', tag: ThemeMode.light.name, systemImage: 'sun.max'),
-              CNChildLabel('Dark Theme', tag: ThemeMode.dark.name, systemImage: 'moon.fill'),
-            ],
-            onChanged: (tag) => appTheme.mode = ThemeMode.values.byName(tag),
-          ),
+          // const CNToolbarSpacer(spacerUnits: 0.25),
+          // const CNToolbarDivider(),
+          // const CNToolbarSpacer(spacerUnits: 0.25),
+          createToolbarThemePicker(context),
           const CNToolbarSpacer(spacerUnits: 0.25),
           const CNToolbarDivider(),
           const CNToolbarSpacer(spacerUnits: 0.25),
         ],
-        search: CNSearchField(text: searchQuery ?? '', placeholder: 'Search', onChanged: onSearchChanged),
+        search: CNSearchField(text: widget.searchQuery ?? '', placeholder: 'Search', onChanged: widget.onSearchChanged),
       ),
-      child: KeyedSubtree(key: ValueKey(selectedIndex), child: entry.page),
+      child: KeyedSubtree(key: ValueKey(widget.selectedIndex), child: entry.page),
     );
   }
 }
@@ -446,4 +442,21 @@ class _StatusBarButton extends StatelessWidget {
       ),
     );
   }
+}
+
+
+CNToolbarItem createToolbarThemePicker(BuildContext context) {
+  final appTheme = context.watch<AppTheme>();
+
+  return CNToolbarPicker(
+    pickerStyle: CNPickerStyle.menu,
+    selection: appTheme.mode.name,
+    children: [
+      CNChildLabel('System Theme', tag: ThemeMode.system.name, systemImage: 'sun.lefthalf.filled'),
+      CNChildLabel('Light Theme', tag: ThemeMode.light.name, systemImage: 'sun.max'),
+      CNChildLabel('Dark Theme', tag: ThemeMode.dark.name, systemImage: 'moon.fill'),
+    ],
+    onChanged: (tag) => appTheme.mode = ThemeMode.values.byName(tag),
+  );
+
 }

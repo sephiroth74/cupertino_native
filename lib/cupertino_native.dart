@@ -76,6 +76,7 @@ export 'theme/cn_toggle_theme_data.dart';
 export 'widgets/cn_pixel_perfect_container.dart';
 export 'widgets/cn_window_geometry.dart';
 export 'components/cn_icon_button.dart';
+export 'widgets/cn_resizable_pane.dart';
 
 /// Top-level facade for simple plugin interactions.
 class CupertinoNative {
