@@ -15,6 +15,7 @@ class PickerDemoPage extends StatefulWidget {
 class _PickerDemoPageState extends State<PickerDemoPage> {
   CNControlSize controlSize = CNControlSize.regular;
   Color? foregroundColor;
+  FlutterPixelGeometry? geometry;
   bool isEnabled = true;
   CNPickerStyle pickerStyle = CNPickerStyle.menu;
   Color? tintColor;
@@ -38,6 +39,12 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                 const SizedBox(height: 16),
                 Center(
                   child: CNPixelPerfectContainer(
+                    onGeometryChanged: (value) {
+                      debugPrint('Picker geometry changed: $value');
+                      setState(() {
+                        geometry = value;
+                      });
+                    },
                     adjustPosition: true,
                     child: CNPicker(
                       debugLog: _kDebugLog,
@@ -70,6 +77,33 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 16),
+                if (geometry != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Window Position: ${geometry!.windowX}, ${geometry!.windowY}'),
+                        const SizedBox(height: 4),
+                        Text('Window Size: ${geometry!.windowWidth} x ${geometry!.windowHeight}'),
+                        const SizedBox(height: 4),
+                        Text('Widget Position: ${geometry!.x}, ${geometry!.y}'),
+                        const SizedBox(height: 4),
+                        Text('Widget Size: ${geometry!.width} x ${geometry!.height}'),
+                        const SizedBox(height: 4),
+                        Text('Widget Physical Position: ${geometry!.physicalX} x ${geometry!.physicalY}'),
+                        const SizedBox(height: 4),
+                        Text('Widget Physical Size: ${geometry!.physicalWidth} x ${geometry!.physicalHeight}'),
+                        const SizedBox(height: 4),
+                        Text('Widget Pixel Aligned Position: ${geometry!.pixelAlignedX} x ${geometry!.pixelAlignedY}'),
+                        const SizedBox(height: 4),
+                        Text('Widget Pixel Aligned Size: ${geometry!.pixelAlignedWidth} x ${geometry!.pixelAlignedHeight}'),
+
+                      ],
+                    ),
+                    
+                  ),
               ],
             ),
           ),

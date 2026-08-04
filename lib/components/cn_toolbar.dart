@@ -1,6 +1,5 @@
 import 'package:cupertino_native/components/cn_widget_debug_id_mixin.dart';
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:cupertino_native/widgets/cn_layout_bounds.dart';
 import 'package:flutter/widgets.dart';
 import 'package:macos_window_utils/macos/ns_visual_effect_view_material.dart';
 import 'package:macos_window_utils/widgets/visual_effect_subview_container/visual_effect_subview_container.dart';
@@ -18,6 +17,8 @@ const double _kToolbarItemWidth = 32.0;
 /// Left inset that clears the window traffic-light buttons when the sidebar is
 /// hidden (the sidebar itself sits under the lights when shown).
 const double _kTrafficLightInset = 70.0;
+
+const double _kToolbarItemDefaultHeight = 28.0;
 
 /// A preferred-size widget that can tell whether it fully obstructs content.
 ///
@@ -184,7 +185,7 @@ class CNToolbarButton extends CNToolbarItem {
     // from the layout — same approach as the native [CNToolbarIconButton].
     return LayoutBuilder(
       builder: (context, constraints) {
-        final side = constraints.hasBoundedHeight ? constraints.maxHeight : 28.0;
+        final side = constraints.hasBoundedHeight ? constraints.maxHeight : _kToolbarItemDefaultHeight;
         return CNIconButtonTheme(
           data: resolved,
           child: CNIconButton(
@@ -308,7 +309,7 @@ class CNToolbarDivider extends CNToolbarItem {
     final dividerColor = color ?? CNTheme.of(context).separatorColor;
     return SizedBox(
       width: padding.horizontal + 1,
-      height: 28,
+      height: _kToolbarItemDefaultHeight,
       child: Padding(
         padding: padding,
         child: ColoredBox(color: dividerColor),
@@ -359,7 +360,7 @@ class CNToolbarIconButton extends CNToolbarItem {
     // the same approach as `CnIconButton` (a fixed frame + centered CNImage).
     return LayoutBuilder(
       builder: (context, constraints) {
-        final side = constraints.hasBoundedHeight ? constraints.maxHeight : 28.0;
+        final side = constraints.hasBoundedHeight ? constraints.maxHeight : _kToolbarItemDefaultHeight;
         // Size the symbol to fit within the square frame (≈45% of the side) so
         // SwiftUI can center it inside the fixed frame instead of drawing it at
         // its default size and overflowing — mirrors `CnIconButton`'s font sizing.
@@ -522,6 +523,7 @@ class _CNToolbarState extends State<CNToolbar> with CNWidgetDebugIdMixin<CNToolb
       constrainedAxis: Axis.horizontal,
       alignment: Alignment.center,
       child: CNPixelPerfectContainer(
+        adjustPosition: true,
         child: child,
       ),
     );
@@ -536,8 +538,11 @@ class _CNToolbarState extends State<CNToolbar> with CNWidgetDebugIdMixin<CNToolb
   /// would strip. Everything else (dividers, spacers, custom widgets) is
   /// vertically centered by [_centerItem].
   Widget _wrapItem(CNToolbarItem item, BuildContext context) {
-    final child = item.build(context);
-    return item.managesOwnHeight ? CNPixelPerfectContainer(child: CNLayoutBounds(enabled: false, child: child)) : _centerItem(child);
+    final child = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: item.build(context),
+    );
+    return item.managesOwnHeight ? CNPixelPerfectContainer(child: child) : _centerItem(child);
   }
 
   @override

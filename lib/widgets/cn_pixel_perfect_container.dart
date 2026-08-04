@@ -87,18 +87,33 @@ class FlutterPixelGeometry {
         'pixelAlignedWidth: $pixelAlignedWidth, pixelAlignedHeight: $pixelAlignedHeight'
         ')';
   }
+
+  /// Prints a debug log of the geometry to the console.
+  void debugLog() {
+    debugPrint('Window Position: $windowX, $windowY');
+    debugPrint('Window Size: $windowWidth x $windowHeight');
+    debugPrint('Widget Position: $x, $y');
+    debugPrint('Widget Size: $width x $height');
+    debugPrint('Widget Physical Position: $physicalX x $physicalY');
+    debugPrint('Widget Physical Size: $physicalWidth x $physicalHeight');
+    debugPrint('Widget Pixel Aligned Position: $pixelAlignedX x $pixelAlignedY');
+    debugPrint('Widget Pixel Aligned Size: $pixelAlignedWidth x $pixelAlignedHeight');
+  }
 }
 
 /// Wrap any widget to measure its global geometry using only Flutter APIs.
 class CNPixelPerfectContainer extends StatefulWidget {
   /// Creates a pixel-geometry probe around [child].
-  const CNPixelPerfectContainer({super.key, required this.child, this.onGeometryChanged, this.adjustPosition = false});
+  const CNPixelPerfectContainer({super.key, required this.child, this.onGeometryChanged, this.adjustPosition = true, this.debugLog = false});
 
   /// If true, applies a local translation to keep x/y aligned to physical pixels.
   final bool adjustPosition;
 
   /// Child being measured.
   final Widget child;
+
+  /// If true, prints debug logs to the console whenever geometry changes.
+  final bool debugLog;
 
   /// Called whenever geometry changes.
   final ValueChanged<FlutterPixelGeometry>? onGeometryChanged;
@@ -235,7 +250,15 @@ class _CNPixelPerfectContainerState extends State<CNPixelPerfectContainer> with 
       windowHeight: windowFrame.height,
     );
 
-    final signature = [geometry.x, geometry.y, geometry.width, geometry.height, geometry.devicePixelRatio, windowFrame.x, windowFrame.y].join('|');
+    final signature = [
+      geometry.x,
+      geometry.y,
+      geometry.width,
+      geometry.height,
+      geometry.devicePixelRatio,
+      windowFrame.x,
+      windowFrame.y,
+    ].join('|');
 
     if (signature == _lastSignature) {
       // debugPrint('[PixelPerfectProbe]: skipping probe because geometry has not changed');
@@ -244,6 +267,10 @@ class _CNPixelPerfectContainerState extends State<CNPixelPerfectContainer> with 
 
     _lastSignature = signature;
     widget.onGeometryChanged?.call(geometry);
+
+    if(widget.debugLog) {
+      geometry.debugLog();
+    }
   }
 
   void _queueProbe() {

@@ -194,6 +194,11 @@ abstract final class CNColors {
     darkColor: Color(0xFF292E32),
   );
 
+  static const CupertinoDynamicColor sidebarBackgroundColor = CupertinoDynamicColor.withBrightness(
+    color: Color(0xFFF2F2F2),
+    darkColor: Color(0xFF1C1C1E),
+  );
+
   /// Transparent color (fully transparent, no matter the brightness)
   static const Color transparent = Color(0x00000000);
 }
