@@ -5,12 +5,14 @@ enum CNTextEditorDeserializer {
         model: CNViewModel<CNTextEditorPayload>,
         onTextChanged: ((String) -> Void)? = nil,
         onSelectionChanged: ((_ base: Int, _ extent: Int) -> Void)? = nil,
+        onFocusChanged: ((Bool) -> Void)? = nil,
         onSizeChanged: ((CGSize) -> Void)? = nil,
     ) -> AnyView {
         AnyView(_CNBoundTextEditorView(
             model: model,
             onTextChanged: onTextChanged,
             onSelectionChanged: onSelectionChanged,
+            onFocusChanged: onFocusChanged,
             onSizeChanged: onSizeChanged,
         ))
     }
@@ -19,6 +21,7 @@ enum CNTextEditorDeserializer {
         @ObservedObject var model: CNViewModel<CNTextEditorPayload>
         let onTextChanged: ((String) -> Void)?
         let onSelectionChanged: ((_ base: Int, _ extent: Int) -> Void)?
+        let onFocusChanged: ((Bool) -> Void)?
         let onSizeChanged: ((CGSize) -> Void)?
         @FocusState private var isFocused: Bool
 
@@ -41,6 +44,7 @@ enum CNTextEditorDeserializer {
                     textBinding: textBinding,
                     autofocus: payload.autofocus,
                     onSelectionChanged: onSelectionChanged,
+                    onFocusChanged: onFocusChanged,
                 ))
             } else {
                 makeTextEditorLegacy(textBinding: textBinding, payload: payload)
@@ -110,6 +114,7 @@ enum CNTextEditorDeserializer {
         let textBinding: Binding<String>
         let autofocus: Bool
         let onSelectionChanged: ((_ base: Int, _ extent: Int) -> Void)?
+        let onFocusChanged: ((Bool) -> Void)?
 
         @State private var localText: String = ""
         @State private var selection: TextSelection?
@@ -139,6 +144,9 @@ enum CNTextEditorDeserializer {
                 }
                 .onChange(of: selection) { _, newSelection in
                     reportSelection(newSelection)
+                }
+                .onChange(of: isFocused) { _, focused in
+                    onFocusChanged?(focused)
                 }
                 .onChange(of: model.payload.text) { _, newText in
                     // Dart pushed new text via applyPatch

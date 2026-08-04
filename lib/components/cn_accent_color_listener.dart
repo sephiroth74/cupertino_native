@@ -114,7 +114,7 @@ class CNAccentColorListener {
 
     // Start event channel subscription (sends initial value immediately)
     _subscription ??= _eventChannel.receiveBroadcastStream().listen((event) {
-      debugPrint('Accent color event: $event');
+      // debugPrint('[CNAccentColorListener] receiveBroadcastStream: $event');
       final parsed = _parse(event);
       if (parsed != null && parsed != _accentColor) {
         _accentColor = parsed;
@@ -132,13 +132,14 @@ class CNAccentColorListener {
         final result = await _methodChannel.invokeMethod<Map<dynamic, dynamic>>(
           'getAccentColor',
         );
-        debugPrint('Accent color method channel result: $result');
+        // debugPrint('[CNAccentColorListener] method channel result: $result');
         final parsed = _parse(result);
         if (parsed != null) {
           _accentColor = parsed;
         }
       } on MissingPluginException {
         // Plugin not available, keep default
+        debugPrint('[CNAccentColorListener] method channel not available');
       }
     }
   }
@@ -205,6 +206,7 @@ class CNAccentColorBuilder extends StatelessWidget {
       initialData: CNAccentColorListener.accentColor,
       stream: CNAccentColorListener.onChange,
       builder: (context, snapshot) {
+        // debugPrint('[CNAccentColorBuilder] build: ${snapshot.data}');
         return builder(
           context,
           snapshot.data ?? CNAccentColorListener.accentColor,

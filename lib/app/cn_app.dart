@@ -452,6 +452,9 @@ class _CNAppState extends State<CNApp> {
                 .toRadixString(16)
                 .padLeft(8, '0')
                 .toUpperCase();
+            debugPrint(
+              'CNApp: accentColor: $accentColorHex, isMainWindow: $isMainWindow',
+            );
             final mode = widget.themeMode ?? ThemeMode.system;
             final platformBrightness = MediaQuery.platformBrightnessOf(context);
             final useDarkTheme =

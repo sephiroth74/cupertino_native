@@ -185,6 +185,16 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
         channel.invokeMethod("textChanged", arguments: text)
     }
 
+    func controlTextDidBeginEditing(_: Notification) {
+        log("focusChanged: true")
+        channel.invokeMethod("focusChanged", arguments: true)
+    }
+
+    func controlTextDidEndEditing(_: Notification) {
+        log("focusChanged: false")
+        channel.invokeMethod("focusChanged", arguments: false)
+    }
+
     func control(_: NSControl, textView _: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
         if commandSelector == #selector(NSResponder.insertNewline(_:)) {
             let text = searchField.stringValue

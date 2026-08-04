@@ -3,7 +3,7 @@ import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
-const _kDebugLog = false;
+const _kDebugLog = true;
 const _kFontSize = 12.0;
 
 class TextFieldDemoPage extends StatefulWidget {
@@ -19,7 +19,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
   CNControlSize controlSize = CNControlSize.regular;
   final TextEditingController controller = TextEditingController(text: '');
   bool enabled = true;
-  CNFont? font = CNFont.system(CNFontSize.points(_kFontSize));
+  CNFont? font;
   double fontSize = _kFontSize;
   Color? foregroundColor;
   bool limitLength = false;
@@ -74,6 +74,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                     paddings: EdgeInsets.all(borderWidth ?? 0),
                     controlSize: controlSize,
                     debugLog: _kDebugLog,
+                    constraints: BoxConstraints(minWidth: 50, maxWidth: 100),
                     textFieldStyle: textFieldStyle,
                     controller: controller,
                     maxLength: limitLength ? 10 : null,
@@ -88,6 +89,9 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                     font: font,
                     tint: tintColor,
                     placeholder: 'Enter something...',
+                    onFocusChange: (value) {
+                      debugPrint('onFocusChange: $value');
+                    },
                     onChanged: enabled
                         ? (value) {
                             debugPrint('onChanged: $value');

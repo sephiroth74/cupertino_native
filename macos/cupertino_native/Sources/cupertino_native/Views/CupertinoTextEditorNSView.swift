@@ -24,6 +24,9 @@ class CupertinoTextEditorNSView: CNWidgetNSView<CNTextEditorPayload> {
                 guard let self, !isUpdatingFromDart else { return }
                 channel.invokeMethod("selectionChanged", arguments: ["base": base, "extent": extent])
             },
+            onFocusChanged: { [weak self] focused in
+                self?.channel.invokeMethod("focusChanged", arguments: focused)
+            },
             onSizeChanged: onSizeChanged,
         )
     }

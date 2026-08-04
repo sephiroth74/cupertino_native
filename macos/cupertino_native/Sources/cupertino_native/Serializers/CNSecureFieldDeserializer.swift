@@ -5,12 +5,14 @@ enum CNSecureFieldDeserializer {
         model: CNViewModel<CNSecureFieldPayload>,
         onTextChanged: ((String) -> Void)? = nil,
         onSubmitted: ((String) -> Void)? = nil,
+        onFocusChanged: ((Bool) -> Void)? = nil,
         onSizeChanged: ((CGSize) -> Void)? = nil,
     ) -> AnyView {
         AnyView(_CNBoundSecureFieldView(
             model: model,
             onTextChanged: onTextChanged,
             onSubmitted: onSubmitted,
+            onFocusChanged: onFocusChanged,
             onSizeChanged: onSizeChanged,
         ))
     }
@@ -19,6 +21,7 @@ enum CNSecureFieldDeserializer {
         @ObservedObject var model: CNViewModel<CNSecureFieldPayload>
         let onTextChanged: ((String) -> Void)?
         let onSubmitted: ((String) -> Void)?
+        let onFocusChanged: ((Bool) -> Void)?
         let onSizeChanged: ((CGSize) -> Void)?
         @FocusState private var isFocused: Bool
         @State private var localText: String = ""
@@ -70,6 +73,9 @@ enum CNSecureFieldDeserializer {
                         if newText != localText {
                             localText = newText
                         }
+                    }
+                    .onChange(of: isFocused) { _, focused in
+                        onFocusChanged?(focused)
                     }
                     .onAppear {
                         localText = model.payload.text

@@ -36,6 +36,7 @@ class CNSearchField extends CNWidget {
     this.autofocus = false,
     this.onChanged,
     this.onSubmitted,
+    this.onFocusChange,
     this.onSuggestionsRequested,
     this.shrink = true,
     this.constraints,
@@ -56,6 +57,9 @@ class CNSearchField extends CNWidget {
 
   /// Optional native NSFont descriptor.
   final CNFont? font;
+
+  /// Called when the field gains (`true`) or loses (`false`) focus.
+  final ValueChanged<bool>? onFocusChange;
 
   /// Called whenever the user changes the search text.
   final ValueChanged<String>? onChanged;
@@ -128,6 +132,10 @@ class _CNSearchFieldState extends CNWidgetState<CNSearchField> {
         final text = call.arguments as String? ?? '';
         logDebug('submitted: "$text"');
         widget.onSubmitted?.call(text);
+      case 'focusChanged':
+        final focused = call.arguments as bool? ?? false;
+        logDebug('focusChanged: $focused');
+        widget.onFocusChange?.call(focused);
       case 'requestSuggestions':
         final args = call.arguments as Map?;
         final query = (args?['query'] as String?) ?? '';

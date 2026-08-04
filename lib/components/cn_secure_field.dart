@@ -32,6 +32,7 @@ class CNSecureField extends CNWidget {
     this.inputFormatters,
     this.onChanged,
     this.onSubmitted,
+    this.onFocusChange,
     this.shrink = true,
     this.constraints,
     this.tint,
@@ -69,6 +70,9 @@ class CNSecureField extends CNWidget {
   /// cluster). Prefer this over a [LengthLimitingTextInputFormatter] as it
   /// avoids a Dart round-trip. When null, no native limit is applied.
   final int? maxLength;
+
+  /// Called when the field gains (`true`) or loses (`false`) focus.
+  final ValueChanged<bool>? onFocusChange;
 
   /// Called when the text changes from user input.
   final ValueChanged<String>? onChanged;
@@ -181,6 +185,9 @@ class _CNSecureFieldState extends CNWidgetState<CNSecureField> {
       case 'submitted':
         final text = call.arguments as String? ?? _controller.text;
         widget.onSubmitted?.call(text);
+      case 'focusChanged':
+        final focused = call.arguments as bool? ?? false;
+        widget.onFocusChange?.call(focused);
     }
   }
 

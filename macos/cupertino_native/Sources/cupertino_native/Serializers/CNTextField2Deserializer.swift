@@ -6,6 +6,7 @@ enum CNTextField2Deserializer {
         onTextChanged: ((String) -> Void)? = nil,
         onSelectionChanged: ((_ base: Int, _ extent: Int) -> Void)? = nil,
         onSubmitted: ((String) -> Void)? = nil,
+        onFocusChanged: ((Bool) -> Void)? = nil,
         onSizeChanged: ((CGSize) -> Void)? = nil,
     ) -> AnyView {
         AnyView(_CNBoundTextField2View(
@@ -13,6 +14,7 @@ enum CNTextField2Deserializer {
             onTextChanged: onTextChanged,
             onSelectionChanged: onSelectionChanged,
             onSubmitted: onSubmitted,
+            onFocusChanged: onFocusChanged,
             onSizeChanged: onSizeChanged,
         ))
     }
@@ -22,6 +24,7 @@ enum CNTextField2Deserializer {
         let onTextChanged: ((String) -> Void)?
         let onSelectionChanged: ((_ base: Int, _ extent: Int) -> Void)?
         let onSubmitted: ((String) -> Void)?
+        let onFocusChanged: ((Bool) -> Void)?
         let onSizeChanged: ((CGSize) -> Void)?
         @FocusState private var isFocused: Bool
 
@@ -46,6 +49,7 @@ enum CNTextField2Deserializer {
                     autofocus: payload.autofocus,
                     onSelectionChanged: onSelectionChanged,
                     onSubmitted: onSubmitted,
+                    onFocusChanged: onFocusChanged,
                 ))
             } else {
                 makeTextFieldLegacy(textBinding: textBinding, payload: payload)
@@ -142,6 +146,7 @@ enum CNTextField2Deserializer {
         let autofocus: Bool
         let onSelectionChanged: ((_ base: Int, _ extent: Int) -> Void)?
         let onSubmitted: ((String) -> Void)?
+        let onFocusChanged: ((Bool) -> Void)?
 
         @State private var localText: String = ""
         @State private var selection: TextSelection?
@@ -192,6 +197,9 @@ enum CNTextField2Deserializer {
             }
             .onChange(of: selection) { _, newSelection in
                 reportSelection(newSelection)
+            }
+            .onChange(of: isFocused) { _, focused in
+                onFocusChanged?(focused)
             }
             .onChange(of: model.payload.text) { _, newText in
                 // Dart pushed new text via applyPatch. Update the buffer first,

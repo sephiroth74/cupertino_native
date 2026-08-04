@@ -22,6 +22,9 @@ class CupertinoSecureFieldNSView: CNWidgetNSView<CNSecureFieldPayload> {
             onSubmitted: { [weak self] text in
                 self?.channel.invokeMethod("submitted", arguments: text)
             },
+            onFocusChanged: { [weak self] focused in
+                self?.channel.invokeMethod("focusChanged", arguments: focused)
+            },
             onSizeChanged: onSizeChanged,
         )
     }

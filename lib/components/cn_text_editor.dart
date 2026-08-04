@@ -32,6 +32,7 @@ class CNTextEditor extends CNWidget {
     this.maxLength,
     this.inputFormatters,
     this.onChanged,
+    this.onFocusChange,
     this.constraints,
     this.tint,
     this.foregroundColor,
@@ -69,6 +70,9 @@ class CNTextEditor extends CNWidget {
   /// cluster). Prefer this over a [LengthLimitingTextInputFormatter] as it
   /// avoids a Dart round-trip. When null, no native limit is applied.
   final int? maxLength;
+
+  /// Called when the editor gains (`true`) or loses (`false`) focus.
+  final ValueChanged<bool>? onFocusChange;
 
   /// Called when the text changes from user input.
   final ValueChanged<String>? onChanged;
@@ -190,6 +194,10 @@ class _CNTextEditorState extends CNWidgetState<CNTextEditor> {
           );
           _isUpdatingFromNative = false;
         }
+      case 'focusChanged':
+        final focused = call.arguments as bool? ?? false;
+        logDebug('focusChanged: $focused');
+        widget.onFocusChange?.call(focused);
     }
   }
 
