@@ -26,6 +26,7 @@ struct CNTextField2Payload: CNSharedPayloadFields {
     var autofocus: Bool
     var maxLength: Int?
     var enabled: Bool
+    var selectable: Bool
 
     init(viewId: String) {
         viewDebugId = viewId
@@ -50,6 +51,7 @@ struct CNTextField2Payload: CNSharedPayloadFields {
         autofocus = false
         maxLength = nil
         enabled = true
+        selectable = true
     }
 
     init?(channel: [String: Any], viewId: Int64) {
@@ -111,6 +113,10 @@ struct CNTextField2Payload: CNSharedPayloadFields {
 
         if let value = channel["enabled"] as? Bool {
             enabled = value
+        }
+
+        if let value = channel["selectable"] as? Bool {
+            selectable = value
         }
     }
 

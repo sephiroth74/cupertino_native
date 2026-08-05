@@ -41,21 +41,31 @@ enum CNTextField2Deserializer {
                 },
             )
 
-            var view: AnyView = if #available(macOS 15.0, *) {
-                AnyView(_CNTextField2WithSelection(
-                    model: model,
-                    textBinding: textBinding,
-                    payload: payload,
-                    autofocus: payload.autofocus,
-                    onSelectionChanged: onSelectionChanged,
-                    onSubmitted: onSubmitted,
-                    onFocusChanged: onFocusChanged,
-                ))
+            var view: AnyView
+            if payload.enabled {
+                // Editable path (with selection reporting on macOS 15+).
+                view = if #available(macOS 15.0, *) {
+                    AnyView(_CNTextField2WithSelection(
+                        model: model,
+                        textBinding: textBinding,
+                        payload: payload,
+                        autofocus: payload.autofocus,
+                        onSelectionChanged: onSelectionChanged,
+                        onSubmitted: onSubmitted,
+                        onFocusChanged: onFocusChanged,
+                    ))
+                } else {
+                    makeTextFieldLegacy(textBinding: textBinding, payload: payload)
+                }
             } else {
-                makeTextFieldLegacy(textBinding: textBinding, payload: payload)
+                // Read-only path. A `.constant` binding makes the field
+                // non-editable while its content stays selectable and copyable.
+                // Disabling the control additionally prevents selection.
+                view = makeReadOnlyTextField(payload: payload)
+                if !payload.selectable {
+                    view = AnyView(view.disabled(true))
+                }
             }
-
-            view = CNViewModifierApplicator.applyEnabled(payload.enabled, to: view)
 
             // Apply font
             view = CNViewModifierApplicator.applyFont(payload.font, to: view)
@@ -123,6 +133,18 @@ enum CNTextField2Deserializer {
                     TextField(placeholder, text: textBinding)
                         .onSubmit { onSubmitted?(model.payload.text) },
                 )
+            }
+        }
+
+        private func makeReadOnlyTextField(payload: CNTextField2Payload) -> AnyView {
+            let placeholder = payload.placeholder ?? ""
+            let promptView: Text? = payload.prompt.flatMap { $0.isEmpty ? nil : Text($0) }
+            // A `.constant` binding renders the current text without allowing edits,
+            // while keeping the content selectable and copyable.
+            if let promptView {
+                return AnyView(TextField(placeholder, text: .constant(payload.text), prompt: promptView))
+            } else {
+                return AnyView(TextField(placeholder, text: .constant(payload.text)))
             }
         }
 

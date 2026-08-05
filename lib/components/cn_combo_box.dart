@@ -298,6 +298,7 @@ class _CNComboBoxState extends State<CNComboBox> {
               paddings: widget.paddings,
               shrink: widget.shrink,
               constraints: BoxConstraints.tightFor(width: width),
+              enabled: widget.enabled,
               onChanged: widget.enabled ? _handleTextChanged : null,
               onSubmitted: widget.enabled ? _handleSubmitted : null,
             ),

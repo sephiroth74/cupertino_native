@@ -3,7 +3,7 @@ import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:flutter/cupertino.dart';
 
-const _kDebugLog = true;
+const _kDebugLog = false;
 const _kFontSize = 12.0;
 
 class TextFieldDemoPage extends StatefulWidget {
@@ -23,6 +23,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
   double fontSize = _kFontSize;
   Color? foregroundColor;
   bool limitLength = false;
+  bool selectable = true;
   String selectionInfo = '';
   CNTextFieldStyle textFieldStyle = CNTextFieldStyle.automatic;
   Color? tintColor;
@@ -74,9 +75,10 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                     paddings: EdgeInsets.all(borderWidth ?? 0),
                     controlSize: controlSize,
                     debugLog: _kDebugLog,
-                    constraints: BoxConstraints(minWidth: 50, maxWidth: 100),
                     textFieldStyle: textFieldStyle,
                     controller: controller,
+                    enabled: enabled,
+                    selectable: selectable,
                     maxLength: limitLength ? 10 : null,
                     overlay: borderWidth != null && borderColor != null
                         ? CNOverlay.stroke(
@@ -92,16 +94,12 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                     onFocusChange: (value) {
                       debugPrint('onFocusChange: $value');
                     },
-                    onChanged: enabled
-                        ? (value) {
-                            debugPrint('onChanged: $value');
-                          }
-                        : null,
-                    onSubmitted: enabled
-                        ? (value) {
-                            debugPrint('onSubmitted: $value');
-                          }
-                        : null,
+                    onChanged: (value) {
+                      debugPrint('onChanged: $value');
+                    },
+                    onSubmitted: (value) {
+                      debugPrint('onSubmitted: $value');
+                    },
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -115,6 +113,12 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
               'Enabled': CNToggle(
                 isOn: enabled,
                 onChanged: (value) => setState(() => enabled = value),
+              ),
+              'Selectable (read-only)': CNToggle(
+                isOn: selectable,
+                onChanged: enabled
+                    ? null
+                    : (value) => setState(() => selectable = value),
               ),
               'Max 10 chars': CNToggle(
                 isOn: limitLength,

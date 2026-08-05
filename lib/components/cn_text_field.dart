@@ -26,6 +26,8 @@ class CNTextField extends CNWidget {
     this.borderColor,
     this.borderWidth,
     this.autofocus = false,
+    this.enabled = true,
+    this.selectable = true,
     this.maxLength,
     this.inputFormatters,
     this.onChanged,
@@ -55,6 +57,19 @@ class CNTextField extends CNWidget {
   /// The text editing controller that controls the text field.
   /// If null, an internal controller is created.
   final TextEditingController? controller;
+
+  /// Whether the field allows editing. When false, the field is read-only.
+  ///
+  /// The content remains selectable (and copyable) while read-only unless
+  /// [selectable] is also set to false, which disables the control entirely.
+  final bool enabled;
+
+  /// Whether the field's content can be selected while read-only.
+  ///
+  /// Only has an effect when [enabled] is false. When true (the default), a
+  /// read-only field still lets the user select and copy its text. When false,
+  /// the control is disabled and its content cannot be selected.
+  final bool selectable;
 
   /// Font descriptor.
   final CNFont? font;
@@ -113,8 +128,6 @@ class CNTextField extends CNWidget {
 
   @override
   String get nativeViewType => _kNativeViewType;
-
-  bool get enabled => onChanged != null || onSubmitted != null;
 }
 
 /// Style for CNTextField2.
@@ -243,6 +256,7 @@ class _CNTextFieldState extends CNWidgetState<CNTextField> {
       'autofocus': widget.autofocus,
       'maxLength': widget.maxLength,
       'enabled': widget.enabled,
+      'selectable': widget.selectable,
     };
 
     widget.writeSharedFields(
