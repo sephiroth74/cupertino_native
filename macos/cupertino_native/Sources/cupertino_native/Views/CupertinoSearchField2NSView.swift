@@ -11,6 +11,7 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
     private var isUpdatingFromDart = false
     private var hasSuggestions = false
     private var autofocus = false
+    private var didAutofocus = false
     private var debugLog = false
     private var font: NSFont?
 
@@ -38,9 +39,20 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        if autofocus, window != nil {
+        // Autofocus only once: re-focusing on every window move would fight
+        // whatever the user (or another view) focused afterwards, and each
+        // makeFirstResponder on a search field selects all its text.
+        if autofocus, !didAutofocus, window != nil {
+            didAutofocus = true
             DispatchQueue.main.async { [weak self] in
-                self?.window?.makeFirstResponder(self?.searchField)
+                guard let self, let window = self.window else { return }
+                window.makeFirstResponder(self.searchField)
+                // Becoming first responder selects the whole string; move the
+                // caret to the end so typing continues instead of overwriting.
+                if let editor = self.searchField.currentEditor() {
+                    let end = (self.searchField.stringValue as NSString).length
+                    editor.selectedRange = NSRange(location: end, length: 0)
+                }
             }
         }
     }
@@ -80,9 +92,19 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
             debugLog = value
         }
 
-        if let text = args["text"] as? String {
+        // Only touch stringValue when it actually differs: assigning it selects
+        // the whole text by default, so re-applying the current value (e.g. an
+        // echo of what the user just typed) would reselect everything on every
+        // keystroke. When the value genuinely differs and the field is being
+        // edited, collapse the selection to the end so typing continues
+        // naturally instead of overwriting the field.
+        if let text = args["text"] as? String, text != searchField.stringValue {
             isUpdatingFromDart = true
             searchField.stringValue = text
+            if let editor = searchField.currentEditor() {
+                let end = (text as NSString).length
+                editor.selectedRange = NSRange(location: end, length: 0)
+            }
             isUpdatingFromDart = false
         }
 

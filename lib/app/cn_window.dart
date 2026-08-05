@@ -121,7 +121,11 @@ class CNWindow extends StatefulWidget {
     this.statusBar,
     this.state = NSVisualEffectViewState.followsWindowActiveState,
     this.toolbarSpansFullWidth = false,
+    this.childMaterial = NSVisualEffectViewMaterial.fullScreenUI,
   });
+
+  /// The material of the child widget. This is used to determine the background color of the window.
+  final NSVisualEffectViewMaterial childMaterial;
 
   /// The background color of the window. If null, the default canvas color from the current [CNTheme] is used.
   final Color? backgroundColor;
@@ -176,8 +180,12 @@ class _CNWindowState extends State<CNWindow> {
   SystemMouseCursor _sidebarCursor = SystemMouseCursors.resizeColumn;
   double _sidebarDragStartPosition = 0.0;
   double _sidebarDragStartWidth = 0.0;
-  int _sidebarSlideDuration = 0;
   double _sidebarWidth = 0.0;
+  // Duration currently driving the AnimatedPositioned children. Held at
+  // [Duration.zero] except while a toggle is in flight, so resize drags stay
+  // instantaneous; the active toggler sets it to the triggering panel's
+  // slideDuration and resets it once the slide completes.
+  Duration _slideDuration = Duration.zero;
   SystemMouseCursor _statusBarCursor = SystemMouseCursors.resizeUp;
   double _statusBarDragStartPosition = 0.0;
   double _statusBarDragStartSize = 0.0;
@@ -209,6 +217,21 @@ class _CNWindowState extends State<CNWindow> {
       if (endSidebar.maxWidth! < _endSidebarWidth) {
         _endSidebarWidth = endSidebar.maxWidth!;
       }
+    }
+  }
+
+  /// Drives a panel toggle with its slide animation: sets [_slideDuration] to
+  /// the triggering panel's duration, flips its visibility, then resets the
+  /// duration to zero once the slide completes so subsequent resize drags stay
+  /// instantaneous. A [Duration.zero] duration toggles instantly (no animation).
+  Future<void> _animateToggle(Duration duration, VoidCallback toggle) async {
+    setState(() {
+      _slideDuration = duration;
+      toggle();
+    });
+    await Future<void>.delayed(duration);
+    if (mounted) {
+      setState(() => _slideDuration = Duration.zero);
     }
   }
 
@@ -251,7 +274,7 @@ class _CNWindowState extends State<CNWindow> {
     Color dividerColor = theme.separatorColor;
     CNBrightnessOverrideHandler.ensureMatchingBrightness(theme.brightness);
     const curve = Curves.linearToEaseOut;
-    final duration = Duration(milliseconds: _sidebarSlideDuration);
+    final duration = _slideDuration;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -332,17 +355,11 @@ class _CNWindowState extends State<CNWindow> {
                 child: VisualEffectSubviewContainer(
                   state: state,
                   material: sidebar.material,
-                  child: DecoratedBox(
-                    decoration: const BoxDecoration(
-                      color: Color.fromRGBO(0, 0, 0, 1.0),
-                      backgroundBlendMode: BlendMode.clear,
-                    ),
-                    child: Container(
-                      color: sidebar.backgroundColor ?? theme.canvasColor,
-                      child: Padding(
-                        padding: sidebar.padding,
-                        child: sidebar.builder(context),
-                      ),
+                  child: Container(
+                    color: sidebar.backgroundColor ?? theme.canvasColor,
+                    child: Padding(
+                      padding: sidebar.padding,
+                      child: sidebar.builder(context),
                     ),
                   ),
                 ),
@@ -379,7 +396,7 @@ class _CNWindowState extends State<CNWindow> {
               bottom: visiblePanelHeight,
               child: ClipRect(
                 child: VisualEffectSubviewContainer(
-                  material: NSVisualEffectViewMaterial.fullScreenUI,
+                  material: widget.childMaterial,
                   state: state,
                   child: widget.child ?? const SizedBox.shrink(),
                 ),
@@ -472,17 +489,11 @@ class _CNWindowState extends State<CNWindow> {
                   child: VisualEffectSubviewContainer(
                     state: state,
                     material: endSidebar.material,
-                    child: DecoratedBox(
-                      decoration: const BoxDecoration(
-                        color: Color.fromRGBO(0, 0, 0, 1.0),
-                        backgroundBlendMode: BlendMode.clear,
-                      ),
-                      child: Container(
-                        color: endSidebar.backgroundColor ?? theme.canvasColor,
-                        child: Padding(
-                          padding: endSidebar.padding,
-                          child: endSidebar.builder(context),
-                        ),
+                    child: Container(
+                      color: endSidebar.backgroundColor ?? theme.canvasColor,
+                      child: Padding(
+                        padding: endSidebar.padding,
+                        child: endSidebar.builder(context),
                       ),
                     ),
                   ),
@@ -722,31 +733,18 @@ class _CNWindowState extends State<CNWindow> {
           visibleSidebarWidth: visibleSidebarWidth,
           visibleEndSidebarWidth: visibleEndSidebarWidth,
           toolbarSpansFullWidth: widget.toolbarSpansFullWidth,
-          sidebarToggler: () async {
-            debugPrint('toggleSidebar: $_showSidebar -> ${!_showSidebar}');
-            setState(() => _sidebarSlideDuration = 300);
-            setState(() => _showSidebar = !_showSidebar);
-            await Future.delayed(Duration(milliseconds: _sidebarSlideDuration));
-            if (mounted) {
-              setState(() => _sidebarSlideDuration = 0);
-            }
-          },
-          endSidebarToggler: () async {
-            setState(() => _sidebarSlideDuration = 300);
-            setState(() => _showEndSidebar = !_showEndSidebar);
-            await Future.delayed(Duration(milliseconds: _sidebarSlideDuration));
-            if (mounted) {
-              setState(() => _sidebarSlideDuration = 0);
-            }
-          },
-          statusBarToggler: () async {
-            setState(() => _sidebarSlideDuration = 300);
-            setState(() => _showStatusBarPanel = !_showStatusBarPanel);
-            await Future.delayed(Duration(milliseconds: _sidebarSlideDuration));
-            if (mounted) {
-              setState(() => _sidebarSlideDuration = 0);
-            }
-          },
+          sidebarToggler: () => _animateToggle(
+            sidebar?.slideDuration ?? Duration.zero,
+            () => _showSidebar = !_showSidebar,
+          ),
+          endSidebarToggler: () => _animateToggle(
+            endSidebar?.slideDuration ?? Duration.zero,
+            () => _showEndSidebar = !_showEndSidebar,
+          ),
+          statusBarToggler: () => _animateToggle(
+            statusBar?.slideDuration ?? Duration.zero,
+            () => _showStatusBarPanel = !_showStatusBarPanel,
+          ),
           child: windowContent,
         );
       },

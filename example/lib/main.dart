@@ -160,6 +160,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     final isDark = theme.brightness == Brightness.dark;
 
     return CNPageScaffold(
+      backgroundColor: CNColors.transparent,
       toolBar: CNToolbar(
         automaticallyImplyLeading: true,
         leading: [
@@ -260,7 +261,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
             return CNWindow(
               state: NSVisualEffectViewState.followsWindowActiveState,
-              backgroundColor: CNTheme.of(context).canvasColor.withAlpha(1),
+              backgroundColor: CNTheme.of(context).canvasColor,
+              childMaterial: NSVisualEffectViewMaterial.windowBackground,
               toolbarSpansFullWidth: true,
               sidebar: CNSidebar(
                 builder: (context) {
@@ -279,10 +281,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 maxWidth: 400,
                 startWidth: 250,
                 dragClosed: true,
-                // In full-width toolbar mode the window already drops the sidebar
-                // below the toolbar strip, so no extra top padding is needed here.
-                material: NSVisualEffectViewMaterial.fullScreenUI,
-                backgroundColor: CNColors.canvasColor.withAlpha(127),
+                material: NSVisualEffectViewMaterial.windowBackground,
+                backgroundColor: CNColors.transparent,
+                // backgroundColor: CNColors.canvasColor.withAlpha(127),
               ),
               statusBar: CNStatusBar(
                 height: 32,

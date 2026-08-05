@@ -52,6 +52,7 @@ class CNStatusBar {
     this.shownByDefault = false,
     this.paddingStart = 8.0,
     this.paddingEnd = 8.0,
+    this.slideDuration = const Duration(milliseconds: 300),
   }) : dragClosedBuffer = dragClosedBuffer ?? expandedMinHeight / 2;
 
   /// Background color of the status bar. If null, uses the theme's canvas color.
@@ -116,4 +117,11 @@ class CNStatusBar {
 
   /// Whether the expanded panel is shown by default.
   final bool shownByDefault;
+
+  /// Duration of the expand/collapse slide animation when the panel is toggled.
+  ///
+  /// Defaults to 300ms. Set to [Duration.zero] to disable the animation and
+  /// toggle instantly. Only affects the toggle animation; resize drags remain
+  /// instantaneous.
+  final Duration slideDuration;
 }

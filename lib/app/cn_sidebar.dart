@@ -20,6 +20,7 @@ class CNSidebar {
     this.shownByDefault = true,
     this.separatorColor,
     this.material = NSVisualEffectViewMaterial.sidebar,
+    this.slideDuration = const Duration(milliseconds: 300),
   }) : dragClosedBuffer = dragClosedBuffer ?? minWidth / 2;
 
   /// Optional background color applied to the sidebar container.
@@ -54,6 +55,16 @@ class CNSidebar {
 
   /// Optional color for the separator line between the sidebar and the main content.
   final Color? separatorColor;
+
+  /// Duration of the show/hide slide animation when the sidebar is toggled.
+  ///
+  /// Defaults to 300ms. Set to [Duration.zero] to disable the animation and
+  /// toggle instantly. In the default split layout the main content area is
+  /// resized in step with the slide, so a long duration is inherently more
+  /// expensive (the native content view relayouts every frame); shortening this
+  /// — or using [Duration.zero] — reduces or removes that cost. Only affects the
+  /// toggle animation; resize drags remain instantaneous.
+  final Duration slideDuration;
 
   /// Whether the sidebar is shown by default when the window opens.
   final bool shownByDefault;

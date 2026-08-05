@@ -56,7 +56,10 @@ class CNComboBox extends StatefulWidget {
     this.foregroundColor,
     this.paddings,
     this.help,
+    this.overlay,
   });
+
+  final CNOverlay? overlay;
 
   /// Whether the combo box auto-completes the field as the user types,
   /// matching the typed prefix against [items].
@@ -297,6 +300,7 @@ class _CNComboBoxState extends State<CNComboBox> {
               help: widget.help,
               paddings: widget.paddings,
               shrink: widget.shrink,
+              overlay: widget.overlay,
               constraints: BoxConstraints.tightFor(width: width),
               enabled: widget.enabled,
               onChanged: widget.enabled ? _handleTextChanged : null,
