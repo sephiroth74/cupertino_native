@@ -21,12 +21,13 @@ class _TextEditorDemoPageState extends State<TextEditorDemoPage> {
     text: 'The quick brown fox jumps over the lazy dog.\n\nType here…',
   );
 
-  bool editable = true;
+  bool enabled = true;
   CNFont? font = CNFont.system(CNFontSize.points(_kFontSize));
   double fontSize = _kFontSize;
   Color? foregroundColor;
   bool limitLength = false;
   bool lowercaseOnly = false;
+  bool selectable = true;
   String selectionInfo = '';
   Color? tintColor;
 
@@ -73,7 +74,8 @@ class _TextEditorDemoPageState extends State<TextEditorDemoPage> {
                       autofocus: true,
                       debugLog: _kDebugLog,
                       controller: controller,
-                      editable: editable,
+                      enabled: enabled,
+                      selectable: selectable,
                       maxLength: limitLength ? 20 : null,
                       inputFormatters: lowercaseOnly
                           ? [
@@ -103,9 +105,15 @@ class _TextEditorDemoPageState extends State<TextEditorDemoPage> {
           RightSideOptionContainer(
             title: 'Options',
             options: {
-              'Editable': CNToggle(
-                isOn: editable,
-                onChanged: (value) => setState(() => editable = value),
+              'Enabled': CNToggle(
+                isOn: enabled,
+                onChanged: (value) => setState(() => enabled = value),
+              ),
+              'Selectable (read-only)': CNToggle(
+                isOn: selectable,
+                onChanged: enabled
+                    ? null
+                    : (value) => setState(() => selectable = value),
               ),
               'Max 20 chars': CNToggle(
                 isOn: limitLength,

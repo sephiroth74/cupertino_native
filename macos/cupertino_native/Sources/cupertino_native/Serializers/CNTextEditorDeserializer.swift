@@ -38,21 +38,28 @@ enum CNTextEditorDeserializer {
                 },
             )
 
-            var view: AnyView = if #available(macOS 15.0, *) {
-                AnyView(_CNTextEditorWithSelection(
-                    model: model,
-                    textBinding: textBinding,
-                    autofocus: payload.autofocus,
-                    onSelectionChanged: onSelectionChanged,
-                    onFocusChanged: onFocusChanged,
-                ))
+            var view: AnyView
+            if payload.enabled {
+                // Editable path (with selection reporting on macOS 15+).
+                view = if #available(macOS 15.0, *) {
+                    AnyView(_CNTextEditorWithSelection(
+                        model: model,
+                        textBinding: textBinding,
+                        autofocus: payload.autofocus,
+                        onSelectionChanged: onSelectionChanged,
+                        onFocusChanged: onFocusChanged,
+                    ))
+                } else {
+                    makeTextEditorLegacy(textBinding: textBinding, payload: payload)
+                }
             } else {
-                makeTextEditorLegacy(textBinding: textBinding, payload: payload)
-            }
-
-            // Read-only editing behaviour.
-            if !payload.editable {
-                view = AnyView(view.disabled(true))
+                // Read-only path. A `.constant` binding makes the editor
+                // non-editable while its content stays selectable and copyable.
+                // Disabling the control additionally prevents selection.
+                view = AnyView(TextEditor(text: .constant(payload.text)))
+                if !payload.selectable {
+                    view = AnyView(view.disabled(true))
+                }
             }
 
             // Apply font

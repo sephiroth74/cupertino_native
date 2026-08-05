@@ -20,7 +20,8 @@ struct CNTextEditorPayload: CNSharedPayloadFields {
     var borderColor: Int?
     var borderWidth: Double?
     var autofocus: Bool
-    var editable: Bool
+    var enabled: Bool
+    var selectable: Bool
     var maxLength: Int?
 
     init(viewId: String) {
@@ -40,7 +41,8 @@ struct CNTextEditorPayload: CNSharedPayloadFields {
         borderColor = nil
         borderWidth = nil
         autofocus = false
-        editable = true
+        enabled = true
+        selectable = true
         maxLength = nil
     }
 
@@ -81,8 +83,12 @@ struct CNTextEditorPayload: CNSharedPayloadFields {
             autofocus = value
         }
 
-        if let value = channel["editable"] as? Bool {
-            editable = value
+        if let value = channel["enabled"] as? Bool {
+            enabled = value
+        }
+
+        if let value = channel["selectable"] as? Bool {
+            selectable = value
         }
 
         if channel.keys.contains("maxLength") {
@@ -92,7 +98,8 @@ struct CNTextEditorPayload: CNSharedPayloadFields {
 
     func identityKey() -> String {
         var parts = sharedIdentityKey()
-        parts.append(editable ? "editable" : "readonly")
+        parts.append(enabled ? "enabled" : "disabled")
+        parts.append(selectable ? "selectable" : "nonselectable")
         return parts.joined(separator: "|")
     }
 }

@@ -28,7 +28,8 @@ class CNTextEditor extends CNWidget {
     this.borderColor,
     this.borderWidth,
     this.autofocus = false,
-    this.editable = true,
+    this.enabled = true,
+    this.selectable = true,
     this.maxLength,
     this.inputFormatters,
     this.onChanged,
@@ -54,9 +55,18 @@ class CNTextEditor extends CNWidget {
   /// If null, an internal controller is created.
   final TextEditingController? controller;
 
-  /// Whether the editor allows editing. When false, the content is
-  /// selectable but read-only.
-  final bool editable;
+  /// Whether the editor allows editing. When false, the editor is read-only.
+  ///
+  /// The content remains selectable (and copyable) while read-only unless
+  /// [selectable] is also set to false, which disables the control entirely.
+  final bool enabled;
+
+  /// Whether the editor's content can be selected while read-only.
+  ///
+  /// Only has an effect when [enabled] is false. When true (the default), a
+  /// read-only editor still lets the user select and copy its text. When
+  /// false, the control is disabled and its content cannot be selected.
+  final bool selectable;
 
   /// Font descriptor applied to the editor's text.
   final CNFont? font;
@@ -215,7 +225,8 @@ class _CNTextEditorState extends CNWidgetState<CNTextEditor> {
       'borderColor': resolveColorToArgb(widget.borderColor, context),
       'borderWidth': widget.borderWidth,
       'autofocus': widget.autofocus,
-      'editable': widget.editable,
+      'enabled': widget.enabled,
+      'selectable': widget.selectable,
       'maxLength': widget.maxLength,
     };
 
