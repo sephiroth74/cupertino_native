@@ -515,6 +515,7 @@ CNToolbarItem createToolbarThemePicker(BuildContext context) {
   final appTheme = context.watch<AppTheme>();
 
   return CNToolbarPicker(
+    help: 'Select the app theme (light, dark, or system)',
     pickerStyle: CNPickerStyle.menu,
     selection: appTheme.mode.name,
     background: CNBackground.shape(

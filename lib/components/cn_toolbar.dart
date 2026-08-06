@@ -458,7 +458,11 @@ class CNToolbarPicker extends CNToolbarItem {
     this.pickerStyle = CNPickerStyle.menu,
     this.tint,
     this.background,
+    this.help,
   });
+
+  /// Optional tooltip text shown on hover (SwiftUI `.help()`).
+  final String? help;
 
   /// Optional background applied to the picker.
   final CNBackground? background;
@@ -489,6 +493,7 @@ class CNToolbarPicker extends CNToolbarItem {
       selection: selection,
       label: label,
       pickerStyle: pickerStyle.name,
+      help: help,
     );
   }
 
