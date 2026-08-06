@@ -22,6 +22,7 @@ class CNText extends CNWidget {
     this.paddings,
     this.help,
     this.overlay,
+    this.background,
     this.lineLimit,
     this.lineLimitReservesSpace,
     this.textScale,
@@ -57,6 +58,9 @@ class CNText extends CNWidget {
 
   @override
   final CNOverlay? overlay;
+
+  @override
+  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

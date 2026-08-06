@@ -36,6 +36,11 @@ final class CNContextMenuHandler: NSObject {
         }
 
         let menu = buildNSMenu(from: items)
+
+        if let menuWidth = asDouble(args["minWidth"]) {
+            menu.minimumWidth = menuWidth
+        }
+
         let anchorPoint = resolveMenuPoint(args: args, contentView: contentView)
         selectedMenuItem = nil
         _ = menu.popUp(positioning: nil, at: anchorPoint, in: contentView)

@@ -32,6 +32,7 @@ class CNSlider extends CNWidget {
     this.paddings,
     this.help,
     this.overlay,
+    this.background,
   }) : assert(min < max),
        assert(value >= min && value <= max),
        assert(step == null || step > 0),
@@ -81,6 +82,9 @@ class CNSlider extends CNWidget {
 
   @override
   final CNOverlay? overlay;
+
+  @override
+  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

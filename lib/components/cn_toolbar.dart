@@ -457,7 +457,11 @@ class CNToolbarPicker extends CNToolbarItem {
     this.onChanged,
     this.pickerStyle = CNPickerStyle.menu,
     this.tint,
+    this.background,
   });
+
+  /// Optional background applied to the picker.
+  final CNBackground? background;
 
   /// Picker items (each with a tag).
   final List<CNChild> children;
@@ -497,6 +501,7 @@ class CNToolbarPicker extends CNToolbarItem {
       onChanged: onChanged,
       pickerStyle: pickerStyle,
       tint: tint,
+      background: background,
       shrink: true,
     );
   }

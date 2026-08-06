@@ -98,10 +98,12 @@ enum CNTextField2Deserializer {
                 )
             }
 
-            view = CNViewModifierApplicator.applyHelp(payload.help, to: view)
-            view = CNViewModifierApplicator.applyOverlay(payload.overlay, to: view)
             // Paddings
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
+
+            view = CNViewModifierApplicator.applyHelp(payload.help, to: view)
+            view = CNViewModifierApplicator.applyBackground(payload.background, to: view)
+            view = CNViewModifierApplicator.applyOverlay(payload.overlay, to: view)
 
             // Debug log rectangle
             view = CNViewModifierApplicator.applyDebugLogRectangle(payload.debugLog, to: view)

@@ -46,6 +46,7 @@ export 'extensions/cn_dynamic_color.dart';
 export 'extensions/color_ext.dart';
 export 'model/control_size.dart';
 export 'style/button_style.dart';
+export 'style/cn_background.dart';
 export 'style/cn_colors.dart';
 export 'style/cn_overlay.dart';
 export 'style/cn_shape.dart';

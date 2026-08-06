@@ -28,6 +28,7 @@ class CNLabel extends CNWidget {
     this.paddings,
     this.help,
     this.overlay,
+    this.background,
   });
 
   /// Convenience constructor that accepts plain strings.
@@ -76,6 +77,9 @@ class CNLabel extends CNWidget {
 
   @override
   final CNOverlay? overlay;
+
+  @override
+  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

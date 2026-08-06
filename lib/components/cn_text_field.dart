@@ -40,6 +40,7 @@ class CNTextField extends CNWidget {
     this.paddings,
     this.help,
     this.overlay,
+    this.background,
   });
 
   /// Whether the field should automatically receive focus when created.
@@ -113,6 +114,9 @@ class CNTextField extends CNWidget {
 
   @override
   final CNOverlay? overlay;
+
+  @override
+  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

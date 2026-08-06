@@ -10,6 +10,7 @@ struct CNMenu2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
     var foregroundColor: Int?
     var help: String?
     var overlay: [String: Any]?
+    var background: [String: Any]?
     var enabled: Bool?
 
     var items: [[String: Any]]
@@ -30,6 +31,7 @@ struct CNMenu2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
         foregroundColor = nil
         help = nil
         overlay = nil
+        background = nil
         enabled = nil
         items = []
         label = []

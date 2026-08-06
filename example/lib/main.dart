@@ -517,6 +517,10 @@ CNToolbarItem createToolbarThemePicker(BuildContext context) {
   return CNToolbarPicker(
     pickerStyle: CNPickerStyle.menu,
     selection: appTheme.mode.name,
+    background: CNBackground.shape(
+      const CNRoundedRectangle(cornerRadius: 6),
+      color: CNTheme.of(context).accentColor?.withAlpha(51),
+    ),
     children: [
       CNChildLabel(
         'System Theme',

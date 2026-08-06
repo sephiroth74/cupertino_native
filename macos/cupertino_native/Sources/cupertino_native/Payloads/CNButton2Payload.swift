@@ -10,6 +10,7 @@ struct CNButton2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
     var foregroundColor: Int?
     var help: String?
     var overlay: [String: Any]?
+    var background: [String: Any]?
     var enabled: Bool?
 
     var children: [[String: Any]]
@@ -29,6 +30,7 @@ struct CNButton2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
         foregroundColor = nil
         help = nil
         overlay = nil
+        background = nil
         children = []
         buttonStyle = nil
         role = nil

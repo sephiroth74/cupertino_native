@@ -11,6 +11,7 @@ struct CNProgressView2Payload: CNSharedPayloadFields {
     var foregroundColor: Int?
     var help: String?
     var overlay: [String: Any]?
+    var background: [String: Any]?
 
     // ProgressView-specific fields
     var style: String?
@@ -28,6 +29,7 @@ struct CNProgressView2Payload: CNSharedPayloadFields {
         foregroundColor = nil
         help = nil
         overlay = nil
+        background = nil
         style = "linear"
         controlSize = "regular"
         value = nil

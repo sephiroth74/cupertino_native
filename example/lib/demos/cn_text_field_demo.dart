@@ -27,6 +27,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
   String selectionInfo = '';
   CNTextFieldStyle textFieldStyle = CNTextFieldStyle.automatic;
   Color? tintColor;
+  bool withBackground = false;
 
   @override
   void dispose() {
@@ -79,6 +80,18 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                     controller: controller,
                     enabled: enabled,
                     selectable: selectable,
+                    background: withBackground
+                        ? CNBackground.shape(
+                            CNRoundedRectangle(
+                              cornerRadius: 8.0,
+                              style: CNRoundedCornerStyle.circular,
+                              inset: 0.0,
+                            ),
+                            color: CNTheme.of(
+                              context,
+                            ).accentColor?.withAlpha(51),
+                          )
+                        : null,
                     maxLength: limitLength ? 10 : null,
                     overlay: borderWidth != null && borderColor != null
                         ? CNOverlay.stroke(
@@ -170,6 +183,10 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                 onChanged: borderColor != null
                     ? (newWidth) => setState(() => borderWidth = newWidth)
                     : null,
+              ),
+              'Background': CNToggle(
+                isOn: withBackground,
+                onChanged: (value) => setState(() => withBackground = value),
               ),
             },
           ),

@@ -48,6 +48,7 @@ class CNComboBox extends StatefulWidget {
     this.font,
     this.style = CNComboBoxStyle.bordered,
     this.completes = false,
+    this.editable = true,
     this.onChanged,
     this.onSelectionChanged,
     this.shrink = true,
@@ -57,9 +58,19 @@ class CNComboBox extends StatefulWidget {
     this.paddings,
     this.help,
     this.overlay,
+    this.background,
+    this.minMenuWidth = true,
   });
 
+  /// Defines if the context menu size should be at least the width of the combo box field.
+  final bool minMenuWidth;
+
+  /// Optional decorative layer drawn on top of the text field (SwiftUI
   final CNOverlay? overlay;
+
+  /// Optional decorative layer drawn behind the text field (SwiftUI
+  /// `.background(alignment:content:)`), e.g. a colored fill or shape.
+  final CNBackground? background;
 
   /// Whether the combo box auto-completes the field as the user types,
   /// matching the typed prefix against [items].
@@ -70,6 +81,14 @@ class CNComboBox extends StatefulWidget {
 
   /// When true, enables debug logging for this specific widget instance.
   final bool debugLog;
+
+  /// Whether the user can edit the text field by typing.
+  ///
+  /// When true (the default), the field behaves like a normal editable combo
+  /// box. When false, the field is read-only *and* its content is not
+  /// selectable: the field acts purely as a menu trigger, so clicking anywhere
+  /// on the control (not just the trailing caret) opens the pop-up list.
+  final bool editable;
 
   /// Optional native font descriptor.
   final CNFont? font;
@@ -218,6 +237,7 @@ class _CNComboBoxState extends State<CNComboBox> {
     final origin = box.localToGlobal(Offset.zero);
     final anchorX = origin.dx;
     final anchorY = origin.dy + box.size.height;
+    final menuWidth = box.size.width;
 
     final items = <CNChild>[
       for (var i = 0; i < widget.items.length; i++)
@@ -233,6 +253,7 @@ class _CNComboBoxState extends State<CNComboBox> {
         'items': items.map((c) => c.toChildPayload(context)).toList(),
         'x': anchorX,
         'y': anchorY,
+        if (widget.minMenuWidth) 'minWidth': menuWidth,
       });
     } on PlatformException catch (e) {
       _log('showContextMenu2 failed: $e');
@@ -288,6 +309,17 @@ class _CNComboBoxState extends State<CNComboBox> {
         // the text. Height is left intrinsic (stable from control size / font).
         final width = _resolveWidth(parentConstraints);
 
+        // The field is editable only when the control is enabled *and* the
+        // caller opted into editing. A read-only field emits no text changes,
+        // so its `onChanged`/`onSubmitted` handlers are dropped — the pop-up
+        // menu still drives value/selection changes.
+        final fieldEditable = widget.enabled && widget.editable;
+
+        // A non-editable combo box has no text interaction (neither typing nor
+        // selecting), so the whole control acts like the caret: a click
+        // anywhere opens the pop-up list, not just the trailing button.
+        final wholeFieldOpensMenu = widget.enabled && !fieldEditable;
+
         Widget content = Stack(
           key: _fieldKey,
           children: [
@@ -301,19 +333,30 @@ class _CNComboBoxState extends State<CNComboBox> {
               paddings: widget.paddings,
               shrink: widget.shrink,
               overlay: widget.overlay,
+              background: widget.background,
               constraints: BoxConstraints.tightFor(width: width),
-              enabled: widget.enabled,
-              onChanged: widget.enabled ? _handleTextChanged : null,
-              onSubmitted: widget.enabled ? _handleSubmitted : null,
+              enabled: fieldEditable,
+              // Read-only implies non-selectable here: the full-field tap layer
+              // owns the clicks, so the text must not steal them for selection.
+              selectable: fieldEditable,
+              onChanged: fieldEditable ? _handleTextChanged : null,
+              onSubmitted: fieldEditable ? _handleSubmitted : null,
             ),
+            // The caret spans the full field only when the whole control acts
+            // as the menu trigger; otherwise it stays pinned to the trailing
+            // edge. Pinning `left: 0` too lets it stretch its near-invisible
+            // hit layer across the field while the visible button hugs the
+            // right.
             Positioned(
               top: 0,
               bottom: 0,
               right: 0,
+              left: wholeFieldOpensMenu ? 0 : null,
               child: _ComboBoxCaret(
                 style: widget.style,
                 menuOpen: _menuOpen,
                 enabled: widget.enabled,
+                fullWidth: wholeFieldOpensMenu,
                 accentColor: widget.tint is Color
                     ? widget.tint as Color
                     : CNTheme.of(context).accentColor,
@@ -351,6 +394,10 @@ double _caretRadius(double side) => (side * 0.18).clamp(2.5, 6.0);
 /// button. [CNComboBoxStyle.bordered] renders a raised accent-filled push button
 /// with a single downward chevron; [CNComboBoxStyle.plain] renders a flat,
 /// subtly-filled button with a double (up/down) chevron.
+///
+/// When [fullWidth] is set the visible button stays square on the trailing
+/// edge, but its near-invisible hit background stretches across the entire
+/// field so a click anywhere opens the pop-up list.
 class _ComboBoxCaret extends StatefulWidget {
   const _ComboBoxCaret({
     required this.style,
@@ -358,10 +405,16 @@ class _ComboBoxCaret extends StatefulWidget {
     required this.enabled,
     required this.accentColor,
     required this.onTap,
+    this.fullWidth = false,
   });
 
   final Color? accentColor;
   final bool enabled;
+
+  /// Whether the caret's clickable area spans the full field width rather than
+  /// just the trailing square button.
+  final bool fullWidth;
+
   final bool menuOpen;
   final VoidCallback onTap;
   final CNComboBoxStyle style;
@@ -469,6 +522,21 @@ class _ComboBoxCaretState extends State<_ComboBoxCaret> {
             ? _buildBordered(context, side)
             : _buildPlain(context, side);
 
+        // The visible button is always a trailing square. In full-width mode
+        // the tappable region extends across the whole field: a near-invisible
+        // scrim gives Flutter pixels to hit-test (a fully transparent overlay
+        // would let the click fall through to the native field beneath).
+        Widget child = SizedBox.square(dimension: side, child: button);
+        if (widget.fullWidth) {
+          child = ColoredBox(
+            color: const Color(0x01000000),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [child],
+            ),
+          );
+        }
+
         return MouseRegion(
           cursor: widget.enabled ? SystemMouseCursors.click : MouseCursor.defer,
           onEnter: widget.enabled
@@ -480,7 +548,7 @@ class _ComboBoxCaretState extends State<_ComboBoxCaret> {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: widget.enabled ? widget.onTap : null,
-            child: SizedBox.square(dimension: side, child: button),
+            child: child,
           ),
         );
       },

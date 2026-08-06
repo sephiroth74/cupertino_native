@@ -41,6 +41,7 @@ enum CNChildViewBuilder {
         }
 
         view = CNViewModifierApplicator.applyHelp(dict["help"] as? String, to: view)
+        view = CNViewModifierApplicator.applyBackground(dict["background"] as? [String: Any], to: view)
         view = CNViewModifierApplicator.applyOverlay(dict["overlay"] as? [String: Any], to: view)
 
         return view

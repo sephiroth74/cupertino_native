@@ -33,6 +33,7 @@ class CNPicker extends CNWidget {
     this.paddings,
     this.help,
     this.overlay,
+    this.background,
   }) : assert(
          children.every(
            (c) =>
@@ -84,6 +85,9 @@ class CNPicker extends CNWidget {
 
   @override
   final CNOverlay? overlay;
+
+  @override
+  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

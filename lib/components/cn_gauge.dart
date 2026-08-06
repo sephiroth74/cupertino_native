@@ -30,6 +30,7 @@ class CNGauge extends CNWidget {
     this.paddings,
     this.help,
     this.overlay,
+    this.background,
   }) : assert(min < max),
        assert(value >= min && value <= max);
 
@@ -71,6 +72,9 @@ class CNGauge extends CNWidget {
 
   @override
   final CNOverlay? overlay;
+
+  @override
+  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

@@ -104,6 +104,7 @@ enum CNSecureFieldDeserializer {
             }
 
             view = CNViewModifierApplicator.applyHelp(payload.help, to: view)
+            view = CNViewModifierApplicator.applyBackground(payload.background, to: view)
             view = CNViewModifierApplicator.applyOverlay(payload.overlay, to: view)
 
             // Debug log rectangle

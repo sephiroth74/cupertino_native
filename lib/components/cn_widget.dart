@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:cupertino_native/channel/params.dart';
+import 'package:cupertino_native/style/cn_background.dart';
 import 'package:cupertino_native/style/cn_overlay.dart';
 import 'package:cupertino_native/style/cn_shape_style.dart';
 import 'package:flutter/widgets.dart';
@@ -43,6 +44,10 @@ abstract class CNWidget extends StatefulWidget {
   /// (SwiftUI `.overlay(alignment:content:)`), e.g. a stroked border.
   CNOverlay? get overlay => null;
 
+  /// Optional decorative layer drawn behind the native view
+  /// (SwiftUI `.background(...)`), e.g. a color fill or a filled shape.
+  CNBackground? get background => null;
+
   /// Serializes the shared modifier fields into a payload map.
   /// Subclasses should call this from [toPayload] to include the common fields.
   ///
@@ -71,6 +76,7 @@ abstract class CNWidget extends StatefulWidget {
     payload['debugLog'] = debugLog;
     payload['help'] = help;
     payload['overlay'] = overlay?.toMap(context);
+    payload['background'] = background?.toMap(context);
     payload['foregroundColor'] = resolveColorToArgb(foregroundColor, context);
     if (effectiveTint is CNShapeStyle) {
       payload['tint'] = effectiveTint.toMap(context);
@@ -92,6 +98,9 @@ abstract class CNWidget extends StatefulWidget {
     if (constraints != null) {
       if (shrink) {
         payload['constraints'] = {
+          'minWidth': constraints.minWidth.isNaN
+              ? null
+              : (constraints.minWidth.isFinite ? constraints.minWidth : null),
           'maxWidth': constraints.maxWidth.isNaN
               ? null
               : (constraints.maxWidth.isFinite ? constraints.maxWidth : null),

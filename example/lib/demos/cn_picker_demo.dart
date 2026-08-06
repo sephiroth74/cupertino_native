@@ -21,6 +21,8 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
   Color? tintColor;
   String value = 'walk';
   bool withLabels = true;
+  bool withOverlay = false;
+  bool withBackground = false;
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +99,29 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
                       tint: tintColor,
                       foregroundColor: foregroundColor,
                       selection: value,
+                      overlay: withOverlay
+                          ? CNOverlay.fill(
+                              CNRoundedRectangle(
+                                cornerRadius: 8.0,
+                                style: CNRoundedCornerStyle.circular,
+                                inset: 0.0,
+                              ),
+                              color: CNTheme.of(
+                                context,
+                              ).accentColor?.withAlpha(51),
+                            )
+                          : null,
+                      background: withBackground
+                          ? CNBackground.shape(
+                              CNRoundedRectangle(
+                                cornerRadius: 8.0,
+                                style: CNRoundedCornerStyle.circular,
+                              ),
+                              color: CNTheme.of(
+                                context,
+                              ).accentColor?.withAlpha(38),
+                            )
+                          : null,
                       onChanged: isEnabled
                           ? (value) {
                               setState(() {
@@ -218,6 +243,14 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
               'Enabled': CNToggle(
                 isOn: isEnabled,
                 onChanged: (value) => setState(() => isEnabled = value),
+              ),
+              'Overlay': CNToggle(
+                isOn: withOverlay,
+                onChanged: (value) => setState(() => withOverlay = value),
+              ),
+              'Background': CNToggle(
+                isOn: withBackground,
+                onChanged: (value) => setState(() => withBackground = value),
               ),
             },
           ),

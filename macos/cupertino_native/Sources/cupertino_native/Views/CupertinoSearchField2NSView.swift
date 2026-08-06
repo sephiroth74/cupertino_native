@@ -45,12 +45,12 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
         if autofocus, !didAutofocus, window != nil {
             didAutofocus = true
             DispatchQueue.main.async { [weak self] in
-                guard let self, let window = self.window else { return }
-                window.makeFirstResponder(self.searchField)
+                guard let self, let window else { return }
+                window.makeFirstResponder(searchField)
                 // Becoming first responder selects the whole string; move the
                 // caret to the end so typing continues instead of overwriting.
-                if let editor = self.searchField.currentEditor() {
-                    let end = (self.searchField.stringValue as NSString).length
+                if let editor = searchField.currentEditor() {
+                    let end = (searchField.stringValue as NSString).length
                     editor.selectedRange = NSRange(location: end, length: 0)
                 }
             }

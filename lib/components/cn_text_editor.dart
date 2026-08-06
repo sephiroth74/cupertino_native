@@ -40,6 +40,7 @@ class CNTextEditor extends CNWidget {
     this.paddings,
     this.help,
     this.overlay,
+    this.background,
   });
 
   /// Whether the editor should automatically receive focus when created.
@@ -98,6 +99,9 @@ class CNTextEditor extends CNWidget {
 
   @override
   final CNOverlay? overlay;
+
+  @override
+  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

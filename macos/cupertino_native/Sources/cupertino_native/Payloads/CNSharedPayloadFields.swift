@@ -28,6 +28,7 @@ protocol CNSharedPayloadFields: CNChannelDeserializable {
     var foregroundColor: Int? { get set }
     var help: String? { get set }
     var overlay: [String: Any]? { get set }
+    var background: [String: Any]? { get set }
 }
 
 extension CNSharedPayloadFields {
@@ -83,6 +84,10 @@ extension CNSharedPayloadFields {
         if channel.keys.contains("overlay") {
             overlay = channel["overlay"] as? [String: Any]
         }
+
+        if channel.keys.contains("background") {
+            background = channel["background"] as? [String: Any]
+        }
     }
 
     /// Returns the identity key components for the shared fields.
@@ -103,6 +108,7 @@ extension CNSharedPayloadFields {
             foregroundColor.map { String(describing: $0) } ?? "nil",
             help ?? "nil",
             overlay.map { String(describing: $0) } ?? "nil",
+            background.map { String(describing: $0) } ?? "nil",
         ]
     }
 }

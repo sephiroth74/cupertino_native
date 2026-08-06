@@ -32,6 +32,7 @@ class CNButton extends CNWidget {
     this.paddings,
     this.help,
     this.overlay,
+    this.background,
   });
 
   /// Visual style for the button.
@@ -71,6 +72,9 @@ class CNButton extends CNWidget {
 
   @override
   final CNOverlay? overlay;
+
+  @override
+  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

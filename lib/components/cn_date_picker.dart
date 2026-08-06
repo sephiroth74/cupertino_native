@@ -29,6 +29,7 @@ class CNDatePicker extends CNWidget {
     this.paddings,
     this.help,
     this.overlay,
+    this.background,
   });
 
   /// Control size.
@@ -66,6 +67,9 @@ class CNDatePicker extends CNWidget {
 
   @override
   final CNOverlay? overlay;
+
+  @override
+  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

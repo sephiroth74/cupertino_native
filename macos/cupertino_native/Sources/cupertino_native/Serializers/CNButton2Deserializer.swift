@@ -37,6 +37,7 @@ enum CNButton2Deserializer {
             view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
             view = CNViewModifierApplicator.applyEnabled(payload.enabled, to: view)
             view = CNViewModifierApplicator.applyHelp(payload.help, to: view)
+            view = CNViewModifierApplicator.applyBackground(payload.background, to: view)
             view = CNViewModifierApplicator.applyOverlay(payload.overlay, to: view)
             view = CNViewModifierApplicator.applyDebugLogRectangle(payload.debugLog, to: view)
 

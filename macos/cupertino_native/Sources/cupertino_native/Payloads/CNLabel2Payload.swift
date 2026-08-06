@@ -10,6 +10,7 @@ struct CNLabel2Payload: CNSharedPayloadFields {
     var foregroundColor: Int?
     var help: String?
     var overlay: [String: Any]?
+    var background: [String: Any]?
 
     var title: [String: Any]?
     var image: [String: Any]?
@@ -28,6 +29,7 @@ struct CNLabel2Payload: CNSharedPayloadFields {
         foregroundColor = nil
         help = nil
         overlay = nil
+        background = nil
         title = nil
         image = nil
         font = nil

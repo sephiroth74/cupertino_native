@@ -12,6 +12,8 @@ class ComboBoxDemoPage extends StatefulWidget {
 class _ComboBoxDemoPageState extends State<ComboBoxDemoPage> {
   bool completes = true;
   bool isEnabled = true;
+  bool isEditable = true;
+  bool hasOverlay = false;
 
   final _fruits = [
     'Apple',
@@ -69,7 +71,19 @@ class _ComboBoxDemoPageState extends State<ComboBoxDemoPage> {
                         items: _fruits,
                         placeholder: 'Select a fruit...',
                         completes: completes,
-                        constraints: const BoxConstraints(maxWidth: 200),
+                        editable: isEditable,
+                        constraints: const BoxConstraints.tightFor(width: 500),
+                        overlay: hasOverlay
+                            ? CNOverlay.strokeBorder(
+                                CNRoundedRectangle(
+                                  cornerRadius: 8.0,
+                                  style: CNRoundedCornerStyle.circular,
+                                  inset: 0.0,
+                                ),
+                                color: CNTheme.of(context).accentColor,
+                                lineWidth: 2.0,
+                              )
+                            : null,
                         onChanged: isEnabled
                             ? (value) {
                                 setState(() => _selectedValue = value);
@@ -93,6 +107,7 @@ class _ComboBoxDemoPageState extends State<ComboBoxDemoPage> {
                         style: CNComboBoxStyle.plain,
                         placeholder: 'Select a fruit...',
                         completes: completes,
+                        editable: isEditable,
                         constraints: const BoxConstraints(maxWidth: 200),
                         onChanged: isEnabled
                             ? (value) {
@@ -121,6 +136,14 @@ class _ComboBoxDemoPageState extends State<ComboBoxDemoPage> {
                   'Completes': CNToggle(
                     isOn: completes,
                     onChanged: (value) => setState(() => completes = value),
+                  ),
+                  'Editable': CNToggle(
+                    isOn: isEditable,
+                    onChanged: (value) => setState(() => isEditable = value),
+                  ),
+                  'Overlay': CNToggle(
+                    isOn: hasOverlay,
+                    onChanged: (value) => setState(() => hasOverlay = value),
                   ),
                 },
               ),

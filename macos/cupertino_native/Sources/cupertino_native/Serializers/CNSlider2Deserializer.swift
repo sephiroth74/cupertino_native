@@ -55,6 +55,7 @@ enum CNSlider2Deserializer {
             // Constraints last (outermost)
             view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
             view = CNViewModifierApplicator.applyHelp(payload.help, to: view)
+            view = CNViewModifierApplicator.applyBackground(payload.background, to: view)
             view = CNViewModifierApplicator.applyOverlay(payload.overlay, to: view)
 
             // Debug log rectangle

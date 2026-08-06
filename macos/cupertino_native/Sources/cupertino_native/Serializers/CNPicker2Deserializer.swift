@@ -34,11 +34,9 @@ enum CNPicker2Deserializer {
                 )
             } else {
                 AnyView(
-                    Picker(selection: binding) {
+                    Picker(selection: binding, label: Text("")) {
                         Self.buildItems(payload.children)
-                    } label: {
-                        EmptyView()
-                    },
+                    }.labelsHidden(),
                 )
             }
 
@@ -52,6 +50,7 @@ enum CNPicker2Deserializer {
             view = CNViewModifierApplicator.applyFixedSize(payload.fixedSize, to: view)
             view = CNViewModifierApplicator.applyEnabled(payload.enabled, to: view)
             view = CNViewModifierApplicator.applyHelp(payload.help, to: view)
+            view = CNViewModifierApplicator.applyBackground(payload.background, to: view)
             view = CNViewModifierApplicator.applyOverlay(payload.overlay, to: view)
 
             // Debug log rectangle

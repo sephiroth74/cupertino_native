@@ -11,6 +11,7 @@ struct CNSlider2Payload: CNSharedPayloadFields {
     var foregroundColor: Int?
     var help: String?
     var overlay: [String: Any]?
+    var background: [String: Any]?
 
     // Slider-specific fields
     var value: Double
@@ -33,6 +34,7 @@ struct CNSlider2Payload: CNSharedPayloadFields {
         foregroundColor = nil
         help = nil
         overlay = nil
+        background = nil
         value = 0.0
         min = 0.0
         max = 1.0

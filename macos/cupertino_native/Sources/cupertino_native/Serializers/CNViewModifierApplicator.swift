@@ -34,6 +34,7 @@ enum CNViewModifierApplicator {
         if shrink {
             // In shrink mode, width constraint is handled via AutoLayout on the hosting view.
             // SwiftUI .frame(maxWidth:) doesn't propagate to fittingSize correctly.
+
             return AnyView(
                 view.frame(
                     minWidth: minWidth,
@@ -251,6 +252,19 @@ enum CNViewModifierApplicator {
         }
         let alignment = resolveAlignment(overlay["alignment"] as? String)
         return AnyView(view.overlay(alignment: alignment) { content })
+    }
+
+    /// Applies a decorative `.background(alignment:content:)` built from a
+    /// background payload (see `CNShapeBuilder`). No-op when `background` is
+    /// nil/invalid.
+    static func applyBackground(_ background: [String: Any]?, to view: AnyView) -> AnyView {
+        guard let background,
+              let content = CNShapeBuilder.makeBackground(background)
+        else {
+            return view
+        }
+        let alignment = resolveAlignment(background["alignment"] as? String)
+        return AnyView(view.background(alignment: alignment) { content })
     }
 
     /// Applies a decorative rectangle border when `debugLog` is true. This is used for debugging layout issues.

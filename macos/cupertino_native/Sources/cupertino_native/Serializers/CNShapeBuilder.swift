@@ -19,6 +19,22 @@ enum CNShapeBuilder {
         return paintShape(shapeDict, mode: mode, paint: paint, strokeStyle: strokeStyle)
     }
 
+    /// Builds the painted background view from a background payload dictionary.
+    ///
+    /// Unlike an overlay, the background may omit a shape: with no `shape` the
+    /// paint fills the whole view (SwiftUI `.background(_ style:)`). With a
+    /// shape it is painted (fill / stroke / strokeBorder) like an overlay.
+    static func makeBackground(_ dict: [String: Any]) -> AnyView? {
+        let paint = resolvePaint(dict)
+        guard let shapeDict = dict["shape"] as? [String: Any] else {
+            // No shape: fill the entire background with the resolved paint.
+            return AnyView(Rectangle().fill(paint))
+        }
+        let mode = dict["mode"] as? String ?? "fill"
+        let strokeStyle = decodeStrokeStyle(dict["strokeStyle"] as? [String: Any])
+        return paintShape(shapeDict, mode: mode, paint: paint, strokeStyle: strokeStyle)
+    }
+
     // MARK: - Paint resolution
 
     /// Resolves the fill/stroke paint: an explicit color, a gradient shape
