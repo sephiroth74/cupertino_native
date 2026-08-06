@@ -76,7 +76,7 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
                       debugPrint('onSuggestionsRequested for query: "$query"');
                       if (query.isEmpty) {
                         debugPrint('Returning all suggestions');
-                        return Future.value(_kDemoSuggestions);
+                        return Future.value([]);
                       } else {
                         debugPrint('Filtering suggestions for query: "$query"');
                         return Future.value(

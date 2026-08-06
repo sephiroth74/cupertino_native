@@ -355,11 +355,17 @@ class _CNWindowState extends State<CNWindow> {
                 child: VisualEffectSubviewContainer(
                   state: state,
                   material: sidebar.material,
-                  child: Container(
-                    color: sidebar.backgroundColor ?? theme.canvasColor,
-                    child: Padding(
-                      padding: sidebar.padding,
-                      child: sidebar.builder(context),
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      color: Color.fromRGBO(0, 0, 0, 1.0),
+                      backgroundBlendMode: BlendMode.clear,
+                    ),
+                    child: Container(
+                      color: sidebar.backgroundColor ?? theme.canvasColor,
+                      child: Padding(
+                        padding: sidebar.padding,
+                        child: sidebar.builder(context),
+                      ),
                     ),
                   ),
                 ),
@@ -398,7 +404,13 @@ class _CNWindowState extends State<CNWindow> {
                 child: VisualEffectSubviewContainer(
                   material: widget.childMaterial,
                   state: state,
-                  child: widget.child ?? const SizedBox.shrink(),
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      color: Color.fromRGBO(0, 0, 0, 1.0),
+                      backgroundBlendMode: BlendMode.clear,
+                    ),
+                    child: widget.child ?? const SizedBox.shrink(),
+                  ),
                 ),
               ),
             ),
@@ -489,11 +501,17 @@ class _CNWindowState extends State<CNWindow> {
                   child: VisualEffectSubviewContainer(
                     state: state,
                     material: endSidebar.material,
-                    child: Container(
-                      color: endSidebar.backgroundColor ?? theme.canvasColor,
-                      child: Padding(
-                        padding: endSidebar.padding,
-                        child: endSidebar.builder(context),
+                    child: DecoratedBox(
+                      decoration: const BoxDecoration(
+                        color: Color.fromRGBO(0, 0, 0, 1.0),
+                        backgroundBlendMode: BlendMode.clear,
+                      ),
+                      child: Container(
+                        color: endSidebar.backgroundColor ?? theme.canvasColor,
+                        child: Padding(
+                          padding: endSidebar.padding,
+                          child: endSidebar.builder(context),
+                        ),
                       ),
                     ),
                   ),

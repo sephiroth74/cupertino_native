@@ -1,5 +1,6 @@
 import 'package:cupertino_native/components/cn_widget_debug_id_mixin.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:macos_window_utils/macos/ns_visual_effect_view_material.dart';
 import 'package:macos_window_utils/widgets/visual_effect_subview_container/visual_effect_subview_container.dart';
@@ -141,6 +142,7 @@ class CNToolbarButton extends CNToolbarItem {
     this.label,
     this.isSelected = false,
     this.theme,
+    this.help,
   });
 
   /// Whether the button renders its selected appearance (and swaps to
@@ -167,6 +169,9 @@ class CNToolbarButton extends CNToolbarItem {
   /// ambient [CNIconButtonTheme].
   final CNIconButtonThemeData? theme;
 
+  /// Optional help text shown on hover (SwiftUI `.help()`).
+  final String? help;
+
   @override
   bool get managesOwnHeight => true;
 
@@ -177,6 +182,7 @@ class CNToolbarButton extends CNToolbarItem {
       title: label ?? '',
       systemImage: systemImage,
       enabled: onPressed != null,
+      help: help,
     );
   }
 
@@ -196,7 +202,7 @@ class CNToolbarButton extends CNToolbarItem {
         final side = constraints.hasBoundedHeight
             ? constraints.maxHeight
             : _kToolbarItemDefaultHeight;
-        return CNIconButtonTheme(
+        final widget = CNIconButtonTheme(
           data: resolved,
           child: CNIconButton(
             size: side,
@@ -207,6 +213,15 @@ class CNToolbarButton extends CNToolbarItem {
             onLongPress: onLongPress,
           ),
         );
+
+        if (help != null) {
+          return Tooltip(
+            message: help,
+            waitDuration: Durations.extralong4,
+            child: widget,
+          );
+        }
+        return widget;
       },
     );
   }
