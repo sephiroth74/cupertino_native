@@ -2,17 +2,25 @@ import Cocoa
 import FlutterMacOS
 
 public class CupertinoNativePlugin: NSObject, FlutterPlugin {
-    static var registrar: FlutterPluginRegistrar?
-    static var contextMenuHandler: CNContextMenuHandler?
-    static var alert2Handler: CNAlert2Handler?
-    static var popover2Handler: CNPopover2Handler?
-    static var accentColorHandler: CNAccentColorHandler?
+    // These are per-instance (one instance per Flutter engine / window), NOT
+    // static. With `desktop_multi_window` each window registers the generated
+    // plugins on its own engine, so `register(with:)` runs once per window.
+    // Static handlers would let the last window to register clobber the shared
+    // registrar, routing every window's context menu / alert / popover onto
+    // that window and breaking pointer state on the others. Keeping them on the
+    // instance means each engine resolves its own window.
+    private var registrar: FlutterPluginRegistrar?
+    private var contextMenuHandler: CNContextMenuHandler?
+    private var alert2Handler: CNAlert2Handler?
+    private var popover2Handler: CNPopover2Handler?
+    private var accentColorHandler: CNAccentColorHandler?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
-        CupertinoNativePlugin.registrar = registrar
-        CupertinoNativePlugin.contextMenuHandler = CNContextMenuHandler(registrar: registrar)
-        CupertinoNativePlugin.alert2Handler = CNAlert2Handler(registrar: registrar)
-        CupertinoNativePlugin.popover2Handler = CNPopover2Handler(registrar: registrar)
+        let instance = CupertinoNativePlugin()
+        instance.registrar = registrar
+        instance.contextMenuHandler = CNContextMenuHandler(registrar: registrar)
+        instance.alert2Handler = CNAlert2Handler(registrar: registrar)
+        instance.popover2Handler = CNPopover2Handler(registrar: registrar)
 
         let channel = FlutterMethodChannel(
             name: "cupertino_native", binaryMessenger: registrar.messenger,
@@ -20,9 +28,8 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
 
         let accentColorHandler = CNAccentColorHandler()
         accentColorHandler.register(with: registrar)
-        CupertinoNativePlugin.accentColorHandler = accentColorHandler
+        instance.accentColorHandler = accentColorHandler
 
-        let instance = CupertinoNativePlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
 
         // New architecture widgets
@@ -93,7 +100,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 result(FlutterError(code: "invalid_args", message: "showAlert2 expects a map of arguments", details: nil))
                 return
             }
-            guard let handler = CupertinoNativePlugin.alert2Handler else {
+            guard let handler = alert2Handler else {
                 result(FlutterError(code: "handler_unavailable", message: "Alert2 handler is not initialized", details: nil))
                 return
             }
@@ -103,7 +110,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 result(FlutterError(code: "invalid_args", message: "showSheet2 expects a map of arguments", details: nil))
                 return
             }
-            guard let handler = CupertinoNativePlugin.alert2Handler else {
+            guard let handler = alert2Handler else {
                 result(FlutterError(code: "handler_unavailable", message: "Alert2 handler is not initialized", details: nil))
                 return
             }
@@ -113,7 +120,7 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 result(FlutterError(code: "invalid_args", message: "showPopover2 expects a map of arguments", details: nil))
                 return
             }
-            guard let handler = CupertinoNativePlugin.popover2Handler else {
+            guard let handler = popover2Handler else {
                 result(FlutterError(code: "handler_unavailable", message: "Popover2 handler is not initialized", details: nil))
                 return
             }
@@ -123,13 +130,13 @@ public class CupertinoNativePlugin: NSObject, FlutterPlugin {
                 result(FlutterError(code: "invalid_args", message: "showContextMenu2 expects a map of arguments", details: nil))
                 return
             }
-            guard let handler = CupertinoNativePlugin.contextMenuHandler else {
+            guard let handler = contextMenuHandler else {
                 result(FlutterError(code: "handler_unavailable", message: "Context menu handler is not initialized", details: nil))
                 return
             }
             handler.showContextMenu2(args: args, result: result)
         case "getAccentColor":
-            guard let handler = CupertinoNativePlugin.accentColorHandler else {
+            guard let handler = accentColorHandler else {
                 result(FlutterError(code: "handler_unavailable", message: "AccentColor handler is not initialized", details: nil))
                 return
             }
