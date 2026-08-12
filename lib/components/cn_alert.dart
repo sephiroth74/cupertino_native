@@ -22,7 +22,7 @@ class CNAlert {
     String? title,
     required String message,
     required List<CNChildButton> actions,
-    CNAlertStyle2 style = CNAlertStyle2.informational,
+    CNAlertStyle style = CNAlertStyle.informational,
     String? suppressionButtonLabel,
     bool suppressionInitiallySelected = false,
   }) async {
@@ -80,7 +80,7 @@ class CNAlert {
     String? title,
     required String message,
     required List<CNChildButton> actions,
-    CNAlertStyle2 style = CNAlertStyle2.informational,
+    CNAlertStyle style = CNAlertStyle.informational,
     String? suppressionButtonLabel,
     bool suppressionInitiallySelected = false,
   }) async {
@@ -147,16 +147,16 @@ class CNAlert {
 
 /// Result returned by [CNAlert.show].
 class CNAlertResult {
+  final int selectedIndex;
+
+  final String? selectedTag;
+  final bool suppressionSelected;
   const CNAlertResult({
     required this.selectedIndex,
     this.selectedTag,
     this.suppressionSelected = false,
   });
-
-  final int selectedIndex;
-  final String? selectedTag;
-  final bool suppressionSelected;
 }
 
 /// Visual style for a native macOS alert.
-enum CNAlertStyle2 { informational, warning, critical }
+enum CNAlertStyle { informational, warning, critical }

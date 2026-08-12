@@ -15,52 +15,6 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
 
   CNAlertResult? _lastResult;
 
-  Future<void> _showConfirmAlert() async {
-    final result = await CNAlert.show(
-      context,
-      title: 'Delete File',
-      message: 'This action cannot be undone.',
-      actions: const [
-        CNChildButton(tag: 'ok', title: 'Ok'),
-        CNChildButton(
-          tag: 'cancel',
-          title: 'Cancel',
-          role: CNButtonRole.cancel,
-        ),
-        CNChildButton(
-          tag: 'delete',
-          title: 'Delete',
-          role: CNButtonRole.destructive,
-        ),
-      ],
-      style: CNAlertStyle2.warning,
-    );
-    if (result != null) setState(() => _lastResult = result);
-  }
-
-  Future<void> _showCriticalAlert() async {
-    final result = await CNAlert.show(
-      context,
-      title: 'Critical Error',
-      message: 'The operation failed due to a critical system condition.',
-      actions: const [CNChildButton(tag: 'dismiss', title: 'Dismiss')],
-      style: CNAlertStyle2.critical,
-    );
-    if (result != null) setState(() => _lastResult = result);
-  }
-
-  Future<void> _showInfoAlert() async {
-    final result = await CNAlert.show(
-      context,
-      title: 'Saved',
-      message: 'Your changes have been saved successfully.',
-      actions: const [CNChildButton(tag: 'ok', title: 'OK')],
-      style: CNAlertStyle2.informational,
-      suppressionButtonLabel: 'Do not show this again',
-    );
-    if (result != null) setState(() => _lastResult = result);
-  }
-
   @override
   Widget build(BuildContext context) {
     return CNContentArea(
@@ -135,5 +89,51 @@ class _AlertDemoPageState extends State<AlertDemoPage> {
         );
       },
     );
+  }
+
+  Future<void> _showConfirmAlert() async {
+    final result = await CNAlert.show(
+      context,
+      title: 'Delete File',
+      message: 'This action cannot be undone.',
+      actions: const [
+        CNChildButton(tag: 'ok', title: 'Ok'),
+        CNChildButton(
+          tag: 'cancel',
+          title: 'Cancel',
+          role: CNButtonRole.cancel,
+        ),
+        CNChildButton(
+          tag: 'delete',
+          title: 'Delete',
+          role: CNButtonRole.destructive,
+        ),
+      ],
+      style: CNAlertStyle.warning,
+    );
+    if (result != null) setState(() => _lastResult = result);
+  }
+
+  Future<void> _showCriticalAlert() async {
+    final result = await CNAlert.show(
+      context,
+      title: 'Critical Error',
+      message: 'The operation failed due to a critical system condition.',
+      actions: const [CNChildButton(tag: 'dismiss', title: 'Dismiss')],
+      style: CNAlertStyle.critical,
+    );
+    if (result != null) setState(() => _lastResult = result);
+  }
+
+  Future<void> _showInfoAlert() async {
+    final result = await CNAlert.show(
+      context,
+      title: 'Saved',
+      message: 'Your changes have been saved successfully.',
+      actions: const [CNChildButton(tag: 'ok', title: 'OK')],
+      style: CNAlertStyle.informational,
+      suppressionButtonLabel: 'Do not show this again',
+    );
+    if (result != null) setState(() => _lastResult = result);
   }
 }

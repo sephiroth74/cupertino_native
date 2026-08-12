@@ -71,6 +71,7 @@ class CNIconButtonThemeData extends Equatable {
     this.iconSizeRatio,
     this.padding,
     this.animationDuration,
+    this.font,
   });
 
   /// Animation duration for hover / press / selection transitions.
@@ -96,6 +97,10 @@ class CNIconButtonThemeData extends Equatable {
 
   /// Icon color in the default (idle) state.
   final Color? foregroundColor;
+
+  /// Font used to draw the glyph. When it carries an explicit point size that
+  /// size wins over [iconSizeRatio]; see [CNIconButton.font].
+  final CNFont? font;
 
   /// Background fill while the pointer is hovering.
   final Color? hoveredBackgroundColor;
@@ -144,6 +149,7 @@ class CNIconButtonThemeData extends Equatable {
     iconSizeRatio,
     padding,
     animationDuration,
+    font,
   ];
 
   /// The toolbar-specific overrides applied to a [CNIconButton] rendered inside
@@ -192,6 +198,7 @@ class CNIconButtonThemeData extends Equatable {
     double? iconSizeRatio,
     EdgeInsetsGeometry? padding,
     Duration? animationDuration,
+    CNFont? font,
   }) {
     return CNIconButtonThemeData(
       foregroundColor: foregroundColor ?? this.foregroundColor,
@@ -219,6 +226,7 @@ class CNIconButtonThemeData extends Equatable {
       iconSizeRatio: iconSizeRatio ?? this.iconSizeRatio,
       padding: padding ?? this.padding,
       animationDuration: animationDuration ?? this.animationDuration,
+      font: font ?? this.font,
     );
   }
 
@@ -243,6 +251,7 @@ class CNIconButtonThemeData extends Equatable {
       iconSizeRatio: other.iconSizeRatio,
       padding: other.padding,
       animationDuration: other.animationDuration,
+      font: other.font,
     );
   }
 
@@ -302,6 +311,8 @@ class CNIconButtonThemeData extends Equatable {
       iconSizeRatio: lerpDouble(a.iconSizeRatio, b.iconSizeRatio, t),
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
       animationDuration: t < 0.5 ? a.animationDuration : b.animationDuration,
+      // Fonts have no meaningful interpolation: snap at the midpoint.
+      font: t < 0.5 ? a.font : b.font,
     );
   }
 }

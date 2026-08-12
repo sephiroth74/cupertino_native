@@ -1,3 +1,5 @@
+import 'dart:math' show min;
+
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
@@ -7,7 +9,7 @@ import 'package:flutter/widgets.dart';
 ///
 /// The button reacts to hover, press, selection and disabled states. Every
 /// visual aspect — per-state foreground/background colors, border, shape,
-/// corner radius, icon size and padding — can be set directly on the widget or,
+/// corner radius, icon size, font and padding — can be set directly on the widget or,
 /// for app-wide consistency, through [CNIconButtonTheme] / [CNThemeData.iconButtonTheme].
 ///
 /// Resolution order for every visual property is:
@@ -47,6 +49,7 @@ class CNIconButton extends StatefulWidget {
     this.iconSizeRatio,
     this.padding,
     this.animationDuration,
+    this.font,
   }) : assert(
          icon != null || systemSymbolName != null,
          'Either icon or systemSymbolName must be provided.',
@@ -87,6 +90,19 @@ class CNIconButton extends StatefulWidget {
 
   /// Icon color in the idle state. Overrides the theme when non-null.
   final Color? foregroundColor;
+
+  /// Optional font used to draw the glyph. Overrides the theme when non-null.
+  ///
+  /// When the font carries an explicit point size ([CNFontSize.points]) that
+  /// size wins over [iconSizeRatio]: the glyph box grows or shrinks to fit it,
+  /// never past [size]. With a [CNFontSize.preset] size the box still comes from
+  /// [iconSizeRatio] and the native side resolves the preset.
+  ///
+  /// For the [systemSymbolName] path the whole font (kind, weight, size) is
+  /// forwarded to the native [CNImage], so this is how you get a bolder or
+  /// lighter SF Symbol. For the [icon] path only the point size applies —
+  /// Flutter's bundled icon fonts have no weight axis.
+  final CNFont? font;
 
   /// Background fill while hovered. Overrides the theme when non-null.
   final Color? hoveredBackgroundColor;
@@ -155,6 +171,10 @@ class CNIconButton extends StatefulWidget {
 }
 
 class _CNIconButtonState extends State<CNIconButton> {
+  /// Fraction of the glyph box used as the SF Symbol point size: the native
+  /// symbol is inset so it fits the reported icon box like the AppKit metric.
+  static const double _kSymbolFontRatio = 0.8;
+
   bool _hovered = false;
   bool _pressed = false;
 
@@ -164,28 +184,41 @@ class _CNIconButtonState extends State<CNIconButton> {
     required BuildContext context,
     required double iconSize,
     required Color foreground,
+    required CNFont? font,
   }) {
+    // An explicit point size wins over iconSizeRatio, clamped to the button so
+    // an oversized font can't paint outside it.
+    final double? points = font?.size.points;
+
     if (widget.icon != null) {
       final IconData effectiveIcon =
           (widget.isSelected ? widget.selectedIcon : null) ?? widget.icon!;
-      return Icon(effectiveIcon, size: iconSize, color: foreground);
+      // A Flutter glyph is drawn at its em size, so no symbol inset applies.
+      return Icon(
+        effectiveIcon,
+        size: points == null ? iconSize : min(points, widget.size),
+        color: foreground,
+      );
     }
 
     final String symbol = widget.isSelected
         ? (widget.selectedSystemSymbolName ?? widget.systemSymbolName!)
         : widget.systemSymbolName!;
 
+    final double box = points == null
+        ? iconSize
+        : min(points / _kSymbolFontRatio, widget.size);
+
     return SizedBox(
-      width: iconSize,
-      height: iconSize,
+      width: box,
+      height: box,
       child: CNImage(
         systemSymbolName: symbol,
         shrink: false,
         foregroundColor: foreground,
         symbolRenderingMode: widget.symbolRenderingMode,
-        // Slightly inset so the glyph fits the reported icon box like the AppKit metric.
-        font: CNFont.system(CNFontSize.points(iconSize - (iconSize * 0.2))),
-        constraints: BoxConstraints.tightFor(width: iconSize, height: iconSize),
+        font: font ?? CNFont.system(CNFontSize.points(box * _kSymbolFontRatio)),
+        constraints: BoxConstraints.tightFor(width: box, height: box),
       ),
     );
   }
@@ -338,6 +371,7 @@ class _CNIconButtonState extends State<CNIconButton> {
         const Duration(milliseconds: 100);
     final CNIconButtonShape shape =
         widget.shape ?? buttonTheme.shape ?? CNIconButtonShape.roundedRectangle;
+    final CNFont? font = widget.font ?? buttonTheme.font;
 
     final Color? borderColor = widget.borderColor ?? buttonTheme.borderColor;
     final double borderWidth =
@@ -357,6 +391,7 @@ class _CNIconButtonState extends State<CNIconButton> {
       context: context,
       iconSize: iconSize,
       foreground: foreground,
+      font: font,
     );
 
     final Widget content = AnimatedContainer(

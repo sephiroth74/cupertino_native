@@ -117,8 +117,11 @@ abstract final class CNColors {
 
   // ignore: public_member_api_docs
   static const label = CupertinoColors.label;
+
+  // ignore: public_member_api_docs
   static const secondaryLabel = CupertinoColors.secondaryLabel;
 
+  // ignore: public_member_api_docs
   static const separator = CupertinoColors.separator;
 
   // ignore: public_member_api_docs
@@ -209,20 +212,14 @@ abstract final class CNColors {
         darkColor: CNColors.systemGray.darkColor.withValues(alpha: 0.8),
       );
 
-  /// The color to use for the window background.
-  /// https://developer.apple.com/documentation/appkit/nscolor/windowbackgroundcolor
-  static const CupertinoDynamicColor windowBackgroundColor =
-      CupertinoDynamicColor.withBrightness(
-        color: Color(0xFFECECEC),
-        darkColor: Color(0xFF323232),
-      );
-
+  // ignore: public_member_api_docs
   static const CupertinoDynamicColor groupedBackgroundColor =
       CupertinoDynamicColor.withBrightness(
         color: Color(0xFFF7F7F7),
         darkColor: Color(0xFF292E32),
       );
 
+  // ignore: public_member_api_docs
   static const CupertinoDynamicColor sidebarBackgroundColor =
       CupertinoDynamicColor.withBrightness(
         color: Color(0xFFF2F2F2),
@@ -231,4 +228,229 @@ abstract final class CNColors {
 
   /// Transparent color (fully transparent, no matter the brightness)
   static const Color transparent = Color(0x00000000);
+
+  /// The color to use for the window background.
+  /// https://developer.apple.com/documentation/appkit/nscolor/windowbackgroundcolor
+  static const CupertinoDynamicColor windowBackgroundColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFFFFFFFF),
+        darkColor: Color(0xFF1E1E1E),
+      );
+
+  /// label color
+  /// https://developer.apple.com/documentation/appkit/nscolor/labelColor
+  static const CupertinoDynamicColor labelColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xD8000000),
+        darkColor: Color(0xD8FFFFFF),
+      );
+
+  /// secondary label color
+  /// https://developer.apple.com/documentation/appkit/nscolor/secondarylabelcolor
+  static const CupertinoDynamicColor secondaryLabelColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0x7F000000),
+        darkColor: Color(0x8CFFFFFF),
+      );
+
+  /// tertiary label color
+  /// https://developer.apple.com/documentation/appkit/nscolor/tertiarylabelcolor
+  static const CupertinoDynamicColor tertiaryLabelColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0x42000000),
+        darkColor: Color(0x3FFFFFFF),
+      );
+
+  /// quaternary label color
+  /// https://developer.apple.com/documentation/appkit/nscolor/quaternarylabelcolor
+  static const CupertinoDynamicColor quaternaryLabelColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0x19000000),
+        darkColor: Color(0x19FFFFFF),
+      );
+
+  /// text color
+  /// https://developer.apple.com/documentation/appkit/nscolor/textcolor
+  static const CupertinoDynamicColor textColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFF000000),
+        darkColor: Color(0xFFFFFFFF),
+      );
+
+  /// placeholder text color
+  /// https://developer.apple.com/documentation/appkit/nscolor/placeholdertextcolor
+  static const CupertinoDynamicColor placeholderTextColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0x7F000000),
+        darkColor: Color(0x8CFFFFFF),
+      );
+
+  /// selected text color
+  /// https://developer.apple.com/documentation/appkit/nscolor/selectedtextcolor
+  static const CupertinoDynamicColor selectedTextColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFF000000),
+        darkColor: Color(0xFFFFFFFF),
+      );
+
+  /// selected text background color
+  /// https://developer.apple.com/documentation/appkit/nscolor/selectedtextbackgroundcolor
+  static const CupertinoDynamicColor textBackgroundColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFFFFFFFF),
+        darkColor: Color(0xFF1E1E1E),
+      );
+
+  /// selected text background color
+  /// https://developer.apple.com/documentation/appkit/nscolor/selectedtextbackgroundcolor
+  static const CupertinoDynamicColor selectedTextBackgroundColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFFB3D7FF),
+        darkColor: Color(0xFF3F638B),
+      );
+
+  /// keyboard focus indicator color
+  /// https://developer.apple.com/documentation/appkit/nscolor/keyboardfocusindicatorcolor
+  static const CupertinoDynamicColor keyboardFocusIndicatorColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0x7F0067F4),
+        darkColor: Color(0x7F1AA9FF),
+      );
+
+  /// unemphasized selected text color
+  /// https://developer.apple.com/documentation/appkit/nscolor/unemphasizedselectedtextcolor
+  static const CupertinoDynamicColor unemphasizedSelectedTextColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFF000000),
+        darkColor: Color(0xFFFFFFFF),
+      );
+
+  /// unemphasized selected text background color
+  /// https://developer.apple.com/documentation/appkit/nscolor/unemphasizedselectedtextbackgroundcolor
+  static const CupertinoDynamicColor unemphasizedSelectedTextBackgroundColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFFDCDCDC),
+        darkColor: Color(0xFF464646),
+      );
+
+  /// link color
+  /// https://developer.apple.com/documentation/appkit/nscolor/linkColor
+  static const CupertinoDynamicColor linkColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFF0068DA),
+        darkColor: Color(0xFF419CFF),
+      );
+
+  /// separator color
+  /// https://developer.apple.com/documentation/appkit/nscolor/separatorcolor
+  static const CupertinoDynamicColor separatorColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0x19000000),
+        darkColor: Color(0x19FFFFFF),
+      );
+
+  /// selected content background color
+  /// https://developer.apple.com/documentation/appkit/nscolor/selectedcontentbackgroundcolor
+  static const CupertinoDynamicColor selectedContentBackgroundColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFF0064E1),
+        darkColor: Color(0xFF0059D1),
+      );
+
+  /// unemphasized selected content background color
+  /// https://developer.apple.com/documentation/appkit/nscolor/unemphasizedselectedcontentbackgroundcolor
+  static const CupertinoDynamicColor
+  unemphasizedSelectedContentBackgroundColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFFDCDCDC),
+        darkColor: Color(0xFF464646),
+      );
+
+  /// control color
+  /// https://developer.apple.com/documentation/appkit/nscolor/controlcolor
+  static const CupertinoDynamicColor controlColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFFFFFFFF),
+        darkColor: Color(0x3FFFFFFF),
+      );
+
+  /// control background color
+  /// https://developer.apple.com/documentation/appkit/nscolor/controlbackgroundcolor
+  static const CupertinoDynamicColor controlBackgroundColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFFFFFFFF),
+        darkColor: Color(0xFF1E1E1E),
+      );
+
+  /// selected control color
+  /// https://developer.apple.com/documentation/appkit/nscolor/selectedcontrolcolor
+  static const CupertinoDynamicColor selectedControlColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFFB3D7FF),
+        darkColor: Color(0xFF3F638B),
+      );
+
+  /// control text color
+  /// https://developer.apple.com/documentation/appkit/nscolor/controltextcolor
+  static const CupertinoDynamicColor controlTextColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xD8000000),
+        darkColor: Color(0xD8FFFFFF),
+      );
+
+  /// selected control text color
+  /// https://developer.apple.com/documentation/appkit/nscolor/selectedcontroltextcolor
+  static const CupertinoDynamicColor selectedControlTextColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xD8000000),
+        darkColor: Color(0xD8FFFFFF),
+      );
+
+  /// disabled control text color
+  /// https://developer.apple.com/documentation/appkit/nscolor/disabledcontroltextcolor
+  static const CupertinoDynamicColor disabledControlTextColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0x3F000000),
+        darkColor: Color(0x3FFFFFFF),
+      );
+
+  /// shadow color
+  /// https://developer.apple.com/documentation/appkit/nscolor/shadowcolor
+  static const CupertinoDynamicColor shadowColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFF000000),
+        darkColor: Color(0xFF000000),
+      );
+
+  /// highlight color
+  /// https://developer.apple.com/documentation/appkit/nscolor/highlightcolor
+  static const CupertinoDynamicColor highlightColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFFFFFFFF),
+        darkColor: Color(0xFFB4B4B4),
+      );
+
+  /// find highlight color
+  /// https://developer.apple.com/documentation/appkit/nscolor/findhighlightcolor
+  static const CupertinoDynamicColor findHighlightColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFFFFFF00),
+        darkColor: Color(0xFFFFFF00),
+      );
+
+  /// grid color
+  /// https://developer.apple.com/documentation/appkit/nscolor/gridcolor
+  static const CupertinoDynamicColor gridColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xFFE6E6E6),
+        darkColor: Color(0xFF1A1A1A),
+      );
+
+  /// header text color
+  /// https://developer.apple.com/documentation/appkit/nscolor/headertextcolor
+  static const CupertinoDynamicColor headerTextColor =
+      CupertinoDynamicColor.withBrightness(
+        color: Color(0xD8000000),
+        darkColor: Color(0xFFFFFFFF),
+      );
 }

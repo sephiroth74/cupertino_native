@@ -3,8 +3,8 @@ import 'package:flutter/cupertino.dart';
 
 const double _kDefaultPadding = 16.0;
 
-/// Styles for the [GroupBox] widget, which can be either [GroupBoxStyle.border] or [GroupBoxStyle.borderless].
-enum GroupBoxStyle {
+/// Styles for the [CNGroupBox] widget, which can be either [CNGroupBoxStyle.border] or [CNGroupBoxStyle.borderless].
+enum CNGroupBoxStyle {
   /// The default style for a GroupBox, which includes a border and background.
   borderless,
 
@@ -13,13 +13,13 @@ enum GroupBoxStyle {
 }
 
 /// Similar to GroupBox in SwiftUI, this widget provides a visual grouping of related content with an optional title. It is typically used to group related form fields or settings in a visually distinct manner.
-class GroupBox extends StatelessWidget {
+class CNGroupBox extends StatelessWidget {
   /// Creates a GroupBox with an optional [label] and required [child] content.
-  const GroupBox({
+  const CNGroupBox({
     super.key,
     this.label,
     required this.child,
-    this.style = GroupBoxStyle.border,
+    this.style = CNGroupBoxStyle.border,
     this.padding,
     this.borderDecoration,
     this.color,
@@ -46,12 +46,12 @@ class GroupBox extends StatelessWidget {
   /// The padding around the content of the GroupBox.
   final EdgeInsetsGeometry? padding;
 
-  /// The visual style of the GroupBox, which can be either [GroupBoxStyle.border] or [GroupBoxStyle.borderless].
-  final GroupBoxStyle style;
+  /// The visual style of the GroupBox, which can be either [CNGroupBoxStyle.border] or [CNGroupBoxStyle.borderless].
+  final CNGroupBoxStyle style;
 
   BoxDecoration _decoration(BuildContext context) {
     switch (style) {
-      case GroupBoxStyle.border:
+      case CNGroupBoxStyle.border:
         if (borderDecoration != null) {
           return borderDecoration!;
         }
@@ -64,7 +64,7 @@ class GroupBox extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(borderRadius ?? 8),
         );
-      case GroupBoxStyle.borderless:
+      case CNGroupBoxStyle.borderless:
         return const BoxDecoration();
     }
   }

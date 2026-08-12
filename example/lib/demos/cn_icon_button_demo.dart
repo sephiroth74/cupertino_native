@@ -22,6 +22,10 @@ class _IconButtonDemoPageState extends State<IconButtonDemoPage> {
   Color? backgroundColor;
   Color? borderColor;
   double borderWidth = 0;
+
+  /// `null` lets the button derive the glyph metric from `iconSizeRatio`.
+  CNFont? font;
+  double fontSize = 24;
   Color? foregroundColor;
   double iconSizeRatio = 0.75;
   bool isEnabled = true;
@@ -60,6 +64,7 @@ class _IconButtonDemoPageState extends State<IconButtonDemoPage> {
               systemSymbolName: isSymbol ? name : null,
               isSelected: isSelected || selectedNames.contains(name),
               shape: shape,
+              font: font,
               iconSizeRatio: iconSizeRatio > 0 ? iconSizeRatio : null,
               foregroundColor: foregroundColor,
               backgroundColor: backgroundColor,
@@ -159,6 +164,42 @@ class _IconButtonDemoPageState extends State<IconButtonDemoPage> {
                   max: 6,
                   value: borderWidth,
                   onChanged: (value) => setState(() => borderWidth = value),
+                ),
+                'Font': FontPicker(
+                  fonts: kAvailableFonts,
+                  value: font,
+                  onChanged: (value) => setState(
+                    () => font = value?.copyWith(
+                      size: CNFontSize.points(fontSize),
+                    ),
+                  ),
+                ),
+                'Font Weight': CNPicker(
+                  selection: (font?.weight ?? CNFontWeight.regular).name,
+                  onChanged: font == null
+                      ? null
+                      : (value) => setState(() {
+                          font = font!.copyWith(
+                            weight: CNFontWeight.values.firstWhere(
+                              (w) => w.name == value,
+                            ),
+                          );
+                        }),
+                  children: CNFontWeight.values
+                      .map((w) => CNChildText(w.name, tag: w.name))
+                      .toList(),
+                  pickerStyle: CNPickerStyle.automatic,
+                ),
+                'Font Size': SizeSliderPicker(
+                  value: fontSize,
+                  onChanged: font == null
+                      ? null
+                      : (value) => setState(() {
+                          fontSize = value;
+                          font = font!.copyWith(
+                            size: CNFontSize.points(fontSize),
+                          );
+                        }),
                 ),
                 'Shape': CNPicker(
                   selection: shape.name,

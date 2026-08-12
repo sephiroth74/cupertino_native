@@ -71,6 +71,7 @@ List<CNFont?> get kAvailableFonts => [
   CNFont.controlContent(defaultFontSize),
   CNFont.label(defaultFontSize),
   CNFont.named('Helvetica Neue', defaultFontSize),
+  CNFont.named('SF Pro', defaultFontSize),
 ];
 
 const kFontSizeDefault = kDefaultFontSize;
