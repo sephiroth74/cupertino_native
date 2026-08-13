@@ -284,8 +284,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 material: NSVisualEffectViewMaterial.windowBackground,
                 separatorColor: CNTheme.of(
                   context,
-                ).separatorColor.withAlpha(10),
+                ).separatorColor.withAlpha(255),
                 backgroundColor: CNColors.transparent,
+                separatorWidth: 6.0,
                 // backgroundColor: CNColors.canvasColor.withAlpha(127),
               ),
               statusBar: CNStatusBar(

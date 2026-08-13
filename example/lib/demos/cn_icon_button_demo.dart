@@ -66,8 +66,11 @@ class _IconButtonDemoPageState extends State<IconButtonDemoPage> {
               shape: shape,
               font: font,
               iconSizeRatio: iconSizeRatio > 0 ? iconSizeRatio : null,
-              foregroundColor: foregroundColor,
-              backgroundColor: backgroundColor,
+              // Idle-only properties: the hover / press / selection colors keep
+              // coming from the theme. A WidgetStatePropertyAll here would paint
+              // every state with the picked color instead.
+              foregroundColor: CNStateColor.idleOnly(foregroundColor),
+              backgroundColor: CNStateColor.idleOnly(backgroundColor),
               borderColor: borderColor,
               borderWidth: borderWidth,
               onTap: isEnabled ? () => _copyName(name) : null,

@@ -1,310 +1,306 @@
-[![Serverpod Liquid Glass Flutter banner](https://github.com/serverpod/cupertino_native/raw/main/misc/banner.jpg)](https://serverpod.dev)
+# Cupertino Native
 
-_This package is part of Serverpod's open-source initiative. [Serverpod](https://serverpod.dev) is the ultimate backend for Flutter - all written in Dart, free, and open-source. 👉 [Check it out](https://serverpod.dev)_
+Real native macOS controls — SwiftUI and AppKit — embedded inside Flutter, with a Flutter-idiomatic API.
 
-# Liquid Glass for Flutter
+Widgets in this package are not repainted look-alikes: each one hosts an actual `NSView` / SwiftUI view through Flutter platform views and drives it over method channels. You get exact system rendering (including Liquid Glass materials, SF Symbols, focus rings and accent-color behaviour) while writing ordinary Dart.
 
-Native Liquid Glass widgets for macOS in Flutter with pixel‑perfect fidelity.
+---
 
-This plugin hosts real AppKit controls inside Flutter using Platform Views and method channels. It matches native look/feel perfectly while still fitting naturally into Flutter code.
+## This is a fork
 
-Does it work and is it fast? Yes. Is it a vibe-coded Frankenstein's monster patched together with duct tape? Also yes.
+This package is a fork of [**serverpod/cupertino_native**](https://github.com/serverpod/cupertino_native) (also on [pub.dev](https://pub.dev/packages/cupertino_native)), created by [Serverpod](https://serverpod.dev) as a proof of concept for bringing Liquid Glass to Flutter. All credit for the original idea and the first implementation goes to them — see their write-up, [_Is it time for Flutter to leave the uncanny valley?_](https://medium.com/serverpod/is-it-time-for-flutter-to-leave-the-uncanny-valley-b7f2cdb834ae).
 
-This package is a proof of concept for bringing Liquid Glass to Flutter. Contributions are most welcome. What we have here can serve as a great starting point for building a complete, polished library. The vision for this package is to bridge the gap until we have a good, new Cupertino library written entirely in Flutter. To move toward completeness, we can also improve parts that are easy to write in Flutter to match the new Liquid Glass style (e.g., improved `CupertinoScaffold`, theme, etc.).
+The fork keeps the original BSD 3-Clause license and the `CN*` naming, but the internals and the widget set have diverged substantially. It is developed independently and is **not** an official Serverpod release.
 
-Read the release blogpost: 👉 [Is it time for Flutter to leave the uncanny valley?](https://medium.com/serverpod/is-it-time-for-flutter-to-leave-the-uncanny-valley-b7f2cdb834ae)
+Fork home: <https://github.com/sephiroth74/cupertino_native>
+
+## How this fork differs from upstream
+
+**Scope and requirements**
+
+- **macOS only.** iOS support has been dropped; every widget targets AppKit/SwiftUI on the desktop.
+- **macOS 26.0+ is required** (upstream targets macOS 11+). The native target is built against the macOS 26 SDK and uses its APIs directly, so there is no back-deployment path.
+
+**Rewritten architecture**
+
+- All widgets share a single base — `CNWidget` / `CNWidgetState` on the Dart side, `CNWidgetNSView<P>` + `CNViewModel<P>` on the Swift side. Adding a widget means writing a payload, a SwiftUI body and a factory; layout, sizing, channel lifecycle and diffing come for free.
+- **Patch-based syncing:** each rebuild sends a minimal, type-aware diff of the widget payload instead of the full state.
+- **Intrinsic sizing model:** every widget supports `shrink` — either the native view reports its intrinsic size back to Dart (`shrink: true`), or Dart resolves constraints and hands them to SwiftUI's `.frame(min/ideal/max)` (`shrink: false`).
+- Most controls are now **SwiftUI-hosted** rather than raw AppKit wrappers, which is what makes styles like `CNButtonStyle.glass` and `CNSymbolRenderingMode` available.
+
+**Much larger widget set**
+
+Upstream ships around eight widgets. This fork ships the full list in [Widgets](#widgets) below, including text input (`CNTextField`, `CNSecureField`, `CNTextEditor`, `CNSearchField`, `CNComboBox`), pickers (`CNPicker`, `CNDatePicker`, `CNColorWell`, `CNPathControl`), indicators (`CNGauge`, `CNProgressView`) and menus (`CNMenu`, `CNContextMenuRegion`, `CNPopover`).
+
+**Application shell**
+
+A whole layer that does not exist upstream: `CNApp`, `CNWindow` (with sidebars, end sidebar and an expandable status bar), `CNPageScaffold`, `CNToolbar` with native toolbar items, `CNSidebar`, `CNStatusBar`, `CNScrollbar`, `CNResizablePane` and multi-window support.
+
+**Extended theming**
+
+`CNThemeData` grew from a handful of semantic colors into a full token set: five fill levels, glass materials, HIG typography, per-widget theme data (`CNButtonThemeData`, `CNSliderThemeData`, `CNToggleThemeData`, …), `CNStateColor` for per-state colors, and live tracking of the user's system accent color via `CNAccentColorListener`.
+
+### Coming from upstream
+
+Several upstream APIs were renamed or replaced:
+
+| Upstream | This fork |
+| --- | --- |
+| `CNIcon(symbol: CNSymbol('star'))` | `CNImage(systemSymbolName: 'star')` |
+| `CNButton(label: 'Press')` | `CNButton(children: [CNChildText('Press')])` |
+| `CNButton.icon(icon: …)` | `CNIconButton(systemSymbolName: …)` or `CNButton` with a `CNChildImage` |
+| `CNSwitch` | `CNToggle` |
+| `CNPopupMenuButton` / `CNPopupMenuItem` | `CNMenu(items: [CNChildButton(…)], label: …)` |
+| `CNMenu` / `CNMenuItem` (context menus) | `CNContextMenuRegion(items: [CNChildButton(…)])` |
+| `CNTabBar` / `CNTabBarItem` | `CNTabView` + `CNTabController` (or `CNSegmentedControl`) |
+| `CNSplitView` / `CNSplitViewController` | `CNPageScaffold(children: …)` with `CNResizablePane`, or `CNWindow(sidebar: …)` |
+| `CNAlertAction`, `CNPopoverAction` | `CNChildButton` |
+| `CNThemeData.primaryColor` | `CNThemeData.accentColor` (`userAccentColor` ?? `systemAccentColor`) |
+
+## Requirements
+
+- macOS **26.0** or later (both the build machine and the target)
+- Xcode **26** or later
+- Flutter **>= 3.44.0**, Dart **>= 3.8.0**
 
 ## Installation
 
-Add the dependency in your app’s `pubspec.yaml`:
+This fork is not published on pub.dev (the `cupertino_native` name there belongs to upstream), so depend on it via Git:
 
-```bash
-flutter pub add cupertino_native
+```yaml
+dependencies:
+  cupertino_native:
+    git:
+      url: https://github.com/sephiroth74/cupertino_native.git
+      ref: main
 ```
 
-Then run `flutter pub get`.
+Then set your app's macOS deployment target to 26.0:
 
-Ensure your platform minimums are compatible:
-
-- macOS 11.0+
-
-You will also need to install the Xcode 26 beta and use `xcode-select` to set it as your default.
-
-```bash
-sudo xcode-select -s /Applications/Xcode-beta.app
+```ruby
+# macos/Podfile
+platform :osx, '26.0'
 ```
 
-## Theming (CNTheme)
+and in `macos/Runner.xcodeproj` set `MACOSX_DEPLOYMENT_TARGET = 26.0` for every configuration.
 
-The package now includes a semantic theme layer that works alongside existing widget APIs.
+If you drive the window yourself (transparent titlebar, full-size content view, …) also add [`macos_window_utils`](https://pub.dev/packages/macos_window_utils) to your app — this package depends on it internally, but you need a direct dependency to import `WindowManipulator`.
 
-### Quick start
+## Widgets
 
-Wrap your app with `CNTheme` and provide `CNThemeData`:
+### Controls
+
+| Widget | Native backing |
+| --- | --- |
+| `CNButton` | SwiftUI `Button`; label composed from `CNChild` elements, `CNButtonStyle` includes `glass` / `prominentGlass` |
+| `CNIconButton` | Borderless SF Symbol button with idle / hovered / pressed / selected / disabled state colors |
+| `CNSegmentedControl` | `NSSegmentedControl`; single, multiple and momentary selection |
+| `CNSlider` | SwiftUI `Slider` with optional steps, tick marks and edge labels |
+| `CNStepper` | SwiftUI `Stepper` |
+| `CNToggle` | SwiftUI `Toggle` (switch, checkbox and button styles) |
+| `CNPicker` | SwiftUI `Picker` (menu, segmented, inline, …) |
+| `CNDatePicker` | SwiftUI `DatePicker`, per-component configuration |
+| `CNColorWell` | Native color well / color panel |
+| `CNPathControl` | `NSPathControl` breadcrumb, optionally editable with an open panel |
+| `CNComboBox` | Editable `CNTextField` plus a window-level `NSMenu` drop-down |
+
+### Text and images
+
+| Widget | Native backing |
+| --- | --- |
+| `CNText` | SwiftUI `Text` with `CNFont`, line limits, truncation and text scale |
+| `CNLabel` | SwiftUI `Label` (title + SF Symbol) |
+| `CNImage` | SF Symbols with hierarchical, palette and multicolor rendering modes |
+| `CNTextField` | SwiftUI `TextField`, driven by a `TextEditingController` |
+| `CNSecureField` | SwiftUI `SecureField` |
+| `CNTextEditor` | Multi-line native editor that fills its constraints |
+| `CNSearchField` | Native search field with asynchronous completion suggestions |
+
+### Indicators
+
+| Widget | Native backing |
+| --- | --- |
+| `CNGauge` | SwiftUI `Gauge` with labels and gradient tint |
+| `CNProgressView` | SwiftUI `ProgressView`, linear or circular, determinate (`value`) or indeterminate |
+
+### Menus, alerts and overlays
+
+| Widget | Native backing |
+| --- | --- |
+| `CNMenu` | SwiftUI `Menu` / pull-down button, supports sub-menus and a primary action |
+| `CNContextMenuRegion` | `NSMenu` on secondary click over any Flutter subtree |
+| `CNAlert` | `NSAlert` as a modal dialog (`show`) or window sheet (`showSheet`), with suppression checkbox |
+| `CNPopover` | `NSPopover` anchored to any widget's `BuildContext` |
+
+### Application shell and layout
+
+| Widget | Purpose |
+| --- | --- |
+| `CNApp` | App root: builds `CNTheme` for light/dark, tracks the main window and window geometry |
+| `CNWindow` / `CNWindowScope` | Window chrome: visual-effect background, leading and trailing sidebars, status bar |
+| `CNPageScaffold` / `CNContentArea` | Page body with a toolbar; single `child` or a split layout of resizable panes |
+| `CNToolbar` | Toolbar with native items: `CNToolbarButton`, `CNToolbarIconButton`, `CNToolbarPullDownButton`, `CNToolbarPicker`, `CNToolbarComboBox`, plus `CNToolbarDivider`, `CNToolbarSpacer` and `CNToolbarCustomItem` |
+| `CNSidebar` | Resizable, collapsible sidebar configuration for `CNWindow` |
+| `CNStatusBar` | Bottom status bar with an expandable panel (push or overlay presentation) |
+| `CNTabView` / `CNTabController` | Tabbed container driven by a native segmented control |
+| `CNResizablePane` | Standalone resizable pane |
+| `CNGroupBox` | SwiftUI-style `GroupBox` grouping with optional title |
+| `CNScrollbar` | macOS-styled scrollbar |
+| `CNPageRoute` | Page route matching macOS navigation transitions |
+
+### Building blocks and utilities
+
+- **`CNChild` family** — declarative content passed into native views: `CNChildText`, `CNChildImage`, `CNChildLabel`, `CNChildButton`, `CNChildDivider`, `CNChildGroup`, `CNChildHStack`, `CNChildVStack`, `CNChildMenu`, `CNChildPicker`, `CNChildProgressView`, `CNChildTextField`, `CNChildToggle`.
+- **Theming** — `CNTheme`, `CNThemeData`, `CNTypography`, `CNColors`, `CNStateColor`, `CNGlassMaterial`, per-widget `*ThemeData` classes.
+- **Styling** — `CNBackground`, `CNOverlay`, `CNShape`, `CNShapeStyle`, `CNFont`, `CNControlSize`.
+- **Helpers** — `CNAccentColorListener` / `CNAccentColorBuilder` (live system accent color), `MainWindowStreamBuilder`, `CNPixelPerfectContainer` and `CNWindowGeometryScope` for pixel-exact alignment between Flutter and native layers.
+
+## Quick start
 
 ```dart
-return CNTheme(
-  data: CNThemeData(
-    brightness: Brightness.light,
-    primaryColor: CupertinoColors.systemBlue,
-  ),
-  child: CupertinoApp(
-    home: MyHomePage(),
-  ),
-);
+import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter/widgets.dart';
+import 'package:macos_window_utils/macos_window_utils.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await WindowManipulator.initialize(enableWindowDelegate: true);
+  // Fetches the current system accent color and keeps CNTheme in sync with it.
+  await CNAccentColorListener.load();
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return CNApp(
+      title: 'Cupertino Native',
+      home: (context) => CNWindow(
+        backgroundColor: CNTheme.of(context).canvasColor,
+        child: const PlaybackPage(),
+      ),
+    );
+  }
+}
+
+class PlaybackPage extends StatefulWidget {
+  const PlaybackPage({super.key});
+
+  @override
+  State<PlaybackPage> createState() => _PlaybackPageState();
+}
+
+class _PlaybackPageState extends State<PlaybackPage> {
+  bool _muted = false;
+  double _volume = 0.4;
+
+  @override
+  Widget build(BuildContext context) {
+    return CNPageScaffold(
+      toolBar: const CNToolbar(title: Text('Playback')),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 16,
+          children: [
+            CNSlider(
+              value: _volume,
+              onChanged: (value) => setState(() => _volume = value),
+            ),
+            CNToggle(
+              isOn: _muted,
+              content: const CNChildLabel('Mute', systemImage: 'speaker.slash'),
+              onChanged: (value) => setState(() => _muted = value),
+            ),
+            CNButton(
+              buttonStyle: CNButtonStyle.glass,
+              children: const [CNChildLabel('Play', systemImage: 'play.fill')],
+              onPressed: () => CNAlert.show(
+                context,
+                title: 'Now playing',
+                message: 'Volume is at ${(_volume * 100).round()}%.',
+                actions: const [CNChildButton(tag: 'ok', title: 'OK')],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 ```
 
-### What is included
+### Theming
 
-- Semantic colors: `primaryColor`, `secondaryColor`, `destructiveColor`,
-  `labelColor`, `secondaryLabelColor`, `separatorColor`,
-  `fillPrimaryColor`, `fillSecondaryColor`, `fillTertiaryColor`, and surfaces.
-- Material tokens from macOS26 presets:
-  `materialUltraThin`, `materialThin`, `materialMedium`,
-  `materialThick`, `materialUltraThick`.
-- HIG-aligned typography via `CNTypography`:
-  `largeTitle`, `title1`, `title2`, `title3`, `headline`, `body`,
-  `callout`, `subheadline`, `footnote`, `caption1`, `caption2`.
-
-### Accessing theme values
+`CNApp` installs a `CNTheme` for you and switches it with `themeMode`. Read tokens from anywhere below it:
 
 ```dart
 final theme = CNTheme.of(context);
 
-Text(
-  'Hello',
-  style: theme.typography.body,
-)
-```
-
-### Override precedence
-
-When both global and local styles exist, resolution follows this order:
-
-1. Explicit widget parameter (`tint`, `textColor`, `backgroundColor`, etc.)
-2. Component-level override (where available)
-3. `CNThemeData` semantic default
-
-### Migration notes
-
-- Existing code that passes explicit colors/fonts keeps working unchanged.
-- If you omit explicit styling, migrated components now use semantic `CNThemeData`
-  defaults.
-- The example app includes a **Theme Tokens** page demonstrating colors,
-  materials, and typography.
-
-## What's in the package
-
-This package ships a handful of native Liquid Glass widgets. Each widget exposes a simple, Flutter‑friendly API and falls back to a reasonable Flutter implementation on non‑Apple platforms.
-
-### Slider
-
-![Liquid Glass Slider](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/slider.png)
-
-```dart
-double _value = 50;
-
-CNSlider(
-  value: _value,
-  min: 0,
-  max: 100,
-  onChanged: (v) => setState(() => _value = v),
-)
-```
-
-
-### Segmented Control
-
-![Liquid Glass Segmented Control](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/segmented-control.png)
-
-```dart
-int _index = 0;
-
-CNSegmentedControl(
-  labels: const ['One', 'Two', 'Three'],
-  selectedIndex: _index,
-  onValueChanged: (i) => setState(() => _index = i),
-)
-```
-
-### Button
-
-![Liquid Glass Button](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/button.png)
-
-```dart
+Text('Hello', style: theme.typography.body);
+Container(color: theme.canvasColor);
 CNButton(
-  label: 'Press me',
+  tint: theme.accentColor, // user accent color, falling back to the system one
+  children: const [CNChildText('Continue')],
   onPressed: () {},
-)
-
-// Icon button variant
-CNButton.icon(
-  icon: const CNSymbol('heart.fill'),
-  onPressed: () {},
-)
-
-// Style is optional; default is CNButtonStyle.automatic.
-```
-
-### Icon (SF Symbols)
-
-![Liquid Glass Icon](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/icon.png)
-
-```dart
-// Monochrome symbol
-const CNIcon(symbol: CNSymbol('star'));
-
-// Multicolor / hierarchical options are also supported
-const CNIcon(
-  symbol: CNSymbol('paintpalette.fill'),
-  mode: CNSymbolRenderingMode.multicolor,
-)
-```
-
-### Popup Menu Button
-
-![Liquid Glass Popup Menu Button](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/popup-menu-button.png)
-
-```dart
-final items = [
-  const CNPopupMenuItem(label: 'New File', icon: CNSymbol('doc', size: 18)),
-  const CNPopupMenuItem(label: 'New Folder', icon: CNSymbol('folder', size: 18)),
-  const CNPopupMenuDivider(),
-  const CNPopupMenuItem(label: 'Rename', icon: CNSymbol('rectangle.and.pencil.and.ellipsis', size: 18)),
-];
-
-CNPopupMenuButton(
-  buttonLabel: 'Actions',
-  items: items,
-  onSelected: (index) {
-    // Handle selection
-  },
-)
-```
-
-### Tab Bar
-
-![Liquid Glass Tab Bar](https://github.com/serverpod/cupertino_native/raw/main/misc/screenshots/tab-bar.png)
-
-```dart
-int _tabIndex = 0;
-
-// Overlay this at the bottom of your page
-CNTabBar(
-  items: const [
-    CNTabBarItem(label: 'Home', icon: CNSymbol('house.fill')),
-    CNTabBarItem(label: 'Profile', icon: CNSymbol('person.crop.circle')),
-    CNTabBarItem(label: 'Settings', icon: CNSymbol('gearshape.fill')),
-  ],
-  currentIndex: _tabIndex,
-  onTap: (i) => setState(() => _tabIndex = i),
-)
-```
-
-### Alert
-
-```dart
-final selectedIndex = await CNAlert.show(
-  context,
-  title: 'Delete File',
-  message: 'This action cannot be undone.',
-  actions: const [
-    CNAlertAction('Cancel', isDefault: true),
-    CNAlertAction('Delete', isDestructive: true),
-  ],
-  style: CNAlertStyle.warning,
 );
 ```
 
-### Popover
+Resolution order for every styled property:
 
-```dart
-CNPopoverButton.label(
-  buttonLabel: 'Details',
-  title: 'Project Actions',
-  message: 'Choose what to do with the current project item.',
-  actions: const [
-    CNPopoverAction(label: 'Open', isDefault: true),
-    CNPopoverAction(label: 'Duplicate'),
-    CNPopoverAction(label: 'Delete', isDestructive: true),
-  ],
-  onSelected: (index) {
-    // Handle selected action
-  },
-)
+1. Explicit widget parameter (`tint`, `foregroundColor`, `font`, …)
+2. Component-level override (`CNThemeData.buttonTheme`, `.sliderTheme`, …)
+3. `CNThemeData` semantic default
+
+Pass `lightTheme` / `darkTheme` to `CNApp` to replace the defaults wholesale.
+
+## Example app
+
+The repository contains a full demo application with one page per widget — including a *Theme Tokens* page, a sidebar, a native toolbar and an expandable status bar. It is the most complete reference for the API.
+
+👉 [`example/`](example/) — see [`example/lib/main.dart`](example/lib/main.dart) for the app shell and [`example/lib/demos/`](example/lib/demos/) for the per-widget pages.
+
+```bash
+cd example
+flutter run -d macos
 ```
 
-### Context Menu
+## Screenshots
 
-```dart
-CNContextMenuRegion(
-  menu: CNMenu(
-    items: [
-      CNMenuItem(title: 'Open'),
-      CNMenuItem(title: 'Rename'),
-      CNMenuItem(title: 'Delete'),
-    ],
-  ),
-  onMenuItemSelected: (item) {
-    // Handle selected menu item
-  },
-  child: const Text('Right click me'),
-)
+<!--
+TODO: add screenshots of the demo app.
+Suggested set: app shell (sidebar + toolbar + status bar), buttons and toggles,
+text input, pickers and date picker, gauges and progress, menus and popovers,
+light and dark side by side.
+
+![App shell](misc/screenshots/app-shell.png)
+-->
+
+_Screenshots coming soon._
+
+## Status and limitations
+
+- macOS 26 only — there is no iOS, Windows, Linux or web implementation, and no fallback rendering on older macOS versions.
+- Non-macOS platforms build, but the widgets render as empty boxes.
+- Native platform views do not compose freely with Flutter scrolling and clipping; scroll views containing native controls still need care.
+- The API is not stable yet. Expect renames between versions.
+
+## Contributing
+
+Issues and pull requests are welcome at <https://github.com/sephiroth74/cupertino_native/issues>.
+
+Before opening a PR:
+
+```bash
+flutter analyze
+flutter test
 ```
 
-### Split View
+New widgets should follow the `CNWidget` / `CNWidgetState` + `CNWidgetNSView` architecture; public APIs need doc comments (`public_member_api_docs` is enforced).
 
-```dart
-final controller = CNSplitViewController();
+## License
 
-CNSplitView(
-  controller: controller,
-  axis: CNSplitAxis.horizontal,
-  initialFraction: 0.35,
-  minFraction: 0.2,
-  maxFraction: 0.8,
-  dividerThickness: 6,
-  dividerInteractiveThickness: 18,
-  dividerDoubleTapAction: CNSplitDividerDoubleTapAction.reset,
-  dividerSemanticLabel: 'Project split divider',
-  snapFractions: const [0.25, 0.5, 0.75],
-  snapThreshold: 0.04,
-  snapReleaseThreshold: 0.065,
-  first: CNSplitPane(
-    minExtent: 160,
-    child: SidebarWidget(),
-  ),
-  second: CNSplitPane(
-    minExtent: 240,
-    child: ContentWidget(),
-  ),
-)
-```
-
-Practical notes:
-
-- Use `minExtent` on both panes to avoid overly compressed UIs during window resize.
-- Keep `dividerInteractiveThickness` larger than `dividerThickness` for easier drag hit-testing.
-- Enable snapping (`snapFractions`) for predictable editor/sidebar presets.
-- Use `snapReleaseThreshold` (>= `snapThreshold`) to control how quickly the
-  divider exits a snapped state.
-- Keyboard shortcuts are enabled by default:
-  - `Alt+Left/Right` or `Alt+Up/Down` to resize.
-  - `Alt+1` / `Alt+2` to toggle first/second pane.
-- For macOS-only visual polish without changing layout behavior:
-  - `macOSDividerStyle: CNSplitMacOSDividerStyle.grabber`
-  - `enableMacOSDividerVisualEffects: true`
-
-
-## What's left to do?
-So far, this is more of a proof of concept than a full package (although the included components do work). Future improvements include:
-
-- Cleaning up the code. Probably by someone who knows a bit about Swift.
-- Adding more native components.
-- Reviewing the Flutter APIs to ensure consistency and eliminate redundancies.
-- Extending the flexibility and styling options of the widgets.
-- Investigate how to best combine scroll views with the native components.
-- macOS compiles and runs, but it's untested with Liquid Glass and generally doesn't look great.
-
-## How was this done?
-Pretty much vibe-coded with Codex and GPT-5. 😅
+BSD 3-Clause — see [LICENSE](LICENSE). Copyright (c) 2025 Serverpod AB for the original work, retained in this fork.

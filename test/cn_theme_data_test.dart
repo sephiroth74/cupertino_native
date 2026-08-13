@@ -67,13 +67,13 @@ void main() {
         final updated = base.copyWith(
           iconButtonTheme: const CNIconButtonThemeData(
             shape: CNIconButtonShape.circle,
-            foregroundColor: Color(0xFF112233),
+            foregroundColor: WidgetStatePropertyAll(Color(0xFF112233)),
           ),
         );
 
         expect(updated.iconButtonTheme.shape, CNIconButtonShape.circle);
         expect(
-          updated.iconButtonTheme.foregroundColor,
+          updated.iconButtonTheme.foregroundColor?.resolve(const {}),
           const Color(0xFF112233),
         );
         expect(updated.userAccentColor, base.userAccentColor);
@@ -82,14 +82,51 @@ void main() {
 
     test('icon button theme merge keeps existing values for null fields', () {
       const a = CNIconButtonThemeData(
-        foregroundColor: Color(0xFF111111),
+        foregroundColor: WidgetStatePropertyAll(Color(0xFF111111)),
         borderWidth: 2,
       );
       const b = CNIconButtonThemeData(borderWidth: 4);
       final merged = a.merge(b);
 
       expect(merged.borderWidth, 4);
-      expect(merged.foregroundColor, const Color(0xFF111111));
+      expect(
+        merged.foregroundColor?.resolve(const {}),
+        const Color(0xFF111111),
+      );
+    });
+
+    test('icon button theme merge layers per-state colors', () {
+      const under = CNIconButtonThemeData(
+        backgroundColor: WidgetStateProperty<Color?>.fromMap({
+          WidgetState.hovered: Color(0xFF111111),
+        }),
+      );
+      const over = CNIconButtonThemeData(
+        backgroundColor: WidgetStateProperty<Color?>.fromMap({
+          WidgetState.pressed: Color(0xFF222222),
+        }),
+      );
+      final merged = under.merge(over).backgroundColor;
+
+      // Each layer keeps the state it covers; neither fills in the idle state.
+      expect(merged?.resolve({WidgetState.hovered}), const Color(0xFF111111));
+      expect(merged?.resolve({WidgetState.pressed}), const Color(0xFF222222));
+      expect(merged?.resolve(const {}), isNull);
+    });
+
+    test('icon button theme merge lets the top layer win a shared state', () {
+      const under = CNIconButtonThemeData(
+        backgroundColor: WidgetStatePropertyAll(Color(0xFF111111)),
+      );
+      const over = CNIconButtonThemeData(
+        backgroundColor: WidgetStateProperty<Color?>.fromMap({
+          WidgetState.pressed: Color(0xFF222222),
+        }),
+      );
+      final merged = under.merge(over).backgroundColor;
+
+      expect(merged?.resolve({WidgetState.pressed}), const Color(0xFF222222));
+      expect(merged?.resolve(const {}), const Color(0xFF111111));
     });
 
     test('merge overrides with other theme values', () {

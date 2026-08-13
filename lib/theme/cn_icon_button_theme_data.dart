@@ -51,19 +51,17 @@ class CNIconButtonTheme extends InheritedTheme {
 /// sensible default from the ambient [CNTheme] (accent color, fills, label
 /// color, …). This lets an app theme just a subset of the appearance while
 /// keeping the rest in sync with the platform look.
+///
+/// [foregroundColor] and [backgroundColor] are [WidgetStateProperty] objects
+/// keyed on [WidgetState.disabled], [WidgetState.pressed],
+/// [WidgetState.hovered] and [WidgetState.selected]. Because they resolve to a
+/// nullable [Color], a property may cover a single state and leave the rest to
+/// the layer below it — see [CNStateColor] and [CNIconButton.foregroundColor].
 class CNIconButtonThemeData extends Equatable {
   /// Creates icon button theme overrides.
   const CNIconButtonThemeData({
     this.foregroundColor,
-    this.hoveredForegroundColor,
-    this.selectedForegroundColor,
-    this.pressedForegroundColor,
-    this.disabledForegroundColor,
     this.backgroundColor,
-    this.hoveredBackgroundColor,
-    this.selectedBackgroundColor,
-    this.pressedBackgroundColor,
-    this.disabledBackgroundColor,
     this.borderColor,
     this.borderWidth,
     this.shape,
@@ -77,8 +75,8 @@ class CNIconButtonThemeData extends Equatable {
   /// Animation duration for hover / press / selection transitions.
   final Duration? animationDuration;
 
-  /// Background fill in the default (idle) state.
-  final Color? backgroundColor;
+  /// Per-state background fill. See [CNIconButton.backgroundColor].
+  final WidgetStateProperty<Color?>? backgroundColor;
 
   /// Border (stroke) color drawn around the button in every state.
   final Color? borderColor;
@@ -89,24 +87,12 @@ class CNIconButtonThemeData extends Equatable {
   /// Border (stroke) width. Defaults to `0` (no border) when null.
   final double? borderWidth;
 
-  /// Background fill while the button is disabled.
-  final Color? disabledBackgroundColor;
-
-  /// Icon color while the button is disabled.
-  final Color? disabledForegroundColor;
-
-  /// Icon color in the default (idle) state.
-  final Color? foregroundColor;
-
   /// Font used to draw the glyph. When it carries an explicit point size that
   /// size wins over [iconSizeRatio]; see [CNIconButton.font].
   final CNFont? font;
 
-  /// Background fill while the pointer is hovering.
-  final Color? hoveredBackgroundColor;
-
-  /// Icon color while the pointer is hovering.
-  final Color? hoveredForegroundColor;
+  /// Per-state icon color. See [CNIconButton.foregroundColor].
+  final WidgetStateProperty<Color?>? foregroundColor;
 
   /// Icon size expressed as a fraction of the button [CNIconButton.size].
   /// Defaults to `0.5` when null.
@@ -115,33 +101,13 @@ class CNIconButtonThemeData extends Equatable {
   /// Extra padding applied inside the button around the icon.
   final EdgeInsetsGeometry? padding;
 
-  /// Background fill while the button is pressed.
-  final Color? pressedBackgroundColor;
-
-  /// Icon color while the button is pressed.
-  final Color? pressedForegroundColor;
-
-  /// Background fill while the button is selected.
-  final Color? selectedBackgroundColor;
-
-  /// Icon color while the button is selected.
-  final Color? selectedForegroundColor;
-
   /// The overall background / hit-target shape.
   final CNIconButtonShape? shape;
 
   @override
   List<Object?> get props => [
     foregroundColor,
-    hoveredForegroundColor,
-    selectedForegroundColor,
-    pressedForegroundColor,
-    disabledForegroundColor,
     backgroundColor,
-    hoveredBackgroundColor,
-    selectedBackgroundColor,
-    pressedBackgroundColor,
-    disabledBackgroundColor,
     borderColor,
     borderWidth,
     shape,
@@ -170,27 +136,26 @@ class CNIconButtonThemeData extends Equatable {
       shape: CNIconButtonShape.roundedRectangle,
       iconSizeRatio: 0.5,
       padding: EdgeInsets.zero,
-      hoveredBackgroundColor: theme.fillQuaternaryColor,
-      pressedBackgroundColor: theme.fillTertiaryColor,
-      selectedBackgroundColor:
-          accent?.withValues(alpha: 0.15) ?? theme.fillSecondaryColor,
-      selectedForegroundColor: accent,
+      // Only the state fills are set: the idle background stays unresolved so a
+      // toolbar button is transparent unless an app theme fills it in, and the
+      // idle foreground tracks the ambient CNTheme label color.
+      backgroundColor: WidgetStateProperty<Color?>.fromMap({
+        WidgetState.pressed: theme.fillTertiaryColor,
+        WidgetState.hovered: theme.fillQuaternaryColor,
+        WidgetState.selected:
+            accent?.withValues(alpha: 0.15) ?? theme.fillSecondaryColor,
+      }),
+      foregroundColor: WidgetStateProperty<Color?>.fromMap({
+        WidgetState.selected: accent,
+      }),
       animationDuration: const Duration(milliseconds: 120),
     );
   }
 
   /// Returns a copy with selected values replaced.
   CNIconButtonThemeData copyWith({
-    Color? foregroundColor,
-    Color? hoveredForegroundColor,
-    Color? selectedForegroundColor,
-    Color? pressedForegroundColor,
-    Color? disabledForegroundColor,
-    Color? backgroundColor,
-    Color? hoveredBackgroundColor,
-    Color? selectedBackgroundColor,
-    Color? pressedBackgroundColor,
-    Color? disabledBackgroundColor,
+    WidgetStateProperty<Color?>? foregroundColor,
+    WidgetStateProperty<Color?>? backgroundColor,
     Color? borderColor,
     double? borderWidth,
     CNIconButtonShape? shape,
@@ -202,23 +167,7 @@ class CNIconButtonThemeData extends Equatable {
   }) {
     return CNIconButtonThemeData(
       foregroundColor: foregroundColor ?? this.foregroundColor,
-      hoveredForegroundColor:
-          hoveredForegroundColor ?? this.hoveredForegroundColor,
-      selectedForegroundColor:
-          selectedForegroundColor ?? this.selectedForegroundColor,
-      pressedForegroundColor:
-          pressedForegroundColor ?? this.pressedForegroundColor,
-      disabledForegroundColor:
-          disabledForegroundColor ?? this.disabledForegroundColor,
       backgroundColor: backgroundColor ?? this.backgroundColor,
-      hoveredBackgroundColor:
-          hoveredBackgroundColor ?? this.hoveredBackgroundColor,
-      selectedBackgroundColor:
-          selectedBackgroundColor ?? this.selectedBackgroundColor,
-      pressedBackgroundColor:
-          pressedBackgroundColor ?? this.pressedBackgroundColor,
-      disabledBackgroundColor:
-          disabledBackgroundColor ?? this.disabledBackgroundColor,
       borderColor: borderColor ?? this.borderColor,
       borderWidth: borderWidth ?? this.borderWidth,
       shape: shape ?? this.shape,
@@ -231,19 +180,22 @@ class CNIconButtonThemeData extends Equatable {
   }
 
   /// Returns a new object where non-null values from [other] override this one.
+  ///
+  /// The color properties are layered rather than replaced: [other] wins for
+  /// every state it resolves and this object still applies to the others, so
+  /// merging a theme that only styles the idle background on top of one that
+  /// styles the hovered fill keeps both (see [CNStateColor.layer]).
   CNIconButtonThemeData merge(CNIconButtonThemeData? other) {
     if (other == null) return this;
     return copyWith(
-      foregroundColor: other.foregroundColor,
-      hoveredForegroundColor: other.hoveredForegroundColor,
-      selectedForegroundColor: other.selectedForegroundColor,
-      pressedForegroundColor: other.pressedForegroundColor,
-      disabledForegroundColor: other.disabledForegroundColor,
-      backgroundColor: other.backgroundColor,
-      hoveredBackgroundColor: other.hoveredBackgroundColor,
-      selectedBackgroundColor: other.selectedBackgroundColor,
-      pressedBackgroundColor: other.pressedBackgroundColor,
-      disabledBackgroundColor: other.disabledBackgroundColor,
+      foregroundColor: CNStateColor.layer(
+        other.foregroundColor,
+        foregroundColor,
+      ),
+      backgroundColor: CNStateColor.layer(
+        other.backgroundColor,
+        backgroundColor,
+      ),
       borderColor: other.borderColor,
       borderWidth: other.borderWidth,
       shape: other.shape,
@@ -262,47 +214,17 @@ class CNIconButtonThemeData extends Equatable {
     double t,
   ) {
     return CNIconButtonThemeData(
-      foregroundColor: Color.lerp(a.foregroundColor, b.foregroundColor, t),
-      hoveredForegroundColor: Color.lerp(
-        a.hoveredForegroundColor,
-        b.hoveredForegroundColor,
+      foregroundColor: WidgetStateProperty.lerp<Color?>(
+        a.foregroundColor,
+        b.foregroundColor,
         t,
+        Color.lerp,
       ),
-      selectedForegroundColor: Color.lerp(
-        a.selectedForegroundColor,
-        b.selectedForegroundColor,
+      backgroundColor: WidgetStateProperty.lerp<Color?>(
+        a.backgroundColor,
+        b.backgroundColor,
         t,
-      ),
-      pressedForegroundColor: Color.lerp(
-        a.pressedForegroundColor,
-        b.pressedForegroundColor,
-        t,
-      ),
-      disabledForegroundColor: Color.lerp(
-        a.disabledForegroundColor,
-        b.disabledForegroundColor,
-        t,
-      ),
-      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      hoveredBackgroundColor: Color.lerp(
-        a.hoveredBackgroundColor,
-        b.hoveredBackgroundColor,
-        t,
-      ),
-      selectedBackgroundColor: Color.lerp(
-        a.selectedBackgroundColor,
-        b.selectedBackgroundColor,
-        t,
-      ),
-      pressedBackgroundColor: Color.lerp(
-        a.pressedBackgroundColor,
-        b.pressedBackgroundColor,
-        t,
-      ),
-      disabledBackgroundColor: Color.lerp(
-        a.disabledBackgroundColor,
-        b.disabledBackgroundColor,
-        t,
+        Color.lerp,
       ),
       borderColor: Color.lerp(a.borderColor, b.borderColor, t),
       borderWidth: lerpDouble(a.borderWidth, b.borderWidth, t),

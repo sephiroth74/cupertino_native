@@ -15,6 +15,14 @@ import 'package:flutter/widgets.dart';
 /// Resolution order for every visual property is:
 /// explicit widget parameter → [CNIconButtonTheme] override → [CNTheme] semantic default.
 ///
+/// The colors are [WidgetStateProperty] objects resolved against
+/// [WidgetState.disabled], [WidgetState.pressed], [WidgetState.hovered] and
+/// [WidgetState.selected]. The first three are mutually exclusive — a pressed
+/// button never reports `hovered` and a disabled one reports neither — while
+/// `selected` can combine with any of them. Order the keys of a
+/// [WidgetStateProperty.fromMap] accordingly (the built-in defaults resolve
+/// disabled → pressed → hovered → selected → idle).
+///
 /// Provide exactly one of [icon] or [systemSymbolName], and optionally a
 /// [selectedIcon] / [selectedSystemSymbolName] to swap the glyph while
 /// [isSelected] is true.
@@ -33,15 +41,7 @@ class CNIconButton extends StatefulWidget {
     this.isSelected = false,
     this.symbolRenderingMode,
     this.foregroundColor,
-    this.hoveredForegroundColor,
-    this.selectedForegroundColor,
-    this.pressedForegroundColor,
-    this.disabledForegroundColor,
     this.backgroundColor,
-    this.hoveredBackgroundColor,
-    this.selectedBackgroundColor,
-    this.pressedBackgroundColor,
-    this.disabledBackgroundColor,
     this.borderColor,
     this.borderWidth,
     this.shape,
@@ -70,8 +70,13 @@ class CNIconButton extends StatefulWidget {
   /// Transition duration for state (hover/press/selection) changes.
   final Duration? animationDuration;
 
-  /// Background fill in the idle state. Overrides the theme when non-null.
-  final Color? backgroundColor;
+  /// Per-state background fill. Overrides the theme for every state it
+  /// resolves; see [foregroundColor] for how partial properties layer.
+  ///
+  /// Defaults to no fill while idle and disabled, [CNThemeData.fillPrimaryColor]
+  /// while pressed, [CNThemeData.fillSecondaryColor] while hovered and a
+  /// translucent accent tint while selected.
+  final WidgetStateProperty<Color?>? backgroundColor;
 
   /// Border stroke color. Overrides the theme when non-null.
   final Color? borderColor;
@@ -82,14 +87,31 @@ class CNIconButton extends StatefulWidget {
   /// Border stroke width. Overrides the theme when non-null.
   final double? borderWidth;
 
-  /// Background fill while disabled. Overrides the theme when non-null.
-  final Color? disabledBackgroundColor;
-
-  /// Icon color while disabled. Overrides the theme when non-null.
-  final Color? disabledForegroundColor;
-
-  /// Icon color in the idle state. Overrides the theme when non-null.
-  final Color? foregroundColor;
+  /// Per-state icon color. Overrides the theme for every state it resolves.
+  ///
+  /// The property resolves to a nullable [Color], so it can cover a subset of
+  /// the states and leave the others to the layers below — the ambient
+  /// [CNIconButtonTheme] first, then the [CNTheme] semantic defaults:
+  ///
+  /// ```dart
+  /// // Only the pressed color is overridden; idle, hovered, selected and
+  /// // disabled keep coming from the theme.
+  /// CNIconButton(
+  ///   size: 28,
+  ///   icon: CupertinoIcons.share,
+  ///   onTap: () {},
+  ///   foregroundColor: WidgetStateProperty<Color?>.fromMap({
+  ///     WidgetState.pressed: CupertinoColors.activeBlue,
+  ///   }),
+  /// )
+  /// ```
+  ///
+  /// Conversely a [WidgetStatePropertyAll] applies to *every* state, which also
+  /// flattens the hover / press feedback.
+  ///
+  /// Defaults to the resolved [CNColors.label], tinted with the accent color
+  /// while hovered, pressed or selected and faded while disabled.
+  final WidgetStateProperty<Color?>? foregroundColor;
 
   /// Optional font used to draw the glyph. Overrides the theme when non-null.
   ///
@@ -103,12 +125,6 @@ class CNIconButton extends StatefulWidget {
   /// lighter SF Symbol. For the [icon] path only the point size applies —
   /// Flutter's bundled icon fonts have no weight axis.
   final CNFont? font;
-
-  /// Background fill while hovered. Overrides the theme when non-null.
-  final Color? hoveredBackgroundColor;
-
-  /// Icon color while hovered. Overrides the theme when non-null.
-  final Color? hoveredForegroundColor;
 
   /// The icon to display inside the button. Cannot be used with [systemSymbolName].
   final IconData? icon;
@@ -130,18 +146,6 @@ class CNIconButton extends StatefulWidget {
 
   /// Extra padding around the icon inside the button. Overrides the theme when non-null.
   final EdgeInsetsGeometry? padding;
-
-  /// Background fill while pressed. Overrides the theme when non-null.
-  final Color? pressedBackgroundColor;
-
-  /// Icon color while pressed. Overrides the theme when non-null.
-  final Color? pressedForegroundColor;
-
-  /// Background fill while selected. Overrides the theme when non-null.
-  final Color? selectedBackgroundColor;
-
-  /// Icon color while selected. Overrides the theme when non-null.
-  final Color? selectedForegroundColor;
 
   /// The icon to display when selected. Cannot be used with [systemSymbolName].
   final IconData? selectedIcon;
@@ -251,72 +255,41 @@ class _CNIconButtonState extends State<CNIconButton> {
     );
   }
 
-  Color? _resolveBackground({
-    required BuildContext context,
+  /// The [CNTheme] semantic fallback for the background fill, used for the
+  /// states neither the widget nor the [CNIconButtonTheme] resolves.
+  ///
+  /// The keys are listed in precedence order, so the resolution stays
+  /// disabled → pressed → hovered → selected → idle even when the caller
+  /// reports several states at once. Idle and disabled resolve to null: an icon
+  /// button has no fill of its own until one is themed in.
+  WidgetStateProperty<Color?> _defaultBackground({
     required CNThemeData theme,
-    required CNIconButtonThemeData buttonTheme,
     required Color? accent,
-    required bool disabled,
-    required bool pressed,
-    required bool hovered,
   }) {
-    if (disabled) {
-      return widget.disabledBackgroundColor ??
-          buttonTheme.disabledBackgroundColor;
-    }
-    if (pressed) {
-      return widget.pressedBackgroundColor ??
-          buttonTheme.pressedBackgroundColor ??
-          theme.fillPrimaryColor;
-    }
-    if (hovered) {
-      return widget.hoveredBackgroundColor ??
-          buttonTheme.hoveredBackgroundColor ??
-          theme.fillSecondaryColor;
-    }
-    if (widget.isSelected) {
-      return widget.selectedBackgroundColor ??
-          buttonTheme.selectedBackgroundColor ??
-          accent?.withValues(alpha: 0.15) ??
-          theme.fillSecondaryColor;
-    }
-    return widget.backgroundColor ?? buttonTheme.backgroundColor;
+    return WidgetStateProperty<Color?>.fromMap({
+      WidgetState.disabled: null,
+      WidgetState.pressed: theme.fillPrimaryColor,
+      WidgetState.hovered: theme.fillSecondaryColor,
+      WidgetState.selected:
+          accent?.withValues(alpha: 0.15) ?? theme.fillSecondaryColor,
+      WidgetState.any: null,
+    });
   }
 
-  Color _resolveForeground({
-    required BuildContext context,
-    required CNThemeData theme,
-    required CNIconButtonThemeData buttonTheme,
+  /// The [CNTheme] semantic fallback for the icon color. Keys are in the same
+  /// precedence order as [_defaultBackground]; every state resolves to a color,
+  /// so this layer always terminates the chain.
+  WidgetStateProperty<Color?> _defaultForeground({
+    required Color idle,
     required Color? accent,
-    required bool disabled,
-    required bool pressed,
-    required bool hovered,
   }) {
-    final Color idle = CNColors.label.resolveFromContext(context);
-    if (disabled) {
-      return widget.disabledForegroundColor ??
-          buttonTheme.disabledForegroundColor ??
-          idle.withValues(alpha: 0.3);
-    }
-    if (pressed) {
-      return widget.pressedForegroundColor ??
-          buttonTheme.pressedForegroundColor ??
-          accent?.withLuminance(0.4) ??
-          idle;
-    }
-    if (hovered) {
-      return widget.hoveredForegroundColor ??
-          buttonTheme.hoveredForegroundColor ??
-          accent?.withLuminance(0.3) ??
-          idle;
-    }
-    if (widget.isSelected) {
-      return widget.selectedForegroundColor ??
-          buttonTheme.selectedForegroundColor ??
-          accent ??
-          idle;
-    }
-    return widget.foregroundColor ?? buttonTheme.foregroundColor ?? idle;
+    return WidgetStateProperty<Color?>.fromMap({
+      WidgetState.disabled: idle.withValues(alpha: 0.3),
+      WidgetState.pressed: accent?.withLuminance(0.4) ?? idle,
+      WidgetState.hovered: accent?.withLuminance(0.3) ?? idle,
+      WidgetState.selected: accent ?? idle,
+      WidgetState.any: idle,
+    });
   }
 
   void _setHovered(bool value) {
@@ -340,25 +313,28 @@ class _CNIconButtonState extends State<CNIconButton> {
     // Precedence for the effective visual state: disabled → pressed → hovered → selected → idle.
     final bool pressed = _interactive && _pressed;
     final bool hovered = _interactive && _hovered && !pressed;
+    // disabled / pressed / hovered are mutually exclusive by construction (see
+    // above); selected is orthogonal and may join any of them.
+    final Set<WidgetState> states = <WidgetState>{
+      if (disabled) WidgetState.disabled,
+      if (pressed) WidgetState.pressed,
+      if (hovered) WidgetState.hovered,
+      if (widget.isSelected) WidgetState.selected,
+    };
 
-    final Color foreground = _resolveForeground(
-      context: context,
-      theme: theme,
-      buttonTheme: buttonTheme,
-      accent: accent,
-      disabled: disabled,
-      pressed: pressed,
-      hovered: hovered,
-    );
-    final Color? background = _resolveBackground(
-      context: context,
-      theme: theme,
-      buttonTheme: buttonTheme,
-      accent: accent,
-      disabled: disabled,
-      pressed: pressed,
-      hovered: hovered,
-    );
+    final Color idle = CNColors.label.resolveFromContext(context);
+    final Color foreground =
+        CNStateColor.resolve(states, [
+          widget.foregroundColor,
+          buttonTheme.foregroundColor,
+          _defaultForeground(idle: idle, accent: accent),
+        ]) ??
+        idle;
+    final Color? background = CNStateColor.resolve(states, [
+      widget.backgroundColor,
+      buttonTheme.backgroundColor,
+      _defaultBackground(theme: theme, accent: accent),
+    ]);
 
     final double iconSizeRatio =
         widget.iconSizeRatio ?? buttonTheme.iconSizeRatio ?? 0.75;
