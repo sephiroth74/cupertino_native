@@ -1,5 +1,13 @@
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 import 'package:macos_window_utils/macos_window_utils.dart';
+
+/// The smallest width a sidebar separator (divider) is allowed to have.
+///
+/// Anything thinner would leave no room for the resize grip and would be
+/// impossible to see against the sidebar background.
+const double kCNSidebarMinSeparatorWidth = 2.0;
 
 /// Configuration for a resizable sidebar panel in a [CNWindow].
 class CNSidebar {
@@ -19,9 +27,15 @@ class CNSidebar {
     this.windowBreakpoint = 556.0,
     this.shownByDefault = true,
     this.separatorColor,
+    this.separatorWidth = 8.0,
+    this.gripColor,
     this.material = NSVisualEffectViewMaterial.sidebar,
     this.slideDuration = const Duration(milliseconds: 300),
-  }) : dragClosedBuffer = dragClosedBuffer ?? minWidth / 2;
+  }) : assert(
+         separatorWidth >= kCNSidebarMinSeparatorWidth,
+         'separatorWidth must be at least $kCNSidebarMinSeparatorWidth',
+       ),
+       dragClosedBuffer = dragClosedBuffer ?? minWidth / 2;
 
   /// Optional background color applied to the sidebar container.
   final Color? backgroundColor;
@@ -56,6 +70,18 @@ class CNSidebar {
   /// Optional color for the separator line between the sidebar and the main content.
   final Color? separatorColor;
 
+  /// Optional color for the grip area used to resize the sidebar.
+  final Color? gripColor;
+
+  /// Width of the separator (divider) drawn between the sidebar and the main
+  /// content, in logical pixels.
+  ///
+  /// Must be at least [kCNSidebarMinSeparatorWidth]; read it back through
+  /// [effectiveSeparatorWidth], which clamps to that minimum in release builds
+  /// too. The pointer grab area is widened independently, so a thin separator is
+  /// still comfortable to drag.
+  final double separatorWidth;
+
   /// Duration of the show/hide slide animation when the sidebar is toggled.
   ///
   /// Defaults to 300ms. Set to [Duration.zero] to disable the animation and
@@ -77,4 +103,8 @@ class CNSidebar {
 
   /// The window width below which the sidebar is automatically hidden.
   final double windowBreakpoint;
+
+  /// [separatorWidth] clamped to [kCNSidebarMinSeparatorWidth].
+  double get effectiveSeparatorWidth =>
+      math.max(kCNSidebarMinSeparatorWidth, separatorWidth);
 }

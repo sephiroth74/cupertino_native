@@ -8,6 +8,17 @@ import 'package:flutter/services.dart';
 import 'package:macos_window_utils/macos_window_utils.dart';
 import 'package:macos_window_utils/widgets/visual_effect_subview_container/visual_effect_subview_container.dart';
 
+/// Smallest pointer-grab width of a sidebar resizer. A separator thinner than
+/// this still gets a band this wide to drag, with the divider centered in it.
+const double _kSidebarResizeBandWidth = 8.0;
+
+/// Size of a single dot of the resize grip drawn in the middle of the divider,
+/// and the gap between two dots.
+const double _kSidebarGripDotSize = 2.0;
+
+/// Cursor shown over a sidebar resizer, and pinned window-wide while dragging.
+const SystemMouseCursor _kSidebarResizeCursor = SystemMouseCursors.resizeColumn;
+
 /// A [CNWindowScope] serves as a scope for its descendants to rely on
 /// values needed for the layout of the descendants.
 ///
@@ -170,14 +181,12 @@ class _CNWindowState extends State<CNWindow> {
   /// cancelled. Null when no resize is active.
   SystemMouseCursor? _activeResizeCursor;
 
-  SystemMouseCursor _endSidebarCursor = SystemMouseCursors.resizeLeft;
   double _endSidebarDragStartPosition = 0.0;
   double _endSidebarDragStartWidth = 0.0;
   double _endSidebarWidth = 0.0;
   late bool _showEndSidebar = widget.endSidebar?.shownByDefault ?? false;
   bool _showSidebar = true;
   late bool _showStatusBarPanel = widget.statusBar?.shownByDefault ?? false;
-  SystemMouseCursor _sidebarCursor = SystemMouseCursors.resizeColumn;
   double _sidebarDragStartPosition = 0.0;
   double _sidebarDragStartWidth = 0.0;
   double _sidebarWidth = 0.0;
@@ -290,6 +299,12 @@ class _CNWindowState extends State<CNWindow> {
         final visibleEndSidebarWidth = canShowEndSidebar
             ? _endSidebarWidth
             : 0.0;
+        final sidebarResizerBand = _CNSidebarResizer.bandWidth(
+          sidebar?.effectiveSeparatorWidth ?? 0.0,
+        );
+        final endSidebarResizerBand = _CNSidebarResizer.bandWidth(
+          endSidebar?.effectiveSeparatorWidth ?? 0.0,
+        );
         final state = widget.state;
 
         final statusBarHeight = statusBar?.height ?? 0.0;
@@ -425,24 +440,26 @@ class _CNWindowState extends State<CNWindow> {
                 curve: curve,
                 duration: duration,
                 top: toolbarStripHeight,
-                left: visibleSidebarWidth - 4,
-                width: 7,
+                left: visibleSidebarWidth,
+                width: canShowSidebar ? sidebarResizerBand : 0,
                 height: effectiveSidebarHeight,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onHorizontalDragStart: (details) {
+                child: _CNSidebarResizer(
+                  thickness: sidebar!.effectiveSeparatorWidth,
+                  color: sidebar.separatorColor ?? dividerColor,
+                  gripColor: sidebar.gripColor ?? theme.fillPrimaryColor,
+                  onDragStart: (details) {
                     _sidebarDragStartWidth = _sidebarWidth;
                     _sidebarDragStartPosition = details.globalPosition.dx;
-                    setState(() => _activeResizeCursor = _sidebarCursor);
+                    setState(() => _activeResizeCursor = _kSidebarResizeCursor);
                   },
-                  onHorizontalDragUpdate: (details) {
+                  onDragUpdate: (details) {
                     setState(() {
                       var newWidth =
                           _sidebarDragStartWidth +
                           details.globalPosition.dx -
                           _sidebarDragStartPosition;
 
-                      if (sidebar!.startWidth != null &&
+                      if (sidebar.startWidth != null &&
                           sidebar.snapToStartBuffer != null &&
                           (newWidth - sidebar.startWidth!).abs() <=
                               sidebar.snapToStartBuffer!) {
@@ -459,25 +476,11 @@ class _CNWindowState extends State<CNWindow> {
                         sidebar.minWidth,
                         math.min(sidebar.maxWidth!, newWidth),
                       );
-                      _sidebarCursor = SystemMouseCursors.resizeColumn;
-                      _activeResizeCursor = _sidebarCursor;
                     });
                   },
-                  onHorizontalDragEnd: (_) =>
+                  onDragEnd: (_) => setState(() => _activeResizeCursor = null),
+                  onDragCancel: () =>
                       setState(() => _activeResizeCursor = null),
-                  onHorizontalDragCancel: () =>
-                      setState(() => _activeResizeCursor = null),
-                  child: MouseRegion(
-                    cursor: _sidebarCursor,
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: VerticalDivider(
-                        thickness: 1,
-                        width: 1,
-                        color: sidebar?.separatorColor ?? dividerColor,
-                      ),
-                    ),
-                  ),
                 ),
               ),
 
@@ -524,24 +527,26 @@ class _CNWindowState extends State<CNWindow> {
                 curve: curve,
                 duration: duration,
                 top: toolbarStripHeight,
-                right: visibleEndSidebarWidth - 4,
-                width: 7,
+                right: visibleEndSidebarWidth,
+                width: canShowEndSidebar ? endSidebarResizerBand : 0,
                 height: effectiveSidebarHeight,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onHorizontalDragStart: (details) {
+                child: _CNSidebarResizer(
+                  thickness: endSidebar!.effectiveSeparatorWidth,
+                  color: endSidebar.separatorColor ?? dividerColor,
+                  gripColor: endSidebar.gripColor ?? theme.fillPrimaryColor,
+                  onDragStart: (details) {
                     _endSidebarDragStartWidth = _endSidebarWidth;
                     _endSidebarDragStartPosition = details.globalPosition.dx;
-                    setState(() => _activeResizeCursor = _endSidebarCursor);
+                    setState(() => _activeResizeCursor = _kSidebarResizeCursor);
                   },
-                  onHorizontalDragUpdate: (details) {
+                  onDragUpdate: (details) {
                     setState(() {
                       var newWidth =
                           _endSidebarDragStartWidth -
                           details.globalPosition.dx +
                           _endSidebarDragStartPosition;
 
-                      if (endSidebar!.startWidth != null &&
+                      if (endSidebar.startWidth != null &&
                           endSidebar.snapToStartBuffer != null &&
                           (newWidth + endSidebar.startWidth!).abs() <=
                               endSidebar.snapToStartBuffer!) {
@@ -558,32 +563,11 @@ class _CNWindowState extends State<CNWindow> {
                         endSidebar.minWidth,
                         math.min(endSidebar.maxWidth!, newWidth),
                       );
-
-                      if (_endSidebarWidth == endSidebar.minWidth) {
-                        _endSidebarCursor = SystemMouseCursors.resizeLeft;
-                      } else if (_endSidebarWidth == endSidebar.maxWidth) {
-                        _endSidebarCursor = SystemMouseCursors.resizeRight;
-                      } else {
-                        _endSidebarCursor = SystemMouseCursors.resizeColumn;
-                      }
-                      _activeResizeCursor = _endSidebarCursor;
                     });
                   },
-                  onHorizontalDragEnd: (_) =>
+                  onDragEnd: (_) => setState(() => _activeResizeCursor = null),
+                  onDragCancel: () =>
                       setState(() => _activeResizeCursor = null),
-                  onHorizontalDragCancel: () =>
-                      setState(() => _activeResizeCursor = null),
-                  child: MouseRegion(
-                    cursor: _endSidebarCursor,
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: VerticalDivider(
-                        thickness: 1,
-                        width: 1,
-                        color: dividerColor,
-                      ),
-                    ),
-                  ),
                 ),
               ),
 
@@ -766,6 +750,79 @@ class _CNWindowState extends State<CNWindow> {
           child: windowContent,
         );
       },
+    );
+  }
+}
+
+/// The drag band and visible divider of a sidebar resizer.
+///
+/// Shared by the leading and the end sidebar so both sides get the exact same
+/// divider style, grab area and cursor. The band is [bandWidth] wide (at least
+/// [_kSidebarResizeBandWidth]) and the divider itself, [thickness] wide, is
+/// centered in it.
+class _CNSidebarResizer extends StatelessWidget {
+  const _CNSidebarResizer({
+    required this.thickness,
+    required this.color,
+    required this.gripColor,
+    required this.onDragStart,
+    required this.onDragUpdate,
+    required this.onDragEnd,
+    required this.onDragCancel,
+  });
+
+  /// Color of the divider bar.
+  final Color color;
+
+  /// Color of the three grip dots drawn in the middle of the divider.
+  final Color gripColor;
+
+  final VoidCallback onDragCancel;
+  final GestureDragEndCallback onDragEnd;
+  final GestureDragStartCallback onDragStart;
+  final GestureDragUpdateCallback onDragUpdate;
+
+  /// Width of the visible divider bar.
+  final double thickness;
+
+  /// Width of the pointer-grab band the divider is centered in.
+  static double bandWidth(double thickness) =>
+      math.max(_kSidebarResizeBandWidth, thickness);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onHorizontalDragStart: onDragStart,
+      onHorizontalDragUpdate: onDragUpdate,
+      onHorizontalDragEnd: onDragEnd,
+      onHorizontalDragCancel: onDragCancel,
+      child: MouseRegion(
+        cursor: _kSidebarResizeCursor,
+        child: Align(
+          alignment: Alignment.center,
+          child: SizedBox(
+            width: thickness,
+            child: ColoredBox(
+              color: color,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var i = 0; i < 3; i++) ...[
+                      if (i > 0) const SizedBox(height: _kSidebarGripDotSize),
+                      SizedBox.square(
+                        dimension: _kSidebarGripDotSize,
+                        child: ColoredBox(color: gripColor),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
