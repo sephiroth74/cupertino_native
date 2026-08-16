@@ -14,6 +14,14 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
     private var didAutofocus = false
     private var debugLog = false
     private var font: NSFont?
+    private var ignorePointer = false
+
+    /// Mirrors a `CNDisabled` scope on the Flutter side: Flutter can only gate
+    /// its own hit testing, so the platform view has to remove itself from
+    /// AppKit's hit-test walk. See `CNWidgetNSView.hitTest(_:)`.
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        ignorePointer ? nil : super.hitTest(point)
+    }
 
     private func log(_ message: String) {
         guard debugLog else { return }
@@ -144,6 +152,10 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
 
         if let enabled = args["enabled"] as? Bool {
             searchField.isEnabled = enabled
+        }
+
+        if args.keys.contains("ignorePointer") {
+            ignorePointer = args["ignorePointer"] as? Bool ?? false
         }
 
         if args.keys.contains("help") {

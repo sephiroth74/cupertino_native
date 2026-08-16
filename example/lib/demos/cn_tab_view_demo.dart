@@ -18,6 +18,7 @@ class _TabViewDemoPageState extends State<TabViewDemoPage> {
   CNTabPosition tabPosition = CNTabPosition.top;
 
   late final CNTabController _controller;
+  bool isTabEnabled = true;
 
   @override
   void dispose() {
@@ -50,13 +51,20 @@ class _TabViewDemoPageState extends State<TabViewDemoPage> {
                 ),
                 child: CNTabView(
                   controller: _controller,
-                  tabs: const [
-                    CNSegment(label: 'General', systemImage: 'gear'),
-                    CNSegment(label: 'Appearance', systemImage: 'paintbrush'),
-                    CNSegment(label: 'Privacy', systemImage: 'lock.shield'),
+                  tabs: [
+                    const CNSegment(label: 'General', systemImage: 'gear'),
+                    const CNSegment(
+                      label: 'Appearance',
+                      systemImage: 'paintbrush',
+                    ),
+                    const CNSegment(
+                      label: 'Privacy',
+                      systemImage: 'lock.shield',
+                    ),
                     CNSegment(
                       label: 'Advanced',
                       systemImage: 'wrench.and.screwdriver',
+                      enabled: isTabEnabled,
                     ),
                   ],
                   tabPosition: tabPosition,
@@ -89,10 +97,16 @@ class _TabViewDemoPageState extends State<TabViewDemoPage> {
                       description: 'Manage your privacy and security settings.',
                     ),
                     _TabContent(
+                      enabled: isTabEnabled,
                       title: 'Advanced',
                       icon: CupertinoIcons.wrench,
                       description:
                           'Advanced configuration options for power users.',
+                      onTap: () {
+                        setState(() {
+                          isTabEnabled = !isTabEnabled;
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -178,15 +192,19 @@ class _TabContent extends StatelessWidget {
     required this.title,
     required this.icon,
     required this.description,
+    this.onTap,
+    this.enabled = true,
   });
 
   final String description;
   final IconData icon;
   final String title;
+  final VoidCallback? onTap;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    final child = Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -197,14 +215,21 @@ class _TabContent extends StatelessWidget {
           Text(description, style: CNTheme.of(context).typography.body),
           const SizedBox(height: 8),
           CNButton(
-            onPressed: () {
-              debugPrint('Button pressed in $title tab');
-            },
+            onPressed:
+                onTap ??
+                () {
+                  debugPrint('Button pressed in $title tab');
+                },
             buttonStyle: CNButtonStyle.borderedProminent,
             children: const [CNChildText('Perform Action')],
           ),
         ],
       ),
     );
+
+    // IgnorePointer alone would not stop the native CNButton below: AppKit
+    // delivers mouse events straight to the embedded NSView. CNDisabled also
+    // forwards the disabled state to every native widget in the subtree.
+    return CNDisabled(disabled: !enabled, opacity: 0.5, child: child);
   }
 }

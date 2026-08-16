@@ -19,6 +19,20 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
     let model: CNViewModel<P>
     var payload: P
 
+    /// Mirrors a `CNDisabled` scope on the Flutter side. Kept outside the payload
+    /// so toggling it re-renders the SwiftUI body through `CNInteractionState`
+    /// instead of rebuilding the root view, which would drop in-flight control
+    /// state such as a text field's editing session.
+    private let interactionState = CNInteractionState()
+
+    private var ignorePointer = false {
+        didSet {
+            guard ignorePointer != oldValue else { return }
+            interactionState.disabled = ignorePointer
+            log("ignorePointer -> \(ignorePointer)")
+        }
+    }
+
     /// The last intrinsic size pushed to (or pulled by) Flutter.
     /// Used to avoid redundant `intrinsicSizeChanged` notifications and to
     /// detect when a deferred re-measurement produced a corrected size.
@@ -82,6 +96,10 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
 
         log("init: viewId=\(viewId), args=\(String(describing: args)), payload=\(payload)")
 
+        if let dict = CNChannelDeserialization.asDict(args) {
+            updateIgnorePointer(from: dict)
+        }
+
         installRootView()
         configureMethodChannel(viewId: viewId)
     }
@@ -89,6 +107,19 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
     @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    /// Takes the whole platform view out of AppKit's hit-test walk while a
+    /// `CNDisabled` scope is active. Flutter can only gate its own hit testing;
+    /// without this, AppKit still routes clicks (and scroll wheel, and cursor
+    /// updates) straight to the embedded control.
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        ignorePointer ? nil : super.hitTest(point)
+    }
+
+    private func updateIgnorePointer(from dict: [String: Any]) {
+        guard dict.keys.contains("ignorePointer") else { return }
+        ignorePointer = dict["ignorePointer"] as? Bool ?? false
     }
 
     override func viewDidMoveToWindow() {
@@ -126,12 +157,13 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
     }
 
     private func installRootView() {
-        hostingView.rootView = makeRootView(model: model, onSizeChanged: { [weak self] _ in
+        let root = makeRootView(model: model, onSizeChanged: { [weak self] _ in
             // The SwiftUI content geometry changed. Re-measure and push a corrected
             // size if it differs from what Flutter last saw. Routed through the
             // coalesced reporter so it can't race with intrinsic-size invalidations.
             self?.scheduleIntrinsicSizeReport()
         })
+        hostingView.rootView = AnyView(CNInteractionGate(state: interactionState, content: root))
     }
 
     /// Schedules a coalesced intrinsic-size measurement on the next runloop turn and,
@@ -170,6 +202,7 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
                         return
                     }
                     payload = decoded
+                    updateIgnorePointer(from: args)
                     model.replace(with: payload)
                     log("setData keys=\(Array(args.keys))")
                     result(nil)
@@ -179,6 +212,7 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
             case "applyPatch":
                 if let patch = CNChannelDeserialization.asDict(call.arguments) {
                     payload.applyPatch(patch)
+                    updateIgnorePointer(from: patch)
                     model.replace(with: payload)
                     log("applyPatch keys=\(Array(patch.keys))")
                     result(nil)
@@ -223,6 +257,25 @@ class CNWidgetNSView<P: CNChannelDeserializable>: NSView {
         let height = max(intrinsicHeight, fitting.height, original.height)
 
         return CGSize(width: width, height: height)
+    }
+}
+
+/// Carries the interaction state that lives outside a widget's payload, so a
+/// `CNDisabled` scope can be toggled without re-creating the SwiftUI root view.
+final class CNInteractionState: ObservableObject {
+    @Published var disabled = false
+}
+
+/// Applies SwiftUI's `.disabled(_:)` to a widget's body from a `CNInteractionState`.
+///
+/// This is what gives natively-rendered controls their disabled appearance and
+/// removes them from keyboard focus; `hitTest` only blocks the pointer.
+private struct CNInteractionGate<Content: View>: View {
+    @ObservedObject var state: CNInteractionState
+    let content: Content
+
+    var body: some View {
+        content.disabled(state.disabled)
     }
 }
 

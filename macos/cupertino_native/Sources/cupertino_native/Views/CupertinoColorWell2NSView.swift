@@ -6,8 +6,16 @@ class CupertinoColorWell2NSView: NSView {
     private let colorWell: NSColorWell
 
     private var enabled: Bool = true
+    private var ignorePointer = false
     private var supportsAlpha: Bool = true
     private var style: NSColorWell.Style = .default
+
+    /// Mirrors a `CNDisabled` scope on the Flutter side: Flutter can only gate
+    /// its own hit testing, so the platform view has to remove itself from
+    /// AppKit's hit-test walk. See `CNWidgetNSView.hitTest(_:)`.
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        ignorePointer ? nil : super.hitTest(point)
+    }
 
     init(viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
@@ -79,6 +87,10 @@ class CupertinoColorWell2NSView: NSView {
         if dict.keys.contains("enabled") {
             enabled = CNChannelDeserialization.decodeBool(dict["enabled"]) ?? true
             colorWell.isEnabled = enabled
+        }
+
+        if dict.keys.contains("ignorePointer") {
+            ignorePointer = CNChannelDeserialization.decodeBool(dict["ignorePointer"]) ?? false
         }
 
         if dict.keys.contains("help") {

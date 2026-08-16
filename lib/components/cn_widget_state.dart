@@ -66,6 +66,7 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T>
   }
 
   MethodChannel? _channel;
+  bool _inheritedDisabled = false;
   double? _intrinsicHeight;
   double? _intrinsicWidth;
   BoxConstraints? _lastConstraints;
@@ -74,6 +75,9 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // A CNDisabled ancestor is a dependency: reading it here means the build
+    // that follows recomputes the payload and patches the native view.
+    _inheritedDisabled = CNDisabled.of(context);
   }
 
   @override
@@ -199,6 +203,16 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T>
 
   Map<String, dynamic> _buildPayload({required BoxConstraints? constraints}) {
     final payload = toWidgetPayload(context, constraints: constraints);
+    // Flutter's IgnorePointer can't stop AppKit from delivering mouse events to
+    // an embedded NSView, so a CNDisabled ancestor has to be forwarded to the
+    // native side. Always written, so re-enabling produces a patch too. The
+    // widget's own `enabled` value is only overridden, never introduced: adding
+    // the key here would leave widgets that don't publish it stuck on a stale
+    // value once the scope is re-enabled.
+    payload['ignorePointer'] = _inheritedDisabled;
+    if (_inheritedDisabled && payload.containsKey('enabled')) {
+      payload['enabled'] = false;
+    }
     writeDebugWidgetId(payload);
     return payload;
   }

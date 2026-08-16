@@ -170,22 +170,26 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
             onPressed: () => CNWindowScope.of(context).toggleSidebar(),
           ),
         ],
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(entry.title),
-            const SizedBox(height: 2.0),
-            Text(
-              'Cupertino Native Demo',
-              style: TextStyle(fontSize: theme.typography.caption1.fontSize),
-            ),
-          ],
+        titleWidth: 200,
+        title: SizedBox(
+          width: 300,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(entry.title),
+              const SizedBox(height: 2.0),
+              Text(
+                'Cupertino Native Demo',
+                style: TextStyle(fontSize: theme.typography.caption1.fontSize),
+              ),
+            ],
+          ),
         ),
         backgroundColor: isDark
             ? accentColor?.withLuminance(0.3)
-            : accentColor?.withLuminance(0.9),
+            : accentColor?.withLuminance(0.8),
         enableBlur: true,
         actions: [
           createToolbarThemePicker(context),
@@ -201,7 +205,23 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
       ),
       child: KeyedSubtree(
         key: ValueKey(widget.selectedIndex),
-        child: entry.page,
+        // The scaffold reserves the toolbar strip via MediaQuery only (the bar is
+        // overlaid), so consume the top inset here or the padding hides under it.
+        child: SafeArea(
+          left: false,
+          right: false,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: theme.canvasColor,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: theme.separatorColor, width: 1.0),
+              ),
+              child: entry.page,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -261,8 +281,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
             return CNWindow(
               state: NSVisualEffectViewState.followsWindowActiveState,
-              backgroundColor: CNTheme.of(context).canvasColor,
-              childMaterial: NSVisualEffectViewMaterial.windowBackground,
+              childMaterial: NSVisualEffectViewMaterial.fullScreenUI,
+              backgroundColor: CNColors.transparent,
               toolbarSpansFullWidth: true,
               sidebar: CNSidebar(
                 builder: (context) {
@@ -281,11 +301,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 maxWidth: 400,
                 startWidth: 250,
                 dragClosed: true,
-                material: NSVisualEffectViewMaterial.windowBackground,
-                separatorColor: CNTheme.of(
-                  context,
-                ).separatorColor.withAlpha(255),
+                material: NSVisualEffectViewMaterial.fullScreenUI,
                 backgroundColor: CNColors.transparent,
+                separatorColor: CNColors.transparent,
                 separatorWidth: 6.0,
                 // backgroundColor: CNColors.canvasColor.withAlpha(127),
               ),
@@ -409,68 +427,89 @@ class _SideBar extends StatelessWidget {
     final isBright = (accentColor?.computeLuminance() ?? 0) > 0.5;
     final labelColor = theme.labelColor;
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: _entries.length,
-      itemBuilder: (context, index) {
-        final entry = _entries[index];
-        final isSelected = index == selectedIndex;
-        final isValidEntry =
-            searchQuery == null ||
-            searchQuery!.isEmpty ||
-            entry.title.toLowerCase().contains(searchQuery!.toLowerCase());
-
-        if (!isValidEntry) {
-          return const SizedBox.shrink();
-        }
-
-        return GestureDetector(
-          onTap: () => onItemSelected(index),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? accentColor?.withValues(alpha: 1.0)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Row(
-              children: [
-                CNImage(
-                  constraints: const BoxConstraints(
-                    maxWidth: 18,
-                    maxHeight: 18,
-                  ),
-                  systemSymbolName: entry.symbolName,
-                  foregroundColor: isSelected
-                      ? isBright
-                            ? CNColors.black
-                            : CNColors.white
-                      : (isDark
-                            ? CupertinoColors.label.darkColor
-                            : CupertinoColors.label.color),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    entry.title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: isSelected
-                          ? (isBright
-                                ? CNColors.label.color
-                                : CNColors.label.darkColor)
-                          : labelColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: 8.0,
+        bottom: 8.0,
+        left: 8.0,
+        right: 2.0,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.canvasColor,
+          borderRadius: BorderRadius.circular(8.0),
+          border: Border.all(
+            color: theme.separatorColor.withAlpha(51),
+            width: 1.0,
           ),
-        );
-      },
+        ),
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          itemCount: _entries.length,
+          itemBuilder: (context, index) {
+            final entry = _entries[index];
+            final isSelected = index == selectedIndex;
+            final isValidEntry =
+                searchQuery == null ||
+                searchQuery!.isEmpty ||
+                entry.title.toLowerCase().contains(searchQuery!.toLowerCase());
+
+            if (!isValidEntry) {
+              return const SizedBox.shrink();
+            }
+
+            return GestureDetector(
+              onTap: () => onItemSelected(index),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
+                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? accentColor?.withValues(alpha: 1.0)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  children: [
+                    CNImage(
+                      constraints: const BoxConstraints(
+                        maxWidth: 18,
+                        maxHeight: 18,
+                      ),
+                      systemSymbolName: entry.symbolName,
+                      foregroundColor: isSelected
+                          ? isBright
+                                ? CNColors.black
+                                : CNColors.white
+                          : (isDark
+                                ? CupertinoColors.label.darkColor
+                                : CupertinoColors.label.color),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        entry.title,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isSelected
+                              ? (isBright
+                                    ? CNColors.label.color
+                                    : CNColors.label.darkColor)
+                              : labelColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

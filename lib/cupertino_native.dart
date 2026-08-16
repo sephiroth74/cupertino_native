@@ -19,6 +19,7 @@ export 'components/cn_color_well.dart';
 export 'components/cn_combo_box.dart';
 export 'components/cn_context_menu.dart';
 export 'components/cn_date_picker.dart';
+export 'components/cn_disabled.dart';
 export 'components/cn_gauge.dart';
 export 'components/cn_image.dart';
 export 'components/cn_label.dart';
