@@ -114,7 +114,7 @@ If you drive the window yourself (transparent titlebar, full-size content view, 
 | `CNTextField` | SwiftUI `TextField`, driven by a `TextEditingController` |
 | `CNSecureField` | SwiftUI `SecureField` |
 | `CNTextEditor` | Multi-line native editor that fills its constraints |
-| `CNSearchField` | Native search field with asynchronous completion suggestions |
+| `CNSearchField` | Native search field with a `TextEditingController` and asynchronous, sectioned completion suggestions (title, subtitle, SF Symbol) |
 
 ### Indicators
 

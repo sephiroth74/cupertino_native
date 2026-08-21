@@ -44,6 +44,7 @@ extension ColorExtension on Color {
     return withValues(alpha: a, red: newR, green: newG, blue: newB);
   }
 
+  // ignore: deprecated_member_use
   /// Returns a new color with the specified [alpha], [red], [green], and [blue] values.
   String toHexString() {
     final alphaInt = (a * 255).round();

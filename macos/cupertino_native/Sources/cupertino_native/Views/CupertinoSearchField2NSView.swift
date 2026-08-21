@@ -1,8 +1,16 @@
 import Cocoa
 import FlutterMacOS
 
+/// Value carried by a suggestion item: `id` is the opaque handle Dart uses to
+/// resolve the picked item back to the object it returned, `value` is the text
+/// written into the field once the item is selected.
+struct CNSuggestionItemValue: Hashable {
+    let id: String
+    let value: String
+}
+
 class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggestionsDelegate {
-    typealias SuggestionItemType = String
+    typealias SuggestionItemType = CNSuggestionItemValue
 
     private let channel: FlutterMethodChannel
     private let searchField = NSSearchField(frame: .zero)
@@ -242,10 +250,10 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
     @available(macOS 15.0, *)
     func textField(
         _ textField: NSTextField,
-        provideUpdatedSuggestions responseHandler: @escaping (NSSuggestionItemResponse<String>) -> Void,
+        provideUpdatedSuggestions responseHandler: @escaping (NSSuggestionItemResponse<SuggestionItemType>) -> Void,
     ) {
         guard hasSuggestions else {
-            responseHandler(NSSuggestionItemResponse<String>())
+            responseHandler(NSSuggestionItemResponse<SuggestionItemType>())
             return
         }
 
@@ -254,26 +262,88 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
 
         channel.invokeMethod("requestSuggestions", arguments: ["query": query]) { [weak self] result in
             guard let self else {
-                responseHandler(NSSuggestionItemResponse<String>())
+                responseHandler(NSSuggestionItemResponse<SuggestionItemType>())
                 return
             }
 
-            let values = result as? [String] ?? []
-            log("suggestions received: \(values.count) items")
-            let items = values.map { NSSuggestionItem<String>(representedValue: $0, title: $0) }
-            responseHandler(NSSuggestionItemResponse<String>(items: items))
+            let sections = Self.decodeSections(result)
+            log("suggestions received: \(sections.count) section(s), \(sections.reduce(0) { $0 + $1.items.count }) items")
+            responseHandler(NSSuggestionItemResponse<SuggestionItemType>(itemSections: sections))
         }
     }
 
     @available(macOS 15.0, *)
-    func textField(_: NSTextField, didSelect item: NSSuggestionItem<String>) {
-        let value = item.representedValue
-        log("suggestion selected: \(value)")
+    func textField(_: NSTextField, didSelect item: NSSuggestionItem<SuggestionItemType>) {
+        let selected = item.representedValue
+        log("suggestion selected: id=\(selected.id) value=\(selected.value)")
         isUpdatingFromDart = true
-        searchField.stringValue = value
+        searchField.stringValue = selected.value
         isUpdatingFromDart = false
-        channel.invokeMethod("textChanged", arguments: value)
-        channel.invokeMethod("submitted", arguments: value)
+        // Dart owns the fan-out from here (controller text, onChanged,
+        // onSuggestionSelected, onSubmitted) so ordering stays in one place.
+        channel.invokeMethod("suggestionSelected", arguments: ["id": selected.id, "value": selected.value])
+    }
+
+    // MARK: - Suggestions decoding
+
+    @available(macOS 15.0, *)
+    private static func decodeSections(_ result: Any?) -> [NSSuggestionItemSection<CNSuggestionItemValue>] {
+        guard let dict = CNChannelSerialization.asDict(result) else { return [] }
+        let rawSections = CNChannelSerialization.asArray(dict["sections"])
+
+        return rawSections.compactMap { rawSection -> NSSuggestionItemSection<CNSuggestionItemValue>? in
+            guard let section = CNChannelSerialization.asDict(rawSection) else { return nil }
+            let items = CNChannelSerialization.asArray(section["items"]).compactMap { raw in
+                CNChannelSerialization.asDict(raw).flatMap { makeSuggestionItem($0) }
+            }
+            // An empty section would still draw its header, so drop it.
+            guard !items.isEmpty else { return nil }
+            return NSSuggestionItemSection(
+                title: CNChannelDeserialization.decodeString(section["title"]),
+                items: items,
+            )
+        }
+    }
+
+    @available(macOS 15.0, *)
+    private static func makeSuggestionItem(_ raw: [String: Any]) -> NSSuggestionItem<CNSuggestionItemValue>? {
+        guard let title = CNChannelDeserialization.decodeString(raw["title"]) else { return nil }
+        let value = CNChannelDeserialization.decodeString(raw["value"]) ?? title
+        let id = CNChannelDeserialization.decodeString(raw["id"]) ?? value
+
+        var item = NSSuggestionItem(
+            representedValue: CNSuggestionItemValue(id: id, value: value),
+            title: title,
+        )
+
+        if let secondary = CNChannelDeserialization.decodeString(raw["secondaryTitle"]), !secondary.isEmpty {
+            item.secondaryTitle = secondary
+        }
+
+        if let toolTip = CNChannelDeserialization.decodeString(raw["help"]), !toolTip.isEmpty {
+            item.toolTip = toolTip
+        }
+
+        if let symbolName = CNChannelDeserialization.decodeString(raw["systemImage"]), !symbolName.isEmpty {
+            item.image = makeSymbolImage(named: symbolName, accessibilityDescription: title, raw: raw)
+        }
+
+        return item
+    }
+
+    private static func makeSymbolImage(
+        named symbolName: String,
+        accessibilityDescription: String,
+        raw: [String: Any],
+    ) -> NSImage? {
+        guard let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: accessibilityDescription) else {
+            return nil
+        }
+        guard let argb = CNChannelDeserialization.decodeInt(raw["imageColor"]) else { return image }
+        let color = ColorUtils.colorFromARGB(argb)
+        // Palette rendering is what tints a symbol without flattening it to a
+        // template mask, so a multi-layer glyph keeps its shape.
+        return image.withSymbolConfiguration(NSImage.SymbolConfiguration(paletteColors: [color])) ?? image
     }
 
     // MARK: - Helpers

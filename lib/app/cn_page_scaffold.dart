@@ -276,7 +276,8 @@ class _RenderCNScaffoldBody extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _CNScaffoldParentData)
+    if (child.parentData is! _CNScaffoldParentData) {
       child.parentData = _CNScaffoldParentData();
+    }
   }
 }

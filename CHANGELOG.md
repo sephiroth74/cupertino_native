@@ -1,4 +1,8 @@
-## 0.2.0-dev
+## 0.1.6
+
+ * Search Field with custom suggestions, allowing regions, subtitle and images
+
+## 0.1.5
 
 * Added `CNSplitView` and `CNSplitViewController` for desktop two-pane layouts.
 * Added Split View demo page with practical controls and mixed-content validation.

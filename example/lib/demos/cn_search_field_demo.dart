@@ -5,19 +5,97 @@ import 'package:flutter/cupertino.dart';
 
 const _kDebugLog = false;
 
-const _kDemoSuggestions = [
-  'AppDelegate.swift',
-  'ContentView.swift',
-  'ViewController.swift',
-  'SceneDelegate.swift',
-  'Info.plist',
-  'Assets.xcassets',
-  'LaunchScreen.storyboard',
-  'Main.storyboard',
-  'Podfile',
-  'Package.swift',
-  'README.md',
+class _DemoFile {
+  const _DemoFile(this.name, this.section, this.kind, this.symbol, this.color);
+
+  final Color color;
+  final String kind;
+  final String name;
+  final String section;
+  final String symbol;
+}
+
+const _kDemoFiles = [
+  _DemoFile(
+    'AppDelegate.swift',
+    'Swift Sources',
+    'Application entry point',
+    'swift',
+    CNColors.orange,
+  ),
+  _DemoFile(
+    'ContentView.swift',
+    'Swift Sources',
+    'SwiftUI view',
+    'swift',
+    CNColors.orange,
+  ),
+  _DemoFile(
+    'ViewController.swift',
+    'Swift Sources',
+    'AppKit controller',
+    'swift',
+    CNColors.orange,
+  ),
+  _DemoFile(
+    'SceneDelegate.swift',
+    'Swift Sources',
+    'Scene lifecycle',
+    'swift',
+    CNColors.orange,
+  ),
+  _DemoFile(
+    'LaunchScreen.storyboard',
+    'Interface',
+    'Storyboard',
+    'rectangle.on.rectangle',
+    CNColors.blue,
+  ),
+  _DemoFile(
+    'Main.storyboard',
+    'Interface',
+    'Storyboard',
+    'rectangle.on.rectangle',
+    CNColors.blue,
+  ),
+  _DemoFile(
+    'Assets.xcassets',
+    'Interface',
+    'Asset catalog',
+    'photo.on.rectangle.angled',
+    CNColors.blue,
+  ),
+  _DemoFile(
+    'Info.plist',
+    'Configuration',
+    'Property list',
+    'list.bullet.rectangle',
+    CNColors.systemGray,
+  ),
+  _DemoFile(
+    'Podfile',
+    'Configuration',
+    'CocoaPods manifest',
+    'shippingbox',
+    CNColors.systemGray,
+  ),
+  _DemoFile(
+    'Package.swift',
+    'Configuration',
+    'SwiftPM manifest',
+    'shippingbox',
+    CNColors.systemGray,
+  ),
+  _DemoFile(
+    'README.md',
+    'Configuration',
+    'Documentation',
+    'doc.text',
+    CNColors.systemGray,
+  ),
 ];
+
+const _kSectionOrder = ['Swift Sources', 'Interface', 'Configuration'];
 
 class SearchFieldDemoPage extends StatefulWidget {
   const SearchFieldDemoPage({super.key});
@@ -27,14 +105,25 @@ class SearchFieldDemoPage extends StatefulWidget {
 }
 
 class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
+  final TextEditingController controller = TextEditingController();
+
   CNTextFieldBezelStyle bezelStyle = CNTextFieldBezelStyle.round;
   CNControlSize controlSize = CNControlSize.regular;
   CNFont? font;
   double fontSize = 24.0;
   bool isEnabled = true;
+  String? lastPicked;
   Color? placeholderColor;
-  String? text;
+  bool showImages = true;
+  bool showSectionTitles = true;
+  bool showSecondaryTitles = true;
   Color? textColor;
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,48 +137,52 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
             child: Padding(
               padding: const EdgeInsets.all(28.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 20),
-                  CNSearchField(
-                    debugLog: _kDebugLog,
-                    text: text,
-                    font: font,
-                    controlSize: controlSize,
-                    bezelStyle: bezelStyle,
-                    placeholderColor: placeholderColor,
-                    textColor: textColor,
-                    onChanged: isEnabled
-                        ? (value) {
-                            debugPrint('Search field text changed: $value');
-                            setState(() {
-                              text = value;
-                            });
-                          }
-                        : null,
-                    onSubmitted: isEnabled
-                        ? (value) {
-                            debugPrint('Search field text submitted: $value');
-                          }
-                        : null,
-                    placeholder: 'Search for a file...',
-                    onSuggestionsRequested: (query) {
-                      debugPrint('onSuggestionsRequested for query: "$query"');
-                      if (query.isEmpty) {
-                        debugPrint('Returning all suggestions');
-                        return Future.value([]);
-                      } else {
-                        debugPrint('Filtering suggestions for query: "$query"');
-                        return Future.value(
-                          _kDemoSuggestions
-                              .where(
-                                (s) => s.toLowerCase().contains(
-                                  query.toLowerCase(),
-                                ),
-                              )
-                              .toList(),
-                        );
-                      }
-                    },
+                  CNPixelPerfectContainer(
+                    child: CNSearchField(
+                      debugLog: _kDebugLog,
+                      controller: controller,
+                      font: font,
+                      controlSize: controlSize,
+                      bezelStyle: bezelStyle,
+                      placeholderColor: placeholderColor,
+                      textColor: textColor,
+                      enabled: isEnabled,
+                      placeholder: 'Search for a file...',
+                      onChanged: (value) {
+                        debugPrint('Search field text changed: $value');
+                      },
+                      onSubmitted: (value) {
+                        debugPrint('Search field text submitted: $value');
+                      },
+                      onSuggestionSelected: (item) {
+                        debugPrint('Suggestion selected: ${item.title}');
+                        setState(() => lastPicked = item.title);
+                      },
+                      onSuggestionsRequested: _suggestionsFor,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      CNButton(
+                        children: const [CNChildText('Clear')],
+                        onPressed: () => controller.clear(),
+                      ),
+                      const SizedBox(width: 12),
+                      CNButton(
+                        children: const [CNChildText('Set "Package.swift"')],
+                        onPressed: () => controller.text = 'Package.swift',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  CNText(
+                    lastPicked == null
+                        ? 'No suggestion picked yet.'
+                        : 'Last picked suggestion: $lastPicked',
                   ),
                 ],
               ),
@@ -134,6 +227,21 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
                   }
                 }),
               ),
+              'Section Titles': CNToggle(
+                isOn: showSectionTitles,
+                controlSize: CNControlSize.regular,
+                onChanged: (v) => setState(() => showSectionTitles = v),
+              ),
+              'Secondary Titles': CNToggle(
+                isOn: showSecondaryTitles,
+                controlSize: CNControlSize.regular,
+                onChanged: (v) => setState(() => showSecondaryTitles = v),
+              ),
+              'Suggestion Images': CNToggle(
+                isOn: showImages,
+                controlSize: CNControlSize.regular,
+                onChanged: (v) => setState(() => showImages = v),
+              ),
               'Enabled': CNToggle(
                 isOn: isEnabled,
                 controlSize: CNControlSize.regular,
@@ -144,5 +252,37 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
         ],
       ),
     );
+  }
+
+  List<CNSuggestionSection> _suggestionsFor(String query) {
+    debugPrint('onSuggestionsRequested for query: "$query"');
+    if (query.isEmpty) return const [];
+
+    final needle = query.toLowerCase();
+    final matches = _kDemoFiles.where(
+      (file) => file.name.toLowerCase().contains(needle),
+    );
+
+    return _kSectionOrder
+        .map((section) {
+          final items = matches
+              .where((file) => file.section == section)
+              .map(
+                (file) => CNSuggestionItem(
+                  title: file.name,
+                  secondaryTitle: showSecondaryTitles ? file.kind : null,
+                  systemImage: showImages ? file.symbol : null,
+                  imageColor: file.color,
+                  help: '${file.section} — ${file.kind}',
+                ),
+              )
+              .toList();
+          return CNSuggestionSection(
+            title: showSectionTitles ? section : null,
+            items: items,
+          );
+        })
+        .where((section) => section.items.isNotEmpty)
+        .toList();
   }
 }

@@ -149,6 +149,16 @@ class _DesktopDemoShell extends StatefulWidget {
 }
 
 class _DesktopDemoShellState extends State<_DesktopDemoShell> {
+  late final TextEditingController _searchController = TextEditingController(
+    text: widget.searchQuery ?? '',
+  );
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // This context sits below CNWindowScope (the shell is CNWindow.child), so
@@ -198,7 +208,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
           const CNToolbarSpacer(spacerUnits: 0.25),
         ],
         search: CNSearchField(
-          text: widget.searchQuery ?? '',
+          controller: _searchController,
           placeholder: 'Search',
           onChanged: widget.onSearchChanged,
         ),
@@ -273,6 +283,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           home: (context) {
             final accentColor = CNTheme.of(context).accentColor;
             final accentColorHex = accentColor != null
+                // ignore: deprecated_member_use
                 ? '#${accentColor.value.toRadixString(16).padLeft(8, '0')}'
                 : 'null';
             debugPrint(

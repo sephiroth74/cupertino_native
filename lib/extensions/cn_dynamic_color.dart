@@ -10,10 +10,12 @@ extension CNColor on Color {
       ? (this as CupertinoDynamicColor).resolveWithContext(context)
       : this;
 
+  // ignore: public_member_api_docs
   Color get darkColor => this is CupertinoDynamicColor
       ? (this as CupertinoDynamicColor).darkColor
       : this;
 
+  // ignore: public_member_api_docs
   Color get color => this is CupertinoDynamicColor
       ? (this as CupertinoDynamicColor).color
       : this;

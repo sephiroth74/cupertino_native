@@ -28,10 +28,12 @@ extension BoxConstraintsX on BoxConstraints {
     map['maxHeight'] = maxHeight.isNaN
         ? null
         : (maxHeight.isFinite ? maxHeight : "infinity");
-    if (tightWidth != null && tightWidth!.isFinite)
+    if (tightWidth != null && tightWidth!.isFinite) {
       map['idealWidth'] = tightWidth;
-    if (tightHeight != null && tightHeight!.isFinite)
+    }
+    if (tightHeight != null && tightHeight!.isFinite) {
       map['idealHeight'] = tightHeight;
+    }
 
     return map;
   }

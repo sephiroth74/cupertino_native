@@ -10,6 +10,13 @@ linter:
 
 analyzer:
   exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
     # Exclude example app from the strict public API doc lint to focus on the
     # package's public surface under lib/.
     # - example/**

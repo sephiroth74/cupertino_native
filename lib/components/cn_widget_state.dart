@@ -60,8 +60,25 @@ abstract class CNWidgetState<T extends CNWidget> extends State<T>
   }
 
   (double, double) computeExpandSize({required BoxConstraints constraints}) {
-    final resolvedWidth = constraints.tightWidth ?? constraints.maxWidth;
-    final resolvedHeight = constraints.tightHeight ?? constraints.maxHeight;
+    var resolvedWidth = constraints.tightWidth ?? constraints.maxWidth;
+    var resolvedHeight = constraints.tightHeight ?? constraints.maxHeight;
+
+    // An unbounded axis carries no size information, so fall back to the
+    // widget's own default for that axis instead of handing infinity to the
+    // ConstrainedBox. Only the unbounded axis falls back: a widget that fills
+    // the width but knows its height (a search field in a Column, say) keeps the
+    // width the parent gave it. Axes whose default is itself infinite stay
+    // infinite and still trip the assert in [build] — nothing can resolve those.
+    if (!resolvedWidth.isFinite || !resolvedHeight.isFinite) {
+      final defaultSize = computeDefaultSize();
+      if (!resolvedWidth.isFinite) {
+        resolvedWidth = constraints.constrainWidth(defaultSize.width);
+      }
+      if (!resolvedHeight.isFinite) {
+        resolvedHeight = constraints.constrainHeight(defaultSize.height);
+      }
+    }
+
     return (resolvedWidth, resolvedHeight);
   }
 
