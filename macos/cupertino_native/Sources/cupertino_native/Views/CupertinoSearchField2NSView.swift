@@ -23,6 +23,9 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
     private var debugLog = false
     private var font: NSFont?
     private var ignorePointer = false
+    private var borderColor: NSColor?
+    private var borderWidth: CGFloat?
+    private var cornerRadius: CGFloat?
 
     /// Mirrors a `CNDisabled` scope on the Flutter side: Flutter can only gate
     /// its own hit testing, so the platform view has to remove itself from
@@ -158,6 +161,18 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
             Self.applyBezelStyle(bezelStyle, to: searchField)
         }
 
+        if args.keys.contains("borderColor") {
+            borderColor = CNChannelDeserialization.decodeInt(args["borderColor"]).map(ColorUtils.colorFromARGB)
+        }
+
+        if args.keys.contains("borderWidth") {
+            borderWidth = CNChannelDeserialization.decodeCGFloat(args["borderWidth"])
+        }
+
+        if args.keys.contains("cornerRadius") {
+            cornerRadius = CNChannelDeserialization.decodeCGFloat(args["cornerRadius"])
+        }
+
         if let enabled = args["enabled"] as? Bool {
             searchField.isEnabled = enabled
         }
@@ -180,6 +195,7 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
 
         applyPlaceholder()
         applyFont()
+        applyBorder()
     }
 
     // MARK: - Channel
@@ -372,6 +388,33 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
         if let font {
             searchField.font = font
         }
+    }
+
+    /// Draws the border on the search field's own layer, on top of whatever the
+    /// AppKit bezel paints. Combine with the `none` bezel style for a fully
+    /// custom outline.
+    private func applyBorder() {
+        let radius = cornerRadius ?? 0
+        let width = borderWidth ?? 0
+        guard radius > 0 || width > 0 || borderColor != nil else {
+            // Nothing requested: leave the layer untouched so the plain control
+            // keeps its stock focus ring instead of a clipped one.
+            searchField.layer?.borderWidth = 0
+            searchField.layer?.borderColor = nil
+            searchField.layer?.cornerRadius = 0
+            searchField.layer?.masksToBounds = false
+            return
+        }
+
+        searchField.wantsLayer = true
+        guard let layer = searchField.layer else { return }
+        layer.borderWidth = width
+        layer.borderColor = borderColor?.cgColor
+        layer.cornerRadius = radius
+        // Without this the cell keeps drawing its square background outside the
+        // rounded border. The trade-off is a focus ring clipped to the same
+        // shape, which is the lesser surprise when a radius was asked for.
+        layer.masksToBounds = radius > 0
     }
 
     private static func applyBezelStyle(_ rawValue: String, to field: NSSearchField) {

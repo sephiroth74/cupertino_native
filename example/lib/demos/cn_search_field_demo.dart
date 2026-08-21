@@ -108,7 +108,10 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
   final TextEditingController controller = TextEditingController();
 
   CNTextFieldBezelStyle bezelStyle = CNTextFieldBezelStyle.round;
+  Color? borderColor;
+  double borderWidth = 0.0;
   CNControlSize controlSize = CNControlSize.regular;
+  double cornerRadius = 0.0;
   CNFont? font;
   double fontSize = 24.0;
   bool isEnabled = true;
@@ -147,6 +150,9 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
                       font: font,
                       controlSize: controlSize,
                       bezelStyle: bezelStyle,
+                      borderColor: borderColor,
+                      borderWidth: borderWidth,
+                      cornerRadius: cornerRadius,
                       placeholderColor: placeholderColor,
                       textColor: textColor,
                       enabled: isEnabled,
@@ -198,6 +204,23 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
               'Bezel Style': BezelStylePicker(
                 value: bezelStyle,
                 onChanged: (v) => setState(() => bezelStyle = v),
+              ),
+              'Border Color': ColorPicker(
+                colors: kSystemColors,
+                value: borderColor,
+                onChanged: (color) => setState(() => borderColor = color),
+              ),
+              'Border Width': SizeSliderPicker(
+                value: borderWidth,
+                min: 0.0,
+                max: 6.0,
+                onChanged: (v) => setState(() => borderWidth = v),
+              ),
+              'Corner Radius': SizeSliderPicker(
+                value: cornerRadius,
+                min: 0.0,
+                max: 20.0,
+                onChanged: (v) => setState(() => cornerRadius = v),
               ),
               'Text Color': ColorPicker(
                 colors: kSystemColors,

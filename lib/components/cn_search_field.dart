@@ -115,6 +115,9 @@ class CNSearchField extends CNWidget {
     this.font,
     this.controlSize = CNControlSize.regular,
     this.bezelStyle = CNTextFieldBezelStyle.round,
+    this.borderColor,
+    this.borderWidth,
+    this.cornerRadius,
     this.autofocus = false,
     this.enabled = true,
     this.onChanged,
@@ -136,12 +139,30 @@ class CNSearchField extends CNWidget {
   /// The border/bezel style of the search field.
   final CNTextFieldBezelStyle bezelStyle;
 
+  /// Color of the border drawn on the native control's layer.
+  ///
+  /// Only visible together with a non-zero [borderWidth]. This border is painted
+  /// *on top of* the AppKit bezel, so pair it with
+  /// [CNTextFieldBezelStyle.none] for a fully custom outline — otherwise the
+  /// bezel keeps drawing its own edge underneath.
+  final Color? borderColor;
+
+  /// Width of the border drawn on the native control's layer. Null means no
+  /// border. See [borderColor].
+  final double? borderWidth;
+
   /// The text editing controller that controls the search text.
   /// If null, an internal controller is created.
   final TextEditingController? controller;
 
   /// The size of the native AppKit control.
   final CNControlSize controlSize;
+
+  /// Corner radius applied to the native control's layer.
+  ///
+  /// Rounds [borderColor]/[borderWidth] and clips the control's own background
+  /// to the same shape, so a square bezel can be given rounded corners.
+  final double? cornerRadius;
 
   /// Whether the native control accepts user interaction.
   final bool enabled;
@@ -309,6 +330,9 @@ class _CNSearchFieldState extends CNWidgetState<CNSearchField> {
       'font': widget.font?.toMap(),
       'controlSize': widget.controlSize.name,
       'bezelStyle': widget.bezelStyle.name,
+      'borderColor': resolveColorToArgb(widget.borderColor, context),
+      'borderWidth': widget.borderWidth,
+      'cornerRadius': widget.cornerRadius,
       'autofocus': widget.autofocus,
       'enabled': widget.enabled,
       'hasSuggestions': widget.onSuggestionsRequested != null,
