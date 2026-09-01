@@ -1,3 +1,7 @@
+## 0.1.7
+
+ * Toolbar decoration
+
 ## 0.1.6
 
  * Search Field with custom suggestions, allowing regions, subtitle and images

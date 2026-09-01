@@ -62,10 +62,13 @@ class CNToolbar extends StatefulWidget
     this.search,
     this.padding = const EdgeInsets.all(8),
     this.backgroundColor,
+    this.decoration,
     this.dividerColor,
-    this.enableBlur = false,
     this.material = NSVisualEffectViewMaterial.headerView,
-  });
+  }) : assert(
+         backgroundColor == null || decoration == null,
+         "Only one of backgroundColor or decoration should be provided.",
+       );
 
   /// Trailing action items (native controls or pure-Flutter items).
   final List<CNToolbarItem> actions;
@@ -78,14 +81,14 @@ class CNToolbar extends StatefulWidget
   /// blur when [enableBlur] is true. Defaults to the theme canvas color.
   final Color? backgroundColor;
 
+  /// Custom decoration for the toolbar container. Overrides the default background color and gradient if provided.
+  final BoxDecoration? decoration;
+
   /// Whether to center the [title] within the available space.
   final bool centerTitle;
 
   /// Color of the 1px bottom divider. Defaults to the theme separator color.
   final Color? dividerColor;
-
-  /// Whether to render a native vibrancy (blur) background.
-  final bool enableBlur;
 
   /// Overall bar height (reserved by the scaffold as top padding).
   final double height;
@@ -94,7 +97,7 @@ class CNToolbar extends StatefulWidget
   /// the synthesized back button.
   final List<CNToolbarItem> leading;
 
-  /// The visual-effect material used when [enableBlur] is true.
+  /// The visual-effect material used.
   final NSVisualEffectViewMaterial material;
 
   /// Inner padding around the bar content.
@@ -677,9 +680,6 @@ class _CNToolbarState extends State<CNToolbar>
       alignment: Alignment.center,
       padding: widget.padding,
       decoration: BoxDecoration(
-        color: widget.enableBlur
-            ? null
-            : (widget.backgroundColor ?? theme.canvasColor),
         border: Border(bottom: BorderSide(color: dividerColor)),
       ),
       child: NavigationToolbar(
@@ -703,15 +703,17 @@ class _CNToolbarState extends State<CNToolbar>
       ),
     );
 
-    if (widget.enableBlur) {
-      bar = VisualEffectSubviewContainer(
-        material: widget.material,
-        child: DecoratedBox(
-          decoration: BoxDecoration(color: widget.backgroundColor),
-          child: bar,
-        ),
-      );
-    }
+    bar = VisualEffectSubviewContainer(
+      material: widget.material,
+      child: DecoratedBox(
+        decoration:
+            widget.decoration ??
+            BoxDecoration(
+              color: widget.backgroundColor ?? CNColors.transparent,
+            ),
+        child: bar,
+      ),
+    );
 
     // Reserve the traffic-light inset via MediaQuery so the leading SafeArea can
     // consume it only when the sidebar is hidden. Empty regions drag the window.

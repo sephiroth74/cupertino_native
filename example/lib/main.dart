@@ -197,10 +197,19 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
             ],
           ),
         ),
-        backgroundColor: isDark
-            ? accentColor?.withLuminance(0.3)
-            : accentColor?.withLuminance(0.8),
-        enableBlur: true,
+        backgroundColor: isDark ? accentColor?.withLuminance(0.3) : null,
+        decoration: isDark
+            ? null
+            : BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    accentColor?.withLuminance(0.8) ?? CNColors.blue,
+                    (accentColor?.withLuminance(0.8) ?? CNColors.blue)
+                        .withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+        material: NSVisualEffectViewMaterial.fullScreenUI,
         actions: [
           createToolbarThemePicker(context),
           const CNToolbarSpacer(spacerUnits: 0.25),
