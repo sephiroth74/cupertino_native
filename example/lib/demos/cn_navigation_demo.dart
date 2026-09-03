@@ -134,12 +134,38 @@ class _DetailPage extends StatelessWidget {
     return CNPageScaffold(
       backgroundColor: theme.canvasColor,
       // The route can pop, so CNToolbar synthesizes a leading back button.
+      //
+      // Each item carries its own `decoration`, painted behind that single
+      // control and inflated by `decorationPadding` — a pill here, a circle
+      // there — rather than one decoration spanning the whole bar.
       toolBar: CNToolbar(
         title: Text(item.title),
         automaticallyImplyLeading: true,
         actions: [
           CNToolbarButton(
+            'square.and.arrow.up',
+            help: 'Share',
+            decorationPadding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 3,
+            ),
+            decoration: ShapeDecoration(
+              color: theme.fillQuaternaryColor,
+              shape: StadiumBorder(
+                side: BorderSide(color: theme.separatorColor),
+              ),
+            ),
+            onPressed: () => debugPrint('Share tapped'),
+          ),
+          const CNToolbarSpacer(spacerUnits: 0.25),
+          CNToolbarButton(
             'gearshape',
+            help: 'Settings',
+            decorationPadding: const EdgeInsets.all(3),
+            decoration: ShapeDecoration(
+              color: theme.fillQuaternaryColor,
+              shape: const CircleBorder(),
+            ),
             onPressed: () => debugPrint('Settings tapped'),
           ),
         ],

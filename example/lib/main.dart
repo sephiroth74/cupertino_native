@@ -170,10 +170,22 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     final isDark = theme.brightness == Brightness.dark;
 
     return CNPageScaffold(
-      backgroundColor: CNColors.transparent,
+      // backgroundColor: accentColor?.withValues(alpha: 0.2),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            (accentColor?.withLuminance(0.8) ?? CNColors.blue).withValues(
+              alpha: 0.0,
+            ),
+            accentColor?.withLuminance(0.8) ?? CNColors.blue,
+          ],
+        ),
+      ),
       toolBar: CNToolbar(
         automaticallyImplyLeading: true,
         leading: [
+          // `decoration` is per item: it paints a rounded fill behind this one
+          // control, inflated by `decorationPadding`.
           CNToolbarIconButton(
             'sidebar.left',
             tooltip: 'Toggle the navigation sidebar',
@@ -197,19 +209,20 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
             ],
           ),
         ),
-        backgroundColor: isDark ? accentColor?.withLuminance(0.3) : null,
-        decoration: isDark
-            ? null
-            : BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    accentColor?.withLuminance(0.8) ?? CNColors.blue,
-                    (accentColor?.withLuminance(0.8) ?? CNColors.blue)
-                        .withValues(alpha: 0.0),
-                  ],
-                ),
-              ),
+        // backgroundColor: isDark ? accentColor?.withLuminance(0.3) : null,
+        backgroundColor: CNColors.transparent,
+        // decoration: isDark
+        //     ? null
+        //     : BoxDecoration(
+        //         gradient: LinearGradient(
+        //           colors: [
+        //             accentColor?.withLuminance(0.8) ?? CNColors.blue,
+        //             (accentColor?.withLuminance(0.8) ?? CNColors.blue).withValues(alpha: 0.0),
+        //           ],
+        //         ),
+        //       ),
         material: NSVisualEffectViewMaterial.fullScreenUI,
+        dividerColor: CNColors.transparent,
         actions: [
           createToolbarThemePicker(context),
           const CNToolbarSpacer(spacerUnits: 0.25),
@@ -582,10 +595,24 @@ CNToolbarItem createToolbarThemePicker(BuildContext context) {
     pickerStyle: CNPickerStyle.menu,
     selection: appTheme.mode.name,
     controlSize: CNControlSize.large,
-    background: CNBackground.shape(
-      const CNRoundedRectangle(cornerRadius: 12),
-      color: CNTheme.of(context).accentColor?.withAlpha(51),
+    decoration: BoxDecoration(
+      color: CNColors.white,
+      boxShadow: const [
+        BoxShadow(
+          color: Colors.black26,
+          blurRadius: 6,
+          spreadRadius: 2,
+          offset: Offset(0, 2),
+          blurStyle: BlurStyle.normal,
+        ),
+      ],
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: Colors.transparent),
     ),
+    // background: CNBackground.shape(
+    //   const CNRoundedRectangle(cornerRadius: 14),
+    //   color: CNTheme.of(context).accentColor?.withAlpha(51),
+    // ),
     children: [
       CNChildLabel(
         'System Theme',

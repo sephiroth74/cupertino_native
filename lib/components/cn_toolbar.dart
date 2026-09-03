@@ -145,6 +145,8 @@ class CNToolbarButton extends CNToolbarItem {
     this.isSelected = false,
     this.theme,
     this.help,
+    super.decoration,
+    super.decorationPadding,
   });
 
   /// Whether the button renders its selected appearance (and swaps to
@@ -247,6 +249,8 @@ class CNToolbarComboBox extends CNToolbarItem {
     this.onSelectionChanged,
     this.width = 160.0,
     this.tint,
+    super.decoration,
+    super.decorationPadding,
   });
 
   /// Whether the field auto-completes against [items] as the user types.
@@ -299,7 +303,12 @@ class CNToolbarComboBox extends CNToolbarItem {
 /// An escape hatch that renders an arbitrary Flutter widget as a toolbar item.
 class CNToolbarCustomItem extends CNToolbarItem {
   /// Creates a custom item from a [builder].
-  const CNToolbarCustomItem({required this.builder, this.overflowLabel});
+  const CNToolbarCustomItem({
+    required this.builder,
+    this.overflowLabel,
+    super.decoration,
+    super.decorationPadding,
+  });
 
   /// Builds the item's widget.
   final WidgetBuilder builder;
@@ -323,6 +332,8 @@ class CNToolbarDivider extends CNToolbarItem {
   const CNToolbarDivider({
     this.padding = const EdgeInsets.all(6.0),
     this.color,
+    super.decoration,
+    super.decorationPadding,
   });
 
   /// Optional divider color.
@@ -358,6 +369,8 @@ class CNToolbarIconButton extends CNToolbarItem {
     this.showLabel = false,
     this.tooltip,
     this.tint,
+    super.decoration,
+    super.decorationPadding,
   });
 
   /// Optional text label (shown beneath the icon when [showLabel] is true, and
@@ -432,7 +445,51 @@ class CNToolbarIconButton extends CNToolbarItem {
 /// Base class for items placed in a [CNToolbar]'s `leading`/`actions` slots.
 abstract class CNToolbarItem {
   /// Const base constructor.
-  const CNToolbarItem();
+  const CNToolbarItem({
+    this.decoration,
+    this.decorationPadding = EdgeInsets.zero,
+  });
+
+  /// Optional decoration painted *behind* this single item — a pill, circle or
+  /// tinted capsule under the control, as opposed to [CNToolbar.decoration],
+  /// which paints behind the whole bar.
+  ///
+  /// The decoration hugs the item, inflated by [decorationPadding]:
+  ///
+  /// ```dart
+  /// CNToolbarButton(
+  ///   'square.and.pencil',
+  ///   label: 'New Mail',
+  ///   decorationPadding: const EdgeInsets.symmetric(horizontal: 10),
+  ///   decoration: ShapeDecoration(
+  ///     color: CNColors.white,
+  ///     shape: const StadiumBorder(),
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// Note: it is *painted*, not clipped — native platform-view items (e.g.
+  /// [CNToolbarIconButton]) draw into their own AppKit layer, which Flutter
+  /// clips do not reach. Give [decorationPadding] enough room that a square
+  /// control stays clear of a rounded decoration's corners.
+  final Decoration? decoration;
+
+  /// Inset between [decoration]'s edge and the item's own content.
+  ///
+  /// Defaults to [EdgeInsets.zero], so the decoration exactly hugs the item.
+  /// Ignored when [decoration] is null.
+  ///
+  /// This is the *only* inset applied: a `border` (or a shape's `side`) is
+  /// stroked inside the decoration's own bounds instead of pushing the item
+  /// further in, so a bordered decoration never grows past the control and
+  /// leaves a rim of itself showing around a native control's background. Give
+  /// it a point or two of padding if you want the stroke clear of the bezel.
+  ///
+  /// On items that size themselves to the toolbar's content band (see
+  /// [managesOwnHeight]) this shrinks the control rather than growing the
+  /// decoration: the band height is fixed, so the decoration fills it and the
+  /// control is inset within.
+  final EdgeInsetsGeometry decorationPadding;
 
   /// Whether this item sizes itself to the toolbar's content band (e.g. a native
   /// control pinned to a fixed frame) and therefore must NOT be wrapped in the
@@ -462,6 +519,8 @@ class CNToolbarPicker extends CNToolbarItem {
     this.background,
     this.help,
     this.controlSize,
+    super.decoration,
+    super.decorationPadding,
   });
 
   /// Optional tooltip text shown on hover (SwiftUI `.help()`).
@@ -527,6 +586,8 @@ class CNToolbarPullDownButton extends CNToolbarItem {
     required this.label,
     this.onItemPressed,
     this.tint,
+    super.decoration,
+    super.decorationPadding,
   });
 
   /// The menu items.
@@ -561,7 +622,11 @@ class CNToolbarPullDownButton extends CNToolbarItem {
 /// A fixed-width spacer between toolbar items (pure Flutter).
 class CNToolbarSpacer extends CNToolbarItem {
   /// Creates a spacer of [spacerUnits] × [_kToolbarItemWidth] width.
-  const CNToolbarSpacer({this.spacerUnits = 1.0});
+  const CNToolbarSpacer({
+    this.spacerUnits = 1.0,
+    super.decoration,
+    super.decorationPadding,
+  });
 
   /// Number of spacer units.
   final double spacerUnits;
@@ -613,9 +678,31 @@ class _CNToolbarState extends State<CNToolbar>
   /// would strip. Everything else (dividers, spacers, custom widgets) is
   /// vertically centered by [_centerItem].
   Widget _wrapItem(CNToolbarItem item, BuildContext context) {
+    Widget content = item.build(context);
+
+    // The per-item decoration goes *inside* the inter-item gutter below, so two
+    // decorated neighbours read as two separate pills with 8pt between them
+    // rather than one continuous strip. It also has to sit outside `item.build`
+    // so that items reading the height band through a LayoutBuilder (see
+    // [CNToolbarItem.managesOwnHeight]) measure the band minus the padding —
+    // the decoration then fills the band and the control is inset within it.
+    final decoration = item.decoration;
+    if (decoration != null) {
+      // Deliberately a DecoratedBox and not a Container: Container folds the
+      // decoration's own border width into its padding (`BoxDecoration.padding`
+      // is `border.dimensions`, `ShapeDecoration.padding` is
+      // `shape.dimensions`), which would inflate the box past the item and leave
+      // a rim of decoration showing around a native control's bezel.
+      // `decorationPadding` stays the only inset.
+      content = DecoratedBox(
+        decoration: decoration,
+        child: Padding(padding: item.decorationPadding, child: content),
+      );
+    }
+
     final child = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: item.build(context),
+      child: content,
     );
     return item.managesOwnHeight
         ? CNPixelPerfectContainer(child: child)

@@ -28,18 +28,47 @@ class CNPageScaffold extends StatelessWidget {
     super.key,
     this.toolBar,
     this.backgroundColor,
+    this.decoration,
     this.resizeToAvoidBottomInset = true,
     this.child,
     this.children,
   }) : assert(
          (child == null) != (children == null),
          'CNPageScaffold requires exactly one of child or children.',
+       ),
+       assert(
+         backgroundColor == null || decoration == null,
+         'Only one of backgroundColor or decoration should be provided.',
        );
 
   /// Background color for the page.
   ///
-  /// If null, the page is transparent (the enclosing window paints the background).
+  /// If null, the page is transparent (the enclosing window paints the
+  /// background). Mutually exclusive with [decoration].
   final Color? backgroundColor;
+
+  /// Background decoration painted behind the body and the [toolBar], for pages
+  /// that want a gradient, an image or a border instead of a flat
+  /// [backgroundColor]:
+  ///
+  /// ```dart
+  /// CNPageScaffold(
+  ///   decoration: BoxDecoration(
+  ///     gradient: LinearGradient(
+  ///       begin: Alignment.topCenter,
+  ///       end: Alignment.bottomCenter,
+  ///       colors: [theme.canvasColor, theme.fillPrimaryColor],
+  ///     ),
+  ///   ),
+  ///   child: …,
+  /// )
+  /// ```
+  ///
+  /// It spans the whole page including the strip under the toolbar, so a
+  /// vertical gradient starts at the window top rather than below the bar. The
+  /// toolbar draws over it and paints its own background unless that is left
+  /// transparent. Mutually exclusive with [backgroundColor].
+  final Decoration? decoration;
 
   /// Single body widget filling the content area. Mutually exclusive with [children].
   final Widget? child;
@@ -53,6 +82,11 @@ class CNPageScaffold extends StatelessWidget {
 
   /// Optional Flutter toolbar overlaid at the top of the page.
   final CNToolbar? toolBar;
+
+  /// What paints behind the page: [decoration] when given, otherwise a flat
+  /// [backgroundColor] (transparent when that is null too).
+  Decoration get _background =>
+      decoration ?? BoxDecoration(color: backgroundColor);
 
   /// Horizontal inset that keeps the body clear of the sidebars when the
   /// enclosing [CNWindow] runs its toolbar full width (see
@@ -115,7 +149,7 @@ class CNPageScaffold extends StatelessWidget {
 
     return SizedBox.expand(
       child: DecoratedBox(
-        decoration: BoxDecoration(color: backgroundColor),
+        decoration: _background,
         child: Stack(
           children: [paddedContent, if (toolBar != null) _positionedToolBar()],
         ),
@@ -131,7 +165,7 @@ class CNPageScaffold extends StatelessWidget {
 
     return SizedBox.expand(
       child: DecoratedBox(
-        decoration: BoxDecoration(color: backgroundColor),
+        decoration: _background,
         child: Stack(
           children: [
             // Reserve the toolbar strip by overriding the top inset (mirrors

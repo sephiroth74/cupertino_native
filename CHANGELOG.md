@@ -1,6 +1,8 @@
 ## 0.1.7
 
  * Toolbar decoration
+ * `CNToolbarItem.decoration` / `decorationPadding`: per-item decoration painted behind each single toolbar item (pill, circle, tinted capsule)
+ * `CNPageScaffold.decoration`: gradient, image or bordered page background instead of a flat `backgroundColor`
 
 ## 0.1.6
 

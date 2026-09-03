@@ -138,8 +138,8 @@ If you drive the window yourself (transparent titlebar, full-size content view, 
 | --- | --- |
 | `CNApp` | App root: builds `CNTheme` for light/dark, tracks the main window and window geometry |
 | `CNWindow` / `CNWindowScope` | Window chrome: visual-effect background, leading and trailing sidebars, status bar |
-| `CNPageScaffold` / `CNContentArea` | Page body with a toolbar; single `child` or a split layout of resizable panes |
-| `CNToolbar` | Toolbar with native items: `CNToolbarButton`, `CNToolbarIconButton`, `CNToolbarPullDownButton`, `CNToolbarPicker`, `CNToolbarComboBox`, plus `CNToolbarDivider`, `CNToolbarSpacer` and `CNToolbarCustomItem` |
+| `CNPageScaffold` / `CNContentArea` | Page body with a toolbar; single `child` or a split layout of resizable panes. `backgroundColor` or `decoration` (gradient, image, border) paints the whole page, toolbar strip included |
+| `CNToolbar` | Toolbar with native items: `CNToolbarButton`, `CNToolbarIconButton`, `CNToolbarPullDownButton`, `CNToolbarPicker`, `CNToolbarComboBox`, plus `CNToolbarDivider`, `CNToolbarSpacer` and `CNToolbarCustomItem`. `decoration` styles the whole bar; every item takes its own `decoration` / `decorationPadding` for a pill or circle behind that single control |
 | `CNSidebar` | Resizable, collapsible sidebar configuration for `CNWindow` |
 | `CNStatusBar` | Bottom status bar with an expandable panel (push or overlay presentation) |
 | `CNTabView` / `CNTabController` | Tabbed container driven by a native segmented control |
