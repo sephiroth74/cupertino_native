@@ -581,8 +581,9 @@ CNToolbarItem createToolbarThemePicker(BuildContext context) {
     help: 'Select the app theme (light, dark, or system)',
     pickerStyle: CNPickerStyle.menu,
     selection: appTheme.mode.name,
+    controlSize: CNControlSize.large,
     background: CNBackground.shape(
-      const CNRoundedRectangle(cornerRadius: 6),
+      const CNRoundedRectangle(cornerRadius: 12),
       color: CNTheme.of(context).accentColor?.withAlpha(51),
     ),
     children: [

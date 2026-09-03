@@ -461,6 +461,7 @@ class CNToolbarPicker extends CNToolbarItem {
     this.tint,
     this.background,
     this.help,
+    this.controlSize,
   });
 
   /// Optional tooltip text shown on hover (SwiftUI `.help()`).
@@ -487,6 +488,9 @@ class CNToolbarPicker extends CNToolbarItem {
   /// Optional tint color.
   final Color? tint;
 
+  /// Control size for the picker.
+  final CNControlSize? controlSize;
+
   @override
   CNChild? toOverflowChild(BuildContext context) {
     return CNChildPicker(
@@ -510,6 +514,7 @@ class CNToolbarPicker extends CNToolbarItem {
       tint: tint,
       background: background,
       shrink: true,
+      controlSize: controlSize ?? CNControlSize.regular,
     );
   }
 }
