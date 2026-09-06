@@ -38,6 +38,9 @@ class CNProgressView extends CNWidget {
   final double? value;
 
   @override
+  final CNBackground? background;
+
+  @override
   final BoxConstraints? constraints;
 
   @override
@@ -48,9 +51,6 @@ class CNProgressView extends CNWidget {
 
   @override
   final CNOverlay? overlay;
-
-  @override
-  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

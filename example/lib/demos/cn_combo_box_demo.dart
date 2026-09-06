@@ -11,9 +11,9 @@ class ComboBoxDemoPage extends StatefulWidget {
 
 class _ComboBoxDemoPageState extends State<ComboBoxDemoPage> {
   bool completes = true;
-  bool isEnabled = true;
-  bool isEditable = true;
   bool hasOverlay = false;
+  bool isEditable = true;
+  bool isEnabled = true;
 
   final _fruits = [
     'Apple',

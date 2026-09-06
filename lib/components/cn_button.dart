@@ -62,6 +62,9 @@ class CNButton extends CNWidget {
   final CNButtonRole role;
 
   @override
+  final CNBackground? background;
+
+  @override
   final BoxConstraints? constraints;
 
   @override
@@ -72,9 +75,6 @@ class CNButton extends CNWidget {
 
   @override
   final CNOverlay? overlay;
-
-  @override
-  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

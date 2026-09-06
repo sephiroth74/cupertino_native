@@ -18,8 +18,10 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
     CNDatePickerComponent.date,
     CNDatePickerComponent.hourAndMinute,
   ];
+
   _DatePickerComponents displayedComponentsEnum =
       _DatePickerComponents.dateAndTime;
+
   bool enabled = true;
   DateTime selectedDate = DateTime.now();
   CupertinoDynamicColor? tintColor;

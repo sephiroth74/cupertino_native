@@ -66,6 +66,9 @@ class CNMenu extends CNWidget {
   final String? primaryActionTag;
 
   @override
+  final CNBackground? background;
+
+  @override
   final BoxConstraints? constraints;
 
   @override
@@ -76,9 +79,6 @@ class CNMenu extends CNWidget {
 
   @override
   final CNOverlay? overlay;
-
-  @override
-  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

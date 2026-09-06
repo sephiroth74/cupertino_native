@@ -1,5 +1,7 @@
 ## 0.1.7
 
+ * fixed main window separator size and added highlight color when dragging
+ * Removed clear background from the sidebars
  * Toolbar decoration
  * `CNToolbarItem.decoration` / `decorationPadding`: per-item decoration painted behind each single toolbar item (pill, circle, tinted capsule)
  * `CNPageScaffold.decoration`: gradient, image or bordered page background instead of a flat `backgroundColor`

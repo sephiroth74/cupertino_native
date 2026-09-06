@@ -167,7 +167,6 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
     final theme = CNTheme.of(context);
     final accentColor = theme.accentColor;
     final entry = _entries[widget.selectedIndex];
-    final isDark = theme.brightness == Brightness.dark;
 
     return CNPageScaffold(
       // backgroundColor: accentColor?.withValues(alpha: 0.2),
@@ -243,7 +242,12 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
           left: false,
           right: false,
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.only(
+              top: 8.0,
+              bottom: 8.0,
+              left: 0.0,
+              right: 8.0,
+            ),
             child: Container(
               decoration: BoxDecoration(
                 color: theme.canvasColor,
@@ -329,6 +333,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     },
                   );
                 },
+                padding: const EdgeInsets.only(
+                  left: 8.0,
+                  right: 0.0,
+                  top: 8.0,
+                  bottom: 8.0,
+                ),
                 minWidth: 250,
                 isResizable: true,
                 maxWidth: 400,
@@ -337,7 +347,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 material: NSVisualEffectViewMaterial.fullScreenUI,
                 backgroundColor: CNColors.transparent,
                 separatorColor: CNColors.transparent,
-                separatorWidth: 6.0,
+                separatorWidth: 4.0,
                 // backgroundColor: CNColors.canvasColor.withAlpha(127),
               ),
               statusBar: CNStatusBar(
@@ -460,88 +470,77 @@ class _SideBar extends StatelessWidget {
     final isBright = (accentColor?.computeLuminance() ?? 0) > 0.5;
     final labelColor = theme.labelColor;
 
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: 8.0,
-        bottom: 8.0,
-        left: 8.0,
-        right: 2.0,
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.canvasColor,
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(
+          color: theme.separatorColor.withAlpha(51),
+          width: 1.0,
+        ),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.canvasColor,
-          borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(
-            color: theme.separatorColor.withAlpha(51),
-            width: 1.0,
-          ),
-        ),
-        child: ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          itemCount: _entries.length,
-          itemBuilder: (context, index) {
-            final entry = _entries[index];
-            final isSelected = index == selectedIndex;
-            final isValidEntry =
-                searchQuery == null ||
-                searchQuery!.isEmpty ||
-                entry.title.toLowerCase().contains(searchQuery!.toLowerCase());
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: _entries.length,
+        itemBuilder: (context, index) {
+          final entry = _entries[index];
+          final isSelected = index == selectedIndex;
+          final isValidEntry =
+              searchQuery == null ||
+              searchQuery!.isEmpty ||
+              entry.title.toLowerCase().contains(searchQuery!.toLowerCase());
 
-            if (!isValidEntry) {
-              return const SizedBox.shrink();
-            }
+          if (!isValidEntry) {
+            return const SizedBox.shrink();
+          }
 
-            return GestureDetector(
-              onTap: () => onItemSelected(index),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
-                ),
-                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? accentColor?.withValues(alpha: 1.0)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  children: [
-                    CNImage(
-                      constraints: const BoxConstraints(
-                        maxWidth: 18,
-                        maxHeight: 18,
-                      ),
-                      systemSymbolName: entry.symbolName,
-                      foregroundColor: isSelected
-                          ? isBright
-                                ? CNColors.black
-                                : CNColors.white
-                          : (isDark
-                                ? CupertinoColors.label.darkColor
-                                : CupertinoColors.label.color),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        entry.title,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: isSelected
-                              ? (isBright
-                                    ? CNColors.label.color
-                                    : CNColors.label.darkColor)
-                              : labelColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+          return GestureDetector(
+            onTap: () => onItemSelected(index),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? accentColor?.withValues(alpha: 1.0)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(6),
               ),
-            );
-          },
-        ),
+              child: Row(
+                children: [
+                  CNImage(
+                    constraints: const BoxConstraints(
+                      maxWidth: 18,
+                      maxHeight: 18,
+                    ),
+                    systemSymbolName: entry.symbolName,
+                    foregroundColor: isSelected
+                        ? isBright
+                              ? CNColors.black
+                              : CNColors.white
+                        : (isDark
+                              ? CupertinoColors.label.darkColor
+                              : CupertinoColors.label.color),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      entry.title,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isSelected
+                            ? (isBright
+                                  ? CNColors.label.color
+                                  : CNColors.label.darkColor)
+                            : labelColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

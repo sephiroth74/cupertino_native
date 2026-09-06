@@ -26,30 +26,37 @@ class CNAccentColor {
     CNColors.blue,
     CNAccentColorName.blue,
   );
+
   static const CNAccentColor graphite = CNAccentColor._(
     CNColors.gray,
     CNAccentColorName.graphite,
   );
+
   static const CNAccentColor green = CNAccentColor._(
     CNColors.green,
     CNAccentColorName.green,
   );
+
   static const CNAccentColor orange = CNAccentColor._(
     CNColors.orange,
     CNAccentColorName.orange,
   );
+
   static const CNAccentColor pink = CNAccentColor._(
     CNColors.pink,
     CNAccentColorName.pink,
   );
+
   static const CNAccentColor purple = CNAccentColor._(
     CNColors.purple,
     CNAccentColorName.purple,
   );
+
   static const CNAccentColor red = CNAccentColor._(
     CNColors.red,
     CNAccentColorName.red,
   );
+
   static const CNAccentColor yellow = CNAccentColor._(
     CNColors.yellow,
     CNAccentColorName.yellow,
@@ -88,9 +95,11 @@ class CNAccentColorListener {
   static CNAccentColor _accentColor = CNAccentColor.blue;
   static final StreamController<CNAccentColor> _controller =
       StreamController<CNAccentColor>.broadcast();
+
   static const EventChannel _eventChannel = EventChannel(
     'cupertino_native/accent_color',
   );
+
   static const MethodChannel _methodChannel = MethodChannel('cupertino_native');
   static StreamSubscription<dynamic>? _subscription;
 

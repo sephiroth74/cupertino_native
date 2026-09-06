@@ -35,6 +35,7 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
     CNFontSize.points(32),
     weight: CNFontWeight.regular,
   );
+
   double fontSize = 32;
   Color? foregroundColor;
   bool isDark = false;

@@ -87,6 +87,19 @@ class CNIconButton extends StatefulWidget {
   /// Border stroke width. Overrides the theme when non-null.
   final double? borderWidth;
 
+  /// Optional font used to draw the glyph. Overrides the theme when non-null.
+  ///
+  /// When the font carries an explicit point size ([CNFontSize.points]) that
+  /// size wins over [iconSizeRatio]: the glyph box grows or shrinks to fit it,
+  /// never past [size]. With a [CNFontSize.preset] size the box still comes from
+  /// [iconSizeRatio] and the native side resolves the preset.
+  ///
+  /// For the [systemSymbolName] path the whole font (kind, weight, size) is
+  /// forwarded to the native [CNImage], so this is how you get a bolder or
+  /// lighter SF Symbol. For the [icon] path only the point size applies —
+  /// Flutter's bundled icon fonts have no weight axis.
+  final CNFont? font;
+
   /// Per-state icon color. Overrides the theme for every state it resolves.
   ///
   /// The property resolves to a nullable [Color], so it can cover a subset of
@@ -112,19 +125,6 @@ class CNIconButton extends StatefulWidget {
   /// Defaults to the resolved [CNColors.label], tinted with the accent color
   /// while hovered, pressed or selected and faded while disabled.
   final WidgetStateProperty<Color?>? foregroundColor;
-
-  /// Optional font used to draw the glyph. Overrides the theme when non-null.
-  ///
-  /// When the font carries an explicit point size ([CNFontSize.points]) that
-  /// size wins over [iconSizeRatio]: the glyph box grows or shrinks to fit it,
-  /// never past [size]. With a [CNFontSize.preset] size the box still comes from
-  /// [iconSizeRatio] and the native side resolves the preset.
-  ///
-  /// For the [systemSymbolName] path the whole font (kind, weight, size) is
-  /// forwarded to the native [CNImage], so this is how you get a bolder or
-  /// lighter SF Symbol. For the [icon] path only the point size applies —
-  /// Flutter's bundled icon fonts have no weight axis.
-  final CNFont? font;
 
   /// The icon to display inside the button. Cannot be used with [systemSymbolName].
   final IconData? icon;

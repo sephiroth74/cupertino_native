@@ -57,6 +57,9 @@ class CNDatePicker extends CNWidget {
   final DateTime selection;
 
   @override
+  final CNBackground? background;
+
+  @override
   final BoxConstraints? constraints;
 
   @override
@@ -67,9 +70,6 @@ class CNDatePicker extends CNWidget {
 
   @override
   final CNOverlay? overlay;
-
-  @override
-  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

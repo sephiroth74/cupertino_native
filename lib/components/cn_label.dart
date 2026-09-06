@@ -67,6 +67,9 @@ class CNLabel extends CNWidget {
   final CNChildText title;
 
   @override
+  final CNBackground? background;
+
+  @override
   final BoxConstraints? constraints;
 
   @override
@@ -77,9 +80,6 @@ class CNLabel extends CNWidget {
 
   @override
   final CNOverlay? overlay;
-
-  @override
-  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

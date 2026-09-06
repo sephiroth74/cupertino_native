@@ -151,12 +151,12 @@ class CNSearchField extends CNWidget {
   /// border. See [borderColor].
   final double? borderWidth;
 
+  /// The size of the native AppKit control.
+  final CNControlSize controlSize;
+
   /// The text editing controller that controls the search text.
   /// If null, an internal controller is created.
   final TextEditingController? controller;
-
-  /// The size of the native AppKit control.
-  final CNControlSize controlSize;
 
   /// Corner radius applied to the native control's layer.
   ///
@@ -170,11 +170,11 @@ class CNSearchField extends CNWidget {
   /// Optional native NSFont descriptor.
   final CNFont? font;
 
-  /// Called when the field gains (`true`) or loses (`false`) focus.
-  final ValueChanged<bool>? onFocusChange;
-
   /// Called whenever the user changes the search text.
   final ValueChanged<String>? onChanged;
+
+  /// Called when the field gains (`true`) or loses (`false`) focus.
+  final ValueChanged<bool>? onFocusChange;
 
   /// Called when the user submits the search text (presses Enter or selects a suggestion).
   final ValueChanged<String>? onSubmitted;
@@ -226,24 +226,14 @@ class CNSearchField extends CNWidget {
 
 class _CNSearchFieldState extends CNWidgetState<CNSearchField> {
   TextEditingController? _internalController;
-
+  int _suggestionGeneration = 0;
   /// Items of the batch currently displayed by the native popup, keyed by the
   /// id handed to native. Lets `suggestionSelected` resolve back to the exact
   /// [CNSuggestionItem] the app returned.
   Map<String, CNSuggestionItem> _visibleSuggestions = const {};
-  int _suggestionGeneration = 0;
 
   @override
   Size computeDefaultSize() => const Size(double.infinity, 24.0);
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.controller == null) {
-      _internalController = TextEditingController();
-    }
-    _controller.addListener(_onControllerChanged);
-  }
 
   @override
   void didUpdateWidget(covariant CNSearchField oldWidget) {
@@ -275,6 +265,15 @@ class _CNSearchFieldState extends CNWidgetState<CNSearchField> {
   Set<Factory<OneSequenceGestureRecognizer>>? get gestureRecognizers => {
     Factory<OneSequenceGestureRecognizer>(() => TapGestureRecognizer()),
   };
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller == null) {
+      _internalController = TextEditingController();
+    }
+    _controller.addListener(_onControllerChanged);
+  }
 
   @override
   Future<dynamic> onNativeMethodCall(MethodCall call) async {

@@ -47,6 +47,13 @@ class CNPageScaffold extends StatelessWidget {
   /// background). Mutually exclusive with [decoration].
   final Color? backgroundColor;
 
+  /// Single body widget filling the content area. Mutually exclusive with [children].
+  final Widget? child;
+
+  /// Horizontal split-view body: resizable panes plus exactly one [CNContentArea].
+  /// Mutually exclusive with [child].
+  final List<Widget>? children;
+
   /// Background decoration painted behind the body and the [toolBar], for pages
   /// that want a gradient, an image or a border instead of a flat
   /// [backgroundColor]:
@@ -70,13 +77,6 @@ class CNPageScaffold extends StatelessWidget {
   /// transparent. Mutually exclusive with [backgroundColor].
   final Decoration? decoration;
 
-  /// Single body widget filling the content area. Mutually exclusive with [children].
-  final Widget? child;
-
-  /// Horizontal split-view body: resizable panes plus exactly one [CNContentArea].
-  /// Mutually exclusive with [child].
-  final List<Widget>? children;
-
   /// Whether the body should avoid bottom insets like the keyboard.
   final bool resizeToAvoidBottomInset;
 
@@ -88,18 +88,18 @@ class CNPageScaffold extends StatelessWidget {
   Decoration get _background =>
       decoration ?? BoxDecoration(color: backgroundColor);
 
-  /// Horizontal inset that keeps the body clear of the sidebars when the
-  /// enclosing [CNWindow] runs its toolbar full width (see
-  /// [CNWindow.toolbarSpansFullWidth]). In split mode the window already confines
-  /// the content beside the sidebars, so this is zero. `CNContentArea` disables
-  /// left/right `SafeArea`, so this must be a real `Padding`, not a MediaQuery
-  /// inset, to take effect.
+  /// Horizontal inset that keeps the body clear of the sidebars — and of the
+  /// separators between them and the content — when the enclosing [CNWindow]
+  /// runs its toolbar full width (see [CNWindow.toolbarSpansFullWidth]). In split
+  /// mode the window already confines the content beside them, so this is zero.
+  /// `CNContentArea` disables left/right `SafeArea`, so this must be a real
+  /// `Padding`, not a MediaQuery inset, to take effect.
   EdgeInsets _fullWidthBodyInset(BuildContext context) {
     final scope = CNWindowScope.maybeOf(context);
     if (scope == null || !scope.toolbarSpansFullWidth) return EdgeInsets.zero;
     return EdgeInsets.only(
-      left: scope.visibleSidebarWidth,
-      right: scope.visibleEndSidebarWidth,
+      left: scope.visibleSidebarWidth + scope.sidebarSeparatorWidth,
+      right: scope.visibleEndSidebarWidth + scope.endSidebarSeparatorWidth,
     );
   }
 

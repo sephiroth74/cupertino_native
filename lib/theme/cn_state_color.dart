@@ -76,13 +76,13 @@ class _CNLayeredStateColor implements WidgetStateProperty<Color?> {
   final WidgetStateProperty<Color?> under;
 
   @override
-  int get hashCode => Object.hash(over, under);
-
-  @override
   bool operator ==(Object other) =>
       other is _CNLayeredStateColor &&
       other.over == over &&
       other.under == under;
+
+  @override
+  int get hashCode => Object.hash(over, under);
 
   @override
   Color? resolve(Set<WidgetState> states) =>

@@ -147,15 +147,15 @@ class CNAlert {
 
 /// Result returned by [CNAlert.show].
 class CNAlertResult {
-  final int selectedIndex;
-
-  final String? selectedTag;
-  final bool suppressionSelected;
   const CNAlertResult({
     required this.selectedIndex,
     this.selectedTag,
     this.suppressionSelected = false,
   });
+
+  final int selectedIndex;
+  final String? selectedTag;
+  final bool suppressionSelected;
 }
 
 /// Visual style for a native macOS alert.

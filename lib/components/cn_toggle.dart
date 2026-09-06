@@ -48,6 +48,9 @@ class CNToggle extends CNWidget {
   final CNToggleStyle toggleStyle;
 
   @override
+  final CNBackground? background;
+
+  @override
   final BoxConstraints? constraints;
 
   @override
@@ -58,9 +61,6 @@ class CNToggle extends CNWidget {
 
   @override
   final CNOverlay? overlay;
-
-  @override
-  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

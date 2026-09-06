@@ -81,11 +81,11 @@ class CNToolbar extends StatefulWidget
   /// blur when [enableBlur] is true. Defaults to the theme canvas color.
   final Color? backgroundColor;
 
-  /// Custom decoration for the toolbar container. Overrides the default background color and gradient if provided.
-  final BoxDecoration? decoration;
-
   /// Whether to center the [title] within the available space.
   final bool centerTitle;
+
+  /// Custom decoration for the toolbar container. Overrides the default background color and gradient if provided.
+  final BoxDecoration? decoration;
 
   /// Color of the 1px bottom divider. Defaults to the theme separator color.
   final Color? dividerColor;
@@ -149,6 +149,9 @@ class CNToolbarButton extends CNToolbarItem {
     super.decorationPadding,
   });
 
+  /// Optional help text shown on hover (SwiftUI `.help()`).
+  final String? help;
+
   /// Whether the button renders its selected appearance (and swaps to
   /// [selectedSystemImage] when provided).
   final bool isSelected;
@@ -172,9 +175,6 @@ class CNToolbarButton extends CNToolbarItem {
   /// Optional per-item overrides layered on top of the toolbar defaults and any
   /// ambient [CNIconButtonTheme].
   final CNIconButtonThemeData? theme;
-
-  /// Optional help text shown on hover (SwiftUI `.help()`).
-  final String? help;
 
   @override
   bool get managesOwnHeight => true;
@@ -523,14 +523,17 @@ class CNToolbarPicker extends CNToolbarItem {
     super.decorationPadding,
   });
 
-  /// Optional tooltip text shown on hover (SwiftUI `.help()`).
-  final String? help;
-
   /// Optional background applied to the picker.
   final CNBackground? background;
 
   /// Picker items (each with a tag).
   final List<CNChild> children;
+
+  /// Control size for the picker.
+  final CNControlSize? controlSize;
+
+  /// Optional tooltip text shown on hover (SwiftUI `.help()`).
+  final String? help;
 
   /// Optional label content shown alongside the picker.
   final List<CNChild>? label;
@@ -546,9 +549,6 @@ class CNToolbarPicker extends CNToolbarItem {
 
   /// Optional tint color.
   final Color? tint;
-
-  /// Control size for the picker.
-  final CNControlSize? controlSize;
 
   @override
   CNChild? toOverflowChild(BuildContext context) {

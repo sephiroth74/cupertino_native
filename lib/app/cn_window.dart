@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:cupertino_native/app/cn_brightness_override_handler.dart';
@@ -8,13 +9,12 @@ import 'package:flutter/services.dart';
 import 'package:macos_window_utils/macos_window_utils.dart';
 import 'package:macos_window_utils/widgets/visual_effect_subview_container/visual_effect_subview_container.dart';
 
-/// Smallest pointer-grab width of a sidebar resizer. A separator thinner than
-/// this still gets a band this wide to drag, with the divider centered in it.
-const double _kSidebarResizeBandWidth = 8.0;
-
 /// Size of a single dot of the resize grip drawn in the middle of the divider,
 /// and the gap between two dots.
 const double _kSidebarGripDotSize = 2.0;
+
+/// How long the pointer must rest on a sidebar resizer before it highlights.
+const Duration _kSidebarResizeHoverDelay = Duration(seconds: 1);
 
 /// Cursor shown over a sidebar resizer, and pinned window-wide while dragging.
 const SystemMouseCursor _kSidebarResizeCursor = SystemMouseCursors.resizeColumn;
@@ -39,6 +39,8 @@ class CNWindowScope extends InheritedWidget {
     required this.isStatusBarExpanded,
     required this.visibleSidebarWidth,
     required this.visibleEndSidebarWidth,
+    required this.sidebarSeparatorWidth,
+    required this.endSidebarSeparatorWidth,
     required this.toolbarSpansFullWidth,
     required VoidCallback sidebarToggler,
     required VoidCallback endSidebarToggler,
@@ -50,6 +52,12 @@ class CNWindowScope extends InheritedWidget {
   /// Provides the constraints from the [CNWindow] to its descendants.
   final BoxConstraints constraints;
 
+  /// On-screen width of the resizer/separator strip drawn next to the end
+  /// sidebar (0 when there is none, or the sidebar is hidden or not resizable).
+  /// It sits between the sidebar and the content, so `CNPageScaffold` adds it to
+  /// [visibleEndSidebarWidth] when insetting its body.
+  final double endSidebarSeparatorWidth;
+
   /// Provides the current visible state of the end [Sidebar].
   final bool isEndSidebarShown;
 
@@ -58,6 +66,12 @@ class CNWindowScope extends InheritedWidget {
 
   /// Whether the status bar expanded panel is currently shown.
   final bool isStatusBarExpanded;
+
+  /// On-screen width of the resizer/separator strip drawn next to the leading
+  /// sidebar (0 when there is none, or the sidebar is hidden or not resizable).
+  /// It sits between the sidebar and the content, so `CNPageScaffold` adds it to
+  /// [visibleSidebarWidth] when insetting its body.
+  final double sidebarSeparatorWidth;
 
   /// Whether the page toolbar spans the full window width (see
   /// [CNWindow.toolbarSpansFullWidth]). When true, `CNPageScaffold` insets its
@@ -85,6 +99,8 @@ class CNWindowScope extends InheritedWidget {
         isStatusBarExpanded != oldWidget.isStatusBarExpanded ||
         visibleSidebarWidth != oldWidget.visibleSidebarWidth ||
         visibleEndSidebarWidth != oldWidget.visibleEndSidebarWidth ||
+        sidebarSeparatorWidth != oldWidget.sidebarSeparatorWidth ||
+        endSidebarSeparatorWidth != oldWidget.endSidebarSeparatorWidth ||
         toolbarSpansFullWidth != oldWidget.toolbarSpansFullWidth;
   }
 
@@ -135,14 +151,14 @@ class CNWindow extends StatefulWidget {
     this.childMaterial = NSVisualEffectViewMaterial.fullScreenUI,
   });
 
-  /// The material of the child widget. This is used to determine the background color of the window.
-  final NSVisualEffectViewMaterial childMaterial;
-
   /// The background color of the window. If null, the default canvas color from the current [CNTheme] is used.
   final Color? backgroundColor;
 
   /// The child widget to be displayed in the window.
   final Widget? child;
+
+  /// The material of the child widget. This is used to determine the background color of the window.
+  final NSVisualEffectViewMaterial childMaterial;
 
   /// The end sidebar configuration (right side).
   final CNSidebar? endSidebar;
@@ -195,6 +211,7 @@ class _CNWindowState extends State<CNWindow> {
   // instantaneous; the active toggler sets it to the triggering panel's
   // slideDuration and resets it once the slide completes.
   Duration _slideDuration = Duration.zero;
+
   SystemMouseCursor _statusBarCursor = SystemMouseCursors.resizeUp;
   double _statusBarDragStartPosition = 0.0;
   double _statusBarDragStartSize = 0.0;
@@ -229,21 +246,6 @@ class _CNWindowState extends State<CNWindow> {
     }
   }
 
-  /// Drives a panel toggle with its slide animation: sets [_slideDuration] to
-  /// the triggering panel's duration, flips its visibility, then resets the
-  /// duration to zero once the slide completes so subsequent resize drags stay
-  /// instantaneous. A [Duration.zero] duration toggles instantly (no animation).
-  Future<void> _animateToggle(Duration duration, VoidCallback toggle) async {
-    setState(() {
-      _slideDuration = duration;
-      toggle();
-    });
-    await Future<void>.delayed(duration);
-    if (mounted) {
-      setState(() => _slideDuration = Duration.zero);
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -257,6 +259,21 @@ class _CNWindowState extends State<CNWindow> {
         (widget.statusBar?.expandedStartHeight ??
             widget.statusBar?.expandedMinHeight) ??
         _statusBarPanelHeight;
+  }
+
+  /// Drives a panel toggle with its slide animation: sets [_slideDuration] to
+  /// the triggering panel's duration, flips its visibility, then resets the
+  /// duration to zero once the slide completes so subsequent resize drags stay
+  /// instantaneous. A [Duration.zero] duration toggles instantly (no animation).
+  Future<void> _animateToggle(Duration duration, VoidCallback toggle) async {
+    setState(() {
+      _slideDuration = duration;
+      toggle();
+    });
+    await Future<void>.delayed(duration);
+    if (mounted) {
+      setState(() => _slideDuration = Duration.zero);
+    }
   }
 
   @override
@@ -281,6 +298,9 @@ class _CNWindowState extends State<CNWindow> {
     final theme = CNTheme.of(context);
     late Color backgroundColor = widget.backgroundColor ?? theme.canvasColor;
     Color dividerColor = theme.separatorColor;
+    // Fallback highlight for a sidebar resizer being hovered or dragged: the
+    // accent color, as AppKit highlights a split view divider.
+    final Color highlightColor = theme.accentColor ?? theme.fillPrimaryColor;
     CNBrightnessOverrideHandler.ensureMatchingBrightness(theme.brightness);
     const curve = Curves.linearToEaseOut;
     final duration = _slideDuration;
@@ -299,12 +319,22 @@ class _CNWindowState extends State<CNWindow> {
         final visibleEndSidebarWidth = canShowEndSidebar
             ? _endSidebarWidth
             : 0.0;
-        final sidebarResizerBand = _CNSidebarResizer.bandWidth(
-          sidebar?.effectiveSeparatorWidth ?? 0.0,
-        );
-        final endSidebarResizerBand = _CNSidebarResizer.bandWidth(
-          endSidebar?.effectiveSeparatorWidth ?? 0.0,
-        );
+        // The resizer is exactly as wide as the separator it draws: no grab
+        // band around it. Only a resizable sidebar draws one, and it takes real
+        // layout space between the sidebar and the content (see leadingInset),
+        // so it never covers the content's edge.
+        final sidebarSeparatorWidth =
+            (sidebar?.isResizable ?? false) && canShowSidebar
+            ? sidebar.effectiveSeparatorWidth
+            : 0.0;
+        final endSidebarSeparatorWidth =
+            (endSidebar?.isResizable ?? false) && canShowEndSidebar
+            ? endSidebar.effectiveSeparatorWidth
+            : 0.0;
+        // Window edge to content edge on either side: the sidebar plus its
+        // separator.
+        final leadingInset = visibleSidebarWidth + sidebarSeparatorWidth;
+        final trailingInset = visibleEndSidebarWidth + endSidebarSeparatorWidth;
         final state = widget.state;
 
         final statusBarHeight = statusBar?.height ?? 0.0;
@@ -324,8 +354,8 @@ class _CNWindowState extends State<CNWindow> {
         // Horizontal bounds for the panel based on expansion mode
         final panelIsOverAll =
             expansionMode == CNStatusBarExpansionMode.overAll;
-        final panelLeft = panelIsOverAll ? 0.0 : visibleSidebarWidth;
-        final panelRight = panelIsOverAll ? 0.0 : visibleEndSidebarWidth;
+        final panelLeft = panelIsOverAll ? 0.0 : leadingInset;
+        final panelRight = panelIsOverAll ? 0.0 : trailingInset;
 
         // The height available for the main Stack (excludes the status bar)
         final stackHeight = height - (hasStatusBar ? statusBarHeight : 0.0);
@@ -342,15 +372,16 @@ class _CNWindowState extends State<CNWindow> {
         // via CNPageScaffold) spans the whole window, so the toolbar strip runs
         // edge to edge. The sidebars drop below that strip and are painted on
         // top of the content's blurred gutters; CNPageScaffold insets its body
-        // by the sidebar widths (via CNWindowScope) so content clears them.
+        // by the sidebar plus separator widths (via CNWindowScope) so content
+        // clears them.
         final toolbarSpans = widget.toolbarSpansFullWidth;
         final toolbarStripHeight = toolbarSpans ? kCNToolbarHeight : 0.0;
         final effectiveSidebarHeight = sidebarHeight - toolbarStripHeight;
-        final contentLeft = toolbarSpans ? 0.0 : visibleSidebarWidth;
+        final contentLeft = toolbarSpans ? 0.0 : leadingInset;
         final contentWidth = toolbarSpans
             ? width
-            : width - visibleSidebarWidth - visibleEndSidebarWidth;
-        final backgroundLeft = toolbarSpans ? 0.0 : visibleSidebarWidth;
+            : width - leadingInset - trailingInset;
+        final backgroundLeft = toolbarSpans ? 0.0 : leadingInset;
 
         // The leading sidebar. In full-width mode it drops below the toolbar
         // strip and paints on top of the content area's left gutter, so it is
@@ -370,17 +401,11 @@ class _CNWindowState extends State<CNWindow> {
                 child: VisualEffectSubviewContainer(
                   state: state,
                   material: sidebar.material,
-                  child: DecoratedBox(
-                    decoration: const BoxDecoration(
-                      color: Color.fromRGBO(0, 0, 0, 1.0),
-                      backgroundBlendMode: BlendMode.clear,
-                    ),
-                    child: Container(
-                      color: sidebar.backgroundColor ?? theme.canvasColor,
-                      child: Padding(
-                        padding: sidebar.padding,
-                        child: sidebar.builder(context),
-                      ),
+                  child: Container(
+                    color: sidebar.backgroundColor ?? theme.canvasColor,
+                    child: Padding(
+                      padding: sidebar.padding,
+                      child: sidebar.builder(context),
                     ),
                   ),
                 ),
@@ -441,12 +466,14 @@ class _CNWindowState extends State<CNWindow> {
                 duration: duration,
                 top: toolbarStripHeight,
                 left: visibleSidebarWidth,
-                width: canShowSidebar ? sidebarResizerBand : 0,
+                width: sidebarSeparatorWidth,
                 height: effectiveSidebarHeight,
                 child: _CNSidebarResizer(
                   thickness: sidebar!.effectiveSeparatorWidth,
                   color: sidebar.separatorColor ?? dividerColor,
                   gripColor: sidebar.gripColor ?? theme.fillPrimaryColor,
+                  highlightColor:
+                      sidebar.separatorHighlightColor ?? highlightColor,
                   onDragStart: (details) {
                     _sidebarDragStartWidth = _sidebarWidth;
                     _sidebarDragStartPosition = details.globalPosition.dx;
@@ -504,17 +531,11 @@ class _CNWindowState extends State<CNWindow> {
                   child: VisualEffectSubviewContainer(
                     state: state,
                     material: endSidebar.material,
-                    child: DecoratedBox(
-                      decoration: const BoxDecoration(
-                        color: Color.fromRGBO(0, 0, 0, 1.0),
-                        backgroundBlendMode: BlendMode.clear,
-                      ),
-                      child: Container(
-                        color: endSidebar.backgroundColor ?? theme.canvasColor,
-                        child: Padding(
-                          padding: endSidebar.padding,
-                          child: endSidebar.builder(context),
-                        ),
+                    child: Container(
+                      color: endSidebar.backgroundColor ?? theme.canvasColor,
+                      child: Padding(
+                        padding: endSidebar.padding,
+                        child: endSidebar.builder(context),
                       ),
                     ),
                   ),
@@ -528,12 +549,14 @@ class _CNWindowState extends State<CNWindow> {
                 duration: duration,
                 top: toolbarStripHeight,
                 right: visibleEndSidebarWidth,
-                width: canShowEndSidebar ? endSidebarResizerBand : 0,
+                width: endSidebarSeparatorWidth,
                 height: effectiveSidebarHeight,
                 child: _CNSidebarResizer(
                   thickness: endSidebar!.effectiveSeparatorWidth,
                   color: endSidebar.separatorColor ?? dividerColor,
                   gripColor: endSidebar.gripColor ?? theme.fillPrimaryColor,
+                  highlightColor:
+                      endSidebar.separatorHighlightColor ?? highlightColor,
                   onDragStart: (details) {
                     _endSidebarDragStartWidth = _endSidebarWidth;
                     _endSidebarDragStartPosition = details.globalPosition.dx;
@@ -734,6 +757,8 @@ class _CNWindowState extends State<CNWindow> {
           isStatusBarExpanded: _showStatusBarPanel,
           visibleSidebarWidth: visibleSidebarWidth,
           visibleEndSidebarWidth: visibleEndSidebarWidth,
+          sidebarSeparatorWidth: sidebarSeparatorWidth,
+          endSidebarSeparatorWidth: endSidebarSeparatorWidth,
           toolbarSpansFullWidth: widget.toolbarSpansFullWidth,
           sidebarToggler: () => _animateToggle(
             sidebar?.slideDuration ?? Duration.zero,
@@ -754,70 +779,155 @@ class _CNWindowState extends State<CNWindow> {
   }
 }
 
-/// The drag band and visible divider of a sidebar resizer.
+/// The visible divider of a sidebar resizer, which is also its drag area.
 ///
 /// Shared by the leading and the end sidebar so both sides get the exact same
-/// divider style, grab area and cursor. The band is [bandWidth] wide (at least
-/// [_kSidebarResizeBandWidth]) and the divider itself, [thickness] wide, is
-/// centered in it.
-class _CNSidebarResizer extends StatelessWidget {
+/// divider style, grab area and cursor. The divider is exactly [thickness] wide
+/// — the pointer-grab area matches it, with no tolerance band around it — so it
+/// sits flush against the sidebar edge and nothing but the separator itself is
+/// drawn over the content. A thin separator is therefore a small drag target.
+///
+/// While the pointer is held down on it — for the whole drag, even once the
+/// pointer has left the bar — or after resting on it for
+/// [_kSidebarResizeHoverDelay], the bar is painted in [highlightColor] with
+/// rounded caps. The highlight clears when the pointer is released outside the
+/// bar or moves off it without a button held.
+class _CNSidebarResizer extends StatefulWidget {
   const _CNSidebarResizer({
     required this.thickness,
     required this.color,
     required this.gripColor,
+    required this.highlightColor,
     required this.onDragStart,
     required this.onDragUpdate,
     required this.onDragEnd,
     required this.onDragCancel,
   });
 
-  /// Color of the divider bar.
+  /// Color of the divider bar at rest.
   final Color color;
 
   /// Color of the three grip dots drawn in the middle of the divider.
   final Color gripColor;
 
+  /// Color the whole bar is painted in while pressed or hovered.
+  final Color highlightColor;
+
   final VoidCallback onDragCancel;
   final GestureDragEndCallback onDragEnd;
   final GestureDragStartCallback onDragStart;
   final GestureDragUpdateCallback onDragUpdate;
-
-  /// Width of the visible divider bar.
+  /// Width of the visible divider bar, and of its pointer-grab area.
   final double thickness;
 
-  /// Width of the pointer-grab band the divider is centered in.
-  static double bandWidth(double thickness) =>
-      math.max(_kSidebarResizeBandWidth, thickness);
+  @override
+  State<_CNSidebarResizer> createState() => _CNSidebarResizerState();
+}
+
+class _CNSidebarResizerState extends State<_CNSidebarResizer> {
+  Timer? _hoverTimer;
+  /// Set once the pointer has rested on the bar for [_kSidebarResizeHoverDelay].
+  bool _isHovered = false;
+
+  /// Set while a pointer is held down on the bar, so the highlight survives the
+  /// whole drag even after the pointer has been dragged off the bar.
+  bool _isPressed = false;
+
+  @override
+  void dispose() {
+    _hoverTimer?.cancel();
+    super.dispose();
+  }
+
+  bool get _isHighlighted => _isPressed || _isHovered;
+
+  /// Whether [globalPosition] is still inside the bar. Used on pointer up to
+  /// decide whether the highlight stays (the pointer was released on the bar,
+  /// which the drag has moved along with it) or clears.
+  bool _hitTest(Offset globalPosition) {
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return false;
+    return box.paintBounds.contains(box.globalToLocal(globalPosition));
+  }
+
+  void _onPointerDown(PointerDownEvent event) {
+    _hoverTimer?.cancel();
+    setState(() => _isPressed = true);
+  }
+
+  void _onPointerUp(PointerUpEvent event) {
+    // The drag steals the hover (CNWindow overlays a window-wide MouseRegion to
+    // pin the cursor), so `_isHovered` is stale here: recover it from where the
+    // pointer came up. Releasing on the bar keeps the highlight up without
+    // waiting out the hover delay again.
+    final stillOnBar = _hitTest(event.position);
+    setState(() {
+      _isPressed = false;
+      _isHovered = stillOnBar;
+    });
+  }
+
+  void _onPointerCancel(PointerCancelEvent event) {
+    setState(() => _isPressed = false);
+  }
+
+  void _onEnter(PointerEnterEvent event) {
+    _hoverTimer?.cancel();
+    if (_isHovered) return;
+    _hoverTimer = Timer(_kSidebarResizeHoverDelay, () {
+      if (!mounted) return;
+      setState(() => _isHovered = true);
+    });
+  }
+
+  void _onExit(PointerExitEvent event) {
+    _hoverTimer?.cancel();
+    if (!_isHovered) return;
+    setState(() => _isHovered = false);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onHorizontalDragStart: onDragStart,
-      onHorizontalDragUpdate: onDragUpdate,
-      onHorizontalDragEnd: onDragEnd,
-      onHorizontalDragCancel: onDragCancel,
-      child: MouseRegion(
-        cursor: _kSidebarResizeCursor,
-        child: Align(
-          alignment: Alignment.center,
-          child: SizedBox(
-            width: thickness,
-            child: ColoredBox(
-              color: color,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (var i = 0; i < 3; i++) ...[
-                      if (i > 0) const SizedBox(height: _kSidebarGripDotSize),
-                      SizedBox.square(
-                        dimension: _kSidebarGripDotSize,
-                        child: ColoredBox(color: gripColor),
-                      ),
-                    ],
+    // The grip dots never exceed the divider, so a thin separator does not
+    // paint them outside the bar.
+    final dotSize = math.min(_kSidebarGripDotSize, widget.thickness);
+    final highlighted = _isHighlighted;
+
+    return Listener(
+      onPointerDown: _onPointerDown,
+      onPointerUp: _onPointerUp,
+      onPointerCancel: _onPointerCancel,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onHorizontalDragStart: widget.onDragStart,
+        onHorizontalDragUpdate: widget.onDragUpdate,
+        onHorizontalDragEnd: widget.onDragEnd,
+        onHorizontalDragCancel: widget.onDragCancel,
+        child: MouseRegion(
+          cursor: _kSidebarResizeCursor,
+          onEnter: _onEnter,
+          onExit: _onExit,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: highlighted ? widget.highlightColor : widget.color,
+              // A bar this narrow can only round to a pill; anything larger is
+              // clipped back to this by BorderRadius anyway.
+              borderRadius: highlighted
+                  ? BorderRadius.circular(widget.thickness / 2)
+                  : null,
+            ),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var i = 0; i < 3; i++) ...[
+                    if (i > 0) SizedBox(height: dotSize),
+                    SizedBox.square(
+                      dimension: dotSize,
+                      child: ColoredBox(color: widget.gripColor),
+                    ),
                   ],
-                ),
+                ],
               ),
             ),
           ),

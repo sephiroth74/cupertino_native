@@ -14,11 +14,11 @@ class _TabViewDemoPageState extends State<TabViewDemoPage> {
   CNControlSize controlSize = CNControlSize.regular;
   CNSegmentDistribution distribution = CNSegmentDistribution.fit;
   bool isEnabled = true;
+  bool isTabEnabled = true;
   CNSegmentStyle segmentStyle = CNSegmentStyle.automatic;
   CNTabPosition tabPosition = CNTabPosition.top;
 
   late final CNTabController _controller;
-  bool isTabEnabled = true;
 
   @override
   void dispose() {
@@ -197,10 +197,10 @@ class _TabContent extends StatelessWidget {
   });
 
   final String description;
-  final IconData icon;
-  final String title;
-  final VoidCallback? onTap;
   final bool enabled;
+  final IconData icon;
+  final VoidCallback? onTap;
+  final String title;
 
   @override
   Widget build(BuildContext context) {

@@ -62,13 +62,6 @@ class CNTextEditor extends CNWidget {
   /// [selectable] is also set to false, which disables the control entirely.
   final bool enabled;
 
-  /// Whether the editor's content can be selected while read-only.
-  ///
-  /// Only has an effect when [enabled] is false. When true (the default), a
-  /// read-only editor still lets the user select and copy its text. When
-  /// false, the control is disabled and its content cannot be selected.
-  final bool selectable;
-
   /// Font descriptor applied to the editor's text.
   final CNFont? font;
 
@@ -82,11 +75,21 @@ class CNTextEditor extends CNWidget {
   /// avoids a Dart round-trip. When null, no native limit is applied.
   final int? maxLength;
 
+  /// Called when the text changes from user input.
+  final ValueChanged<String>? onChanged;
+
   /// Called when the editor gains (`true`) or loses (`false`) focus.
   final ValueChanged<bool>? onFocusChange;
 
-  /// Called when the text changes from user input.
-  final ValueChanged<String>? onChanged;
+  /// Whether the editor's content can be selected while read-only.
+  ///
+  /// Only has an effect when [enabled] is false. When true (the default), a
+  /// read-only editor still lets the user select and copy its text. When
+  /// false, the control is disabled and its content cannot be selected.
+  final bool selectable;
+
+  @override
+  final CNBackground? background;
 
   @override
   final BoxConstraints? constraints;
@@ -99,9 +102,6 @@ class CNTextEditor extends CNWidget {
 
   @override
   final CNOverlay? overlay;
-
-  @override
-  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

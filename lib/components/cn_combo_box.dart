@@ -62,12 +62,6 @@ class CNComboBox extends StatefulWidget {
     this.minMenuWidth = true,
   });
 
-  /// Defines if the context menu size should be at least the width of the combo box field.
-  final bool minMenuWidth;
-
-  /// Optional decorative layer drawn on top of the text field (SwiftUI
-  final CNOverlay? overlay;
-
   /// Optional decorative layer drawn behind the text field (SwiftUI
   /// `.background(alignment:content:)`), e.g. a colored fill or shape.
   final CNBackground? background;
@@ -102,12 +96,18 @@ class CNComboBox extends StatefulWidget {
   /// The items in the combo box pop-up list.
   final List<String> items;
 
+  /// Defines if the context menu size should be at least the width of the combo box field.
+  final bool minMenuWidth;
+
   /// Called whenever the text changes (user typing, selecting, or submitting).
   final ValueChanged<String>? onChanged;
 
   /// Called when the user selects an item from the pop-up list.
   /// The argument is the index of the selected item in [items].
   final ValueChanged<int>? onSelectionChanged;
+
+  /// Optional decorative layer drawn on top of the text field (SwiftUI
+  final CNOverlay? overlay;
 
   /// Optional padding applied around the control.
   final EdgeInsetsGeometry? paddings;
@@ -145,9 +145,9 @@ class _CNComboBoxState extends State<CNComboBox> {
   late final TextEditingController _controller = TextEditingController(
     text: widget.text,
   );
+
   final GlobalKey _fieldKey = GlobalKey();
   bool _isUpdatingText = false;
-
   /// Length of the text last reported by the native field. Used to tell an
   /// insertion (net growth of the typed prefix) from a deletion (backspace /
   /// forward-delete), so autocomplete only extends on real insertions.
@@ -410,7 +410,6 @@ class _ComboBoxCaret extends StatefulWidget {
 
   final Color? accentColor;
   final bool enabled;
-
   /// Whether the caret's clickable area spans the full field width rather than
   /// just the trailing square button.
   final bool fullWidth;

@@ -20,14 +20,14 @@ class _ProbeItem extends CNToolbarItem {
     super.decorationPadding,
   });
 
-  @override
-  final bool managesOwnHeight;
-
   /// Reports the constraints the item is built with.
   final ValueChanged<BoxConstraints>? onConstraints;
 
   final Key probeKey;
   final Size size;
+
+  @override
+  final bool managesOwnHeight;
 
   @override
   CNChild? toOverflowChild(BuildContext context) => null;

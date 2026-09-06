@@ -62,6 +62,9 @@ class CNGauge extends CNWidget {
   final double value;
 
   @override
+  final CNBackground? background;
+
+  @override
   final BoxConstraints? constraints;
 
   @override
@@ -72,9 +75,6 @@ class CNGauge extends CNWidget {
 
   @override
   final CNOverlay? overlay;
-
-  @override
-  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

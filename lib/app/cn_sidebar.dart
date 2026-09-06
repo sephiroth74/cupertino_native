@@ -27,6 +27,7 @@ class CNSidebar {
     this.windowBreakpoint = 556.0,
     this.shownByDefault = true,
     this.separatorColor,
+    this.separatorHighlightColor,
     this.separatorWidth = 8.0,
     this.gripColor,
     this.material = NSVisualEffectViewMaterial.sidebar,
@@ -49,6 +50,9 @@ class CNSidebar {
   /// The distance below [minWidth] at which dragging closes the sidebar.
   final double dragClosedBuffer;
 
+  /// Optional color for the grip area used to resize the sidebar.
+  final Color? gripColor;
+
   /// Whether the sidebar can be resized by dragging its edge.
   final bool? isResizable;
 
@@ -70,17 +74,25 @@ class CNSidebar {
   /// Optional color for the separator line between the sidebar and the main content.
   final Color? separatorColor;
 
-  /// Optional color for the grip area used to resize the sidebar.
-  final Color? gripColor;
+  /// Optional color the separator is painted in while the user interacts with
+  /// it: for the whole duration of a resize drag, and after the pointer has
+  /// rested on it for about a second. The highlight is drawn with rounded caps
+  /// over the full separator area and clears as soon as the pointer leaves it
+  /// without a button held. Defaults to the theme's accent color.
+  final Color? separatorHighlightColor;
 
   /// Width of the separator (divider) drawn between the sidebar and the main
   /// content, in logical pixels.
   ///
   /// Must be at least [kCNSidebarMinSeparatorWidth]; read it back through
   /// [effectiveSeparatorWidth], which clamps to that minimum in release builds
-  /// too. The pointer grab area is widened independently, so a thin separator is
-  /// still comfortable to drag.
+  /// too. This is the exact width of both the drawn divider and its pointer grab
+  /// area — there is no wider tolerance band around it, so a thin separator is
+  /// also a small drag target.
   final double separatorWidth;
+
+  /// Whether the sidebar is shown by default when the window opens.
+  final bool shownByDefault;
 
   /// Duration of the show/hide slide animation when the sidebar is toggled.
   ///
@@ -91,9 +103,6 @@ class CNSidebar {
   /// — or using [Duration.zero] — reduces or removes that cost. Only affects the
   /// toggle animation; resize drags remain instantaneous.
   final Duration slideDuration;
-
-  /// Whether the sidebar is shown by default when the window opens.
-  final bool shownByDefault;
 
   /// The snap buffer around [startWidth] for snapping during drag.
   final double? snapToStartBuffer;

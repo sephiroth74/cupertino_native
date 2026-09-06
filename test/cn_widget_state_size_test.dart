@@ -61,6 +61,9 @@ class _FakeWidget extends CNWidget {
   BoxConstraints? get constraints => null;
 
   @override
+  State<_FakeWidget> createState() => _FakeState();
+
+  @override
   Color? get foregroundColor => null;
 
   @override
@@ -77,9 +80,6 @@ class _FakeWidget extends CNWidget {
 
   @override
   Object? get tint => null;
-
-  @override
-  State<_FakeWidget> createState() => _FakeState();
 }
 
 class _FakeState extends CNWidgetState<_FakeWidget> {

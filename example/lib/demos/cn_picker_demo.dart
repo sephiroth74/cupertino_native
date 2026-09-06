@@ -20,9 +20,9 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
   CNPickerStyle pickerStyle = CNPickerStyle.menu;
   Color? tintColor;
   String value = 'walk';
+  bool withBackground = false;
   bool withLabels = true;
   bool withOverlay = false;
-  bool withBackground = false;
 
   @override
   Widget build(BuildContext context) {

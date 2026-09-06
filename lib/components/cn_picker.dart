@@ -75,6 +75,9 @@ class CNPicker extends CNWidget {
   final String selection;
 
   @override
+  final CNBackground? background;
+
+  @override
   final BoxConstraints? constraints;
 
   @override
@@ -85,9 +88,6 @@ class CNPicker extends CNWidget {
 
   @override
   final CNOverlay? overlay;
-
-  @override
-  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

@@ -105,12 +105,11 @@ class SearchFieldDemoPage extends StatefulWidget {
 }
 
 class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
-  final TextEditingController controller = TextEditingController();
-
   CNTextFieldBezelStyle bezelStyle = CNTextFieldBezelStyle.round;
   Color? borderColor;
   double borderWidth = 0.0;
   CNControlSize controlSize = CNControlSize.regular;
+  final TextEditingController controller = TextEditingController();
   double cornerRadius = 0.0;
   CNFont? font;
   double fontSize = 24.0;
@@ -118,14 +117,46 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
   String? lastPicked;
   Color? placeholderColor;
   bool showImages = true;
-  bool showSectionTitles = true;
   bool showSecondaryTitles = true;
+  bool showSectionTitles = true;
   Color? textColor;
 
   @override
   void dispose() {
     controller.dispose();
     super.dispose();
+  }
+
+  List<CNSuggestionSection> _suggestionsFor(String query) {
+    debugPrint('onSuggestionsRequested for query: "$query"');
+    if (query.isEmpty) return const [];
+
+    final needle = query.toLowerCase();
+    final matches = _kDemoFiles.where(
+      (file) => file.name.toLowerCase().contains(needle),
+    );
+
+    return _kSectionOrder
+        .map((section) {
+          final items = matches
+              .where((file) => file.section == section)
+              .map(
+                (file) => CNSuggestionItem(
+                  title: file.name,
+                  secondaryTitle: showSecondaryTitles ? file.kind : null,
+                  systemImage: showImages ? file.symbol : null,
+                  imageColor: file.color,
+                  help: '${file.section} — ${file.kind}',
+                ),
+              )
+              .toList();
+          return CNSuggestionSection(
+            title: showSectionTitles ? section : null,
+            items: items,
+          );
+        })
+        .where((section) => section.items.isNotEmpty)
+        .toList();
   }
 
   @override
@@ -275,37 +306,5 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
         ],
       ),
     );
-  }
-
-  List<CNSuggestionSection> _suggestionsFor(String query) {
-    debugPrint('onSuggestionsRequested for query: "$query"');
-    if (query.isEmpty) return const [];
-
-    final needle = query.toLowerCase();
-    final matches = _kDemoFiles.where(
-      (file) => file.name.toLowerCase().contains(needle),
-    );
-
-    return _kSectionOrder
-        .map((section) {
-          final items = matches
-              .where((file) => file.section == section)
-              .map(
-                (file) => CNSuggestionItem(
-                  title: file.name,
-                  secondaryTitle: showSecondaryTitles ? file.kind : null,
-                  systemImage: showImages ? file.symbol : null,
-                  imageColor: file.color,
-                  help: '${file.section} — ${file.kind}',
-                ),
-              )
-              .toList();
-          return CNSuggestionSection(
-            title: showSectionTitles ? section : null,
-            items: items,
-          );
-        })
-        .where((section) => section.items.isNotEmpty)
-        .toList();
   }
 }

@@ -48,6 +48,9 @@ class CNText extends CNWidget {
   final CNTextTruncationMode? truncationMode;
 
   @override
+  final CNBackground? background;
+
+  @override
   final BoxConstraints? constraints;
 
   @override
@@ -58,9 +61,6 @@ class CNText extends CNWidget {
 
   @override
   final CNOverlay? overlay;
-
-  @override
-  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

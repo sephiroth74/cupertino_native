@@ -43,6 +43,9 @@ class CNImage extends CNWidget {
   final String systemSymbolName;
 
   @override
+  final CNBackground? background;
+
+  @override
   final BoxConstraints? constraints;
 
   @override
@@ -53,9 +56,6 @@ class CNImage extends CNWidget {
 
   @override
   final CNOverlay? overlay;
-
-  @override
-  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;

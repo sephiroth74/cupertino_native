@@ -22,9 +22,9 @@ class _IconButtonDemoPageState extends State<IconButtonDemoPage> {
   Color? backgroundColor;
   Color? borderColor;
   double borderWidth = 0;
-
   /// `null` lets the button derive the glyph metric from `iconSizeRatio`.
   CNFont? font;
+
   double fontSize = 24;
   Color? foregroundColor;
   double iconSizeRatio = 0.75;

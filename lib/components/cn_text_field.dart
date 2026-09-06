@@ -65,13 +65,6 @@ class CNTextField extends CNWidget {
   /// [selectable] is also set to false, which disables the control entirely.
   final bool enabled;
 
-  /// Whether the field's content can be selected while read-only.
-  ///
-  /// Only has an effect when [enabled] is false. When true (the default), a
-  /// read-only field still lets the user select and copy its text. When false,
-  /// the control is disabled and its content cannot be selected.
-  final bool selectable;
-
   /// Font descriptor.
   final CNFont? font;
 
@@ -85,11 +78,11 @@ class CNTextField extends CNWidget {
   /// avoids a Dart round-trip. When null, no native limit is applied.
   final int? maxLength;
 
-  /// Called when the field gains (`true`) or loses (`false`) focus.
-  final ValueChanged<bool>? onFocusChange;
-
   /// Called when the text changes from user input.
   final ValueChanged<String>? onChanged;
+
+  /// Called when the field gains (`true`) or loses (`false`) focus.
+  final ValueChanged<bool>? onFocusChange;
 
   /// Called when the user presses Enter.
   final ValueChanged<String>? onSubmitted;
@@ -100,8 +93,18 @@ class CNTextField extends CNWidget {
   /// Prompt text shown when the field is empty.
   final String? prompt;
 
+  /// Whether the field's content can be selected while read-only.
+  ///
+  /// Only has an effect when [enabled] is false. When true (the default), a
+  /// read-only field still lets the user select and copy its text. When false,
+  /// the control is disabled and its content cannot be selected.
+  final bool selectable;
+
   /// Text field visual style.
   final CNTextFieldStyle textFieldStyle;
+
+  @override
+  final CNBackground? background;
 
   @override
   final BoxConstraints? constraints;
@@ -114,9 +117,6 @@ class CNTextField extends CNWidget {
 
   @override
   final CNOverlay? overlay;
-
-  @override
-  final CNBackground? background;
 
   @override
   final EdgeInsetsGeometry? paddings;
