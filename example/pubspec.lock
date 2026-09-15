@@ -79,7 +79,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.1.7"
+    version: "0.1.7+20260906"
   equatable:
     dependency: transitive
     description:

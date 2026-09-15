@@ -1,5 +1,8 @@
 ## 0.1.7
 
+ * `CNWindow.material`: window-wide visual-effect material, set on the window's own `NSVisualEffectView`, so every part that keeps its background transparent blurs against it
+ * Per-part materials and states layered over it: `CNSidebar.material` / `state`, `CNStatusBar.material` / `expandedMaterial` / `state`, `CNToolbar.material` / `state`, `CNWindow.childMaterial` / `childState`
+ * A part with a material in play now defaults its background to transparent instead of the canvas color, so a declared blur is no longer hidden by it
  * fixed main window separator size and added highlight color when dragging
  * Removed clear background from the sidebars
  * Toolbar decoration

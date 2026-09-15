@@ -2,6 +2,7 @@ import 'package:cupertino_native/components/cn_widget_debug_id_mixin.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter/material.dart';
 import 'package:macos_window_utils/macos/ns_visual_effect_view_material.dart';
+import 'package:macos_window_utils/macos/ns_visual_effect_view_state.dart';
 import 'package:macos_window_utils/widgets/visual_effect_subview_container/visual_effect_subview_container.dart';
 import 'package:window_manager/window_manager.dart' show DragToMoveArea;
 
@@ -64,7 +65,8 @@ class CNToolbar extends StatefulWidget
     this.backgroundColor,
     this.decoration,
     this.dividerColor,
-    this.material = NSVisualEffectViewMaterial.headerView,
+    this.material,
+    this.state,
   }) : assert(
          backgroundColor == null || decoration == null,
          "Only one of backgroundColor or decoration should be provided.",
@@ -97,14 +99,29 @@ class CNToolbar extends StatefulWidget
   /// the synthesized back button.
   final List<CNToolbarItem> leading;
 
-  /// The visual-effect material used.
-  final NSVisualEffectViewMaterial material;
+  /// The material of the toolbar's own visual effect view.
+  ///
+  /// When set, the bar gets a dedicated `NSVisualEffectView` layered under it —
+  /// `NSVisualEffectViewMaterial.headerView` is AppKit's titlebar material — so
+  /// the bar can blur differently from the rest of the window. It shows wherever
+  /// the bar and the page behind it leave their paint transparent.
+  ///
+  /// When null (the default) the bar adds no view of its own and the window's
+  /// global material (`CNWindow.material`) runs behind it as well.
+  final NSVisualEffectViewMaterial? material;
 
   /// Inner padding around the bar content.
   final EdgeInsets padding;
 
   /// Optional native search field placed before the [actions].
   final CNSearchField? search;
+
+  /// The active-state policy of the toolbar's [material].
+  ///
+  /// Defaults to the enclosing window's state (`CNWindow.state`) when null.
+  /// Only has an effect together with [material]: without one the bar shows the
+  /// window's global visual effect view, which follows the window's own state.
+  final NSVisualEffectViewState? state;
 
   /// Title slot — a plain Flutter widget (typically `Text`); no platform view.
   final Widget? title;
@@ -795,17 +812,27 @@ class _CNToolbarState extends State<CNToolbar>
       ),
     );
 
-    bar = VisualEffectSubviewContainer(
-      material: widget.material,
-      child: DecoratedBox(
-        decoration:
-            widget.decoration ??
-            BoxDecoration(
-              color: widget.backgroundColor ?? CNColors.transparent,
-            ),
-        child: bar,
-      ),
+    bar = DecoratedBox(
+      decoration:
+          widget.decoration ??
+          BoxDecoration(color: widget.backgroundColor ?? CNColors.transparent),
+      child: bar,
     );
+
+    // A material of its own gets the bar a dedicated visual effect subview; with
+    // none, the bar stays transparent over whatever the window blurs behind it
+    // (its global material, or the content area's).
+    final material = widget.material;
+    if (material != null) {
+      bar = VisualEffectSubviewContainer(
+        material: material,
+        state:
+            widget.state ??
+            scope?.windowState ??
+            NSVisualEffectViewState.followsWindowActiveState,
+        child: bar,
+      );
+    }
 
     // Reserve the traffic-light inset via MediaQuery so the leading SafeArea can
     // consume it only when the sidebar is hidden. Empty regions drag the window.

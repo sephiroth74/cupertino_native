@@ -30,7 +30,8 @@ class CNSidebar {
     this.separatorHighlightColor,
     this.separatorWidth = 8.0,
     this.gripColor,
-    this.material = NSVisualEffectViewMaterial.sidebar,
+    this.material,
+    this.state,
     this.slideDuration = const Duration(milliseconds: 300),
   }) : assert(
          separatorWidth >= kCNSidebarMinSeparatorWidth,
@@ -39,6 +40,11 @@ class CNSidebar {
        dragClosedBuffer = dragClosedBuffer ?? minWidth / 2;
 
   /// Optional background color applied to the sidebar container.
+  ///
+  /// Defaults to the theme's canvas color, or to transparent when a material
+  /// shows through the sidebar — its own [material] or the window's global one —
+  /// so that an opaque color never hides the blur unless it was asked for
+  /// explicitly.
   final Color? backgroundColor;
 
   /// The builder function that constructs the sidebar content.
@@ -59,8 +65,17 @@ class CNSidebar {
   /// Optional key to identify the sidebar for state preservation.
   final Key? key;
 
-  /// The material to use for the sidebar's visual effect view. Defaults to [NSVisualEffectViewMaterial.sidebar].
-  final NSVisualEffectViewMaterial material;
+  /// The material of the sidebar's own visual effect view.
+  ///
+  /// When set, the sidebar gets a dedicated `NSVisualEffectView` layered over
+  /// the window-wide one, so it can blur differently from the rest of the
+  /// window; whatever the window painted behind it is cleared so the blur is
+  /// visible, and [backgroundColor] defaults to transparent (pass a translucent
+  /// color to tint the blur).
+  ///
+  /// When null the sidebar has no visual effect view of its own and shows the
+  /// window's global material (`CNWindow.material`) through instead.
+  final NSVisualEffectViewMaterial? material;
 
   /// The maximum width the sidebar can be resized to.
   final double? maxWidth;
@@ -109,6 +124,13 @@ class CNSidebar {
 
   /// The initial width of the sidebar. Defaults to [minWidth] if null.
   final double? startWidth;
+
+  /// The active-state policy of the sidebar's [material].
+  ///
+  /// Defaults to the window's state (`CNWindow.state`) when null. Only has an
+  /// effect together with [material]: without one the sidebar shows the window's
+  /// global visual effect view, which follows the window's own state.
+  final NSVisualEffectViewState? state;
 
   /// The window width below which the sidebar is automatically hidden.
   final double windowBreakpoint;

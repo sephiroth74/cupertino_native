@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:macos_window_utils/macos_window_utils.dart';
 
 /// The horizontal scope of the expanded status bar panel.
 ///
@@ -38,6 +39,9 @@ class CNStatusBar {
     this.color,
     this.dividerColor,
     this.expandedColor,
+    this.material,
+    this.expandedMaterial,
+    this.state,
     this.height = 22.0,
     this.expandedBuilder,
     this.expandedMinHeight = 100.0,
@@ -55,7 +59,11 @@ class CNStatusBar {
     this.slideDuration = const Duration(milliseconds: 300),
   }) : dragClosedBuffer = dragClosedBuffer ?? expandedMinHeight / 2;
 
-  /// Background color of the status bar. If null, uses the theme's canvas color.
+  /// Background color of the status bar.
+  ///
+  /// If null, uses the theme's canvas color — or transparent when a material
+  /// shows through the bar ([material] or the window's global one), so that an
+  /// opaque color never hides the blur unless it was asked for explicitly.
   final Color? color;
 
   /// Color of the divider line above the status bar. If null, uses the theme's separator color.
@@ -71,7 +79,18 @@ class CNStatusBar {
   final WidgetBuilder? expandedBuilder;
 
   /// Background color of the expanded panel. If null, uses [color] or the theme's canvas color.
+  ///
+  /// As with [color], it defaults to transparent instead when a material shows
+  /// through the panel ([expandedMaterial], [material], or the window's global
+  /// one).
   final Color? expandedColor;
+
+  /// The material of the expanded panel's own visual effect view.
+  ///
+  /// Defaults to [material] when null, so bar and panel blur alike unless the
+  /// panel is given a material of its own. Set it to blur the panel differently
+  /// — e.g. a `headerView` bar over a `contentBackground` panel.
+  final NSVisualEffectViewMaterial? expandedMaterial;
 
   /// The maximum height the expanded panel can be resized to.
   final double expandedMaxHeight;
@@ -100,6 +119,17 @@ class CNStatusBar {
   /// Builder for items on the left side of the status bar.
   final CNStatusBarItemsBuilder? leftItems;
 
+  /// The material of the status bar's own visual effect view.
+  ///
+  /// When set, the bar gets a dedicated `NSVisualEffectView` layered over the
+  /// window-wide one, so it can blur differently from the rest of the window;
+  /// [color] then defaults to transparent (pass a translucent color to tint the
+  /// blur). It also seeds [expandedMaterial] for the expanded panel.
+  ///
+  /// When null the bar has no visual effect view of its own and shows the
+  /// window's global material (`CNWindow.material`) through instead.
+  final NSVisualEffectViewMaterial? material;
+
   /// Padding at the end (right) of the status bar items row.
   final double paddingEnd;
 
@@ -124,4 +154,11 @@ class CNStatusBar {
   /// toggle instantly. Only affects the toggle animation; resize drags remain
   /// instantaneous.
   final Duration slideDuration;
+
+  /// The active-state policy of [material] and [expandedMaterial].
+  ///
+  /// Defaults to the window's state (`CNWindow.state`) when null. Only has an
+  /// effect together with a material: without one the bar shows the window's
+  /// global visual effect view, which follows the window's own state.
+  final NSVisualEffectViewState? state;
 }

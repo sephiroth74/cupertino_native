@@ -170,6 +170,8 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
 
     return CNPageScaffold(
       // backgroundColor: accentColor?.withValues(alpha: 0.2),
+      // backgroundColor: CNColors.white.withAlpha(127),
+
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -220,7 +222,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
         //           ],
         //         ),
         //       ),
-        material: NSVisualEffectViewMaterial.fullScreenUI,
+        // material: NSVisualEffectViewMaterial.fullScreenUI,
         dividerColor: CNColors.transparent,
         actions: [
           createToolbarThemePicker(context),
@@ -318,7 +320,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
             return CNWindow(
               state: NSVisualEffectViewState.followsWindowActiveState,
-              childMaterial: NSVisualEffectViewMaterial.fullScreenUI,
+              material: NSVisualEffectViewMaterial.fullScreenUI,
+              // childMaterial: NSVisualEffectViewMaterial.fullScreenUI,
+              // childState: NSVisualEffectViewState.followsWindowActiveState,
               backgroundColor: CNColors.transparent,
               toolbarSpansFullWidth: true,
               sidebar: CNSidebar(
@@ -344,7 +348,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 maxWidth: 400,
                 startWidth: 250,
                 dragClosed: true,
-                material: NSVisualEffectViewMaterial.fullScreenUI,
+                material: null,
                 backgroundColor: CNColors.transparent,
                 separatorColor: CNColors.transparent,
                 separatorWidth: 4.0,

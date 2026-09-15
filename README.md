@@ -257,6 +257,41 @@ Resolution order for every styled property:
 
 Pass `lightTheme` / `darkTheme` to `CNApp` to replace the defaults wholesale.
 
+### Window materials
+
+`CNWindow.material` is the window-wide material: it is set on the window's own
+`NSVisualEffectView`, which sits behind everything Flutter draws, so every part
+that leaves its background transparent — content area, sidebars, status bar,
+toolbar — blurs against that single material.
+
+```dart
+CNWindow(
+  material: NSVisualEffectViewMaterial.underWindowBackground,
+  state: NSVisualEffectViewState.followsWindowActiveState,
+  // Blurs with the window.
+  sidebar: CNSidebar(minWidth: 250, builder: (context) => const Sidebar()),
+  statusBar: CNStatusBar(
+    // A blur of its own, tinted by a translucent color.
+    material: NSVisualEffectViewMaterial.headerView,
+    color: CNTheme.of(context).canvasColor.withAlpha(127),
+  ),
+  child: CNPageScaffold(
+    toolBar: const CNToolbar(material: NSVisualEffectViewMaterial.headerView),
+    child: const PlaybackPage(),
+  ),
+)
+```
+
+Any part can opt out of the window-wide material by declaring its own —
+`CNWindow.childMaterial` (content area), `CNSidebar.material`,
+`CNStatusBar.material` / `expandedMaterial`, `CNToolbar.material` — which layers
+a separate visual-effect view over the window's for that part alone. Each also
+takes a `state`, defaulting to `CNWindow.state`.
+
+Since an opaque background would hide the blur, a part with a material in play
+(its own or the window's) defaults its background to transparent. Pass a color
+explicitly to tint the blur with a translucent one, or to cover it.
+
 ## Example app
 
 The repository contains a full demo application with one page per widget — including a *Theme Tokens* page, a sidebar, a native toolbar and an expandable status bar. It is the most complete reference for the API.

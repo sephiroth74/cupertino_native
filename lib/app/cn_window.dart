@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:cupertino_native/app/cn_brightness_override_handler.dart';
+import 'package:cupertino_native/app/cn_window_material_handler.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -42,6 +43,8 @@ class CNWindowScope extends InheritedWidget {
     required this.sidebarSeparatorWidth,
     required this.endSidebarSeparatorWidth,
     required this.toolbarSpansFullWidth,
+    required this.windowMaterial,
+    required this.windowState,
     required VoidCallback sidebarToggler,
     required VoidCallback endSidebarToggler,
     required VoidCallback statusBarToggler,
@@ -87,6 +90,16 @@ class CNWindowScope extends InheritedWidget {
   /// `CNPageScaffold` to inset its body in [toolbarSpansFullWidth] mode.
   final double visibleSidebarWidth;
 
+  /// The window-wide material (see [CNWindow.material]), or null when the window
+  /// declares none. Parts that leave their own material unset — a [CNToolbar],
+  /// for one — blur against this instead of adding a visual effect view of their
+  /// own, and so default their background to transparent when it is non-null.
+  final NSVisualEffectViewMaterial? windowMaterial;
+
+  /// The window-wide visual-effect state (see [CNWindow.state]), used as the
+  /// default by any part that declares a material but no state of its own.
+  final NSVisualEffectViewState windowState;
+
   final Function _endSidebarToggler;
   final Function _sidebarToggler;
   final Function _statusBarToggler;
@@ -101,7 +114,9 @@ class CNWindowScope extends InheritedWidget {
         visibleEndSidebarWidth != oldWidget.visibleEndSidebarWidth ||
         sidebarSeparatorWidth != oldWidget.sidebarSeparatorWidth ||
         endSidebarSeparatorWidth != oldWidget.endSidebarSeparatorWidth ||
-        toolbarSpansFullWidth != oldWidget.toolbarSpansFullWidth;
+        toolbarSpansFullWidth != oldWidget.toolbarSpansFullWidth ||
+        windowMaterial != oldWidget.windowMaterial ||
+        windowState != oldWidget.windowState;
   }
 
   /// Toggles the [endSidebar] of the [CNWindow].
@@ -129,8 +144,7 @@ class CNWindowScope extends InheritedWidget {
   /// Returns the [CNWindowScope] of the [CNWindow] that most tightly encloses
   /// the given [context].
   static CNWindowScope of(BuildContext context) {
-    final CNWindowScope? result = context
-        .dependOnInheritedWidgetOfExactType<CNWindowScope>();
+    final CNWindowScope? result = context.dependOnInheritedWidgetOfExactType<CNWindowScope>();
     assert(result != null, 'No CNWindowScope found in context');
     return result!;
   }
@@ -148,25 +162,62 @@ class CNWindow extends StatefulWidget {
     this.statusBar,
     this.state = NSVisualEffectViewState.followsWindowActiveState,
     this.toolbarSpansFullWidth = false,
-    this.childMaterial = NSVisualEffectViewMaterial.fullScreenUI,
+    this.material,
+    this.childMaterial,
+    this.childState,
   });
 
-  /// The background color of the window. If null, the default canvas color from the current [CNTheme] is used.
+  /// The background color of the window.
+  ///
+  /// If null, the default canvas color from the current [CNTheme] is used — or
+  /// transparent when [material] is set, so the window-wide blur is not painted
+  /// over. Pass a translucent color to tint the blur.
   final Color? backgroundColor;
 
   /// The child widget to be displayed in the window.
   final Widget? child;
 
-  /// The material of the child widget. This is used to determine the background color of the window.
-  final NSVisualEffectViewMaterial childMaterial;
+  /// The material of the content area's own visual effect view.
+  ///
+  /// When set, the content area gets a dedicated `NSVisualEffectView` layered
+  /// over the window-wide one, so the page can blur differently from the
+  /// sidebars and the status bar. When null the content area shows [material]
+  /// through instead.
+  final NSVisualEffectViewMaterial? childMaterial;
+
+  /// The active-state policy of [childMaterial]. Defaults to [state] when null.
+  final NSVisualEffectViewState? childState;
 
   /// The end sidebar configuration (right side).
   final CNSidebar? endSidebar;
 
+  /// The material applied to the window as a whole.
+  ///
+  /// It is set on the window's root `NSVisualEffectView`, which sits behind
+  /// everything Flutter draws, so every part that leaves its background
+  /// transparent — the content area, the sidebars, the status bar, the toolbar —
+  /// blurs against this one material.
+  ///
+  /// A part opts out of it by declaring a material of its own ([childMaterial],
+  /// [CNSidebar.material], [CNStatusBar.material], [CNToolbar.material]), which
+  /// layers a separate visual effect view over this one for that part alone.
+  ///
+  /// Because an opaque background would hide the blur, setting this also flips
+  /// the default background of the window and of every part without an explicit
+  /// color to transparent. Colors passed explicitly still win, and a translucent
+  /// one tints the blur.
+  ///
+  /// When null the window keeps the native default material
+  /// (`windowBackground`).
+  final NSVisualEffectViewMaterial? material;
+
   /// The sidebar configuration (left side).
   final CNSidebar? sidebar;
 
-  /// The visual effect state for the window.
+  /// The visual-effect state applied to the window's root `NSVisualEffectView`
+  /// (see [material]), and the default for every part that declares a material
+  /// but no state of its own ([childState], [CNSidebar.state],
+  /// [CNStatusBar.state], [CNToolbar.state]).
   final NSVisualEffectViewState state;
 
   /// The status bar configuration (bottom).
@@ -223,8 +274,7 @@ class _CNWindowState extends State<CNWindow> {
     final sidebar = widget.sidebar;
     if (sidebar == null) {
       _sidebarWidth = 0.0;
-    } else if (sidebar.minWidth != old.sidebar!.minWidth ||
-        sidebar.maxWidth != old.sidebar!.maxWidth) {
+    } else if (sidebar.minWidth != old.sidebar!.minWidth || sidebar.maxWidth != old.sidebar!.maxWidth) {
       if (sidebar.minWidth > _sidebarWidth) {
         _sidebarWidth = sidebar.minWidth;
       }
@@ -235,8 +285,7 @@ class _CNWindowState extends State<CNWindow> {
     final endSidebar = widget.endSidebar;
     if (endSidebar == null) {
       _endSidebarWidth = 0.0;
-    } else if (endSidebar.minWidth != old.endSidebar!.minWidth ||
-        endSidebar.maxWidth != old.endSidebar!.maxWidth) {
+    } else if (endSidebar.minWidth != old.endSidebar!.minWidth || endSidebar.maxWidth != old.endSidebar!.maxWidth) {
       if (endSidebar.minWidth > _endSidebarWidth) {
         _endSidebarWidth = endSidebar.minWidth;
       }
@@ -249,16 +298,9 @@ class _CNWindowState extends State<CNWindow> {
   @override
   void initState() {
     super.initState();
-    _sidebarWidth =
-        (widget.sidebar?.startWidth ?? widget.sidebar?.minWidth) ??
-        _sidebarWidth;
-    _endSidebarWidth =
-        (widget.endSidebar?.startWidth ?? widget.endSidebar?.minWidth) ??
-        _endSidebarWidth;
-    _statusBarPanelHeight =
-        (widget.statusBar?.expandedStartHeight ??
-            widget.statusBar?.expandedMinHeight) ??
-        _statusBarPanelHeight;
+    _sidebarWidth = (widget.sidebar?.startWidth ?? widget.sidebar?.minWidth) ?? _sidebarWidth;
+    _endSidebarWidth = (widget.endSidebar?.startWidth ?? widget.endSidebar?.minWidth) ?? _endSidebarWidth;
+    _statusBarPanelHeight = (widget.statusBar?.expandedStartHeight ?? widget.statusBar?.expandedMinHeight) ?? _statusBarPanelHeight;
   }
 
   /// Drives a panel toggle with its slide animation: sets [_slideDuration] to
@@ -276,6 +318,58 @@ class _CNWindowState extends State<CNWindow> {
     }
   }
 
+  /// The painted body of [sidebar]: its background — transparent by default
+  /// when a material blurs behind it — around the builder's content, wrapped in
+  /// the sidebar's own visual effect subview when it declares one.
+  Widget _buildSidebarBody(BuildContext context, CNSidebar sidebar, {required Color canvasColor}) {
+    return _withMaterial(
+      ColoredBox(
+        color: _resolveBackground(sidebar.backgroundColor, material: sidebar.material, canvasColor: canvasColor),
+        child: Padding(padding: sidebar.padding, child: sidebar.builder(context)),
+      ),
+      material: sidebar.material,
+      state: sidebar.state,
+    );
+  }
+
+  /// Erases whatever Flutter painted behind [child] — the window background,
+  /// mostly — so that a native visual effect view sitting under the Flutter
+  /// view is not hidden by it.
+  Widget _clearBehind(Widget child) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(color: Color.fromRGBO(0, 0, 0, 1.0), backgroundBlendMode: BlendMode.clear),
+      child: child,
+    );
+  }
+
+  /// Resolves the background of one part of the window: [color] when given,
+  /// otherwise transparent if a material blurs behind that part — its own
+  /// [material], or the window-wide [CNWindow.material] when it has none — since
+  /// an opaque color would hide the blur, and [canvasColor] when nothing blurs.
+  Color _resolveBackground(Color? color, {required Color canvasColor, NSVisualEffectViewMaterial? material}) {
+    if (color != null) return color;
+    return (material ?? widget.material) != null ? CNColors.transparent : canvasColor;
+  }
+
+  /// Gives [child] a visual effect subview of its own when [material] is
+  /// declared, clearing the window paint behind it so the blur shows through.
+  /// With no material the child is handed back untouched and the window-wide
+  /// material (see [CNWindow.material]) blurs behind it instead.
+  ///
+  /// [state] falls back to the window's own [CNWindow.state] when null.
+  Widget _withMaterial(
+    Widget child, {
+    required NSVisualEffectViewMaterial? material,
+    required NSVisualEffectViewState? state,
+  }) {
+    if (material == null) return child;
+    return VisualEffectSubviewContainer(
+      material: material,
+      state: state ?? widget.state,
+      child: _clearBehind(child),
+    );
+  }
+
   @override
   // ignore: code-metrics
   Widget build(BuildContext context) {
@@ -284,19 +378,21 @@ class _CNWindowState extends State<CNWindow> {
     final endSidebar = widget.endSidebar;
     final statusBar = widget.statusBar;
     if (sidebar?.startWidth != null) {
-      assert(
-        (sidebar!.startWidth! >= sidebar.minWidth) &&
-            (sidebar.startWidth! <= sidebar.maxWidth!),
-      );
+      assert((sidebar!.startWidth! >= sidebar.minWidth) && (sidebar.startWidth! <= sidebar.maxWidth!));
     }
     if (endSidebar?.startWidth != null) {
-      assert(
-        (endSidebar!.startWidth! >= endSidebar.minWidth) &&
-            (endSidebar.startWidth! <= endSidebar.maxWidth!),
-      );
+      assert((endSidebar!.startWidth! >= endSidebar.minWidth) && (endSidebar.startWidth! <= endSidebar.maxWidth!));
     }
     final theme = CNTheme.of(context);
-    late Color backgroundColor = widget.backgroundColor ?? theme.canvasColor;
+    // The window-wide material lives on the window's root NSVisualEffectView,
+    // behind everything Flutter draws, so the parts that keep their own paint
+    // transparent all blur against it (see CNWindowMaterialHandler).
+    CNWindowMaterialHandler.ensureVisualEffect(material: widget.material, state: widget.state);
+    final Color backgroundColor = _resolveBackground(
+      widget.backgroundColor,
+      material: null,
+      canvasColor: theme.canvasColor,
+    );
     Color dividerColor = theme.separatorColor;
     // Fallback highlight for a sidebar resizer being hovered or dragged: the
     // accent color, as AppKit highlights a split view divider.
@@ -311,49 +407,34 @@ class _CNWindowState extends State<CNWindow> {
         final height = constraints.maxHeight;
         final isAtBreakpoint = width <= (sidebar?.windowBreakpoint ?? 0);
         final isAtEndBreakpoint = width <= (endSidebar?.windowBreakpoint ?? 0);
-        final canShowSidebar =
-            _showSidebar && !isAtBreakpoint && sidebar != null;
-        final canShowEndSidebar =
-            _showEndSidebar && !isAtEndBreakpoint && endSidebar != null;
+        final canShowSidebar = _showSidebar && !isAtBreakpoint && sidebar != null;
+        final canShowEndSidebar = _showEndSidebar && !isAtEndBreakpoint && endSidebar != null;
         final visibleSidebarWidth = canShowSidebar ? _sidebarWidth : 0.0;
-        final visibleEndSidebarWidth = canShowEndSidebar
-            ? _endSidebarWidth
-            : 0.0;
+        final visibleEndSidebarWidth = canShowEndSidebar ? _endSidebarWidth : 0.0;
         // The resizer is exactly as wide as the separator it draws: no grab
         // band around it. Only a resizable sidebar draws one, and it takes real
         // layout space between the sidebar and the content (see leadingInset),
         // so it never covers the content's edge.
-        final sidebarSeparatorWidth =
-            (sidebar?.isResizable ?? false) && canShowSidebar
-            ? sidebar.effectiveSeparatorWidth
-            : 0.0;
-        final endSidebarSeparatorWidth =
-            (endSidebar?.isResizable ?? false) && canShowEndSidebar
+        final sidebarSeparatorWidth = (sidebar?.isResizable ?? false) && canShowSidebar ? sidebar.effectiveSeparatorWidth : 0.0;
+        final endSidebarSeparatorWidth = (endSidebar?.isResizable ?? false) && canShowEndSidebar
             ? endSidebar.effectiveSeparatorWidth
             : 0.0;
         // Window edge to content edge on either side: the sidebar plus its
         // separator.
         final leadingInset = visibleSidebarWidth + sidebarSeparatorWidth;
         final trailingInset = visibleEndSidebarWidth + endSidebarSeparatorWidth;
-        final state = widget.state;
 
         final statusBarHeight = statusBar?.height ?? 0.0;
         final hasStatusBar = statusBar != null;
-        final expansionMode =
-            statusBar?.expansionMode ?? CNStatusBarExpansionMode.overContent;
-        final presentationStyle =
-            statusBar?.presentationStyle ?? CNStatusBarPresentationStyle.push;
-        final isFloating =
-            presentationStyle == CNStatusBarPresentationStyle.floating;
+        final expansionMode = statusBar?.expansionMode ?? CNStatusBarExpansionMode.overContent;
+        final presentationStyle = statusBar?.presentationStyle ?? CNStatusBarPresentationStyle.push;
+        final isFloating = presentationStyle == CNStatusBarPresentationStyle.floating;
 
         // In push mode, panel height reduces the content area. In floating mode, it doesn't.
-        final visiblePanelHeight = (_showStatusBarPanel && !isFloating)
-            ? _statusBarPanelHeight
-            : 0.0;
+        final visiblePanelHeight = (_showStatusBarPanel && !isFloating) ? _statusBarPanelHeight : 0.0;
 
         // Horizontal bounds for the panel based on expansion mode
-        final panelIsOverAll =
-            expansionMode == CNStatusBarExpansionMode.overAll;
+        final panelIsOverAll = expansionMode == CNStatusBarExpansionMode.overAll;
         final panelLeft = panelIsOverAll ? 0.0 : leadingInset;
         final panelRight = panelIsOverAll ? 0.0 : trailingInset;
 
@@ -365,8 +446,7 @@ class _CNWindowState extends State<CNWindow> {
         // bottom too (otherwise their full-height native subviews overlap the
         // panel). In overContent mode the panel is inset to the content area,
         // so sidebars keep their full height.
-        final sidebarHeight =
-            stackHeight - (panelIsOverAll ? visiblePanelHeight : 0.0);
+        final sidebarHeight = stackHeight - (panelIsOverAll ? visiblePanelHeight : 0.0);
 
         // Full-width toolbar mode: the content area (which carries the toolbar
         // via CNPageScaffold) spans the whole window, so the toolbar strip runs
@@ -378,9 +458,7 @@ class _CNWindowState extends State<CNWindow> {
         final toolbarStripHeight = toolbarSpans ? kCNToolbarHeight : 0.0;
         final effectiveSidebarHeight = sidebarHeight - toolbarStripHeight;
         final contentLeft = toolbarSpans ? 0.0 : leadingInset;
-        final contentWidth = toolbarSpans
-            ? width
-            : width - leadingInset - trailingInset;
+        final contentWidth = toolbarSpans ? width : width - leadingInset - trailingInset;
         final backgroundLeft = toolbarSpans ? 0.0 : leadingInset;
 
         // The leading sidebar. In full-width mode it drops below the toolbar
@@ -398,18 +476,16 @@ class _CNWindowState extends State<CNWindow> {
                 height: effectiveSidebarHeight,
                 left: canShowSidebar ? 0.0 : -_sidebarWidth,
                 width: _sidebarWidth,
-                child: VisualEffectSubviewContainer(
-                  state: state,
-                  material: sidebar.material,
-                  child: Container(
-                    color: sidebar.backgroundColor ?? theme.canvasColor,
-                    child: Padding(
-                      padding: sidebar.padding,
-                      child: sidebar.builder(context),
-                    ),
-                  ),
-                ),
+                child: _buildSidebarBody(context, sidebar, canvasColor: theme.canvasColor),
               );
+
+        // The content area clears the window background behind it whether or not
+        // it has a material of its own: it shows either childMaterial or, with
+        // none, the window-wide material.
+        final content = widget.child ?? const SizedBox.shrink();
+        final contentChild = widget.childMaterial != null
+            ? _withMaterial(content, material: widget.childMaterial, state: widget.childState)
+            : _clearBehind(content);
 
         final mainStack = Stack(
           clipBehavior: Clip.hardEdge,
@@ -440,19 +516,7 @@ class _CNWindowState extends State<CNWindow> {
               width: contentWidth,
               top: 0,
               bottom: visiblePanelHeight,
-              child: ClipRect(
-                child: VisualEffectSubviewContainer(
-                  material: widget.childMaterial,
-                  state: state,
-                  child: DecoratedBox(
-                    decoration: const BoxDecoration(
-                      color: Color.fromRGBO(0, 0, 0, 1.0),
-                      backgroundBlendMode: BlendMode.clear,
-                    ),
-                    child: widget.child ?? const SizedBox.shrink(),
-                  ),
-                ),
-              ),
+              child: ClipRect(child: contentChild),
             ),
 
             // Leading sidebar (overlaid on the content's left gutter, below the
@@ -472,8 +536,7 @@ class _CNWindowState extends State<CNWindow> {
                   thickness: sidebar!.effectiveSeparatorWidth,
                   color: sidebar.separatorColor ?? dividerColor,
                   gripColor: sidebar.gripColor ?? theme.fillPrimaryColor,
-                  highlightColor:
-                      sidebar.separatorHighlightColor ?? highlightColor,
+                  highlightColor: sidebar.separatorHighlightColor ?? highlightColor,
                   onDragStart: (details) {
                     _sidebarDragStartWidth = _sidebarWidth;
                     _sidebarDragStartPosition = details.globalPosition.dx;
@@ -481,33 +544,24 @@ class _CNWindowState extends State<CNWindow> {
                   },
                   onDragUpdate: (details) {
                     setState(() {
-                      var newWidth =
-                          _sidebarDragStartWidth +
-                          details.globalPosition.dx -
-                          _sidebarDragStartPosition;
+                      var newWidth = _sidebarDragStartWidth + details.globalPosition.dx - _sidebarDragStartPosition;
 
                       if (sidebar.startWidth != null &&
                           sidebar.snapToStartBuffer != null &&
-                          (newWidth - sidebar.startWidth!).abs() <=
-                              sidebar.snapToStartBuffer!) {
+                          (newWidth - sidebar.startWidth!).abs() <= sidebar.snapToStartBuffer!) {
                         newWidth = sidebar.startWidth!;
                       }
 
                       if (sidebar.dragClosed) {
-                        final closeBelow =
-                            sidebar.minWidth - sidebar.dragClosedBuffer;
+                        final closeBelow = sidebar.minWidth - sidebar.dragClosedBuffer;
                         _showSidebar = newWidth >= closeBelow;
                       }
 
-                      _sidebarWidth = math.max(
-                        sidebar.minWidth,
-                        math.min(sidebar.maxWidth!, newWidth),
-                      );
+                      _sidebarWidth = math.max(sidebar.minWidth, math.min(sidebar.maxWidth!, newWidth));
                     });
                   },
                   onDragEnd: (_) => setState(() => _activeResizeCursor = null),
-                  onDragCancel: () =>
-                      setState(() => _activeResizeCursor = null),
+                  onDragCancel: () => setState(() => _activeResizeCursor = null),
                 ),
               ),
 
@@ -528,17 +582,7 @@ class _CNWindowState extends State<CNWindow> {
                     minHeight: effectiveSidebarHeight,
                     maxHeight: effectiveSidebarHeight,
                   ).normalize(),
-                  child: VisualEffectSubviewContainer(
-                    state: state,
-                    material: endSidebar.material,
-                    child: Container(
-                      color: endSidebar.backgroundColor ?? theme.canvasColor,
-                      child: Padding(
-                        padding: endSidebar.padding,
-                        child: endSidebar.builder(context),
-                      ),
-                    ),
-                  ),
+                  child: _buildSidebarBody(context, endSidebar, canvasColor: theme.canvasColor),
                 ),
               ),
 
@@ -555,8 +599,7 @@ class _CNWindowState extends State<CNWindow> {
                   thickness: endSidebar!.effectiveSeparatorWidth,
                   color: endSidebar.separatorColor ?? dividerColor,
                   gripColor: endSidebar.gripColor ?? theme.fillPrimaryColor,
-                  highlightColor:
-                      endSidebar.separatorHighlightColor ?? highlightColor,
+                  highlightColor: endSidebar.separatorHighlightColor ?? highlightColor,
                   onDragStart: (details) {
                     _endSidebarDragStartWidth = _endSidebarWidth;
                     _endSidebarDragStartPosition = details.globalPosition.dx;
@@ -564,33 +607,24 @@ class _CNWindowState extends State<CNWindow> {
                   },
                   onDragUpdate: (details) {
                     setState(() {
-                      var newWidth =
-                          _endSidebarDragStartWidth -
-                          details.globalPosition.dx +
-                          _endSidebarDragStartPosition;
+                      var newWidth = _endSidebarDragStartWidth - details.globalPosition.dx + _endSidebarDragStartPosition;
 
                       if (endSidebar.startWidth != null &&
                           endSidebar.snapToStartBuffer != null &&
-                          (newWidth + endSidebar.startWidth!).abs() <=
-                              endSidebar.snapToStartBuffer!) {
+                          (newWidth + endSidebar.startWidth!).abs() <= endSidebar.snapToStartBuffer!) {
                         newWidth = endSidebar.startWidth!;
                       }
 
                       if (endSidebar.dragClosed) {
-                        final closeBelow =
-                            endSidebar.minWidth - endSidebar.dragClosedBuffer;
+                        final closeBelow = endSidebar.minWidth - endSidebar.dragClosedBuffer;
                         _showEndSidebar = newWidth >= closeBelow;
                       }
 
-                      _endSidebarWidth = math.max(
-                        endSidebar.minWidth,
-                        math.min(endSidebar.maxWidth!, newWidth),
-                      );
+                      _endSidebarWidth = math.max(endSidebar.minWidth, math.min(endSidebar.maxWidth!, newWidth));
                     });
                   },
                   onDragEnd: (_) => setState(() => _activeResizeCursor = null),
-                  onDragCancel: () =>
-                      setState(() => _activeResizeCursor = null),
+                  onDragCancel: () => setState(() => _activeResizeCursor = null),
                 ),
               ),
 
@@ -608,35 +642,31 @@ class _CNWindowState extends State<CNWindow> {
                 bottom: 0,
                 height: _showStatusBarPanel ? _statusBarPanelHeight : 0.0,
                 child: ClipRect(
-                  child: ColoredBox(
-                    color:
-                        statusBar.expandedColor ??
-                        statusBar.color ??
-                        theme.canvasColor,
-                    child: _showStatusBarPanel
-                        ? Column(
-                            children: [
-                              Divider(
-                                height: 1,
-                                thickness: 1,
-                                color: dividerColor,
-                              ),
-                              Expanded(
-                                child: statusBar.expandedBuilder!(context),
-                              ),
-                            ],
-                          )
-                        : const SizedBox.shrink(),
+                  child: _withMaterial(
+                    ColoredBox(
+                      color: _resolveBackground(
+                        statusBar.expandedColor ?? statusBar.color,
+                        material: statusBar.expandedMaterial ?? statusBar.material,
+                        canvasColor: theme.canvasColor,
+                      ),
+                      child: _showStatusBarPanel
+                          ? Column(
+                              children: [
+                                Divider(height: 1, thickness: 1, color: dividerColor),
+                                Expanded(child: statusBar.expandedBuilder!(context)),
+                              ],
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                    material: statusBar.expandedMaterial ?? statusBar.material,
+                    state: statusBar.state,
                   ),
                 ),
               ),
 
             // Status bar panel resizer (shared by push and floating: the panel
             // is bottom-anchored in both, so the drag handle sits on its top edge).
-            if (hasStatusBar &&
-                statusBar.isResizable &&
-                statusBar.expandedBuilder != null &&
-                _showStatusBarPanel)
+            if (hasStatusBar && statusBar.isResizable && statusBar.expandedBuilder != null && _showStatusBarPanel)
               AnimatedPositioned(
                 curve: curve,
                 duration: duration,
@@ -653,15 +683,10 @@ class _CNWindowState extends State<CNWindow> {
                   },
                   onVerticalDragUpdate: (details) {
                     setState(() {
-                      var newHeight =
-                          _statusBarDragStartSize -
-                          (details.globalPosition.dy -
-                              _statusBarDragStartPosition);
+                      var newHeight = _statusBarDragStartSize - (details.globalPosition.dy - _statusBarDragStartPosition);
 
                       if (statusBar.dragClosed) {
-                        final closeBelow =
-                            statusBar.expandedMinHeight -
-                            statusBar.dragClosedBuffer;
+                        final closeBelow = statusBar.expandedMinHeight - statusBar.dragClosedBuffer;
                         _showStatusBarPanel = newHeight >= closeBelow;
                       }
 
@@ -670,11 +695,9 @@ class _CNWindowState extends State<CNWindow> {
                         math.min(statusBar.expandedMaxHeight, newHeight),
                       );
 
-                      if (_statusBarPanelHeight ==
-                          statusBar.expandedMinHeight) {
+                      if (_statusBarPanelHeight == statusBar.expandedMinHeight) {
                         _statusBarCursor = SystemMouseCursors.resizeUp;
-                      } else if (_statusBarPanelHeight ==
-                          statusBar.expandedMaxHeight) {
+                      } else if (_statusBarPanelHeight == statusBar.expandedMaxHeight) {
                         _statusBarCursor = SystemMouseCursors.resizeDown;
                       } else {
                         _statusBarCursor = SystemMouseCursors.resizeRow;
@@ -682,19 +705,13 @@ class _CNWindowState extends State<CNWindow> {
                       _activeResizeCursor = _statusBarCursor;
                     });
                   },
-                  onVerticalDragEnd: (_) =>
-                      setState(() => _activeResizeCursor = null),
-                  onVerticalDragCancel: () =>
-                      setState(() => _activeResizeCursor = null),
+                  onVerticalDragEnd: (_) => setState(() => _activeResizeCursor = null),
+                  onVerticalDragCancel: () => setState(() => _activeResizeCursor = null),
                   child: MouseRegion(
                     cursor: _statusBarCursor,
                     child: Align(
                       alignment: Alignment.center,
-                      child: Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: dividerColor,
-                      ),
+                      child: Divider(height: 1, thickness: 1, color: dividerColor),
                     ),
                   ),
                 ),
@@ -708,23 +725,26 @@ class _CNWindowState extends State<CNWindow> {
             if (hasStatusBar)
               SizedBox(
                 height: statusBarHeight,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: statusBar.color ?? theme.canvasColor,
-                    border: Border(
-                      top: BorderSide(
-                        color: statusBar.dividerColor ?? dividerColor,
-                        width: 1,
+                child: _withMaterial(
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: _resolveBackground(
+                        statusBar.color,
+                        material: statusBar.material,
+                        canvasColor: theme.canvasColor,
                       ),
+                      border: Border(top: BorderSide(color: statusBar.dividerColor ?? dividerColor, width: 1)),
+                    ),
+                    child: _StatusBarContent(
+                      leftItems: statusBar.leftItems,
+                      rightItems: statusBar.rightItems,
+                      isExpanded: _showStatusBarPanel,
+                      paddingStart: statusBar.paddingStart,
+                      paddingEnd: statusBar.paddingEnd,
                     ),
                   ),
-                  child: _StatusBarContent(
-                    leftItems: statusBar.leftItems,
-                    rightItems: statusBar.rightItems,
-                    isExpanded: _showStatusBarPanel,
-                    paddingStart: statusBar.paddingStart,
-                    paddingEnd: statusBar.paddingEnd,
-                  ),
+                  material: statusBar.material,
+                  state: statusBar.state,
                 ),
               ),
           ],
@@ -745,8 +765,7 @@ class _CNWindowState extends State<CNWindow> {
         final windowContent = Stack(
           children: [
             layout,
-            if (resizeCursor != null)
-              Positioned.fill(child: MouseRegion(cursor: resizeCursor)),
+            if (resizeCursor != null) Positioned.fill(child: MouseRegion(cursor: resizeCursor)),
           ],
         );
 
@@ -760,18 +779,13 @@ class _CNWindowState extends State<CNWindow> {
           sidebarSeparatorWidth: sidebarSeparatorWidth,
           endSidebarSeparatorWidth: endSidebarSeparatorWidth,
           toolbarSpansFullWidth: widget.toolbarSpansFullWidth,
-          sidebarToggler: () => _animateToggle(
-            sidebar?.slideDuration ?? Duration.zero,
-            () => _showSidebar = !_showSidebar,
-          ),
-          endSidebarToggler: () => _animateToggle(
-            endSidebar?.slideDuration ?? Duration.zero,
-            () => _showEndSidebar = !_showEndSidebar,
-          ),
-          statusBarToggler: () => _animateToggle(
-            statusBar?.slideDuration ?? Duration.zero,
-            () => _showStatusBarPanel = !_showStatusBarPanel,
-          ),
+          windowMaterial: widget.material,
+          windowState: widget.state,
+          sidebarToggler: () => _animateToggle(sidebar?.slideDuration ?? Duration.zero, () => _showSidebar = !_showSidebar),
+          endSidebarToggler: () =>
+              _animateToggle(endSidebar?.slideDuration ?? Duration.zero, () => _showEndSidebar = !_showEndSidebar),
+          statusBarToggler: () =>
+              _animateToggle(statusBar?.slideDuration ?? Duration.zero, () => _showStatusBarPanel = !_showStatusBarPanel),
           child: windowContent,
         );
       },
@@ -817,6 +831,7 @@ class _CNSidebarResizer extends StatefulWidget {
   final GestureDragEndCallback onDragEnd;
   final GestureDragStartCallback onDragStart;
   final GestureDragUpdateCallback onDragUpdate;
+
   /// Width of the visible divider bar, and of its pointer-grab area.
   final double thickness;
 
@@ -826,6 +841,7 @@ class _CNSidebarResizer extends StatefulWidget {
 
 class _CNSidebarResizerState extends State<_CNSidebarResizer> {
   Timer? _hoverTimer;
+
   /// Set once the pointer has rested on the bar for [_kSidebarResizeHoverDelay].
   bool _isHovered = false;
 
@@ -912,9 +928,7 @@ class _CNSidebarResizerState extends State<_CNSidebarResizer> {
               color: highlighted ? widget.highlightColor : widget.color,
               // A bar this narrow can only round to a pill; anything larger is
               // clipped back to this by BorderRadius anyway.
-              borderRadius: highlighted
-                  ? BorderRadius.circular(widget.thickness / 2)
-                  : null,
+              borderRadius: highlighted ? BorderRadius.circular(widget.thickness / 2) : null,
             ),
             child: Center(
               child: Column(
