@@ -390,7 +390,6 @@ class _CNWindowState extends State<CNWindow> {
     CNWindowMaterialHandler.ensureVisualEffect(material: widget.material, state: widget.state);
     final Color backgroundColor = _resolveBackground(
       widget.backgroundColor,
-      material: null,
       canvasColor: theme.canvasColor,
     );
     Color dividerColor = theme.separatorColor;
