@@ -830,7 +830,6 @@ class _CNSidebarResizer extends StatefulWidget {
   final GestureDragEndCallback onDragEnd;
   final GestureDragStartCallback onDragStart;
   final GestureDragUpdateCallback onDragUpdate;
-
   /// Width of the visible divider bar, and of its pointer-grab area.
   final double thickness;
 
@@ -840,7 +839,6 @@ class _CNSidebarResizer extends StatefulWidget {
 
 class _CNSidebarResizerState extends State<_CNSidebarResizer> {
   Timer? _hoverTimer;
-
   /// Set once the pointer has rested on the bar for [_kSidebarResizeHoverDelay].
   bool _isHovered = false;
 

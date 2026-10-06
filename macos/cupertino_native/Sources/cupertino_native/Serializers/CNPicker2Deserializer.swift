@@ -72,8 +72,26 @@ enum CNPicker2Deserializer {
         private static func buildItems(_ items: [[String: Any]]) -> some View {
             ForEach(Array(items.enumerated()), id: \.offset) { _, child in
                 let tag = child["tag"] as? String ?? ""
-                CNChildViewBuilder.buildChild(child).tag(tag)
+                CNChildViewBuilder.buildChild(mirroringTintOnIcon(child)).tag(tag)
             }
+        }
+
+        /// Since macOS 27 the closed `.menu` picker is drawn by SwiftUI instead of an
+        /// NSPopUpButton, and it ignores `.tint` on the selected label's icon (the open
+        /// NSMenu still honors it). Mirroring the tint into the icon's foreground style
+        /// keeps both states the same color; `.tint` is kept for the NSMenu items.
+        private static func mirroringTintOnIcon(_ child: [String: Any]) -> [String: Any] {
+            guard child["type"] as? String == "label",
+                  let tint = child["tint"] as? Int,
+                  (child["foregroundStyleColors"] as? [Any])?.isEmpty ?? true
+            else { return child }
+
+            var child = child
+            child["foregroundStyleColors"] = [tint]
+            if child["symbolRenderingMode"] as? String == nil {
+                child["symbolRenderingMode"] = "monochrome"
+            }
+            return child
         }
 
         private func applyPickerStyle(_ style: String?, to view: AnyView) -> AnyView {
