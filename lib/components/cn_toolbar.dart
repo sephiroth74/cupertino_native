@@ -450,22 +450,56 @@ class CNToolbarIconButton extends CNToolbarItem {
         // Size the symbol to fit within the square frame (≈45% of the side) so
         // SwiftUI can center it inside the fixed frame instead of drawing it at
         // its default size and overflowing — mirrors `CnIconButton`'s font sizing.
-        final iconFont = CNFont.system(CNFontSize.points(side * 0.45));
+        var fontSize = side * 0.45;
+
+        // The glass hugs the button's content, which would otherwise be the
+        // bezel's natural width and overflow (and get clipped by) the square.
+        // Pin the content to the square minus the outer paddings and the
+        // glass's inner padding, so the glass fills the square exactly (a
+        // circle with the default capsule shape); the glass is the bezel.
+        BoxConstraints? contentConstraints;
+        final glass = glassEffect;
+        if (glass != null) {
+          final outer = paddings ?? EdgeInsets.zero;
+          final inner = glass.padding ?? EdgeInsets.zero;
+          final width = side - outer.horizontal - inner.horizontal;
+          final height = side - outer.vertical - inner.vertical;
+          contentConstraints = BoxConstraints.tightFor(
+            width: width > 0 ? width : 0,
+            height: height > 0 ? height : 0,
+          );
+          if (height * 0.8 < fontSize) fontSize = height * 0.8;
+        }
+        final iconFont = CNFont.system(
+          CNFontSize.points(fontSize > 1 ? fontSize : 1),
+        );
+
         return CNButton(
           onPressed: onPressed,
-          buttonStyle: CNButtonStyle.accessoryBarAction,
+          buttonStyle: glass != null
+              ? CNButtonStyle.borderless
+              : CNButtonStyle.accessoryBarAction,
           shrink: false,
           debugLog: false,
           constraints: BoxConstraints.tightFor(width: side, height: side),
           tint: tint,
           help: tooltip,
-          glassEffect: glassEffect,
+          glassEffect: glass,
           paddings: paddings,
           children: [
             if (showLabel && label != null)
-              CNChildLabel(label!, systemImage: systemImage, font: iconFont)
+              CNChildLabel(
+                label!,
+                systemImage: systemImage,
+                font: iconFont,
+                constraints: contentConstraints,
+              )
             else
-              CNChildImage(systemImage, font: iconFont),
+              CNChildImage(
+                systemImage,
+                font: iconFont,
+                constraints: contentConstraints,
+              ),
           ],
         );
       },

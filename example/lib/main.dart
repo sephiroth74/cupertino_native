@@ -193,6 +193,8 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
           CNToolbarIconButton(
             'sidebar.left',
             tooltip: 'Toggle the navigation sidebar',
+            glassEffect: const CNGlassEffect(interactive: false, padding: EdgeInsets.all(2.0)),
+            paddings: const EdgeInsets.all(1.0),
             onPressed: () => CNWindowScope.of(context).toggleSidebar(),
           ),
         ],
