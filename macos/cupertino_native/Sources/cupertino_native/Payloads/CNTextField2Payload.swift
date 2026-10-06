@@ -12,6 +12,7 @@ struct CNTextField2Payload: CNSharedPayloadFields {
     var help: String?
     var overlay: [String: Any]?
     var background: [String: Any]?
+    var glassEffect: [String: Any]?
 
     // TextField-specific fields
     var text: String
@@ -40,6 +41,7 @@ struct CNTextField2Payload: CNSharedPayloadFields {
         help = nil
         overlay = nil
         background = nil
+        glassEffect = nil
         text = ""
         selectionBase = nil
         selectionExtent = nil

@@ -90,10 +90,12 @@ enum CNSecureFieldDeserializer {
                 view = AnyView(view.border(Color(nsColor: color), width: width))
             }
 
-            view = applyTextFieldStyle(payload.textFieldStyle, to: view)
+            let textFieldStyle = CNViewModifierApplicator.resolveStyle(payload.textFieldStyle, glassEffect: payload.glassEffect, bezelFreeStyle: "plain")
+            view = applyTextFieldStyle(textFieldStyle, to: view)
             view = CNViewModifierApplicator.applyControlSize(payload.controlSize, to: view)
             view = CNViewModifierApplicator.applyForegroundColor(payload.foregroundColor, to: view)
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
+            view = CNViewModifierApplicator.applyGlassEffect(payload.glassEffect, to: view)
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
             view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
 

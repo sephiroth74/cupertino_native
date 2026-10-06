@@ -1,6 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
+import 'package:cupertino_native_example/demos/glass_effect_options.dart';
 import 'package:flutter/cupertino.dart';
 
 const _kDebugLog = false;
@@ -16,6 +17,7 @@ class ProgressIndicatorsPageDemo extends StatefulWidget {
 class _ProgressIndicatorsPageDemoState
     extends State<ProgressIndicatorsPageDemo> {
   CNControlSize controlSize = CNControlSize.regular;
+  GlassEffectOptions glass = const GlassEffectOptions();
   bool isDetermininate = true;
   double progressValue = 0.75;
   CNProgressViewStyle progressViewStyle = CNProgressViewStyle.linear;
@@ -38,12 +40,17 @@ class _ProgressIndicatorsPageDemoState
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
                 Center(
-                  child: CNProgressView(
-                    debugLog: _kDebugLog,
-                    value: isDetermininate ? progressValue : null,
-                    style: progressViewStyle,
-                    controlSize: controlSize,
-                    tint: tintColor,
+                  child: GlassBackdrop(
+                    options: glass,
+                    child: CNProgressView(
+                      debugLog: _kDebugLog,
+                      glassEffect: glass.effect(minPadding: 8),
+                      paddings: glass.paddings(),
+                      value: isDetermininate ? progressValue : null,
+                      style: progressViewStyle,
+                      controlSize: controlSize,
+                      tint: tintColor,
+                    ),
                   ),
                 ),
               ],
@@ -84,6 +91,10 @@ class _ProgressIndicatorsPageDemoState
                         });
                       }
                     : null,
+              ),
+              ...glassEffectOptionEntries(
+                glass,
+                (v) => setState(() => glass = v),
               ),
             },
           ),

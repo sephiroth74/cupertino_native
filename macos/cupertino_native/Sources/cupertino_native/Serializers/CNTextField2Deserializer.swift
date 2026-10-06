@@ -78,7 +78,8 @@ enum CNTextField2Deserializer {
             }
 
             // Apply style
-            view = applyTextFieldStyle(payload.textFieldStyle, to: view)
+            let textFieldStyle = CNViewModifierApplicator.resolveStyle(payload.textFieldStyle, glassEffect: payload.glassEffect, bezelFreeStyle: "plain")
+            view = applyTextFieldStyle(textFieldStyle, to: view)
 
             // Apply control size
             view = CNViewModifierApplicator.applyControlSize(payload.controlSize, to: view)
@@ -99,6 +100,7 @@ enum CNTextField2Deserializer {
             }
 
             // Paddings
+            view = CNViewModifierApplicator.applyGlassEffect(payload.glassEffect, to: view)
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
 
             view = CNViewModifierApplicator.applyHelp(payload.help, to: view)

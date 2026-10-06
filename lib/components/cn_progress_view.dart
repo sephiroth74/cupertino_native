@@ -23,6 +23,7 @@ class CNProgressView extends CNWidget {
     this.help,
     this.overlay,
     this.background,
+    this.glassEffect,
   }) : assert(total > 0);
 
   /// Control size for the progress view.
@@ -45,6 +46,9 @@ class CNProgressView extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final CNGlassEffect? glassEffect;
 
   @override
   final String? help;
@@ -84,6 +88,12 @@ class _CNProgressViewState extends CNWidgetState<CNProgressView> {
     required double defaultWidth,
     double? intrinsicWidth,
   }) {
+    // A linear bar has no natural width: SwiftUI reports only its insets
+    // (paddings, glass padding), which would collapse it. Size it from the
+    // constraints instead.
+    if (widget.style == CNProgressViewStyle.linear) {
+      intrinsicWidth = null;
+    }
     double resolvedWidth;
     if (intrinsicWidth != null) {
       resolvedWidth = intrinsicWidth;

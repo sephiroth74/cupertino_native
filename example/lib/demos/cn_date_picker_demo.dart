@@ -1,5 +1,6 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
+import 'package:cupertino_native_example/demos/glass_effect_options.dart';
 import 'package:flutter/cupertino.dart';
 
 class DatePickerDemoPage extends StatefulWidget {
@@ -23,6 +24,7 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
       _DatePickerComponents.dateAndTime;
 
   bool enabled = true;
+  GlassEffectOptions glass = const GlassEffectOptions();
   DateTime selectedDate = DateTime.now();
   CupertinoDynamicColor? tintColor;
 
@@ -42,21 +44,26 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(top: 24),
-              child: CNDatePicker(
-                selection: selectedDate,
-                controlSize: controlSize,
-                datePickerStyle: datePickerStyle,
-                displayedComponents: displayedComponents,
-                minDate: DateTime.now().subtract(const Duration(days: 365)),
-                maxDate: DateTime.now().add(const Duration(days: 365)),
-                debugLog: false,
-                onChanged: enabled
-                    ? (value) {
-                        setState(() {
-                          selectedDate = value;
-                        });
-                      }
-                    : null,
+              child: GlassBackdrop(
+                options: glass,
+                child: CNDatePicker(
+                  selection: selectedDate,
+                  glassEffect: glass.effect(),
+                  paddings: glass.paddings(),
+                  controlSize: controlSize,
+                  datePickerStyle: datePickerStyle,
+                  displayedComponents: displayedComponents,
+                  minDate: DateTime.now().subtract(const Duration(days: 365)),
+                  maxDate: DateTime.now().add(const Duration(days: 365)),
+                  debugLog: false,
+                  onChanged: enabled
+                      ? (value) {
+                          setState(() {
+                            selectedDate = value;
+                          });
+                        }
+                      : null,
+                ),
               ),
             ),
           ),
@@ -110,6 +117,10 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
                           CNChildText(component.name, tag: component.name),
                     )
                     .toList(),
+              ),
+              ...glassEffectOptionEntries(
+                glass,
+                (v) => setState(() => glass = v),
               ),
             },
           ),

@@ -1,6 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
+import 'package:cupertino_native_example/demos/glass_effect_options.dart';
 import 'package:flutter/cupertino.dart';
 
 const _kDebugLog = false;
@@ -14,6 +15,7 @@ class MenuButtonDemoPage extends StatefulWidget {
 
 class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
   CNControlSize controlSize = CNControlSize.large;
+  GlassEffectOptions glass = const GlassEffectOptions();
   bool isEnabled = true;
   String lastAction = 'None';
   CNMenuStyle menuStyle = CNMenuStyle.automatic;
@@ -44,47 +46,56 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
                   style: CNTheme.of(context).typography.title2,
                 ),
                 const SizedBox(height: 16),
-                CNMenu(
-                  debugLog: _kDebugLog,
-                  items: [
-                    CNChildButton(
-                      tag: 'open',
-                      title: 'Open in Preview',
-                      systemImage: 'star',
-                      badge: 2,
-                    ),
-                    CNChildDivider(),
-                    CNChildButton(tag: 'save', title: 'Save as PDF'),
-                    CNChildMenu(
-                      tag: 'editPrimary',
-                      items: [
-                        CNChildButton(
-                          tag: 'cut',
-                          title: 'Cut',
-                          systemImage: 'scissors',
-                        ),
-                        CNChildButton(
-                          tag: 'copy',
-                          title: 'Copy',
-                          systemImage: 'doc.on.doc',
-                        ),
-                        CNChildDivider(),
-                        CNChildButton(
-                          tag: 'paste',
-                          title: 'Paste',
-                          systemImage: 'list.bullet.clipboard.fill',
-                          enabled: false,
-                        ),
-                      ],
-                      label: [CNChildLabel('Edit', systemImage: 'highlighter')],
-                    ),
-                  ],
-                  label: [CNChildLabel('PDF', systemImage: 'doc.fill')],
-                  primaryActionTag: usePrimaryAction ? 'pdfPrimary' : null,
-                  onItemPressed: isEnabled ? (tag) => setLastAction(tag) : null,
-                  menuStyle: menuStyle,
-                  controlSize: controlSize,
-                  tint: tintColor,
+                GlassBackdrop(
+                  options: glass,
+                  child: CNMenu(
+                    debugLog: _kDebugLog,
+                    glassEffect: glass.effect(),
+                    paddings: glass.paddings(),
+                    items: [
+                      CNChildButton(
+                        tag: 'open',
+                        title: 'Open in Preview',
+                        systemImage: 'star',
+                        badge: 2,
+                      ),
+                      CNChildDivider(),
+                      CNChildButton(tag: 'save', title: 'Save as PDF'),
+                      CNChildMenu(
+                        tag: 'editPrimary',
+                        items: [
+                          CNChildButton(
+                            tag: 'cut',
+                            title: 'Cut',
+                            systemImage: 'scissors',
+                          ),
+                          CNChildButton(
+                            tag: 'copy',
+                            title: 'Copy',
+                            systemImage: 'doc.on.doc',
+                          ),
+                          CNChildDivider(),
+                          CNChildButton(
+                            tag: 'paste',
+                            title: 'Paste',
+                            systemImage: 'list.bullet.clipboard.fill',
+                            enabled: false,
+                          ),
+                        ],
+                        label: [
+                          CNChildLabel('Edit', systemImage: 'highlighter'),
+                        ],
+                      ),
+                    ],
+                    label: [CNChildLabel('PDF', systemImage: 'doc.fill')],
+                    primaryActionTag: usePrimaryAction ? 'pdfPrimary' : null,
+                    onItemPressed: isEnabled
+                        ? (tag) => setLastAction(tag)
+                        : null,
+                    menuStyle: menuStyle,
+                    controlSize: controlSize,
+                    tint: tintColor,
+                  ),
                 ),
               ],
             ),
@@ -118,6 +129,10 @@ class _MenuButtonDemoPageState extends State<MenuButtonDemoPage> {
               'Primary Action': CNToggle(
                 isOn: usePrimaryAction,
                 onChanged: (value) => setState(() => usePrimaryAction = value),
+              ),
+              ...glassEffectOptionEntries(
+                glass,
+                (v) => setState(() => glass = v),
               ),
             },
           ),

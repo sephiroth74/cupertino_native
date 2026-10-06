@@ -1,5 +1,6 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
+import 'package:cupertino_native_example/demos/glass_effect_options.dart';
 import 'package:flutter/cupertino.dart';
 
 const _kDebugLog = false;
@@ -14,6 +15,7 @@ class StepperDemoPage extends StatefulWidget {
 class _StepperDemoPageState extends State<StepperDemoPage> {
   CNControlSize controlSize = CNControlSize.regular;
   bool enabled = true;
+  GlassEffectOptions glass = const GlassEffectOptions();
   double value = 5;
 
   @override
@@ -38,16 +40,21 @@ class _StepperDemoPageState extends State<StepperDemoPage> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  CNStepper(
-                    debugLog: _kDebugLog,
-                    value: value,
-                    min: 0,
-                    max: 100,
-                    step: 1,
-                    controlSize: controlSize,
-                    onChanged: enabled
-                        ? (v) => setState(() => value = v)
-                        : null,
+                  GlassBackdrop(
+                    options: glass,
+                    child: CNStepper(
+                      debugLog: _kDebugLog,
+                      glassEffect: glass.effect(),
+                      paddings: glass.paddings(),
+                      value: value,
+                      min: 0,
+                      max: 100,
+                      step: 1,
+                      controlSize: controlSize,
+                      onChanged: enabled
+                          ? (v) => setState(() => value = v)
+                          : null,
+                    ),
                   ),
                 ],
               ),
@@ -64,6 +71,10 @@ class _StepperDemoPageState extends State<StepperDemoPage> {
               'Enabled': CNToggle(
                 isOn: enabled,
                 onChanged: (v) => setState(() => enabled = v),
+              ),
+              ...glassEffectOptionEntries(
+                glass,
+                (v) => setState(() => glass = v),
               ),
             },
           ),

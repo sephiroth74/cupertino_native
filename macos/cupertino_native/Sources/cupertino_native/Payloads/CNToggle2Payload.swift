@@ -12,6 +12,7 @@ struct CNToggle2Payload: CNSharedPayloadFields {
     var help: String?
     var overlay: [String: Any]?
     var background: [String: Any]?
+    var glassEffect: [String: Any]?
 
     // Toggle-specific fields
     var isOn: Bool
@@ -31,6 +32,7 @@ struct CNToggle2Payload: CNSharedPayloadFields {
         help = nil
         overlay = nil
         background = nil
+        glassEffect = nil
         isOn = false
         enabled = true
         toggleStyle = "automatic"

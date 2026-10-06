@@ -1,6 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
+import 'package:cupertino_native_example/demos/glass_effect_options.dart';
 import 'package:flutter/cupertino.dart';
 
 const _kDebugLog = false;
@@ -19,6 +20,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
   CNControlSize controlSize = CNControlSize.large;
   CNFont? font;
   double fontSize = kFontSizeDefault;
+  GlassEffectOptions glass = const GlassEffectOptions();
   bool isEnabled = true;
   bool isProgressRunning = false;
   double labelIconToTitleSpacing = 8;
@@ -77,138 +79,145 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.all(8),
-                    child: Column(
-                      children: [
-                        CNPixelPerfectContainer(
-                          adjustPosition: true,
-                          onGeometryChanged: (geometry) {
-                            debugPrint('PixelPerfectContainer geometry changed: $geometry');
-                            setState(() {
-                              lastGeometry = geometry;
-                            });
-                          },
-                          child: CNButton(
-                            onPressed: isEnabled ? () => _set('Default') : null,
-                            buttonStyle: buttonStyle,
-                            controlSize: controlSize,
-                            tint: tintColor,
-                            debugLog: _kDebugLog,
-                            paddings: padding,
-                            children: [CNChildText('Text Only', font: font)],
+                    child: GlassBackdrop(
+                      options: glass,
+                      child: Column(
+                        children: [
+                          CNPixelPerfectContainer(
+                            adjustPosition: true,
+                            onGeometryChanged: (geometry) {
+                              debugPrint('PixelPerfectContainer geometry changed: $geometry');
+                              setState(() {
+                                lastGeometry = geometry;
+                              });
+                            },
+                            child: CNButton(
+                              onPressed: isEnabled ? () => _set('Default') : null,
+                              buttonStyle: buttonStyle,
+                              controlSize: controlSize,
+                              tint: tintColor,
+                              debugLog: _kDebugLog,
+                              paddings: glass.paddings(padding),
+                              glassEffect: glass.effect(),
+                              children: [CNChildText('Text Only', font: font)],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        CNPixelPerfectContainer(
-                          adjustPosition: true,
-                          child: CNButton(
-                            onPressed: isEnabled ? () => _set('Default.2') : null,
-                            buttonStyle: buttonStyle,
-                            controlSize: controlSize,
-                            tint: tintColor,
-                            paddings: padding,
-                            debugLog: false,
-                            children: [
-                              CNChildImage(
-                                'square.and.arrow.up',
-                                font: font,
-                                symbolRenderingMode: CNSymbolRenderingMode.hierarchical,
-                                paddings: EdgeInsets.symmetric(horizontal: labelReservedIconWidth),
-                              ),
-                              CNChildText(
-                                'Icon and Text',
-                                paddings: EdgeInsets.only(left: labelIconToTitleSpacing),
-                                font: font,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        CNPixelPerfectContainer(
-                          adjustPosition: true,
-                          child: CNButton(
-                            onPressed: isEnabled ? () => _set('Default.3') : null,
-                            buttonStyle: buttonStyle,
-                            controlSize: controlSize,
-                            paddings: padding,
-                            tint: tintColor,
-                            debugLog: false,
-                            children: [
-                              const CNChildProgressView(style: CNProgressViewStyle.circular, controlSize: CNControlSize.small),
-                              CNChildImage(
-                                'square.and.arrow.down.badge.checkmark.fill',
-                                font: font,
-                                symbolRenderingMode: CNSymbolRenderingMode.hierarchical,
-                                paddings: EdgeInsets.symmetric(horizontal: labelReservedIconWidth),
-                              ),
-                              CNChildText(
-                                'Icon and Text',
-                                paddings: EdgeInsets.only(left: labelIconToTitleSpacing),
-                                font: font,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        CNPixelPerfectContainer(
-                          adjustPosition: true,
-                          child: CNButton(
-                            onPressed: isEnabled
-                                ? () {
-                                    _set('Default.5');
-                                    if (isProgressRunning) {
-                                      stopProgress();
-                                    } else {
-                                      startProgress();
-                                    }
-                                  }
-                                : null,
-                            buttonStyle: buttonStyle,
-                            controlSize: controlSize,
-                            tint: tintColor,
-                            debugLog: false,
-                            paddings: padding,
-                            children: [
-                              CNChildProgressView(
-                                tint: CNColors.fillSecondary,
-                                value: progressValue.toDouble(),
-                                total: progressMax.toDouble(),
-                                style: CNProgressViewStyle.linear,
-                                controlSize: CNControlSize.small,
-                                constraints: BoxConstraints.tightFor(width: 80),
-                              ),
-                              CNChildText(
-                                'Icon and Progress',
-                                font: font,
-                                paddings: EdgeInsets.only(left: labelIconToTitleSpacing),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        if (lastGeometry != null) ...[
-                          DefaultTextStyle(
-                            style: CNTheme.of(context).typography.caption1,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          const SizedBox(height: 16),
+                          CNPixelPerfectContainer(
+                            adjustPosition: true,
+                            child: CNButton(
+                              onPressed: isEnabled ? () => _set('Default.2') : null,
+                              buttonStyle: buttonStyle,
+                              controlSize: controlSize,
+                              tint: tintColor,
+                              paddings: glass.paddings(padding),
+                              glassEffect: glass.effect(),
+                              debugLog: false,
                               children: [
-                                Text(
-                                  'Last geometry: ${lastGeometry!.x}, ${lastGeometry!.y}, ${lastGeometry!.width}, ${lastGeometry!.height}',
+                                CNChildImage(
+                                  'square.and.arrow.up',
+                                  font: font,
+                                  symbolRenderingMode: CNSymbolRenderingMode.hierarchical,
+                                  paddings: EdgeInsets.symmetric(horizontal: labelReservedIconWidth),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Physical geometry: ${lastGeometry!.physicalX}, ${lastGeometry!.physicalY}, ${lastGeometry!.physicalWidth}, ${lastGeometry!.physicalHeight}',
+                                CNChildText(
+                                  'Icon and Text',
+                                  paddings: EdgeInsets.only(left: labelIconToTitleSpacing),
+                                  font: font,
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Window geometry: ${lastGeometry!.windowX}, ${lastGeometry!.windowY}, ${lastGeometry!.windowWidth}, ${lastGeometry!.windowHeight}',
-                                ),
-                                const SizedBox(height: 4),
-                                Text('Device pixel ratio: ${lastGeometry!.devicePixelRatio}'),
                               ],
                             ),
                           ),
+                          const SizedBox(height: 16),
+                          CNPixelPerfectContainer(
+                            adjustPosition: true,
+                            child: CNButton(
+                              onPressed: isEnabled ? () => _set('Default.3') : null,
+                              buttonStyle: buttonStyle,
+                              controlSize: controlSize,
+                              paddings: glass.paddings(padding),
+                              glassEffect: glass.effect(),
+                              tint: tintColor,
+                              debugLog: false,
+                              children: [
+                                const CNChildProgressView(style: CNProgressViewStyle.circular, controlSize: CNControlSize.small),
+                                CNChildImage(
+                                  'square.and.arrow.down.badge.checkmark.fill',
+                                  font: font,
+                                  symbolRenderingMode: CNSymbolRenderingMode.hierarchical,
+                                  paddings: EdgeInsets.symmetric(horizontal: labelReservedIconWidth),
+                                ),
+                                CNChildText(
+                                  'Icon and Text',
+                                  paddings: EdgeInsets.only(left: labelIconToTitleSpacing),
+                                  font: font,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          CNPixelPerfectContainer(
+                            adjustPosition: true,
+                            child: CNButton(
+                              onPressed: isEnabled
+                                  ? () {
+                                      _set('Default.5');
+                                      if (isProgressRunning) {
+                                        stopProgress();
+                                      } else {
+                                        startProgress();
+                                      }
+                                    }
+                                  : null,
+                              buttonStyle: buttonStyle,
+                              controlSize: controlSize,
+                              tint: tintColor,
+                              debugLog: false,
+                              paddings: glass.paddings(padding),
+                              glassEffect: glass.effect(),
+                              children: [
+                                CNChildProgressView(
+                                  tint: CNColors.fillSecondary,
+                                  value: progressValue.toDouble(),
+                                  total: progressMax.toDouble(),
+                                  style: CNProgressViewStyle.linear,
+                                  controlSize: CNControlSize.small,
+                                  constraints: BoxConstraints.tightFor(width: 80),
+                                ),
+                                CNChildText(
+                                  'Icon and Progress',
+                                  font: font,
+                                  paddings: EdgeInsets.only(left: labelIconToTitleSpacing),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          if (lastGeometry != null) ...[
+                            DefaultTextStyle(
+                              style: CNTheme.of(context).typography.caption1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Last geometry: ${lastGeometry!.x}, ${lastGeometry!.y}, ${lastGeometry!.width}, ${lastGeometry!.height}',
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Physical geometry: ${lastGeometry!.physicalX}, ${lastGeometry!.physicalY}, ${lastGeometry!.physicalWidth}, ${lastGeometry!.physicalHeight}',
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Window geometry: ${lastGeometry!.windowX}, ${lastGeometry!.windowY}, ${lastGeometry!.windowWidth}, ${lastGeometry!.windowHeight}',
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text('Device pixel ratio: ${lastGeometry!.devicePixelRatio}'),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
+                        ),
                     ),
                   ),
                 ),
@@ -261,6 +270,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                     value: labelIconToTitleSpacing,
                     onChanged: (value) => setState(() => labelIconToTitleSpacing = value),
                   ),
+                  ...glassEffectOptionEntries(glass, (value) => setState(() => glass = value)),
                 },
               ),
             ],

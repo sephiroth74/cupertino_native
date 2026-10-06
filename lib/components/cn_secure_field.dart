@@ -41,6 +41,7 @@ class CNSecureField extends CNWidget {
     this.help,
     this.overlay,
     this.background,
+    this.glassEffect,
   });
 
   /// Whether the field should automatically receive focus when created.
@@ -98,6 +99,9 @@ class CNSecureField extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final CNGlassEffect? glassEffect;
 
   @override
   final String? help;

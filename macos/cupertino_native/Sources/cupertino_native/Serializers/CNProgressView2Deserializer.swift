@@ -31,6 +31,7 @@ enum CNProgressView2Deserializer {
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
 
             // Paddings
+            view = CNViewModifierApplicator.applyGlassEffect(payload.glassEffect, to: view)
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
 
             // Constraints last (outermost)

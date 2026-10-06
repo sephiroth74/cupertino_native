@@ -11,6 +11,7 @@ struct CNButton2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
     var help: String?
     var overlay: [String: Any]?
     var background: [String: Any]?
+    var glassEffect: [String: Any]?
     var enabled: Bool?
 
     var children: [[String: Any]]
@@ -31,6 +32,7 @@ struct CNButton2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
         help = nil
         overlay = nil
         background = nil
+        glassEffect = nil
         children = []
         buttonStyle = nil
         role = nil

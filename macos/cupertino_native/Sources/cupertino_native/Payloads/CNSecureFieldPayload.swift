@@ -11,6 +11,7 @@ struct CNSecureFieldPayload: CNSharedPayloadFields {
     var help: String?
     var overlay: [String: Any]?
     var background: [String: Any]?
+    var glassEffect: [String: Any]?
 
     var text: String
     var placeholder: String?
@@ -34,6 +35,7 @@ struct CNSecureFieldPayload: CNSharedPayloadFields {
         help = nil
         overlay = nil
         background = nil
+        glassEffect = nil
         text = ""
         placeholder = nil
         prompt = nil

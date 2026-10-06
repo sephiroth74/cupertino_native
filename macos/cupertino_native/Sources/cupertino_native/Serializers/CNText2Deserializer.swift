@@ -28,6 +28,7 @@ enum CNText2Deserializer {
             view = Self.applyTruncationMode(to: view, payload: payload)
 
             // Paddings
+            view = CNViewModifierApplicator.applyGlassEffect(payload.glassEffect, to: view)
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
 
             // Constraints last (outermost)

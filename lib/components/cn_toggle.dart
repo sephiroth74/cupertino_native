@@ -29,6 +29,7 @@ class CNToggle extends CNWidget {
     this.help,
     this.overlay,
     this.background,
+    this.glassEffect,
   });
 
   /// The content of the toggle (label area). If null, an empty label is used.
@@ -55,6 +56,9 @@ class CNToggle extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final CNGlassEffect? glassEffect;
 
   @override
   final String? help;

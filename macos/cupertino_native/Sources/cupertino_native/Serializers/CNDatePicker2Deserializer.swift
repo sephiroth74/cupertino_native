@@ -61,11 +61,16 @@ enum CNDatePicker2Deserializer {
             // Apply control size
             view = CNViewModifierApplicator.applyControlSize(payload.controlSize, to: view)
 
+            if [nil, "automatic", "compact"].contains(payload.datePickerStyle) {
+                view = AnyView(view.padding(Self.stepperFieldOverflow(payload.controlSize)))
+            }
+
             // Apply shared modifiers
             view = CNViewModifierApplicator.applyForegroundColor(payload.foregroundColor, to: view)
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
 
             // Paddings
+            view = CNViewModifierApplicator.applyGlassEffect(payload.glassEffect, to: view)
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
 
             // Constraints last (outermost)
@@ -105,6 +110,20 @@ enum CNDatePicker2Deserializer {
                 }
             }
             return result.isEmpty ? .date : result
+        }
+
+        /// The stepper-field picker (`.automatic` / `.compact` on macOS) draws past
+        /// the layout bounds it reports — the stepper by 4–8pt on the trailing
+        /// edge and, at large sizes, the field bezel ~5pt above — so a platform
+        /// view sized to those bounds clips it. Measured on macOS 27; padding the
+        /// picker keeps the whole control inside the view.
+        private static func stepperFieldOverflow(_ controlSize: String?) -> EdgeInsets {
+            switch controlSize {
+            case "large", "extraLarge":
+                EdgeInsets(top: 5, leading: 1, bottom: 1, trailing: 8)
+            default:
+                EdgeInsets(top: 1, leading: 1, bottom: 1, trailing: 5)
+            }
         }
 
         private static func applyStyle(to view: AnyView, payload: CNDatePicker2Payload) -> AnyView {

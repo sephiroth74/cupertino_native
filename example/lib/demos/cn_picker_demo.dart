@@ -1,6 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
+import 'package:cupertino_native_example/demos/glass_effect_options.dart';
 import 'package:flutter/cupertino.dart';
 
 const _kDebugLog = false;
@@ -16,6 +17,7 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
   CNControlSize controlSize = CNControlSize.regular;
   Color? foregroundColor;
   FlutterPixelGeometry? geometry;
+  GlassEffectOptions glass = const GlassEffectOptions();
   bool isEnabled = true;
   CNPickerStyle pickerStyle = CNPickerStyle.menu;
   Color? tintColor;
@@ -40,96 +42,101 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
               children: [
                 const SizedBox(height: 16),
                 Center(
-                  child: CNPixelPerfectContainer(
-                    onGeometryChanged: (value) {
-                      debugPrint('Picker geometry changed: $value');
-                      setState(() {
-                        geometry = value;
-                      });
-                    },
-                    adjustPosition: true,
-                    child: CNPicker(
-                      debugLog: _kDebugLog,
-                      controlSize: controlSize,
-                      pickerStyle: pickerStyle,
-                      children: [
-                        CNChildLabel(
-                          'Walk',
-                          systemImage: 'figure.walk',
-                          tag: 'walk',
-                        ),
-                        if (pickerStyle == CNPickerStyle.menu ||
-                            pickerStyle == CNPickerStyle.automatic)
-                          CNChildDivider(),
-                        CNChildLabel(
-                          'Airplane',
-                          systemImage: 'airplane',
-                          tag: 'airplane',
-                        ),
-                        CNChildLabel('Car', systemImage: 'car', tag: 'car'),
-                        CNChildLabel('Bus', systemImage: 'bus', tag: 'bus'),
-                        CNChildLabel('Tram', systemImage: 'tram', tag: 'tram'),
-                        CNChildLabel(
-                          'Train',
-                          systemImage: 'train.side.front.car',
-                          tag: 'train.side.front.car',
-                        ),
-                        CNChildLabel(
-                          'Ferry',
-                          systemImage: 'ferry',
-                          tag: 'ferry',
-                        ),
-                        CNChildLabel(
-                          'Sailboat',
-                          systemImage: 'sailboat',
-                          tag: 'sailboat',
-                        ),
-                        CNChildLabel(
-                          'Bicycle',
-                          systemImage: 'bicycle',
-                          tag: 'bicycle',
-                        ),
-                      ],
-                      label: withLabels
-                          ? [
-                              CNChildText('Picker Style'),
-                              CNChildText('Make a selection'),
-                            ]
-                          : null,
-                      tint: tintColor,
-                      foregroundColor: foregroundColor,
-                      selection: value,
-                      overlay: withOverlay
-                          ? CNOverlay.fill(
-                              CNRoundedRectangle(
-                                cornerRadius: 8.0,
-                                style: CNRoundedCornerStyle.circular,
-                                inset: 0.0,
-                              ),
-                              color: CNTheme.of(
-                                context,
-                              ).accentColor?.withAlpha(51),
-                            )
-                          : null,
-                      background: withBackground
-                          ? CNBackground.shape(
-                              CNRoundedRectangle(
-                                cornerRadius: 8.0,
-                                style: CNRoundedCornerStyle.circular,
-                              ),
-                              color: CNTheme.of(
-                                context,
-                              ).accentColor?.withAlpha(38),
-                            )
-                          : null,
-                      onChanged: isEnabled
-                          ? (value) {
-                              setState(() {
-                                debugPrint('Picker selection changed: $value');
-                                this.value = value;
-                              });
-                            }
-                          : null,
+                  child: GlassBackdrop(
+                    options: glass,
+                    child: CNPixelPerfectContainer(
+                      onGeometryChanged: (value) {
+                        debugPrint('Picker geometry changed: $value');
+                        setState(() {
+                          geometry = value;
+                        });
+                      },
+                      adjustPosition: true,
+                      child: CNPicker(
+                        debugLog: _kDebugLog,
+                        glassEffect: glass.effect(),
+                        paddings: glass.paddings(),
+                        controlSize: controlSize,
+                        pickerStyle: pickerStyle,
+                        children: [
+                          CNChildLabel(
+                            'Walk',
+                            systemImage: 'figure.walk',
+                            tag: 'walk',
+                          ),
+                          if (pickerStyle == CNPickerStyle.menu ||
+                              pickerStyle == CNPickerStyle.automatic)
+                            CNChildDivider(),
+                          CNChildLabel(
+                            'Airplane',
+                            systemImage: 'airplane',
+                            tag: 'airplane',
+                          ),
+                          CNChildLabel('Car', systemImage: 'car', tag: 'car'),
+                          CNChildLabel('Bus', systemImage: 'bus', tag: 'bus'),
+                          CNChildLabel('Tram', systemImage: 'tram', tag: 'tram'),
+                          CNChildLabel(
+                            'Train',
+                            systemImage: 'train.side.front.car',
+                            tag: 'train.side.front.car',
+                          ),
+                          CNChildLabel(
+                            'Ferry',
+                            systemImage: 'ferry',
+                            tag: 'ferry',
+                          ),
+                          CNChildLabel(
+                            'Sailboat',
+                            systemImage: 'sailboat',
+                            tag: 'sailboat',
+                          ),
+                          CNChildLabel(
+                            'Bicycle',
+                            systemImage: 'bicycle',
+                            tag: 'bicycle',
+                          ),
+                        ],
+                        label: withLabels
+                            ? [
+                                CNChildText('Picker Style'),
+                                CNChildText('Make a selection'),
+                              ]
+                            : null,
+                        tint: tintColor,
+                        foregroundColor: foregroundColor,
+                        selection: value,
+                        overlay: withOverlay
+                            ? CNOverlay.fill(
+                                CNRoundedRectangle(
+                                  cornerRadius: 8.0,
+                                  style: CNRoundedCornerStyle.circular,
+                                  inset: 0.0,
+                                ),
+                                color: CNTheme.of(
+                                  context,
+                                ).accentColor?.withAlpha(51),
+                              )
+                            : null,
+                        background: withBackground
+                            ? CNBackground.shape(
+                                CNRoundedRectangle(
+                                  cornerRadius: 8.0,
+                                  style: CNRoundedCornerStyle.circular,
+                                ),
+                                color: CNTheme.of(
+                                  context,
+                                ).accentColor?.withAlpha(38),
+                              )
+                            : null,
+                        onChanged: isEnabled
+                            ? (value) {
+                                setState(() {
+                                  debugPrint('Picker selection changed: $value');
+                                  this.value = value;
+                                });
+                              }
+                            : null,
+                      ),
                     ),
                   ),
                 ),
@@ -251,6 +258,10 @@ class _PickerDemoPageState extends State<PickerDemoPage> {
               'Background': CNToggle(
                 isOn: withBackground,
                 onChanged: (value) => setState(() => withBackground = value),
+              ),
+              ...glassEffectOptionEntries(
+                glass,
+                (value) => setState(() => glass = value),
               ),
             },
           ),

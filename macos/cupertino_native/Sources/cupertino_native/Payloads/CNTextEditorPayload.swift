@@ -12,6 +12,7 @@ struct CNTextEditorPayload: CNSharedPayloadFields {
     var help: String?
     var overlay: [String: Any]?
     var background: [String: Any]?
+    var glassEffect: [String: Any]?
 
     // TextEditor-specific fields
     var text: String
@@ -36,6 +37,7 @@ struct CNTextEditorPayload: CNSharedPayloadFields {
         help = nil
         overlay = nil
         background = nil
+        glassEffect = nil
         text = ""
         selectionBase = nil
         selectionExtent = nil

@@ -147,42 +147,49 @@ class RightSideOptionContainer extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (title != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Text(
-                  title!,
-                  style: CNTheme.of(context).typography.title2,
-                ),
-              ),
-            if (options.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              for (var entry in options.entries)
+        // Scrolls when the options outgrow the window (e.g. once the glass
+        // effect details are expanded).
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (title != null)
                 Padding(
-                  padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(entry.key, style: TextStyle(fontSize: 12)),
-                      ),
-                      SizedBox(
-                        width: 175,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: entry.value,
-                        ),
-                      ),
-                    ],
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    title!,
+                    style: CNTheme.of(context).typography.title2,
                   ),
                 ),
-              const SizedBox(height: 16),
+              if (options.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                for (var entry in options.entries)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            entry.key,
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 175,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: entry.value,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 16),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

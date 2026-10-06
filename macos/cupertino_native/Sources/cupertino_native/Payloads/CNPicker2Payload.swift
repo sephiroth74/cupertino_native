@@ -11,12 +11,14 @@ struct CNPicker2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
     var help: String?
     var overlay: [String: Any]?
     var background: [String: Any]?
+    var glassEffect: [String: Any]?
     var enabled: Bool?
 
     var children: [[String: Any]]
     var selection: String
     var label: [[String: Any]]?
     var pickerStyle: String?
+    var buttonStyle: String?
     var controlSize: String?
     var font: [String: Any]?
     var fixedSize: Bool
@@ -32,10 +34,12 @@ struct CNPicker2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
         help = nil
         overlay = nil
         background = nil
+        glassEffect = nil
         children = []
         selection = ""
         label = nil
         pickerStyle = nil
+        buttonStyle = nil
         controlSize = nil
         font = nil
         enabled = nil
@@ -72,6 +76,10 @@ struct CNPicker2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
             pickerStyle = channel["pickerStyle"] as? String
         }
 
+        if channel.keys.contains("buttonStyle") {
+            buttonStyle = channel["buttonStyle"] as? String
+        }
+
         if channel.keys.contains("controlSize") {
             controlSize = channel["controlSize"] as? String
         }
@@ -99,6 +107,7 @@ struct CNPicker2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
         parts.append(selection)
         parts.append(String(describing: label))
         parts.append(pickerStyle ?? "automatic")
+        parts.append(buttonStyle ?? "nil")
         parts.append(controlSize ?? "nil")
         parts.append(font.map { String(describing: $0) } ?? "nil")
         parts.append(enabled.map { String(describing: $0) } ?? "nil")

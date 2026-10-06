@@ -33,6 +33,7 @@ class CNSlider extends CNWidget {
     this.help,
     this.overlay,
     this.background,
+    this.glassEffect,
   }) : assert(min < max),
        assert(value >= min && value <= max),
        assert(step == null || step > 0),
@@ -79,6 +80,9 @@ class CNSlider extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final CNGlassEffect? glassEffect;
 
   @override
   final String? help;
@@ -197,7 +201,7 @@ class _CNSliderState extends CNWidgetState<CNSlider> {
   }
 
   double _defaultHeight() {
-    final verticalPaddings = widget.paddings?.vertical ?? 0;
+    final verticalPaddings = widget.totalPaddings.vertical;
     final hasTickLabels = widget.ticks?.any((e) => e.label != null) ?? false;
     double defaultHeight;
 

@@ -11,6 +11,7 @@ struct CNMenu2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
     var help: String?
     var overlay: [String: Any]?
     var background: [String: Any]?
+    var glassEffect: [String: Any]?
     var enabled: Bool?
 
     var items: [[String: Any]]
@@ -32,6 +33,7 @@ struct CNMenu2Payload: CNSharedPayloadFields, CNFixedSizablePayload {
         help = nil
         overlay = nil
         background = nil
+        glassEffect = nil
         enabled = nil
         items = []
         label = []

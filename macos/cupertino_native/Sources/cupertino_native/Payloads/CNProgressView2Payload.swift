@@ -12,6 +12,7 @@ struct CNProgressView2Payload: CNSharedPayloadFields {
     var help: String?
     var overlay: [String: Any]?
     var background: [String: Any]?
+    var glassEffect: [String: Any]?
 
     // ProgressView-specific fields
     var style: String?
@@ -30,6 +31,7 @@ struct CNProgressView2Payload: CNSharedPayloadFields {
         help = nil
         overlay = nil
         background = nil
+        glassEffect = nil
         style = "linear"
         controlSize = "regular"
         value = nil

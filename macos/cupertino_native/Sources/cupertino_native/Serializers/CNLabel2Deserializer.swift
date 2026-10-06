@@ -50,6 +50,7 @@ enum CNLabel2Deserializer {
             view = CNViewModifierApplicator.applyFont(payload.font, to: view)
             view = CNViewModifierApplicator.applyForegroundColor(payload.foregroundColor, to: view)
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
+            view = CNViewModifierApplicator.applyGlassEffect(payload.glassEffect, to: view)
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
             view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
             view = CNViewModifierApplicator.applyHelp(payload.help, to: view)

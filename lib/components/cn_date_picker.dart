@@ -30,6 +30,7 @@ class CNDatePicker extends CNWidget {
     this.help,
     this.overlay,
     this.background,
+    this.glassEffect,
   });
 
   /// Control size.
@@ -64,6 +65,9 @@ class CNDatePicker extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final CNGlassEffect? glassEffect;
 
   @override
   final String? help;

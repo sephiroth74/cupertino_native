@@ -267,6 +267,51 @@ enum CNViewModifierApplicator {
         return AnyView(view.background(alignment: alignment) { content })
     }
 
+    /// Applies a Liquid Glass `.glassEffect(_:in:)` built from a glass payload
+    /// (`variant`, `tint`, `interactive`, `shape`, `padding`). `padding` is
+    /// applied first, so it sits inside the glass. No-op when `glassEffect` is
+    /// nil or before macOS 26.
+    static func applyGlassEffect(_ glassEffect: [String: Any]?, to view: AnyView) -> AnyView {
+        guard let glassEffect else {
+            return view
+        }
+        guard #available(macOS 26.0, *) else {
+            return view
+        }
+
+        let view = applyPaddings(CNPaddingsPayload.fromChannel(glassEffect["padding"] as? [String: Any]), to: view)
+
+        var glass: Glass = switch glassEffect["variant"] as? String {
+        case "clear": .clear
+        case "identity": .identity
+        default: .regular
+        }
+        if let tint = CNChannelDeserialization.decodeInt(glassEffect["tint"]) {
+            glass = glass.tint(ColorUtils.swiftUIColorFromARGB(tint))
+        }
+        if CNChannelDeserialization.decodeBool(glassEffect["interactive"]) == true {
+            glass = glass.interactive()
+        }
+
+        if let shapeDict = glassEffect["shape"] as? [String: Any],
+           let shape = CNShapeBuilder.makeShape(shapeDict)
+        {
+            return AnyView(view.glassEffect(glass, in: shape))
+        }
+        return AnyView(view.glassEffect(glass))
+    }
+
+    /// With a glass effect the glass itself is the control's bezel: a style left
+    /// at its default (`nil` / `"automatic"`) resolves to `bezelFreeStyle`, so no
+    /// opaque native bezel shows inside the glass. Explicit styles are kept, which
+    /// is how a caller opts back into the native bezel.
+    static func resolveStyle(_ style: String?, glassEffect: [String: Any]?, bezelFreeStyle: String) -> String? {
+        guard glassEffect != nil, style == nil || style == "automatic" else {
+            return style
+        }
+        return bezelFreeStyle
+    }
+
     /// Applies a decorative rectangle border when `debugLog` is true. This is used for debugging layout issues.
     static func applyDebugLogRectangle(_ debugLog: Bool, to view: AnyView) -> AnyView {
         guard debugLog else {

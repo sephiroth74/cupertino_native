@@ -12,6 +12,7 @@ struct CNDatePicker2Payload: CNSharedPayloadFields {
     var help: String?
     var overlay: [String: Any]?
     var background: [String: Any]?
+    var glassEffect: [String: Any]?
 
     // DatePicker-specific fields
     var selection: Double?
@@ -34,6 +35,7 @@ struct CNDatePicker2Payload: CNSharedPayloadFields {
         help = nil
         overlay = nil
         background = nil
+        glassEffect = nil
         selection = nil
         displayedComponents = ["date"]
         datePickerStyle = "automatic"

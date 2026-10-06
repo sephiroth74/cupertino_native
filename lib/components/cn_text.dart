@@ -23,6 +23,7 @@ class CNText extends CNWidget {
     this.help,
     this.overlay,
     this.background,
+    this.glassEffect,
     this.lineLimit,
     this.lineLimitReservesSpace,
     this.textScale,
@@ -55,6 +56,9 @@ class CNText extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final CNGlassEffect? glassEffect;
 
   @override
   final String? help;
@@ -102,8 +106,8 @@ class _CNTextState extends CNWidgetState<CNText> {
       }
     }
 
-    defaultWidth += (widget.paddings?.horizontal ?? 0);
-    defaultHeight += (widget.paddings?.vertical ?? 0);
+    defaultWidth += widget.totalPaddings.horizontal;
+    defaultHeight += widget.totalPaddings.vertical;
     return Size(defaultWidth, defaultHeight);
   }
 

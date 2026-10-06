@@ -77,6 +77,11 @@ enum CNTextEditorDeserializer {
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
 
             // Paddings
+            // The glass is the editor's background: hide the opaque text background.
+            if payload.glassEffect != nil {
+                view = AnyView(view.scrollContentBackground(.hidden))
+            }
+            view = CNViewModifierApplicator.applyGlassEffect(payload.glassEffect, to: view)
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
 
             // Constraints last (outermost). shrink is always false for the editor,

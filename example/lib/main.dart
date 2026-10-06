@@ -13,6 +13,7 @@ import 'demos/cn_combo_box_demo.dart';
 import 'demos/cn_context_menu_demo.dart';
 import 'demos/cn_date_picker_demo.dart';
 import 'demos/cn_gauge_demo.dart';
+import 'demos/cn_glass_effect_demo.dart';
 import 'demos/cn_icon_button_demo.dart';
 import 'demos/cn_image_demo.dart';
 import 'demos/cn_label_demo.dart';
@@ -56,6 +57,7 @@ const _entries = <_DemoEntry>[
   _DemoEntry('CNContextMenu', 'ellipsis.rectangle', ContextMenuDemoPage()),
   _DemoEntry('CNDatePicker', 'calendar', DatePickerDemoPage()),
   _DemoEntry('CNGauge', 'gauge.chart.lefthalf.righthalf', GaugeDemoPage()),
+  _DemoEntry('Glass Effect', 'drop', GlassEffectDemoPage()),
   _DemoEntry('CNIconButton', 'square.grid.2x2', IconButtonDemoPage()),
   _DemoEntry('CNImage', 'testtube.2', CNImage2DemoPage()),
   _DemoEntry('CNLabel', 'textformat', LabelDemoPage()),
@@ -183,6 +185,7 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
         ),
       ),
       toolBar: CNToolbar(
+        height: 54,
         automaticallyImplyLeading: true,
         leading: [
           // `decoration` is per item: it paints a rounded fill behind this one
@@ -225,6 +228,18 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
         // material: NSVisualEffectViewMaterial.fullScreenUI,
         dividerColor: CNColors.transparent,
         actions: [
+          CNToolbarNativeButton(
+            buttonStyle: CNButtonStyle.glass,
+            controlSize: CNControlSize.large,
+            // Room for the glass outer edge, which renders past the bezel.
+            paddings: const EdgeInsets.all(1),
+            help: 'A native CNButton placed in the toolbar',
+            overflowLabel: 'Share',
+            onPressed: () => debugPrint('Toolbar native button pressed'),
+            children: [
+              CNChildLabel('Share', systemImage: 'square.and.arrow.up'),
+            ],
+          ),
           createToolbarThemePicker(context),
           const CNToolbarSpacer(spacerUnits: 0.25),
           const CNToolbarDivider(),
@@ -598,20 +613,22 @@ CNToolbarItem createToolbarThemePicker(BuildContext context) {
     pickerStyle: CNPickerStyle.menu,
     selection: appTheme.mode.name,
     controlSize: CNControlSize.large,
-    decoration: BoxDecoration(
-      color: CNColors.white,
-      boxShadow: const [
-        BoxShadow(
-          color: Colors.black26,
-          blurRadius: 6,
-          spreadRadius: 2,
-          offset: Offset(0, 2),
-          blurStyle: BlurStyle.normal,
-        ),
-      ],
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: Colors.transparent),
-    ),
+    paddings: const EdgeInsets.all(1),
+    glassEffect: const CNGlassEffect(interactive: false, padding: EdgeInsets.all(7.0)),
+    // decoration: BoxDecoration(
+    //   color: CNColors.white,
+    //   boxShadow: const [
+    //     BoxShadow(
+    //       color: Colors.black26,
+    //       blurRadius: 6,
+    //       spreadRadius: 2,
+    //       offset: Offset(0, 2),
+    //       blurStyle: BlurStyle.normal,
+    //     ),
+    //   ],
+    //   borderRadius: BorderRadius.circular(14),
+    //   border: Border.all(color: Colors.transparent),
+    // ),
     // background: CNBackground.shape(
     //   const CNRoundedRectangle(cornerRadius: 14),
     //   color: CNTheme.of(context).accentColor?.withAlpha(51),

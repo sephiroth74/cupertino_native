@@ -41,6 +41,7 @@ class CNTextEditor extends CNWidget {
     this.help,
     this.overlay,
     this.background,
+    this.glassEffect,
   });
 
   /// Whether the editor should automatically receive focus when created.
@@ -96,6 +97,9 @@ class CNTextEditor extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final CNGlassEffect? glassEffect;
 
   @override
   final String? help;

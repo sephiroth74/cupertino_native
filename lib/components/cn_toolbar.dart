@@ -46,8 +46,9 @@ abstract class CNObstructingPreferredSizeWidget implements PreferredSizeWidget {
 /// ```
 ///
 /// Items ([actions] / [leading]) may be native platform-view controls
-/// ([CNToolbarIconButton], [CNToolbarPullDownButton], [CNToolbarPicker]) or pure
-/// Flutter widgets ([CNToolbarDivider], [CNToolbarSpacer], [CNToolbarCustomItem]).
+/// ([CNToolbarIconButton], [CNToolbarNativeButton], [CNToolbarPullDownButton],
+/// [CNToolbarPicker]) or pure Flutter widgets ([CNToolbarDivider],
+/// [CNToolbarSpacer], [CNToolbarCustomItem]).
 class CNToolbar extends StatefulWidget
     implements CNObstructingPreferredSizeWidget {
   /// Creates a Flutter toolbar.
@@ -386,9 +387,16 @@ class CNToolbarIconButton extends CNToolbarItem {
     this.showLabel = false,
     this.tooltip,
     this.tint,
+    this.glassEffect,
+    this.paddings,
     super.decoration,
     super.decorationPadding,
   });
+
+  /// Optional Liquid Glass layer drawn behind the control (see
+  /// [CNGlassEffect]). Pair it with [paddings] so the glass's outer edge is not
+  /// clipped by the native view.
+  final CNGlassEffect? glassEffect;
 
   /// Optional text label (shown beneath the icon when [showLabel] is true, and
   /// used as the overflow-menu title).
@@ -396,6 +404,10 @@ class CNToolbarIconButton extends CNToolbarItem {
 
   /// Called when tapped. When null, the button is disabled.
   final VoidCallback? onPressed;
+
+  /// Optional padding around the control, applied natively outside its bezel
+  /// (and outside [glassEffect]).
+  final EdgeInsetsGeometry? paddings;
 
   /// Whether to render [label] beneath the icon.
   final bool showLabel;
@@ -447,6 +459,8 @@ class CNToolbarIconButton extends CNToolbarItem {
           constraints: BoxConstraints.tightFor(width: side, height: side),
           tint: tint,
           help: tooltip,
+          glassEffect: glassEffect,
+          paddings: paddings,
           children: [
             if (showLabel && label != null)
               CNChildLabel(label!, systemImage: systemImage, font: iconFont)
@@ -523,6 +537,124 @@ abstract class CNToolbarItem {
   CNChild? toOverflowChild(BuildContext context);
 }
 
+/// A plain native button ([CNButton]) placed as a toolbar item.
+///
+/// Unlike [CNToolbarIconButton], which pins a borderless symbol to a square
+/// frame sized off the bar, this item renders the button exactly as [CNButton]
+/// would: any [children] content and [buttonStyle], at its natural size,
+/// vertically centered in the bar (it does not manage its own height).
+///
+/// ```dart
+/// CNToolbarNativeButton(
+///   buttonStyle: CNButtonStyle.glass,
+///   paddings: const EdgeInsets.all(2),
+///   overflowLabel: 'Share',
+///   onPressed: share,
+///   children: [CNChildLabel('Share', systemImage: 'square.and.arrow.up')],
+/// )
+/// ```
+class CNToolbarNativeButton extends CNToolbarItem {
+  /// Creates a toolbar button whose label is built from [children].
+  const CNToolbarNativeButton({
+    required this.children,
+    this.onPressed,
+    this.buttonStyle = CNButtonStyle.automatic,
+    this.role = CNButtonRole.none,
+    this.controlSize,
+    this.labelStyle,
+    this.tint,
+    this.foregroundColor,
+    this.help,
+    this.overlay,
+    this.background,
+    this.glassEffect,
+    this.paddings,
+    this.overflowLabel,
+    super.decoration,
+    super.decorationPadding,
+  });
+
+  /// Optional background applied to the button.
+  final CNBackground? background;
+
+  /// Visual style for the button.
+  final CNButtonStyle buttonStyle;
+
+  /// Content views inside the button's label (see [CNButton.children]).
+  final List<CNChild> children;
+
+  /// Control size for the button.
+  final CNControlSize? controlSize;
+
+  /// Optional foreground color applied to the button.
+  final Color? foregroundColor;
+
+  /// Optional Liquid Glass layer drawn behind the button (see
+  /// [CNGlassEffect]). Pair it with [paddings] so the glass's outer edge is not
+  /// clipped by the native view.
+  final CNGlassEffect? glassEffect;
+
+  /// Optional tooltip text shown on hover (SwiftUI `.help()`).
+  final String? help;
+
+  /// Label style applied inside the button.
+  final CNLabelStyle? labelStyle;
+
+  /// Called when tapped. When null, the button is disabled.
+  final VoidCallback? onPressed;
+
+  /// Optional label used in the overflow menu (no overflow entry if null).
+  final String? overflowLabel;
+
+  /// Optional decorative layer drawn on top of the button.
+  final CNOverlay? overlay;
+
+  /// Optional padding around the button, applied natively outside its bezel.
+  ///
+  /// Glass styles ([CNButtonStyle.glass], [CNButtonStyle.prominentGlass]) draw
+  /// their outer edge past the button's bounds; a few points of padding give the
+  /// native view room to render it without clipping.
+  final EdgeInsetsGeometry? paddings;
+
+  /// Semantic role for the button action.
+  final CNButtonRole role;
+
+  /// Optional tint, a [Color] or a [CNShapeStyle] (see [CNButton.tint]).
+  final Object? tint;
+
+  @override
+  CNChild? toOverflowChild(BuildContext context) {
+    if (overflowLabel == null) return null;
+    return CNChildButton(
+      tag: overflowLabel!,
+      title: overflowLabel!,
+      role: role,
+      enabled: onPressed != null,
+      help: help,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CNButton(
+      onPressed: onPressed,
+      buttonStyle: buttonStyle,
+      role: role,
+      controlSize: controlSize,
+      labelStyle: labelStyle,
+      tint: tint,
+      foregroundColor: foregroundColor,
+      help: help,
+      overlay: overlay,
+      background: background,
+      glassEffect: glassEffect,
+      paddings: paddings,
+      shrink: true,
+      children: children,
+    );
+  }
+}
+
 /// A picker backed by a native `CNPicker`.
 class CNToolbarPicker extends CNToolbarItem {
   /// Creates a toolbar picker.
@@ -536,6 +668,9 @@ class CNToolbarPicker extends CNToolbarItem {
     this.background,
     this.help,
     this.controlSize,
+    this.buttonStyle,
+    this.glassEffect,
+    this.paddings,
     super.decoration,
     super.decorationPadding,
   });
@@ -543,11 +678,20 @@ class CNToolbarPicker extends CNToolbarItem {
   /// Optional background applied to the picker.
   final CNBackground? background;
 
+  /// Button style of the picker's trigger (see [CNPicker.buttonStyle]). With a
+  /// [glassEffect] the bezel is dropped unless a style is set explicitly.
+  final CNButtonStyle? buttonStyle;
+
   /// Picker items (each with a tag).
   final List<CNChild> children;
 
   /// Control size for the picker.
   final CNControlSize? controlSize;
+
+  /// Optional Liquid Glass layer drawn behind the control (see
+  /// [CNGlassEffect]). Pair it with [paddings] so the glass's outer edge is not
+  /// clipped by the native view.
+  final CNGlassEffect? glassEffect;
 
   /// Optional tooltip text shown on hover (SwiftUI `.help()`).
   final String? help;
@@ -557,6 +701,10 @@ class CNToolbarPicker extends CNToolbarItem {
 
   /// Called with the newly selected tag.
   final ValueChanged<String>? onChanged;
+
+  /// Optional padding around the control, applied natively outside its bezel
+  /// (and outside [glassEffect]).
+  final EdgeInsetsGeometry? paddings;
 
   /// Visual style for the picker.
   final CNPickerStyle pickerStyle;
@@ -589,6 +737,9 @@ class CNToolbarPicker extends CNToolbarItem {
       pickerStyle: pickerStyle,
       tint: tint,
       background: background,
+      buttonStyle: buttonStyle,
+      glassEffect: glassEffect,
+      paddings: paddings,
       shrink: true,
       controlSize: controlSize ?? CNControlSize.regular,
     );
@@ -602,10 +753,18 @@ class CNToolbarPullDownButton extends CNToolbarItem {
     required this.items,
     required this.label,
     this.onItemPressed,
+    this.menuStyle = CNMenuStyle.automatic,
     this.tint,
+    this.glassEffect,
+    this.paddings,
     super.decoration,
     super.decorationPadding,
   });
+
+  /// Optional Liquid Glass layer drawn behind the control (see
+  /// [CNGlassEffect]). Pair it with [paddings] so the glass's outer edge is not
+  /// clipped by the native view.
+  final CNGlassEffect? glassEffect;
 
   /// The menu items.
   final List<CNChild> items;
@@ -613,8 +772,17 @@ class CNToolbarPullDownButton extends CNToolbarItem {
   /// The trigger label content (e.g. an icon).
   final List<CNChild> label;
 
+  /// Visual style of the trigger. With a [glassEffect], the default
+  /// [CNMenuStyle.automatic] drops the bezel; set e.g.
+  /// [CNMenuStyle.borderedButton] to keep it.
+  final CNMenuStyle menuStyle;
+
   /// Called with the pressed item's tag.
   final ValueChanged<String>? onItemPressed;
+
+  /// Optional padding around the control, applied natively outside its bezel
+  /// (and outside [glassEffect]).
+  final EdgeInsetsGeometry? paddings;
 
   /// Optional tint color.
   final Color? tint;
@@ -630,7 +798,10 @@ class CNToolbarPullDownButton extends CNToolbarItem {
       label: label,
       items: items,
       onItemPressed: onItemPressed,
+      menuStyle: menuStyle,
       tint: tint,
+      glassEffect: glassEffect,
+      paddings: paddings,
       shrink: true,
     );
   }

@@ -25,6 +25,7 @@ class CNImage extends CNWidget {
     this.help,
     this.overlay,
     this.background,
+    this.glassEffect,
   });
 
   /// Optional font to apply to the image.
@@ -50,6 +51,9 @@ class CNImage extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final CNGlassEffect? glassEffect;
 
   @override
   final String? help;
@@ -99,8 +103,8 @@ class _CNImageState extends CNWidgetState<CNImage> {
       fontSize = 36;
     }
 
-    final double defaultWidth = fontSize + (widget.paddings?.horizontal ?? 0);
-    final double defaultHeight = fontSize + (widget.paddings?.vertical ?? 0);
+    final double defaultWidth = fontSize + widget.totalPaddings.horizontal;
+    final double defaultHeight = fontSize + widget.totalPaddings.vertical;
 
     return Size(defaultWidth, defaultHeight);
   }

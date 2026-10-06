@@ -11,6 +11,7 @@ struct CNLabel2Payload: CNSharedPayloadFields {
     var help: String?
     var overlay: [String: Any]?
     var background: [String: Any]?
+    var glassEffect: [String: Any]?
 
     var title: [String: Any]?
     var image: [String: Any]?
@@ -30,6 +31,7 @@ struct CNLabel2Payload: CNSharedPayloadFields {
         help = nil
         overlay = nil
         background = nil
+        glassEffect = nil
         title = nil
         image = nil
         font = nil

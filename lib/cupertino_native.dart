@@ -49,6 +49,7 @@ export 'model/control_size.dart';
 export 'style/button_style.dart';
 export 'style/cn_background.dart';
 export 'style/cn_colors.dart';
+export 'style/cn_glass_effect.dart';
 export 'style/cn_overlay.dart';
 export 'style/cn_shape.dart';
 export 'style/cn_shape_style.dart';

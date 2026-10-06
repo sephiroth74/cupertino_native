@@ -33,6 +33,7 @@ class CNButton extends CNWidget {
     this.help,
     this.overlay,
     this.background,
+    this.glassEffect,
   });
 
   /// Visual style for the button.
@@ -69,6 +70,9 @@ class CNButton extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final CNGlassEffect? glassEffect;
 
   @override
   final String? help;

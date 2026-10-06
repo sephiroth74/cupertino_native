@@ -1,6 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
+import 'package:cupertino_native_example/demos/glass_effect_options.dart';
 import 'package:flutter/cupertino.dart';
 
 const _kDebugLog = false;
@@ -22,6 +23,7 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
   CNFont? font;
   double fontSize = _kFontSize;
   Color? foregroundColor;
+  GlassEffectOptions glass = const GlassEffectOptions();
   bool limitLength = false;
   bool selectable = true;
   String selectionInfo = '';
@@ -71,48 +73,52 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
                 const SizedBox(height: 12),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: CNTextField(
-                    autofocus: true,
-                    paddings: EdgeInsets.all(borderWidth ?? 0),
-                    controlSize: controlSize,
-                    debugLog: _kDebugLog,
-                    textFieldStyle: textFieldStyle,
-                    controller: controller,
-                    enabled: enabled,
-                    selectable: selectable,
-                    background: withBackground
-                        ? CNBackground.shape(
-                            CNRoundedRectangle(
-                              cornerRadius: 8.0,
-                              style: CNRoundedCornerStyle.circular,
-                              inset: 0.0,
-                            ),
-                            color: CNTheme.of(
-                              context,
-                            ).accentColor?.withAlpha(51),
-                          )
-                        : null,
-                    maxLength: limitLength ? 10 : null,
-                    overlay: borderWidth != null && borderColor != null
-                        ? CNOverlay.stroke(
-                            CNRoundedRectangle(cornerRadius: 8.0),
-                            color: borderColor,
-                            lineWidth: borderWidth!,
-                          )
-                        : null,
-                    foregroundColor: foregroundColor,
-                    font: font,
-                    tint: tintColor,
-                    placeholder: 'Enter something...',
-                    onFocusChange: (value) {
-                      debugPrint('onFocusChange: $value');
-                    },
-                    onChanged: (value) {
-                      debugPrint('onChanged: $value');
-                    },
-                    onSubmitted: (value) {
-                      debugPrint('onSubmitted: $value');
-                    },
+                  child: GlassBackdrop(
+                    options: glass,
+                    child: CNTextField(
+                      autofocus: true,
+                      paddings: glass.paddings(EdgeInsets.all(borderWidth ?? 0)),
+                      glassEffect: glass.effect(),
+                      controlSize: controlSize,
+                      debugLog: _kDebugLog,
+                      textFieldStyle: textFieldStyle,
+                      controller: controller,
+                      enabled: enabled,
+                      selectable: selectable,
+                      background: withBackground
+                          ? CNBackground.shape(
+                              CNRoundedRectangle(
+                                cornerRadius: 8.0,
+                                style: CNRoundedCornerStyle.circular,
+                                inset: 0.0,
+                              ),
+                              color: CNTheme.of(
+                                context,
+                              ).accentColor?.withAlpha(51),
+                            )
+                          : null,
+                      maxLength: limitLength ? 10 : null,
+                      overlay: borderWidth != null && borderColor != null
+                          ? CNOverlay.stroke(
+                              CNRoundedRectangle(cornerRadius: 8.0),
+                              color: borderColor,
+                              lineWidth: borderWidth!,
+                            )
+                          : null,
+                      foregroundColor: foregroundColor,
+                      font: font,
+                      tint: tintColor,
+                      placeholder: 'Enter something...',
+                      onFocusChange: (value) {
+                        debugPrint('onFocusChange: $value');
+                      },
+                      onChanged: (value) {
+                        debugPrint('onChanged: $value');
+                      },
+                      onSubmitted: (value) {
+                        debugPrint('onSubmitted: $value');
+                      },
+                    ),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -187,6 +193,10 @@ class _TextFieldDemoPageState extends State<TextFieldDemoPage> {
               'Background': CNToggle(
                 isOn: withBackground,
                 onChanged: (value) => setState(() => withBackground = value),
+              ),
+              ...glassEffectOptionEntries(
+                glass,
+                (value) => setState(() => glass = value),
               ),
             },
           ),

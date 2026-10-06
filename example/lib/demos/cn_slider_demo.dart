@@ -1,6 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
+import 'package:cupertino_native_example/demos/glass_effect_options.dart';
 import 'package:flutter/cupertino.dart';
 
 const _kDebugLog = false;
@@ -14,6 +15,7 @@ class SliderDemoPage extends StatefulWidget {
 
 class _SliderDemoPageState extends State<SliderDemoPage> {
   double _defaultSliderValue = .5;
+  GlassEffectOptions _glass = const GlassEffectOptions();
   bool _hasTicks = false;
   bool _isEditing = false;
   bool _isEnabled = true;
@@ -41,36 +43,42 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                 const SizedBox(height: 16),
                 Text('Value: ${_defaultSliderValue.toStringAsFixed(2)}'),
                 const SizedBox(height: 16),
-                CNSlider(
-                  debugLog: _kDebugLog,
-                  value: _defaultSliderValue,
-                  onChanged: _isEnabled
-                      ? (v) => setState(() {
-                          debugPrint('new value: $v');
-                          _defaultSliderValue = v;
-                        })
-                      : null,
-                  onEditingChanged: (editing) =>
-                      setState(() => _isEditing = editing),
-                  minimumValueLabel: _showLabels ? "0.0" : null,
-                  maximumValueLabel: _showLabels ? "1.0" : null,
-                  step: _isStepped ? 0.05 : null,
-                  ticks: _hasTicks
-                      ? [
-                          CNSliderTick(0.1, label: "0.1"),
-                          CNSliderTick(0.2, label: "0.2"),
-                          CNSliderTick(0.3, label: "0.3"),
-                          CNSliderTick(0.4, label: "0.4"),
-                          CNSliderTick(0.5, label: "0.5"),
-                          CNSliderTick(0.6, label: "0.6"),
-                          CNSliderTick(0.7, label: "0.7"),
-                          CNSliderTick(0.8, label: "0.8"),
-                          CNSliderTick(0.9, label: "0.9"),
-                        ]
-                      : null,
-                  controlSize: _size,
-                  tint: _tintColor,
-                  paddings: EdgeInsets.only(bottom: 6, top: 2),
+                GlassBackdrop(
+                  options: _glass,
+                  child: CNSlider(
+                    debugLog: _kDebugLog,
+                    glassEffect: _glass.effect(minPadding: 8),
+                    value: _defaultSliderValue,
+                    onChanged: _isEnabled
+                        ? (v) => setState(() {
+                            debugPrint('new value: $v');
+                            _defaultSliderValue = v;
+                          })
+                        : null,
+                    onEditingChanged: (editing) =>
+                        setState(() => _isEditing = editing),
+                    minimumValueLabel: _showLabels ? "0.0" : null,
+                    maximumValueLabel: _showLabels ? "1.0" : null,
+                    step: _isStepped ? 0.05 : null,
+                    ticks: _hasTicks
+                        ? [
+                            CNSliderTick(0.1, label: "0.1"),
+                            CNSliderTick(0.2, label: "0.2"),
+                            CNSliderTick(0.3, label: "0.3"),
+                            CNSliderTick(0.4, label: "0.4"),
+                            CNSliderTick(0.5, label: "0.5"),
+                            CNSliderTick(0.6, label: "0.6"),
+                            CNSliderTick(0.7, label: "0.7"),
+                            CNSliderTick(0.8, label: "0.8"),
+                            CNSliderTick(0.9, label: "0.9"),
+                          ]
+                        : null,
+                    controlSize: _size,
+                    tint: _tintColor,
+                    paddings: _glass.paddings(
+                      EdgeInsets.only(bottom: 6, top: 2),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -113,6 +121,10 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                 colors: kSystemColors,
                 value: _tintColor,
                 onChanged: (c) => setState(() => _tintColor = c),
+              ),
+              ...glassEffectOptionEntries(
+                _glass,
+                (v) => setState(() => _glass = v),
               ),
             },
           ),

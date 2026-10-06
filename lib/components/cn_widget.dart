@@ -2,6 +2,7 @@
 
 import 'package:cupertino_native/channel/params.dart';
 import 'package:cupertino_native/style/cn_background.dart';
+import 'package:cupertino_native/style/cn_glass_effect.dart';
 import 'package:cupertino_native/style/cn_overlay.dart';
 import 'package:cupertino_native/style/cn_shape_style.dart';
 import 'package:flutter/widgets.dart';
@@ -48,6 +49,16 @@ abstract class CNWidget extends StatefulWidget {
   /// (SwiftUI `.background(...)`), e.g. a color fill or a filled shape.
   CNBackground? get background => null;
 
+  /// Optional Liquid Glass layer drawn behind the native view
+  /// (SwiftUI `.glassEffect(_:in:)`, macOS 26+).
+  CNGlassEffect? get glassEffect => null;
+
+  /// Total inset the native side adds around the content: [paddings] plus the
+  /// [glassEffect]'s inner padding. Use it when estimating a default size.
+  EdgeInsetsGeometry get totalPaddings => (paddings ?? EdgeInsets.zero).add(
+    glassEffect?.padding ?? EdgeInsets.zero,
+  );
+
   /// Serializes the shared modifier fields into a payload map.
   /// Subclasses should call this from [toPayload] to include the common fields.
   ///
@@ -77,6 +88,7 @@ abstract class CNWidget extends StatefulWidget {
     payload['help'] = help;
     payload['overlay'] = overlay?.toMap(context);
     payload['background'] = background?.toMap(context);
+    payload['glassEffect'] = glassEffect?.toMap(context);
     payload['foregroundColor'] = resolveColorToArgb(foregroundColor, context);
     if (effectiveTint is CNShapeStyle) {
       payload['tint'] = effectiveTint.toMap(context);

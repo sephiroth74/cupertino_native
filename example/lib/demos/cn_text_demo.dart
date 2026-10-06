@@ -1,6 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
+import 'package:cupertino_native_example/demos/glass_effect_options.dart';
 import 'package:flutter/cupertino.dart';
 
 const _kDebugLog = false;
@@ -23,6 +24,7 @@ class _TextDemoPageState extends State<TextDemoPage> {
   CNFont? font = CNFont.boldSystem(CNFontSize.points(_kFontSize));
   double fontSize = _kFontSize;
   Color? foregroundColor;
+  GlassEffectOptions glass = const GlassEffectOptions();
   int lineLimit = 1;
   CNTextScale textScale = CNTextScale.defaultScale;
   CNTextTruncationMode truncationMode = CNTextTruncationMode.tail;
@@ -55,16 +57,21 @@ class _TextDemoPageState extends State<TextDemoPage> {
                       ),
                       child: Align(
                         alignment: Alignment.center,
-                        child: CNText(
-                          'Hello World.',
-                          lineLimit: lineLimit,
-                          lineLimitReservesSpace: true,
-                          textScale: textScale,
-                          truncationMode: truncationMode,
-                          font: font,
-                          foregroundColor: foregroundColor,
-                          debugLog: _kDebugLog,
-                          shrink: _kShrink,
+                        child: GlassBackdrop(
+                          options: glass,
+                          child: CNText(
+                            'Hello World.',
+                            glassEffect: glass.effect(minPadding: 8),
+                            paddings: glass.paddings(),
+                            lineLimit: lineLimit,
+                            lineLimitReservesSpace: true,
+                            textScale: textScale,
+                            truncationMode: truncationMode,
+                            font: font,
+                            foregroundColor: foregroundColor,
+                            debugLog: _kDebugLog,
+                            shrink: _kShrink,
+                          ),
                         ),
                       ),
                     ),
@@ -132,6 +139,10 @@ class _TextDemoPageState extends State<TextDemoPage> {
                     (mode) => mode.name == tag,
                   ),
                 ),
+              ),
+              ...glassEffectOptionEntries(
+                glass,
+                (v) => setState(() => glass = v),
               ),
             },
           ),

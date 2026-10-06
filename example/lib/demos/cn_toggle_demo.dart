@@ -1,6 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
+import 'package:cupertino_native_example/demos/glass_effect_options.dart';
 import 'package:flutter/cupertino.dart';
 
 const _kDebugLog = false;
@@ -14,6 +15,7 @@ class ToggleDemo extends StatefulWidget {
 
 class _ToggleDemoState extends State<ToggleDemo> {
   CNControlSize controlSize = CNControlSize.regular;
+  GlassEffectOptions glass = const GlassEffectOptions();
   bool isEnabled = true;
   bool isOn = true;
   Color? tintColor;
@@ -31,25 +33,32 @@ class _ToggleDemoState extends State<ToggleDemo> {
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                CNToggle(
-                  debugLog: _kDebugLog,
-                  isOn: isOn,
-                  toggleStyle: toggleStyle,
-                  controlSize: controlSize,
-                  tint: tintColor,
-                  onChanged: isEnabled ? (v) => setState(() => isOn = v) : null,
-                  content: CNChildVStack(
-                    alignment: CNAlignment.leading,
-                    children: [
-                      CNChildText('Vibrate on Ring'),
-                      CNChildText(
-                        "Enable vibration when the phone rings",
-                        font: CNFont.label(
-                          CNFontSize.preset(CNFontSizePreset.system),
+                GlassBackdrop(
+                  options: glass,
+                  child: CNToggle(
+                    debugLog: _kDebugLog,
+                    glassEffect: glass.effect(minPadding: 6),
+                    paddings: glass.paddings(),
+                    isOn: isOn,
+                    toggleStyle: toggleStyle,
+                    controlSize: controlSize,
+                    tint: tintColor,
+                    onChanged: isEnabled
+                        ? (v) => setState(() => isOn = v)
+                        : null,
+                    content: CNChildVStack(
+                      alignment: CNAlignment.leading,
+                      children: [
+                        CNChildText('Vibrate on Ring'),
+                        CNChildText(
+                          "Enable vibration when the phone rings",
+                          font: CNFont.label(
+                            CNFontSize.preset(CNFontSizePreset.system),
+                          ),
+                          foregroundColor: CupertinoColors.secondaryLabel,
                         ),
-                        foregroundColor: CupertinoColors.secondaryLabel,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -85,6 +94,10 @@ class _ToggleDemoState extends State<ToggleDemo> {
               'Enabled': CNToggle(
                 isOn: isEnabled,
                 onChanged: (v) => setState(() => isEnabled = v),
+              ),
+              ...glassEffectOptionEntries(
+                glass,
+                (v) => setState(() => glass = v),
               ),
             },
           ),

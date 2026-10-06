@@ -29,6 +29,7 @@ class CNLabel extends CNWidget {
     this.help,
     this.overlay,
     this.background,
+    this.glassEffect,
   });
 
   /// Convenience constructor that accepts plain strings.
@@ -46,6 +47,7 @@ class CNLabel extends CNWidget {
     BoxConstraints? constraints,
     Color? tint,
     EdgeInsetsGeometry? paddings,
+    CNGlassEffect? glassEffect,
   }) = _CNLabelSimple;
 
   /// Optional font applied to the entire label.
@@ -74,6 +76,9 @@ class CNLabel extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final CNGlassEffect? glassEffect;
 
   @override
   final String? help;
@@ -127,6 +132,7 @@ class _CNLabelSimple extends CNLabel {
     super.constraints,
     super.tint,
     super.paddings,
+    super.glassEffect,
   }) : _titleText = titleText,
        _font = font,
        _foregroundColor2 = foregroundColor,

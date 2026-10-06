@@ -97,49 +97,65 @@ enum CNShapeBuilder {
 
     // MARK: - Shape dispatch
 
+    /// Builds the bare (unpainted) shape described by a shape dictionary, with
+    /// its `inset` applied — e.g. the shape of a glass effect.
+    ///
+    /// Returns `nil` for an unknown shape type.
+    static func makeShape(_ shapeDict: [String: Any]) -> AnyShape? {
+        guard let shape = makeInsettableShape(shapeDict) else { return nil }
+        return eraseShape(shape, inset: decodeInset(shapeDict))
+    }
+
+    private static func eraseShape(_ shape: some InsettableShape, inset: CGFloat) -> AnyShape {
+        AnyShape(shape.inset(by: inset))
+    }
+
     private static func paintShape(
         _ shapeDict: [String: Any],
         mode: String,
         paint: AnyShapeStyle,
         strokeStyle: StrokeStyle,
     ) -> AnyView? {
-        let type = shapeDict["type"] as? String ?? ""
-        let inset = CNChannelDeserialization.decodeCGFloat(shapeDict["inset"]) ?? 0
+        guard let shape = makeInsettableShape(shapeDict) else { return nil }
+        return render(shape, inset: decodeInset(shapeDict), mode: mode, paint: paint, strokeStyle: strokeStyle)
+    }
 
-        switch type {
+    private static func decodeInset(_ shapeDict: [String: Any]) -> CGFloat {
+        CNChannelDeserialization.decodeCGFloat(shapeDict["inset"]) ?? 0
+    }
+
+    private static func makeInsettableShape(_ shapeDict: [String: Any]) -> (any InsettableShape)? {
+        switch shapeDict["type"] as? String ?? "" {
         case "rectangle":
-            return render(Rectangle(), inset: inset, mode: mode, paint: paint, strokeStyle: strokeStyle)
+            return Rectangle()
 
         case "roundedRectangle":
             let style = cornerStyle(shapeDict["style"] as? String)
             if let width = CNChannelDeserialization.decodeCGFloat(shapeDict["cornerWidth"]),
                let height = CNChannelDeserialization.decodeCGFloat(shapeDict["cornerHeight"])
             {
-                let shape = RoundedRectangle(cornerSize: CGSize(width: width, height: height), style: style)
-                return render(shape, inset: inset, mode: mode, paint: paint, strokeStyle: strokeStyle)
+                return RoundedRectangle(cornerSize: CGSize(width: width, height: height), style: style)
             }
             let radius = CNChannelDeserialization.decodeCGFloat(shapeDict["cornerRadius"]) ?? 8
-            return render(RoundedRectangle(cornerRadius: radius, style: style), inset: inset, mode: mode, paint: paint, strokeStyle: strokeStyle)
+            return RoundedRectangle(cornerRadius: radius, style: style)
 
         case "circle":
-            return render(Circle(), inset: inset, mode: mode, paint: paint, strokeStyle: strokeStyle)
+            return Circle()
 
         case "ellipse":
-            return render(Ellipse(), inset: inset, mode: mode, paint: paint, strokeStyle: strokeStyle)
+            return Ellipse()
 
         case "capsule":
-            let style = cornerStyle(shapeDict["style"] as? String)
-            return render(Capsule(style: style), inset: inset, mode: mode, paint: paint, strokeStyle: strokeStyle)
+            return Capsule(style: cornerStyle(shapeDict["style"] as? String))
 
         case "unevenRoundedRectangle":
-            let shape = UnevenRoundedRectangle(
+            return UnevenRoundedRectangle(
                 topLeadingRadius: CNChannelDeserialization.decodeCGFloat(shapeDict["topLeading"]) ?? 0,
                 bottomLeadingRadius: CNChannelDeserialization.decodeCGFloat(shapeDict["bottomLeading"]) ?? 0,
                 bottomTrailingRadius: CNChannelDeserialization.decodeCGFloat(shapeDict["bottomTrailing"]) ?? 0,
                 topTrailingRadius: CNChannelDeserialization.decodeCGFloat(shapeDict["topTrailing"]) ?? 0,
                 style: cornerStyle(shapeDict["style"] as? String),
             )
-            return render(shape, inset: inset, mode: mode, paint: paint, strokeStyle: strokeStyle)
 
         default:
             return nil

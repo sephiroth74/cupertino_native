@@ -29,6 +29,7 @@ class CNStepper extends CNWidget {
     this.help,
     this.overlay,
     this.background,
+    this.glassEffect,
   }) : assert(min < max),
        assert(value >= min && value <= max),
        assert(step > 0);
@@ -62,6 +63,9 @@ class CNStepper extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final CNGlassEffect? glassEffect;
 
   @override
   final String? help;

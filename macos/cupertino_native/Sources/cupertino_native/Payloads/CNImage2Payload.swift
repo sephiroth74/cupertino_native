@@ -12,6 +12,7 @@ struct CNImage2Payload: CNSharedPayloadFields {
     var help: String?
     var overlay: [String: Any]?
     var background: [String: Any]?
+    var glassEffect: [String: Any]?
 
     // Image-specific fields
     var systemSymbolName: String
@@ -31,6 +32,7 @@ struct CNImage2Payload: CNSharedPayloadFields {
         help = nil
         overlay = nil
         background = nil
+        glassEffect = nil
         systemSymbolName = "questionmark.circle"
         font = nil
         symbolRenderingMode = nil

@@ -23,6 +23,7 @@ class CNPicker extends CNWidget {
     this.label,
     this.onChanged,
     this.pickerStyle = CNPickerStyle.automatic,
+    this.buttonStyle,
     this.controlSize = CNControlSize.regular,
     this.font,
     this.shrink = true,
@@ -34,6 +35,7 @@ class CNPicker extends CNWidget {
     this.help,
     this.overlay,
     this.background,
+    this.glassEffect,
   }) : assert(
          children.every(
            (c) =>
@@ -44,6 +46,16 @@ class CNPicker extends CNWidget {
          ),
          'CNPicker2 children must be CNChildText, CNChildImage, CNChildLabel, or CNChildDivider',
        );
+
+  /// Button style applied to the picker's trigger (SwiftUI `.buttonStyle`).
+  ///
+  /// Only meaningful for [CNPickerStyle.menu] / [CNPickerStyle.automatic]
+  /// pickers, whose closed state is a button. [CNButtonStyle.borderless] drops
+  /// the native bezel. With a [glassEffect] and no explicit style the bezel is
+  /// dropped automatically; set e.g. [CNButtonStyle.bordered] to keep it. The
+  /// glass button styles have no effect on a picker: use [glassEffect]
+  /// instead.
+  final CNButtonStyle? buttonStyle;
 
   /// Picker items. Each must have a non-null [CNChild.tag].
   final List<CNChild> children;
@@ -82,6 +94,9 @@ class CNPicker extends CNWidget {
 
   @override
   final Color? foregroundColor;
+
+  @override
+  final CNGlassEffect? glassEffect;
 
   @override
   final String? help;
@@ -221,6 +236,7 @@ class _CNPickerState extends CNWidgetState<CNPicker> {
       'selection': widget.selection,
       'label': widget.label?.map((c) => c.toChildPayload(context)).toList(),
       'pickerStyle': widget.pickerStyle.name,
+      'buttonStyle': widget.buttonStyle?.name,
       'controlSize': widget.controlSize.name,
       'font': widget.font?.toMap(),
       'enabled': widget.enabled,

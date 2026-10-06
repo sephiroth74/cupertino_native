@@ -25,13 +25,15 @@ enum CNButton2Deserializer {
                 },
             )
 
-            view = CNViewModifierApplicator.applyButtonStyle(payload.buttonStyle, to: view)
+            let buttonStyle = CNViewModifierApplicator.resolveStyle(payload.buttonStyle, glassEffect: payload.glassEffect, bezelFreeStyle: "borderless")
+            view = CNViewModifierApplicator.applyButtonStyle(buttonStyle, to: view)
             view = CNViewModifierApplicator.applyControlSize(payload.controlSize, to: view)
             view = CNViewModifierApplicator.applyLabelStyle(payload.labelStyle, to: view)
 
             // Shared modifiers
             view = CNViewModifierApplicator.applyForegroundColor(payload.foregroundColor, to: view)
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
+            view = CNViewModifierApplicator.applyGlassEffect(payload.glassEffect, to: view)
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
             view = CNViewModifierApplicator.applyFixedSize(payload.fixedSize, to: view)
             view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)

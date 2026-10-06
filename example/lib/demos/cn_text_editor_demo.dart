@@ -1,6 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
+import 'package:cupertino_native_example/demos/glass_effect_options.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
@@ -25,6 +26,12 @@ class _TextEditorDemoPageState extends State<TextEditorDemoPage> {
   CNFont? font = CNFont.system(CNFontSize.points(_kFontSize));
   double fontSize = _kFontSize;
   Color? foregroundColor;
+  // A capsule makes no sense around a tall editor: start from a rounded rect.
+  GlassEffectOptions glass = const GlassEffectOptions(
+    shape: GlassShapeKind.roundedRectangle,
+    padding: 8,
+  );
+
   bool limitLength = false;
   bool lowercaseOnly = false;
   bool selectable = true;
@@ -70,30 +77,35 @@ class _TextEditorDemoPageState extends State<TextEditorDemoPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    child: CNTextEditor(
-                      autofocus: true,
-                      debugLog: _kDebugLog,
-                      controller: controller,
-                      enabled: enabled,
-                      selectable: selectable,
-                      maxLength: limitLength ? 20 : null,
-                      inputFormatters: lowercaseOnly
-                          ? [
-                              TextInputFormatter.withFunction(
-                                (oldValue, newValue) => newValue.copyWith(
-                                  text: newValue.text.toLowerCase(),
+                    child: GlassBackdrop(
+                      options: glass,
+                      child: CNTextEditor(
+                        autofocus: true,
+                        glassEffect: glass.effect(),
+                        paddings: glass.paddings(),
+                        debugLog: _kDebugLog,
+                        controller: controller,
+                        enabled: enabled,
+                        selectable: selectable,
+                        maxLength: limitLength ? 20 : null,
+                        inputFormatters: lowercaseOnly
+                            ? [
+                                TextInputFormatter.withFunction(
+                                  (oldValue, newValue) => newValue.copyWith(
+                                    text: newValue.text.toLowerCase(),
+                                  ),
                                 ),
-                              ),
-                            ]
-                          : null,
-                      borderColor: borderColor,
-                      borderWidth: borderWidth,
-                      foregroundColor: foregroundColor,
-                      font: font,
-                      tint: tintColor,
-                      onChanged: (value) {
-                        debugPrint('onChanged (len=${value.length})');
-                      },
+                              ]
+                            : null,
+                        borderColor: borderColor,
+                        borderWidth: borderWidth,
+                        foregroundColor: foregroundColor,
+                        font: font,
+                        tint: tintColor,
+                        onChanged: (value) {
+                          debugPrint('onChanged (len=${value.length})');
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -159,6 +171,10 @@ class _TextEditorDemoPageState extends State<TextEditorDemoPage> {
                 onChanged: borderColor != null
                     ? (newWidth) => setState(() => borderWidth = newWidth)
                     : null,
+              ),
+              ...glassEffectOptionEntries(
+                glass,
+                (v) => setState(() => glass = v),
               ),
             },
           ),

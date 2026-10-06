@@ -37,11 +37,13 @@ enum CNMenu2Deserializer {
                 )
             }
 
-            view = applyMenuStyle(payload.menuStyle, to: view)
+            let menuStyle = CNViewModifierApplicator.resolveStyle(payload.menuStyle, glassEffect: payload.glassEffect, bezelFreeStyle: "borderlessButton")
+            view = applyMenuStyle(menuStyle, to: view)
             view = CNViewModifierApplicator.applyControlSize(payload.controlSize, to: view)
             view = CNViewModifierApplicator.applyFont(payload.font, to: view)
             view = CNViewModifierApplicator.applyForegroundColor(payload.foregroundColor, to: view)
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
+            view = CNViewModifierApplicator.applyGlassEffect(payload.glassEffect, to: view)
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
             view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
             view = CNViewModifierApplicator.applyFixedSize(payload.fixedSize, to: view)

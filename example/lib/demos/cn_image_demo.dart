@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
+import 'package:cupertino_native_example/demos/glass_effect_options.dart';
 import 'package:cupertino_native_example/demos/icon_catalog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -38,6 +39,7 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
 
   double fontSize = 32;
   Color? foregroundColor;
+  GlassEffectOptions glass = const GlassEffectOptions();
   bool isDark = false;
   CNSymbolRenderingMode renderingMode = CNSymbolRenderingMode.monochrome;
   Color? selectedBackgroundColor;
@@ -111,7 +113,8 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                       width: imageSize,
                       height: imageSize,
                     ),
-              paddings: EdgeInsets.all(8.0),
+              glassEffect: glass.effect(),
+              paddings: glass.paddings(EdgeInsets.all(8.0)),
             ),
           ),
           const SizedBox(height: 6),
@@ -148,27 +151,30 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              child: Wrap(
-                clipBehavior: Clip.hardEdge,
-                alignment: WrapAlignment.start,
-                spacing: 16.0,
-                runSpacing: 16.0,
-                children: kSFSymbolNames
-                    .getRange(0, min(_kMaxImages, kSFSymbolNames.length))
-                    .map((name) {
-                      return _symbolRow(
-                        systemSymbolName: name,
-                        shrink: _kShrink,
-                        font: font,
-                        symbolRenderingMode: renderingMode,
-                        symbolColorRenderingMode: colorMode,
-                        foregroundStyleColors: colors,
-                        foregroundColor: foregroundColor,
-                        backgroundColor: backgroundColor,
-                        isDark: isDark,
-                      );
-                    })
-                    .toList(),
+              child: GlassBackdrop(
+                options: glass,
+                child: Wrap(
+                  clipBehavior: Clip.hardEdge,
+                  alignment: WrapAlignment.start,
+                  spacing: 16.0,
+                  runSpacing: 16.0,
+                  children: kSFSymbolNames
+                      .getRange(0, min(_kMaxImages, kSFSymbolNames.length))
+                      .map((name) {
+                        return _symbolRow(
+                          systemSymbolName: name,
+                          shrink: _kShrink,
+                          font: font,
+                          symbolRenderingMode: renderingMode,
+                          symbolColorRenderingMode: colorMode,
+                          foregroundStyleColors: colors,
+                          foregroundColor: foregroundColor,
+                          backgroundColor: backgroundColor,
+                          isDark: isDark,
+                        );
+                      })
+                      .toList(),
+                ),
               ),
             ),
           ),
@@ -304,6 +310,10 @@ class _CNImage2DemoPageState extends State<CNImage2DemoPage> {
                   fontSize = value;
                   font = font.copyWith(size: CNFontSize.points(fontSize));
                 }),
+              ),
+              ...glassEffectOptionEntries(
+                glass,
+                (v) => setState(() => glass = v),
               ),
             },
           ),
