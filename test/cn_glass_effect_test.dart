@@ -50,6 +50,42 @@ void main() {
       expect(const CNText('a').totalPaddings.vertical, 0);
     });
   });
+
+  group('CNSearchField', () {
+    testWidgets('forwards its glass effect to the shared payload', (
+      tester,
+    ) async {
+      const effect = CNGlassEffect(
+        variant: CNGlassVariant.clear,
+        padding: EdgeInsets.all(4),
+      );
+      const field = CNSearchField(glassEffect: effect);
+      late Map<String, dynamic> payload;
+      late Map<String, dynamic> expected;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Builder(
+            builder: (context) {
+              payload = field.writeSharedFields(
+                context,
+                payload: <String, dynamic>{},
+                constraints: null,
+              );
+              expected = effect.toMap(context);
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+      expect(payload['glassEffect'], expected);
+      expect(field.totalPaddings.vertical, 8);
+    });
+
+    test('leaves the bezel style unset by default', () {
+      expect(const CNSearchField().bezelStyle, isNull);
+    });
+  });
 }
 
 Future<Map<String, dynamic>> _serialize(

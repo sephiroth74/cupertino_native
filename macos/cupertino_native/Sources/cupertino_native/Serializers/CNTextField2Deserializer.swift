@@ -88,6 +88,12 @@ enum CNTextField2Deserializer {
             view = CNViewModifierApplicator.applyForegroundColor(payload.foregroundColor, to: view)
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
 
+            // Glass and paddings inside the constraints, so the imposed frame
+            // includes them: outside it, a field filling the width would push
+            // the glass ends past the native view, which clips them.
+            view = CNViewModifierApplicator.applyGlassEffect(payload.glassEffect, to: view)
+            view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
+
             // Constraints last (outermost)
             view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
 
@@ -98,10 +104,6 @@ enum CNTextField2Deserializer {
                         .onAppear { isFocused = true },
                 )
             }
-
-            // Paddings
-            view = CNViewModifierApplicator.applyGlassEffect(payload.glassEffect, to: view)
-            view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
 
             view = CNViewModifierApplicator.applyHelp(payload.help, to: view)
             view = CNViewModifierApplicator.applyBackground(payload.background, to: view)

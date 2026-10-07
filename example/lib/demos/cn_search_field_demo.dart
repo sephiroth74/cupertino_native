@@ -1,6 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
+import 'package:cupertino_native_example/demos/glass_effect_options.dart';
 import 'package:flutter/cupertino.dart';
 
 const _kDebugLog = false;
@@ -105,7 +106,7 @@ class SearchFieldDemoPage extends StatefulWidget {
 }
 
 class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
-  CNTextFieldBezelStyle bezelStyle = CNTextFieldBezelStyle.round;
+  CNTextFieldBezelStyle? bezelStyle;
   Color? borderColor;
   double borderWidth = 0.0;
   CNControlSize controlSize = CNControlSize.regular;
@@ -113,6 +114,7 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
   double cornerRadius = 0.0;
   CNFont? font;
   double fontSize = 24.0;
+  GlassEffectOptions glass = const GlassEffectOptions();
   bool isEnabled = true;
   String? lastPicked;
   Color? placeholderColor;
@@ -174,31 +176,36 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 20),
-                  CNPixelPerfectContainer(
-                    child: CNSearchField(
-                      debugLog: _kDebugLog,
-                      controller: controller,
-                      font: font,
-                      controlSize: controlSize,
-                      bezelStyle: bezelStyle,
-                      borderColor: borderColor,
-                      borderWidth: borderWidth,
-                      cornerRadius: cornerRadius,
-                      placeholderColor: placeholderColor,
-                      textColor: textColor,
-                      enabled: isEnabled,
-                      placeholder: 'Search for a file...',
-                      onChanged: (value) {
-                        debugPrint('Search field text changed: $value');
-                      },
-                      onSubmitted: (value) {
-                        debugPrint('Search field text submitted: $value');
-                      },
-                      onSuggestionSelected: (item) {
-                        debugPrint('Suggestion selected: ${item.title}');
-                        setState(() => lastPicked = item.title);
-                      },
-                      onSuggestionsRequested: _suggestionsFor,
+                  GlassBackdrop(
+                    options: glass,
+                    child: CNPixelPerfectContainer(
+                      child: CNSearchField(
+                        debugLog: _kDebugLog,
+                        glassEffect: glass.effect(),
+                        paddings: glass.paddings(),
+                        controller: controller,
+                        font: font,
+                        controlSize: controlSize,
+                        bezelStyle: bezelStyle,
+                        borderColor: borderColor,
+                        borderWidth: borderWidth,
+                        cornerRadius: cornerRadius,
+                        placeholderColor: placeholderColor,
+                        textColor: textColor,
+                        enabled: isEnabled,
+                        placeholder: 'Search for a file...',
+                        onChanged: (value) {
+                          debugPrint('Search field text changed: $value');
+                        },
+                        onSubmitted: (value) {
+                          debugPrint('Search field text submitted: $value');
+                        },
+                        onSuggestionSelected: (item) {
+                          debugPrint('Suggestion selected: ${item.title}');
+                          setState(() => lastPicked = item.title);
+                        },
+                        onSuggestionsRequested: _suggestionsFor,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -300,6 +307,10 @@ class _SearchFieldDemoPageState extends State<SearchFieldDemoPage> {
                 isOn: isEnabled,
                 controlSize: CNControlSize.regular,
                 onChanged: (v) => setState(() => isEnabled = v),
+              ),
+              ...glassEffectOptionEntries(
+                glass,
+                (value) => setState(() => glass = value),
               ),
             },
           ),

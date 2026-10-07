@@ -24,7 +24,8 @@ enum CNGlassVariant {
 ///
 /// Unlike the glass *button styles* ([CNButtonStyle.glass]), which only apply
 /// to buttons, the effect works on any SwiftUI-backed widget — pickers, menus,
-/// labels, text, sliders…
+/// labels, text, sliders… — and on [CNSearchField], through AppKit's
+/// `NSGlassEffectView`.
 ///
 /// The glass hugs the control. Two insets control the spacing around it:
 /// - [padding] is applied *inside* the glass, between the content and the glass
@@ -35,10 +36,11 @@ enum CNGlassVariant {
 /// The glass replaces the control's own bezel: when the control's style is left
 /// at its default, its opaque native chrome is dropped so it doesn't show
 /// inside the glass — buttons and menu pickers render borderless, menus as
-/// [CNMenuStyle.borderlessButton], text fields as [CNTextFieldStyle.plain], and
-/// a text editor hides its text background. Set an explicit style (e.g.
-/// [CNButtonStyle.bordered], [CNMenuStyle.borderedButton],
-/// [CNTextFieldStyle.roundedBorder]) to keep the native bezel inside the glass.
+/// [CNMenuStyle.borderlessButton], text fields as [CNTextFieldStyle.plain],
+/// search fields as [CNTextFieldBezelStyle.none], and a text editor hides its
+/// text background. Set an explicit style (e.g. [CNButtonStyle.bordered],
+/// [CNMenuStyle.borderedButton], [CNTextFieldStyle.roundedBorder]) to keep the
+/// native bezel inside the glass.
 ///
 /// Example — a glass capsule around a menu picker:
 ///

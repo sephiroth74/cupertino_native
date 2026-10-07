@@ -9,18 +9,22 @@ class BezelStylePicker extends StatelessWidget {
     required this.onChanged,
   });
 
-  final ValueChanged<CNTextFieldBezelStyle> onChanged;
-  final CNTextFieldBezelStyle value;
+  /// Called with null when the "default" entry is picked.
+  final ValueChanged<CNTextFieldBezelStyle?> onChanged;
+  final CNTextFieldBezelStyle? value;
 
   @override
   Widget build(BuildContext context) {
     return CNPicker(
-      selection: value.name,
-      children: CNTextFieldBezelStyle.values
-          .map((style) => CNChildText(style.name, tag: style.name))
-          .toList(),
+      selection: value?.name ?? 'default',
+      children: [
+        const CNChildText('default', tag: 'default'),
+        ...CNTextFieldBezelStyle.values.map(
+          (style) => CNChildText(style.name, tag: style.name),
+        ),
+      ],
       onChanged: (value) => onChanged(
-        CNTextFieldBezelStyle.values.firstWhere((e) => e.name == value),
+        CNTextFieldBezelStyle.values.where((e) => e.name == value).firstOrNull,
       ),
       pickerStyle: CNPickerStyle.automatic,
     );

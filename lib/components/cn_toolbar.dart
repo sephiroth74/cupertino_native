@@ -114,7 +114,20 @@ class CNToolbar extends StatefulWidget
   /// Inner padding around the bar content.
   final EdgeInsets padding;
 
-  /// Optional native search field placed before the [actions].
+  /// Optional native search field placed after the [actions], vertically
+  /// centered in the bar at its natural height.
+  ///
+  /// Give it a [CNSearchField.glassEffect] to match glass toolbar items; pair it
+  /// with [CNSearchField.paddings] so the glass's outer edge is not clipped:
+  ///
+  /// ```dart
+  /// search: CNSearchField(
+  ///   placeholder: 'Search',
+  ///   controlSize: CNControlSize.large,
+  ///   paddings: const EdgeInsets.all(1),
+  ///   glassEffect: const CNGlassEffect(padding: EdgeInsets.all(7)),
+  /// ),
+  /// ```
   final CNSearchField? search;
 
   /// The active-state policy of the toolbar's [material].

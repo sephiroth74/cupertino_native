@@ -104,6 +104,10 @@ class CNSuggestionSection {
 /// native code calls this callback and displays the returned sections (each item
 /// supports a title, a secondary title and an SF Symbol image). If null, no
 /// suggestions are shown.
+///
+/// With a [glassEffect] (macOS 26+) the field is embedded in an AppKit
+/// `NSGlassEffectView`, and its focus ring follows the glass shape — the look of
+/// the System Settings sidebar search field.
 class CNSearchField extends CNWidget {
   const CNSearchField({
     super.key,
@@ -114,7 +118,7 @@ class CNSearchField extends CNWidget {
     this.placeholderColor,
     this.font,
     this.controlSize = CNControlSize.regular,
-    this.bezelStyle = CNTextFieldBezelStyle.round,
+    this.bezelStyle,
     this.borderColor,
     this.borderWidth,
     this.cornerRadius,
@@ -131,13 +135,18 @@ class CNSearchField extends CNWidget {
     this.foregroundColor,
     this.paddings,
     this.help,
+    this.glassEffect,
   });
 
   /// Whether the field should automatically receive focus when created.
   final bool autofocus;
 
   /// The border/bezel style of the search field.
-  final CNTextFieldBezelStyle bezelStyle;
+  ///
+  /// Defaults to [CNTextFieldBezelStyle.round], or to
+  /// [CNTextFieldBezelStyle.none] with a [glassEffect], since the glass is the
+  /// bezel then. Set it explicitly to keep a native bezel inside the glass.
+  final CNTextFieldBezelStyle? bezelStyle;
 
   /// Color of the border drawn on the native control's layer.
   ///
@@ -205,6 +214,14 @@ class CNSearchField extends CNWidget {
   @override
   final Color? foregroundColor;
 
+  /// Optional Liquid Glass drawn behind the field (macOS 26+).
+  ///
+  /// Natively an `NSGlassEffectView`, which only supports uniformly rounded
+  /// corners: capsules, circles and ellipses render as a capsule, and a
+  /// [CNUnevenRoundedRectangle] uses its largest corner.
+  @override
+  final CNGlassEffect? glassEffect;
+
   @override
   final String? help;
 
@@ -227,13 +244,15 @@ class CNSearchField extends CNWidget {
 class _CNSearchFieldState extends CNWidgetState<CNSearchField> {
   TextEditingController? _internalController;
   int _suggestionGeneration = 0;
+
   /// Items of the batch currently displayed by the native popup, keyed by the
   /// id handed to native. Lets `suggestionSelected` resolve back to the exact
   /// [CNSuggestionItem] the app returned.
   Map<String, CNSuggestionItem> _visibleSuggestions = const {};
 
   @override
-  Size computeDefaultSize() => const Size(double.infinity, 24.0);
+  Size computeDefaultSize() =>
+      Size(double.infinity, 24.0 + widget.totalPaddings.vertical);
 
   @override
   void didUpdateWidget(covariant CNSearchField oldWidget) {
@@ -328,7 +347,7 @@ class _CNSearchFieldState extends CNWidgetState<CNSearchField> {
       'placeholderColor': resolveColorToArgb(widget.placeholderColor, context),
       'font': widget.font?.toMap(),
       'controlSize': widget.controlSize.name,
-      'bezelStyle': widget.bezelStyle.name,
+      'bezelStyle': widget.bezelStyle?.name,
       'borderColor': resolveColorToArgb(widget.borderColor, context),
       'borderWidth': widget.borderWidth,
       'cornerRadius': widget.cornerRadius,

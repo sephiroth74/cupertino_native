@@ -13,7 +13,16 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
     typealias SuggestionItemType = CNSuggestionItemValue
 
     private let channel: FlutterMethodChannel
-    private let searchField = NSSearchField(frame: .zero)
+    private let searchField = CNSearchFieldControl(frame: .zero)
+    private var bezelStyle: String?
+    private var paddings: CNPaddingsPayload?
+    private var glassEffect: [String: Any]?
+    /// The `NSGlassEffectView` hosting the search field while a glass is shown.
+    private var glassView: NSView?
+    private var glassConstraints: [NSLayoutConstraint] = []
+    private var fieldConstraints: [NSLayoutConstraint] = []
+    /// Total inset between this view's edges and the search field.
+    private var fieldInsets = NSEdgeInsetsZero
     private var placeholderText: String?
     private var placeholderColor: NSColor?
     private var isUpdatingFromDart = false
@@ -90,13 +99,12 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
         searchField.sendsWholeSearchString = true
 
         searchField.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(searchField)
-        NSLayoutConstraint.activate([
-            searchField.leadingAnchor.constraint(equalTo: leadingAnchor),
-            searchField.trailingAnchor.constraint(equalTo: trailingAnchor),
-            searchField.topAnchor.constraint(equalTo: topAnchor),
-            searchField.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
+        applyGlassEffect()
+    }
+
+    override func layout() {
+        super.layout()
+        updateGlassShape()
     }
 
     // MARK: - Payload handling
@@ -157,8 +165,16 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
             searchField.controlSize = ControlSizeUtils.controlSizeFromString(controlSize)
         }
 
-        if let bezelStyle = args["bezelStyle"] as? String {
-            Self.applyBezelStyle(bezelStyle, to: searchField)
+        if args.keys.contains("bezelStyle") {
+            bezelStyle = args["bezelStyle"] as? String
+        }
+
+        if args.keys.contains("paddings") {
+            paddings = CNPaddingsPayload.fromChannel(args["paddings"] as? [String: Any])
+        }
+
+        if args.keys.contains("glassEffect") {
+            glassEffect = args["glassEffect"] as? [String: Any]
         }
 
         if args.keys.contains("borderColor") {
@@ -196,6 +212,12 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
         applyPlaceholder()
         applyFont()
         applyBorder()
+        if args.keys.contains("bezelStyle") || args.keys.contains("glassEffect") {
+            applyBezelStyle()
+        }
+        if args.keys.contains("paddings") || args.keys.contains("glassEffect") || args.keys.contains("bezelStyle") {
+            applyGlassEffect()
+        }
     }
 
     // MARK: - Channel
@@ -225,7 +247,13 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
                     result(FlutterError(code: "bad_args", message: "Missing patch args", details: nil))
                 }
             case "getIntrinsicSize":
-                let size = searchField.intrinsicContentSize
+                let field = searchField.intrinsicContentSize
+                // A width without intrinsic metric stays negative so Dart keeps
+                // treating it as unknown.
+                let size = CGSize(
+                    width: field.width < 0 ? field.width : field.width + fieldInsets.left + fieldInsets.right,
+                    height: field.height + fieldInsets.top + fieldInsets.bottom,
+                )
                 log("getIntrinsicSize -> \(size)")
                 result(["width": Double(size.width), "height": Double(size.height)])
             default:
@@ -417,7 +445,14 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
         layer.masksToBounds = radius > 0
     }
 
-    private static func applyBezelStyle(_ rawValue: String, to field: NSSearchField) {
+    /// With a glass effect the glass is the bezel: a bezel style left at its
+    /// default resolves to `none`, an explicit one is kept.
+    private func applyBezelStyle() {
+        let style = CNViewModifierApplicator.resolveStyle(bezelStyle, glassEffect: glassEffect, bezelFreeStyle: "none")
+        Self.applyBezelStyle(style, to: searchField)
+    }
+
+    private static func applyBezelStyle(_ rawValue: String?, to field: NSSearchField) {
         switch rawValue {
         case "none":
             field.isBezeled = false
@@ -432,5 +467,223 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
             field.isBezeled = true
             field.bezelStyle = .roundedBezel
         }
+    }
+
+    // MARK: - Glass effect
+
+    /// AppKit counterpart of `CNViewModifierApplicator.applyGlassEffect`: on
+    /// macOS 26+ the search field becomes the content of an `NSGlassEffectView`,
+    /// inset by the glass padding, and the glass is inset by `paddings`. Without
+    /// a glass the field is inset by `paddings` only; `identity` keeps the glass
+    /// padding but draws no glass, like SwiftUI's `Glass.identity`.
+    private func applyGlassEffect() {
+        let outer = Self.edgeInsets(paddings)
+
+        guard #available(macOS 26.0, *), let glassEffect else {
+            removeGlassView()
+            pinSearchField(in: self, insets: outer)
+            return
+        }
+
+        let inner = Self.edgeInsets(CNPaddingsPayload.fromChannel(glassEffect["padding"] as? [String: Any]))
+        guard glassEffect["variant"] as? String != "identity" else {
+            removeGlassView()
+            pinSearchField(in: self, insets: Self.adding(outer, inner))
+            return
+        }
+
+        let glass = glassView as? NSGlassEffectView ?? makeGlassView()
+        glass.style = glassEffect["variant"] as? String == "clear" ? .clear : .regular
+        glass.tintColor = CNChannelDeserialization.decodeInt(glassEffect["tint"]).map(ColorUtils.colorFromARGB)
+        // `effectIsInteractive` only exists in the macOS 27 SDK; KVC keeps the
+        // plugin building against the macOS 26 one.
+        if glass.responds(to: NSSelectorFromString("setEffectIsInteractive:")) {
+            glass.setValue(CNChannelDeserialization.decodeBool(glassEffect["interactive"]) == true, forKey: "effectIsInteractive")
+        }
+
+        // A shape inset moves the glass edge, not the field: positive values
+        // shrink the glass around it, negative ones grow it.
+        let shapeInset = CNChannelDeserialization.decodeCGFloat((glassEffect["shape"] as? [String: Any])?["inset"]) ?? 0
+        let inset = NSEdgeInsets(top: shapeInset, left: shapeInset, bottom: shapeInset, right: shapeInset)
+        Self.pin(glass, in: self, insets: Self.adding(outer, inset), replacing: &glassConstraints)
+        pinSearchField(in: glass.contentView!, insets: Self.adding(inner, Self.negated(inset)))
+        fieldInsets = Self.adding(outer, inner)
+
+        // Without a bezel of its own the field takes its focus ring from the
+        // glass, like the System Settings sidebar search field.
+        searchField.searchCell?.focusRingView = searchField.isBezeled ? nil : glass
+        needsLayout = true
+    }
+
+    @available(macOS 26.0, *)
+    private func makeGlassView() -> NSGlassEffectView {
+        let glass = NSGlassEffectView()
+        glass.translatesAutoresizingMaskIntoConstraints = false
+        glass.contentView = NSView()
+        addSubview(glass)
+        glassView = glass
+        return glass
+    }
+
+    private func removeGlassView() {
+        searchField.searchCell?.focusRingView = nil
+        guard let glassView else { return }
+        NSLayoutConstraint.deactivate(glassConstraints)
+        glassConstraints = []
+        glassView.removeFromSuperview()
+        self.glassView = nil
+    }
+
+    private func pinSearchField(in container: NSView, insets: NSEdgeInsets) {
+        Self.pin(searchField, in: container, insets: insets, replacing: &fieldConstraints)
+        fieldInsets = insets
+    }
+
+    /// `NSGlassEffectView` only has a uniform corner radius, so the glass shape
+    /// collapses to one: half the short side for capsules (the default),
+    /// circles and ellipses, the largest corner for uneven rectangles.
+    private func updateGlassShape() {
+        guard #available(macOS 26.0, *), let glass = glassView as? NSGlassEffectView else { return }
+        let size = glass.bounds.size
+        let maxRadius = min(size.width, size.height) / 2
+        let radius = min(Self.glassCornerRadius(glassEffect?["shape"] as? [String: Any]) ?? maxRadius, maxRadius)
+        if glass.cornerRadius != radius {
+            glass.cornerRadius = radius
+        }
+        if let cell = searchField.searchCell, cell.focusRingView != nil {
+            cell.focusRingCornerRadius = radius
+            searchField.noteFocusRingMaskChanged()
+        }
+    }
+
+    /// The corner radius of a `CNShape` payload, or nil for fully rounded shapes.
+    private static func glassCornerRadius(_ shape: [String: Any]?) -> CGFloat? {
+        guard let shape else { return nil }
+        switch shape["type"] as? String {
+        case "rectangle":
+            return 0
+        case "roundedRectangle":
+            if let width = CNChannelDeserialization.decodeCGFloat(shape["cornerWidth"]),
+               let height = CNChannelDeserialization.decodeCGFloat(shape["cornerHeight"])
+            {
+                return min(width, height)
+            }
+            return CNChannelDeserialization.decodeCGFloat(shape["cornerRadius"]) ?? 8
+        case "unevenRoundedRectangle":
+            return ["topLeading", "bottomLeading", "bottomTrailing", "topTrailing"]
+                .compactMap { CNChannelDeserialization.decodeCGFloat(shape[$0]) }
+                .max() ?? 0
+        default:
+            return nil
+        }
+    }
+
+    /// Moves `view` into `container` (if needed) and pins its edges with `insets`,
+    /// replacing the previous `constraints`.
+    private static func pin(
+        _ view: NSView,
+        in container: NSView,
+        insets: NSEdgeInsets,
+        replacing constraints: inout [NSLayoutConstraint],
+    ) {
+        NSLayoutConstraint.deactivate(constraints)
+        if view.superview !== container {
+            view.removeFromSuperview()
+            container.addSubview(view)
+        }
+        constraints = [
+            view.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: insets.left),
+            view.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -insets.right),
+            view.topAnchor.constraint(equalTo: container.topAnchor, constant: insets.top),
+            view.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -insets.bottom),
+        ]
+        NSLayoutConstraint.activate(constraints)
+    }
+
+    private static func edgeInsets(_ paddings: CNPaddingsPayload?) -> NSEdgeInsets {
+        guard let paddings else { return NSEdgeInsetsZero }
+        return NSEdgeInsets(top: paddings.top, left: paddings.leading, bottom: paddings.bottom, right: paddings.trailing)
+    }
+
+    private static func adding(_ lhs: NSEdgeInsets, _ rhs: NSEdgeInsets) -> NSEdgeInsets {
+        NSEdgeInsets(top: lhs.top + rhs.top, left: lhs.left + rhs.left, bottom: lhs.bottom + rhs.bottom, right: lhs.right + rhs.right)
+    }
+
+    private static func negated(_ insets: NSEdgeInsets) -> NSEdgeInsets {
+        NSEdgeInsets(top: -insets.top, left: -insets.left, bottom: -insets.bottom, right: -insets.right)
+    }
+}
+
+/// `NSSearchField` drawn by a `CNSearchFieldCell`.
+private final class CNSearchFieldControl: NSSearchField {
+    override class var cellClass: AnyClass? {
+        get { CNSearchFieldCell.self }
+        set {}
+    }
+
+    var searchCell: CNSearchFieldCell? {
+        cell as? CNSearchFieldCell
+    }
+}
+
+/// Fixes how a search field without a bezel edits and shows focus.
+///
+/// AppKit hands such a field's editor the whole cell frame, so the text being
+/// edited slides under the magnifier; editing inside `searchTextRect(forBounds:)`
+/// keeps it where the idle text is drawn. When `focusRingView` is set (the glass
+/// the field sits in), the focus ring outlines that view instead of the bare
+/// text rect.
+private final class CNSearchFieldCell: NSSearchFieldCell {
+    weak var focusRingView: NSView?
+    var focusRingCornerRadius: CGFloat = 0
+
+    override func edit(
+        withFrame rect: NSRect,
+        in controlView: NSView,
+        editor textObj: NSText,
+        delegate: Any?,
+        event: NSEvent?,
+    ) {
+        super.edit(withFrame: editingRect(forBounds: rect), in: controlView, editor: textObj, delegate: delegate, event: event)
+    }
+
+    override func select(
+        withFrame rect: NSRect,
+        in controlView: NSView,
+        editor textObj: NSText,
+        delegate: Any?,
+        start selStart: Int,
+        length selLength: Int,
+    ) {
+        super.select(
+            withFrame: editingRect(forBounds: rect),
+            in: controlView,
+            editor: textObj,
+            delegate: delegate,
+            start: selStart,
+            length: selLength,
+        )
+    }
+
+    override func focusRingMaskBounds(forFrame cellFrame: NSRect, in controlView: NSView) -> NSRect {
+        focusRingRect(in: controlView) ?? super.focusRingMaskBounds(forFrame: cellFrame, in: controlView)
+    }
+
+    override func drawFocusRingMask(withFrame cellFrame: NSRect, in controlView: NSView) {
+        guard let rect = focusRingRect(in: controlView) else {
+            super.drawFocusRingMask(withFrame: cellFrame, in: controlView)
+            return
+        }
+        let radius = min(focusRingCornerRadius, rect.width / 2, rect.height / 2)
+        NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius).fill()
+    }
+
+    private func editingRect(forBounds rect: NSRect) -> NSRect {
+        isBezeled ? rect : searchTextRect(forBounds: rect)
+    }
+
+    private func focusRingRect(in controlView: NSView) -> NSRect? {
+        guard let focusRingView else { return nil }
+        return controlView.convert(focusRingView.bounds, from: focusRingView)
     }
 }

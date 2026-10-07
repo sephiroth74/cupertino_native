@@ -250,6 +250,9 @@ class _DesktopDemoShellState extends State<_DesktopDemoShell> {
         search: CNSearchField(
           controller: _searchController,
           placeholder: 'Search',
+          controlSize: CNControlSize.large,
+          paddings: const EdgeInsets.all(1),
+          glassEffect: const CNGlassEffect(padding: EdgeInsets.all(7)),
           onChanged: widget.onSearchChanged,
         ),
       ),
