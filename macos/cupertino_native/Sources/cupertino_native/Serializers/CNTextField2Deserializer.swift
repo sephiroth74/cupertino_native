@@ -50,6 +50,7 @@ enum CNTextField2Deserializer {
                         textBinding: textBinding,
                         payload: payload,
                         autofocus: payload.autofocus,
+                        isFocused: $isFocused,
                         onSelectionChanged: onSelectionChanged,
                         onSubmitted: onSubmitted,
                         onFocusChanged: onFocusChanged,
@@ -92,6 +93,15 @@ enum CNTextField2Deserializer {
             // includes them: outside it, a field filling the width would push
             // the glass ends past the native view, which clips them.
             view = CNViewModifierApplicator.applyGlassEffect(payload.glassEffect, to: view)
+            // A plain field has no focus ring of its own: the glass carries it.
+            if textFieldStyle == "plain" {
+                view = CNViewModifierApplicator.applyGlassFocusRing(
+                    payload.glassEffect,
+                    paddings: payload.paddings,
+                    isFocused: isFocused,
+                    to: view,
+                )
+            }
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
 
             // Constraints last (outermost)
@@ -172,13 +182,14 @@ enum CNTextField2Deserializer {
         let textBinding: Binding<String>
         let payload: CNTextField2Payload
         let autofocus: Bool
+        /// Owned by the parent, which draws the glass focus ring around this field.
+        @FocusState.Binding var isFocused: Bool
         let onSelectionChanged: ((_ base: Int, _ extent: Int) -> Void)?
         let onSubmitted: ((String) -> Void)?
         let onFocusChanged: ((Bool) -> Void)?
 
         @State private var localText: String = ""
         @State private var selection: TextSelection?
-        @FocusState private var isFocused: Bool
 
         var body: some View {
             let placeholder = payload.placeholder ?? ""

@@ -96,6 +96,15 @@ enum CNSecureFieldDeserializer {
             view = CNViewModifierApplicator.applyForegroundColor(payload.foregroundColor, to: view)
             view = CNViewModifierApplicator.applyTint(payload.tint, to: view)
             view = CNViewModifierApplicator.applyGlassEffect(payload.glassEffect, to: view)
+            // A plain field has no focus ring of its own: the glass carries it.
+            if textFieldStyle == "plain" {
+                view = CNViewModifierApplicator.applyGlassFocusRing(
+                    payload.glassEffect,
+                    paddings: payload.paddings,
+                    isFocused: isFocused,
+                    to: view,
+                )
+            }
             view = CNViewModifierApplicator.applyPaddings(payload.paddings, to: view)
             view = CNViewModifierApplicator.applyConstraints(constraints: payload.constraints, shrink: payload.shrink, to: view)
 

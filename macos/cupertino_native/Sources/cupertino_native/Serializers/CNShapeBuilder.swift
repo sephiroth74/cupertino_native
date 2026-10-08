@@ -98,12 +98,13 @@ enum CNShapeBuilder {
     // MARK: - Shape dispatch
 
     /// Builds the bare (unpainted) shape described by a shape dictionary, with
-    /// its `inset` applied — e.g. the shape of a glass effect.
+    /// its `inset` applied — e.g. the shape of a glass effect. `outset` grows
+    /// it further outward, e.g. to stroke a ring around that glass.
     ///
     /// Returns `nil` for an unknown shape type.
-    static func makeShape(_ shapeDict: [String: Any]) -> AnyShape? {
+    static func makeShape(_ shapeDict: [String: Any], outset: CGFloat = 0) -> AnyShape? {
         guard let shape = makeInsettableShape(shapeDict) else { return nil }
-        return eraseShape(shape, inset: decodeInset(shapeDict))
+        return eraseShape(shape, inset: decodeInset(shapeDict) - outset)
     }
 
     private static func eraseShape(_ shape: some InsettableShape, inset: CGFloat) -> AnyShape {

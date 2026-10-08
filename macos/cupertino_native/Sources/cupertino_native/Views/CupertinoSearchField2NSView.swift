@@ -551,7 +551,12 @@ class CupertinoSearchField2NSView: NSView, NSSearchFieldDelegate, NSTextSuggesti
             glass.cornerRadius = radius
         }
         if let cell = searchField.searchCell, cell.focusRingView != nil {
-            cell.focusRingCornerRadius = radius
+            // AppKit draws the ring outside the mask; shrink the mask by the room
+            // `paddings` don't leave, so the ring moves onto the glass rim
+            // instead of being clipped by this view's bounds.
+            let inset = CNViewModifierApplicator.focusRingWidth - CNViewModifierApplicator.focusRingOutset(paddings: paddings)
+            cell.focusRingInset = inset
+            cell.focusRingCornerRadius = max(0, radius - inset)
             searchField.noteFocusRingMaskChanged()
         }
     }
@@ -635,6 +640,8 @@ private final class CNSearchFieldControl: NSSearchField {
 /// text rect.
 private final class CNSearchFieldCell: NSSearchFieldCell {
     weak var focusRingView: NSView?
+    /// How far the focus ring mask sits inside `focusRingView`'s bounds.
+    var focusRingInset: CGFloat = 0
     var focusRingCornerRadius: CGFloat = 0
 
     override func edit(
@@ -685,5 +692,6 @@ private final class CNSearchFieldCell: NSSearchFieldCell {
     private func focusRingRect(in controlView: NSView) -> NSRect? {
         guard let focusRingView else { return nil }
         return controlView.convert(focusRingView.bounds, from: focusRingView)
+            .insetBy(dx: focusRingInset, dy: focusRingInset)
     }
 }

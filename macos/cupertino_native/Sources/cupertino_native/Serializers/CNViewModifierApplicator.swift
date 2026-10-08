@@ -301,6 +301,58 @@ enum CNViewModifierApplicator {
         return AnyView(view.glassEffect(glass))
     }
 
+    /// Width of the system keyboard focus ring, which AppKit draws just outside
+    /// the focused shape.
+    static let focusRingWidth: CGFloat = 3
+
+    /// Draws a keyboard focus ring around the glass of `applyGlassEffect` while
+    /// `isFocused`, for bezel-free fields whose own ring the glass replaces (the
+    /// System Settings sidebar search field look). Apply it right after
+    /// `applyGlassEffect`, before `applyPaddings`. No-op without a visible glass.
+    static func applyGlassFocusRing(
+        _ glassEffect: [String: Any]?,
+        paddings: CNPaddingsPayload?,
+        isFocused: Bool,
+        to view: AnyView,
+    ) -> AnyView {
+        guard #available(macOS 26.0, *), let glassEffect, glassEffect["variant"] as? String != "identity" else {
+            return view
+        }
+        // Stroke centered on a path pushed out to the middle of the ring, so the
+        // ring spans [outset - width, outset] from the glass edge.
+        let center = focusRingOutset(paddings: paddings) - focusRingWidth / 2
+        let ring = (glassEffect["shape"] as? [String: Any]).flatMap { CNShapeBuilder.makeShape($0, outset: center) }
+            ?? AnyShape(Capsule().inset(by: -center))
+        return AnyView(view.overlay { _CNFocusRing(shape: ring, isFocused: isFocused) })
+    }
+
+    /// Like AppKit's, the ring only shows while the window is active.
+    @available(macOS 26.0, *)
+    private struct _CNFocusRing: View {
+        let shape: AnyShape
+        let isFocused: Bool
+        @Environment(\.appearsActive) private var appearsActive
+
+        var body: some View {
+            let visible = isFocused && appearsActive
+            shape
+                .stroke(Color(nsColor: .keyboardFocusIndicatorColor), lineWidth: CNViewModifierApplicator.focusRingWidth)
+                .opacity(visible ? 1 : 0)
+                .animation(.easeOut(duration: 0.15), value: visible)
+                .allowsHitTesting(false)
+        }
+    }
+
+    /// How far a focus ring may extend past a control: the native view clips
+    /// at its bounds, so only the room `paddings` leave around the control is
+    /// usable. Capped at the ring width; with less room the ring moves onto the
+    /// control's rim instead of being cut.
+    static func focusRingOutset(paddings: CNPaddingsPayload?) -> CGFloat {
+        guard let paddings else { return 0 }
+        let room = min(paddings.top, paddings.leading, paddings.bottom, paddings.trailing)
+        return min(focusRingWidth, max(0, room))
+    }
+
     /// With a glass effect the glass itself is the control's bezel: a style left
     /// at its default (`nil` / `"automatic"`) resolves to `bezelFreeStyle`, so no
     /// opaque native bezel shows inside the glass. Explicit styles are kept, which
