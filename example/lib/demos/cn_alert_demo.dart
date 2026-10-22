@@ -1,7 +1,6 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native/widgets/cn_layout_bounds.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 class AlertDemoPage extends StatefulWidget {
   const AlertDemoPage({super.key});

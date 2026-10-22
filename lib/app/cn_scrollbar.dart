@@ -1,7 +1,7 @@
 import 'package:cupertino_native/theme/cn_scrollbar_theme.dart';
 import 'package:cupertino_native/utils/utils.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 
 const double _kScrollbarMinLength = 36.0;
 const double _kScrollbarMinOverscrollLength = 8.0;

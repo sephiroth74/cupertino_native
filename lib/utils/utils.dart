@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter/widgets.dart';
 
 // ignore: public_member_api_docs
 bool debugCheckHasCNTheme(BuildContext context, [bool check = true]) {

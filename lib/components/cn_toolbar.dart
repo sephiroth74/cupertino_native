@@ -1,9 +1,9 @@
 import 'package:cupertino_native/components/cn_widget_debug_id_mixin.dart';
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:flutter/material.dart';
 import 'package:macos_window_utils/macos/ns_visual_effect_view_material.dart';
 import 'package:macos_window_utils/macos/ns_visual_effect_view_state.dart';
 import 'package:macos_window_utils/widgets/visual_effect_subview_container/visual_effect_subview_container.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:window_manager/window_manager.dart' show DragToMoveArea;
 
 /// Default overall toolbar height (mirrors AppKit's 52pt titlebar+toolbar strip).

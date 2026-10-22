@@ -5,10 +5,10 @@ import 'package:cupertino_native/app/cn_brightness_override_handler.dart';
 import 'package:cupertino_native/app/cn_window_material_handler.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native/utils/utils.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:macos_window_utils/macos_window_utils.dart';
 import 'package:macos_window_utils/widgets/visual_effect_subview_container/visual_effect_subview_container.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Size of a single dot of the resize grip drawn in the middle of the divider,
 /// and the gap between two dots.
