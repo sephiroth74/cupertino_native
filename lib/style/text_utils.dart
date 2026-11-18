@@ -1,6 +1,6 @@
 import 'package:cupertino_native/style/font.dart';
 import 'package:cupertino_native/style/text.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 /// Creates a declarative `CNFont` from a Flutter `TextStyle`.
 CNFont cnFontFromTextStyle(TextStyle style) {

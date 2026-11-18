@@ -5,7 +5,7 @@ import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:cupertino_native_example/demos/glass_effect_options.dart';
 import 'package:cupertino_native_example/demos/icon_catalog.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
 
 const _kBackgroundColors = {

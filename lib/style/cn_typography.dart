@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 const _kDefaultFontFamily = '.AppleSystemUIFont';
 

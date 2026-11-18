@@ -4,7 +4,7 @@ import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:cupertino_native_example/demos/icon_catalog.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
 
 const _kCountMax = 500.0;

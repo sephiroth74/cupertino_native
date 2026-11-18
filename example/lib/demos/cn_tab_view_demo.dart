@@ -1,6 +1,6 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 class TabViewDemoPage extends StatefulWidget {
   const TabViewDemoPage({super.key});

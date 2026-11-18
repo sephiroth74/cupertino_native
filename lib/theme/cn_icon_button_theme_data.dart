@@ -2,7 +2,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 /// The overall shape of a [CNIconButton]'s background / hit target.
 enum CNIconButtonShape {

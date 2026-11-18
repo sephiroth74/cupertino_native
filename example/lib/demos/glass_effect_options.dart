@@ -1,7 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 /// Colorful backdrop that makes the glass visible (glass over a flat fill
 /// looks like a faint shadow only).

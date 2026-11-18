@@ -1,7 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/glass_effect_options.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 /// Demonstrates the shared SwiftUI `.glassEffect(_:in:)` support: a Liquid
 /// Glass layer behind any SwiftUI-backed CN widget, including the native

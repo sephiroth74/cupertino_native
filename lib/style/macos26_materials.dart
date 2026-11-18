@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 /// Glass material with backdrop blur and opacity
 /// Designed for Liquid Glass aesthetic in macOS 26

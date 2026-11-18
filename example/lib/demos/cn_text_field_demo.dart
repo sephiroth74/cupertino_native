@@ -2,7 +2,7 @@ import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/common_widgets.dart';
 import 'package:cupertino_native_example/demos/consts.dart';
 import 'package:cupertino_native_example/demos/glass_effect_options.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 const _kDebugLog = false;
 const _kFontSize = 12.0;

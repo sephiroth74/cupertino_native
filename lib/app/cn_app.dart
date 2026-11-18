@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:flutter/cupertino.dart' as c;
+import 'package:cupertino_ui/cupertino_ui.dart' as c;
 import 'package:macos_window_utils/macos/ns_window_delegate.dart';
 import 'package:macos_window_utils/ns_window_delegate_handler/ns_window_delegate_handler.dart';
 import 'package:macos_window_utils/window_manipulator.dart';

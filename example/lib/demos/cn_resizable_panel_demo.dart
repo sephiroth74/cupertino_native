@@ -1,5 +1,5 @@
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 /// Demonstrates [CNPageScaffold]'s horizontal split-view layout.
 ///

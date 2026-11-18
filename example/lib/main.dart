@@ -1,7 +1,7 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native_example/demos/cn_resizable_panel_demo.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, ThemeMode;
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart' show Colors, ThemeMode;
 import 'package:macos_window_utils/macos_window_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';

@@ -1,7 +1,7 @@
 import 'dart:math' show min;
 
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/widgets.dart';
 
 /// A highly customizable icon button rendering either a Flutter [IconData] or a

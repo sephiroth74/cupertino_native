@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:async/async.dart';
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:path_provider/path_provider.dart';
 
 class PathControlDemoPage extends StatefulWidget {

@@ -1,6 +1,6 @@
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 /// Applies [CNPickerThemeData] to descendant [CNPicker] widgets.
 class CNPickerTheme extends InheritedTheme {

@@ -2,7 +2,7 @@ import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cupertino_native/theme/cn_image_theme_data.dart';
 import 'package:cupertino_native/theme/cn_text_theme_data.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 import '../style/text_utils.dart';
 

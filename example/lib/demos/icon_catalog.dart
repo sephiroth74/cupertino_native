@@ -5,8 +5,8 @@
 // `CNImage`. Keys are the identifiers you would type in code, so the demos can
 // show the name next to each glyph and copy it to the clipboard.
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The icon families the demos can browse.
 ///

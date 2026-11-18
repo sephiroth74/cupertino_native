@@ -1,5 +1,5 @@
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 /// macOS 26 (Liquid Glass era) color palette extracted from the
 /// Apple community Figma file «macOS 26 — Community».
